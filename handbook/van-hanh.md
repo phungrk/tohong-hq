@@ -38,6 +38,6 @@ Bất kỳ trạng thái nào chưa Xong đều có thể `escalate` lên Capu k
 
 ## Tuyển thêm bộ phận
 
-1. Tạo `.claude/agents/<tên>.md` theo khuôn của `product.md`: sứ mệnh, cách làm một việc, quyền hạn, KPI.
+1. Tạo `.claude/agents/<tên>.md` theo khuôn của `product.md`: sứ mệnh, cách làm một việc, quyền hạn, KPI. Nếu vị trí đã có trong `org/roster.json`, dashboard tự đổi từ "Need Hiring" sang "Hired"; vị trí mới hoàn toàn thì thêm một dòng vào `org/roster.json`.
 2. Thêm tên bộ phận vào mục "Bạn là ai trong phiên này" của `CLAUDE.md`.
 3. Giao một việc nhỏ để chạy thử trước khi giao việc thật.

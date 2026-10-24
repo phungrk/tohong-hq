@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Xuất dữ liệu sổ cái cho dashboard Tơ Hồng HQ.
+
+Đọc board/*.md, ledger/events.jsonl và org/roster.json, ghi ra 3 file JSON
+(mảng các dòng) vào thư mục đích:
+
+  tasks.json   — mỗi việc một dòng, kèm số giờ kể từ lần cập nhật cuối
+  events.json  — nhật ký sự kiện, đánh số lại cho duy nhất (seq)
+  roster.json  — sơ đồ tổ chức, trạng thái Hired / Need Hiring
+
+Script chỉ đọc sổ cái, không ghi gì vào repo.
+
+  python3 scripts/export_dashboard.py --out /tmp/tohong-dash
+"""
+import argparse
+import json
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import task  # noqa: E402  (dùng chung cách đọc file việc và thời gian)
+
+ROOT = task.ROOT
+
+
+def export(out: Path):
+    out.mkdir(parents=True, exist_ok=True)
+    as_of = task.now()
+    stamp = task.stamp(as_of)
+
+    tasks = []
+    for t in task.all_tasks():
+        hours = round((as_of - task.parse_stamp(t["updated"])).total_seconds() / 3600, 1)
+        tasks.append({
+            "id": t["id"], "title": t["title"], "state": t["state"], "holder": t["holder"],
+            "owner": t["owner"], "reviewer": t["reviewer"], "rounds": t["rounds"],
+            "version": t["version"], "deadline": t.get("deadline", ""), "budget": t.get("budget", ""),
+            "cost": t["cost"], "created": t["created"], "updated": t["updated"],
+            "hours_since_update": hours, "pipeline": f"{t['owner']} → {t['reviewer']}", "as_of": stamp,
+        })
+
+    events = []
+    if task.LEDGER.exists():
+        lines = [l for l in task.LEDGER.read_text(encoding="utf-8").splitlines() if l.strip()]
+        for i, line in enumerate(lines, 1):
+            try:
+                e = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            events.append({
+                "seq": f"S-{i:05d}", "ledger_id": e.get("id", ""), "t": e.get("t", ""),
+                "task": e.get("task", ""), "title": e.get("title", ""), "event": e.get("event", ""),
+                "from": e.get("from", ""), "to": e.get("to", ""), "round": e.get("round", 0),
+                "severity": e.get("severity", ""), "detail": e.get("detail", ""),
+                "link": e.get("link", ""), "cost": float(e.get("cost", 0) or 0),
+            })
+        events.sort(key=lambda e: (e["t"], e["seq"]))
+
+    roster_src = json.loads((ROOT / "org" / "roster.json").read_text(encoding="utf-8"))
+    roster = []
+    for r in roster_src["roles"]:
+        f = r.get("agent_file", "")
+        hired = r["kind"] == "human" or (f and (ROOT / f).exists())
+        roster.append({
+            "id": r["id"], "name": r["name"], "role": r["role"], "kind": r["kind"],
+            "reports_to": r.get("reports_to", ""), "mission": r.get("mission", ""),
+            "agent_file": f, "status": "Hired" if hired else "Need Hiring", "as_of": stamp,
+        })
+
+    for name, rows in (("tasks", tasks), ("events", events), ("roster", roster)):
+        (out / f"{name}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"Đã xuất lúc {stamp}: {len(tasks)} việc, {len(events)} sự kiện, "
+          f"{sum(r['status'] == 'Hired' for r in roster)}/{len(roster)} vị trí đã có người → {out}")
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser(description="Xuất dữ liệu cho dashboard")
+    p.add_argument("--out", required=True, help="Thư mục ghi tasks.json, events.json, roster.json")
+    export(Path(p.parse_args().out))

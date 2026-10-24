@@ -1,0 +1,13 @@
+{
+  "_note": "Sơ đồ tổ chức Tơ Hồng HQ. Trạng thái Hired/Need Hiring do scripts/export_dashboard.py tự tính: một bộ phận agent là Hired khi có file agent_file trong repo. Tuyển thêm bộ phận = tạo file agent đó, không cần sửa file này.",
+  "roles": [
+    {"id": "capu", "name": "Capu", "role": "CEO", "kind": "human", "reports_to": "", "mission": "Quyết định cuối, giữ tầm nhìn", "agent_file": ""},
+    {"id": "chief-of-staff", "name": "Chief of Staff", "role": "Điều phối, tổng hợp", "kind": "main-session", "reports_to": "capu", "mission": "Biến ý định của Capu thành việc, theo dõi và báo cáo", "agent_file": "CLAUDE.md"},
+    {"id": "reviewer", "name": "Reviewer", "role": "Kiểm định độc lập", "kind": "agent", "reports_to": "capu", "mission": "Chỉ để việc đạt tiêu chí đi tiếp", "agent_file": ".claude/agents/reviewer.md"},
+    {"id": "product", "name": "Product", "role": "Roadmap, PRD", "kind": "agent", "reports_to": "chief-of-staff", "mission": "Quyết định nên xây gì tiếp theo", "agent_file": ".claude/agents/product.md"},
+    {"id": "engineering", "name": "Engineering", "role": "Code, deploy", "kind": "agent", "reports_to": "chief-of-staff", "mission": "Xây và vận hành sản phẩm Tơ Hồng", "agent_file": ".claude/agents/engineering.md"},
+    {"id": "vendor-ops", "name": "Vendor Ops", "role": "Nhà cung cấp", "kind": "agent", "reports_to": "chief-of-staff", "mission": "Tìm, xác minh và cập nhật vendor cưới", "agent_file": ".claude/agents/vendor-ops.md"},
+    {"id": "growth", "name": "Growth", "role": "Nội dung, người dùng", "kind": "agent", "reports_to": "chief-of-staff", "mission": "Bản tin, nội dung, kéo cặp đôi tới Tơ Hồng", "agent_file": ".claude/agents/growth.md"},
+    {"id": "finance", "name": "Finance", "role": "Chi phí, ngân sách", "kind": "agent", "reports_to": "chief-of-staff", "mission": "Theo dõi chi phí LLM và ngân sách", "agent_file": ".claude/agents/finance.md"}
+  ]
+}
