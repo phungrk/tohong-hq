@@ -24,7 +24,10 @@ import task  # noqa: E402  (dùng chung cách đọc file việc và thời gian
 ROOT = task.ROOT
 
 
-def export(out: Path):
+PRIVATE_EVENT_FIELDS = ("detail", "link")
+
+
+def export(out: Path, public: bool = False):
     out.mkdir(parents=True, exist_ok=True)
     as_of = task.now()
     stamp = task.stamp(as_of)
@@ -68,13 +71,24 @@ def export(out: Path):
             "agent_file": f, "status": "Hired" if hired else "Need Hiring", "as_of": stamp,
         })
 
+    if public:
+        # Bản công khai: bỏ nội dung chi tiết (defect, ghi chú, đường dẫn file)
+        for e in events:
+            for k in PRIVATE_EVENT_FIELDS:
+                e.pop(k, None)
+
     for name, rows in (("tasks", tasks), ("events", events), ("roster", roster)):
         (out / f"{name}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"Đã xuất lúc {stamp}: {len(tasks)} việc, {len(events)} sự kiện, "
+    bundle = {"generated_at": stamp, "timezone": "Asia/Ho_Chi_Minh", "public": public,
+              "tasks": tasks, "events": events, "roster": roster}
+    (out / "dashboard.json").write_text(json.dumps(bundle, ensure_ascii=False), encoding="utf-8")
+    print(f"Đã xuất lúc {stamp}{' (bản công khai)' if public else ''}: {len(tasks)} việc, {len(events)} sự kiện, "
           f"{sum(r['status'] == 'Hired' for r in roster)}/{len(roster)} vị trí đã có người → {out}")
 
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description="Xuất dữ liệu cho dashboard")
-    p.add_argument("--out", required=True, help="Thư mục ghi tasks.json, events.json, roster.json")
-    export(Path(p.parse_args().out))
+    p.add_argument("--out", required=True, help="Thư mục ghi tasks.json, events.json, roster.json, dashboard.json")
+    p.add_argument("--public", action="store_true", help="Bỏ nội dung chi tiết để đăng công khai")
+    a = p.parse_args()
+    export(Path(a.out), public=a.public)

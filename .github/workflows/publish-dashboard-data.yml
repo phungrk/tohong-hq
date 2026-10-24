@@ -1,0 +1,49 @@
+name: Xuất dữ liệu dashboard
+
+# Mỗi khi main thay đổi, xuất sổ cái (bản công khai, không có nội dung chi tiết)
+# ra nhánh dashboard-data. Trang https://phungrk.github.io/tohong-hq-dashboard/
+# đọc file dashboard.json trên nhánh đó.
+#
+# Lần push của workflow "Đồng bộ sổ cái vào main" dùng GITHUB_TOKEN nên không
+# kích hoạt được sự kiện push; vì vậy workflow này chạy thêm sau khi workflow
+# đó hoàn tất (workflow_run).
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["Đồng bộ sổ cái vào main"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dashboard-data
+  cancel-in-progress: true
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Xuất dữ liệu
+        run: python3 scripts/export_dashboard.py --public --out "$RUNNER_TEMP/out"
+
+      - name: Đẩy lên nhánh dashboard-data
+        run: |
+          cd "$RUNNER_TEMP/out"
+          git init -q -b dashboard-data
+          git config user.name "tohong-ledger-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Dữ liệu dashboard từ main@${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" dashboard-data
