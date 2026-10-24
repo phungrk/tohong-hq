@@ -41,3 +41,26 @@ Bất kỳ trạng thái nào chưa Xong đều có thể `escalate` lên Capu k
 1. Tạo `.claude/agents/<tên>.md` theo khuôn của `product.md`: sứ mệnh, cách làm một việc, quyền hạn, KPI. Nếu vị trí đã có trong `org/roster.json`, dashboard tự đổi từ "Need Hiring" sang "Hired"; vị trí mới hoàn toàn thì thêm một dòng vào `org/roster.json`.
 2. Thêm tên bộ phận vào mục "Bạn là ai trong phiên này" của `CLAUDE.md`.
 3. Giao một việc nhỏ để chạy thử trước khi giao việc thật.
+
+## Thông báo Slack
+
+Workflow `.github/workflows/notify-slack.yml` đọc sổ cái mỗi khi `main` thay đổi và gửi lên Slack:
+
+| Biểu tượng | Sự kiện | Kênh |
+| --- | --- | --- |
+| 🆕 | Giao việc mới | Chính |
+| 📥 | Bàn giao, kèm link pull request nếu có | Chính |
+| ↩️ | Reviewer trả về, kèm vòng và lỗi | Chính |
+| ✅ | Reviewer chấp nhận; nếu có PR thì báo "PR sẵn sàng để anh merge" | Cần anh |
+| ⛔ | Bị chặn | Cần anh |
+| 🙋 | Leo thang, cần Capu quyết | Cần anh |
+| 🚨 | Agent sửa tay sổ cái | Cần anh |
+| 📋 | Báo cáo mới trong `reports/` (standup, wrap-up, chất lượng) | Chính |
+
+Secrets của repo (Settings → Secrets and variables → Actions):
+
+- `SLACK_WEBHOOK_URL` (bắt buộc): Incoming Webhook của kênh chính.
+- `SLACK_WEBHOOK_DECISIONS` (tùy chọn): webhook của kênh "cần anh". Không có thì mọi tin vào kênh chính.
+
+Trạng thái "đã báo tới đâu" nằm trên nhánh `notify-state`. Lần chạy đầu chỉ gửi một tin chào, không gửi lại lịch sử cũ.
+Chạy thử không gửi: `python3 scripts/notify_slack.py --state /tmp/state --dry-run`.

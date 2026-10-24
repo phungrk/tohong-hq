@@ -1,0 +1,61 @@
+name: Báo Slack
+
+# Mỗi khi sổ cái trên main thay đổi, gửi các sự kiện quan trọng và báo cáo mới lên Slack.
+# Lần push của workflow "Đồng bộ sổ cái vào main" dùng GITHUB_TOKEN nên không kích hoạt
+# được sự kiện push; vì vậy workflow này chạy thêm sau khi workflow đó hoàn tất.
+# Trạng thái "đã báo tới đâu" lưu trên nhánh notify-state.
+
+on:
+  push:
+    branches: [main]
+    paths: ["ledger/**", "reports/**"]
+  workflow_run:
+    workflows: ["Đồng bộ sổ cái vào main"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: slack-notify
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Lấy trạng thái đã báo
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          S="$RUNNER_TEMP/state"
+          URL="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if ! git clone -q --depth 1 -b notify-state "$URL" "$S" 2>/dev/null; then
+            mkdir -p "$S" && git -C "$S" init -q -b notify-state
+          fi
+
+      - name: Gửi lên Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_DECISIONS: ${{ secrets.SLACK_WEBHOOK_DECISIONS }}
+        run: python3 scripts/notify_slack.py --state "$RUNNER_TEMP/state"
+
+      - name: Lưu trạng thái
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP/state"
+          git add -A
+          if git diff --cached --quiet; then echo "Không có gì mới."; exit 0; fi
+          git -c user.name="tohong-ledger-bot" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Đã báo Slack tới main@${GITHUB_SHA::7}"
+          git push -q "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:notify-state
