@@ -185,7 +185,24 @@ def main():
     p = argparse.ArgumentParser(description="Báo Slack các cập nhật mới của sổ cái")
     p.add_argument("--state", required=True, help="Thư mục lưu trạng thái đã báo")
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--test", action="store_true",
+                   help="Gửi một tin thử vào từng kênh đã cấu hình, không đọc hay ghi trạng thái")
     a = p.parse_args()
+
+    if a.test:
+        sent = 0
+        for name, var in (("kênh chính", "SLACK_WEBHOOK_URL"), ("kênh cần anh", "SLACK_WEBHOOK_DECISIONS")):
+            url = os.environ.get(var, "").strip()
+            if not url:
+                print(f"::warning::Chưa có secret {var} ({name}).")
+                continue
+            post(url, f"🔔 Tin thử từ *Tơ Hồng HQ* gửi vào {name} (secret `{var}`). "
+                      f"Thấy tin này là kết nối đã đúng. {link(DASHBOARD, 'Dashboard')}")
+            print(f"Đã gửi tin thử vào {name} ({var}).")
+            sent += 1
+        if not sent:
+            raise RuntimeError("Không có secret Slack nào, chưa gửi được tin thử.")
+        return
 
     state = Path(a.state)
     state.mkdir(parents=True, exist_ok=True)

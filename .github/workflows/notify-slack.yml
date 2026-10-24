@@ -13,6 +13,11 @@ on:
     workflows: ["Đồng bộ sổ cái vào main"]
     types: [completed]
   workflow_dispatch:
+    inputs:
+      test:
+        description: "Chỉ gửi tin thử vào từng kênh Slack (không đụng tới trạng thái)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -43,7 +48,15 @@ jobs:
             mkdir -p "$S" && git -C "$S" init -q -b notify-state
           fi
 
+      - name: Gửi tin thử
+        if: github.event_name == 'workflow_dispatch' && inputs.test
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_DECISIONS: ${{ secrets.SLACK_WEBHOOK_DECISIONS }}
+        run: python3 scripts/notify_slack.py --state "$RUNNER_TEMP/state" --test
+
       - name: Gửi lên Slack
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.test) }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_DECISIONS: ${{ secrets.SLACK_WEBHOOK_DECISIONS }}
