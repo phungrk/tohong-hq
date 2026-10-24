@@ -1,0 +1,70 @@
+name: Đồng bộ sổ cái vào main
+
+# Phiên Claude Code in the cloud chỉ được đẩy lên nhánh claude/... của nó.
+# Workflow này đưa các thay đổi đó vào main để sổ cái chỉ có một bản:
+#   - chỉ đụng tới thư mục sổ cái  → rebase lên main rồi đẩy thẳng vào main
+#   - đụng tới file khác (CLAUDE.md, agent, script...) → mở pull request chờ Capu duyệt
+#   - rebase bị xung đột            → mở pull request chờ Capu xử lý
+
+on:
+  push:
+    branches: ["claude/**"]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ledger-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cấu hình git
+        run: |
+          git config user.name "tohong-ledger-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Kiểm tra phạm vi thay đổi
+        id: scope
+        run: |
+          git fetch origin main
+          changed=$(git diff --name-only origin/main...HEAD)
+          echo "Các file thay đổi:"; echo "$changed"
+          outside=$(echo "$changed" | grep -Ev '^(board|ledger|handoffs|decisions|inbox|reports|products)/' | grep -v '^$' || true)
+          if [ -n "$outside" ]; then
+            echo "Có file ngoài sổ cái:"; echo "$outside"
+            echo "mode=pr" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=direct" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Rebase và đẩy vào main
+        id: direct
+        if: steps.scope.outputs.mode == 'direct'
+        continue-on-error: true
+        run: |
+          git rebase origin/main
+          git push origin HEAD:main
+
+      - name: Mở pull request khi cần Capu duyệt
+        if: steps.scope.outputs.mode == 'pr' || steps.direct.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          REASON: ${{ steps.scope.outputs.mode == 'pr' && 'Thay đổi chạm tới file ngoài sổ cái (hiến pháp, agent, script).' || 'Rebase lên main bị xung đột.' }}
+        run: |
+          git rebase --abort 2>/dev/null || true
+          if gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' | grep -q .; then
+            echo "Pull request cho $BRANCH đã có sẵn."
+          else
+            gh pr create --base main --head "$BRANCH" \
+              --title "Cần Capu duyệt: $BRANCH" \
+              --body "$REASON Sổ cái chưa được đồng bộ tự động cho nhánh này."
+          fi

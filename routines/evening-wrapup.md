@@ -18,5 +18,5 @@ Mai làm: <danh sách ngắn>
 Đáng lo: <nếu có, một dòng; không có thì bỏ dòng này>
 ```
 
-4. `git add -A && git commit -m "[wrapup] <YYYY-MM-DD>"` rồi `git fetch origin main && git rebase origin/main && git push origin HEAD:main`.
+4. `git add -A && git commit -m "[wrapup] <YYYY-MM-DD>"` rồi `git fetch origin main && git rebase origin/main && git push --force-with-lease origin HEAD`.
 5. Tin nhắn cuối cùng là nội dung wrap-up. Capu không cần trả lời.

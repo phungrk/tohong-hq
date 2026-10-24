@@ -23,7 +23,7 @@ Chi phí 24 giờ qua: $<x>
 ```
 
 4. Với mỗi việc ở trạng thái Mới không ai bắt đầu quá 24 giờ, gọi subagent tương ứng để bắt đầu.
-5. `git add -A && git commit -m "[standup] <YYYY-MM-DD>"` rồi `git fetch origin main && git rebase origin/main && git push origin HEAD:main`.
+5. `git add -A && git commit -m "[standup] <YYYY-MM-DD>"` rồi `git fetch origin main && git rebase origin/main && git push --force-with-lease origin HEAD`.
 6. Tin nhắn cuối cùng của phiên chính là nội dung digest ở bước 3, để Capu đọc ngay trong thông báo.
 
 Không tạo việc mới, không đổi ưu tiên, không trả lời thay Capu các Decision Request.

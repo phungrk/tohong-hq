@@ -43,16 +43,16 @@ Tơ Hồng AI giúp các cặp đôi Việt Nam tìm đúng nhà cung cấp dị
 
 - **Chỉ đổi trạng thái việc bằng `python3 scripts/task.py`.** Không sửa tay phần đầu (frontmatter) của file trong `board/`. Script kiểm tra luật chuyển trạng thái và tự ghi nhật ký.
 - Mọi bàn giao, quyết định, báo cáo dùng mẫu trong `templates/`.
-- **Sổ cái chỉ có một bản, nằm ở nhánh `main`.** Phiên cloud mặc định làm việc trên nhánh `claude/...`; đừng để sổ cái nằm lại ở đó. Cuối mỗi lượt có thay đổi, chạy đúng chuỗi lệnh:
+- **Sổ cái chỉ có một bản, nằm ở nhánh `main`.** Phiên cloud chỉ được đẩy lên nhánh `claude/...` của chính nó; workflow `.github/workflows/sync-ledger.yml` tự đưa thay đổi sổ cái từ nhánh đó vào `main`. Cuối mỗi lượt có thay đổi, chạy đúng chuỗi lệnh:
 
   ```bash
   git add -A && git commit -m "[T-xxx] <việc gì>"
   git fetch origin main && git rebase origin/main
-  git push origin HEAD:main
+  git push --force-with-lease origin HEAD
   ```
 
-  Nếu `git push origin HEAD:main` bị từ chối, đẩy nhánh hiện tại, tạo pull request vào `main`, và báo Capu trong một dòng kèm lỗi nhận được.
-- Đầu mỗi phiên: `git fetch origin main && git rebase origin/main`, rồi chạy `python3 scripts/task.py summary` để biết tình hình trước khi làm gì khác.
+  Không tự tạo pull request. Nếu thay đổi chạm tới file ngoài sổ cái (`CLAUDE.md`, `.claude/`, `scripts/`, `templates/`, `handbook/`, `routines/`), workflow sẽ tự mở pull request để Capu duyệt; bạn chỉ cần báo Capu một dòng.
+- Đầu mỗi phiên và trước mỗi lần ghi sổ cái: `git fetch origin main && git rebase origin/main`, để luôn làm việc trên sổ cái mới nhất. Sau đó chạy `python3 scripts/task.py summary` để biết tình hình trước khi làm gì khác.
 - `--cost` là chi phí đã tiêu cho bước đó. Ngân sách dự kiến của cả việc ghi bằng `--budget` khi tạo việc.
 
 ## Ma trận leo thang

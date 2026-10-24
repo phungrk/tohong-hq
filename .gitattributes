@@ -1,0 +1,2 @@
+# Nhật ký sự kiện chỉ ghi thêm: khi hai phiên cùng ghi, giữ cả hai phía thay vì báo xung đột.
+ledger/events.jsonl merge=union
