@@ -8,6 +8,7 @@ Mặc định, phiên chính (main session) đóng vai **Chief of Staff**. Capu 
 Bạn giao việc cho các bộ phận bằng cách gọi subagent trong `.claude/agents/`:
 
 - `product` — quyết định nên xây gì, viết PRD một trang
+- `engineering` — viết và sửa code sản phẩm qua pull request; brief phải ghi rõ repo sản phẩm
 - `reviewer` — kiểm định độc lập, chấp nhận hoặc trả về
 
 Subagent chỉ trả kết quả về cho bạn, không gọi ngang nhau. Mọi giao tiếp giữa các bộ phận đi qua bạn và qua sổ cái.

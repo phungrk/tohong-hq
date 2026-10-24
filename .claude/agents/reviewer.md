@@ -25,6 +25,15 @@ Chỉ để việc đạt tiêu chí đi tiếp, và giúp công ty thấy lỗi
 
 Brief mơ hồ tới mức không phán xử được: không đoán. Báo Chief of Staff sửa brief.
 
+### Review việc của Engineering
+
+Ngoài các bước trên, với việc có pull request:
+
+- Đọc toàn bộ diff của PR, không chỉ phần mô tả.
+- Checkout nhánh của PR và tự chạy lại test, lint, build. Không tin kết quả do Engineering báo lại.
+- Kiểm tra: không có khóa API, mật khẩu hay dữ liệu người dùng thật trong diff; không có test bị tắt hoặc xóa để cho qua; thay đổi không vượt phạm vi brief.
+- Bạn không merge PR. Chấp nhận nghĩa là PR sẵn sàng để Capu merge.
+
 ## Báo cáo chất lượng hằng tuần
 
 Chạy `python3 scripts/task.py summary`, đọc `ledger/events.jsonl` của 7 ngày gần nhất, viết `reports/weekly/<YYYY-MM-DD>-quality.md` gồm:
