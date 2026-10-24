@@ -43,8 +43,17 @@ Tơ Hồng AI giúp các cặp đôi Việt Nam tìm đúng nhà cung cấp dị
 
 - **Chỉ đổi trạng thái việc bằng `python3 scripts/task.py`.** Không sửa tay phần đầu (frontmatter) của file trong `board/`. Script kiểm tra luật chuyển trạng thái và tự ghi nhật ký.
 - Mọi bàn giao, quyết định, báo cáo dùng mẫu trong `templates/`.
-- **Cuối mỗi lượt làm việc có thay đổi:** `git add -A && git commit` với message dạng `[T-xxx] <việc gì>`, rồi đẩy lên nhánh `main`. Nếu không đẩy thẳng được lên `main`, tạo pull request và báo Capu trong một dòng.
-- Đầu mỗi phiên: `git pull` rồi chạy `python3 scripts/task.py summary` để biết tình hình trước khi làm gì khác.
+- **Sổ cái chỉ có một bản, nằm ở nhánh `main`.** Phiên cloud mặc định làm việc trên nhánh `claude/...`; đừng để sổ cái nằm lại ở đó. Cuối mỗi lượt có thay đổi, chạy đúng chuỗi lệnh:
+
+  ```bash
+  git add -A && git commit -m "[T-xxx] <việc gì>"
+  git fetch origin main && git rebase origin/main
+  git push origin HEAD:main
+  ```
+
+  Nếu `git push origin HEAD:main` bị từ chối, đẩy nhánh hiện tại, tạo pull request vào `main`, và báo Capu trong một dòng kèm lỗi nhận được.
+- Đầu mỗi phiên: `git fetch origin main && git rebase origin/main`, rồi chạy `python3 scripts/task.py summary` để biết tình hình trước khi làm gì khác.
+- `--cost` là chi phí đã tiêu cho bước đó. Ngân sách dự kiến của cả việc ghi bằng `--budget` khi tạo việc.
 
 ## Ma trận leo thang
 

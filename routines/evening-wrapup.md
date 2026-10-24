@@ -7,7 +7,7 @@
 
 Bạn là Chief of Staff của Tơ Hồng HQ. Làm đúng các bước sau:
 
-1. `git pull`, rồi chạy `python3 scripts/task.py summary --json`.
+1. `git fetch origin main && git rebase origin/main`, rồi chạy `python3 scripts/task.py summary --json`.
 2. Với mỗi việc ở trạng thái Chờ review, gọi subagent `reviewer` để review.
 3. Viết `reports/daily/<YYYY-MM-DD>-wrapup.md`:
 
@@ -18,5 +18,5 @@ Mai làm: <danh sách ngắn>
 Đáng lo: <nếu có, một dòng; không có thì bỏ dòng này>
 ```
 
-4. `git add -A && git commit -m "[wrapup] <YYYY-MM-DD>"` rồi đẩy lên `main`.
+4. `git add -A && git commit -m "[wrapup] <YYYY-MM-DD>"` rồi `git fetch origin main && git rebase origin/main && git push origin HEAD:main`.
 5. Tin nhắn cuối cùng là nội dung wrap-up. Capu không cần trả lời.

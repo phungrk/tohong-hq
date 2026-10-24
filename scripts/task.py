@@ -45,7 +45,7 @@ EVENT_VI = {
     "escalated": "Leo thang", "decided": "Capu quyết định",
 }
 FIELDS = ["id", "title", "state", "holder", "owner", "reviewer", "rounds", "version",
-          "deadline", "escalation", "created", "updated", "prev_state", "cost"]
+          "deadline", "budget", "escalation", "created", "updated", "prev_state", "cost"]
 MAX_ROUNDS = 2          # vòng trả về tối đa trước khi tự động leo thang
 STALL_HOURS = 24        # quá ngưỡng này không có sự kiện = đứng yên
 
@@ -188,7 +188,7 @@ def cmd_new(a):
     meta = {
         "id": tid, "title": a.title, "state": "new", "holder": a.to, "owner": a.to,
         "reviewer": a.reviewer, "rounds": 0, "version": 0, "deadline": a.deadline or "",
-        "escalation": a.escalation, "created": ts, "updated": ts, "prev_state": "", "cost": round(a.cost, 2),
+        "budget": a.budget or "", "escalation": a.escalation, "created": ts, "updated": ts, "prev_state": "", "cost": round(a.cost, 2),
     }
     if not a.criteria:
         raise LedgerError("Việc mới phải có ít nhất một --criteria (tiêu chí chấp nhận).")
@@ -405,7 +405,8 @@ def main(argv=None):
             sp.add_argument("task")
         sp.add_argument("--by", default=by_default, required=by_default is None)
         sp.add_argument("--note", default="")
-        sp.add_argument("--cost", type=float, default=0.0, help="Chi phí ước tính, USD")
+        sp.add_argument("--cost", type=float, default=0.0,
+                        help="Chi phí ĐÃ TIÊU cho bước này, USD (không phải ngân sách)")
         sp.add_argument("--link", default="")
 
     sp = sub.add_parser("new", help="Tạo việc mới (Chief of Staff)")
@@ -417,6 +418,7 @@ def main(argv=None):
     sp.add_argument("--criteria", action="append", default=[])
     sp.add_argument("--out-of-scope", default="")
     sp.add_argument("--deadline", default="")
+    sp.add_argument("--budget", default="", help="Ngân sách dự kiến cho cả việc, vd '$2'")
     sp.add_argument("--reviewer", default="reviewer")
     sp.add_argument("--escalation", default="tu-lam", choices=["tu-lam", "bao-sau", "hoi-truoc"])
     sp.set_defaults(fn=cmd_new)
