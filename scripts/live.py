@@ -8,8 +8,10 @@ tiến trình nền tách riêng để lệnh gọi trả về ngay.
 Biến môi trường:
   TOHONG_LIVE_URL    địa chỉ Worker, vd https://tohong-live.<subdomain>.workers.dev
                      (đặt trong .claude/settings.json)
-  TOHONG_LIVE_TOKEN  mã bí mật để gửi (đặt trong biến môi trường của môi trường cloud,
-                     không bao giờ commit)
+  TOHONG_LIVE_TOKEN  tùy chọn. Cách khuyến nghị là lưu mã thành Network secret của môi trường
+                     cloud (host tohong-live.phungnc.workers.dev, header Authorization: Bearer):
+                     proxy tự gắn mã vào request, agent không bao giờ thấy mã. Chỉ đặt biến này
+                     khi không dùng được Network secret. Không bao giờ commit mã.
   TOHONG_LIVE_SYNC=1 gửi đồng bộ thay vì chạy nền (dùng khi thử nghiệm)
 """
 import json
@@ -25,11 +27,13 @@ PUBLIC_EVENT_FIELDS = ("id", "t", "task", "title", "event", "from", "to", "round
 def _post(payload):
     url = os.environ.get("TOHONG_LIVE_URL", "").rstrip("/")
     token = os.environ.get("TOHONG_LIVE_TOKEN", "")
-    if not url or not token:
+    if not url:
         return
+    headers = {"Content-Type": "application/json"}
+    if token:  # không có thì Network secret của môi trường cloud gắn hộ
+        headers["Authorization"] = f"Bearer {token}"
     req = urllib.request.Request(
-        url + "/event", data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"})
+        url + "/event", data=json.dumps(payload, ensure_ascii=False).encode("utf-8"), headers=headers)
     try:
         urllib.request.urlopen(req, timeout=5).read()
     except Exception:
@@ -38,7 +42,7 @@ def _post(payload):
 
 def emit(payload):
     """Gửi một payload. Không chặn, không ném lỗi."""
-    if not os.environ.get("TOHONG_LIVE_URL") or not os.environ.get("TOHONG_LIVE_TOKEN"):
+    if not os.environ.get("TOHONG_LIVE_URL"):
         return
     try:
         if os.environ.get("TOHONG_LIVE_SYNC") == "1":

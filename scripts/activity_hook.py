@@ -24,7 +24,7 @@ ACTIONS = {
 
 
 def main():
-    if not os.environ.get("TOHONG_LIVE_URL") or not os.environ.get("TOHONG_LIVE_TOKEN"):
+    if not os.environ.get("TOHONG_LIVE_URL"):
         return
     data = json.load(sys.stdin)
     agent = data.get("agent_type") or "chief-of-staff"
