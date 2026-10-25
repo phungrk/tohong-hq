@@ -76,6 +76,7 @@ task.py, log_hook.py, activity_hook.py ──POST──▶ Cloudflare Worker toh
 - `scripts/live.py` gửi trong tiến trình nền, không bao giờ làm chậm hay làm hỏng việc của agent. Thiếu cấu hình thì tự bỏ qua.
 - Chỉ phát các trường công khai: không có nội dung defect, ghi chú hay đường dẫn file.
 - `scripts/activity_hook.py` (PreToolUse) phát nhịp "đang làm gì" của từng agent, tối đa một nhịp mỗi 10 giây: đọc tài liệu, sửa file, chạy lệnh, tra cứu, giao việc. Không gửi lệnh hay nội dung.
+- `python3 scripts/live.py --done T-xxx` gửi nhịp `status: done` của Chief of Staff: dashboard tắt sáng node và hiện "Task [tên] đã hoàn thành"; Worker giữ thông báo này 10 phút, nhịp mới của agent sẽ ghi đè.
 - Mã Worker nằm trong `live/`. Workflow `deploy-live` tự deploy khi `live/` thay đổi.
 
 Cấu hình:

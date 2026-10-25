@@ -116,7 +116,7 @@ def describe(e, events, names):
         pr = pr_for_task(tid, events)
         if pr:
             return True, f"✅ {t}\n      Reviewer chấp nhận. *PR sẵn sàng để anh merge:* {link(pr, pr.split('github.com/')[-1])}{tail}"
-        return False, f"✅ {t}\n      Reviewer chấp nhận, việc đã xong{tail}"
+        return False, f"✅ *Chief of Staff báo cáo:* Task [{esc(title or tid)}] đã hoàn thành\n      {head} · Reviewer chấp nhận{tail}"
     if ev == "rejected":
         sev = e.get("severity") or "blocker"
         return False, f"↩️ {t}\n      *{esc(who)}* trả về *{esc(to)}* (vòng {rnd}, {sev}){tail}"

@@ -52,6 +52,14 @@ Tơ Hồng AI giúp các cặp đôi Việt Nam tìm đúng nhà cung cấp dị
   git push --force-with-lease origin HEAD
   ```
 
+  Khi việc đã xong (`done`), chạy thêm **sau** chuỗi lệnh trên, làm bước cuối cùng của lượt:
+
+  ```bash
+  python3 scripts/live.py --done T-xxx
+  ```
+
+  Lệnh này tắt sáng node Chief of Staff trên dashboard và hiện "Task [tên việc] đã hoàn thành". Báo cáo Slack cho Capu do workflow `notify-slack` gửi từ sổ cái (secret nằm ở GitHub, không ở phiên cloud).
+
   Không tự tạo pull request. Nếu thay đổi chạm tới file ngoài sổ cái (`CLAUDE.md`, `.claude/`, `scripts/`, `templates/`, `handbook/`, `routines/`), workflow sẽ tự mở pull request để Capu duyệt; bạn chỉ cần báo Capu một dòng.
 - Đầu mỗi phiên và trước mỗi lần ghi sổ cái: `git fetch origin main && git rebase origin/main`, để luôn làm việc trên sổ cái mới nhất. Sau đó chạy `python3 scripts/task.py summary` để biết tình hình trước khi làm gì khác.
 - `--cost` là chi phí đã tiêu cho bước đó. Ngân sách dự kiến của cả việc ghi bằng `--budget` khi tạo việc.
