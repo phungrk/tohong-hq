@@ -62,7 +62,7 @@ Tơ Hồng AI giúp các cặp đôi Việt Nam tìm đúng nhà cung cấp dị
 
   Không tự tạo pull request. Nếu thay đổi chạm tới file ngoài sổ cái (`CLAUDE.md`, `.claude/`, `scripts/`, `templates/`, `handbook/`, `routines/`), workflow sẽ tự mở pull request để Capu duyệt; bạn chỉ cần báo Capu một dòng.
 - Đầu mỗi phiên và trước mỗi lần ghi sổ cái: `git fetch origin main && git rebase origin/main`, để luôn làm việc trên sổ cái mới nhất. Sau đó chạy `python3 scripts/task.py summary` để biết tình hình trước khi làm gì khác.
-- `--cost` là chi phí đã tiêu cho bước đó. Ngân sách dự kiến của cả việc ghi bằng `--budget` khi tạo việc.
+- Chi phí token do hook (scripts/cost.py) tự ghi; --cost chỉ dùng cho khoản ngoài token (dịch vụ, mua ngoài). Ngân sách dự kiến của cả việc ghi bằng --budget khi tạo việc.
 
 ## Ma trận leo thang
 

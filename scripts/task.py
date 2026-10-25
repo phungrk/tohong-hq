@@ -14,13 +14,18 @@ Ví dụ:
   python3 scripts/task.py handoff T-001 --by product --note "Bản PRD v1" --link handoffs/T-001-v1.md
   python3 scripts/task.py reject T-001 --by reviewer --against "tiêu chí 2" --severity blocker --note "Thiếu chỉ số"
   python3 scripts/task.py accept T-001 --by reviewer
+  python3 scripts/task.py cost T-001 --by chief-of-staff --cost -2.0 --note "Điều chỉnh: nhập nhầm ngân sách"
   python3 scripts/task.py summary
 """
 import argparse
+import contextlib
+import hashlib
 import json
 import os
 import re
 import sys
+import tempfile
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -48,8 +53,10 @@ STATE_VI = {
 EVENT_VI = {
     "assigned": "Giao việc", "started": "Bắt đầu", "handoff": "Bàn giao", "rejected": "Trả về",
     "accepted": "Chấp nhận", "blocked": "Báo bị chặn", "unblocked": "Gỡ chặn",
-    "escalated": "Leo thang", "decided": "Capu quyết định",
+    "escalated": "Leo thang", "decided": "Capu quyết định", "cost": "Ghi chi phí", "requested": "Capu yêu cầu",
 }
+REQUESTER = "capu"      # người duy nhất được ghi là bên yêu cầu (--requested-by)
+REQUEST_TO = "chief-of-staff"
 FIELDS = ["id", "title", "state", "holder", "owner", "reviewer", "rounds", "version",
           "deadline", "budget", "escalation", "created", "updated", "prev_state", "cost"]
 MAX_ROUNDS = 2          # vòng trả về tối đa trước khi tự động leo thang
@@ -135,6 +142,49 @@ def next_id():
 
 
 # ---------- nhật ký ----------
+@contextlib.contextmanager
+def ledger_lock(wait_s=10.0):
+    """Khóa ghi sổ cái giữa các tiến trình (task.py và hook chi phí chạy song song).
+
+    File khóa nằm trong thư mục tạm, không nằm trong repo. Chờ tối đa wait_s giây rồi
+    vẫn chạy tiếp: thà hiếm khi ghi chen còn hơn treo agent.
+    """
+    f = None
+    try:
+        import fcntl
+        key = hashlib.sha1(str(ROOT.resolve()).encode()).hexdigest()[:12]
+        f = open(Path(tempfile.gettempdir()) / f"tohong-ledger-{key}.lock", "w")
+        deadline = time.time() + wait_s
+        while True:
+            try:
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except OSError:
+                if time.time() > deadline:
+                    break
+                time.sleep(0.05)
+    except Exception:
+        pass
+    try:
+        yield
+    finally:
+        if f:
+            f.close()
+
+
+def read_events():
+    if not LEDGER.exists():
+        return []
+    out = []
+    for line in LEDGER.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            try:
+                out.append(json.loads(line))
+            except json.JSONDecodeError:
+                pass
+    return out
+
+
 def next_event_id():
     if not LEDGER.exists():
         return "E-0001"
@@ -142,20 +192,55 @@ def next_event_id():
     return f"E-{n + 1:04d}"
 
 
-def log_event(meta, event, frm, to, detail="", severity="", cost=0.0, link=""):
+def log_event(meta, event, frm, to, detail="", severity="", cost=0.0, link="",
+              ndigits=2, with_state=True, extra=None):
     LEDGER.parent.mkdir(parents=True, exist_ok=True)
     row = {
         "id": next_event_id(), "t": stamp(), "task": meta["id"], "title": meta["title"],
         "event": event, "from": frm, "to": to, "round": meta.get("rounds", 0),
-        "severity": severity, "detail": detail, "link": link, "cost": round(cost, 2),
-        # trạng thái và người giữ SAU sự kiện, để dashboard cập nhật không cần đọc board/
-        "state": meta.get("state", ""), "holder": meta.get("holder", ""),
+        "severity": severity, "detail": detail, "link": link, "cost": round(cost, ndigits),
     }
+    if with_state:
+        # trạng thái và người giữ SAU sự kiện, để dashboard cập nhật không cần đọc board/
+        row["state"], row["holder"] = meta.get("state", ""), meta.get("holder", "")
+    row.update(extra or {})
     with LEDGER.open("a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
     if live:
-        live.emit_event(row, meta)
+        live.emit_event(row, meta if with_state else None)
     return row
+
+
+def record_cost(tid, by, cost, note, *, link="", severity="", event="cost", extra=None):
+    """Ghi một sự kiện chi phí. KHÔNG đổi trạng thái, người giữ hay giờ cập nhật của việc.
+
+    - from = to = agent đã tiêu tiền (dashboard cộng cost theo from; from == to nên không
+      bị vẽ thành luồng bàn giao).
+    - Không ghi state/holder để dashboard realtime không đụng tới trạng thái việc.
+    - Có mã việc thì cộng vào trường cost của board/T-xxx.md (qua script, không thêm dòng lịch sử).
+    - Không có mã việc thì vẫn ghi, task rỗng.
+    - Người gọi tự giữ ledger_lock() nếu có thể chạy song song.
+    """
+    meta, body = {"id": "", "title": "", "rounds": 0}, None
+    if tid:
+        meta, body = read_task(tid)
+    row = log_event(meta, event, by, by, note, severity, cost, link, ndigits=4,
+                    with_state=False, extra=extra)
+    if tid and cost:
+        meta["cost"] = round(meta["cost"] + cost, 4)
+        write_task(meta, body)
+    return row
+
+
+def record_request(meta, by, detail="", at=None):
+    """Ghi sự kiện requested (Capu → Chief of Staff). KHÔNG đổi trạng thái, người giữ hay file board/.
+
+    Giống record_cost: không kèm state/holder, nên dashboard realtime không đụng tới trạng thái việc.
+    """
+    extra = {"round": 0}   # lúc Capu yêu cầu, việc chưa qua vòng trả về nào
+    if at:
+        extra["t"] = at
+    return log_event(meta, "requested", by, REQUEST_TO, detail, with_state=False, extra=extra)
 
 
 def append_history(body, row):
@@ -185,7 +270,7 @@ def transition(tid, allowed_from, new_state, event, by, to, *, holder=None, deta
     if holder:
         meta["holder"] = holder
     meta["updated"] = stamp()
-    meta["cost"] = round(meta["cost"] + cost, 2)
+    meta["cost"] = round(meta["cost"] + cost, 4)
     row = log_event(meta, event, by, to, detail, severity, cost, link)
     write_task(meta, append_history(body, row))
     return meta, row
@@ -208,9 +293,28 @@ def cmd_new(a):
             f"**Bối cảnh:** {a.context or '—'}\n\n"
             f"### Tiêu chí chấp nhận\n\n{crit}\n\n"
             f"### Không làm\n\n{a.out_of_scope or '—'}\n\n## Lịch sử\n")
+    if a.requested_by:
+        record_request(meta, a.requested_by, a.goal or "")   # ngay trước assigned
     row = log_event(meta, "assigned", a.by, a.to, a.goal or "", cost=a.cost)
     write_task(meta, append_history(body, row))
     print(f"Đã tạo {tid} → {a.to}. File: board/{tid}.md")
+
+
+def cmd_request(a):
+    """Ghi bù sự kiện requested cho việc đã có. Chỉ thêm một dòng vào ledger."""
+    meta, _ = read_task(a.task)
+    if any(e.get("task") == a.task and e.get("event") == "requested" for e in read_events()):
+        raise LedgerError(f"{a.task} đã có sự kiện requested; không ghi trùng.")
+    at = a.at
+    if not at:
+        # mặc định: 1 phút trước sự kiện assigned đầu tiên, để thứ tự thời gian đúng (Capu yêu cầu trước khi giao)
+        first = next((e for e in read_events() if e.get("task") == a.task and e.get("event") == "assigned"), None)
+        if first:
+            at = stamp(parse_stamp(first["t"]) - timedelta(minutes=1))
+    else:
+        parse_stamp(at)
+    row = record_request(meta, a.by, a.note or "Ghi bù", at=at)
+    print(f"{row['id']}: ghi bù requested {a.by} → {REQUEST_TO} cho {a.task} lúc {row['t']} (trạng thái việc không đổi)")
 
 
 def cmd_start(a):
@@ -326,6 +430,15 @@ def cmd_decide(a):
     print(f"{a.task}: Capu đã quyết → {meta['owner']} làm tiếp")
 
 
+def cmd_cost(a):
+    if not a.note:
+        raise LedgerError("Ghi chi phí phải có --note: số liệu lấy từ đâu (transcript, hóa đơn, điều chỉnh...).")
+    tid = "" if a.task in (None, "", "-") else a.task
+    extra = {"adjusts": a.adjusts} if a.adjusts else None
+    row = record_cost(tid, a.by, a.cost, a.note, link=a.link or "", extra=extra)
+    print(f"{row['id']}: ghi chi phí ${row['cost']} cho {a.by}{' · ' + tid if tid else ''} (trạng thái việc không đổi)")
+
+
 def build_summary():
     tasks = all_tasks()
     events = []
@@ -431,7 +544,16 @@ def main(argv=None):
     sp.add_argument("--budget", default="", help="Ngân sách dự kiến cho cả việc, vd '$2'")
     sp.add_argument("--reviewer", default="reviewer")
     sp.add_argument("--escalation", default="tu-lam", choices=["tu-lam", "bao-sau", "hoi-truoc"])
+    sp.add_argument("--requested-by", choices=[REQUESTER], default="",
+                    help="Capu là người yêu cầu: ghi thêm sự kiện requested (capu → chief-of-staff) ngay trước assigned")
     sp.set_defaults(fn=cmd_new)
+
+    sp = sub.add_parser("request", help="Ghi bù: Capu đã yêu cầu việc này (không đổi trạng thái)")
+    sp.add_argument("task")
+    sp.add_argument("--by", default=REQUESTER, choices=[REQUESTER])
+    sp.add_argument("--note", default="", help="Bằng chứng / nguồn, mặc định 'Ghi bù'")
+    sp.add_argument("--at", default="", help="Giờ yêu cầu YYYY-MM-DDTHH:MM; mặc định 1 phút trước assigned")
+    sp.set_defaults(fn=cmd_request)
 
     for name, fn, hlp in [("start", cmd_start, "Bắt đầu làm"), ("handoff", cmd_handoff, "Bàn giao cho reviewer"),
                           ("accept", cmd_accept, "Reviewer chấp nhận"), ("block", cmd_block, "Báo bị chặn"),
@@ -451,6 +573,15 @@ def main(argv=None):
     sp.add_argument("--close", action="store_true", help="Đóng việc thay vì làm tiếp")
     sp.set_defaults(fn=cmd_decide)
 
+    sp = sub.add_parser("cost", help="Ghi chi phí đã tiêu, không đổi trạng thái việc")
+    sp.add_argument("task", nargs="?", default="", help="T-xxx; bỏ trống hoặc '-' nếu không gắn việc nào")
+    sp.add_argument("--by", required=True, help="Agent đã tiêu khoản này (dashboard cộng theo trường from)")
+    sp.add_argument("--cost", type=float, required=True, help="USD; số âm cho điều chỉnh")
+    sp.add_argument("--note", default="", help="Bắt buộc: nguồn số liệu hoặc lý do điều chỉnh")
+    sp.add_argument("--link", default="")
+    sp.add_argument("--adjusts", default="", help="Mã sự kiện được điều chỉnh, vd E-0001")
+    sp.set_defaults(fn=cmd_cost)
+
     sp = sub.add_parser("summary", help="Tình hình công ty")
     sp.add_argument("--json", action="store_true")
     sp.set_defaults(fn=cmd_summary)
@@ -461,7 +592,8 @@ def main(argv=None):
 
     a = p.parse_args(argv)
     try:
-        a.fn(a)
+        with ledger_lock():
+            a.fn(a)
     except LedgerError as e:
         print(f"Lỗi: {e}", file=sys.stderr)
         sys.exit(2)
