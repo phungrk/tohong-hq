@@ -85,5 +85,5 @@ Cấu hình:
 | GitHub Secrets | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | Để deploy Worker |
 | GitHub Secrets | `TOHONG_LIVE_TOKEN` | Mã bí mật để gửi sự kiện |
 | Biến môi trường của môi trường cloud (claude.ai/code) | `TOHONG_LIVE_TOKEN` | Cùng mã ở trên |
-| Truy cập mạng của môi trường cloud | domain `tohong-live.<subdomain>.workers.dev` | Cho phép phiên agent gửi tới Worker |
-| `.claude/settings.json` → `env` | `TOHONG_LIVE_URL` | `https://tohong-live.<subdomain>.workers.dev` |
+| Truy cập mạng của môi trường cloud | domain `tohong-live.phungnc.workers.dev` | Cho phép phiên agent gửi tới Worker |
+| `.claude/settings.json` → `env` | `TOHONG_LIVE_URL` | `https://tohong-live.phungnc.workers.dev` |

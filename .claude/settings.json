@@ -1,6 +1,6 @@
 {
   "env": {
-    "TOHONG_LIVE_URL": ""
+    "TOHONG_LIVE_URL": "https://tohong-live.phungnc.workers.dev"
   },
   "hooks": {
     "PreToolUse": [
