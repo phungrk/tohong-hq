@@ -53,8 +53,10 @@ STATE_VI = {
 EVENT_VI = {
     "assigned": "Giao việc", "started": "Bắt đầu", "handoff": "Bàn giao", "rejected": "Trả về",
     "accepted": "Chấp nhận", "blocked": "Báo bị chặn", "unblocked": "Gỡ chặn",
-    "escalated": "Leo thang", "decided": "Capu quyết định", "cost": "Ghi chi phí",
+    "escalated": "Leo thang", "decided": "Capu quyết định", "cost": "Ghi chi phí", "requested": "Capu yêu cầu",
 }
+REQUESTER = "capu"      # người duy nhất được ghi là bên yêu cầu (--requested-by)
+REQUEST_TO = "chief-of-staff"
 FIELDS = ["id", "title", "state", "holder", "owner", "reviewer", "rounds", "version",
           "deadline", "budget", "escalation", "created", "updated", "prev_state", "cost"]
 MAX_ROUNDS = 2          # vòng trả về tối đa trước khi tự động leo thang
@@ -230,6 +232,17 @@ def record_cost(tid, by, cost, note, *, link="", severity="", event="cost", extr
     return row
 
 
+def record_request(meta, by, detail="", at=None):
+    """Ghi sự kiện requested (Capu → Chief of Staff). KHÔNG đổi trạng thái, người giữ hay file board/.
+
+    Giống record_cost: không kèm state/holder, nên dashboard realtime không đụng tới trạng thái việc.
+    """
+    extra = {"round": 0}   # lúc Capu yêu cầu, việc chưa qua vòng trả về nào
+    if at:
+        extra["t"] = at
+    return log_event(meta, "requested", by, REQUEST_TO, detail, with_state=False, extra=extra)
+
+
 def append_history(body, row):
     line = f"- {row['t']} · {EVENT_VI.get(row['event'], row['event'])} · {row['from']} → {row['to']}"
     if row["severity"]:
@@ -280,9 +293,28 @@ def cmd_new(a):
             f"**Bối cảnh:** {a.context or '—'}\n\n"
             f"### Tiêu chí chấp nhận\n\n{crit}\n\n"
             f"### Không làm\n\n{a.out_of_scope or '—'}\n\n## Lịch sử\n")
+    if a.requested_by:
+        record_request(meta, a.requested_by, a.goal or "")   # ngay trước assigned
     row = log_event(meta, "assigned", a.by, a.to, a.goal or "", cost=a.cost)
     write_task(meta, append_history(body, row))
     print(f"Đã tạo {tid} → {a.to}. File: board/{tid}.md")
+
+
+def cmd_request(a):
+    """Ghi bù sự kiện requested cho việc đã có. Chỉ thêm một dòng vào ledger."""
+    meta, _ = read_task(a.task)
+    if any(e.get("task") == a.task and e.get("event") == "requested" for e in read_events()):
+        raise LedgerError(f"{a.task} đã có sự kiện requested; không ghi trùng.")
+    at = a.at
+    if not at:
+        # mặc định: 1 phút trước sự kiện assigned đầu tiên, để thứ tự thời gian đúng (Capu yêu cầu trước khi giao)
+        first = next((e for e in read_events() if e.get("task") == a.task and e.get("event") == "assigned"), None)
+        if first:
+            at = stamp(parse_stamp(first["t"]) - timedelta(minutes=1))
+    else:
+        parse_stamp(at)
+    row = record_request(meta, a.by, a.note or "Ghi bù", at=at)
+    print(f"{row['id']}: ghi bù requested {a.by} → {REQUEST_TO} cho {a.task} lúc {row['t']} (trạng thái việc không đổi)")
 
 
 def cmd_start(a):
@@ -512,7 +544,16 @@ def main(argv=None):
     sp.add_argument("--budget", default="", help="Ngân sách dự kiến cho cả việc, vd '$2'")
     sp.add_argument("--reviewer", default="reviewer")
     sp.add_argument("--escalation", default="tu-lam", choices=["tu-lam", "bao-sau", "hoi-truoc"])
+    sp.add_argument("--requested-by", choices=[REQUESTER], default="",
+                    help="Capu là người yêu cầu: ghi thêm sự kiện requested (capu → chief-of-staff) ngay trước assigned")
     sp.set_defaults(fn=cmd_new)
+
+    sp = sub.add_parser("request", help="Ghi bù: Capu đã yêu cầu việc này (không đổi trạng thái)")
+    sp.add_argument("task")
+    sp.add_argument("--by", default=REQUESTER, choices=[REQUESTER])
+    sp.add_argument("--note", default="", help="Bằng chứng / nguồn, mặc định 'Ghi bù'")
+    sp.add_argument("--at", default="", help="Giờ yêu cầu YYYY-MM-DDTHH:MM; mặc định 1 phút trước assigned")
+    sp.set_defaults(fn=cmd_request)
 
     for name, fn, hlp in [("start", cmd_start, "Bắt đầu làm"), ("handoff", cmd_handoff, "Bàn giao cho reviewer"),
                           ("accept", cmd_accept, "Reviewer chấp nhận"), ("block", cmd_block, "Báo bị chặn"),

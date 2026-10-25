@@ -16,7 +16,8 @@ Bất kỳ trạng thái nào chưa Xong đều có thể `escalate` lên Capu k
 
 | Ai | Lệnh | Khi nào |
 | --- | --- | --- |
-| Chief of Staff | `task.py new --title … --to … --criteria …` | Capu giao việc |
+| Chief of Staff | `task.py new --title … --to … --criteria … [--requested-by capu]` | Giao việc. Việc do Capu yêu cầu thì luôn thêm `--requested-by capu` |
+| Chief of Staff | `task.py request T-xxx [--note "<bằng chứng>"] [--at YYYY-MM-DDTHH:MM]` | Ghi bù: việc đã có mà quên `--requested-by`. Không đổi trạng thái, không ghi trùng |
 | Bộ phận | `task.py start T-xxx --by <bộ phận>` | Bắt đầu hoặc bắt đầu sửa |
 | Bộ phận | `task.py handoff T-xxx --by <bộ phận> --link handoffs/…` | Làm xong, chuyển review |
 | Reviewer | `task.py accept T-xxx --by reviewer` | Mọi tiêu chí đạt |
@@ -26,6 +27,12 @@ Bất kỳ trạng thái nào chưa Xong đều có thể `escalate` lên Capu k
 | Chief of Staff | `task.py decide T-xxx --note "…" [--close]` | Ghi lại quyết định của Capu |
 | Bất kỳ ai | `task.py summary` | Đầu mỗi phiên |
 | Chief of Staff | `task.py cost [T-xxx] --by <agent> --cost <USD> --note "<nguồn>" [--adjusts E-xxxx]` | Ghi tay hoặc điều chỉnh chi phí; không đổi trạng thái việc |
+
+## Ghi lại việc Capu yêu cầu
+
+`task.py new --requested-by capu` ghi thêm sự kiện `requested` (from=capu, to=chief-of-staff, cost 0) ngay trước sự kiện `assigned`; không có cờ thì hành vi như cũ. Bản đồ luồng dùng sự kiện này để vẽ đường Capu → Chief of Staff. Chỉ dùng khi có bằng chứng Capu là người yêu cầu (việc Chief of Staff tự tạo thì không gắn cờ).
+
+`task.py request T-xxx` ghi bù cho việc đã tạo: chỉ thêm một dòng vào `ledger/events.jsonl`, không sửa dòng cũ, không đổi trạng thái hay file `board/`. Giờ mặc định là 1 phút trước sự kiện `assigned` đầu tiên của việc. Mỗi việc chỉ có một sự kiện `requested`. Sự kiện này đi qua đường truyền realtime như sự kiện khác nhưng không báo Slack (đã có tin "Giao việc").
 
 ## Chi phí: tính từ token thật
 
