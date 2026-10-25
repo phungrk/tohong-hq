@@ -11,11 +11,12 @@ import { DurableObject } from "cloudflare:workers";
 
 const KEEP_EVENTS = 300;          // số sự kiện giữ lại cho ảnh chụp
 const ACTIVITY_TTL_MS = 120_000;  // agent không có nhịp mới sau 2 phút coi như nghỉ
+const DONE_TTL_MS = 600_000;      // thông báo "đã hoàn thành" giữ lại 10 phút cho dashboard mở muộn
 const MAX_BODY = 8_192;
 
 const EVENT_FIELDS = ["id", "t", "task", "title", "event", "from", "to", "round", "severity", "cost",
                       "state", "holder", "owner", "reviewer", "rounds"];
-const ACTIVITY_FIELDS = ["agent", "action", "tool", "task"];
+const ACTIVITY_FIELDS = ["agent", "action", "tool", "task", "status"];
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -57,7 +58,9 @@ export class LiveHub extends DurableObject {
     const events = this.sql.exec(`SELECT body FROM events ORDER BY seq DESC LIMIT ?`, KEEP_EVENTS)
       .toArray().map((r) => JSON.parse(r.body)).reverse();
     const since = Date.now() - ACTIVITY_TTL_MS;
-    const activity = this.sql.exec(`SELECT body FROM activity WHERE at > ?`, since)
+    const activity = this.sql.exec(
+      `SELECT body FROM activity WHERE at > ? OR (at > ? AND json_extract(body, '$.status') = 'done')`,
+      since, Date.now() - DONE_TTL_MS)
       .toArray().map((r) => JSON.parse(r.body));
     return { type: "snapshot", server_time: Date.now(), events, activity };
   }

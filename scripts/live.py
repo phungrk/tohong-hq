@@ -16,10 +16,13 @@ Biến môi trường:
 """
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.request
+from pathlib import Path
 
+ROOT = Path(os.environ.get("TOHONG_ROOT", Path(__file__).resolve().parent.parent))
 PUBLIC_EVENT_FIELDS = ("id", "t", "task", "title", "event", "from", "to", "round", "severity", "cost",
                        "state", "holder", "owner", "reviewer", "rounds")
 
@@ -29,7 +32,7 @@ def _post(payload):
     token = os.environ.get("TOHONG_LIVE_TOKEN", "")
     if not url:
         return
-    headers = {"Content-Type": "application/json"}
+    headers = {"Content-Type": "application/json", "User-Agent": "tohong-hq/1.0"}  # Cloudflare chặn UA mặc định của urllib (403)
     if token:  # không có thì Network secret của môi trường cloud gắn hộ
         headers["Authorization"] = f"Bearer {token}"
     req = urllib.request.Request(
@@ -71,6 +74,23 @@ def emit_event(row, meta=None):
 def emit_activity(agent, action, tool="", task=""):
     emit({"type": "activity", "agent": agent, "action": action, "tool": tool, "task": task})
 
+
+def emit_done(task_id, title=""):
+    """Chief of Staff báo xong một việc: node tắt sáng, hiện "Task [tên] đã hoàn thành"."""
+    if not title:
+        try:
+            m = re.search(r"^title:\s*(.+)$", (ROOT / "board" / f"{task_id}.md").read_text(encoding="utf-8"), re.M)
+            title = m.group(1).strip().strip('"') if m else task_id
+        except Exception:
+            title = task_id
+    emit({"type": "activity", "agent": "chief-of-staff", "status": "done", "task": task_id,
+          "action": f"Task [{title}] đã hoàn thành"})
+
+
+if __name__ == "__main__" and "--done" in sys.argv:
+    # python3 scripts/live.py --done T-xxx : bước cuối của lượt, sau mọi lệnh git
+    os.environ["TOHONG_LIVE_SYNC"] = "1"
+    emit_done(sys.argv[sys.argv.index("--done") + 1])
 
 if __name__ == "__main__" and "--post" in sys.argv:
     try:
