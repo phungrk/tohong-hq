@@ -20,6 +20,7 @@ Brief của mỗi việc phải ghi rõ làm trên repo nào. Brief không ghi t
 | `phungrk/tohong-front` | Frontend của Tơ Hồng |
 | `phungrk/tohong-back` | Backend của Tơ Hồng |
 | `phungrk/tohong-vendor-matching` | Engine ghép cặp đôi với vendor |
+| `phungrk/tohong-hq-dashboard` | Dashboard công khai của Tơ Hồng HQ (trang tĩnh, đọc `dashboard.json`) |
 
 Repo này (`tohong-hq`) là sổ cái của công ty, không chứa code sản phẩm. Code sản phẩm không bao giờ được ghi vào đây.
 
