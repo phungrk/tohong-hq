@@ -45,7 +45,8 @@ def export(out: Path, public: bool = False):
 
     events = []
     if task.LEDGER.exists():
-        lines = [l for l in task.LEDGER.read_text(encoding="utf-8").splitlines() if l.strip()]
+        # bỏ dòng trùng y hệt (có thể sinh ra khi rebase nhánh có nhật ký gộp hai phía)
+        lines = list(dict.fromkeys(l for l in task.LEDGER.read_text(encoding="utf-8").splitlines() if l.strip()))
         for i, line in enumerate(lines, 1):
             try:
                 e = json.loads(line)
