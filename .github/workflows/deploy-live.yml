@@ -37,8 +37,10 @@ jobs:
           [ -z "$CF_ACCOUNT" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
           [ -z "$LIVE_TOKEN" ] && missing="$missing TOHONG_LIVE_TOKEN"
           if [ -n "$missing" ]; then
-            echo "::warning::Chưa deploy vì thiếu secret:$missing (Settings → Secrets and variables → Actions). Thêm xong thì bấm Run workflow."
+            msg="Chưa deploy vì workflow không đọc được secret:$missing. Kiểm tra: đúng repo tohong-hq, tab Secrets (không phải Variables), mục Repository secrets (không phải Environment), đúng tên viết hoa."
             echo "ok=false" >> "$GITHUB_OUTPUT"
+            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then echo "::error::$msg"; exit 1; fi
+            echo "::warning::$msg"
           else
             echo "ok=true" >> "$GITHUB_OUTPUT"
           fi
