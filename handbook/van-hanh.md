@@ -36,6 +36,18 @@ Bất kỳ trạng thái nào chưa Xong đều có thể `escalate` lên Capu k
 | Review tuần | Thứ Bảy | Capu mở một phiên với Chief of Staff | Ưu tiên tuần sau, ghi vào `decisions/` |
 | Retro tháng | Thứ Bảy cuối tháng | Capu + Chief of Staff + Reviewer | Sửa `CLAUDE.md`, file agent, mẫu |
 
+## Model của từng bộ phận
+
+| Bộ phận | Model | Lý do |
+| --- | --- | --- |
+| Chief of Staff (phiên chính) | Capu chọn khi mở phiên | Không đặt bằng file |
+| `reviewer` | `opus` | Người gác cổng cuối cùng, cần kiểm kỹ nhất |
+| `product`, `engineering` | `sonnet` | Ưu tiên chi phí; đã có reviewer gác chất lượng |
+
+- Đặt bằng dòng `model:` trong frontmatter của `.claude/agents/<tên>.md`. Dùng alias (`sonnet`, `opus`, `haiku`) để tự lên bản mới nhất; cần ghim cố định thì ghi ID đầy đủ, vd `claude-opus-5-5`. Ghi `inherit` để dùng model của phiên chính. Nguồn: https://code.claude.com/docs/en/sub-agents (mục "Choose a model").
+- Cách đổi: sửa dòng `model:` đó; vì đây là file trong `.claude/`, workflow sẽ mở PR để Capu duyệt.
+- Thứ tự ưu tiên của Claude Code: tham số `model` truyền lúc gọi subagent thắng frontmatter. Chief of Staff không truyền `model` khi giao việc, trừ khi Capu yêu cầu.
+
 ## Tuyển thêm bộ phận
 
 1. Tạo `.claude/agents/<tên>.md` theo khuôn của `product.md`: sứ mệnh, cách làm một việc, quyền hạn, KPI. Nếu vị trí đã có trong `org/roster.json`, dashboard tự đổi từ "Need Hiring" sang "Hired"; vị trí mới hoàn toàn thì thêm một dòng vào `org/roster.json`.
