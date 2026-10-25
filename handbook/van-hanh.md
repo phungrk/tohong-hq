@@ -64,3 +64,26 @@ Secrets của repo (Settings → Secrets and variables → Actions):
 
 Trạng thái "đã báo tới đâu" nằm trên nhánh `notify-state`. Lần chạy đầu chỉ gửi một tin chào, không gửi lại lịch sử cũ.
 Chạy thử không gửi: `python3 scripts/notify_slack.py --state /tmp/state --dry-run`.
+
+## Đường truyền realtime
+
+Git là sổ cái gốc nhưng chậm (chỉ lên GitHub khi agent commit). Để dashboard đổi ngay khi việc xảy ra, có thêm một đường truyền trực tiếp:
+
+```
+task.py, log_hook.py, activity_hook.py ──POST──▶ Cloudflare Worker tohong-live ──WebSocket──▶ dashboard
+```
+
+- `scripts/live.py` gửi trong tiến trình nền, không bao giờ làm chậm hay làm hỏng việc của agent. Thiếu cấu hình thì tự bỏ qua.
+- Chỉ phát các trường công khai: không có nội dung defect, ghi chú hay đường dẫn file.
+- `scripts/activity_hook.py` (PreToolUse) phát nhịp "đang làm gì" của từng agent, tối đa một nhịp mỗi 10 giây: đọc tài liệu, sửa file, chạy lệnh, tra cứu, giao việc. Không gửi lệnh hay nội dung.
+- Mã Worker nằm trong `live/`. Workflow `deploy-live` tự deploy khi `live/` thay đổi.
+
+Cấu hình:
+
+| Ở đâu | Tên | Giá trị |
+| --- | --- | --- |
+| GitHub Secrets | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | Để deploy Worker |
+| GitHub Secrets | `TOHONG_LIVE_TOKEN` | Mã bí mật để gửi sự kiện |
+| Biến môi trường của môi trường cloud (claude.ai/code) | `TOHONG_LIVE_TOKEN` | Cùng mã ở trên |
+| Truy cập mạng của môi trường cloud | domain `tohong-live.<subdomain>.workers.dev` | Cho phép phiên agent gửi tới Worker |
+| `.claude/settings.json` → `env` | `TOHONG_LIVE_URL` | `https://tohong-live.<subdomain>.workers.dev` |

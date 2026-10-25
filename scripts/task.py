@@ -30,6 +30,12 @@ try:
 except Exception:  # pragma: no cover
     TZ = None
 
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import live  # đường truyền realtime; thiếu cấu hình thì tự bỏ qua
+except Exception:  # pragma: no cover
+    live = None
+
 ROOT = Path(os.environ.get("TOHONG_ROOT", Path(__file__).resolve().parent.parent))
 BOARD = ROOT / "board"
 LEDGER = ROOT / "ledger" / "events.jsonl"
@@ -142,9 +148,13 @@ def log_event(meta, event, frm, to, detail="", severity="", cost=0.0, link=""):
         "id": next_event_id(), "t": stamp(), "task": meta["id"], "title": meta["title"],
         "event": event, "from": frm, "to": to, "round": meta.get("rounds", 0),
         "severity": severity, "detail": detail, "link": link, "cost": round(cost, 2),
+        # trạng thái và người giữ SAU sự kiện, để dashboard cập nhật không cần đọc board/
+        "state": meta.get("state", ""), "holder": meta.get("holder", ""),
     }
     with LEDGER.open("a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    if live:
+        live.emit_event(row, meta)
     return row
 
 

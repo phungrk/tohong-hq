@@ -1,0 +1,71 @@
+name: Deploy đường truyền realtime
+
+# Deploy Cloudflare Worker "tohong-live" (thư mục live/) mỗi khi nó thay đổi trên main.
+# Cần 3 secret của repo:
+#   CLOUDFLARE_API_TOKEN   token mẫu "Edit Cloudflare Workers"
+#   CLOUDFLARE_ACCOUNT_ID  Account ID của Cloudflare
+#   TOHONG_LIVE_TOKEN      mã bí mật agent dùng để gửi sự kiện (giống biến môi trường cloud)
+
+on:
+  push:
+    branches: [main]
+    paths: ["live/**", ".github/workflows/deploy-live.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-live
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Kiểm tra secrets
+        id: check
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          LIVE_TOKEN: ${{ secrets.TOHONG_LIVE_TOKEN }}
+        run: |
+          missing=""
+          [ -z "$CF_TOKEN" ] && missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -z "$CF_ACCOUNT" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -z "$LIVE_TOKEN" ] && missing="$missing TOHONG_LIVE_TOKEN"
+          if [ -n "$missing" ]; then
+            echo "::warning::Chưa deploy vì thiếu secret:$missing (Settings → Secrets and variables → Actions). Thêm xong thì bấm Run workflow."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy Worker
+        id: deploy
+        if: steps.check.outputs.ok == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: live
+          wranglerVersion: "4.145.0"
+          secrets: |
+            LIVE_TOKEN
+        env:
+          LIVE_TOKEN: ${{ secrets.TOHONG_LIVE_TOKEN }}
+
+      - name: Kiểm tra Worker
+        if: steps.check.outputs.ok == 'true'
+        env:
+          URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo "Worker: $URL"
+          echo "### Đường truyền realtime đã deploy" >> "$GITHUB_STEP_SUMMARY"
+          echo "Địa chỉ: $URL" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$URL" ]; then
+            for i in 1 2 3 4 5; do curl -fsS "$URL/snapshot" >/dev/null && { echo "Worker trả lời bình thường."; exit 0; }; sleep 5; done
+            echo "::warning::Worker chưa trả lời /snapshot, thử lại sau ít phút."
+          fi

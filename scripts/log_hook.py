@@ -63,6 +63,12 @@ def main():
     }
     with ledger.open("a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import live
+        live.emit_event(row)
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

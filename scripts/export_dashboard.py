@@ -58,6 +58,7 @@ def export(out: Path, public: bool = False):
                 "from": e.get("from", ""), "to": e.get("to", ""), "round": e.get("round", 0),
                 "severity": e.get("severity", ""), "detail": e.get("detail", ""),
                 "link": e.get("link", ""), "cost": float(e.get("cost", 0) or 0),
+                "state": e.get("state", ""), "holder": e.get("holder", ""),
             })
         events.sort(key=lambda e: (e["t"], e["seq"]))
 

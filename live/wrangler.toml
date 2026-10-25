@@ -1,0 +1,14 @@
+name = "tohong-live"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[[durable_objects.bindings]]
+name = "HUB"
+class_name = "LiveHub"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["LiveHub"]
+
+# Secret LIVE_TOKEN được đặt khi deploy (workflow deploy-live), không ghi ở đây.
