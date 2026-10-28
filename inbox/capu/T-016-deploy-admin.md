@@ -1,6 +1,6 @@
 ---
 type: decision-request
-task: T-015
+task: T-016
 from: chief-of-staff
 to: capu
 decide-by: 2026-10-31
