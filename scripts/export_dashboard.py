@@ -41,6 +41,7 @@ def export(out: Path, public: bool = False):
             "version": t["version"], "deadline": t.get("deadline", ""), "budget": t.get("budget", ""),
             "cost": t["cost"], "created": t["created"], "updated": t["updated"],
             "hours_since_update": hours, "pipeline": f"{t['owner']} → {t['reviewer']}", "as_of": stamp,
+            "tier": str(t.get("tier") or ""),
         })
 
     events = []
@@ -73,6 +74,12 @@ def export(out: Path, public: bool = False):
             "agent_file": f, "status": "Hired" if hired else "Need Hiring", "as_of": stamp,
         })
 
+    # Số eval hồi quy: mục cấp một của eval/regression/ (trừ tên bắt đầu '.' và README.md); null nếu thiếu thư mục
+    reg_dir = ROOT / "eval" / "regression"
+    regression_evals = None
+    if reg_dir.is_dir():
+        regression_evals = sum(1 for p in reg_dir.iterdir() if not p.name.startswith(".") and p.name != "README.md")
+
     if public:
         # Bản công khai: bỏ nội dung chi tiết (defect, ghi chú, đường dẫn file)
         for e in events:
@@ -82,7 +89,7 @@ def export(out: Path, public: bool = False):
     for name, rows in (("tasks", tasks), ("events", events), ("roster", roster)):
         (out / f"{name}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
     bundle = {"generated_at": stamp, "timezone": "Asia/Ho_Chi_Minh", "public": public,
-              "tasks": tasks, "events": events, "roster": roster}
+              "regression_evals": regression_evals, "tasks": tasks, "events": events, "roster": roster}
     (out / "dashboard.json").write_text(json.dumps(bundle, ensure_ascii=False), encoding="utf-8")
     print(f"Đã xuất lúc {stamp}{' (bản công khai)' if public else ''}: {len(tasks)} việc, {len(events)} sự kiện, "
           f"{sum(r['status'] == 'Hired' for r in roster)}/{len(roster)} vị trí đã có người → {out}")
