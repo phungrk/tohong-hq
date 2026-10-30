@@ -64,6 +64,15 @@ def load_names():
     return names
 
 
+def task_tier(tid):
+    """Bậc lưới lọc của việc, đọc từ frontmatter board/T-xxx.md; không có thì rỗng."""
+    p = ROOT / "board" / f"{tid}.md"
+    if not tid or not p.exists():
+        return ""
+    m = re.search(r"^tier:\s*\"?([ABC])\"?\s*$", p.read_text(encoding="utf-8"), re.M)
+    return m.group(1) if m else ""
+
+
 def task_title(tid, cache={}):
     if tid in cache:
         return cache[tid]
@@ -114,11 +123,16 @@ def describe(e, events, names):
         return False, f"📥 {t}\n      *{esc(who)}* bàn giao cho *{esc(to)}*{prs}{tail}"
     if ev == "accepted":
         pr = pr_for_task(tid, events)
+        tier = task_tier(tid)
+        if pr and tier == "C":
+            return True, f"✅ {t}\n      Reviewer chấp nhận (bậc C). *PR sẵn sàng để anh merge:* {link(pr, pr.split('github.com/')[-1])}{tail}"
         if pr:
-            return True, f"✅ {t}\n      Reviewer chấp nhận. *PR sẵn sàng để anh merge:* {link(pr, pr.split('github.com/')[-1])}{tail}"
+            return False, f"✅ {t}\n      Reviewer chấp nhận (bậc {tier or 'B'}). Chief of Staff merge {link(pr, pr.split('github.com/')[-1])}{tail}"
         return False, f"✅ *Chief of Staff báo cáo:* Task [{esc(title or tid)}] đã hoàn thành\n      {head} · Reviewer chấp nhận{tail}"
     if ev == "rejected":
         sev = e.get("severity") or "blocker"
+        if e.get("state") == "spec":
+            return True, f"📝 {t}\n      Trả về vòng {rnd}: *về spec* — Spec Writer sửa spec + eval{tail}"
         return False, f"↩️ {t}\n      *{esc(who)}* trả về *{esc(to)}* (vòng {rnd}, {sev}){tail}"
     if ev == "blocked":
         return True, f"⛔ {t}\n      *{esc(who)}* báo bị chặn{tail}"
