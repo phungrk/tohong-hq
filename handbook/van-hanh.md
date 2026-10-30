@@ -3,25 +3,30 @@
 ## Máy trạng thái của một việc
 
 ```
-Mới ──start──▶ Đang làm ──handoff──▶ Chờ review ──accept──▶ Xong
+Mới ──start──▶ Đang làm ──handoff──▶ Chờ review ──accept──▶ Xong ──merge theo bậc──▶ Bể
                  │  ▲                   │   ▲
            block │  │ unblock    reject │   │ handoff (bản sửa)
                  ▼  │                   ▼   │
-               Bị chặn               Rework ──(vòng 3)──▶ Leo thang ──decide──▶ Đang làm / Xong
+               Bị chặn          vòng 1: Rework
+                                vòng 2: Về spec ──respec (vòng về 0)──▶ Đang làm
+                                về spec lần 2 mà vẫn trả về ──▶ Leo thang ──decide──▶ Đang làm / Xong
 ```
 
 Bất kỳ trạng thái nào chưa Xong đều có thể `escalate` lên Capu khi chạm mức "Hỏi trước".
+
+Mỗi việc mang **bậc lưới lọc** `tier: A|B|C` và danh sách `eval` (xem "Lưới lọc ba bậc" trong `CLAUDE.md`). Việc giao cho `engineering` bắt buộc có eval; `task.py new` từ chối nếu thiếu.
 
 ## Bảng lệnh
 
 | Ai | Lệnh | Khi nào |
 | --- | --- | --- |
-| Chief of Staff | `task.py new --title … --to … --criteria … [--requested-by capu]` | Giao việc. Việc do Capu yêu cầu thì luôn thêm `--requested-by capu` |
+| Chief of Staff | `task.py new --title … --to … --criteria … [--eval …] [--tier A\|B\|C] [--requested-by capu]` | Giao việc. `--eval` bắt buộc với engineering; `--tier` mặc định B, `hoi-truoc` ép C. Việc do Capu yêu cầu thì luôn thêm `--requested-by capu` |
 | Chief of Staff | `task.py request T-xxx [--note "<bằng chứng>"] [--at YYYY-MM-DDTHH:MM]` | Ghi bù: việc đã có mà quên `--requested-by`. Không đổi trạng thái, không ghi trùng |
 | Bộ phận | `task.py start T-xxx --by <bộ phận>` | Bắt đầu hoặc bắt đầu sửa |
 | Bộ phận | `task.py handoff T-xxx --by <bộ phận> --link handoffs/…` | Làm xong, chuyển review |
 | Reviewer | `task.py accept T-xxx --by reviewer` | Mọi tiêu chí đạt |
-| Reviewer | `task.py reject T-xxx --by reviewer --against "…" --severity blocker` | Có tiêu chí không đạt |
+| Reviewer | `task.py reject T-xxx --by reviewer --against "…" --severity blocker` | Có tiêu chí hoặc eval không đạt. Vòng 1 → Rework, vòng 2 → Về spec |
+| Product (Spec Writer) | `task.py respec T-xxx --by product --note "…" [--eval …]` | Spec + eval đã sửa, trả việc về người làm, vòng về 0 |
 | Bất kỳ ai | `task.py block T-xxx --by … --note "…"` | Bị chặn |
 | Chief of Staff | `task.py escalate T-xxx --by chief-of-staff --note "…"` | Cần Capu quyết |
 | Chief of Staff | `task.py decide T-xxx --note "…" [--close]` | Ghi lại quyết định của Capu |
@@ -61,13 +66,18 @@ Giới hạn đã biết:
 
 ## Nhịp vận hành
 
+Nhịp theo quyết định, không theo lịch. Không còn standup sáng và wrap-up chiều: dashboard và Slack là trạng thái thật, và Slack chỉ kêu ở kênh "cần anh" khi việc về spec, bậc C chờ merge, bị chặn, leo thang, hoặc chi phí bất thường.
+
 | Nhịp | Khi nào (giờ Sài Gòn) | Cách chạy | Đầu ra |
 | --- | --- | --- | --- |
-| Standup sáng | 8:00 thứ Hai–Sáu | Routine `routines/morning-standup.md` | `reports/daily/…-standup.md` |
-| Wrap-up chiều | 18:00 thứ Hai–Sáu | Routine `routines/evening-wrapup.md` | `reports/daily/…-wrapup.md` |
 | Báo cáo chất lượng | 17:00 thứ Sáu | Routine `routines/weekly-quality.md` | `reports/weekly/…-quality.md` |
-| Review tuần | Thứ Bảy | Capu mở một phiên với Chief of Staff | Ưu tiên tuần sau, ghi vào `decisions/` |
-| Retro tháng | Thứ Bảy cuối tháng | Capu + Chief of Staff + Reviewer | Sửa `CLAUDE.md`, file agent, mẫu |
+| Insight tuần + ống hồi | 9:00 thứ Bảy | Routine `routines/weekly-insight.md` | `insights/…-weekly.md`, `insights/…-feedback.md`, eval hồi quy |
+| **Phiên spec** | Thứ Bảy, sau khi đọc insight | Capu mở một phiên với Chief of Staff: viết 2–3 ý định cho tuần sau, Spec Writer biến thành spec + eval ngay trong phiên | Việc mới trên board, có eval; ý định ghi vào `decisions/` |
+| Retro tháng | Thứ Bảy cuối tháng | Capu + Chief of Staff + Reviewer, chỉ bàn **quy trình** (không bàn từng việc) | Sửa `CLAUDE.md`, file agent, mẫu, policy bậc |
+
+Chỉ số theo dõi (trong báo cáo chất lượng, thay cho velocity): spec acceptance rate, số lần về spec, eval pass rate lần đầu, giờ từ giao việc tới chấp nhận, số quyết định Capu phải ra mỗi ngày, chi phí mỗi việc.
+
+Khi chuyển sang mô hình này, Capu xóa hai scheduled task "Standup sáng" và "Wrap-up chiều" trên claude.ai/code và tạo task "Insight tuần" theo `routines/weekly-insight.md`.
 
 ## Model của từng bộ phận
 
@@ -75,7 +85,7 @@ Giới hạn đã biết:
 | --- | --- | --- |
 | Chief of Staff (phiên chính) | Capu chọn khi mở phiên | Không đặt bằng file |
 | `reviewer` | `opus` | Người gác cổng cuối cùng, cần kiểm kỹ nhất |
-| `product`, `engineering` | `sonnet` | Ưu tiên chi phí; đã có reviewer gác chất lượng |
+| `product`, `engineering`, `insight` | `sonnet` | Ưu tiên chi phí; đã có reviewer gác chất lượng |
 
 - Đặt bằng dòng `model:` trong frontmatter của `.claude/agents/<tên>.md`. Dùng alias (`sonnet`, `opus`, `haiku`) để tự lên bản mới nhất; cần ghim cố định thì ghi ID đầy đủ, vd `claude-opus-5-5`. Ghi `inherit` để dùng model của phiên chính. Nguồn: https://code.claude.com/docs/en/sub-agents (mục "Choose a model").
 - Cách đổi: sửa dòng `model:` đó; vì đây là file trong `.claude/`, workflow sẽ mở PR để Capu duyệt.
@@ -96,7 +106,8 @@ Workflow `.github/workflows/notify-slack.yml` đọc sổ cái mỗi khi `main` 
 | 🆕 | Giao việc mới | Chính |
 | 📥 | Bàn giao, kèm link pull request nếu có | Chính |
 | ↩️ | Reviewer trả về, kèm vòng và lỗi | Chính |
-| ✅ | Reviewer chấp nhận; nếu có PR thì báo "PR sẵn sàng để anh merge" | Cần anh |
+| ✅ | Reviewer chấp nhận. Bậc A/B: Chief of Staff merge, tin vào kênh chính. Bậc C có PR: "PR sẵn sàng để anh merge" | Chính (A/B) · Cần anh (C) |
+| 📝 | Việc về spec (trả về vòng 2) | Cần anh |
 | ⛔ | Bị chặn | Cần anh |
 | 🙋 | Leo thang, cần Capu quyết | Cần anh |
 | 🚨 | Agent sửa tay sổ cái | Cần anh |
