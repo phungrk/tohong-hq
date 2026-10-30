@@ -148,6 +148,45 @@ async function hoverEdge(page, i) { // gửi mousemove thẳng vào đường (t
 const num = s => { const m = /(\d+)\s*$/.exec(s || ''); return m ? +m[1] : NaN; };
 const hexRgb = h => { const m = /^#([0-9a-f]{6})$/i.exec(h || ''); if (!m) return null; const n = parseInt(m[1], 16); return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`; };
 const overlap = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+// Kiểm chung "không đè nhau" cho Bản đồ luồng (dùng ở C2 và C4, cả 1280px và 390px).
+// Chỉ nhìn cái người dùng thấy: hộp thật (getBoundingClientRect) của mọi chữ trong #flow
+// (tên, nhãn vai, Need Hiring, hành động, nhãn bậc, "Về spec", "chờ anh merge", số trong huy hiệu)
+// và hộp của huy hiệu (.wip-badge, .run-badge). Hai hộp bất kỳ không được giao nhau quá TOL px mỗi chiều
+// (hộp chữ của trình duyệt có đệm dòng nên co mỗi cạnh TOL px trước khi so). Chữ nằm trong một huy hiệu
+// thì chỉ tính hộp huy hiệu; chữ và huy hiệu cùng một nút nhân vật vẫn phải không giao nhau.
+// Thêm: không đường bàn giao (.run-edge) nào cắt qua hộp nhãn vai (co EDGE_SLACK px mỗi cạnh).
+const TOL = 1, EDGE_SLACK = 3;
+const readBoxes = page => page.evaluate(() => {
+  const flow = document.querySelector('#flow'); if (!flow) return { items: [], pts: [] };
+  const rect = el => { const r = el.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; };
+  const inBadge = el => !!el.closest('.run-badge, .wip-badge');
+  const items = [];
+  flow.querySelectorAll('svg text').forEach(el => { if (inBadge(el)) return; const b = rect(el); if (b.w < 1 || b.h < 1) return;
+    items.push({ kind: el.dataset.label || 'text', text: el.textContent.trim(), ...b }); });
+  flow.querySelectorAll('.run-badge, .wip-badge').forEach(el => { const b = rect(el); if (b.w < 1 || b.h < 1) return;
+    items.push({ kind: el.classList.contains('run-badge') ? 'run-badge' : 'wip-badge', text: el.textContent.trim(), ...b }); });
+  const roles = items.filter(i => i.kind === 'role');
+  const pts = [];
+  flow.querySelectorAll('.run-edge').forEach((p, i) => { const m = p.getScreenCTM(), L = p.getTotalLength();
+    for (let s = 0; s <= L; s += 2) { const q = p.getPointAtLength(s); pts.push({ i, from: p.dataset.from, to: p.dataset.to, x: m.a * q.x + m.c * q.y + m.e, y: m.b * q.x + m.d * q.y + m.f }); } });
+  return { items, roles, pts };
+});
+async function noOverlap(page, vn) {
+  const { items, roles, pts } = await readBoxes(page); const bad = [];
+  const shrink = (b, d) => ({ x: b.x + d, y: b.y + d, w: b.w - 2 * d, h: b.h - 2 * d });
+  const name = i => `${i.kind === 'text' ? 'chữ' : i.kind === 'run-badge' ? 'huy hiệu' : i.kind === 'wip-badge' ? 'huy hiệu số việc' : 'nhãn ' + i.kind} "${i.text}"`;
+  const seen = new Set();
+  for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+    if (/badge$/.test(items[i].kind) && /badge$/.test(items[j].kind)) continue; // huy hiệu đè huy hiệu: ngoài phạm vi D1, chưa kiểm
+    const a = shrink(items[i], TOL), b = shrink(items[j], TOL);
+    const ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x), oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+    if (ox > 0 && oy > 0) { const k = [items[i].kind, items[i].text, items[j].kind, items[j].text].join('|'); if (seen.has(k)) continue; seen.add(k);
+      bad.push(`${vn}: ${name(items[i])} đè ${name(items[j])} (${ox.toFixed(1)}×${oy.toFixed(1)}px)`); }
+  }
+  for (const r of roles || []) { const b = shrink(r, EDGE_SLACK); const hit = pts.find(p => p.x > b.x && p.x < b.x + b.w && p.y > b.y && p.y < b.y + b.h);
+    if (hit) bad.push(`${vn}: đường ${hit.from}→${hit.to} cắt qua nhãn vai "${r.text}"`); }
+  return bad;
+}
 const STAGES = [['pump', 'Máy bơm'], ['column', 'Thân cột'], ['jet', 'Tia'], ['filter', 'Lưới lọc'], ['pool', 'Bể'], ['return', 'Ống hồi']];
 
 function compareFountain(F, exp, label, bad) {
@@ -239,6 +278,7 @@ checks[2] = async () => { // nhãn vai lấy từ roster, không hardcode; xếp
     for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++)
       if (!['tier', 'await-merge', 'spec-edge'].includes(L[i].label) && !['tier', 'await-merge', 'spec-edge'].includes(L[j].label) && overlap(L[i], L[j]) > 1)
         bad.push(`${vn}: nhãn "${L[i].text}" đè nhãn "${L[j].text}"`);
+    bad.push(...await noOverlap(o.page, vn));
     await o.ctx.close();
   }
   const o = await open(WIDE, { ...mainData(), roster: roster({ [PRO]: 'Vai thử nghiệm đổi' }) });
@@ -301,7 +341,7 @@ checks[4] = async () => { // bậc A/B/C trên đường tới Reviewer và tool
     const edges = await readEdges(o.page), L = await readLabels(o.page);
     const eng = edges.find(e => e.kind === 'review' && e.from === ENG && e.to === 'reviewer');
     const pro = edges.find(e => e.kind === 'review' && e.from === PRO && e.to === 'reviewer');
-    if (!eng || !pro) { bad.push(`${vn}: thiếu đường review (data-kind="review") engineering→reviewer hoặc product→reviewer`); await o.ctx.close(); continue; }
+    if (!eng || !pro) { bad.push(`${vn}: thiếu đường review (data-kind="review") engineering→reviewer hoặc product→reviewer`); bad.push(...await noOverlap(o.page, vn)); await o.ctx.close(); continue; }
     const tier = (a, b) => L.find(l => l.label === 'tier' && l.from === a && l.to === b);
     const wm = (a, b) => L.find(l => l.label === 'await-merge' && l.from === a && l.to === b);
     const te = tier(ENG, 'reviewer'), tp = tier(PRO, 'reviewer');
@@ -310,6 +350,7 @@ checks[4] = async () => { // bậc A/B/C trên đường tới Reviewer và tool
     const we = wm(ENG, 'reviewer');
     if (!we || we.text !== 'chờ anh merge') bad.push(`${vn}: đường có việc bậc C phải có nhãn "chờ anh merge", thấy "${we && we.text}"`);
     if (wm(PRO, 'reviewer')) bad.push(`${vn}: đường không có việc bậc C không được có nhãn "chờ anh merge"`);
+    bad.push(...await noOverlap(o.page, vn));
     if (vn === 'wide') {
       const t1 = await hoverEdge(o.page, eng.i);
       for (const [id, s] of [['T-221', 'Bậc A'], ['T-223', 'Bậc C'], ['T-225', 'Bậc A']]) if (!new RegExp(id + '[^]*' + s).test(t1)) bad.push(`tooltip đường engineering→reviewer thiếu "${id} … ${s}"`);

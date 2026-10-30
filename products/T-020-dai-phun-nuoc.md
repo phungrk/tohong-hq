@@ -66,6 +66,7 @@ Một thẻ mới `#dai-phun-nuoc` đặt ngay sau thẻ Bản đồ luồng, ti
 | Nhãn trên bản đồ | phần tử có `data-label` ∈ `name`, `role`, `hiring`, `action` kèm `data-agent="<id>"` (nút Hoàn thành dùng `data-agent="done"`) |
 | Đường đang chạy | `.run-edge` (đã có) thêm `data-kind` ∈ `run`, `review`, `rework`, `spec`; `data-from`, `data-to` (đã có) |
 | Nhãn trên đường | `data-label` ∈ `tier`, `await-merge`, `spec-edge`, kèm `data-from`, `data-to` của đường |
+| Huy hiệu và chữ trong bản đồ | huy hiệu số việc của nhân vật `.wip-badge`, huy hiệu `×n` trên đường `.run-badge` (cả hai là nhóm SVG chứa hình và chữ); mọi chữ khác là phần tử `text` trong `#flow svg`. Không thêm `data-*` mới: eval so hộp thật (`getBoundingClientRect`) của chúng và lấy mẫu điểm dọc `.run-edge` |
 | Thẻ bảng | `#dai-phun-nuoc` |
 | Tầng | `[data-stage]` ∈ `pump, column, jet, filter, pool, return`, đúng thứ tự trong DOM; thuộc tính `data-warn` là danh sách từ `stuck`, `spec` cách nhau bằng dấu cách (rỗng nếu không cảnh báo) |
 | Trường trong tầng (`[data-field]`) | `name` (tên tầng: Máy bơm, Thân cột, Tia, Lưới lọc, Bể, Ống hồi), `count` (chữ là số nguyên), `frame` (phần tử viền: SVG dùng `stroke`, HTML dùng `border-top-color`), `stuck` (chữ `đứng yên n`, chỉ có khi n ≥ 1), `spec` (chữ `về spec n`, chỉ ở Thân cột khi n ≥ 1), `tier-a`, `tier-b`, `tier-c`, `tier-none` (chữ `A 2`, `B 1`, `C 1`, `? 1`, chỉ ở Lưới lọc, luôn có), `regression` (chữ là số nguyên hoặc `—`, chỉ ở Bể) |
@@ -90,9 +91,9 @@ Chạy cả bộ in một dòng `PASS` hoặc `FAIL <lý do>` ở cuối, mã th
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
 | 1 | Có nhân vật insight riêng, đúng chỗ, không đè ai; ba vị trí chưa tuyển vẫn là bóng mờ; chín vị trí cũ không đổi toạ độ (1px); roster thiếu insight thì không vẽ; insight Need Hiring thì là bóng mờ | `E --criterion 1` (dùng `eval/T-020/baseline-positions.json`, ghi từ main `d3c855b`) |
-| 2 | Mỗi vị trí có nhãn vai đúng bằng `roster[].role`, đổi role trong dữ liệu thì nhãn đổi theo; xếp tên, vai, rồi Need Hiring/hành động; không nhãn nào đè nhãn nào ở 1280px và 390px | `E --criterion 2` |
+| 2 | Mỗi vị trí có nhãn vai đúng bằng `roster[].role`, đổi role trong dữ liệu thì nhãn đổi theo; xếp tên, vai, rồi Need Hiring/hành động; không chữ nào đè chữ khác, đè huy hiệu `.wip-badge`/`.run-badge`, hay bị huy hiệu đè (tên, nhãn vai, Need Hiring, hành động, nhãn bậc, `Về spec`, `chờ anh merge`), và không đường nào cắt qua nhãn vai, ở 1280px và 390px | `E --criterion 2` |
 | 3 | Việc `spec` vẽ đúng một đường `data-kind="spec"` reviewer → product màu `--spec`, tách khỏi đường rework cùng hai đầu, nhãn `Về spec ×2`, tooltip đúng; Product `revising` với chuyển động khác `working`, tooltip `Đang sửa spec`, nhất thời thắng `revising`; không có việc spec thì không có đường spec | `E --criterion 3` |
-| 4 | Đường review có nhãn bậc (`A·C`, `B·?`), nhãn `chờ anh merge` đúng chỗ có bậc C, tooltip từng việc có `Bậc X`; ở cả 1280px và 390px | `E --criterion 4` |
+| 4 | Đường review có nhãn bậc (`A·C`, `B·?`), nhãn `chờ anh merge` đúng chỗ có bậc C, tooltip từng việc có `Bậc X`; ở cả 1280px và 390px không nhãn đường hay huy hiệu nào đè tên, nhãn vai hay nhau (cùng phép kiểm chung của tiêu chí 2) | `E --criterion 4` |
 | 5 | Mọi thứ của T-019 còn nguyên (số đường bàn giao và trả về, huy hiệu số việc, tooltip, act-ring, upset qua live, 390px không tràn ngang, reduced-motion, không lỗi console) và `tests/characters.js` vẫn qua | `E --criterion 5` |
 | 6 | Sáu tầng đúng tên, đúng thứ tự, đếm đúng theo bảng quy tắc cho cả 8 trạng thái và cho owner product / engineering / insight / owner khác, với dữ liệu chính và với 8 bộ dữ liệu mỗi bộ một trạng thái; Phía Capu và ngoài đài đúng | `E --criterion 6` |
 | 7 | Cảnh báo đứng yên (>24h, 24,0 chưa) và về spec đúng tầng, đúng nhãn, đúng màu `--warn`/`--spec`/`--bad`; tầng không cảnh báo trung tính; việc `done`, `blocked`, `escalated` không tạo cảnh báo tầng | `E --criterion 7` |
@@ -127,3 +128,6 @@ Vẽ lại bố cục Bản đồ luồng (chỉ thêm insight, nhãn vai, đư�
 
 ## Câu hỏi mở
 Tầng Ống hồi (sự cố → eval hồi quy → quay lại Máy bơm) chưa có trạng thái nào của `task.py` ứng với nó; em đang đếm là "việc `insight` đã xong trong 7 ngày" (trùng với Bể) và để số eval hồi quy ở Bể đúng như tiêu chí 8. Anh có muốn Ống hồi đếm thứ khác (ví dụ chính số eval hồi quy) không? Nếu anh không trả lời, giữ nguyên cách đếm trên.
+
+## Nhật ký sửa spec
+- 2026-10-30, từ T-021-D1: tiêu chí 2 và 4 chỉ nói "không nhãn nào đè nhãn nào" và eval cũ bỏ qua nhãn đường (`tier`, `await-merge`, `spec-edge`) cùng huy hiệu, nên PR #7 PASS dù "Về spec ×2" che "Growth", `×2` đè "Orchestrator", "chờ anh merge" đè `×3`. Đã nêu rõ ba loại đè (chữ-chữ, chữ-huy hiệu, huy hiệu-chữ) và đường cắt nhãn vai; eval so hộp thật, dung sai 1px (đường: 3px). Huy hiệu đè huy hiệu chưa kiểm (ngoài phạm vi D1).
