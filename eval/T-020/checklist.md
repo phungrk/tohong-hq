@@ -17,7 +17,7 @@ Cách mở: mở `index.html` của nhánh bằng một máy chủ tĩnh, nạp 
 - [ ] Nhân vật Product trông khác lúc làm việc bình thường (gợi ý "đang sửa"), khi xem hai ảnh `spec-flow-wide.png` và `doing-flow-wide.png`? Có / không
 
 ## Tiêu chí 4 (bậc)
-- [ ] Mở `review-flow-wide.png`: nhãn bậc và `chờ anh merge` nằm gần đường tương ứng, không đè lên tên nhân vật, không đè nhãn khác? Có / không
+- [ ] Mở `review-flow-wide.png`: nhãn bậc và `chờ anh merge` không đè lên tên nhân vật, không đè nhãn khác? Có / không (phần "gần đường nào" do `--criterion 11` kiểm, không kiểm bằng mắt)
 - [ ] Ở `all-flow-narrow.png` (390px): nhãn `Về spec ×2`, `A·C`, `B·?`, `chờ anh merge` không che tên hay nhãn vai của vị trí nào? Có / không
 
 ## Tiêu chí 7 (cảnh báo)
@@ -32,3 +32,7 @@ Cách mở: mở `index.html` của nhánh bằng một máy chủ tĩnh, nạp 
 ## Tiêu chí 10 (ảnh)
 - [ ] Mô tả PR có nhúng ít nhất các ảnh `all-flow-wide.png`, `all-fountain-wide.png`, `all-flow-narrow.png`, `all-fountain-narrow.png`, và nêu đường dẫn thư mục `docs/screenshots/T-0xx/`? Có / không
 - [ ] Trong ảnh `done-fountain-wide.png`, Bể hiện số 3 và số eval hồi quy; trong `new-fountain-wide.png` và `doing-fountain-wide.png` Bể không bị cảnh báo? Có / không
+
+## Tiêu chí 11 (nhãn gắn với đường; bổ sung cho máy, sau T-021-D2)
+- [ ] Mở `all-flow-narrow.png`: chỉ nhìn ảnh, không nhìn mã, chỉ ra đường của từng nhãn `A·C`, `B·?`, `chờ anh merge`, `Về spec ×2` (đường nối chính xác hai nhân vật nào). Kết quả có trùng `data-from`/`data-to` của nhãn đó không? Có / không
+- [ ] Nhãn nào dùng đường dẫn (nét mảnh nối nhãn với đường) thì đường dẫn không cắt qua đường nào khác và không che tên hay nhãn vai? Có / không (bỏ qua nếu không nhãn nào dùng)

@@ -543,6 +543,83 @@ checks[9] = async () => { // cùng nguồn + realtime; 390px; reduced-motion; kh
   if (bad.length) throw new Error(bad.slice(0, 6).join(' ; '));
 };
 
+
+// ---------- Gắn nhãn với đường (C11) và giữ bố cục (C12), thêm sau T-021-D2 ----------
+// Hằng số lấy từ spec T-020 mục "Nhãn gắn với đường": K = 14, M = 10, LEADER_MAX = 60, ROUTE_R = 45, ROUTE_RATIO = 1.8.
+const ATT_K = 14, ATT_M = 10, LEADER_MAX = 60, ROUTE_R = 45, ROUTE_RATIO = 1.8;
+const EDGE_LABELS = { tier: 'review', 'await-merge': 'review', 'spec-edge': 'spec' };
+const readAttach = page => page.evaluate(() => {
+  const flow = document.querySelector('#flow'); if (!flow) return null;
+  const toClient = (el, q) => { const m = el.getScreenCTM(); return { x: m.a * q.x + m.c * q.y + m.e, y: m.b * q.x + m.d * q.y + m.f }; };
+  const sample = (el, step) => { const L = el.getTotalLength(), pts = []; for (let s = 0; s < L; s += step) pts.push(toClient(el, el.getPointAtLength(s))); pts.push(toClient(el, el.getPointAtLength(L))); return { pts, len: L }; };
+  const edges = [...flow.querySelectorAll('.run-edge')].map((p, i) => ({ i, kind: p.dataset.kind || '', from: p.dataset.from, to: p.dataset.to, pts: sample(p, 2).pts }));
+  const labels = [...flow.querySelectorAll('[data-label="tier"],[data-label="await-merge"],[data-label="spec-edge"]')].map(el => { const r = el.getBoundingClientRect();
+    return { label: el.dataset.label, from: el.dataset.from, to: el.dataset.to, text: el.textContent.trim(), x: r.x, y: r.y, w: r.width, h: r.height }; });
+  const leaders = [...flow.querySelectorAll('[data-leader]')].map(el => { const s = typeof el.getTotalLength === 'function' ? sample(el, 2) : { pts: [], len: 0 };
+    return { for: el.dataset.for, from: el.dataset.from, to: el.dataset.to, pts: s.pts, len: s.len }; });
+  return { edges, labels, leaders };
+});
+const distRect = (b, p) => Math.hypot(Math.max(b.x - p.x, 0, p.x - (b.x + b.w)), Math.max(b.y - p.y, 0, p.y - (b.y + b.h)));
+const minDist = (b, pts) => pts.length ? Math.min(...pts.map(p => distRect(b, p))) : Infinity;
+const ptDist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const minPts = (A, B) => { let m = Infinity; for (const a of A) for (const b of B) { const d = ptDist(a, b); if (d < m) m = d; } return m; };
+// Trả về danh sách lỗi "nhãn không rõ thuộc đường nào" cho trang đang mở.
+async function attachment(page, tag) {
+  const D = await readAttach(page), bad = [];
+  if (!D) return [`${tag}: không có #flow`];
+  for (const L of D.labels) {
+    const own = D.edges.find(e => e.kind === EDGE_LABELS[L.label] && e.from === L.from && e.to === L.to);
+    const name = `nhãn ${L.label} "${L.text}" (${L.from}→${L.to})`;
+    if (!own) { bad.push(`${tag}: ${name} không có đường data-kind="${EDGE_LABELS[L.label]}" cùng hai đầu`); continue; }
+    const others = D.edges.filter(e => e !== own);
+    const dOwn = minDist(L, own.pts), dOther = Math.min(...others.map(e => minDist(L, e.pts)), Infinity);
+    const lead = D.leaders.find(l => l.for === L.label && l.from === L.from && l.to === L.to);
+    if (lead) { // cách 2: đường dẫn nối nhãn với đường của nó
+      const ends = [lead.pts[0], lead.pts[lead.pts.length - 1]];
+      const onEdge = ends.findIndex(p => p && minPts([p], own.pts) <= 3), other = ends[1 - Math.max(onEdge, 0)];
+      if (lead.len > LEADER_MAX) bad.push(`${tag}: đường dẫn của ${name} dài ${lead.len.toFixed(0)}px, tối đa ${LEADER_MAX}`);
+      else if (onEdge < 0) bad.push(`${tag}: một đầu đường dẫn của ${name} không chạm đường của nó`);
+      else if (!other || distRect(L, other) > 4) bad.push(`${tag}: đầu kia đường dẫn của ${name} không chạm nhãn`);
+      else { const cross = others.find(e => minPts(lead.pts, e.pts) < 3); if (cross) bad.push(`${tag}: đường dẫn của ${name} chạm đường ${cross.from}→${cross.to}`); }
+    } else { // cách 1: nhãn sát đường của nó
+      if (dOwn > ATT_K) bad.push(`${tag}: ${name} cách đường của nó ${dOwn.toFixed(0)}px (tối đa ${ATT_K}) và không có đường dẫn`);
+      else if (dOther - dOwn < ATT_M) { const nr = others.reduce((x, e) => minDist(L, e.pts) < minDist(L, x.pts) ? e : x);
+        bad.push(`${tag}: ${name} cách đường của nó ${dOwn.toFixed(0)}px, cách đường ${nr.kind} ${nr.from}→${nr.to} ${dOther.toFixed(0)}px (đường của nó phải gần hơn ít nhất ${ATT_M}px)`); }
+    }
+  }
+  return bad;
+}
+checks[11] = async () => { // nhãn bậc / chờ anh merge / Về spec gắn rõ với đường của nó, ở 1280px và 390px
+  const bad = [];
+  const sets = [['all', () => mainData()], ['review', () => bundle(STATE_SETS.review.tasks(), { regression_evals: 1 })], ['spec', () => bundle(STATE_SETS.spec.tasks(), { regression_evals: 1 })]];
+  let seen = 0;
+  for (const [vn, vp] of [['wide', WIDE], ['narrow', NARROW]]) for (const [sn, mk] of sets) {
+    const o = await open(vp, mk()); const n = (await readAttach(o.page) || { labels: [] }).labels.length; seen += n;
+    if (!n) bad.push(`${vn}/${sn}: không có nhãn đường nào (tier, await-merge, spec-edge)`);
+    bad.push(...await attachment(o.page, `${vn}/${sn}`)); await o.ctx.close();
+  }
+  if (bad.length) throw new Error(bad.slice(0, 6).join(' ; '));
+};
+checks[12] = async () => { // đổi tuyến/độ cong được, nhưng không vẽ lại bố cục: tâm nút, hai đầu đường, độ vòng
+  const bad = [];
+  for (const [vn, vp] of [['wide', WIDE], ['narrow', NARROW]]) {
+    const o = await open(vp, mainData()); const { chars } = await readChars(o.page);
+    const E = await o.page.evaluate(() => [...document.querySelectorAll('#flow .run-edge')].map(p => { const L = p.getTotalLength(), a = p.getPointAtLength(0), b = p.getPointAtLength(L);
+      return { kind: p.dataset.kind || '', from: p.dataset.from, to: p.dataset.to, len: L, a: { x: a.x, y: a.y }, b: { x: b.x, y: b.y } }; }));
+    const want = ['run:chief-of-staff>engineering', 'run:chief-of-staff>product', 'run:chief-of-staff>insight', 'review:engineering>reviewer', 'review:product>reviewer', 'rework:reviewer>engineering', 'rework:reviewer>product', 'rework:reviewer>chief-of-staff', 'spec:reviewer>product'];
+    if (E.length !== want.length) bad.push(`${vn}: bộ dữ liệu chính phải có đúng ${want.length} đường, thấy ${E.length}`);
+    const got = new Set(E.map(e => `${e.kind}:${e.from}>${e.to}`));
+    for (const w of want) if (!got.has(w)) bad.push(`${vn}: thiếu đường ${w}`);
+    for (const e of E) { const f = chars[e.from], t = chars[e.to]; if (!f || !t) continue;
+      const near = (p, c) => Math.hypot(p.x - c.cx, p.y - c.cy);
+      if (near(e.a, f) > ROUTE_R || near(e.b, t) > ROUTE_R) bad.push(`${vn}: đường ${e.from}→${e.to} (${e.kind}) không bắt đầu/kết thúc trong ${ROUTE_R}px quanh tâm hai nút`);
+      const straight = Math.hypot(f.cx - t.cx, f.cy - t.cy);
+      if (e.len > ROUTE_RATIO * straight) bad.push(`${vn}: đường ${e.from}→${e.to} (${e.kind}) dài ${e.len.toFixed(0)}px, quá ${ROUTE_RATIO}× khoảng cách thẳng ${straight.toFixed(0)}px (vòng quá xa)`); }
+    await o.ctx.close();
+  }
+  if (bad.length) throw new Error(bad.slice(0, 6).join(' ; '));
+};
+
 const SHOT_SETS = [...Object.keys(STATE_SETS), 'all'];
 const SHOT_NAMES = SHOT_SETS.flatMap(s => ['flow', 'fountain'].flatMap(p => ['wide', 'narrow'].map(v => `${s}-${p}-${v}.png`)));
 async function takeShots(dir) {
@@ -599,7 +676,7 @@ checks[10] = async () => { // ảnh chụp từng trạng thái của cả hai b
     await browser.close(); fixtureServer.close(); process.exit(miss.length ? 1 : 0);
   }
   const NAMES = { 1: 'insight có nhân vật riêng, chín vị trí cũ không đổi', 2: 'nhãn vai từ roster', 3: 'đường về spec + Product revising', 4: 'bậc A/B/C + chờ anh merge',
-    5: 'giữ T-019', 6: 'sáu tầng đếm đúng', 7: 'cảnh báo nghẽn/spec', 8: 'eval hồi quy ở Bể', 9: 'cùng nguồn, realtime, 390px, reduced-motion', 10: 'ảnh chụp đã commit' };
+    5: 'giữ T-019', 6: 'sáu tầng đếm đúng', 7: 'cảnh báo nghẽn/spec', 8: 'eval hồi quy ở Bể', 9: 'cùng nguồn, realtime, 390px, reduced-motion', 10: 'ảnh chụp đã commit', 11: 'nhãn đường gắn rõ với đường của nó', 12: 'tuyến đường không vẽ lại bố cục' };
   const res = [];
   for (const n of Object.keys(checks)) {
     if (ONLY && ONLY !== n) continue;
