@@ -3,7 +3,7 @@
 
 Chạy trong một bản clone có đủ lịch sử, đã fetch origin/main và nhánh cần đồng bộ.
 
-1. Phần sổ cái (board/, ledger/, handoffs/, decisions/, inbox/, reports/, products/)
+1. Phần sổ cái (board/, ledger/, handoffs/, decisions/, inbox/, reports/, products/, eval/, insights/)
    luôn được đưa thẳng vào main, kể cả khi nhánh có sửa file khác:
      - ledger/events.jsonl: chỉ ghi thêm những dòng main chưa có (không trùng, không mất)
      - file khác: lấy bản trên nhánh (hoặc xóa nếu nhánh đã xóa)
@@ -24,7 +24,7 @@ import subprocess
 import sys
 import tempfile
 
-LEDGER_DIRS = ("board/", "ledger/", "handoffs/", "decisions/", "inbox/", "reports/", "products/")
+LEDGER_DIRS = ("board/", "ledger/", "handoffs/", "decisions/", "inbox/", "reports/", "products/", "eval/", "insights/")
 EVENTS = "ledger/events.jsonl"
 BOT = ["-c", "user.name=tohong-ledger-bot",
        "-c", "user.email=41898282+github-actions[bot]@users.noreply.github.com"]

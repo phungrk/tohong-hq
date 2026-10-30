@@ -7,9 +7,13 @@ Mọi thay đổi trạng thái của việc PHẢI đi qua script này. Script:
   - ghi thêm một dòng vào ledger/events.jsonl (chỉ ghi thêm, không sửa).
 
 Ví dụ:
-  python3 scripts/task.py new --title "PRD bộ lọc ngân sách" --to product \
+  python3 scripts/task.py new --title "Spec bộ lọc ngân sách" --to product \
       --goal "Cặp đôi lọc vendor theo ngân sách" \
-      --criteria "Có giả thuyết kèm chỉ số" --criteria "Có ít nhất 5 tiêu chí chấp nhận"
+      --criteria "Spec có giả thuyết kèm chỉ số" --criteria "Mỗi tiêu chí có eval chạy được"
+  python3 scripts/task.py new --title "Cài bộ lọc ngân sách" --to engineering --tier B \
+      --criteria "Vendor ngoài khoảng giá không hiện" \
+      --eval "cd tohong-front && npm test -- budget-filter" --eval "eval/T-021-budget.md"
+  python3 scripts/task.py respec T-021 --by product --note "Spec v2: định nghĩa khớp khoảng giá"
   python3 scripts/task.py start T-001 --by product
   python3 scripts/task.py handoff T-001 --by product --note "Bản PRD v1" --link handoffs/T-001-v1.md
   python3 scripts/task.py reject T-001 --by reviewer --against "tiêu chí 2" --severity blocker --note "Thiếu chỉ số"
@@ -45,21 +49,29 @@ ROOT = Path(os.environ.get("TOHONG_ROOT", Path(__file__).resolve().parent.parent
 BOARD = ROOT / "board"
 LEDGER = ROOT / "ledger" / "events.jsonl"
 
-STATES = ["new", "doing", "review", "rework", "blocked", "escalated", "done"]
+STATES = ["new", "doing", "review", "rework", "spec", "blocked", "escalated", "done"]
 STATE_VI = {
     "new": "Mới", "doing": "Đang làm", "review": "Chờ review", "rework": "Rework",
-    "blocked": "Bị chặn", "escalated": "Leo thang", "done": "Xong",
+    "spec": "Về spec", "blocked": "Bị chặn", "escalated": "Leo thang", "done": "Xong",
 }
 EVENT_VI = {
     "assigned": "Giao việc", "started": "Bắt đầu", "handoff": "Bàn giao", "rejected": "Trả về",
     "accepted": "Chấp nhận", "blocked": "Báo bị chặn", "unblocked": "Gỡ chặn",
     "escalated": "Leo thang", "decided": "Capu quyết định", "cost": "Ghi chi phí", "requested": "Capu yêu cầu",
+    "respec": "Sửa spec xong",
 }
+SPEC_OWNER = "product"  # bộ phận giữ spec + eval (Spec Writer)
+TIERS = ["A", "B", "C"]   # bậc lưới lọc: A tự merge, B Chief of Staff merge, C Capu duyệt
+TIER_VI = {"A": "A — tự merge khi eval xanh", "B": "B — Chief of Staff merge sau accept",
+           "C": "C — Capu duyệt"}
+NEEDS_EVAL = {"engineering"}   # bộ phận chỉ nhận việc khi đã có eval chạy được
 REQUESTER = "capu"      # người duy nhất được ghi là bên yêu cầu (--requested-by)
 REQUEST_TO = "chief-of-staff"
 FIELDS = ["id", "title", "state", "holder", "owner", "reviewer", "rounds", "version",
-          "deadline", "budget", "escalation", "created", "updated", "prev_state", "cost"]
-MAX_ROUNDS = 2          # vòng trả về tối đa trước khi tự động leo thang
+          "deadline", "budget", "escalation", "tier", "eval", "spec_returns",
+          "created", "updated", "prev_state", "cost"]
+MAX_ROUNDS = 2          # vòng trả về tối đa; vòng 2 đưa việc về spec, không về người làm
+MAX_SPEC_RETURNS = 1    # về spec quá số này thì leo thang: brief hỏng, cần Capu
 STALL_HOURS = 24        # quá ngưỡng này không có sự kiện = đứng yên
 
 
@@ -106,10 +118,18 @@ def read_task(tid):
             v = v.strip()
             if len(v) >= 2 and v[0] == v[-1] == '"':
                 v = json.loads(v)
+            elif v.startswith("["):
+                try:
+                    v = json.loads(v)
+                except json.JSONDecodeError:
+                    pass
             meta[k.strip()] = v
-    for k in ("rounds", "version"):
+    for k in ("rounds", "version", "spec_returns"):
         meta[k] = int(meta.get(k) or 0)
     meta["cost"] = float(meta.get("cost") or 0)
+    if not isinstance(meta.get("eval"), list):
+        meta["eval"] = [x for x in [meta.get("eval")] if x]
+    meta["tier"] = meta.get("tier") or ""
     return meta, m.group(2)
 
 
@@ -117,7 +137,9 @@ def write_task(meta, body):
     lines = ["---"]
     for k in FIELDS:
         v = meta.get(k, "")
-        if isinstance(v, str) and (v == "" or re.search(r"[:#\"']", v) or v != v.strip()):
+        if isinstance(v, list):
+            v = json.dumps(v, ensure_ascii=False)
+        elif isinstance(v, str) and (v == "" or re.search(r"[:#\"']", v) or v != v.strip()):
             v = json.dumps(v, ensure_ascii=False)
         lines.append(f"{k}: {v}")
     lines.append("---")
@@ -280,24 +302,35 @@ def transition(tid, allowed_from, new_state, event, by, to, *, holder=None, deta
 def cmd_new(a):
     tid = next_id()
     ts = stamp()
+    tier = a.tier or ("C" if a.escalation == "hoi-truoc" else "B")
+    if a.escalation == "hoi-truoc" and tier != "C":
+        raise LedgerError("Việc mức 'hoi-truoc' luôn là bậc C (Capu duyệt). Bỏ --tier hoặc đặt --tier C.")
     meta = {
         "id": tid, "title": a.title, "state": "new", "holder": a.to, "owner": a.to,
         "reviewer": a.reviewer, "rounds": 0, "version": 0, "deadline": a.deadline or "",
-        "budget": a.budget or "", "escalation": a.escalation, "created": ts, "updated": ts, "prev_state": "", "cost": round(a.cost, 2),
+        "budget": a.budget or "", "escalation": a.escalation, "tier": tier, "eval": list(a.eval),
+        "spec_returns": 0, "created": ts, "updated": ts, "prev_state": "", "cost": round(a.cost, 2),
     }
     if not a.criteria:
         raise LedgerError("Việc mới phải có ít nhất một --criteria (tiêu chí chấp nhận).")
+    if a.to in NEEDS_EVAL and not a.eval:
+        raise LedgerError(
+            f"Việc giao cho {a.to} phải có ít nhất một --eval (lệnh hoặc file kiểm tra chạy được). "
+            f"Chưa có eval thì chưa phải spec: giao {SPEC_OWNER} viết spec + eval trước.")
     crit = "\n".join(f"{i}. {c}" for i, c in enumerate(a.criteria, 1))
+    evl = "\n".join(f"- `{e}`" for e in a.eval) or "— (chưa có; bộ phận giữ spec bổ sung trước khi giao Engineering)"
     body = (f"\n# {tid} · {a.title}\n\n## Brief\n\n"
             f"**Mục tiêu:** {a.goal or a.title}\n\n"
             f"**Bối cảnh:** {a.context or '—'}\n\n"
+            f"**Bậc lưới lọc:** {TIER_VI[tier]}\n\n"
             f"### Tiêu chí chấp nhận\n\n{crit}\n\n"
+            f"### Eval (lưới lọc chạy được)\n\n{evl}\n\n"
             f"### Không làm\n\n{a.out_of_scope or '—'}\n\n## Lịch sử\n")
     if a.requested_by:
         record_request(meta, a.requested_by, a.goal or "")   # ngay trước assigned
     row = log_event(meta, "assigned", a.by, a.to, a.goal or "", cost=a.cost)
     write_task(meta, append_history(body, row))
-    print(f"Đã tạo {tid} → {a.to}. File: board/{tid}.md")
+    print(f"Đã tạo {tid} → {a.to} (bậc {tier}, {len(a.eval)} eval). File: board/{tid}.md")
 
 
 def cmd_request(a):
@@ -352,18 +385,30 @@ def cmd_reject(a):
         print(f"{a.task}: Xong (kèm lỗi minor đã ghi nhận)")
         return
     rounds = meta["rounds"] + 1
-    if rounds > MAX_ROUNDS:
+    if rounds >= MAX_ROUNDS:
+        # Vòng 2: lỗi lặp lại gần như luôn là spec hỏng, không phải người làm kém.
+        # Việc quay về bộ phận giữ spec; về spec lần nữa thì leo thang.
+        if meta["spec_returns"] >= MAX_SPEC_RETURNS:
+            def up(m):
+                m["rounds"] = rounds
+                m["prev_state"] = "spec"
+            transition(a.task, ["review"], "escalated", "rejected", a.by, meta["owner"],
+                       holder="chief-of-staff", detail=detail, severity="blocker", cost=a.cost,
+                       link=a.link or "", mutate=up)
+            m2, b2 = read_task(a.task)
+            row = log_event(m2, "escalated", "chief-of-staff", "chief-of-staff",
+                            f"Đã về spec {meta['spec_returns']} lần mà vẫn trả về: brief hỏng, cần Capu")
+            write_task(m2, append_history(b2, row))
+            print(f"{a.task}: Vòng {rounds}, spec đã sửa {meta['spec_returns']} lần → Leo thang.")
+            return
+
         def up(m):
             m["rounds"] = rounds
-            m["prev_state"] = "rework"
-        transition(a.task, ["review"], "escalated", "rejected", a.by, meta["owner"],
-                   holder="chief-of-staff", detail=detail, severity="blocker", cost=a.cost,
-                   link=a.link or "", mutate=up)
-        m2, b2 = read_task(a.task)
-        row = log_event(m2, "escalated", "chief-of-staff", "chief-of-staff",
-                        f"Vòng trả về thứ {rounds}: Chief of Staff tìm gốc vấn đề")
-        write_task(m2, append_history(b2, row))
-        print(f"{a.task}: Vòng {rounds} → Leo thang. Chief of Staff phải xử lý.")
+            m["spec_returns"] += 1
+        transition(a.task, ["review"], "spec", "rejected", a.by, SPEC_OWNER,
+                   holder=SPEC_OWNER, detail=detail + " · vòng 2: về spec", severity="blocker",
+                   cost=a.cost, link=a.link or "", mutate=up)
+        print(f"{a.task}: Vòng {rounds} → Về spec ({SPEC_OWNER} sửa spec + eval, rồi `respec`)")
         return
 
     def up(m):
@@ -375,9 +420,31 @@ def cmd_reject(a):
 
 
 def cmd_accept(a):
-    transition(a.task, ["review"], "done", "accepted", a.by, "done", holder="-",
-               detail=a.note or "", cost=a.cost)
-    print(f"{a.task}: Xong")
+    meta, _ = transition(a.task, ["review"], "done", "accepted", a.by, "done", holder="-",
+                         detail=a.note or "", cost=a.cost)
+    tier = meta.get("tier") or "C"
+    print(f"{a.task}: Xong · bậc {TIER_VI.get(tier, tier)}")
+
+
+def cmd_respec(a):
+    """Bộ phận giữ spec đã sửa spec + eval: việc quay về người làm, đếm vòng lại từ 0."""
+    if not a.note:
+        raise LedgerError("respec phải có --note: spec đã đổi gì.")
+    meta, _ = read_task(a.task)
+    if a.eval:
+        meta_eval = list(a.eval)
+    else:
+        meta_eval = meta["eval"]
+    if meta["owner"] in NEEDS_EVAL and not meta_eval:
+        raise LedgerError("Việc của Engineering sau respec vẫn phải có eval: thêm --eval.")
+
+    def reset(m):
+        m["rounds"] = 0
+        m["eval"] = meta_eval
+        m["prev_state"] = ""
+    transition(a.task, ["spec"], "doing", "respec", a.by, meta["owner"], holder=meta["owner"],
+               detail=a.note, link=a.link or "", cost=a.cost, mutate=reset)
+    print(f"{a.task}: Spec đã sửa → {meta['owner']} làm lại từ đầu (vòng về 0)")
 
 
 def cmd_block(a):
@@ -387,7 +454,7 @@ def cmd_block(a):
 
     def keep(m):
         m["prev_state"] = m["state"]
-    transition(a.task, ["new", "doing", "rework"], "blocked", "blocked", a.by, "chief-of-staff",
+    transition(a.task, ["new", "doing", "rework", "spec"], "blocked", "blocked", a.by, "chief-of-staff",
                detail=a.note, cost=a.cost, mutate=keep)
     print(f"{a.task}: Bị chặn — {a.note}")
 
@@ -463,11 +530,12 @@ def build_summary():
             alerts.append({"task": t["id"], "title": t["title"], "kind": "Bị chặn", "hours": h})
         elif h > STALL_HOURS:
             alerts.append({"task": t["id"], "title": t["title"], "kind": f"Đứng yên quá {STALL_HOURS} giờ", "hours": h})
-        elif t["state"] == "rework" and t["rounds"] >= MAX_ROUNDS:
-            alerts.append({"task": t["id"], "title": t["title"], "kind": f"Rework vòng {t['rounds']}", "hours": h})
+        elif t["state"] == "spec":
+            alerts.append({"task": t["id"], "title": t["title"], "kind": "Về spec: spec + eval cần sửa", "hours": h})
     done = [t for t in tasks if t["state"] == "done"]
     first_pass = [t for t in done if t["rounds"] == 0 and not any(
         e["task"] == t["id"] and e["event"] == "rejected" for e in events)]
+    spec_returns = sum(t.get("spec_returns", 0) for t in tasks)
     since = t_now - timedelta(hours=24)
     last24 = [e for e in events if parse_stamp(e["t"]) >= since]
     return {
@@ -477,6 +545,7 @@ def build_summary():
                   "rounds": t["rounds"], "hours_since_update": hours(t)} for t in open_tasks],
         "alerts": alerts,
         "first_pass_yield": round(len(first_pass) / len(done), 2) if done else None,
+        "spec_returns": spec_returns,
         "cost_total": round(sum(e.get("cost", 0) for e in events), 2),
         "last_24h": {
             "events": len(last24),
@@ -496,7 +565,7 @@ def cmd_summary(a):
     print(f"Tình hình lúc {s['as_of']}")
     print("  " + " · ".join(f"{STATE_VI[k]}: {v}" for k, v in c.items() if v))
     fpy = s["first_pass_yield"]
-    print(f"  First-pass yield: {'—' if fpy is None else f'{fpy:.0%}'} · Chi phí tổng: ${s['cost_total']}")
+    print(f"  First-pass yield: {'—' if fpy is None else f'{fpy:.0%}'} · Về spec: {s['spec_returns']} lần · Chi phí tổng: ${s['cost_total']}")
     l24 = s["last_24h"]
     print(f"  24 giờ qua: {l24['events']} sự kiện, {l24['accepted']} chấp nhận, {l24['rejected']} trả về, ${l24['cost']}")
     if s["alerts"]:
@@ -544,6 +613,10 @@ def main(argv=None):
     sp.add_argument("--budget", default="", help="Ngân sách dự kiến cho cả việc, vd '$2'")
     sp.add_argument("--reviewer", default="reviewer")
     sp.add_argument("--escalation", default="tu-lam", choices=["tu-lam", "bao-sau", "hoi-truoc"])
+    sp.add_argument("--tier", choices=TIERS, default="",
+                    help="Bậc lưới lọc: A tự merge khi eval xanh, B Chief of Staff merge, C Capu duyệt. Mặc định B; hoi-truoc → C")
+    sp.add_argument("--eval", action="append", default=[],
+                    help="Lệnh hoặc file kiểm tra chạy được. Bắt buộc với việc giao engineering")
     sp.add_argument("--requested-by", choices=[REQUESTER], default="",
                     help="Capu là người yêu cầu: ghi thêm sự kiện requested (capu → chief-of-staff) ngay trước assigned")
     sp.set_defaults(fn=cmd_new)
@@ -567,6 +640,11 @@ def main(argv=None):
     sp.add_argument("--against", required=True, help="Tiêu chí chấp nhận bị vi phạm")
     sp.add_argument("--severity", choices=["blocker", "minor"], default="blocker")
     sp.set_defaults(fn=cmd_reject)
+
+    sp = sub.add_parser("respec", help="Spec + eval đã sửa: trả việc về người làm, vòng về 0")
+    common(sp, by_default=SPEC_OWNER)
+    sp.add_argument("--eval", action="append", default=[], help="Thay toàn bộ eval của việc")
+    sp.set_defaults(fn=cmd_respec)
 
     sp = sub.add_parser("decide", help="Ghi quyết định của Capu cho việc đang leo thang")
     common(sp, by_default="capu")
