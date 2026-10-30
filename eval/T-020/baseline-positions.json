@@ -1,0 +1,78 @@
+{
+ "wide": {
+  "capu": {
+   "cx": 567,
+   "cy": 40
+  },
+  "chief-of-staff": {
+   "cx": 567,
+   "cy": 130
+  },
+  "product": {
+   "cx": 113.4,
+   "cy": 245
+  },
+  "engineering": {
+   "cx": 340.2,
+   "cy": 245
+  },
+  "vendor-ops": {
+   "cx": 567,
+   "cy": 245
+  },
+  "growth": {
+   "cx": 793.8,
+   "cy": 245
+  },
+  "finance": {
+   "cx": 1020.6,
+   "cy": 245
+  },
+  "reviewer": {
+   "cx": 396.9,
+   "cy": 360
+  },
+  "done": {
+   "cx": 793.8,
+   "cy": 360
+  }
+ },
+ "narrow": {
+  "capu": {
+   "cx": 162,
+   "cy": 40
+  },
+  "chief-of-staff": {
+   "cx": 162,
+   "cy": 130
+  },
+  "product": {
+   "cx": 55.08,
+   "cy": 240
+  },
+  "engineering": {
+   "cx": 162,
+   "cy": 240
+  },
+  "vendor-ops": {
+   "cx": 268.92,
+   "cy": 240
+  },
+  "growth": {
+   "cx": 106.92,
+   "cy": 335
+  },
+  "finance": {
+   "cx": 217.08,
+   "cy": 335
+  },
+  "reviewer": {
+   "cx": 97.2,
+   "cy": 450
+  },
+  "done": {
+   "cx": 226.8,
+   "cy": 450
+  }
+ }
+}
