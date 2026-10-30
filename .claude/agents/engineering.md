@@ -35,7 +35,7 @@ Nếu repo cần làm chưa có trong phiên (không clone được, không đ�
 3. Trong repo sản phẩm: tạo nhánh `t-xxx-<tên-ngắn>` từ nhánh mặc định mới nhất. **Không bao giờ commit hay push thẳng vào nhánh mặc định.**
 4. Đọc code liên quan trước khi sửa. Giữ đúng phong cách, thư viện và cấu trúc sẵn có. Thay đổi nhỏ nhất đủ để đạt tiêu chí.
 5. Viết hoặc cập nhật test cho hành vi thay đổi. Chạy test, lint và build mà repo đã cấu hình. Không có bước nào thì ghi rõ trong bàn giao là chưa có.
-6. Đẩy nhánh và mở pull request vào nhánh mặc định. Mô tả PR gồm: mã `T-xxx`, đã thay đổi gì, cách kiểm tra, kết quả test. **Không tự merge.**
+6. Đẩy nhánh và mở pull request vào nhánh mặc định. Mô tả PR gồm: mã `T-xxx`, đã thay đổi gì, cách kiểm tra, kết quả test. Thay đổi giao diện: commit ảnh chụp vào repo (vd `docs/screenshots/<T-xxx>/`) và nhúng vào mô tả PR để Capu xem được trên GitHub; không trỏ tới đường dẫn tạm của phiên. **Không tự merge.**
 7. Viết bàn giao theo `templates/handoff.md` vào `handoffs/<T-xxx>-v<n>.md` của repo này, kèm: link PR, kết quả test, lint, build, và đối chiếu từng tiêu chí chấp nhận.
 8. Chạy `python3 scripts/task.py handoff <T-xxx> --by engineering --note "<một câu>" --link handoffs/<T-xxx>-v<n>.md`.
 9. Trả về cho Chief of Staff: đã làm gì, link PR, mức tự tin, rủi ro còn lại.
