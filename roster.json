@@ -1,0 +1,112 @@
+[
+ {
+  "id": "capu",
+  "name": "Capu",
+  "role": "CEO · Spec Owner",
+  "kind": "human",
+  "reports_to": "",
+  "mission": "Viết ý định, quyết bậc C",
+  "agent_file": "",
+  "status": "Hired",
+  "as_of": "2026-10-31T20:10"
+ },
+ {
+  "id": "chief-of-staff",
+  "name": "Chief of Staff",
+  "role": "Orchestrator",
+  "kind": "main-session",
+  "reports_to": "capu",
+  "mission": "Giao spec, chọn bậc, merge theo policy, giữ bể tri thức",
+  "agent_file": "CLAUDE.md",
+  "status": "Hired",
+  "as_of": "2026-10-31T20:10"
+ },
+ {
+  "id": "insight",
+  "name": "Insight",
+  "role": "Máy bơm",
+  "kind": "agent",
+  "reports_to": "chief-of-staff",
+  "mission": "Tìm pain từ dữ liệu sản phẩm; sự cố → bất biến vào bể",
+  "agent_file": ".claude/agents/insight.md",
+  "status": "Hired",
+  "as_of": "2026-10-31T20:10"
+ },
+ {
+  "id": "product",
+  "name": "Product",
+  "role": "Spec + eval tầng 1",
+  "kind": "agent",
+  "reports_to": "chief-of-staff",
+  "mission": "Biến ý định thành spec + eval máy thực thi được; đề xuất bất biến",
+  "agent_file": ".claude/agents/product.md",
+  "status": "Hired",
+  "as_of": "2026-10-31T20:10"
+ },
+ {
+  "id": "spec-critic",
+  "name": "Spec critic",
+  "role": "Spec Gate",
+  "kind": "agent",
+  "reports_to": "capu",
+  "mission": "Tìm cách hiểu thứ hai, đối chiếu bất biến, rút bất biến mới",
+  "agent_file": ".claude/agents/spec-critic.md",
+  "status": "Hired",
+  "as_of": "2026-10-31T20:10"
+ },
+ {
+  "id": "engineering",
+  "name": "Engineering",
+  "role": "Code",
+  "kind": "agent",
+  "reports_to": "chief-of-staff",
+  "mission": "Biến spec + eval thành code qua Code Gate",
+  "agent_file": ".claude/agents/engineering.md",
+  "status": "Hired",
+  "as_of": "2026-10-31T20:10"
+ },
+ {
+  "id": "adversary",
+  "name": "Adversary",
+  "role": "Code Gate",
+  "kind": "agent",
+  "reports_to": "capu",
+  "mission": "Phân loại lỗi, tìm input phá, thêm eval tầng 3",
+  "agent_file": ".claude/agents/adversary.md",
+  "status": "Hired",
+  "as_of": "2026-10-31T20:10"
+ },
+ {
+  "id": "vendor-ops",
+  "name": "Vendor Ops",
+  "role": "Nhà cung cấp",
+  "kind": "agent",
+  "reports_to": "chief-of-staff",
+  "mission": "Tìm, xác minh và cập nhật vendor cưới",
+  "agent_file": ".claude/agents/vendor-ops.md",
+  "status": "Need Hiring",
+  "as_of": "2026-10-31T20:10"
+ },
+ {
+  "id": "growth",
+  "name": "Growth",
+  "role": "Nội dung, người dùng",
+  "kind": "agent",
+  "reports_to": "chief-of-staff",
+  "mission": "Bản tin, nội dung, kéo cặp đôi tới Tơ Hồng",
+  "agent_file": ".claude/agents/growth.md",
+  "status": "Need Hiring",
+  "as_of": "2026-10-31T20:10"
+ },
+ {
+  "id": "finance",
+  "name": "Finance",
+  "role": "Chi phí, ngân sách",
+  "kind": "agent",
+  "reports_to": "chief-of-staff",
+  "mission": "Theo dõi chi phí LLM và ngân sách",
+  "agent_file": ".claude/agents/finance.md",
+  "status": "Need Hiring",
+  "as_of": "2026-10-31T20:10"
+ }
+]
