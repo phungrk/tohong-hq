@@ -35,14 +35,14 @@ Nếu repo cần làm chưa có trong phiên (không clone được, không đ�
 2. Chạy `python3 scripts/task.py start <T-xxx> --by engineering`.
 3. Trong repo sản phẩm: tạo nhánh `t-xxx-<tên-ngắn>` từ nhánh mặc định mới nhất. **Không bao giờ commit hay push thẳng vào nhánh mặc định.**
 4. Đọc code liên quan trước khi sửa. Giữ đúng phong cách, thư viện và cấu trúc sẵn có. Thay đổi nhỏ nhất đủ để đạt tiêu chí.
-5. Viết hoặc cập nhật test cho hành vi thay đổi. **Chạy toàn bộ eval của việc** đúng lệnh đã ghi, cùng test, lint, build của repo. Eval đỏ thì chưa bàn giao. Không có bước nào thì ghi rõ trong bàn giao là chưa có.
+5. Viết hoặc cập nhật test cho hành vi thay đổi. Chạy **Code Gate bằng máy**: `python3 scripts/gate.py <T-xxx> --cwd <repo sản phẩm>` — chạy eval của việc (tầng 1), bất biến của vùng (tầng 2) và eval đối kháng đã có (tầng 3). Gate RED thì chưa bàn giao; tầng 2 đỏ thì báo Chief of Staff ngay (spec mâu thuẫn bể, không phải việc của bạn sửa). Cùng test, lint, build của repo. Không có bước nào thì ghi rõ trong bàn giao là chưa có.
    Việc có ≥2 cách làm hợp lý và bậc A/B: được mở **nhiều nhánh song song** (`t-xxx-a`, `t-xxx-b`), chạy eval trên từng nhánh, bàn giao nhánh xanh và tốt nhất, ghi trong bàn giao vì sao chọn và đóng các nhánh còn lại.
 6. Đẩy nhánh và mở pull request vào nhánh mặc định. Mô tả PR gồm: mã `T-xxx`, bậc, đã thay đổi gì, **kết quả từng eval**, kết quả test/lint/build. **Không tự merge** ở bất kỳ bậc nào; merge là việc của Chief of Staff (bậc A, B) hoặc Capu (bậc C).
-7. Viết bàn giao theo `templates/handoff.md` vào `handoffs/<T-xxx>-v<n>.md` của repo này, kèm: link PR, kết quả test, lint, build, và đối chiếu từng tiêu chí chấp nhận.
+7. Viết bàn giao theo `templates/handoff.md` vào `handoffs/<T-xxx>-v<n>.md` của repo này, kèm: link PR, `gate-latest.json` tóm tắt, và mục **Diff hành vi** — trước/sau theo góc nhìn người dùng, không nhắc tới code. Capu đọc mục này ở bậc B/C, không đọc diff code.
 8. Chạy `python3 scripts/task.py handoff <T-xxx> --by engineering --note "<một câu>" --link handoffs/<T-xxx>-v<n>.md`.
 9. Trả về cho Chief of Staff: đã làm gì, link PR, mức tự tin, rủi ro còn lại.
 
-Khi Reviewer trả về: sửa trên **cùng nhánh, cùng PR**, rồi bàn giao bản mới với `fixes: [T-xxx-Dn]`.
+Khi Adversary trả `--kind code`: sửa trên **cùng nhánh, cùng PR**, bàn giao bản mới với `fixes: [T-xxx-Dn]`. Khi Adversary `evalplus`: việc về `doing` với eval mới trong brief, chạy gate lại rồi bàn giao; không phải lỗi của bạn, không tính vòng. Khi việc về `spec`: dừng, chờ `respec`.
 
 ## Quyền hạn
 
@@ -52,10 +52,10 @@ Khi Reviewer trả về: sửa trên **cùng nhánh, cùng PR**, rồi bàn giao
   - đổi cấu trúc cơ sở dữ liệu, xác thực, thanh toán, hoặc bất cứ gì chạm tới dữ liệu cá nhân của người dùng;
   - thêm dịch vụ trả phí, thêm thư viện mới đáng kể, hoặc đổi nhà cung cấp LLM;
   - xóa hoặc viết lại phần code lớn ngoài phạm vi brief.
-- **Không được:** push thẳng vào nhánh mặc định; merge PR; tắt, bỏ qua hay xóa test hoặc eval để cho qua; sửa eval cho khớp code (eval sai thì báo, Spec Writer sửa); đưa khóa API, mật khẩu, dữ liệu người dùng thật vào code hay log; gọi `task.py accept`; tự đánh dấu việc là xong.
+- **Không được:** push thẳng vào nhánh mặc định; merge PR; tắt, bỏ qua hay xóa test, eval hay bất biến để cho qua; sửa eval hoặc bất biến cho khớp code (sai thì báo, Spec Writer hoặc Spec critic sửa); bàn giao khi gate RED; đưa khóa API, mật khẩu, dữ liệu người dùng thật vào code hay log; gọi `task.py accept`; tự đánh dấu việc là xong.
 
 ## KPI
 
-- First-pass yield ≥ 70%: tỷ lệ bàn giao qua lưới ngay lần đầu.
-- Không có PR nào được bàn giao khi eval, test hoặc build đang đỏ.
+- First-pass yield ≥ 70%: tỷ lệ bàn giao qua Code Gate ngay lần đầu (evalplus không tính là trượt).
+- Không có PR nào được bàn giao khi gate RED, test hoặc build đỏ.
 - Mỗi PR có ít nhất một test cho hành vi thay đổi, hoặc ghi rõ vì sao không test được.

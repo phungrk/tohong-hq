@@ -3,29 +3,31 @@
 ## Máy trạng thái của một việc
 
 ```
-Mới ──start──▶ Đang làm ──handoff──▶ Chờ review ──accept──▶ Xong ──merge theo bậc──▶ Bể
-                 │  ▲                   │   ▲
-           block │  │ unblock    reject │   │ handoff (bản sửa)
-                 ▼  │                   ▼   │
-               Bị chặn          vòng 1: Code rework (người làm sửa code)
-                                vòng 2: Spec rework ──respec (vòng về 0)──▶ Đang làm
-                                spec rework lần 2 mà vẫn trả về ──▶ Leo thang ──decide──▶ Đang làm / Xong
+Mới ──start──▶ Đang làm ──handoff──▶ Chờ review (cổng) ──accept──▶ Xong ──merge theo bậc──▶ Release
+                 │  ▲                   │
+           block │  │ unblock           ├─ reject --kind code ──▶ Code rework ──handoff──▶ Chờ review
+                 ▼  │                   ├─ reject --kind spec ──▶ Spec rework ──respec (vòng về 0)──▶ Đang làm
+               Bị chặn                  ├─ evalplus ──▶ Đang làm (eval mới, không tính vòng)
+                                        └─ spec lệch lần 3 ──▶ Leo thang ──decide──▶ Đang làm / Xong
+Cổng của việc product = spec-critic (Spec Gate); của việc engineering = adversary (Code Gate, sau khi máy gate.py chạy).
 ```
 
 Bất kỳ trạng thái nào chưa Xong đều có thể `escalate` lên Capu khi chạm mức "Hỏi trước".
 
-Mỗi việc mang **bậc lưới lọc** `tier: A|B|C` và danh sách `eval` (xem "Lưới lọc ba bậc" trong `CLAUDE.md`). Việc giao cho `engineering` bắt buộc có eval; `task.py new` từ chối nếu thiếu.
+Mỗi việc mang **bậc** `tier: A|B|C`, **vùng** `area` (để `gate.py` chạy thêm `eval/invariants/<area>/`), danh sách `eval`, và hai bộ đếm `spec_returns`, `evals_added`. Việc giao cho `engineering` bắt buộc có eval; `task.py new` từ chối nếu thiếu.
 
 ## Bảng lệnh
 
 | Ai | Lệnh | Khi nào |
 | --- | --- | --- |
-| Chief of Staff | `task.py new --title … --to … --criteria … [--eval …] [--tier A\|B\|C] [--requested-by capu]` | Giao việc. `--eval` bắt buộc với engineering; `--tier` mặc định B, `hoi-truoc` ép C. Việc do Capu yêu cầu thì luôn thêm `--requested-by capu` |
+| Chief of Staff | `task.py new --title … --to … --criteria … [--eval …] [--tier A\|B\|C] [--area …] [--requested-by capu]` | Giao việc. `--eval` bắt buộc với engineering; `--tier` mặc định B, `hoi-truoc` ép C; `--area` để gate chạy bất biến vùng. Cổng tự đặt theo bộ phận |
+| Engineering / Spec Writer | `scripts/gate.py T-xxx [--cwd <repo>]` | Chạy Code Gate bằng máy trước khi bàn giao; kết quả vào `eval/T-xxx/gate-latest.json` |
 | Chief of Staff | `task.py request T-xxx [--note "<bằng chứng>"] [--at YYYY-MM-DDTHH:MM]` | Ghi bù: việc đã có mà quên `--requested-by`. Không đổi trạng thái, không ghi trùng |
 | Bộ phận | `task.py start T-xxx --by <bộ phận>` | Bắt đầu hoặc bắt đầu sửa |
 | Bộ phận | `task.py handoff T-xxx --by <bộ phận> --link handoffs/…` | Làm xong, chuyển review |
-| Reviewer | `task.py accept T-xxx --by reviewer` | Mọi tiêu chí đạt |
-| Reviewer | `task.py reject T-xxx --by reviewer --against "…" --severity blocker` | Có tiêu chí hoặc eval không đạt. Vòng 1 → Code rework, vòng 2 → Spec rework |
+| spec-critic / adversary | `task.py accept T-xxx --by <cổng> --note "…"` | Qua cổng. spec-critic ghi bất biến đã thêm; adversary ghi số eval đối kháng đã thử |
+| spec-critic / adversary | `task.py reject T-xxx --by <cổng> --kind code\|spec --against "…"` | `code`: eval tầng 1 đỏ → Code rework. `spec`: bất biến đỏ / hai cách hiểu → Spec rework ngay |
+| adversary | `task.py evalplus T-xxx --by adversary --eval eval/T-xxx/adv-nn.py --note "…"` | Tìm được input phá: thêm eval tầng 3, việc chạy lại, không tính vòng |
 | Product (Spec Writer) | `task.py respec T-xxx --by product --note "…" [--eval …]` | Spec + eval đã sửa, trả việc về người làm, vòng về 0 |
 | Bất kỳ ai | `task.py block T-xxx --by … --note "…"` | Bị chặn |
 | Chief of Staff | `task.py escalate T-xxx --by chief-of-staff --note "…"` | Cần Capu quyết |
@@ -75,7 +77,7 @@ Nhịp theo quyết định, không theo lịch. Không còn standup sáng và w
 | **Phiên spec** | Thứ Bảy, sau khi đọc insight | Capu mở một phiên với Chief of Staff: viết 2–3 ý định cho tuần sau, Spec Writer biến thành spec + eval ngay trong phiên | Việc mới trên board, có eval; ý định ghi vào `decisions/` |
 | Retro tháng | Thứ Bảy cuối tháng | Capu + Chief of Staff + Reviewer, chỉ bàn **quy trình** (không bàn từng việc) | Sửa `CLAUDE.md`, file agent, mẫu, policy bậc |
 
-Chỉ số theo dõi (trong báo cáo chất lượng, thay cho velocity): spec acceptance rate, số lần spec rework, eval pass rate lần đầu, giờ từ giao việc tới chấp nhận, số quyết định Capu phải ra mỗi ngày, chi phí mỗi việc.
+Chỉ số theo dõi (trong báo cáo chất lượng, thay cho velocity): spec acceptance rate (qua Spec Gate lần đầu), số spec rework và tầng gây ra, **eval sinh thêm mỗi việc** (đối kháng + hồi quy), **số bất biến trong bể** theo vùng, eval pass rate lần đầu, giờ từ giao việc tới chấp nhận, số quyết định Capu phải ra mỗi ngày, chi phí mỗi việc.
 
 Khi chuyển sang mô hình này, Capu xóa hai scheduled task "Standup sáng" và "Wrap-up chiều" trên claude.ai/code và tạo task "Insight tuần" theo `routines/weekly-insight.md`.
 
@@ -84,8 +86,8 @@ Khi chuyển sang mô hình này, Capu xóa hai scheduled task "Standup sáng" v
 | Bộ phận | Model | Lý do |
 | --- | --- | --- |
 | Chief of Staff (phiên chính) | Capu chọn khi mở phiên | Không đặt bằng file |
-| `reviewer` | `opus` | Người gác cổng cuối cùng, cần kiểm kỹ nhất |
-| `product`, `engineering`, `insight` | `sonnet` | Ưu tiên chi phí; đã có reviewer gác chất lượng |
+| `spec-critic`, `adversary` | `opus` | Hai người gác cổng; tìm cách hiểu thứ hai và input phá cần suy luận kỹ nhất |
+| `product`, `engineering`, `insight` | `sonnet` | Ưu tiên chi phí; đã có hai cổng gác chất lượng |
 
 - Đặt bằng dòng `model:` trong frontmatter của `.claude/agents/<tên>.md`. Dùng alias (`sonnet`, `opus`, `haiku`) để tự lên bản mới nhất; cần ghim cố định thì ghi ID đầy đủ, vd `claude-opus-5-5`. Ghi `inherit` để dùng model của phiên chính. Nguồn: https://code.claude.com/docs/en/sub-agents (mục "Choose a model").
 - Cách đổi: sửa dòng `model:` đó; vì đây là file trong `.claude/`, workflow sẽ mở PR để Capu duyệt.
@@ -106,8 +108,9 @@ Workflow `.github/workflows/notify-slack.yml` đọc sổ cái mỗi khi `main` 
 | 🆕 | Giao việc mới | Chính |
 | 📥 | Bàn giao, kèm link pull request nếu có | Chính |
 | ↩️ | Reviewer trả về, kèm vòng và lỗi | Chính |
-| ✅ | Reviewer chấp nhận. Bậc A/B: Chief of Staff merge, tin vào kênh chính. Bậc C có PR: "PR sẵn sàng để anh merge" | Chính (A/B) · Cần anh (C) |
-| 📝 | Việc vào Spec rework (trả về vòng 2) | Cần anh |
+| ✅ | Qua cổng. Bậc A: Chief of Staff merge. Bậc B: "anh đọc diff hành vi, 48h không phản đối thì merge". Bậc C: "PR sẵn sàng để anh merge" | Chính (A) · Cần anh (B, C) |
+| 📝 | Việc vào Spec rework (`--kind spec`) | Cần anh |
+| 🧪 | Adversary thêm eval tầng 3, việc chạy lại | Chính |
 | ⛔ | Bị chặn | Cần anh |
 | 🙋 | Leo thang, cần Capu quyết | Cần anh |
 | 🚨 | Agent sửa tay sổ cái | Cần anh |
