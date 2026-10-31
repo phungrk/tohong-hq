@@ -20,31 +20,31 @@
       "agent_file": "CLAUDE.md"
     },
     {
-      "id": "reviewer",
-      "name": "Reviewer",
-      "role": "Lưới lọc",
-      "kind": "agent",
-      "reports_to": "capu",
-      "mission": "Chạy eval, review ý định; chỉ để việc đạt đi tiếp",
-      "agent_file": ".claude/agents/reviewer.md"
-    },
-    {
       "id": "insight",
       "name": "Insight",
       "role": "Máy bơm",
       "kind": "agent",
       "reports_to": "chief-of-staff",
-      "mission": "Tìm pain từ dữ liệu sản phẩm; ống hồi sự cố → eval",
+      "mission": "Tìm pain từ dữ liệu sản phẩm; sự cố → bất biến vào bể",
       "agent_file": ".claude/agents/insight.md"
     },
     {
       "id": "product",
       "name": "Product",
-      "role": "Spec + eval",
+      "role": "Spec + eval tầng 1",
       "kind": "agent",
       "reports_to": "chief-of-staff",
-      "mission": "Biến ý định thành spec + eval máy thực thi được",
+      "mission": "Biến ý định thành spec + eval máy thực thi được; đề xuất bất biến",
       "agent_file": ".claude/agents/product.md"
+    },
+    {
+      "id": "spec-critic",
+      "name": "Spec critic",
+      "role": "Spec Gate",
+      "kind": "agent",
+      "reports_to": "capu",
+      "mission": "Tìm cách hiểu thứ hai, đối chiếu bất biến, rút bất biến mới",
+      "agent_file": ".claude/agents/spec-critic.md"
     },
     {
       "id": "engineering",
@@ -52,8 +52,17 @@
       "role": "Code",
       "kind": "agent",
       "reports_to": "chief-of-staff",
-      "mission": "Biến spec + eval thành code qua lưới",
+      "mission": "Biến spec + eval thành code qua Code Gate",
       "agent_file": ".claude/agents/engineering.md"
+    },
+    {
+      "id": "adversary",
+      "name": "Adversary",
+      "role": "Code Gate",
+      "kind": "agent",
+      "reports_to": "capu",
+      "mission": "Phân loại lỗi, tìm input phá, thêm eval tầng 3",
+      "agent_file": ".claude/agents/adversary.md"
     },
     {
       "id": "vendor-ops",

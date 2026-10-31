@@ -32,7 +32,7 @@ DASHBOARD = os.environ.get("DASHBOARD_URL", "https://phungrk.github.io/tohong-hq
 MAX_LINES = 25          # số dòng sự kiện tối đa trong một tin
 MAX_REPORT_CHARS = 2800  # độ dài tối đa của một báo cáo gửi lên Slack
 
-NOTIFY = {"assigned", "handoff", "accepted", "rejected", "blocked", "unblocked",
+NOTIFY = {"assigned", "handoff", "accepted", "rejected", "evalplus", "blocked", "unblocked",
           "escalated", "decided", "board_edited_directly"}
 PR_RE = re.compile(r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+")
 
@@ -125,15 +125,19 @@ def describe(e, events, names):
         pr = pr_for_task(tid, events)
         tier = task_tier(tid)
         if pr and tier == "C":
-            return True, f"✅ {t}\n      Reviewer chấp nhận (bậc C). *PR sẵn sàng để anh merge:* {link(pr, pr.split('github.com/')[-1])}{tail}"
+            return True, f"✅ {t}\n      Qua Code Gate (bậc C). *Anh đọc diff hành vi trong bàn giao rồi merge:* {link(pr, pr.split('github.com/')[-1])}{tail}"
+        if pr and tier == "B":
+            return True, f"✅ {t}\n      Qua Code Gate (bậc B). *Anh đọc diff hành vi*; 48h không phản đối thì Chief of Staff merge {link(pr, pr.split('github.com/')[-1])}{tail}"
         if pr:
-            return False, f"✅ {t}\n      Reviewer chấp nhận (bậc {tier or 'B'}). Chief of Staff merge {link(pr, pr.split('github.com/')[-1])}{tail}"
+            return False, f"✅ {t}\n      Qua Code Gate (bậc A). Chief of Staff merge {link(pr, pr.split('github.com/')[-1])}{tail}"
         return False, f"✅ *Chief of Staff báo cáo:* Task [{esc(title or tid)}] đã hoàn thành\n      {head} · Reviewer chấp nhận{tail}"
     if ev == "rejected":
         sev = e.get("severity") or "blocker"
         if e.get("state") == "spec":
-            return True, f"📝 {t}\n      Trả về vòng {rnd}: *về spec* — Spec Writer sửa spec + eval{tail}"
-        return False, f"↩️ {t}\n      *{esc(who)}* trả về *{esc(to)}* (vòng {rnd}, {sev}){tail}"
+            return True, f"📝 {t}\n      *{esc(who)}* trả: *spec rework* — Spec Writer sửa spec + eval{tail}"
+        return False, f"↩️ {t}\n      *{esc(who)}* trả: *code rework* lần {rnd}{tail}"
+    if ev == "evalplus":
+        return False, f"🧪 {t}\n      Adversary thêm eval tầng 3, *{esc(to)}* chạy lại{tail}"
     if ev == "blocked":
         return True, f"⛔ {t}\n      *{esc(who)}* báo bị chặn{tail}"
     if ev == "unblocked":
