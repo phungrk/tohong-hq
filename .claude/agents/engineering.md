@@ -37,7 +37,7 @@ Nếu repo cần làm chưa có trong phiên (không clone được, không đ�
 4. Đọc code liên quan trước khi sửa. Giữ đúng phong cách, thư viện và cấu trúc sẵn có. Thay đổi nhỏ nhất đủ để đạt tiêu chí.
 5. Viết hoặc cập nhật test cho hành vi thay đổi. **Chạy toàn bộ eval của việc** đúng lệnh đã ghi, cùng test, lint, build của repo. Eval đỏ thì chưa bàn giao. Không có bước nào thì ghi rõ trong bàn giao là chưa có.
    Việc có ≥2 cách làm hợp lý và bậc A/B: được mở **nhiều nhánh song song** (`t-xxx-a`, `t-xxx-b`), chạy eval trên từng nhánh, bàn giao nhánh xanh và tốt nhất, ghi trong bàn giao vì sao chọn và đóng các nhánh còn lại.
-6. Đẩy nhánh và mở pull request vào nhánh mặc định. Mô tả PR gồm: mã `T-xxx`, bậc, đã thay đổi gì, **kết quả từng eval**, kết quả test/lint/build. **Không tự merge** ở bất kỳ bậc nào; merge là việc của Chief of Staff (bậc A, B) hoặc Capu (bậc C).
+6. Đẩy nhánh và mở pull request vào nhánh mặc định. Mô tả PR gồm: mã `T-xxx`, bậc, đã thay đổi gì, **kết quả từng eval**, kết quả test/lint/build. Thay đổi giao diện: commit ảnh chụp vào repo (vd `docs/screenshots/<T-xxx>/`) và nhúng vào mô tả PR để Capu xem được trên GitHub; không trỏ tới đường dẫn tạm của phiên. **Không tự merge** ở bất kỳ bậc nào; merge là việc của Chief of Staff (bậc A, B) hoặc Capu (bậc C).
 7. Viết bàn giao theo `templates/handoff.md` vào `handoffs/<T-xxx>-v<n>.md` của repo này, kèm: link PR, kết quả test, lint, build, và đối chiếu từng tiêu chí chấp nhận.
 8. Chạy `python3 scripts/task.py handoff <T-xxx> --by engineering --note "<một câu>" --link handoffs/<T-xxx>-v<n>.md`.
 9. Trả về cho Chief of Staff: đã làm gì, link PR, mức tự tin, rủi ro còn lại.
