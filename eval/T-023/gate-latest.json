@@ -1,6 +1,6 @@
 {
   "task": "T-023",
-  "at": "2026-10-31T12:22",
+  "at": "2026-10-31T13:08",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "eval/T-023/eval-1.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 13852,
+      "ms": 15819,
       "out": "",
       "tier": 1
     },
@@ -20,8 +20,24 @@
       "eval": "eval/T-023/adv-01.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 111406,
+      "ms": 111283,
       "out": "PASS S1: thiếu model → bể 0\nPASS S1: Agent code đếm 1 (state lạ, owner insight không bị đếm)\nPASS S1: không lỗi console ()\nPASS S2: 390px, 40 việc, không tràn ngang\nPASS S2: không lỗi console ()\nPASS S3: Code Gate lên màu khi 2 dot chạm\nPASS S3: một dot đi ra, còn T-002 trong cổng → Code Gate vẫn giữ màu\nPASS S5: rejected không state, accepted tier rỗng → không lỗi console ()\nPASS S4: Code Gate lên màu khi dot chạm\nPASS S4: T-001 chưa ra khỏi Code Gate sau 95 giây → vẫn giữ màu\nTất cả PASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-023/adv-02.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 124145,
+      "out": "PASS S6: Spec Writer lên màu khi dot assigned chạm\nPASS S6: Spec Gate lên màu khi dot handoff chạm\nPASS S6: dot đã rời Spec Writer, không còn việc nào ở đó → Spec Writer hết màu\nPASS S6: không lỗi console ()\nPASS S7: Agent code lên màu khi dot chạm\nPASS S7: Code Gate lên màu\nPASS S7: dot đã rời Agent code, không còn việc nào ở đó → Agent code hết màu\nPASS S8: việc lạ T-999 → Code Gate lên màu khi dot chạm\nPASS S8: sau một nhịp render, sổ cái nói Code Gate trống → hết màu (không kẹt)\nPASS S8: không lỗi console ()\nPASS S9: dashboard.json được tải lại (2 lần)\nPASS S9: Insight lên màu khi dot nguồn chạm\nPASS S9: mọi dot đã ra khỏi Insight, không việc nào ở đó → Insight hết màu\nPASS S9: không lỗi console ()\nTất cả PASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-023/adv-03.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 15865,
+      "out": "PASS S10: Code Gate lên màu khi 2 dot chạm\nPASS S10: evalplus T-001 đã ra, T-002 còn trong Code Gate → Code Gate vẫn giữ màu\nPASS S10: không lỗi console ()\nPASS S11: Spec Gate lên màu khi 2 dot chạm\nPASS S11: T-001 qua Spec Gate, T-002 còn trong cổng → Spec Gate vẫn giữ màu\nPASS S11: không lỗi console ()\nTất cả PASS",
       "tier": 1
     }
   ],
