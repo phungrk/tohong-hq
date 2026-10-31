@@ -1,6 +1,6 @@
 {
   "task": "T-023",
-  "at": "2026-10-31T12:10",
+  "at": "2026-10-31T12:22",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,8 +12,16 @@
       "eval": "eval/T-023/eval-1.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 14146,
+      "ms": 13852,
       "out": "",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-023/adv-01.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 111406,
+      "out": "PASS S1: thiếu model → bể 0\nPASS S1: Agent code đếm 1 (state lạ, owner insight không bị đếm)\nPASS S1: không lỗi console ()\nPASS S2: 390px, 40 việc, không tràn ngang\nPASS S2: không lỗi console ()\nPASS S3: Code Gate lên màu khi 2 dot chạm\nPASS S3: một dot đi ra, còn T-002 trong cổng → Code Gate vẫn giữ màu\nPASS S5: rejected không state, accepted tier rỗng → không lỗi console ()\nPASS S4: Code Gate lên màu khi dot chạm\nPASS S4: T-001 chưa ra khỏi Code Gate sau 95 giây → vẫn giữ màu\nTất cả PASS",
       "tier": 1
     }
   ],
