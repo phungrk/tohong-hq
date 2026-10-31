@@ -1,0 +1,21 @@
+{
+  "task": "T-023",
+  "at": "2026-10-31T12:10",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/dashboard",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "eval/T-023/eval-1.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 14146,
+      "out": "",
+      "tier": 1
+    }
+  ],
+  "hint": ""
+}

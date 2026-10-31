@@ -1,0 +1,21 @@
+{
+  "task": "T-024",
+  "at": "2026-10-31T12:09",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/dashboard",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "python3 scripts/export_dashboard.py --out /tmp/dash-eval --public && python3 -c \"import json;d=json.load(open('/tmp/dash-eval/dashboard.json'));assert 'invariants_total' in d['model'];assert 'tier' in d['tasks'][0]\"",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 197,
+      "out": "Đã xuất lúc 2026-10-31T19:09 (bản công khai): 24 việc, 159 sự kiện, 7/10 vị trí đã có người → /tmp/dash-eval",
+      "tier": 1
+    }
+  ],
+  "hint": ""
+}
