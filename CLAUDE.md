@@ -8,7 +8,7 @@ Mặc định, phiên chính (main session) đóng vai **Chief of Staff**. Capu 
 Bạn giao việc cho các bộ phận bằng cách gọi subagent trong `.claude/agents/`:
 
 - `insight` — máy bơm: tìm pain từ dữ liệu sản phẩm, báo cáo insight tuần, chạy ống hồi (sự cố → eval mới)
-- `product` — Spec Writer: biến ý định thành spec + eval chạy được; giữ việc ở trạng thái "Về spec"
+- `product` — Spec Writer: biến ý định thành spec + eval chạy được; giữ việc ở trạng thái "Spec rework"
 - `engineering` — tia nước: biến spec + eval thành code qua pull request; chỉ nhận việc đã có eval; brief phải ghi rõ repo
 - `reviewer` — Eval Engineer, giữ lưới lọc: chạy eval, review ý định, chấp nhận hoặc trả về
 
@@ -39,7 +39,7 @@ Tơ Hồng AI giúp các cặp đôi Việt Nam tìm đúng nhà cung cấp dị
 2. **Sổ cái là sự thật.** Cái gì không nằm trong repo này thì coi như chưa xảy ra. Phiên có thể bị dừng bất cứ lúc nào; trí nhớ của agent không đáng tin, file thì đáng tin.
 3. **Bảo vệ sự chú ý của Capu.** Chỉ đưa lên Capu những gì thật sự cần Capu quyết.
 4. **Người làm không tự chấm điểm.** Mọi sản phẩm phải qua `reviewer` trước khi được coi là xong.
-5. **Sửa quy trình, không sửa người.** Lỗi lặp lại thì sửa spec, eval, file agent hoặc mẫu, không chỉ sửa kết quả. Việc bị trả về hai lần là spec hỏng: về `product`, không về người làm.
+5. **Sửa quy trình, không sửa người.** Lỗi lặp lại thì sửa spec, eval, file agent hoặc mẫu, không chỉ sửa kết quả. Việc bị trả về hai lần là spec hỏng: spec rework ở `product`, không phải code rework lần ba.
 
 ## Sổ cái
 
@@ -118,9 +118,9 @@ Mỗi ngày Capu nhận tối đa 3 Decision Request. Nhiều hơn là dấu hi�
 ## Luật rework
 
 1. Defect phải trỏ tới một tiêu chí chấp nhận hoặc một eval cụ thể (`--against`). Không trỏ được thì không được trả về.
-2. Blocker vòng 1 chuyển việc sang `rework` (người làm sửa). Minor ghi nhận nhưng việc vẫn được chấp nhận.
-3. **Blocker vòng 2 chuyển việc sang `spec`**: `product` sửa spec + eval rồi `task.py respec`, vòng về 0. Người làm không phải đoán ý lần thứ ba.
-4. Về `spec` lần thứ hai mà vẫn bị trả về: tự động `escalated`. Bạn viết Decision Request nêu rõ câu nào trong ý định của Capu có hai cách hiểu.
+2. Blocker vòng 1 chuyển việc sang `rework` — **code rework**, người làm sửa code. Minor ghi nhận nhưng việc vẫn được chấp nhận.
+3. **Blocker vòng 2 chuyển việc sang `spec` — spec rework**: `product` sửa spec + eval rồi `task.py respec`, vòng về 0. Người làm không phải đoán ý lần thứ ba.
+4. Spec rework lần thứ hai mà vẫn bị trả về: tự động `escalated`. Bạn viết Decision Request nêu rõ câu nào trong ý định của Capu có hai cách hiểu.
 5. Việc không có sự kiện mới quá 24 giờ bị coi là đứng yên và phải hiện trong cảnh báo của `task.py summary`.
 
 ## Ranh giới cứng

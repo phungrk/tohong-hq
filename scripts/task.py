@@ -51,8 +51,8 @@ LEDGER = ROOT / "ledger" / "events.jsonl"
 
 STATES = ["new", "doing", "review", "rework", "spec", "blocked", "escalated", "done"]
 STATE_VI = {
-    "new": "Mới", "doing": "Đang làm", "review": "Chờ review", "rework": "Rework",
-    "spec": "Về spec", "blocked": "Bị chặn", "escalated": "Leo thang", "done": "Xong",
+    "new": "Mới", "doing": "Đang làm", "review": "Chờ review", "rework": "Code rework",
+    "spec": "Spec rework", "blocked": "Bị chặn", "escalated": "Leo thang", "done": "Xong",
 }
 EVENT_VI = {
     "assigned": "Giao việc", "started": "Bắt đầu", "handoff": "Bàn giao", "rejected": "Trả về",
@@ -70,8 +70,8 @@ REQUEST_TO = "chief-of-staff"
 FIELDS = ["id", "title", "state", "holder", "owner", "reviewer", "rounds", "version",
           "deadline", "budget", "escalation", "tier", "eval", "spec_returns",
           "created", "updated", "prev_state", "cost"]
-MAX_ROUNDS = 2          # vòng trả về tối đa; vòng 2 đưa việc về spec, không về người làm
-MAX_SPEC_RETURNS = 1    # về spec quá số này thì leo thang: brief hỏng, cần Capu
+MAX_ROUNDS = 2          # vòng trả về tối đa; vòng 1 code rework, vòng 2 spec rework (không về người làm)
+MAX_SPEC_RETURNS = 1    # spec rework quá số này thì leo thang: brief hỏng, cần Capu
 STALL_HOURS = 24        # quá ngưỡng này không có sự kiện = đứng yên
 
 
@@ -387,7 +387,7 @@ def cmd_reject(a):
     rounds = meta["rounds"] + 1
     if rounds >= MAX_ROUNDS:
         # Vòng 2: lỗi lặp lại gần như luôn là spec hỏng, không phải người làm kém.
-        # Việc quay về bộ phận giữ spec; về spec lần nữa thì leo thang.
+        # Spec rework: việc quay về bộ phận giữ spec; spec rework lần nữa thì leo thang.
         if meta["spec_returns"] >= MAX_SPEC_RETURNS:
             def up(m):
                 m["rounds"] = rounds
@@ -397,7 +397,7 @@ def cmd_reject(a):
                        link=a.link or "", mutate=up)
             m2, b2 = read_task(a.task)
             row = log_event(m2, "escalated", "chief-of-staff", "chief-of-staff",
-                            f"Đã về spec {meta['spec_returns']} lần mà vẫn trả về: brief hỏng, cần Capu")
+                            f"Đã spec rework {meta['spec_returns']} lần mà vẫn trả về: brief hỏng, cần Capu")
             write_task(m2, append_history(b2, row))
             print(f"{a.task}: Vòng {rounds}, spec đã sửa {meta['spec_returns']} lần → Leo thang.")
             return
@@ -406,9 +406,9 @@ def cmd_reject(a):
             m["rounds"] = rounds
             m["spec_returns"] += 1
         transition(a.task, ["review"], "spec", "rejected", a.by, SPEC_OWNER,
-                   holder=SPEC_OWNER, detail=detail + " · vòng 2: về spec", severity="blocker",
+                   holder=SPEC_OWNER, detail=detail + " · vòng 2: spec rework", severity="blocker",
                    cost=a.cost, link=a.link or "", mutate=up)
-        print(f"{a.task}: Vòng {rounds} → Về spec ({SPEC_OWNER} sửa spec + eval, rồi `respec`)")
+        print(f"{a.task}: Vòng {rounds} → Spec rework ({SPEC_OWNER} sửa spec + eval, rồi `respec`)")
         return
 
     def up(m):
@@ -531,7 +531,7 @@ def build_summary():
         elif h > STALL_HOURS:
             alerts.append({"task": t["id"], "title": t["title"], "kind": f"Đứng yên quá {STALL_HOURS} giờ", "hours": h})
         elif t["state"] == "spec":
-            alerts.append({"task": t["id"], "title": t["title"], "kind": "Về spec: spec + eval cần sửa", "hours": h})
+            alerts.append({"task": t["id"], "title": t["title"], "kind": "Spec rework: spec + eval cần sửa", "hours": h})
     done = [t for t in tasks if t["state"] == "done"]
     first_pass = [t for t in done if t["rounds"] == 0 and not any(
         e["task"] == t["id"] and e["event"] == "rejected" for e in events)]
@@ -565,7 +565,7 @@ def cmd_summary(a):
     print(f"Tình hình lúc {s['as_of']}")
     print("  " + " · ".join(f"{STATE_VI[k]}: {v}" for k, v in c.items() if v))
     fpy = s["first_pass_yield"]
-    print(f"  First-pass yield: {'—' if fpy is None else f'{fpy:.0%}'} · Về spec: {s['spec_returns']} lần · Chi phí tổng: ${s['cost_total']}")
+    print(f"  First-pass yield: {'—' if fpy is None else f'{fpy:.0%}'} · Spec rework: {s['spec_returns']} lần · Chi phí tổng: ${s['cost_total']}")
     l24 = s["last_24h"]
     print(f"  24 giờ qua: {l24['events']} sự kiện, {l24['accepted']} chấp nhận, {l24['rejected']} trả về, ${l24['cost']}")
     if s["alerts"]:

@@ -132,7 +132,7 @@ def describe(e, events, names):
     if ev == "rejected":
         sev = e.get("severity") or "blocker"
         if e.get("state") == "spec":
-            return True, f"📝 {t}\n      Trả về vòng {rnd}: *về spec* — Spec Writer sửa spec + eval{tail}"
+            return True, f"📝 {t}\n      Trả về vòng {rnd}: *spec rework* — Spec Writer sửa spec + eval{tail}"
         return False, f"↩️ {t}\n      *{esc(who)}* trả về *{esc(to)}* (vòng {rnd}, {sev}){tail}"
     if ev == "blocked":
         return True, f"⛔ {t}\n      *{esc(who)}* báo bị chặn{tail}"

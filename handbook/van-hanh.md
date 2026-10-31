@@ -7,9 +7,9 @@ Mới ──start──▶ Đang làm ──handoff──▶ Chờ review ──
                  │  ▲                   │   ▲
            block │  │ unblock    reject │   │ handoff (bản sửa)
                  ▼  │                   ▼   │
-               Bị chặn          vòng 1: Rework
-                                vòng 2: Về spec ──respec (vòng về 0)──▶ Đang làm
-                                về spec lần 2 mà vẫn trả về ──▶ Leo thang ──decide──▶ Đang làm / Xong
+               Bị chặn          vòng 1: Code rework (người làm sửa code)
+                                vòng 2: Spec rework ──respec (vòng về 0)──▶ Đang làm
+                                spec rework lần 2 mà vẫn trả về ──▶ Leo thang ──decide──▶ Đang làm / Xong
 ```
 
 Bất kỳ trạng thái nào chưa Xong đều có thể `escalate` lên Capu khi chạm mức "Hỏi trước".
@@ -25,7 +25,7 @@ Mỗi việc mang **bậc lưới lọc** `tier: A|B|C` và danh sách `eval` (x
 | Bộ phận | `task.py start T-xxx --by <bộ phận>` | Bắt đầu hoặc bắt đầu sửa |
 | Bộ phận | `task.py handoff T-xxx --by <bộ phận> --link handoffs/…` | Làm xong, chuyển review |
 | Reviewer | `task.py accept T-xxx --by reviewer` | Mọi tiêu chí đạt |
-| Reviewer | `task.py reject T-xxx --by reviewer --against "…" --severity blocker` | Có tiêu chí hoặc eval không đạt. Vòng 1 → Rework, vòng 2 → Về spec |
+| Reviewer | `task.py reject T-xxx --by reviewer --against "…" --severity blocker` | Có tiêu chí hoặc eval không đạt. Vòng 1 → Code rework, vòng 2 → Spec rework |
 | Product (Spec Writer) | `task.py respec T-xxx --by product --note "…" [--eval …]` | Spec + eval đã sửa, trả việc về người làm, vòng về 0 |
 | Bất kỳ ai | `task.py block T-xxx --by … --note "…"` | Bị chặn |
 | Chief of Staff | `task.py escalate T-xxx --by chief-of-staff --note "…"` | Cần Capu quyết |
@@ -66,7 +66,7 @@ Giới hạn đã biết:
 
 ## Nhịp vận hành
 
-Nhịp theo quyết định, không theo lịch. Không còn standup sáng và wrap-up chiều: dashboard và Slack là trạng thái thật, và Slack chỉ kêu ở kênh "cần anh" khi việc về spec, bậc C chờ merge, bị chặn, leo thang, hoặc chi phí bất thường.
+Nhịp theo quyết định, không theo lịch. Không còn standup sáng và wrap-up chiều: dashboard và Slack là trạng thái thật, và Slack chỉ kêu ở kênh "cần anh" khi việc vào spec rework, bậc C chờ merge, bị chặn, leo thang, hoặc chi phí bất thường.
 
 | Nhịp | Khi nào (giờ Sài Gòn) | Cách chạy | Đầu ra |
 | --- | --- | --- | --- |
@@ -75,7 +75,7 @@ Nhịp theo quyết định, không theo lịch. Không còn standup sáng và w
 | **Phiên spec** | Thứ Bảy, sau khi đọc insight | Capu mở một phiên với Chief of Staff: viết 2–3 ý định cho tuần sau, Spec Writer biến thành spec + eval ngay trong phiên | Việc mới trên board, có eval; ý định ghi vào `decisions/` |
 | Retro tháng | Thứ Bảy cuối tháng | Capu + Chief of Staff + Reviewer, chỉ bàn **quy trình** (không bàn từng việc) | Sửa `CLAUDE.md`, file agent, mẫu, policy bậc |
 
-Chỉ số theo dõi (trong báo cáo chất lượng, thay cho velocity): spec acceptance rate, số lần về spec, eval pass rate lần đầu, giờ từ giao việc tới chấp nhận, số quyết định Capu phải ra mỗi ngày, chi phí mỗi việc.
+Chỉ số theo dõi (trong báo cáo chất lượng, thay cho velocity): spec acceptance rate, số lần spec rework, eval pass rate lần đầu, giờ từ giao việc tới chấp nhận, số quyết định Capu phải ra mỗi ngày, chi phí mỗi việc.
 
 Khi chuyển sang mô hình này, Capu xóa hai scheduled task "Standup sáng" và "Wrap-up chiều" trên claude.ai/code và tạo task "Insight tuần" theo `routines/weekly-insight.md`.
 
@@ -107,7 +107,7 @@ Workflow `.github/workflows/notify-slack.yml` đọc sổ cái mỗi khi `main` 
 | 📥 | Bàn giao, kèm link pull request nếu có | Chính |
 | ↩️ | Reviewer trả về, kèm vòng và lỗi | Chính |
 | ✅ | Reviewer chấp nhận. Bậc A/B: Chief of Staff merge, tin vào kênh chính. Bậc C có PR: "PR sẵn sàng để anh merge" | Chính (A/B) · Cần anh (C) |
-| 📝 | Việc về spec (trả về vòng 2) | Cần anh |
+| 📝 | Việc vào Spec rework (trả về vòng 2) | Cần anh |
 | ⛔ | Bị chặn | Cần anh |
 | 🙋 | Leo thang, cần Capu quyết | Cần anh |
 | 🚨 | Agent sửa tay sổ cái | Cần anh |

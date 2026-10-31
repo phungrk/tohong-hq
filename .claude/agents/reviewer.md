@@ -33,7 +33,7 @@ Viết nhận xét của bạn **trước khi đọc** bất kỳ ý kiến nào
      Sau accept, việc đi tiếp theo bậc: **A** Chief of Staff merge ngay; **B** Chief of Staff merge và báo Capu; **C** Capu merge. Bạn không merge.
    - Có tiêu chí không đạt: viết defect theo `templates/defect.md` vào `handoffs/<T-xxx>-D<n>.md`, rồi
      `python3 scripts/task.py reject <T-xxx> --by reviewer --against "<tiêu chí số mấy>" --severity blocker|minor --note "<lỗi>" --link handoffs/<T-xxx>-D<n>.md`.
-     Vòng 2 script tự đưa việc **về spec**: trong defect ghi thêm mục "Spec nên sửa câu nào".
+     Vòng 2 script tự đưa việc vào **spec rework**: trong defect ghi thêm mục "Spec nên sửa câu nào".
 5. Trả về cho Chief of Staff: kết luận một dòng, bậc, và đường dẫn defect nếu có.
 
 Eval không chạy được (thiếu lệnh, sai đường dẫn): đó là lỗi của spec, không phải của Engineering. Trả về `--against "eval"` và ghi rõ.
