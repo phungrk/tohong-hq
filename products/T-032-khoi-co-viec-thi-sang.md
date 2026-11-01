@@ -7,10 +7,13 @@ Capu (2026-11-01, `board/T-032.md`, kèm ảnh): khối Ý định ghi "1 việc
 
 ## Câu nào của T-028 bị thay
 Nguyên nhân là spec T-028 (`products/T-028-mo-hinh-dot-chay.md`), mục 4 "Khối đang xử lý", quy tắc A. Hai câu bị thay, cả hai nằm ở dòng 77:
-1. "Việc `new`, `blocked`, việc `done` bậc A hoặc quá 48 giờ không làm khối nào sáng" -> **thay bằng**: "Việc `new` của `product` làm khối `nd_intents` sáng (bảng bên dưới). Việc `new` của chủ khác, việc `blocked`, việc `done` bậc A hoặc quá 48 giờ không làm khối nào sáng."
+1. "Việc `new`, `blocked`, việc `done` bậc A hoặc quá 48 giờ không làm khối nào sáng" -> **thay bằng**: "Việc `new` của `product` làm khối `nd_intents` sáng; việc `new` của `engineering` làm khối `nd_exec` sáng (bảng quy tắc A). Việc `new` của `insight` hay `chief-of-staff`, việc `blocked`, việc `done` bậc A hoặc quá 48 giờ không làm khối nào sáng."
 2. "Các khối còn lại (`nd_intents`, `nd_kr`, `nd_rel`, `nd_prod`, `src_*`) không có quy tắc A." -> **thay bằng**: "Các khối còn lại (`nd_kr`, `nd_rel`, `nd_prod`, `src_*`) không có quy tắc A, vì lý do ghi ở mục E2-E6 của spec T-032."
 Không đổi: bảng ánh xạ dot, màu, quy tắc B, mục 5 và 6 của T-028 (trừ dòng "Khối rảnh không tô" ở "Hệ quả", vẫn đúng: khối rảnh là khối có số đếm 0).
-Hệ quả cho T-028: thêm một hàng vào bảng quy tắc A: `nd_intents` | chủ việc `product`, `state=new` | spec.
+Hệ quả cho T-028, bảng quy tắc A (mục 4) sau khi sửa có đúng hai thay đổi, và không còn câu nào của T-028 được đọc khác bảng "Quyết định từng khối":
+- Thêm hàng: `nd_intents` | chủ việc `product`, `state=new` | spec.
+- Sửa hàng `nd_exec` (T-028 dòng 71, hiện "chủ việc `engineering`, `state=doing`") thành: `nd_exec` | chủ việc `engineering`, `state` ∈ {`new`, `doing`} | code. (`rework` vẫn thuộc `nd_rework`, ADR-014.)
+Các câu khác của T-028 nhắc "việc ở khối" (dòng 80 "khi dot rời mà sổ cái không còn việc ở khối nguồn thì khối nguồn tắt", mục 6 "chỉ theo A") đọc theo bảng A đã sửa này; không câu nào khác đổi.
 
 ## Bằng chứng
 - Ảnh Capu gửi + `board/T-032.md`: Ý định hiện "1 việc product chờ viết spec" mà tối.
@@ -69,7 +72,7 @@ Chạy từ `cd /home/user/tohong-hq`; `<repo>` là thư mục repo dashboard. C
 
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Ý định ghi đúng số việc `product` `new`; số > 0 thì sáng viền 3px màu spec `#14754d`, nền 18%; về 0 thì tắt (qua live, và lúc mở trang); việc `new` của chủ khác không làm nó sáng; giao việc mới qua live thì ở lại sáng. Tái hiện đúng ảnh của Capu | `bash eval/T-032/run.sh <repo> --criterion 1` |
+| 1 | Ý định ghi đúng số việc `product` `new`; số > 0 thì sáng viền 3px màu spec `#14754d`, nền 18%; về 0 thì tắt (qua live, và lúc mở trang); việc `new` của chủ khác `product` (engineering, insight, chief-of-staff) không làm Ý định sáng; giao việc mới qua live thì ở lại sáng. Tái hiện đúng ảnh của Capu | `bash eval/T-032/run.sh <repo> --criterion 1` |
 | 2 | Mọi khối có số đếm "việc đang ở khối" (`nd_intents`, `nd_spec`, `gt_spec`, `nd_respec`, `nd_exec`, `nd_rework`, `gt_code`, `nd_capu`): số > 0 thì sáng đúng màu loại, số = 0 thì tối, khối khác không sáng oan (dữ liệu đầy đủ và từng khối riêng lẻ) | `bash eval/T-032/run.sh <repo> --criterion 2` |
 | 3 | Các ngoại lệ E2-E6 đúng: với số tích luỹ > 0, `nd_prod`, `nd_rel`, `nd_kr`, `nd_insight` (khi không có việc insight đang làm), `src_*` đều không sáng; dot vẫn nháy rồi tắt trong 13 giây | `bash eval/T-032/run.sh <repo> --criterion 3` |
 | 4 | Dot (B) đè lên khối đang sáng theo A rồi trả về màu spec, không tắt; khối số 0 nhận dot thì nháy rồi tắt | `bash eval/T-032/run.sh <repo> --criterion 4` |
