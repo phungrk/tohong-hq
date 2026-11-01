@@ -1,6 +1,6 @@
 {
   "task": "T-030",
-  "at": "2026-11-01T06:08",
+  "at": "2026-11-01T06:21",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 1",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 7605,
+      "ms": 9966,
       "out": "ch sub=false lớp=-\n  ok  [1] Forward 2: lại trang con Ảnh  :: hash=#/ngan-sach/photography tab=Ngân sách sub=true lớp=-\n  ok  [1] không lỗi trang khi đi qua các bước\n  ok  [1] đang ở danh mục Ảnh  :: hash=#/ngan-sach/photography tab=Ngân sách sub=true lớp=-\n  ok  [1] chạm tab Ngân sách khi đang ở trang con: sang #/ngan-sach, trang con đóng  :: hash=#/ngan-sach tab=Ngân sách sub=false lớp=-\n  ok  [1] chạm tab Ngân sách ở trang con: thêm đúng một bước  :: history.length 5, mong 5\n  ok  [1] rồi Back: về lại danh mục Ảnh  :: hash=#/ngan-sach/photography tab=Ngân sách sub=true lớp=-\n  ok  [1] nút \"Quay lại\" của trang con: về #/ngan-sach  :: hash=#/ngan-sach tab=Ngân sách sub=false lớp=-\n  ok  [1] rồi Back: về Trang chủ (không có bước thừa)  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\nPASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 2",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 42821,
+      "ms": 43514,
       "out": "tory.length 4, mong 4\n  ok  [2] Paywall (chat trả 402): Back chỉ đóng lớp này, tab và địa chỉ không đổi  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=chat\n  ok  [2] Paywall (chat trả 402): mở lại (kịch bản đóng bằng giao diện)  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=chat+paywall\n  ok  [2] Paywall (chat trả 402): đóng bằng giao diện  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=chat\n  ok  [2] Paywall (chat trả 402): Back sau khi đóng: đóng lớp bên dưới (chat), không bước chết  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [2] tải lại khi mở ngăn kéo: ngăn kéo đóng, vẫn ở Ngân sách  :: hash=#/ngan-sach tab=Ngân sách sub=false lớp=-\n  ok  [2] rồi Back: về Trang chủ ngay (không bước chết)  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [2] không lỗi trang\nPASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 3",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 12586,
+      "ms": 13126,
       "out": "ok  [3] mở app: không đẩy bước giả (history.length bằng lúc nạp trang)  :: history.length 2, lúc nạp 2\n  ok  [3] ở Trang chủ không còn bước: Back rời app, không ở lại  :: url sau Back: about:blank\n  ok  [3] không hộp thoại \"rời trang?\"\n  ok  [3] Trang chủ -> Ngân sách -> Back: về Trang chủ  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [3] Back tiếp từ Trang chủ: rời app  :: url about:blank\n  ok  [3] ở gốc, mở ngăn kéo rồi Back: chỉ đóng ngăn kéo  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [3] Back tiếp: rời app  :: url about:blank\n  ok  [3] link sâu vào #/ngan-sach: không chèn bước Trang chủ phía trước  :: history.length 2, lúc nạp 2\n  ok  [3] link sâu: Back rời app  :: url about:blank\nPASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 4",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 26528,
+      "ms": 26516,
       "out": " lớp=-\n  ok  [4] \"Quay lại\" sau link sâu không thêm bước và không rời app  :: history.length 2, lúc nạp 2\n  ok  [4] link danh mục không tồn tại: về #/ngan-sach  :: hash=#/ngan-sach tab=Ngân sách sub=false lớp=-\n  ok  [4] thay địa chỉ không thêm bước  :: history.length 2, lúc nạp 2\n  ok  [4] hash lạ: về #/trang-chu, tab Trang chủ  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [4] thay địa chỉ không thêm bước  :: history.length 2, lúc nạp 2\n  ok  [4] gõ tay #/khach-moi vào thanh địa chỉ: chuyển tab Khách mời  :: hash=#/khach-moi tab=Khách mời sub=false lớp=-\n  ok  [4] rồi Back: về Trang chủ  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [4] mọi địa chỉ hash khớp mẫu cho phép (không email, tên, mã cặp đôi)  :: #/ngan-sach #/khach-moi #/ke-hoach #/ngan-sach/photography\nPASS",
       "tier": 1
     },
@@ -44,15 +44,15 @@
       "eval": "node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 5",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4370,
-      "out": "đặc đến sát cạnh, logo nằm trong vòng an toàn (bán kính 40%)  :: 0/1391 điểm ngoài vòng an toàn không phải nền; góc [252,248,243,255]\n  ok  [5] icon any 512x512 (/icon-512.png) tải được, là PNG đúng 512x512  :: 512x512\n  ok  [5] icon any 512x512 có hình logo tím (violet) ở giữa  :: tỉ lệ điểm tím ở vùng giữa 33.6%\n  ok  [5] có <link rel=\"apple-touch-icon\" sizes=\"180x180\">  :: {\"href\":\"http://127.0.0.1:38071/apple-touch-icon.png\",\"sizes\":\"180x180\"}\n  ok  [5] apple-touch-icon là PNG đúng 180x180, đặc (không trong suốt), có logo tím  :: 180x180 góc alpha 255/255/255/255 tím 33.5%\n  ok  [5] favicon.svg (logo gốc) giữ nguyên, không có hình mới thay thế\n  ok  [5] Chrome báo đủ điều kiện cài (Page.getInstallabilityErrors rỗng)\n  ok  [5] manifest không có lỗi nghiêm trọng khi Chrome phân tích\nPASS",
+      "ms": 5002,
+      "out": "đặc đến sát cạnh, logo nằm trong vòng an toàn (bán kính 40%)  :: 0/1391 điểm ngoài vòng an toàn không phải nền; góc [252,248,243,255]\n  ok  [5] icon any 512x512 (/icon-512.png) tải được, là PNG đúng 512x512  :: 512x512\n  ok  [5] icon any 512x512 có hình logo tím (violet) ở giữa  :: tỉ lệ điểm tím ở vùng giữa 33.6%\n  ok  [5] có <link rel=\"apple-touch-icon\" sizes=\"180x180\">  :: {\"href\":\"http://127.0.0.1:45075/apple-touch-icon.png\",\"sizes\":\"180x180\"}\n  ok  [5] apple-touch-icon là PNG đúng 180x180, đặc (không trong suốt), có logo tím  :: 180x180 góc alpha 255/255/255/255 tím 33.5%\n  ok  [5] favicon.svg (logo gốc) giữ nguyên, không có hình mới thay thế\n  ok  [5] Chrome báo đủ điều kiện cài (Page.getInstallabilityErrors rỗng)\n  ok  [5] manifest không có lỗi nghiêm trọng khi Chrome phân tích\nPASS",
       "tier": 1
     },
     {
       "eval": "node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 6",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 30542,
+      "ms": 32216,
       "out": "OS: hướng dẫn có \"Chia sẻ\" và \"Thêm vào MH chính\"; không có nút \"Cài ứng dụng\"  :: Thêm Tơ Hồng vào màn hình chính Bấm nút Chia sẻ, rồi chọn Thêm vào MH chính. Không nhắc lại\n  ok  [6] iOS: tắt rồi tải lại: không hiện lại\n  ok  [6] chạy standalone (Android + display-mode: standalone): không hiện gợi ý\n  ok  [6] chạy standalone (iOS + navigator.standalone): không hiện gợi ý\n  ok  [6] chạy standalone (iOS + display-mode: standalone): không hiện gợi ý\n  ok  [6] trình duyệt thường không có beforeinstallprompt và không phải iOS: không hiện gợi ý\n  ok  [6] trình duyệt nào bắn beforeinstallprompt cũng hiện gợi ý (kể cả máy tính)\n  ok  [6] sự kiện appinstalled: gợi ý ẩn\n  ok  [6] Onboarding đang mở (người mới): chưa hiện gợi ý\n  ok  [6] xong Onboarding: gợi ý (sự kiện đã đến từ trước) hiện ra\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 7",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 8055,
+      "ms": 9080,
       "out": "ok  [7] [390] bảng markdown trong chat vẫn render (BotMarkdown)\n  ok  [7] [1280] bảng markdown trong chat vẫn render (BotMarkdown)\nPASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "python3 ../tohong-hq/eval/T-027/check_7_guard.py --repo .",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 26550,
+      "ms": 21400,
       "out": "lint: base 32 error/3 warning; hiện tại 32/3\nPASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "bash ../tohong-hq/eval/T-027/check_7_inv.sh .",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 127505,
+      "ms": 143085,
       "out": "PASS",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "python3 ../tohong-hq/eval/T-027/check_8_shots.py --repo .",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 97,
+      "ms": 87,
       "out": "PASS",
       "tier": 1
     },
@@ -100,7 +100,7 @@
       "eval": "eval/T-030/adv-01-dieu-huong-va-goi-y-cai.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 56871,
+      "ms": 68063,
       "out": "ok  [H] H: #/NGAN-SACH không thêm bước  :: len 2, h0 2\n  ok  [H] H: #/NGAN-SACH không lỗi trang\n  ok  [I] I: gợi ý hiện  :: {\"hint\":{\"top\":492.5,\"bottom\":574.5},\"tabTop\":581.5,\"sw\":390,\"iw\":390}\n  ok  [I] I: gợi ý nằm trên thanh tab, không đè  :: {\"hint\":{\"top\":492.5,\"bottom\":574.5},\"tabTop\":581.5,\"sw\":390,\"iw\":390}\n  ok  [I] I: không cuộn ngang  :: {\"hint\":{\"top\":492.5,\"bottom\":574.5},\"tabTop\":581.5,\"sw\":390,\"iw\":390}\n  ok  [I] I: có gợi ý, sheet Thêm việc vẫn thấy được nút đóng và nút Thêm (hoặc cuộn được)  :: {\"close\":{\"top\":9.5,\"bottom\":39.5},\"add\":{\"top\":498.5,\"bottom\":544.5},\"scrollable\":false,\"ih\":640}\n  ok  [I] I: có sự kiện install_*  :: install_hint_shown,install_prompt_result\n  ok  [I] I: install_* chỉ thêm platform/outcome ngoài thuộc tính chung, không email/tên/sđt  :: []\nPASS",
       "tier": 1
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/front/navigation/inv-001-thu-tu-back-mot-buoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 7484,
+      "ms": 9283,
       "out": "ch sub=false lớp=-\n  ok  [1] Forward 2: lại trang con Ảnh  :: hash=#/ngan-sach/photography tab=Ngân sách sub=true lớp=-\n  ok  [1] không lỗi trang khi đi qua các bước\n  ok  [1] đang ở danh mục Ảnh  :: hash=#/ngan-sach/photography tab=Ngân sách sub=true lớp=-\n  ok  [1] chạm tab Ngân sách khi đang ở trang con: sang #/ngan-sach, trang con đóng  :: hash=#/ngan-sach tab=Ngân sách sub=false lớp=-\n  ok  [1] chạm tab Ngân sách ở trang con: thêm đúng một bước  :: history.length 5, mong 5\n  ok  [1] rồi Back: về lại danh mục Ảnh  :: hash=#/ngan-sach/photography tab=Ngân sách sub=true lớp=-\n  ok  [1] nút \"Quay lại\" của trang con: về #/ngan-sach  :: hash=#/ngan-sach tab=Ngân sách sub=false lớp=-\n  ok  [1] rồi Back: về Trang chủ (không có bước thừa)  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\nPASS",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/front/navigation/inv-002-back-dong-lop-tren-truoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 42480,
+      "ms": 45306,
       "out": "tory.length 4, mong 4\n  ok  [2] Paywall (chat trả 402): Back chỉ đóng lớp này, tab và địa chỉ không đổi  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=chat\n  ok  [2] Paywall (chat trả 402): mở lại (kịch bản đóng bằng giao diện)  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=chat+paywall\n  ok  [2] Paywall (chat trả 402): đóng bằng giao diện  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=chat\n  ok  [2] Paywall (chat trả 402): Back sau khi đóng: đóng lớp bên dưới (chat), không bước chết  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [2] tải lại khi mở ngăn kéo: ngăn kéo đóng, vẫn ở Ngân sách  :: hash=#/ngan-sach tab=Ngân sách sub=false lớp=-\n  ok  [2] rồi Back: về Trang chủ ngay (không bước chết)  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [2] không lỗi trang\nPASS",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/front/navigation/inv-003-khong-bay-goc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 12041,
+      "ms": 13043,
       "out": "ok  [3] mở app: không đẩy bước giả (history.length bằng lúc nạp trang)  :: history.length 2, lúc nạp 2\n  ok  [3] ở Trang chủ không còn bước: Back rời app, không ở lại  :: url sau Back: about:blank\n  ok  [3] không hộp thoại \"rời trang?\"\n  ok  [3] Trang chủ -> Ngân sách -> Back: về Trang chủ  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [3] Back tiếp từ Trang chủ: rời app  :: url about:blank\n  ok  [3] ở gốc, mở ngăn kéo rồi Back: chỉ đóng ngăn kéo  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [3] Back tiếp: rời app  :: url about:blank\n  ok  [3] link sâu vào #/ngan-sach: không chèn bước Trang chủ phía trước  :: history.length 2, lúc nạp 2\n  ok  [3] link sâu: Back rời app  :: url about:blank\nPASS",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/front/navigation/inv-004-hash-dung-man.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 26091,
+      "ms": 26996,
       "out": " lớp=-\n  ok  [4] \"Quay lại\" sau link sâu không thêm bước và không rời app  :: history.length 2, lúc nạp 2\n  ok  [4] link danh mục không tồn tại: về #/ngan-sach  :: hash=#/ngan-sach tab=Ngân sách sub=false lớp=-\n  ok  [4] thay địa chỉ không thêm bước  :: history.length 2, lúc nạp 2\n  ok  [4] hash lạ: về #/trang-chu, tab Trang chủ  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [4] thay địa chỉ không thêm bước  :: history.length 2, lúc nạp 2\n  ok  [4] gõ tay #/khach-moi vào thanh địa chỉ: chuyển tab Khách mời  :: hash=#/khach-moi tab=Khách mời sub=false lớp=-\n  ok  [4] rồi Back: về Trang chủ  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [4] mọi địa chỉ hash khớp mẫu cho phép (không email, tên, mã cặp đôi)  :: #/ngan-sach #/khach-moi #/ke-hoach #/ngan-sach/photography\nPASS",
       "tier": 2
     },
@@ -140,17 +140,25 @@
       "eval": "eval/invariants/front/navigation/inv-005-manifest-cai-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 4134,
-      "out": "tím ở vùng giữa 22.8%\n  ok  [5] icon maskable 512x512: tràn nền #FCF8F3 đặc đến sát cạnh, logo nằm trong vòng an toàn (bán kính 40%)  :: 0/1391 điểm ngoài vòng an toàn không phải nền; góc [252,248,243,255]\n  ok  [5] icon any 512x512 (/icon-512.png) tải được, là PNG đúng 512x512  :: 512x512\n  ok  [5] icon any 512x512 có hình logo tím (violet) ở giữa  :: tỉ lệ điểm tím ở vùng giữa 33.6%\n  ok  [5] có <link rel=\"apple-touch-icon\" sizes=\"180x180\">  :: {\"href\":\"http://127.0.0.1:38965/apple-touch-icon.png\",\"sizes\":\"180x180\"}\n  ok  [5] apple-touch-icon là PNG đúng 180x180, đặc (không trong suốt), có logo tím  :: 180x180 góc alpha 255/255/255/255 tím 33.5%\n  ok  [5] Chrome báo đủ điều kiện cài (Page.getInstallabilityErrors rỗng)\n  ok  [5] manifest không có lỗi nghiêm trọng khi Chrome phân tích\nPASS",
+      "ms": 6444,
+      "out": "tím ở vùng giữa 22.8%\n  ok  [5] icon maskable 512x512: tràn nền #FCF8F3 đặc đến sát cạnh, logo nằm trong vòng an toàn (bán kính 40%)  :: 0/1391 điểm ngoài vòng an toàn không phải nền; góc [252,248,243,255]\n  ok  [5] icon any 512x512 (/icon-512.png) tải được, là PNG đúng 512x512  :: 512x512\n  ok  [5] icon any 512x512 có hình logo tím (violet) ở giữa  :: tỉ lệ điểm tím ở vùng giữa 33.6%\n  ok  [5] có <link rel=\"apple-touch-icon\" sizes=\"180x180\">  :: {\"href\":\"http://127.0.0.1:41261/apple-touch-icon.png\",\"sizes\":\"180x180\"}\n  ok  [5] apple-touch-icon là PNG đúng 180x180, đặc (không trong suốt), có logo tím  :: 180x180 góc alpha 255/255/255/255 tím 33.5%\n  ok  [5] Chrome báo đủ điều kiện cài (Page.getInstallabilityErrors rỗng)\n  ok  [5] manifest không có lỗi nghiêm trọng khi Chrome phân tích\nPASS",
       "tier": 2
     },
     {
       "eval": "eval/invariants/front/navigation/inv-006-goi-y-cai-ton-trong-lua-chon.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 30756,
+      "ms": 33355,
       "out": "OS: hướng dẫn có \"Chia sẻ\" và \"Thêm vào MH chính\"; không có nút \"Cài ứng dụng\"  :: Thêm Tơ Hồng vào màn hình chính Bấm nút Chia sẻ, rồi chọn Thêm vào MH chính. Không nhắc lại\n  ok  [6] iOS: tắt rồi tải lại: không hiện lại\n  ok  [6] chạy standalone (Android + display-mode: standalone): không hiện gợi ý\n  ok  [6] chạy standalone (iOS + navigator.standalone): không hiện gợi ý\n  ok  [6] chạy standalone (iOS + display-mode: standalone): không hiện gợi ý\n  ok  [6] trình duyệt thường không có beforeinstallprompt và không phải iOS: không hiện gợi ý\n  ok  [6] trình duyệt nào bắn beforeinstallprompt cũng hiện gợi ý (kể cả máy tính)\n  ok  [6] sự kiện appinstalled: gợi ý ẩn\n  ok  [6] Onboarding đang mở (người mới): chưa hiện gợi ý\n  ok  [6] xong Onboarding: gợi ý (sự kiện đã đến từ trước) hiện ra\nPASS",
       "tier": 2
+    },
+    {
+      "eval": "eval/T-030/adv-02-goi-y-an-khi-co-lop.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 40364,
+      "out": "et vendor: install_hint_shown đúng 1 lần dù ẩn/hiện nhiều lần  :: số lần 1\n  ok  [J] J sheet vendor: không lỗi trang\n  ok  [K] K: 2 lớp → ẩn\n  ok  [K] K: còn 1 lớp → vẫn ẩn\n  ok  [K] K: Back nhanh hết lớp → gợi ý hiện\n  ok  [K] K: chọn tab từ ngăn kéo → gợi ý hiện lại\n  ok  [K] K: race paywall + đóng chat → hết lớp, gợi ý hiện (thêm 0 Back)  :: hash=#/trang-chu tab=Trang chủ sub=false lớp=-\n  ok  [L] L: bấm Không nhắc lại → ẩn\n  ok  [L] L: mở/đóng lớp sau khi tắt → không hiện lại\n  ok  [L] L: tải lại + sự kiện mới → không hiện\n  ok  [L] L: lớp mở → không còn nút \"Không nhắc lại\" trong DOM  :: còn 0\n  ok  [M] M: 390x640 sheet Thêm việc: nút đóng và nút Thêm trong màn  :: {\"close\":9.5,\"add\":544.5,\"ih\":640}\n  ok  [M] M: 390x640 chat: ô nhắn trong màn  :: {\"top\":568,\"bottom\":610,\"ih\":640}\nPASS",
+      "tier": 3
     }
   ],
   "hint": ""
