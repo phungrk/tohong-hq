@@ -1,0 +1,77 @@
+{
+  "task": "T-031",
+  "at": "2026-11-01T06:33",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng dashboard/model",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "eval/invariants/dashboard/model/inv-001-khong-dot-gia.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 9473,
+      "out": "PASS no-fake-dots",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-002-tran-dot.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 18378,
+      "out": "PASS dot-cap",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-003-dot-tren-duong.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 8553,
+      "out": "PASS dot-on-path",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-004-khong-ket-sang.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 16897,
+      "out": "PASS no-stuck-lit",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-005-reduced-motion-khong-dot.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 5268,
+      "out": "PASS reduced-no-dots",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-006-khong-cuon-ngang-390.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2324,
+      "out": "PASS no-hscroll-390",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-007-capu-sang-khi-escalated.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 13799,
+      "out": "PASS capu-escalated",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-008-dot-co-khi-doi-be-ngang.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 7096,
+      "out": "PASS rotate",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
