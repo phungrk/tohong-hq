@@ -23,7 +23,7 @@ Nếu Back đi đúng trang trước và có gợi ý cài thì người dùng �
 - **Bước lịch sử**: một mục trong lịch sử của tab trình duyệt. Đo bằng `history.length` tăng 1. Back = nút Back trình duyệt, vuốt back iOS/Android, phím Back hệ thống Android, `history.back()`; chúng không khác nhau.
 - **Tab**: bốn tab trên thanh dưới. Nút giữa "AI" (chỉ số 1) **không phải tab**, nó mở chat AI (là một lớp).
 - **Trang con**: màn đầy trang nằm trong một tab, có địa chỉ riêng. Hiện chỉ có **một**: *Danh mục ngân sách* (mở khi chạm một hạng mục ở tab Ngân sách, ví dụ "Ảnh").
-- **Lớp**: thứ phủ lên màn, đóng lại thì quay về màn bên dưới, **không có địa chỉ riêng**. Danh sách đóng: ngăn kéo; chat AI (gồm Paywall trong nó); màn Mời; sheet vendor ở Ngân sách; sheet Kết nối; sheet Timeline (thêm mốc, thêm việc); chỉnh sửa hồ sơ ở Trang chủ; VendorFlowSheet. **Không phải lớp**: Onboarding, hộp đăng nhập Clerk, `SaveBanner`, thông báo "Đã lưu vào Vendors", gợi ý cài app (mục 9). Sheet/modal mới thêm về sau là lớp, trừ khi spec khác nói ngược.
+- **Lớp**: thứ phủ lên màn, đóng lại thì quay về màn bên dưới, **không có địa chỉ riêng**. Danh sách đóng: ngăn kéo; chat AI (gồm Paywall trong nó); màn Mời; sheet vendor ở Ngân sách; sheet Kết nối; sheet Timeline ("Thêm mốc", "Thêm việc"); sửa ngày cưới ở Trang chủ (nút "Chỉnh sửa ngày cưới"). **Không phải lớp**: Onboarding, hộp đăng nhập Clerk, `SaveBanner`, thông báo "Đã lưu vào Vendors", gợi ý cài app (mục 9). Sheet/modal mới thêm về sau là lớp, trừ khi spec khác nói ngược. `VendorFlowSheet` chỉ được dùng trong `Vendors.jsx`, file không được import ở đâu (mã chết, người dùng không mở được) nên chưa thuộc danh sách; khi nó được gắn vào app thì nó là lớp và phải thêm bước mở vào eval.
 - **Gốc**: màn Trang chủ ở bước đầu tiên của tab trình duyệt, không có bước nào của app phía trước.
 
 ### 1. Địa chỉ (hash) của từng màn
@@ -56,7 +56,7 @@ Back về **đúng màn của bước trước**: tab trước, hoặc trang con
 - **Back khi có lớp mở**: chỉ đóng **lớp trên cùng**. Tab, trang con, địa chỉ không đổi. Back tiếp đóng lớp kế tiếp, hết lớp rồi mới đổi trang.
 - **Đóng lớp bằng giao diện** (nút đóng, "Thôi", chạm lớp tối, chạm ngoài khung theo INV-005/006, xác nhận xong tự đóng) tương đương một Back: bước của lớp ấy không còn là bước chết. Sau đó bấm Back đi tới **trang trước đó**, không phải một lần Back "không đổi gì". `history.length` không bắt buộc giảm.
 - **Chọn đích từ trong lớp** (chọn tab trong ngăn kéo; mở cuộc trò chuyện cũ từ ngăn kéo): lớp đóng và đích được ghi; so với lúc chưa mở lớp, tổng số bước mới là đúng **một** nếu đích có địa chỉ khác, **không** nếu đích cùng địa chỉ (chọn "Trang chủ" khi đang ở Trang chủ). Sau đó Back về trang đứng trước lúc mở lớp.
-- **Forward vào bước từng là lớp**: lớp **không** mở lại; người dùng ở lại trang liền trước bước đó. Không lỗi, không vòng lặp.
+- **Forward vào bước từng là lớp**: lớp **không** mở lại; người dùng ở lại trang liền trước bước đó (app tự lùi một bước, không thay bước đó bằng địa chỉ trang). Back kế tiếp đi tới **trang trước đó** của trang này (như khi Back từ bất kỳ trang nào), không phải một lần Back "không đổi gì". Không lỗi, không vòng lặp.
 - Đổi địa chỉ bằng tay (gõ vào thanh địa chỉ, sửa `location.hash`) đóng mọi lớp và đi tới màn đó như một bước bình thường.
 
 ### 5. Tải lại
@@ -108,7 +108,7 @@ Chạy với cwd là repo front (`tohong-front`), repo sổ cái ở `../tohong-
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
 | 1 | Chuyển tab/trang con ghi đúng một bước; Back/Forward đúng thứ tự nhiều bước; "Quay lại" của trang con khớp (mục 2, 3) | `node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 1` |
-| 2 | Có lớp mở thì Back đóng lớp trên cùng trước, không đổi trang; đóng bằng giao diện không để bước chết; chọn đích từ ngăn kéo tổng một bước; tải lại khi mở lớp (mục 4, 5) | `node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 2` |
+| 2 | Có lớp mở thì Back đóng lớp trên cùng trước, không đổi trang (8 lớp eval mở được, mỗi lớp qua cùng một bộ kiểm: mở thêm đúng một bước và địa chỉ giữ nguyên; Back chỉ đóng lớp đó; đóng bằng giao diện rồi Back về trang trước, không bước chết); đóng bằng giao diện không để bước chết; chọn đích từ ngăn kéo tổng một bước; tải lại khi mở lớp (mục 4, 5) | `node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 2` |
 | 3 | Gốc Tổng quan không bẫy: không bước giả, Back rời app, link sâu không chèn bước (mục 6, 7) | `node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 3` |
 | 4 | Hash đúng từng tab; tải lại giữ tab và trang con; link sâu; hash lạ và id không tồn tại; địa chỉ không chứa dữ liệu cá nhân (mục 1, 5, 7) | `node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 4` |
 | 5 | Manifest có PNG 192 và 512 (maskable và any, đúng cỡ, logo sinh từ favicon, `favicon.svg` không đổi), `apple-touch-icon` 180, Chrome báo đủ điều kiện cài (mục 8) | `node ../tohong-hq/eval/T-027/check_t027.cjs --repo . --only 5` |
@@ -119,7 +119,7 @@ Chạy với cwd là repo front (`tohong-front`), repo sổ cái ở `../tohong-
 
 Tiêu chí 7 có ba lệnh vì một lệnh kiểm thành phần/build/lint, một lệnh kiểm render trong trình duyệt, một lệnh chạy bất biến của bể; cả ba phải đạt.
 
-Màn eval tới được: Trang chủ, Ngân sách, danh mục Ảnh, sheet vendor, sheet Kết nối, chat AI, màn Mời, ngăn kéo, bốn tab, gợi ý cài. Không tới được (ở checklist): sheet Timeline, chỉnh sửa hồ sơ, VendorFlowSheet, Paywall, Onboarding đầy đủ, hộp đăng nhập Clerk. Luật mục 4 áp dụng cho chúng; eval chưa kiểm. Ai thêm lớp mới phải thêm bước mở nó vào `check_t027.cjs` (qua Chief of Staff).
+Lớp eval mở được bằng dữ liệu giả (8): ngăn kéo, chat AI, màn Mời, sheet vendor, sheet Kết nối, sheet Timeline "Thêm mốc", sheet Timeline "Thêm việc", sửa ngày cưới, Paywall (chat `POST /chat` trả 402; đóng bằng "Thử thêm 3 lượt"). Cũng đi qua: Onboarding (đi hết để kiểm gợi ý cài hiện sau đó), bốn tab, gợi ý cài. Chưa có eval: hộp đăng nhập Clerk (không dựng được, không phải lớp), `VendorFlowSheet` (mã chết). Ai thêm lớp mới phải thêm bước mở nó vào `check_t027.cjs` (qua Chief of Staff).
 
 ## Bất biến đề xuất (tầng 2)
 Vùng `front/navigation`. Spec critic rút vào `eval/invariants/front/navigation/` khi spec qua cổng. Viết được thành eval chạy được bằng đúng `check_t027.cjs` (cần trình bọc `.sh` đọc đường dẫn repo từ `TOHONG_FRONT_REPO`, như `front/layout`, và bản chụp cố định của script trong `lib/`):

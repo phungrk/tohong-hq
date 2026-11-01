@@ -74,7 +74,7 @@ const server = http.createServer((req, res) => {
 const summary = () => ({ profile: { wedding_date: '2027-03-14', city: 'Hà Nội', bride_name: 'A', groom_name: 'B' }, days_left: 135, total_days: 365, done_days: 230,
   budget: { total_tr: 300, spent_tr: 0, over: false }, timeline: { done: 0, total: 0 }, vendors: { confirmed: 0, shortlisted: 0, empty: 0 }, guests: { yes: 0, pending: 0, no: 0, total: 0, capacity: 200 } });
 const sse = (ev, data) => `event: ${ev}\ndata: ${JSON.stringify(data)}\n\n`;
-async function mockApi(route, log) {
+async function mockApi(route, log, flags = {}) {
   const req = route.request(); const u = new URL(req.url()); const p = u.pathname; const m = req.method();
   if (log) log.push({ url: req.url(), method: m, body: req.postData() || '' });
   const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' };
@@ -88,10 +88,15 @@ async function mockApi(route, log) {
   if (p === '/api/vendors/status') return json({ vendors: {} });
   if (p.startsWith('/api/vendors/')) return json({ vendor: {}, match: {} });
   if (p.endsWith('/members')) return json({ members: [], invites: [] });
+  if (p.endsWith('/chat') && m === 'POST' && flags.chat402) {
+    return route.fulfill({ status: 402, contentType: 'application/json', headers: cors, body: JSON.stringify({ error: 'trial_exhausted' }) });
+  }
   if (p.endsWith('/chat') && m === 'POST') {
     return route.fulfill({ status: 200, headers: { 'content-type': 'text/event-stream', ...cors },
       body: sse('conversation', { id: 'conv1' }) + sse('chunk', { text: 'Bảng ngân sách:\n\n| Hạng mục | Tiền |\n|---|---|\n| Tiệc | 150tr |\n' }) + sse('done', {}) });
   }
+  if (p.endsWith('/subscription/trial')) return json({});
+  if (p.endsWith('/subscription') && flags.chat402) return json({ subscription: { plan: null, status: 'trial', trial_messages_total: 6, trial_messages_used: 1, trial_extended: false } });
   if (p.endsWith('/subscription')) return json({ status: 'trial', trial: { total: 6, remaining: 6 } });
   if (p.endsWith('/connect-requests')) return json({ requests: [] });
   if (p.endsWith('/timeline') || p.endsWith('/guests')) return json({ phases: [], guests: [], summary: {} });
@@ -131,6 +136,10 @@ const SNAP = () => {
       invite: shown(label('Mời người ấy')),
       connect: shown(label('kết nối vendor')),
       vendor: q('[data-testid=connect-btn]').some(shown),
+      timeline: q('label').some((e) => e.textContent.trim() === 'Tên mốc' && shown(e)),
+      task: q('label').some((e) => e.textContent.trim() === 'Tên việc' && shown(e)),
+      edit: q('button').some((e) => e.textContent.trim() === 'Huỷ' && shown(e)),
+      paywall: q('div').some((e) => e.children.length > 0 === false && e.textContent.trim().startsWith('Thử thêm 3 lượt') && shown(e)),
     },
   };
 };
@@ -190,11 +199,11 @@ async function newCtx(browser, W, opts = {}) {
 }
 async function openPage(ctx, hash = '', opts = {}) {
   const page = await ctx.newPage(); page.setDefaultTimeout(5000);
-  const net = { posthog: [], api: [], errs: [] };
+  const net = { posthog: [], api: [], errs: [], flags: { chat402: !!opts.chat402 } };
   await page.route('**/*', (route) => {
     const u = route.request().url();
     if (u.startsWith(BASE_URL)) return route.continue();
-    if (u.startsWith('http://localhost:8787/')) return mockApi(route, net.api);
+    if (u.startsWith('http://localhost:8787/')) return mockApi(route, net.api, net.flags);
     if (u.startsWith('https://us.i.posthog.com/capture')) {
       try { net.posthog.push(JSON.parse(route.request().postData() || '{}')); } catch { /* bỏ qua */ }
       return route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":1}' });
@@ -226,7 +235,7 @@ async function clickShown(page, match) {
       return true;
     };
     const re = new RegExp(m);
-    const b = [...document.querySelectorAll('button')].filter((x) => re.test(x.getAttribute('aria-label') || x.textContent.trim())).filter(ok)[0];
+    const b = [...document.querySelectorAll('button')].filter((x) => re.test(x.getAttribute('aria-label') || x.title || x.textContent.trim())).filter(ok)[0];
     if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   }, match.source);
   if (!pt) throw new Error('không thấy nút đang hiện khớp ' + match);
@@ -284,6 +293,19 @@ async function scn(fn) {
       await expectState(page, 'Forward 2: lại trang con Ảnh', { hash: '#/ngan-sach/photography', sub: true });
       check('không lỗi trang khi đi qua các bước', page.__net.errs.length === 0, page.__net.errs.slice(0, 2).join(' | '));
       await ctx.close();
+    });
+
+    await scn(async () => {
+      const c3 = await newCtx(browser, W); const p3 = await openPage(c3);
+      await tabBtn(p3, 'Ngân sách').click(); await p3.waitForTimeout(300); await openSubPage(p3);
+      await expectState(p3, 'đang ở danh mục Ảnh', { hash: '#/ngan-sach/photography', sub: true });
+      const before = (await snap(p3)).len;
+      await tabBtn(p3, 'Ngân sách').click();
+      await expectState(p3, 'chạm tab Ngân sách khi đang ở trang con: sang #/ngan-sach, trang con đóng', { hash: '#/ngan-sach', tab: 'Ngân sách', sub: false, budget: true });
+      check('chạm tab Ngân sách ở trang con: thêm đúng một bước', (await snap(p3)).len === before + 1, `history.length ${(await snap(p3)).len}, mong ${before + 1}`);
+      await p3.goBack();
+      await expectState(p3, 'rồi Back: về lại danh mục Ảnh', { hash: '#/ngan-sach/photography', sub: true });
+      await c3.close();
     });
 
     // Nút "Quay lại" của trang con = Back; chọn tab từ ngăn kéo = thay lớp, tổng một bước.
@@ -395,6 +417,51 @@ async function scn(fn) {
       await ctx.close();
     });
 
+    // 2h. Bộ kiểm chung cho mọi lớp eval mở được (ngoài 5 lớp đã kiểm riêng ở trên):
+    //     mở thêm đúng 1 bước + địa chỉ giữ nguyên; Back chỉ đóng lớp đó; đóng bằng giao diện rồi Back về trang trước (không bước chết).
+    const baseOf = async (page, cfg) => { if (cfg.setup) await cfg.setup(page); await page.waitForTimeout(400); };
+    const LAYER_CFG = [
+      { key: 'timeline', name: 'sheet Timeline "Thêm mốc"', setup: async (pg) => { await tabBtn(pg, 'Kế hoạch').click(); await pg.waitForTimeout(400); await clickShown(pg, /^Ngày cưới/); await pg.waitForTimeout(300); },
+        open: (pg) => pg.getByRole('button', { name: 'Thêm mốc', exact: true }).click(), uiClose: async (pg) => { await pg.evaluate(() => { const t = [...document.querySelectorAll('div')].find((e) => e.children.length === 0 && e.textContent.trim() === 'Thêm mốc'); t.parentElement.querySelector('button').click(); }); }, base: '-', backHash: '#/trang-chu', tab: 'Kế hoạch', hash: '#/ke-hoach' },
+      { key: 'task', name: 'sheet Timeline "Thêm việc"', setup: async (pg) => { await tabBtn(pg, 'Kế hoạch').click(); await pg.waitForTimeout(400); },
+        open: (pg) => pg.getByRole('button', { name: 'Thêm việc', exact: true }).click(), uiClose: async (pg) => { await pg.evaluate(() => { const t = [...document.querySelectorAll('div')].find((e) => e.children.length === 0 && e.textContent.trim() === 'Thêm việc'); t.parentElement.querySelector('button').click(); }); }, base: '-', backHash: '#/trang-chu', tab: 'Kế hoạch', hash: '#/ke-hoach' },
+      { key: 'edit', name: 'sửa ngày cưới (Trang chủ)', setup: null,
+        open: (pg) => clickShown(pg, /^Chỉnh sửa ngày cưới$/), uiClose: (pg) => clickShown(pg, /^Huỷ$/), base: '-', backHash: null, tab: 'Trang chủ', hash: '#/trang-chu' },
+      { key: 'paywall', name: 'Paywall (chat trả 402)', setup: async (pg) => { await openChat(pg); await pg.waitForTimeout(600); },
+        open: async (pg) => { const i = pg.getByLabel('Nhắn cho Tơ Hồng'); await i.fill('Ngân sách thế nào'); await i.press('Enter'); },
+        uiClose: async (pg) => { await pg.getByText('Thử thêm 3 lượt', { exact: false }).first().click(); }, base: 'chat', backHash: null, tab: 'Trang chủ', hash: '#/trang-chu', chat402: true },
+    ];
+    for (const cfg of LAYER_CFG) {
+      const withBase = (k) => (cfg.base === '-' ? k : `${cfg.base}+${k}`);
+      // (i) mở -> +1 bước, địa chỉ giữ; Back đóng đúng lớp đó
+      await scn(async () => {
+        const ctx = await newCtx(browser, W); const page = await openPage(ctx, '', { chat402: cfg.chat402 });
+        await baseOf(page, cfg);
+        const pre = await snap(page);
+        await cfg.open(page);
+        await expectState(page, `${cfg.name}: mở ra, địa chỉ giữ ${cfg.hash}`, { layers: withBase(cfg.key), hash: cfg.hash, tab: cfg.tab });
+        const post = await snap(page);
+        check(`${cfg.name}: mở thêm đúng một bước`, post.len === pre.len + 1, `history.length ${post.len}, mong ${pre.len + 1}`);
+        await page.goBack();
+        await expectState(page, `${cfg.name}: Back chỉ đóng lớp này, tab và địa chỉ không đổi`, { layers: cfg.base, hash: cfg.hash, tab: cfg.tab });
+        await ctx.close();
+      });
+      // (ii) mở -> đóng bằng giao diện -> Back về trang trước, không bước chết
+      await scn(async () => {
+        const ctx = await newCtx(browser, W); const page = await openPage(ctx, '', { chat402: cfg.chat402 });
+        await baseOf(page, cfg);
+        await cfg.open(page);
+        await expectState(page, `${cfg.name}: mở lại (kịch bản đóng bằng giao diện)`, { layers: withBase(cfg.key) });
+        await cfg.uiClose(page);
+        await expectState(page, `${cfg.name}: đóng bằng giao diện`, { layers: cfg.base, hash: cfg.hash });
+        await page.goBack();
+        if (cfg.base !== '-') await expectState(page, `${cfg.name}: Back sau khi đóng: đóng lớp bên dưới (chat), không bước chết`, { layers: '-', hash: cfg.hash });
+        else if (cfg.backHash) await expectState(page, `${cfg.name}: Back sau khi đóng: về trang trước ${cfg.backHash}`, { hash: cfg.backHash, tab: 'Trang chủ', layers: '-' });
+        else check(`${cfg.name}: Back sau khi đóng: rời app (không bước chết)`, await left(page), `url ${page.url()}`);
+        await ctx.close();
+      });
+    }
+
     // 2g. Tải lại khi đang mở lớp
     await scn(async () => {
       let ctx, page;
@@ -450,7 +517,7 @@ async function scn(fn) {
       let ctx, page;
       ctx = await newCtx(browser, W); page = await openPage(ctx, '#/ngan-sach');
       await page.waitForTimeout(1200);
-      s = await snap(page);
+      const s = await snap(page);
       check('link sâu vào #/ngan-sach: không chèn bước Trang chủ phía trước', s.len === page.__h0, `history.length ${s.len}, lúc nạp ${page.__h0}`);
       await page.goBack();
       check('link sâu: Back rời app', await left(page), `url ${page.url()}`);
@@ -487,7 +554,7 @@ async function scn(fn) {
       await expectState(page, 'tải lại tại trang con: vẫn ở trang con Ảnh', { hash: '#/ngan-sach/photography', tab: 'Ngân sách', sub: true });
       await page.getByRole('button', { name: 'Quay lại' }).click();
       await expectState(page, 'link sâu rồi "Quay lại": sang #/ngan-sach', { hash: '#/ngan-sach', sub: false });
-      check('"Quay lại" sau link sâu không thêm bước và không rời app', (await snap(page)).len <= page.__h0 + 0 + (await page.evaluate(() => history.length)) && !(await left(page)));
+      check('"Quay lại" sau link sâu không thêm bước và không rời app', (await snap(page)).len === page.__h0 && !(await left(page)), `history.length ${(await snap(page)).len}, lúc nạp ${page.__h0}`);
       await ctx.close();
     });
 
@@ -712,6 +779,12 @@ async function scn(fn) {
       await page.waitForTimeout(1500);
       await page.evaluate(() => window.__fireInstall('accepted'));
       check('Onboarding đang mở (người mới): chưa hiện gợi ý', !(await bannerOn(page, 1500)));
+      // đi hết Onboarding: Bắt đầu -> điền tên -> Tiếp theo (tới khi hết) -> Bỏ qua
+      await page.getByRole('button', { name: /^Bắt đầu/ }).click(); await page.waitForTimeout(500);
+      for (const inp of await page.locator('input[type=text], input:not([type])').all()) { if (await inp.isVisible()) await inp.fill('An'); }
+      for (let i = 0; i < 4; i++) { const nx = page.getByRole('button', { name: /^Tiếp theo/ }); if (!(await nx.count())) break; await nx.first().click(); await page.waitForTimeout(500); }
+      await page.getByRole('button', { name: 'Bỏ qua' }).click(); await page.waitForTimeout(1200);
+      check('xong Onboarding: gợi ý (sự kiện đã đến từ trước) hiện ra', await bannerOn(page, 3000));
       await ctx.close();
     });
   }

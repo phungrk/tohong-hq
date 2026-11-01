@@ -1,6 +1,6 @@
 # T-027 checklist máy thật (Back và cài app)
 
-Lý do dùng checklist: trình giả lập (Playwright/Chromium) không có vuốt back của iOS, hộp thoại cài thật của Android, "Thêm vào MH chính" của Safari, và không dựng được vài lớp (sheet Timeline, chỉnh sửa hồ sơ, VendorFlowSheet, Paywall). Mọi tiêu chí đã có eval tự động ở `check_t027.cjs`; đây là phần bổ sung, không thay.
+Lý do dùng checklist: trình giả lập (Playwright/Chromium) không có vuốt back của iOS, hộp thoại cài thật của Android, "Thêm vào MH chính" của Safari, và các điều kiện thật (hết lượt dùng thử thật, mạng chậm). Mọi tiêu chí đã có eval tự động ở `check_t027.cjs`; đây là phần bổ sung, không thay.
 
 Cách kiểm chung: dùng bản đã deploy hoặc `npm run build && npm run preview -- --host` rồi mở bằng điện thoại trên cùng mạng (cài app cần HTTPS: dùng bản deploy hoặc đường hầm HTTPS). Mỗi dòng trả lời có/không; một "không" thì ghi dòng đó vào defect.
 
@@ -11,7 +11,7 @@ Cách kiểm chung: dùng bản đã deploy hoặc `npm run build && npm run pre
 3. iPhone, Safari: mở chat AI, vuốt back: chat đóng, không rời app? ("có" là đạt)
 4. Android, Chrome: lặp lại 1-3 bằng phím/cử chỉ Back hệ thống. ("có" cho cả ba là đạt)
 5. Android, Chrome: đóng ngăn kéo bằng nút "Đóng menu" rồi bấm Back: về trang trước ngay, không phải bấm hai lần? ("có" là đạt)
-6. Mở sheet Timeline (Kế hoạch → Thêm việc), chỉnh sửa hồ sơ ở Trang chủ (chạm tên/ngày cưới), VendorFlowSheet, Paywall (dữ liệu thử `trial.remaining = 0`): với mỗi lớp, Back đóng lớp trước, không đổi tab? ("có" cho cả bốn là đạt; eval tự động chưa mở được các lớp này)
+6. Paywall bản thật (hết lượt dùng thử thật, không phải 402 giả): Back đóng Paywall, chat còn mở? Chỉ cần kiểm nếu hành vi khác eval. (Sheet Timeline, sửa ngày cưới, Paywall đã có eval tự động; `VendorFlowSheet` là mã chết, bỏ qua.)
 7. Mở lớp (vd ngăn kéo) rồi bấm Back rồi Forward trên trình duyệt: lớp không tự mở lại, không lỗi? ("có" là đạt)
 8. Tải lại trang khi đang ở `#/ngan-sach/<id>` với ngăn kéo mở: ngăn kéo đóng, vẫn ở danh mục; Back một lần về danh sách (không phải bấm hai lần)? ("có" là đạt)
 9. Gõ tay `/#/khach-moi` vào thanh địa chỉ (hoặc dán link): vào thẳng Khách mời; Back rời app? ("có" là đạt)
