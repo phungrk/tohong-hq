@@ -41,7 +41,7 @@ Tối đa một trang. Capu đọc báo cáo này rồi viết ý định cho tu
 
 Quét sự cố, lỗi, eval đỏ sau khi merge, và kết quả 0 trong 7 ngày. Với mỗi thứ lặp lại hoặc nghiêm trọng:
 
-- Nếu là lỗi hành vi đã có spec: viết **eval mới** vào `eval/regression/<tên>.md` (hoặc script) để lưới bắt được lần sau, và đề xuất Chief of Staff thêm vào eval của việc liên quan.
+- Nếu là lỗi hành vi đã có spec: viết **eval hồi quy** chạy được vào `eval/invariants/<area>/inv-<nnn>-<tên>.py|.sh` (ghi nguồn: sự cố ngày nào). Từ đó mọi việc chạm vùng ấy tự động chạy nó ở Code Gate tầng 2. Không biết vùng thì để ở `eval/regression/` và báo Chief of Staff xếp vùng.
 - Nếu là pain chưa có spec: ghi thành **ý định đề xuất** trong báo cáo insight, không tự tạo việc.
 
 Ghi kết quả vào `insights/<YYYY-MM-DD>-feedback.md`: đã thêm eval nào, đề xuất ý định nào.

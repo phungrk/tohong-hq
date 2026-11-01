@@ -15,11 +15,11 @@ tasks: []
 3. Chưa có nguồn insight nào ngoài trực giác của Capu; chưa phỏng vấn user, chưa đọc dữ liệu sản phẩm.
 
 **Thay đổi:**
-- `scripts/task.py`: trường `eval`, `tier`, `spec_returns`; trạng thái `spec`; lệnh `respec`. Việc giao `engineering` bắt buộc có eval. Trả về vòng 2 đưa việc về `spec` (Spec Writer sửa), về spec lần hai mà vẫn trả về thì leo thang.
+- `scripts/task.py`: trường `eval`, `tier`, `spec_returns`; trạng thái `spec`; lệnh `respec`. Việc giao `engineering` bắt buộc có eval. Trả về vòng 1 là code rework; vòng 2 đưa việc vào `spec` — spec rework (Spec Writer sửa); spec rework lần hai mà vẫn trả về thì leo thang.
 - `CLAUDE.md`: mô hình đài phun nước; lưới lọc ba bậc A/B/C thay cho "merge là Hỏi trước"; luật rework mới; thay thế ADR-001/004/008 bằng luật chung.
 - Charter: `product` → Spec Writer (spec + eval, không PRD); `reviewer` → Eval Engineer (hai tầng: eval tự động, review ý định); `engineering` chỉ nhận việc có eval, được chạy nhiều nhánh song song, không merge.
 - Tuyển `insight`: báo cáo insight tuần từ dữ liệu sản phẩm, ống hồi (sự cố → eval hồi quy).
-- Nhịp: bỏ standup sáng và wrap-up chiều; thêm Insight tuần (thứ Bảy 9:00) và phiên spec thứ Bảy. Chỉ số thay velocity: spec acceptance rate, số lần về spec, eval pass rate, giờ giao→chấp nhận, số quyết định của Capu, chi phí mỗi việc.
+- Nhịp: bỏ standup sáng và wrap-up chiều; thêm Insight tuần (thứ Bảy 9:00) và phiên spec thứ Bảy. Chỉ số thay velocity: spec acceptance rate, số lần spec rework, eval pass rate, giờ giao→chấp nhận, số quyết định của Capu, chi phí mỗi việc.
 - Mẫu mới `templates/spec.md`; thư mục `eval/`, `insights/`.
 
 **Việc Capu cần làm sau khi merge:**
@@ -29,4 +29,4 @@ tasks: []
 
 **Giữ nguyên:** ranh giới cứng của `CLAUDE.md`; không đặt secret thay Capu; không migration trên dữ liệu thật; người làm không tự chấm điểm.
 
-**Theo dõi:** sau 4 tuần, báo cáo chất lượng so sánh first-pass yield và số quyết định của Capu trước/sau. Nếu số lần về spec không giảm sau 8 tuần thì vấn đề ở khuôn spec, sửa `templates/spec.md` trước khi sửa charter.
+**Theo dõi:** sau 4 tuần, báo cáo chất lượng so sánh first-pass yield và số quyết định của Capu trước/sau. Nếu số lần spec rework không giảm sau 8 tuần thì vấn đề ở khuôn spec, sửa `templates/spec.md` trước khi sửa charter.

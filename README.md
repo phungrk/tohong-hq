@@ -3,13 +3,13 @@
 Trụ sở của công ty Tơ Hồng AI: một người (Capu, CEO) và các agent AI, vận hành trên Claude Code in the cloud.
 
 - `CLAUDE.md` — hiến pháp công ty. Phiên chính đóng vai Chief of Staff.
-- `.claude/agents/` — các bộ phận: `insight`, `product` (Spec Writer), `engineering`, `reviewer` (Eval Engineer).
+- `.claude/agents/` — các bộ phận: `insight`, `product` (Spec Writer), `spec-critic` (Spec Gate), `engineering`, `adversary` (Code Gate).
 - `board/` — mỗi việc một file. Trạng thái chỉ đổi bằng `scripts/task.py`.
 - `ledger/events.jsonl` — nhật ký sự kiện, nguồn dữ liệu cho dashboard.
 - `handbook/van-hanh.md` — máy trạng thái, bảng lệnh, nhịp vận hành.
 - `templates/` — 5 mẫu thông điệp.
 - `routines/` — prompt cho các Routine chạy theo lịch (báo cáo chất lượng thứ Sáu, insight tuần thứ Bảy).
-- `products/`, `eval/`, `insights/` — spec, eval chạy được, và báo cáo insight: thân cột, lưới lọc và máy bơm của mô hình đài phun nước (xem `CLAUDE.md`).
+- `products/`, `eval/`, `eval/invariants/`, `insights/` — spec, eval ba tầng, bất biến theo vùng, báo cáo insight (mô hình Eval-Gated, xem `CLAUDE.md`). `scripts/gate.py` là Code Gate bằng máy.
 
 ## Bắt đầu
 
