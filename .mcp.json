@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "PostHog": {
+      "type": "http",
+      "url": "https://mcp.posthog.com/mcp?readonly=true",
+      "headers": {
+        "x-posthog-read-only": "true",
+        "x-posthog-project-id": "469478"
+      }
+    }
+  }
+}
