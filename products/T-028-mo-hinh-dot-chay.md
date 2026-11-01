@@ -37,8 +37,8 @@ Nếu mỗi sự kiện sổ cái thật chạy đúng một dot trên đúng đ
 | M6 | `handoff`, `from=engineering` | `p_exec_gate` | code | `gt_code` (giữ) |
 | M7 | `handoff`, `from=insight` | `p_insight_intent` | ins | `nd_intents` (nháy) |
 | M8 | `accepted`, chủ việc `product` (Spec Gate qua) | `p_gate_kr` | spec | `nd_kr` (nháy) |
-| M9 | `accepted`, chủ việc `engineering`, `tier=A` hoặc `tier` rỗng (Code Gate xanh, merge) | `p_gate_rel` rồi `p_rel_res` | code | `nd_rel` (giữ ở giữa), `nd_prod` (nháy) |
-| M10 | `accepted`, chủ việc `engineering`, `tier=B` hoặc `C` (chờ Capu đọc diff) | `p_gate_capu` | code | `nd_capu` (giữ) |
+| M9 | `accepted`, chủ việc `engineering`, `tier=A` (Code Gate xanh, merge) | `p_gate_rel` rồi `p_rel_res` | code | `nd_rel` (giữ ở giữa), `nd_prod` (nháy) |
+| M10 | `accepted`, chủ việc `engineering`, `tier=B`, `C` hoặc rỗng (rỗng coi là C, như `task.py`; chờ Capu đọc diff) | `p_gate_capu` | code | `nd_capu` (giữ) |
 | M11 | `accepted`, chủ việc `insight` | `p_insight_kr` | ins | `nd_kr` (nháy) |
 | M12 | `rejected`, `state=spec`, chủ việc `product` (Spec Gate chặn) | `p_gate_respec` | back | `nd_respec` (giữ) |
 | M13 | `rejected`, `state=spec`, chủ việc `engineering` (Code Gate báo spec lệch) | `p_gate_respec2` | back | `nd_respec` (giữ) |
@@ -49,13 +49,13 @@ Nếu mỗi sự kiện sổ cái thật chạy đúng một dot trên đúng đ
 | M18 | `decided`, `state` sau sự kiện khác `done` (Capu quyết, việc làm tiếp) | `p_capu_exec` | back | `nd_exec` (giữ) |
 | M19 | (không phải dòng sổ cái) `model.insight_reports` trong `dashboard.json` tăng so với lần tải trước | `p_src1` rồi `p_insight_intent` | ins | `nd_insight` (giữ ở giữa), `nd_intents` (nháy) |
 
-**Bỏ qua (không dot, không lỗi console):** mọi dòng không khớp bảng trên. Gồm rõ ràng: `rejected` mà `state` sau sự kiện không phải `spec`/`rework` (lỗi `minor` có `state=review`; `state=escalated` vì dòng `escalated` đi liền sau đã vẽ; `state=rework` của việc product); `blocked`, `unblocked`, `cost`, `requested`, `file_written`, `board_edited_directly`; `decided` có `state=done`; `assigned` tới `chief-of-staff` hay bộ phận khác ngoài product/engineering/insight; `started` không phải của engineering hoặc `round=0`; `handoff` từ `chief-of-staff` hay bộ phận khác; `accepted` của việc `chief-of-staff` hoặc không biết chủ việc; `escalated` mà `to` khác `capu`. Các đường `p_kr_spec`, `p_kr_gate`, `p_res_insight`, `p_capu_res`, `p_src2`, `p_src3` không có sự kiện sổ cái tương ứng nên không bao giờ có dot (vẫn vẽ như hiện có).
+**Bỏ qua (không dot, không lỗi console):** mọi dòng không khớp bảng trên. Gồm rõ ràng: `rejected` mà `state` sau sự kiện không phải `spec`/`rework` (lỗi `minor` có `state=review`; `state=escalated` vì ở lần spec lệch thứ ba `task.py` ghi `rejected` rồi `escalated` với `to=chief-of-staff`, nên M17 không khớp và sự kiện này không có dot; khối Capu vẫn sáng đỏ nhờ quy tắc A; `state=rework` của việc product); `blocked`, `unblocked`, `cost`, `requested`, `file_written`, `board_edited_directly`; `decided` có `state=done`; `assigned` tới `chief-of-staff` hay bộ phận khác ngoài product/engineering/insight; `started` không phải của engineering hoặc `round=0`; `handoff` từ `chief-of-staff` hay bộ phận khác; `accepted` của việc `chief-of-staff` hoặc không biết chủ việc; `escalated` mà `to` khác `capu`. Các đường `p_kr_spec`, `p_kr_gate`, `p_res_insight`, `p_capu_res`, `p_src2`, `p_src3` không có sự kiện sổ cái tương ứng nên không bao giờ có dot (vẫn vẽ như hiện có).
 
 ### 3. Dot chạy thế nào
 - Mỗi chặng (một đường) dot chạy từ đầu đường tới cuối đường trong 0,7 đến 2,8 giây (khuyến nghị 1,4). Khi khối nguồn không đang chờ dot khác, dot xuất hiện trong vòng 1,5 giây sau khi trang nhận sự kiện.
 - Dot không rời một khối **giữ** sớm hơn 1,0 giây sau khi dot trước đó tới khối ấy; nếu chưa đủ thì dot chờ (đã hiện nhưng đứng ở đầu đường, hoặc chưa hiện).
 - Kích thước hiển thị: đường kính 7 đến 16 px ở mọi bề ngang từ 320 đến 1920 px (nên bán kính trong hệ toạ độ SVG phải bù theo độ co của svg).
-- Giới hạn: tại mọi thời điểm số `circle` trong `#fx_f` (kể cả dot đang chờ) không quá **12**. Sự kiện đến khi đã đủ 12 thì dot của nó bị bỏ, không xếp hàng. Dot xong thì phần tử bị gỡ; không có dot treo.
+- Giới hạn: tại mọi thời điểm số `circle` trong `#fx_f` (kể cả dot đang chờ) không quá **12**. Sự kiện đến khi đã đủ 12 thì dot của nó bị bỏ, không xếp hàng, và khối đích của nó KHÔNG sáng theo B (chỉ còn quy tắc A áp dụng). Dot xong thì phần tử bị gỡ; không có dot treo.
 - Khung hình không bị giật: không có khoảng cách giữa hai khung hình liên tiếp quá 300 ms khi dồn 40 sự kiện cùng lúc.
 
 ### 4. Khối "đang xử lý" (khối sáng)
@@ -71,11 +71,11 @@ Khối **sáng** nghĩa là: đường viền 3px màu M và nền `color-mix(in
   | `nd_exec` | chủ việc `engineering`, `state=doing` | code |
   | `nd_rework` | chủ việc `engineering`, `state=rework` | back |
   | `gt_code` | chủ việc `engineering`, `state=review` | code |
-  | `nd_capu` | `state=escalated` (mọi chủ việc), hoặc `state=done` với `tier` ∈ {B, C} và `hours_since_update < 48` | bad nếu có việc `escalated`, ngược lại code |
+  | `nd_capu` | (i) `state=escalated`, **mọi chủ việc kể cả `chief-of-staff`**, sáng đỏ suốt thời gian chờ Capu quyết, hoặc (ii) chủ việc `engineering`, `state=done`, `tier` ∈ {B, C} hoặc rỗng, `hours_since_update < 48` (diff hành vi chờ đọc); việc `done` của `product` hay `insight` không làm Capu sáng | bad nếu có việc (i), ngược lại code nếu có việc (ii) |
   | `nd_insight` | chủ việc `insight`, `state` ∈ {`doing`, `rework`} | ins |
 
-  `hours_since_update` lấy từ `dashboard.json`; việc vừa đổi trạng thái qua live tính là 0. Việc `new`, `blocked`, việc của `chief-of-staff`, việc `done` bậc A hoặc quá 48 giờ không làm khối nào sáng. Các khối còn lại (`nd_intents`, `nd_kr`, `nd_rel`, `nd_prod`, `src_*`) không có quy tắc A.
-- **B. Khối đang giữ dot.** Khối loại **giữ** (`nd_spec`, `gt_spec`, `nd_respec`, `nd_exec`, `nd_rework`, `gt_code`, `nd_capu`, `nd_rel`, `nd_insight`) sáng từ lúc dot **chạm** tới (cuối đường) cho tới lúc dot khác **rời** khỏi nó (đầu đường có khối đó làm khối nguồn) hoặc quá **10 giây** kể từ lúc dot chạm tới, cái nào đến trước. Khối loại **nháy** (`nd_intents`, `nd_kr`, `nd_prod`, `src_*`) sáng **0,6 giây** từ lúc dot chạm tới rồi tắt. Màu khi B là màu của dot vừa chạm tới.
+  `hours_since_update` lấy từ `dashboard.json`; việc vừa đổi trạng thái qua live tính là 0. Việc `new`, `blocked`, việc `done` bậc A hoặc quá 48 giờ không làm khối nào sáng; việc của `chief-of-staff` không làm khối nào sáng ngoại trừ việc `escalated` ở khối Capu (i) nói trên. Các khối còn lại (`nd_intents`, `nd_kr`, `nd_rel`, `nd_prod`, `src_*`) không có quy tắc A.
+- **B. Khối đang giữ dot.** Khối loại **giữ** (`nd_spec`, `gt_spec`, `nd_respec`, `nd_exec`, `nd_rework`, `gt_code`, `nd_capu`, `nd_rel`, `nd_insight`) sáng từ lúc dot **chạm** tới (cuối đường) cho tới lúc có một dot **rời** khỏi nó (đầu đường có khối đó làm khối nguồn; **kể cả chính dot đang chạy chuỗi** đi tiếp) hoặc quá **10 giây** kể từ lúc dot chạm tới, cái nào đến trước. Trong chuỗi (M9 `nd_rel`, M19 `nd_insight`) dot **dừng** ở khối giữa từ 1,0 đến 1,7 giây rồi mới chạy chặng sau: khối giữa sáng đúng khoảng đó, và tắt trong vòng 0,5 giây sau khi chặng sau bắt đầu (nếu sổ cái không còn việc ở đó). Khối loại **nháy** (`nd_intents`, `nd_kr`, `nd_prod`, `src_*`) sáng **0,6 giây** từ lúc dot chạm tới rồi tắt. Màu khi B là màu của dot vừa chạm tới.
 
 Hệ quả (đều phải đúng): khi dot rời mà sổ cái không còn việc ở khối nguồn thì khối nguồn tắt ngay lúc dot rời; hai việc cùng trong một cổng, một việc đi ra thì cổng vẫn sáng (vì A); khối rảnh không tô; mở trang giữa lúc có việc đang chạy thì các khối có việc sáng ngay, không có dot nào. Khi vừa A vừa B thì lấy màu B cho tới khi B hết, sau đó về màu A.
 
@@ -86,7 +86,7 @@ Dưới bảng có chú giải (`#model .mlegend`) gồm 5 chấm màu, mỗi ch
 - **Không có sự kiện:** không `circle` nào được tạo trong `#fx_f` (kể cả sau 7 giây); khối sáng/tắt chỉ theo A.
 - **Tải lại trang (hoặc kênh live nối lại và gửi `snapshot`):** sự kiện cũ không phát lại thành dot. Khối có việc sáng ngay theo A.
 - **Kênh live tắt hoặc mất:** vẫn đúng mọi thứ trên; dot chỉ đến từ sự kiện mới xuất hiện giữa hai lần tải `dashboard.json` (mỗi 60 giây); `#model-live` nói "sau mỗi lần tải".
-- **`prefers-reduced-motion: reduce`:** không tạo `circle` nào. Mỗi sự kiện có ánh xạ coi như dot tới ngay: khối nguồn được nhả ngay, khối đích sáng ngay theo B (cùng thời lượng nháy 0,6 giây và giữ tối đa 10 giây; chuỗi M9/M19 thì khối giữa nháy 0,6 giây rồi khối cuối nháy 0,6 giây). Không có chuyển động nào khác thêm vào.
+- **`prefers-reduced-motion: reduce`:** không tạo `circle` nào. Mỗi sự kiện có ánh xạ coi như dot tới ngay: khối nguồn được nhả ngay, khối đích sáng ngay theo B (cùng thời lượng nháy 0,6 giây và giữ tối đa 10 giây; chuỗi M9/M19 thì khối giữa nháy 0,6 giây rồi khối cuối nháy 0,6 giây; riêng reduced-motion không áp dụng dừng 1,0–1,7 giây). Không có chuyển động nào khác thêm vào.
 - **Màn hình 390px:** trang không cuộn ngang; svg rộng từ 300 đến 390px nằm trong khung nhìn; số đếm trên khối (`.n` của `nd_*`) hiển thị ≥ 9px; chú giải nằm trọn trong màn hình, chữ ≥ 11px; dot vẫn chạy đúng đường và đường kính 7–16px; khối sáng đúng như ở desktop.
 - **Dữ liệu thiếu (không có `state`, không rõ chủ việc, việc không có trong `dashboard.json`, thiếu `model`):** không ném lỗi, bảng vẫn vẽ, sự kiện không đủ thông tin thì bỏ qua.
 
@@ -116,7 +116,7 @@ Lệnh chung (cwd `/home/user/tohong-hq`): `bash eval/T-028/run.sh <thư-mục-r
 | --- | --- | --- |
 | 1 | Với từng dòng M1–M18, một sự kiện live tương ứng sinh đúng một dot, đi từ đầu tới cuối đúng đường (hoặc chuỗi đường) ghi trong bảng, mỗi chặng 0,7–2,8 giây, dot hiện trong 1,5 giây; M19 và sự kiện mới giữa hai lần tải (kênh live tắt) cũng có dot; 18 loại sự kiện "bỏ qua" không sinh dot nào | `bash eval/T-028/run.sh <repo> --criterion 1` |
 | 2 | Màu của mọi dot đúng cột "Màu dot" (đo `fill` tính ra) | `… --criterion 2` |
-| 3 | Khối sáng đúng quy tắc mục 4: khối đích sáng đúng màu, viền 3px, nền 18% (22% với `nd_kr`/`nd_prod`) lúc dot chạm; nháy thì tắt sau 0,6 giây; giữ thì còn sáng, tắt tối đa 10 giây (M3); khối nguồn tắt khi dot rời và sổ cái hết việc; hai việc trong cổng; khối có việc sáng không cần dot; khối rảnh không tô; dot rời không sớm hơn 1,0 giây sau lúc dot trước tới | `… --criterion 3` |
+| 3 | Khối sáng đúng quy tắc mục 4: khối đích sáng đúng màu, viền 3px, nền 18% (22% với `nd_kr`/`nd_prod`) lúc dot chạm; nháy thì tắt sau 0,6 giây; giữ thì còn sáng, tắt tối đa 10 giây (M3); khối giữa chuỗi (`nd_rel` ở M9, `nd_insight` ở M19) sáng từ lúc dot tới đến lúc dot rời, 1,0–1,7 giây, và tắt trong 0,5 giây sau đó; Capu sáng đỏ với việc `escalated` của mọi chủ việc (kể cả chief-of-staff) và không sáng với việc `done` bậc B của product; khối nguồn tắt khi dot rời và sổ cái hết việc; hai việc trong cổng; khối có việc sáng không cần dot; khối rảnh không tô; dot rời không sớm hơn 1,0 giây sau lúc dot trước tới | `… --criterion 3` |
 | 4 | Có chú giải đủ 5 chấm màu có chữ và câu có "khối sáng" và "đang xử lý" | `… --criterion 4` |
 | 5 | Không dot khi không có sự kiện (7 giây, kể cả có sự kiện cũ trong `dashboard.json` và `snapshot`); không phát lại sự kiện cũ; sự kiện đã qua live không chạy lần hai khi vào `dashboard.json`; dồn 40 sự kiện thì ≤ 12 `circle`, vẫn có dot, không giật, sạch sau khi xong; `#model-live` đúng với kênh bật/tắt | `… --criterion 5` |
 | 6 | `prefers-reduced-motion: reduce`: không `circle` nào; khối vẫn sáng theo A và theo B (đích sáng, nguồn nhả, nháy rồi tắt) | `… --criterion 6` |
