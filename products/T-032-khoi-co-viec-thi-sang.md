@@ -24,7 +24,7 @@ Nếu mọi khối có số đếm việc đều sáng khi số > 0 thì Capu nh
 ## Hành vi (người dùng thấy gì)
 
 ### Quy tắc chung (thay cho "chỉ vài khối có quy tắc A")
-**Số đếm hiển thị của một khối** là: (a) chữ số lớn `.n` trong khối `nd_*` kiểu việc (`nd_intents`, `nd_spec`, `nd_respec`, `nd_exec`, `nd_rework`, `nd_capu`); (b) số "N chờ" trong cổng (`gt_spec` ở `#sgateQ`, `gt_code` ở `#gateQ`). Khối có số đếm hiển thị mà là **số việc đang ở khối đó** thì: **số > 0 -> sáng (quy tắc A) màu theo loại; số về 0 -> tắt**, ngay khi trang vẽ lại (qua live hay tải lại), không chờ gì thêm. Các số khác trong chú thích (vd "1 chờ" cạnh "0 đang code") là thông tin phụ, không làm khối sáng (E1).
+**Số đếm hiển thị của một khối** là: (a) chữ số lớn `.n` (riêng `nd_exec`: cả số "N chờ" trong chú thích) trong khối `nd_*` kiểu việc (`nd_intents`, `nd_spec`, `nd_respec`, `nd_exec`, `nd_rework`, `nd_capu`); (b) số "N chờ" trong cổng (`gt_spec` ở `#sgateQ`, `gt_code` ở `#gateQ`). Khối có số đếm hiển thị mà là **số việc đang ở khối đó** thì: **số > 0 -> sáng (quy tắc A) màu theo loại; số về 0 -> tắt**, ngay khi trang vẽ lại (qua live hay tải lại), không chờ gì thêm. Số "N chờ" ở chú thích của `nd_exec` cũng là số đếm việc đang ở khối (việc `engineering` `new`) và làm khối sáng (ADR-013); các số tích luỹ trong chú thích thì không (E2-E6).
 
 ### Quyết định từng khối
 
@@ -34,7 +34,7 @@ Nếu mọi khối có số đếm việc đều sáng khi số > 0 thì Capu nh
 | `nd_spec` | `.n` = chủ `product`, `doing`/`rework` | Giữ như T-028 | spec | Không đổi |
 | `gt_spec` | `#sgateQ` = chủ `product`, `review` | Giữ | spec | Không đổi |
 | `nd_respec` | `.n` = `state=spec` | Giữ | back | Không đổi |
-| `nd_exec` | `.n` = chủ `engineering`, `doing` | Giữ | code | **E1**: chú thích "N chờ" là việc `engineering` `new`; không làm sáng. Lý do: số lớn là 0 nên sáng sẽ mâu thuẫn với chính con số trên khối; việc `new` chưa ai nhận làm thì chưa "đang xử lý". Ý định khác (hàng đợi) vì số lớn của nó chính là hàng đợi. |
+| `nd_exec` | `.n` = chủ `engineering`, `doing`; chú thích "N chờ" = chủ `engineering`, `new` | **Sáng khi `.n` > 0 hoặc "N chờ" > 0** (ADR-013 bỏ E1); tắt khi cả hai bằng 0. Con số hiển thị giữ nguyên, không gộp | code | Việc `engineering` `rework` thuộc `nd_rework`, không làm `nd_exec` sáng. Việc `engineering` `new` cũng là việc chưa ai nhận như việc `product` `new`, nên cùng quy tắc. |
 | `nd_rework` | `.n` = chủ `engineering`, `rework` | Giữ | back | Không đổi |
 | `gt_code` | `#gateQ` = chủ `engineering`, `review` | Giữ | code | Không đổi |
 | `nd_capu` | `.n` = leo thang + diff chờ đọc | Giữ | bad nếu có leo thang, ngược lại code | Không đổi |
@@ -51,7 +51,7 @@ Quy ước cho ngoại lệ: khối có số đếm **tích luỹ hoặc theo c�
 - **Về 0:** việc đó chuyển `doing` (qua live hoặc tải lại): Ý định ghi "0" và tắt; Spec Writer sáng spec.
 - **Giao việc mới qua live:** `assigned` tới `product`: Ý định nháy rồi **ở lại sáng spec** (số đếm 1), không tắt sau 0,6 giây; hai việc `new` thì ghi "2" và vẫn sáng.
 - **Dot insight tới Ý định khi số > 0:** màu B (ins) trong 0,6 giây rồi về spec. Khi số = 0: nháy rồi tắt.
-- **Việc `new` của `engineering`/`insight`/`chief-of-staff`:** Ý định ghi "0", tắt.
+- **Việc `new` của `engineering`/`insight`/`chief-of-staff`:** Ý định ghi "0", tắt. Riêng `engineering` `new`: Thực thi ghi "0 đang code · 1 chờ" và sáng màu code; về 0 cả hai thì tắt.
 - **`prefers-reduced-motion: reduce`:** Ý định vẫn sáng/tắt theo số đếm như trên; vẫn không `circle` nào.
 - **390px:** như T-028: không cuộn ngang, `.n` hiển thị >= 9px; Ý định sáng/tắt giống desktop.
 - **Dữ liệu thiếu:** như T-028, không ném lỗi.
@@ -59,7 +59,7 @@ Quy ước cho ngoại lệ: khối có số đếm **tích luỹ hoặc theo c�
 ## Ràng buộc (vòi)
 - Repo: `phungrk/tohong-hq-dashboard` · Nhánh: `t-032-…` (Engineering điền) · Vùng (`area`): `dashboard/model`.
 - Bất biến của vùng đã đọc: `eval/invariants/dashboard/model/` inv-001..008. Spec này không vi phạm inv-001, 002, 003, 005, 006, 007, 008. **`inv-004` (không kẹt sáng) cần cập nhật**: dữ liệu "rảnh" của nó chứa `T('T-3','new','product')` và kỳ vọng không khối nào sáng; theo spec này khối Ý định phải sáng với dữ liệu đó, nên sau T-032 inv-004 sẽ đỏ oan. Đề xuất cụ thể ở "Bất biến đề xuất". Chief of Staff phân xử, ghi `decisions/`.
-- Eval cũ sẽ đỏ sau khi T-032 merge (mô tả hành vi bị thay, không phải lỗi code): `eval/T-028/model-dots.cjs` kịch bản S1 (khối `nd_intents` "rảnh không tô" với `T-9` là `new` của product, dòng ~313, 320) và S4 (`T-5` `new` của product, dòng ~336). Chief of Staff phân xử như ADR-010, không sửa test cho khớp code.
+- Eval cũ sẽ đỏ sau khi T-032 merge (mô tả hành vi bị thay, không phải lỗi code): `eval/T-028/model-dots.cjs` kịch bản S1 (khối `nd_intents` "rảnh không tô" với `T-9` là `new` của product, dòng ~313, 320) và S4 (`T-5` `new` của product và `T-3` `new` của engineering, dòng ~336: sau ADR-013 Thực thi cũng sáng). Chief of Staff phân xử như ADR-010, không sửa test cho khớp code.
 - Kiến trúc: một file `index.html`, không thêm thư viện, không đổi schema `dashboard.json`, không đổi bảng ánh xạ dot, không đổi màu. (Gợi ý, không ép: thêm một khoá vào bảng màu theo sổ cái là đủ cho Ý định.)
 - Không chạm payment, auth, DB, dữ liệu người dùng. Không gửi gì ra ngoài.
 - Bậc lưới lọc: **A** (đúng bậc Capu đặt): UI tĩnh, eval tự động phủ cả 6 tiêu chí.
@@ -83,7 +83,7 @@ Cả sáu tiêu chí 1-6 chạy một lệnh `bash eval/T-032/run.sh <repo>` (in
 
 ## Bất biến đề xuất (tầng 2)
 1. **Sửa inv-004** (`eval/invariants/dashboard/model/lib/model_inv.cjs`, check `no-stuck-lit`; và dòng mô tả ở đầu `inv-004-khong-ket-sang.sh`). Lý do: dữ liệu "rảnh" hiện chứa việc `new` của `product`, sau T-032 Ý định phải sáng với dữ liệu đó. Đề xuất cụ thể:
-   - Trong dữ liệu rảnh, đổi `T('T-3','new','product')` thành `T('T-3','new','engineering')` (việc `new` của chủ không đếm vào khối nào sáng) và thêm `T('T-5','new','insight')`. Mọi phần còn lại của check giữ nguyên (không khối nào sáng lúc mở; sau dot `assigned -> insight` 14,5 giây vẫn không khối nào sáng).
+   - Trong dữ liệu rảnh, đổi `T('T-3','new','product')` thành `T('T-3','new','insight')` (việc `new` của insight không đếm vào khối nào; KHÔNG dùng `engineering`, vì sau ADR-013 việc đó làm Thực thi sáng) và thêm `T('T-5','new','chief-of-staff')`. Mọi phần còn lại của check giữ nguyên (không khối nào sáng lúc mở; sau dot `assigned -> insight` 14,5 giây vẫn không khối nào sáng).
    - Đổi dòng mô tả thành: "khối có số đếm việc đang ở khối bằng 0 thì không sáng; khối giữ dot nhận dot mà sổ cái không có việc thì tắt trong 10 giây".
    Bản chất bất biến không đổi (không kẹt sáng); chỉ bỏ một dữ liệu nay không còn "rảnh".
 2. **Bất biến mới inv-009 "số đếm > 0 thì sáng"**: với mọi khối trong bảng "Quyết định từng khối" có loại "sáng khi > 0" (8 khối đầu), khối sáng khi và chỉ khi số đếm hiển thị của nó > 0, đúng màu loại. Ghép được từ tiêu chí 2 của `eval/T-032/khoi-sang.cjs` (hàm `c2`). Ngoại lệ E2-E6 chỉ tồn tại nếu liệt kê trong bảng; thêm khối có số đếm mới mà không xếp loại thì đỏ. Đây là chỗ T-028 thiếu nên Spec Gate không bắt được.
@@ -91,8 +91,8 @@ Cả sáu tiêu chí 1-6 chạy một lệnh `bash eval/T-032/run.sh <repo>` (in
 ## Không làm
 - Đổi bảng ánh xạ dot, màu, quy tắc B, chú giải.
 - Làm Production/Release/Reservoir sáng theo bất kỳ cách nào khác ngoài nháy khi dot tới (E2-E4); muốn "Production sáng khi đang deploy" thì cần trạng thái deploy trong sổ cái, việc riêng.
-- Sáng khối Thực thi khi chỉ có việc `engineering` `new` (E1).
+- Gộp "đang code" và "chờ" thành một con số trên khối Thực thi (ADR-013: giữ nguyên hai số).
 - T-031 (nhân vật), T-030.
 
 ## Câu hỏi mở
-Không. (Hai chọn lựa Capu có thể đảo, đều đã chốt theo hướng bảo thủ: E1 việc `engineering` `new` không làm Thực thi sáng; E2-E4 các khối tích luỹ không sáng. Đổi thì sửa một dòng trong bảng và một ý trong eval.)
+Không. (Capu có thể đảo E2-E4: các khối tích luỹ không sáng. Đổi thì sửa một dòng trong bảng và một ý trong eval.)
