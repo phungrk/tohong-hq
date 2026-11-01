@@ -1,6 +1,6 @@
 {
   "task": "T-029",
-  "at": "2026-11-01T05:16",
+  "at": "2026-11-01T05:20",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-028/run.sh /home/user/tohong-hq-dashboard",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 111768,
+      "ms": 109909,
       "out": "PASS C1 bảng ánh xạ: mỗi sự kiện một dot đúng đường, sự kiện bỏ qua không dot (25/25)\nPASS C2 màu dot đúng 5 loại (19/19)\nPASS C3 khối đang xử lý sáng, khối rảnh không tô (50/50)\nPASS C4 chú giải màu và khối sáng (6/6)\nPASS C5 không dot giả, giới hạn dot, tải lại, kênh live tắt (10/10)\nPASS C6 prefers-reduced-motion (7/7)\nPASS C7 390px (8/8)\nPASS C8 không lỗi console, không thư viện/mạng ngoài mới (31/31)\nPASS C9 các bảng khác giữ nguyên (1/1)\nPASS C10 ảnh chụp đã commit (1/1)\nPASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "eval/invariants/dashboard/model/inv-001-khong-dot-gia.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9413,
+      "ms": 9346,
       "out": "PASS no-fake-dots",
       "tier": 2
     },
@@ -36,7 +36,7 @@
       "eval": "eval/invariants/dashboard/model/inv-002-tran-dot.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 18518,
+      "ms": 18415,
       "out": "PASS dot-cap",
       "tier": 2
     },
@@ -44,7 +44,7 @@
       "eval": "eval/invariants/dashboard/model/inv-003-dot-tren-duong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 8716,
+      "ms": 8469,
       "out": "PASS dot-on-path",
       "tier": 2
     },
@@ -52,7 +52,7 @@
       "eval": "eval/invariants/dashboard/model/inv-004-khong-ket-sang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 17001,
+      "ms": 16927,
       "out": "PASS no-stuck-lit",
       "tier": 2
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/dashboard/model/inv-005-reduced-motion-khong-dot.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 5326,
+      "ms": 5519,
       "out": "PASS reduced-no-dots",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/dashboard/model/inv-006-khong-cuon-ngang-390.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 2343,
+      "ms": 2390,
       "out": "PASS no-hscroll-390",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/dashboard/model/inv-007-capu-sang-khi-escalated.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 13801,
+      "ms": 13909,
       "out": "PASS capu-escalated",
       "tier": 2
     }
