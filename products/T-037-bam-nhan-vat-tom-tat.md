@@ -8,15 +8,16 @@ Capu (2026-11-01, `board/T-037.md`): bấm vào nhân vật trong khối của b
 ## Bằng chứng
 - Dashboard nhánh `t-036-bo-cuc-phong-to` @ `2306da9` (`/home/user/tohong-hq-dashboard`, đọc bằng worktree tạm), `index.html`:
   - `drawModel` (dòng ~897-922) quyết định khối sáng bằng bảng `STATECOL` từ danh sách việc trong `x.tasks` (đã gộp dữ liệu live): `specNew`, `specDoing`, `specGate`, `specRw`, `execNew`, `execDoing`, `execRw`, `codeGate`, `esc`, `capuRead`, `insBusy`. Mục "Khối nào giữ việc nào" bên dưới là đúng các danh sách này, không phải suy đoán.
-  - `nd_kr`, `nd_prod`, `nd_rel`, `src_*` không có quy tắc A (T-032 E2-E6); `nd_kr` và `nd_prod` có nhân vật nhưng không giữ việc nào.
+  - `nd_kr`, `nd_prod`, `nd_rel`, `src_*` không có quy tắc A (T-032 E2-E6); `nd_kr` và `nd_prod` có nhân vật, chỉ sáng vì dot (`applyLit`: `HELD` tối đa `HOLD_MAX`=10 giây, hoặc `ping` 0,6 giây).
+  - Tên việc thật (`board/T-0*.md`) gần như đều có tiền tố loại việc (`Spec:`, `Dashboard:`, `App:`, `Spec sửa:`); cắt 20 ký tự nguyên văn ra `Spec: bấm vào nhân…` (Spec Gate D1 lỗi 1, ADR-017).
   - Nhân vật: `g.mch` trong `g#chars`, thứ tự DOM `nd_intents, nd_spec, nd_respec, gt_spec, nd_exec, nd_rework, gt_code, nd_capu, nd_insight, nd_kr, nd_prod` (`CH_AT`). Hiện chưa có `tabindex`, `role`, `aria-*` và `.mch` có `pointer-events:none`, nên chưa bấm được (đo: bấm vào tâm thân bot không có gì xảy ra).
   - Lớp SVG: `g#fx_f`, `g#chars`, `g#fx_b` (bong bóng sự kiện, `BUB_CAP=3`, `BUB_MS=2000`, `WAIT_MS=3000`, `bubLay` cỡ chữ 12px bù hệ số co).
   - Chế độ phóng to (khối script cuối file): Esc đóng phóng to; Tab luôn đưa tiêu điểm về nút `#model-zoom` (`e.preventDefault(); b.focus()`), nên hiện nay không thể Tab tới nhân vật khi phóng to: spec này đổi (mục 6).
 - Trường công khai của việc trong bản `--public` (`scripts/export_dashboard.py` dòng 36-41): `id, title, state, holder, owner, reviewer, rounds, version, deadline, budget, cost, created, updated, hours_since_update, pipeline, as_of, tier`; `detail` và `link` bị bỏ ở sự kiện. Spec này chỉ đọc `id`, `title`, `state`, `owner`, `tier`, `hours_since_update`.
-- Chưa có số liệu người dùng (Capu là người dùng duy nhất). Các số 40 ký tự/giây, 20 ký tự tên, "không tự tắt", từ trạng thái tiếng Việt là GIẢ ĐỊNH, tự tin ~60%; ghi thành số cụ thể để eval đo được, đổi số thì đổi cả eval.
+- Chưa có số liệu người dùng (Capu là người dùng duy nhất). Các số 40 ký tự/giây, 28 ký tự tên, "không tự tắt", từ trạng thái tiếng Việt là GIẢ ĐỊNH, tự tin ~60%; ghi thành số cụ thể để eval đo được, đổi số thì đổi cả eval.
 
 ## Giả thuyết
-Nếu Capu bấm nhân vật là thấy "khối này đang giữ việc nào, ở trạng thái gì" ngay tại chỗ, không phải đối chiếu số ở khối với bảng Việc, thì bảng Mô hình đọc được bằng một cú bấm. Chỉ số: GIẢ ĐỊNH, không có số đo ngoài `eval/T-037/checklist.md`. Chỉ số bảo vệ: inv-001..021 xanh; 0 lỗi console; khung hình không trễ ≥ 300 ms; không cuộn ngang ở 390px; bong bóng sự kiện (≤ 3, chữ cố định) không đổi.
+Nếu Capu bấm nhân vật là thấy "khối này đang giữ việc nào, ở trạng thái gì" ngay tại chỗ, không phải đối chiếu số ở khối với bảng Việc, thì bảng Mô hình đọc được bằng một cú bấm. Chỉ số: GIẢ ĐỊNH, không có số đo ngoài `eval/T-037/checklist.md`. Chỉ số bảo vệ: inv-001..022 xanh; 0 lỗi console; khung hình không trễ ≥ 300 ms; không cuộn ngang ở 390px; bong bóng sự kiện (≤ 3, chữ cố định) không đổi.
 
 ## Hành vi (người dùng thấy gì)
 
@@ -41,12 +42,17 @@ Nếu Capu bấm nhân vật là thấy "khối này đang giữ việc nào, �
 | `nd_insight` | `owner=insight` và `state` ∈ {`doing`, `rework`} |
 | `nd_kr`, `nd_prod` | không giữ việc nào (T-032 E2, E4) |
 
-Hệ quả bắt buộc, đo được: với chín khối có quy tắc A (mọi khối trừ `nd_kr`, `nd_prod`), **khối sáng theo quy tắc A khi và chỉ khi tóm tắt của nó không phải `Đang rảnh`**; số việc trong tóm tắt (số dòng việc + N của dòng "+N việc nữa") bằng số việc khối giữ. Khối chỉ sáng vì dot vừa tới (quy tắc B, tối đa 10 giây) mà không giữ việc nào thì tóm tắt vẫn là `Đang rảnh` (dot là sự kiện thoáng qua, không phải việc đang giữ). Việc `blocked`, việc `done` bậc A hoặc quá 48 giờ, việc `new` của `insight` và `chief-of-staff` không thuộc khối nào (như T-032).
+**Khối sáng vì dot (quy tắc B), theo ADR-017 (`decisions/2026-11-01-t037-tom-tat.md`, sửa lỗi D1 mục 2).** Nguyên tắc: tóm tắt và đèn không bao giờ nói hai điều khác nhau. "Sáng" ở đây là khối có `busy` hoặc `ping` (viền ≥ 2,5px), do bất kỳ quy tắc nào.
+- Khối giữ việc theo quy tắc A (bảng trên): tóm tắt là các dòng việc như mục 2, kể cả khi đồng thời sáng vì dot.
+- Khối **không giữ việc nào theo A nhưng đang sáng vì dot**: tóm tắt là **đúng một dòng** về dot gần nhất chạm hoặc rời khối: `Vừa nhận T-xxx · <tên rút gọn>` (dot chạm khối đích) hoặc `Vừa giao T-xxx · <tên rút gọn>` (dot rời khối nguồn); `T-xxx` là việc của sự kiện sinh ra dot, tên rút gọn như mục 2 (lấy `title` hiện tại của việc đó; thiếu thì `(không tên)`). Dot không gắn việc nào (báo cáo insight tuần mới) thì dòng là `Vừa nhận insight mới` / `Vừa giao insight mới`. Dòng này giữ **suốt thời gian khối còn sáng**; hết sáng thì tóm tắt về `Đang rảnh`.
+- **Khối không sáng và không giữ việc theo A**: `Đang rảnh`. Khối sáng thì tóm tắt **không bao giờ** là `Đang rảnh` (lệch quá 300 ms là lỗi).
+- Hệ quả đo được: (i) với chín khối có quy tắc A, khối sáng theo quy tắc A khi và chỉ khi tóm tắt là dòng việc; số việc (số dòng việc + N của "+N việc nữa") bằng số việc khối giữ; (ii) ở mọi khối, đèn sáng thì dòng đầu khác `Đang rảnh`, đèn tắt và không giữ việc thì dòng đầu là `Đang rảnh`. `nd_kr`, `nd_prod` không giữ việc nào theo A nên chỉ có hai trạng thái: `Vừa nhận …` khi đang sáng vì dot, `Đang rảnh` khi tắt. Việc `blocked`, việc `done` bậc A hoặc quá 48 giờ, việc `new` của `insight` và `chief-of-staff` không thuộc khối nào (như T-032).
+- Khi trạng thái sáng đổi (dot tới, dot rời, hết 10 giây, ping tắt) lúc tóm tắt đang mở: áp quy tắc "đổi nội dung" của mục 5 (≤ 1 giây).
 
 ### 2. Nội dung tóm tắt
 **Mỗi việc một dòng:** `T-xxx · <tên rút gọn> · <trạng thái>`, ngăn bằng ` · ` (dấu chấm giữa U+00B7, có một dấu cách hai bên).
 - `T-xxx` là `id` của việc, nguyên văn.
-- **Tên rút gọn:** lấy `title`; gộp mọi dãy khoảng trắng thành một dấu cách; bỏ khoảng trắng đầu cuối; chuẩn hoá NFC. Nếu dài **≤ 20 ký tự** thì giữ nguyên; nếu **> 20** thì lấy 19 ký tự đầu, bỏ khoảng trắng cuối của đoạn đó, rồi thêm `…` (U+2026) (kết quả luôn ≤ 20 ký tự). `title` rỗng hoặc thiếu thì ghi `(không tên)`.
+- **Tên rút gọn** (ADR-017): lấy `title`; gộp mọi dãy khoảng trắng thành một dấu cách; bỏ khoảng trắng đầu cuối; chuẩn hoá NFC; **bỏ một tiền tố loại việc**: phần đầu tên khớp `^[^:]{1,24}:\s+` (không quá 24 ký tự không chứa `:`, rồi dấu `:`, rồi ít nhất một khoảng trắng; vd `Spec: `, `Spec sửa: `, `Dashboard: `, `App: `, `export_dashboard.py: `), nếu phần còn lại không rỗng. Không bỏ gì khi không khớp (vd `Giờ họp 10:30 với Capu`). Sau đó, nếu dài **≤ 28 ký tự** thì giữ nguyên; nếu **> 28** thì lấy 27 ký tự đầu, bỏ khoảng trắng cuối của đoạn đó, rồi thêm `…` (U+2026) (kết quả luôn ≤ 28 ký tự). Rỗng thì ghi `(không tên)`. Ví dụ: `Spec: bảng Mô hình Eval-Gated 2029 có dot chạy…` → `bảng Mô hình Eval-Gated 202…`; `Spec sửa: khối Ý định (và khối tích luỹ) sáng khi có việc` → `khối Ý định (và khối tích l…`; `export_dashboard.py: bỏ detail ở bản public` → `bỏ detail ở bản public`.
 - **Trạng thái tiếng Việt** theo `state` của việc (chỉ các trạng thái có thể được giữ):
 
 | `state` | Chữ |
@@ -61,13 +67,14 @@ Hệ quả bắt buộc, đo được: với chín khối có quy tắc A (mọi
 
 **Thứ tự việc:** (1) việc `escalated` trước; (2) trong mỗi nhóm, theo **số của id tăng dần** (số nguyên sau `T-`, vd `T-1030` đứng sau `T-106`, không theo thứ tự chữ cái); id không có số thì xếp cuối theo chữ cái. Thứ tự không phụ thuộc thứ tự dữ liệu hay thời gian cập nhật (để không nhảy dòng khi live).
 
-**Số dòng:** tối đa **3 dòng việc**. Nếu khối giữ thêm n > 3 việc thì thêm đúng một dòng thứ tư `+<n−3> việc nữa` (vd `+2 việc nữa`). Khối giữ 1 đến 3 việc thì không có dòng này. Khối **không giữ việc nào**: đúng một dòng `Đang rảnh`. Tổng cộng 1 đến 4 dòng; mỗi dòng việc dài ≤ 43 ký tự (8 + 20 + 3 + 12).
+**Số dòng:** tối đa **3 dòng việc**. Nếu khối giữ thêm n > 3 việc thì thêm đúng một dòng thứ tư `+<n−3> việc nữa` (vd `+2 việc nữa`). Khối giữ 1 đến 3 việc thì không có dòng này. Khối **không giữ việc nào theo A và không sáng**: đúng một dòng `Đang rảnh` (khối sáng vì dot: mục 1). Tổng cộng 1 đến 4 dòng; mỗi dòng việc dài ≤ 51 ký tự (8 + 28 + 3 + 12).
 
 ### 3. Hình dạng và vị trí
 - Tóm tắt là `<g class="sum" data-block="<id khối>" data-state="typing|done">` nằm trong lớp mới `<g id="fx_s">`, **con cuối cùng của `#model svg`** (sau `#fx_b`, `#chars`, `#fx_f`). Bên trong: một `rect[data-part="sum-bg"]`, 1 đến 4 `text[data-part="sum-line"]` (mỗi dòng một phần tử, theo thứ tự), một `path` đuôi trỏ về nhân vật (tuỳ chọn). Không `foreignObject`, không `<svg>` lồng, không ảnh. `#fx_s` rỗng khi không có tóm tắt.
 - **Chỉ một tóm tắt cùng lúc** trong toàn trang. Không nằm trong `#fx_b`; **không tính vào giới hạn 3 bong bóng sự kiện** (`#fx_b .bub` vẫn ≤ 3, chữ cố định theo T-031).
 - **Cỡ chữ** hiển thị 9 đến 16 px (cỡ chữ SVG × hệ số co của `svg`) ở mọi bề ngang 320 đến 1920px, bản thường và phóng to. Mặc định 12px; nếu hộp rộng hơn `svg` thì **giảm cỡ chữ** (không xuống dưới 9px) cho vừa. Nếu ở 9px dòng dài nhất vẫn rộng hơn `svg` (chỉ xảy ra khi tên toàn chữ hoa rộng ở khung ≤ 340px, svg ~254px), thì cắt thêm phần **tên rút gọn** của các dòng đó bằng `…` cho tới khi vừa (`T-xxx` và trạng thái giữ nguyên); ngoài trường hợp này không cắt chữ. Màu: cùng bảng màu bong bóng sự kiện (nền `#fff9d6`, chữ `#222`, viền `#7a6a20`), tương phản chữ/nền ≥ 4,5 ở chế độ sáng và tối.
-- **Hộp bao `sum-bg` luôn nằm trọn trong `svg`** (dung sai 0,5px), **không chồng lên thân bot của chính nhân vật đó** (không quá 0,5u mỗi chiều), và **đứng trên cùng**: tại tâm mỗi dòng chữ đã hiện, `document.elementFromPoint` trả về phần tử nằm trong `g.sum` (không bị nút `#model-zoom`, bong bóng sự kiện hay phần tử khác che). Bong bóng được phép che chữ và nhân vật của khối khác trong lúc đang mở (xem Câu hỏi mở). Vị trí đặt trên, dưới hay bên cạnh là việc của Engineering, miễn thỏa các điều này.
+- **Hộp bao `sum-bg` luôn nằm trọn trong `svg`** (dung sai 0,5px), **không chồng lên thân bot của chính nhân vật đó** (không quá 0,5u mỗi chiều), **không giao với chữ của chính khối được bấm** (mọi `text` của khối đó ngoài `.mch`: tên, số đếm `.n`, chú thích `.cap`, nhãn; dung sai 0,5px mỗi chiều), và **đứng trên cùng**: tại tâm mỗi dòng chữ đã hiện, `document.elementFromPoint` trả về phần tử nằm trong `g.sum` (không bị nút `#model-zoom`, bong bóng sự kiện hay phần tử khác che). Bong bóng được phép che chữ và nhân vật của **khối khác** trong lúc đang mở. Đây là **cách đọc AC4 "Không che chữ khối" do Chief of Staff phân xử (ADR-017), chưa phải lời Capu**. Vị trí đặt trên, dưới hay bên cạnh khối là việc của Engineering, miễn thỏa các điều này.
+- **Chữ nhìn thấy thật:** mọi dòng có chữ đều nhìn thấy trong suốt lúc gõ (opacity tính ra > 0,05, `fill` không trong suốt, không `display:none`/`visibility:hidden`); `g.sum` không chứa `text` nào ngoài các `sum-line` (không giấu một bản chữ đầy đủ ở chỗ khác).
 - **Kích thước cố định từ lúc hiện**: hộp bao `sum-bg` được tính theo nội dung đầy đủ ngay khi mở và không đổi kích thước suốt lúc gõ (sai số 0,5px); chỉ đổi khi nội dung đổi do live (mục 5) hoặc khi đổi bề ngang.
 - **Trong khung nhìn:** sau khi mở xong (≤ 300 ms), hộp bao `sum-bg` nằm trọn trong khung nhìn của trình duyệt (`0..innerWidth`, `0..innerHeight`). Nếu chưa thì cuộn tối thiểu (trang ở bản thường, `#model` ở chế độ phóng to) cho vừa. Cuộn không làm trang cuộn ngang.
 
@@ -140,11 +147,11 @@ Tóm tắt tính lại mỗi lần bảng vẽ lại (live, tải lại dữ li�
 | inv-016/018 (thân bot không che chữ) | Tóm tắt là `text` ngoài `.mch/.bub`; các eval cũ không mở tóm tắt | Không đổi; eval T-037 đo riêng thân bot của chính nó (mục 3). |
 | inv-010/011/012/015 | Bấm không đổi trạng thái/nét vẽ nhân vật | Không đổi; eval T-037 chạy lại ở tiêu chí 5. |
 | inv-021, T-035/T-036 eval phóng to (Tab, Esc) | Nhánh Tab và Esc đổi hành vi **chỉ khi** có nhân vật hoặc tóm tắt | Chạy nguyên văn, phải xanh (tiêu chí 5); không sửa. |
-| inv-022 (sắp có: bong bóng đúng cỡ khi đổi phóng to) | Chỉ xét `#fx_b` | Chưa có file; Spec Critic ghép khi có. |
+| inv-022 (đã có trong bể: `inv-022-bong-bong-dung-co-khi-doi-phong-to.sh`, bong bóng đúng cỡ khi đổi phóng to) | Chỉ xét `#fx_b` | Không đổi; tiêu chí 5 chạy cả vùng (inv-001..022). |
 
 ## Ràng buộc (vòi)
 - Repo: `phungrk/tohong-hq-dashboard` (một file `index.html`), nhánh `t-037-bam-nhan-vat-tom-tat` dựa trên `t-036-bo-cuc-phong-to` (head `2306da9` hoặc mới hơn; Engineering rebase nếu T-036 đã merge vào `main`). Vùng `dashboard/model`.
-- Bất biến của vùng đã đọc: `eval/invariants/dashboard/model/` inv-001..021 (và mã trong `lib/`): spec không mâu thuẫn bất biến nào; không đề nghị đổi/xoá bất biến nào.
+- Bất biến của vùng đã đọc: `eval/invariants/dashboard/model/` inv-001..022 (và mã trong `lib/`): spec không mâu thuẫn bất biến nào; không đề nghị đổi/xoá bất biến nào.
 - Không chạm: `dashboard.json`, kênh live, `scripts/live.py`, các bảng khác, dot, khối sáng, bong bóng sự kiện (trừ mục 5), nhân vật (hình, trạng thái, cử động).
 - Bậc lưới lọc: **A** (đúng bậc Capu đặt): UI tĩnh, eval tự động phủ 6/6 tiêu chí, không chạm payment/auth/DB/dữ liệu người dùng; chỉ đọc trường công khai.
 - Chạy eval cần Playwright (`NODE_PATH=$(npm root -g)`) và d3 cục bộ (`D3=/đường/dẫn/d3.min.js`).
@@ -159,32 +166,33 @@ Tóm tắt tính lại mỗi lần bảng vẽ lại (live, tải lại dữ li�
 | Chữ đã hiện | ghép `textContent` của các `sum-line` theo thứ tự (dòng cách bằng `\n` khi so sánh) |
 
 ## Tiêu chí chấp nhận và eval
-Một lệnh cho mọi tiêu chí, chạy từ `/home/user/tohong-hq`: `bash eval/T-037/run.sh <repo-dashboard> --task T-037 [--criterion N]`. In từng dòng `PASS Cn …`/`FAIL Cn.<mã> <lý do>`, dòng cuối `PASS` hoặc `FAIL …`, mã thoát 0/1. Dữ liệu `dashboard.json`, kênh live và d3 đều giả/cục bộ.
+Một lệnh cho mọi tiêu chí, chạy từ `/home/user/tohong-hq`: `bash eval/T-037/run.sh <repo-dashboard> --task T-038 [--criterion N]` (T-038 là việc code; `--task` chỉ quyết định thư mục ảnh `docs/screenshots/T-038/`). In từng dòng `PASS Cn …`/`FAIL Cn.<mã> <lý do>`, dòng cuối `PASS` hoặc `FAIL …`, mã thoát 0/1. Dữ liệu `dashboard.json`, kênh live và d3 đều giả/cục bộ.
 
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Mục 1-2 (AC1): bấm (chuột và Enter/Space) mở tóm tắt đúng nội dung cho cả 11 khối theo dữ liệu giả (khối nhiều việc, khối rảnh, tên dài và ranh giới 20/21 ký tự, thứ tự theo số, escalated trước, `+N việc nữa`); khớp khối sáng; không rò `detail`/`link`; bấm khối không nhân vật không mở gì | `… --criterion 1` |
-| 2 | Mục 3-4 (AC2): bong bóng hiện trước chữ; gõ lần lượt ~40 ký tự/giây, chữ đã hiện luôn là tiền tố; bấm lần hai (nhân vật hoặc bong bóng) hiện ngay hết; bấm lần ba đóng; bấm ngoài và Esc đóng; mở nhân vật khác đóng cái cũ (không bao giờ hai cái); không tự tắt sau 12 giây; quan hệ với bong bóng sự kiện (tầng, gỡ, không tạo cùng khối, ≤ 3) | `… --criterion 2` |
+| 1 | Mục 1-2 (AC1): bấm (chuột và Enter/Space) mở tóm tắt đúng nội dung cho cả 11 khối theo dữ liệu giả (khối nhiều việc, khối rảnh, bộ tên thật lấy từ `board/` kèm kết quả viết tay: bỏ tiền tố rồi cắt 27+`…`, ranh giới 28/29 ký tự, thứ tự theo số, escalated trước, `+N việc nữa`); khớp khối sáng; **khối sáng vì dot (nd_kr, nd_prod, hai khối nguồn) thì nói `Vừa nhận/giao T-xxx · tên`, hết sáng thì `Đang rảnh`, không khung nào đèn và lời lệch quá 300 ms**; không rò `detail`/`link`; bấm khối không nhân vật không mở gì | `… --criterion 1` |
+| 2 | Mục 3-4 (AC2): bong bóng hiện trước chữ; gõ lần lượt ~40 ký tự/giây, chữ đã hiện luôn là tiền tố; bấm lần hai (nhân vật hoặc bong bóng) hiện ngay hết; bấm lần ba đóng; bấm ngoài và Esc đóng; mở nhân vật khác đóng cái cũ (không bao giờ hai cái); không tự tắt sau 12 giây; quan hệ với bong bóng sự kiện (tầng, gỡ, không tạo cùng khối, ≤ 3); chữ nhìn thấy thật trong lúc gõ, không text lạ trong `g.sum` | `… --criterion 2` |
 | 3 | Mục 5 (AC3): việc rời/vào/đổi trạng thái qua live khi đang mở: cập nhật trong 1 giây cùng phần tử, hiện ngay đủ, không đóng, vùng đọc cập nhật; sự kiện không liên quan không làm gõ lại | `… --criterion 3` |
-| 4 | Mục 3, 6, 7 (AC4): focus/Enter/Space/aria-label/aria-expanded/vòng tiêu điểm; `#model-sum-live` đúng và tức thì; Tab xoay vòng khi phóng to, Esc hai nấc; reduced-motion hiện ngay; cỡ chữ 9-16px, trọn trong svg, không đè thân bot, trên cùng, trong khung nhìn, ở 320/390/1280/1920 và phóng to 390/1280, tối; vùng bấm ≥ 44px ở 390; đổi bề ngang khi đang mở | `… --criterion 4` |
-| 5 | Mục 7, 8 (AC5): inv-001..021 chạy lại xanh; bong bóng sự kiện giữ nguyên (≤ 3, chữ cố định) khi có tóm tắt; 40 sự kiện khi tóm tắt đang mở: khung < 300 ms, ≤ 12 dot, 0 lỗi console; trạng thái nhân vật không đổi vì bấm; khung hình lúc gõ < 300 ms | `… --criterion 5` (thêm `--no-inv` để chạy riêng không chạy 21 bất biến) |
-| 6 | (AC6) `docs/screenshots/T-037/` đã commit ở HEAD đủ 7 ảnh: `dang-go-1280`, `dang-go-1280-sau`, `xong-1280`, `ranh-1280`, `dang-go-390`, `phong-to-390`, `toi-390` (.png), khác nhau, ≥ 5KB; `dang-go-390`, `phong-to-390`, `toi-390` rộng đúng 390px; chụp lúc chữ đang gõ dở bằng `--shots` | `… --criterion 6` (chụp: `bash eval/T-037/run.sh <repo> --task T-037 --shots`) |
+| 4 | Mục 3, 6, 7 (AC4): focus/Enter/Space/aria-label/aria-expanded/vòng tiêu điểm; `#model-sum-live` đúng và tức thì; Tab xoay vòng khi phóng to, Esc hai nấc; reduced-motion hiện ngay; cỡ chữ 9-16px, trọn trong svg, không đè thân bot, **không che chữ của chính khối (tên, số đếm, chú thích)**, trên cùng, trong khung nhìn, ở 320/390/1280/1920 và phóng to 390/1280, tối; vùng bấm ≥ 44px ở 390; đổi bề ngang khi đang mở | `… --criterion 4` |
+| 5 | Mục 7, 8 (AC5): inv-001..022 chạy lại xanh; bong bóng sự kiện giữ nguyên (≤ 3, chữ cố định) khi có tóm tắt; 40 sự kiện khi tóm tắt đang mở: khung < 300 ms, ≤ 12 dot, 0 lỗi console; trạng thái nhân vật không đổi vì bấm; khung hình lúc gõ < 300 ms | `… --criterion 5` (thêm `--no-inv` để chạy riêng không chạy 22 bất biến) |
+| 6 | (AC6) `docs/screenshots/T-038/` đã commit ở HEAD đủ 7 ảnh: `dang-go-1280`, `dang-go-1280-sau`, `xong-1280`, `ranh-1280`, `dang-go-390`, `phong-to-390`, `toi-390` (.png), khác nhau, ≥ 5KB; `dang-go-390`, `phong-to-390`, `toi-390` rộng đúng 390px; chụp lúc chữ đang gõ dở bằng `--shots` | `… --criterion 6` (chụp: `bash eval/T-037/run.sh <repo> --task T-038 --shots`) |
 | (nhìn) | Phần máy không đo được: chữ gõ "có hồn" (nhịp, không giật), bong bóng dễ đọc, đuôi trỏ đúng nhân vật, không rối khi nhiều bong bóng | `eval/T-037/checklist.md` (checklist, vì cảm nhận thị giác không đo được bằng máy) |
 
 `--task` bắt buộc cho tiêu chí 6 và `--shots` (thư mục ảnh `docs/screenshots/<task>/`, không có giá trị mặc định). Eval chụp ảnh chờ tới khi chữ **đang gõ dở** (đã gõ 15% đến 70% tổng) rồi mới chụp, và kiểm lại sau khi chụp vẫn chưa gõ xong; không đạt thì `--shots` in `FAIL` và không ghi ảnh.
 
 ## Bất biến đề xuất (tầng 2)
 Vùng `dashboard/model`; Spec Critic rút vào bể khi spec qua cổng (mã mẫu: các hàm oracle và đọc `g.sum` trong `eval/T-037/bam-nhan-vat-tom-tat.cjs`):
-1. **Tóm tắt khớp khối sáng.** Với mọi khối có quy tắc A, khối sáng theo quy tắc A khi và chỉ khi tóm tắt của nó khác `Đang rảnh`, và số việc trong tóm tắt bằng số việc khối giữ (mục 1). Lý do: Capu đọc đèn và đọc lời; hai thứ không được nói hai điều khác nhau; thêm khối hay đổi quy tắc A mà quên cập nhật tóm tắt thì đỏ.
+1. **Tóm tắt khớp khối sáng.** Khối sáng thì tóm tắt không bao giờ là `Đang rảnh`; khối tắt và không giữ việc theo A thì là `Đang rảnh` (lệch ≤ 300 ms); với mọi khối có quy tắc A, khối sáng theo quy tắc A khi và chỉ khi tóm tắt là dòng việc, và số việc bằng số việc khối giữ (mục 1). Lý do: Capu đọc đèn và đọc lời; hai thứ không được nói hai điều khác nhau; thêm khối hay đổi quy tắc A mà quên cập nhật tóm tắt thì đỏ.
 2. **Tóm tắt không rò dữ liệu riêng.** Dù dữ liệu việc có `detail`, `link`, ghi chú, đường dẫn, không chữ nào trong `#fx_s` và `#model-sum-live` chứa chúng (chỉ `id`, `title`, `state`).
 3. **Một tóm tắt, ở lớp riêng, và nhường tầng cho bong bóng sự kiện.** `#fx_s` có ≤ 1 `g.sum`, nằm sau `#fx_b`; `#fx_b .bub` vẫn ≤ 3 khi tóm tắt đang mở; bong bóng sự kiện cùng khối với tóm tắt đang mở không tồn tại.
-4. **Esc đóng từng lớp một.** Khi có tóm tắt trong chế độ phóng to: Esc lần một đóng tóm tắt, phóng to còn; Esc lần hai đóng phóng to (mở rộng inv-021).
+4. **Tóm tắt không che chữ của chính khối và không đè thân bot** (mục 3), ở 320/390/1280/1920 và phóng to.
+5. **Esc đóng từng lớp một.** Khi có tóm tắt trong chế độ phóng to: Esc lần một đóng tóm tắt, phóng to còn; Esc lần hai đóng phóng to (mở rộng inv-021).
 
 ## Không làm
 Gọi AI để tóm tắt; hiện ghi chú, defect, đường dẫn file, `detail`/`link`; sửa dữ liệu từ dashboard (không nút, không ô nhập); âm thanh; tự tắt theo giờ; các bảng khác ngoài Mô hình; đổi hình, cử động, trạng thái của nhân vật; đổi quy tắc khối sáng, dot, bong bóng sự kiện; thêm thư viện.
 
 ## Câu hỏi mở
-Trong lúc tóm tắt đang mở, bong bóng có được che chữ và nhân vật của khối khác không? Spec chọn **được** (nó là cửa sổ nhỏ tạm thời, đóng bằng một cú bấm; ở 390px bong bóng rộng hơn cả khối nên không thể tránh) và chỉ cấm đè thân bot của chính nhân vật được bấm; nếu Capu hiểu "không che chữ khối" là không che bất cứ chữ khối nào thì bong bóng phải đặt ở vùng trống và không vừa ở 390px, cần nới bố cục (việc riêng). Không trả lời thì giữ "được".
+Không. (Che chữ khối khác đã được Chief of Staff phân xử ở ADR-017; đây là cách đọc AC4 của Chief of Staff, chưa phải lời Capu.)
 
 ## Nhật ký sửa eval
-(chưa có)
+- 2026-11-01 (Spec Writer, theo Spec Gate `handoffs/T-037-D1.md` và ADR-017): sửa **mục 2** (tên rút gọn: bỏ tiền tố `<từ>:` rồi cắt 27+`…`, thay "19+`…` của 20 ký tự", vì tên thật có tiền tố ăn 6-11 ký tự), **mục 1** (khối sáng vì dot nói `Vừa nhận/giao T-xxx · tên`, thay "vẫn Đang rảnh", vì đèn sáng mà lời nói rảnh), **mục 3** (không che chữ của chính khối, thay "chỉ không đè thân bot"; ghi rõ đó là cách đọc của Chief of Staff), chữ nhìn thấy thật, bảng inv-022. Eval: thêm N1 (tên thật), B1-B4 (có dot), T5b (chữ nhìn thấy), kiểm che chữ chính khối ở G1-G3; đổi dữ liệu giả (ranh giới 28/29). Chứng minh: đỏ trên nhánh T-036; xanh trên bản thử; bản đột biến (bỏ nhánh dot; bỏ né chữ) đỏ.
