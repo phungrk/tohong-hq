@@ -30,10 +30,10 @@ Nếu thân bot to gấp đôi và khối đủ rộng để bot lao ≥ 8 đơn
 Ở **cả hai** viewport chuẩn, lúc nghỉ, với đủ 11 nhân vật:
 - **1.1 Cỡ nhân vật.** Thân bot cao **62 đến 100u** (hiện 30u). Hệ quả đo bằng px: **≥ 68px ở 1280** (gấp đôi 34px hiện nay; 62u = 70px) và **≥ 19px ở 390** (gấp đôi 9,7px; 62u = 20px). Mức 62u là sàn: "gấp ≥ 2 lần" theo ý định.
 - **1.2 Cỡ khối.** Hình chính của mọi khối có nhân vật có **cạnh nhỏ nhất ≥ 110u** (hiện 66–96u; cổng 88–92u, tính đường kính). Cụ thể cần ≥ 110u ở `nd_intents`, `nd_spec`, `nd_respec`, `nd_exec`, `nd_rework`, `nd_capu`, `nd_insight`, `nd_kr`, `nd_prod`, `gt_spec`, `gt_code`. `nd_rel` và ba `src_*` không có nhân vật, không đổi.
-- **1.3 Nhân vật nằm trong khối.** Ở chín khối không phải cổng: hộp bao thân bot lúc nghỉ **nằm trọn** trong hộp bao hình chính (dung sai 0,5u). Ở hai cổng (bot nổi ở mép, xem mục 4): **tâm** thân bot nằm trong hộp bao của cổng và hộp bao thân bot nằm trọn trong `svg` (không bị cắt).
-- **1.4 Chữ không thu nhỏ.** Ở 1280: chữ `.t`, `.cap`, `.n` của khối hiển thị ≥ **13,0px, 11,9px, 24,9px** (bằng hiện nay; dung sai 0,15px của làm tròn). Nghĩa là cỡ chữ SVG không được giảm để nhường chỗ cho bot.
+- **1.3 Nhân vật nằm trong khối.** Ở chín khối không phải cổng: hộp bao thân bot lúc nghỉ **nằm trọn** trong hộp bao hình chính (dung sai 0,5u). Ở hai cổng: hộp bao thân bot nằm **trọn trong vòng tròn của cổng**, cách mép trong của viền ≥ 2u (bốn góc hộp bao cách tâm cổng ≤ bán kính − 2u), để viền sáng 3px không lộ qua khe chân bot (m2 của D1; đồng thời tâm thân nằm trong cổng, đúng T-031 S6), và nằm trọn trong `svg`. "Nổi trên cùng" ở hai cổng nghĩa là thứ tự vẽ (mục 4), không phải bot nhô ra ngoài vòng tròn.
+- **1.4 Chữ không thu nhỏ.** Ở 1280: chữ `.t`, `.cap`, `.n` của khối hiển thị ≥ **13,0px, 11,9px, 24,9px** (dung sai 0,15px). Đo trên **mọi** phần tử chữ của mọi khối, cổng và nhãn đường, không chỉ một khối: cỡ SVG (đơn vị) `.node .t` ≥ 11,5; `.node .cap` ≥ 10,5; `.node .n` ≥ 22; `.res .t` ≥ 12; `.gate text` ≥ 8,5; `.lbl` ≥ 10,5. Cỡ chữ không được giảm để nhường chỗ cho bot.
 - **1.5 Không che chữ.** Lúc nghỉ và ở MỌI trạng thái (work, give theo cả 4 chiều, take, wait), hộp bao thân bot không che chữ nào (định nghĩa mục 0), kể cả nhãn đường (`.lbl`) và chữ của khối khác. Eval đo ở 1280 và 390 trong lúc chạy 12 sự kiện (M4–M18).
-- **1.6 Biên độ.** Khi `give`: tâm thân bot dịch theo chiều `data-dir` **≥ 8u** so với chỗ nghỉ (lúc nghỉ). Khi `take`: tâm thân bot nhảy lên **≥ 8u** so với chỗ nghỉ (dung sai làm tròn đo 0,1u). Mọi `give`/`take` quan sát được đều phải đạt (không chỉ cái lớn nhất), và phải quan sát được ít nhất 4 `give` và 4 `take` trong 12 sự kiện của kịch bản. Các ngưỡng T-031 khác giữ nguyên (work nhún ≥ 1,2u; wait đung đưa ≥ 1,2u; không nhún dọc ở wait; 1,0–1,5 giây mỗi cử động).
+- **1.6 Biên độ.** Ngưỡng là **max(8u; 0,25 × chiều cao thân lúc nghỉ của chính nhân vật đó)**: thân 62u cần ≥ 15,5u; thân 100u cần ≥ 25u (hiện nay 4u trên 30u = 13%; video ~ gần một thân; 0,25 là GIẢ ĐỊNH, tự tin ~60%, chặn kiểu "bot to mà lao y như cũ"). Khi `give`: tâm thân dịch theo chiều `data-dir` ≥ ngưỡng so với chỗ nghỉ. Khi `take`: tâm thân nhảy lên ≥ ngưỡng (dung sai làm tròn đo 0,1u). Trong lúc lao/nhảy thân bot không che chữ (1.5) và không bị cắt ra ngoài `svg` (hộp bao trong svg, dung sai 0,5u) ở cả hai viewport. Mọi `give`/`take` quan sát được đều phải đạt (không chỉ cái lớn nhất), và phải quan sát được ít nhất 4 `give` và 4 `take` trong 12 sự kiện của kịch bản. Các ngưỡng T-031 khác giữ nguyên (work nhún ≥ 1,2u; wait đung đưa ≥ 1,2u; không nhún dọc ở wait; 1,0–1,5 giây mỗi cử động).
 - **1.7 Bong bóng.** Hộp bao bong bóng của một nhân vật không giao với hộp bao thân bot của chính nhân vật đó (> 0,5u mỗi chiều) ở mọi khung hình. (Hiện bong bóng đặt cách tâm bot cố định 32u phía trên, sẽ đè đầu bot to gấp đôi.) Mọi điều khác của T-031 mục 4 giữ nguyên (trọn trong svg, chữ 9–16px, tối đa 3 bong bóng, 2,0 giây).
 - **1.8 Chiều cao tổng.** `viewBox` cao ≤ 1200u (≈ 1361px ở 1280).
 - **1.9 390px, bản thường.** Trang không cuộn ngang (`scrollWidth ≤ innerWidth`, inv-006); bảng vẫn **vừa trọn bề ngang** (svg rộng 300–390px, T-028 P2); không có cuộn dọc riêng trong bảng. **Quyết định cho 390:** ở bản thường chấp nhận chữ `.cap` nhỏ (3,4px, đã có từ T-028) và **không** thu nhỏ hay cuộn: nhân vật và dot đọc được (≥ 19px), chữ chi tiết đọc ở chế độ phóng to hoặc hai ngón. Lý do: cuộn ngang bị cấm (inv-006), cuộn dọc riêng trong bảng gây kẹt cuộn trang trên điện thoại.
@@ -45,7 +45,7 @@ Hợp đồng quan sát (eval đọc đúng các thứ này; không ép cách c�
 
 | Thứ | Giá trị |
 | --- | --- |
-| Nút | `button#model-zoom` nằm trong `#model`, `type=button`, nhìn thấy ngay khi mở trang (không phải cuộn trong bảng). Không chứa `<svg>`. |
+| Nút | `button#model-zoom` nằm trong `#model`, `type=button`, nhìn thấy ngay khi cuộn tới đầu bảng: nút nằm trong khung nhìn (1280 và 390), `document.elementFromPoint` tại tâm nút trả về chính nút (không bị che, không nằm trong vùng cuộn của svg). Không chứa `<svg>`. |
 | Nhãn khi chưa phóng to | chữ hiển thị `Phóng to`; `aria-label="Phóng to bảng Mô hình"`; `aria-expanded="false"`; `#model` không có `role=dialog` và không có `data-zoom`. |
 | Nhãn khi đang phóng to | chữ `Thu nhỏ`; `aria-label="Thu nhỏ bảng Mô hình"`; `aria-expanded="true"`. Cùng một nút, đổi nhãn. |
 | Trạng thái | `#model[data-zoom="on"]` khi phóng to; khi thoát thì **không còn thuộc tính** `data-zoom`. Khi phóng to: `#model` có `role="dialog"`, `aria-modal="true"` và `aria-label` không rỗng (vd "Bảng Mô hình Eval-Gated 2029, chế độ phóng to"); khi thoát thì bỏ ba thuộc tính này. |
@@ -72,9 +72,10 @@ Hợp đồng quan sát (eval đọc đúng các thứ này; không ép cách c�
 Dot (đường `p_*`, 5 màu, trần 12, 1,2 giây giữa hai chặng), quy tắc khối sáng (viền 3px, nền 18/22%, số đếm > 0 thì sáng), năm trạng thái nhân vật và bong bóng của T-031, chú giải, Bản đồ luồng và các bảng khác: giữ nguyên hành vi T-028, T-032, T-031 (trừ các câu ở mục "Câu nào của T-031, T-028 bị thay").
 
 ### 4. Bot ở Spec Gate và Code Gate luôn nằm trên cùng (tiêu chí 3)
-Áp cho `g.mch[data-block="gt_spec"]` và `g.mch[data-block="gt_code"]`, ở bản thường (1280 và 390) và khi phóng to. Hai điều, đều đo được:
+Áp cho `g.mch[data-block="gt_spec"]` và `g.mch[data-block="gt_code"]`, ở bản thường (1280 và 390) và khi phóng to. Ba điều, đều đo được:
 - **4.1 Thứ tự vẽ.** Không có phần tử vẽ nào (`path`, `circle`, `rect`, `line`, `polyline`, `polygon`, `ellipse`, `text`, `use`, `image`) nằm **ngoài** `g.mch` của cổng đó, **đứng sau** nó trong thứ tự DOM (tức vẽ sau, đè lên) mà hộp bao hiển thị giao với hộp bao thân bot (> 0,5px mỗi chiều). Ngoại lệ duy nhất: bong bóng `#fx_b .bub` (đã có ràng buộc riêng ở 1.7). Phần tử không hiện (`display:none`, `visibility:hidden`, opacity ≤ 0,05, bbox rỗng) bị bỏ qua. Đo ở lúc nghỉ, và **ở mọi khung hình** khi chạy 12 sự kiện (có dot, `give`, `take`). Gồm: viền khối/cổng (kể cả viền sáng 3px), đường nối `p_*`, đầu mũi tên, nhãn, và **dot**.
   Ngoài ra eval đặt thử một `circle` vào `#fx_f` ngay tâm thân bot và kiểm nó vẫn nằm dưới bot (không phụ thuộc lúc dot chạy qua). (Không dùng `elementsFromPoint`: `.mch` có `pointer-events:none` nên không bao giờ nằm trong kết quả.)
+- **4.3 Viền của chính cổng không chạy qua thân bot.** Đã bảo đảm bằng 1.3 (thân bot nằm trọn trong vòng tròn, cách viền ≥ 2u); eval đo ở L4 (tiêu chí 1) cho `gt_spec` và `gt_code`, ở 1280 và 390.
 - **4.2 Đường nối không cắm vào bot.** Lúc nghỉ, **không** đường `p_*` nào đi qua hộp bao thân bot của hai cổng nới 2u mỗi phía (lấy mẫu mỗi 2u dọc đường). Hiện `p_exec_gate` (đầu mũi tên ở (748,296)) cắm vào bot của `gt_code`. Chuyển bot lên mép trên cổng hay dời đầu mút đường là việc của Engineering; chỉ cần đo ra không cắt.
 - Cách cài gợi ý (không ràng buộc): `g#chars` đứng sau `g#fx_f` trong DOM. Được phép áp cho cả 11 nhân vật; chỉ hai cổng là bắt buộc.
 
@@ -90,6 +91,7 @@ Dot (đường `p_*`, 5 màu, trần 12, 1,2 giây giữa hai chặng), quy tắ
 ## Câu nào của T-031, T-028 bị thay (chỉ những câu này)
 - **T-031 mục 1 "Vị trí và cỡ"**, câu "chiều cao hiển thị trên màn hình 20 đến 56 px ở 1280px và 9 đến 56 px ở 390px (thân cao 30 đơn vị SVG ở trạng thái nghỉ là đạt cả hai)" → **thay bằng** mục 1.1 của spec này: thân cao 62–100u; ≥ 68px (≤ 114px) ở 1280; ≥ 19px (≤ 56px) ở 390. Các câu khác của mục đó (tâm trong khối, không che chữ quá 2 đơn vị) giữ nguyên. Lý do trần 56→114 ở 1280: 56px nhỏ hơn 68px sàn mới (bản thân yêu cầu "gấp 2" mâu thuẫn trần cũ). Trần ở 390 giữ 56.
 - **T-031 mục 6 "Màn hình 390px"**: "nhân vật cao ≥ 9px" → "≥ 19px". Các ý khác giữ nguyên.
+- **T-031 tiêu chí 8, ý xoay màn hình 390 → 844px (eval P5, "cao 9–56px")** → **"19–80px"** (ADR-015). Ở 844px svg rộng 778px (hệ số 0,778): thân 100u = 78px, nên trần 56px (= 72u) sẽ cấm thân > 72u dù 1.1 cho phép tới 100u; nâng trần P5 lên 80px để 1.1 và P5 cùng đúng với mọi thân 62–100u. Trần ở 390 (P2, 56px) giữ: 100u = 32px.
 - T-031 mục 4 (bong bóng): thêm 1.7 (không đè thân bot chủ). Không đổi câu nào.
 - **T-028** không bị thay câu nào; mục 5 của spec này **thực thi** đúng câu "dot là phần tử circle ... chạy dọc đường" của T-028 mục 1 (dot phải hiển thị).
 - Giữ nguyên: inv-001..016 (không đổi bất biến nào; xem bảng dưới).
@@ -100,7 +102,7 @@ Dot (đường `p_*`, 5 màu, trần 12, 1,2 giây giữa hai chặng), quy tắ
 | Eval / bất biến | Phụ thuộc | Việc cần làm |
 | --- | --- | --- |
 | `eval/T-031/model-characters.cjs` S7 (dòng 344) | cỡ thân 20–56px ở 1280 | **Đã sửa** (Spec Writer): 68–114px, ghi ở "Nhật ký sửa eval" của T-031. Sàn tăng, trần tăng vì mâu thuẫn trực tiếp với yêu cầu (56 < 68). **Chief of Staff phân xử** (mục "Cần phân xử"). |
-| `eval/T-031/model-characters.cjs` C8 P2 (dòng 504), P5 (dòng 513) | sàn 9px ở 390 | **Đã sửa**: sàn 19px, trần 56 giữ. Chỉ chặt thêm. |
+| `eval/T-031/model-characters.cjs` C8 P2 (dòng 504), P5 (dòng 513) | sàn 9px ở 390; trần 56px ở 844 sau xoay | **Đã sửa**: P2 sàn 19px (trần 56 giữ); P5 sàn 19px và trần 80px (ADR-015: 100u × 0,778 = 78px). |
 | `eval/T-031/model-characters.cjs` C3, C4 (biên độ ≥ 1,2/≥ 3/≥ 2u) | biên độ tính bằng đơn vị SVG | Không đổi, vẫn đúng (T-035 thêm ≥ 8 ở tiêu chí 1). |
 | `eval/T-031/model-characters.cjs` S6 (tâm trong khối, không che chữ khối đó), C5 bong bóng (trọn trong svg, 9–16px) | hộp bao so với hình chính; vị trí bong bóng tính từ `c.y-32` trong `bubLay` | Không đổi eval; **mã** `bubLay` (đặt bong bóng cách tâm bot 32u) phải theo cỡ bot mới (1.7). |
 | `eval/T-031/model-characters.cjs` C12 (ảnh T-031 đã commit), C11 (Bản đồ luồng không đổi byte) | ảnh cũ; vùng khác của trang | Không đổi. Ảnh T-035 ở `docs/screenshots/T-035/`, tiêu chí 5. |
@@ -126,7 +128,7 @@ Một lệnh cho mọi tiêu chí, chạy từ thư mục `/home/user/tohong-hq`
 
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Mục 1 (1.1–1.9): nhân vật cao 62–100u (≥ 68px ở 1280, ≥ 19px ở 390); khối cạnh ≥ 110u; thân trọn trong khối (hai cổng: tâm trong cổng); chữ không nhỏ đi; không che chữ nào ở mọi trạng thái; lao/nhảy ≥ 8u; bong bóng không đè bot; viewBox 1000×≤1200; 390px không cuộn ngang | `cd /home/user/tohong-hq && bash eval/T-035/run.sh <repo> --task T-035 --criterion 1` |
+| 1 | Mục 1 (1.1–1.9): nhân vật cao 62–100u (≥ 68px ở 1280, ≥ 19px ở 390); khối cạnh ≥ 110u; thân trọn trong khối (hai cổng: tâm trong cổng); chữ không nhỏ đi; không che chữ nào ở mọi trạng thái; lao/nhảy ≥ max(8u; 0,25 × thân); chữ mọi khối không nhỏ đi; viền cổng không qua bot; bong bóng không đè bot; viewBox 1000×≤1200; 390px không cuộn ngang | `cd /home/user/tohong-hq && bash eval/T-035/run.sh <repo> --task T-035 --criterion 1` |
 | 2 | Mục 2 và 5: nút/nhãn/aria; vào bằng nút; thoát bằng nút, Esc, Back; tiêu điểm; phủ khung nhìn; không cuộn ngang; một svg; 390px dùng được; đổi chiều màn hình; dot, khối sáng, nhân vật chạy khi phóng to; dot hiện thật; reduced-motion | `… --criterion 2` |
 | 3 | Mục 4: bot ở `gt_spec`, `gt_code` luôn trên cùng, không phần tử nào vẽ đè (thứ tự vẽ, dot thử), đường nối không cắm vào bot; dot hiện thật (G0) | `… --criterion 3` |
 | 4 | Mục 6: inv-001..016, eval T-028 (trừ C3)/T-032/T-031 xanh; reduced-motion; 0 lỗi console; 40 sự kiện khung < 300ms (thường và phóng to) | `… --criterion 4` (thêm `--no-old` để bỏ ba eval cũ khi chạy riêng) |
@@ -150,4 +152,5 @@ Robot chạy thật qua đường; đổi màu hay ánh xạ dot; các bảng kh
 Không (đã chốt ở ADR-015: phương án kéo trong lớp phủ).
 
 ## Nhật ký sửa eval
-- 2026-11-01 (Spec Writer, T-035): đổi `eval/T-031/model-characters.cjs` S7 (20–56 → 68–114px ở 1280), C8 P2 và P5 (sàn 9 → 19px ở 390). Lý do: T-035 mục 1.1; xem bảng trên. Không đổi ý kiểm nào khác.
+- 2026-11-01 (Spec Writer, T-035): đổi `eval/T-031/model-characters.cjs` S7 (20–56 → 68–114px ở 1280), C8 P2 (sàn 9 → 19px ở 390) và P5 (sau xoay 844: 9–56 → 19–80px). Lý do: T-035 mục 1.1 + ADR-015; xem bảng trên. Không đổi ý kiểm nào khác.
+- 2026-11-01 (Spec Writer, sửa D1 T-035-D1): B1 trần P5 ở 844 (xem trên); B2 biên độ theo cỡ thân (1.6); m1 đo chữ mọi khối (1.4, L5b); m2 viền cổng không chạy qua bot (1.3, 4.3); m3 nút thấy ngay (Z1).

@@ -34,12 +34,12 @@ if ((SHOTS || ONLY === 5) && !TASK) { console.log('FAIL cần tham số --task <
 // ---------- hằng số theo spec (mục "Số đo") ----------
 const CHARS = ['nd_intents', 'nd_spec', 'nd_respec', 'gt_spec', 'nd_exec', 'nd_rework', 'gt_code', 'nd_capu', 'nd_insight', 'nd_kr', 'nd_prod'];
 const GATES = ['gt_spec', 'gt_code'];
-const BODY_MIN_U = 62, BODY_MAX_U = 100;       // chiều cao thân bot, đơn vị SVG (nay 30)
+const BODY_MIN_U = 62, BODY_MAX_U = 100;  // 100u × 0,778 = 78px ở 844px (T-031 P5 trần 80)       // chiều cao thân bot, đơn vị SVG (nay 30)
 const BODY_MIN_PX_1280 = 68;                    // 2 × 34px hiện nay
 const BODY_MIN_PX_390 = 19;                     // 2 × ~9,7px hiện nay
 const BLOCK_MIN_U = 110;                        // cạnh nhỏ nhất của hình chính khối có nhân vật (nay 66–96; cổng 88–92)
 const VB_W = 1000, VB_H_MAX = 1200;
-const AMP_MIN_U = 8;                            // biên độ lao/nhảy
+const AMP_MIN_U = 8, AMP_REL = 0.25;                            // biên độ lao/nhảy
 const TEXT_PX_MIN = { t: 13.0, cap: 11.9, n: 24.9 }; // cỡ chữ khối ở 1280 hiện nay, không được nhỏ đi (dung sai 0,15)
 const ALL_BASELINE_BODY_PX_1280 = 34;
 const FRAME_MAX = 300;
@@ -104,7 +104,7 @@ const SAMPLER = `(() => {
     return out; };
   W.snap = () => { const svg = svgEl(); if (!svg) return null; const sr = R(svg), sc = sr.width / (svg.viewBox.baseVal.width || ${VB_W}), o = { sc, w: sr.width, h: sr.height, ch: {} };
     svg.querySelectorAll('g.mch').forEach(g => { const body = g.querySelector('[data-part="body"]'); if (!body) return; const b = R(body);
-      o.ch[g.getAttribute('data-block')] = { s: g.getAttribute('data-state'), d: g.getAttribute('data-dir'), cx: (b.left + b.width / 2 - sr.left) / sc, cy: (b.top + b.height / 2 - sr.top) / sc, wu: b.width / sc, hu: b.height / sc, hpx: b.height }; });
+      o.ch[g.getAttribute('data-block')] = { out: (b.left < sr.left - 0.5 * sc || b.right > sr.right + 0.5 * sc || b.top < sr.top - 0.5 * sc || b.bottom > sr.bottom + 0.5 * sc), s: g.getAttribute('data-state'), d: g.getAttribute('data-dir'), cx: (b.left + b.width / 2 - sr.left) / sc, cy: (b.top + b.height / 2 - sr.top) / sc, wu: b.width / sc, hu: b.height / sc, hpx: b.height }; });
     return o; };
   W.base = () => { W.b0 = W.snap(); return W.b0; };
   let frame = 0;
@@ -188,13 +188,17 @@ async function crit1() {
       rec(1, `L2 ${tag} ${id} thân cao ${fmt(c.hu)} đơn vị = ${fmt(c.hpx)}px (cần ${BODY_MIN_U}–${BODY_MAX_U} đơn vị, ≥ ${minPx}px)`, c.hu + 0.1 >= BODY_MIN_U && c.hu <= BODY_MAX_U && c.hpx + 0.1 >= minPx ? null : `cao ${fmt(c.hu)} đơn vị / ${fmt(c.hpx)}px`); }
     for (const [id, g] of Object.entries(geo.blocks)) rec(1, `L3 ${tag} ${id} hình chính ${fmt(g.w, 0)}×${fmt(g.h, 0)} đơn vị (cạnh nhỏ ≥ ${BLOCK_MIN_U})`, Math.min(g.w, g.h) + 0.1 >= BLOCK_MIN_U ? null : `${fmt(g.w, 0)}×${fmt(g.h, 0)}`);
     for (const [id, g] of Object.entries(geo.blocks)) { if (!g.inside) continue;
-      rec(1, `L4 ${tag} ${id} ${GATES.includes(id) ? 'tâm thân trong cổng và thân trong svg' : 'thân bot lúc nghỉ nằm trọn trong hình chính của khối'}`, g.inside === 'ok' ? null : g.inside); }
+      rec(1, `L4 ${tag} ${id} ${GATES.includes(id) ? 'thân bot nằm trọn trong vòng tròn cổng (cách viền ≥ 2 đơn vị) và trong svg' : 'thân bot lúc nghỉ nằm trọn trong hình chính của khối'}`, g.inside === 'ok' ? null : g.inside); }
+    rec(1, `L5b ${tag} cỡ chữ SVG của MỌI khối, cổng và nhãn không nhỏ hơn hiện nay (.t 11,5; .cap 10,5; .n 22; .res .t 12; cổng 8,5; nhãn đường 10,5 đơn vị)`, geo.fs.length ? geo.fs.slice(0, 3).join(' | ') : null);
     if (w === 1280) { for (const k of ['t', 'cap', 'n']) rec(1, `L5 1280px chữ .${k} của khối ${fmt(geo.text[k], 2)}px (không nhỏ hơn ${TEXT_PX_MIN[k]}px)`, geo.text[k] + 0.15 >= TEXT_PX_MIN[k] ? null : `chữ .${k} chỉ ${fmt(geo.text[k], 2)}px`); }
     rec(1, `L6 ${tag} lúc nghỉ thân bot không che chữ nào (> 2 đơn vị)`, sc.rest.ovl.length ? sc.rest.ovl.slice(0, 3).join(' | ') : null);
     const amp = amplitude(sc); const g = Object.entries(amp.give), t = Object.entries(amp.take);
     rec(1, `L7 ${tag} có ít nhất 4 khối lao (give) và 4 khối nhảy (take) trong 12 sự kiện (đo ${g.length}/${t.length})`, g.length >= 4 && t.length >= 4 ? null : `chỉ thấy ${g.length} give, ${t.length} take`);
-    for (const [id, v] of g) rec(1, `L7 ${tag} ${id} lao ${fmt(v)} đơn vị theo chiều đích (≥ ${AMP_MIN_U})`, v + 0.1 >= AMP_MIN_U ? null : `lao ${fmt(v)}`);
-    for (const [id, v] of t) rec(1, `L7 ${tag} ${id} nhảy lên ${fmt(v)} đơn vị (≥ ${AMP_MIN_U})`, v + 0.1 >= AMP_MIN_U ? null : `nhảy ${fmt(v)}`);
+    const need = id => Math.max(AMP_MIN_U, AMP_REL * (base.ch[id] ? base.ch[id].hu : 0));
+    for (const [id, v] of g) rec(1, `L7 ${tag} ${id} lao ${fmt(v)} đơn vị theo chiều đích (≥ max(${AMP_MIN_U}; ${AMP_REL} × thân ${fmt(base.ch[id].hu)}) = ${fmt(need(id))})`, v + 0.1 >= need(id) ? null : `lao ${fmt(v)} < ${fmt(need(id))}`);
+    for (const [id, v] of t) rec(1, `L7 ${tag} ${id} nhảy lên ${fmt(v)} đơn vị (≥ ${fmt(need(id))})`, v + 0.1 >= need(id) ? null : `nhảy ${fmt(v)} < ${fmt(need(id))}`);
+    const outs = [...new Set(sc.w.log.flatMap(r => Object.entries(r.ch).filter(([, c]) => c.out).map(([id, c]) => id + '[' + c.s + ']')))];
+    rec(1, `L7b ${tag} khi cử động thân bot không bị cắt ra ngoài svg`, outs.length ? 'thân ra ngoài svg: ' + outs.slice(0, 4).join(', ') : null);
     const ov = Object.keys(sc.w.ovl); rec(1, `L8 ${tag} trong mọi trạng thái, thân bot không che chữ nào quá 2 đơn vị (${ov.length ? ov.slice(0, 2).join(' | ') : 'ok'})`, ov.length ? `${ov.length} chỗ che chữ: ${ov.slice(0, 3).join(' | ')}` : null);
     const bb = Object.keys(sc.w.bub).concat(sc.rest.bub); rec(1, `L9 ${tag} bong bóng không đè lên thân của chính nhân vật đó`, bb.length ? bb.slice(0, 3).join(' | ') : null);
     rec(1, `L10 ${tag} không lỗi console`, sc.errs);
@@ -208,11 +212,13 @@ async function geometry(w) {
     for (const id of CHARS) { const blk = document.getElementById(id), shape = blk && blk.querySelector(':scope > rect, :scope > circle'), g = svg.querySelector('g.mch[data-block="' + id + '"]'), body = g && g.querySelector('[data-part="body"]'); if (!shape) continue;
       const s = shape.getBoundingClientRect(), b = body ? body.getBoundingClientRect() : null; let inside = 'ok';
       if (!b) inside = 'không có thân';
-      else if (GATES.includes(id)) { const cx = b.left + b.width / 2, cy = b.top + b.height / 2; if (!(cx >= s.left && cx <= s.right && cy >= s.top && cy <= s.bottom)) inside = 'tâm thân ngoài cổng'; else if (b.left < sr.left - 0.5 || b.right > sr.right + 0.5 || b.top < sr.top - 0.5 || b.bottom > sr.bottom + 0.5) inside = 'thân bot tràn ra ngoài svg'; }
+      else if (GATES.includes(id)) { const cx0 = s.left + s.width / 2, cy0 = s.top + s.height / 2, cx = b.left + b.width / 2, cy = b.top + b.height / 2; if (!(cx >= s.left && cx <= s.right && cy >= s.top && cy <= s.bottom)) inside = 'tâm thân ngoài cổng'; else if ([[b.left, b.top], [b.right, b.top], [b.left, b.bottom], [b.right, b.bottom]].some(([x, y]) => Math.hypot(x - cx0, y - cy0) > s.width / 2 - 2 * sc)) inside = 'viền cổng chạy qua thân bot (thân phải nằm trọn trong vòng tròn, cách viền ≥ 2 đơn vị)'; else if (b.left < sr.left - 0.5 || b.right > sr.right + 0.5 || b.top < sr.top - 0.5 || b.bottom > sr.bottom + 0.5) inside = 'thân bot tràn ra ngoài svg'; }
       else { const e = 0.5 * sc; if (b.left < s.left - e || b.right > s.right + e || b.top < s.top - e || b.bottom > s.bottom + e) inside = 'thân tràn khỏi hình chính ' + (['trái', 'phải', 'trên', 'dưới'][[s.left - b.left, b.right - s.right, s.top - b.top, b.bottom - s.bottom].findIndex(v => v > e)] || ''); }
       out.blocks[id] = { w: s.width / sc, h: s.height / sc, inside }; }
     const px = sel => { const e = document.querySelector(sel); return e ? parseFloat(getComputedStyle(e).fontSize) * sc : 0; };
     out.text = { t: px('#nd_exec .t'), cap: px('#nd_exec .cap'), n: px('#nd_exec .n') };
+    out.fs = []; const FS_MIN = [['.node .t', 11.5], ['.node .cap', 10.5], ['.node .n', 22], ['.res .t', 12], ['.res .lbl', 10.5], ['.gate text', 8.5], ['.lbl', 10.5]];
+    for (const [sel, min] of FS_MIN) svg.querySelectorAll(sel).forEach(e => { if (e.closest('.mch,.bub')) return; const u = parseFloat(getComputedStyle(e).fontSize); const b = e.closest('g[id]'); if (u + 0.05 < min) out.fs.push((b ? b.id : '?') + ' ' + sel + ' ' + u.toFixed(1) + 'u < ' + min + 'u'); });
     return out; }, { CHARS, GATES });
   await o.ctx.close(); return g;
 }
@@ -241,6 +247,9 @@ async function crit2() {
       rec(2, `Z1 ${tag} đúng một svg trong #model và không trùng id`, st0.svgN === 1 && !st0.dup.length ? null : `svg: ${st0.svgN}, id trùng: ${st0.dup.slice(0, 3).join(',')}`);
       // viewport meta không chặn phóng bằng hai ngón
       if (w === 390) { const vm = await o.page.evaluate(() => (document.querySelector('meta[name=viewport]') || {}).content || ''); rec(2, 'Z1 390px viewport không chặn phóng bằng hai ngón (không có user-scalable=no, maximum-scale=1)', /user-scalable\s*=\s*(no|0)|maximum-scale\s*=\s*1(\.0)?\b/i.test(vm) ? 'viewport: ' + vm : null); }
+      await o.page.evaluate(() => { const m = document.querySelector('#model'); window.scrollTo(0, m.getBoundingClientRect().top + window.scrollY - 10); }); await o.page.waitForTimeout(200);
+      const vis0 = await o.page.evaluate(() => { const b = document.querySelector('button#model-zoom'), r = b.getBoundingClientRect(), e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { inView: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth, hit: !!(e && b.contains(e)) }; });
+      rec(2, `Z1 ${tag} cuộn tới đầu bảng là thấy nút ngay (nằm trong khung nhìn, bấm được, không bị che)`, vis0.inView && vis0.hit ? null : `nút ${vis0.inView ? 'bị che' : 'ngoài khung nhìn'}`);
       const inlineSvgW = st0.sw, inlineBody = st0.hpx;
       await o.page.evaluate(() => { const m = document.querySelector('#model'); window.scrollTo(0, m.getBoundingClientRect().top + window.scrollY - 10); }); await o.page.waitForTimeout(200);
       const y0 = await o.page.evaluate(() => window.scrollY), url0 = o.page.url();
@@ -309,7 +318,7 @@ async function crit2() {
     const lit = log.map(r => r.lit).filter(l => l && Object.keys(l).length); const litOk = ['nd_exec', 'gt_code'].every(id => lit.some(l => (l[id] || 0) >= 2.5));
     rec(2, `R3 ${tag} phóng to: khối sáng (viền ≥ 2,5px) ở nd_exec và gt_code`, litOk ? null : 'khối không sáng');
     const st = new Set(log.flatMap(r => Object.values(r.ch).map(c => c.s))); const amp = amplitude(sc);
-    rec(2, `R4 ${tag} phóng to: nhân vật cử động (có ${[...st].join(', ')}; lao/nhảy ≥ ${AMP_MIN_U} đơn vị)`, st.has('give') && st.has('take') && Object.values(amp.give).some(v => v + 0.1 >= AMP_MIN_U) && Object.values(amp.take).some(v => v + 0.1 >= AMP_MIN_U) ? null : 'thiếu give/take hoặc biên độ nhỏ');
+    rec(2, `R4 ${tag} phóng to: nhân vật cử động (có ${[...st].join(', ')}; lao/nhảy ≥ max(${AMP_MIN_U}; ${AMP_REL} × thân))`, st.has('give') && st.has('take') && Object.entries(amp.give).some(([id, v]) => v + 0.1 >= Math.max(AMP_MIN_U, AMP_REL * ((sc.base.ch[id] || {}).hu || 0))) && Object.entries(amp.take).some(([id, v]) => v + 0.1 >= Math.max(AMP_MIN_U, AMP_REL * ((sc.base.ch[id] || {}).hu || 0))) ? null : 'thiếu give/take hoặc biên độ nhỏ');
     const ov = Object.keys(sc.w.ovl); rec(2, `R5 ${tag} phóng to: nhân vật không che chữ`, ov.length ? ov.slice(0, 3).join(' | ') : null);
     rec(2, `R6 ${tag} phóng to: không lỗi console, khung hình không trễ ≥ ${FRAME_MAX}ms (đo ${fmt(sc.w.maxGap, 0)}ms)`, sc.errs || (sc.w.maxGap < FRAME_MAX ? null : `khung trễ ${fmt(sc.w.maxGap, 0)}ms`));
   }
