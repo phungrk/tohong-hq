@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Thư viện đo bất biến vùng dashboard/model (nguồn: T-028, spec products/T-028-mo-hinh-dot-chay.md, qua Spec Gate 2026-11-01).
 // Viết lại gọn từ các ca của eval/T-028/model-dots.cjs (S2, B1/B4, dot trên đường, M3/S4, RM2, P1, S5); bản cố định, không phụ thuộc eval việc.
-//   node model_inv.cjs --repo <repo-dashboard> --check <no-fake-dots|dot-cap|dot-on-path|no-stuck-lit|reduced-no-dots|no-hscroll-390|capu-escalated>
+//   node model_inv.cjs --repo <repo-dashboard> --check <no-fake-dots|dot-cap|dot-on-path|no-stuck-lit|reduced-no-dots|no-hscroll-390|capu-escalated|count-lit>
 // Dữ liệu dashboard.json, kênh live (WebSocket) và d3 đều giả/cục bộ. Mã thoát 0 = đạt.
 const fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
@@ -86,9 +86,10 @@ const CHECKS = {
     }
     return null;
   },
-  // Bất biến 4: khối không có việc theo sổ cái và không nhận dot trong 10 giây thì tắt; dữ liệu rảnh thì không khối nào sáng
+  // Bất biến 4: khối có số đếm việc đang ở khối bằng 0 thì không sáng; khối giữ dot nhận dot mà sổ cái không có việc thì tắt trong 10 giây
   'no-stuck-lit': async () => {
-    const o = await open({ data: dash([T('T-1', 'done', 'engineering', { tier: 'A' }), T('T-2', 'blocked', 'engineering'), T('T-3', 'new', 'product'), T('T-4', 'done', 'engineering', { tier: 'B', h: 60 })]) });
+    // ADR-012 mục 2 + ADR-014 (T-032): việc new của product/engineering nay làm khối sáng, nên dữ liệu rảnh dùng việc new của insight và chief-of-staff.
+    const o = await open({ data: dash([T('T-1', 'done', 'engineering', { tier: 'A' }), T('T-2', 'blocked', 'engineering'), T('T-3', 'new', 'insight'), T('T-4', 'done', 'engineering', { tier: 'B', h: 60 }), T('T-5', 'new', 'chief-of-staff')]) });
     let l = await lit(o); const on0 = Object.keys(l).filter(k => l[k][0] >= 2.5);
     if (on0.length) { await o.ctx.close(); return 'dữ liệu rảnh mà khối sáng: ' + on0.join(', '); }
     send(o, { task: 'T-901', event: 'assigned', from: 'chief-of-staff', to: 'insight', state: 'new', holder: 'insight', owner: 'insight' });
@@ -116,6 +117,59 @@ const CHECKS = {
     const chk = async w => { const l = (await lit(o)).nd_capu; if (!l) return 'không đọc được nd_capu'; if (l[0] < 2.5) return `${w}: Capu không sáng (viền ${l[0]}px)`; return near(rgb(l[1]), BAD) ? null : `${w}: viền Capu màu ${l[1]}, cần #d33`; };
     let e = await chk('lúc mở trang'); if (!e) { await o.page.waitForTimeout(11500); e = await chk('sau 11 giây'); }
     await o.ctx.close(); return e;
+  },
+  // Bất biến 9 (nguồn T-032, ADR-012/013/014): khối loại "sáng khi > 0" (nd_intents, nd_spec, gt_spec, nd_respec, nd_exec, nd_rework, gt_code, nd_capu)
+  // sáng khi và chỉ khi số đếm việc hiển thị trên khối > 0, đúng màu loại. Số đếm đọc từ trang: chữ số lớn .n; riêng nd_exec cộng số "N chờ" ở chú thích; cổng là "N chờ".
+  // Khối số tích luỹ / cửa sổ thời gian (nd_kr, nd_rel, nd_prod, src_*) và nd_insight (khi không có việc insight đang làm) không sáng chỉ vì số > 0 (E2-E6).
+  'count-lit': async () => {
+    const HEXC = { spec: [0x14, 0x75, 0x4d], code: [0x2b, 0x7f, 0xb8], back: [0xd9, 0x93, 0x1f], bad: BAD, ins: [0x8a, 0x5c, 0xf6] };
+    const COUNTED = ['nd_intents', 'nd_spec', 'gt_spec', 'nd_respec', 'nd_exec', 'nd_rework', 'gt_code', 'nd_capu'];
+    const readCounts = o => o.page.evaluate(() => {
+      const num = s => { const m = /(\d+)/.exec(s || ''); return m ? +m[1] : NaN; };
+      const big = id => { const e = document.querySelector('#' + id + ' .n'); return e ? num(e.textContent) : NaN; };
+      const cap = (document.querySelector('#nd_exec .cap') || {}).textContent || '';
+      const wait = /(\d+)\s*chờ/.exec(cap);
+      return { nd_intents: big('nd_intents'), nd_spec: big('nd_spec'), nd_respec: big('nd_respec'), nd_rework: big('nd_rework'), nd_capu: big('nd_capu'),
+        nd_exec: big('nd_exec') + (wait ? +wait[1] : 0), gt_spec: num((document.getElementById('sgateQ') || {}).textContent), gt_code: num((document.getElementById('gateQ') || {}).textContent) };
+    });
+    const isOn = (l, id) => l[id] && l[id][0] >= 2.5;
+    const judge = async (name, data, want, colors) => {
+      const o = await open({ data }); const c = await readCounts(o), l = await lit(o); await o.ctx.close();
+      if (o.errors.length) return [`${name}: lỗi trang ${o.errors[0]}`];
+      const bad = [];
+      for (const [id, k] of Object.entries(want)) if (c[id] !== k) bad.push(`${name}: tiền đề sai, ${id} hiển thị số ${c[id]}, cần ${k}`);
+      for (const id of COUNTED) {
+        if (!(c[id] >= 0)) { bad.push(`${name}: không đọc được số đếm của ${id}`); continue; }
+        if (c[id] > 0 && !isOn(l, id)) { bad.push(`${name}: ${id} có số đếm ${c[id]} mà không sáng (viền ${l[id] ? l[id][0] : '?'}px)`); continue; }
+        if (c[id] === 0 && isOn(l, id)) { bad.push(`${name}: ${id} số đếm 0 mà sáng`); continue; }
+        if (c[id] > 0 && colors[id] && !near(rgb(l[id][1]), HEXC[colors[id]])) { bad.push(`${name}: ${id} sáng màu ${l[id][1]}, cần màu ${colors[id]}`); continue; }
+      }
+      const extra = ['nd_kr', 'nd_rel', 'nd_prod', 'src_data', 'src_inc', 'src_fb', 'nd_insight'].filter(id => isOn(l, id));
+      if (extra.length) bad.push(`${name}: khối số tích luỹ / không có việc sáng oan: ${extra.join(', ')}`);
+      return bad;
+    };
+    const nowIso = new Date().toISOString().slice(0, 16);
+    const cumul = [T('T-90', 'done', 'engineering', { tier: 'A', h: 1 }), T('T-91', 'done', 'engineering', { tier: 'A', h: 100 })].map(t => ({ ...t, updated: nowIso }));
+    const cases = [
+      ['đầy đủ', [T('T-1', 'new', 'product'), T('T-2', 'doing', 'product'), T('T-3', 'review', 'product'), T('T-4', 'spec', 'engineering', { holder: 'product' }), T('T-5', 'new', 'engineering'),
+        T('T-6', 'rework', 'engineering'), T('T-7', 'review', 'engineering'), T('T-8', 'escalated', 'engineering', { holder: 'capu' }), ...cumul],
+        { nd_intents: 1, nd_spec: 1, gt_spec: 1, nd_respec: 1, nd_exec: 1, nd_rework: 1, gt_code: 1, nd_capu: 1 },
+        { nd_intents: 'spec', nd_spec: 'spec', gt_spec: 'spec', nd_respec: 'back', nd_exec: 'code', nd_rework: 'back', gt_code: 'code', nd_capu: 'bad' }],
+      ['rảnh (chỉ số tích luỹ)', [...cumul, T('T-3', 'new', 'insight'), T('T-4', 'new', 'chief-of-staff'), T('T-5', 'blocked', 'engineering')],
+        { nd_intents: 0, nd_spec: 0, gt_spec: 0, nd_respec: 0, nd_exec: 0, nd_rework: 0, gt_code: 0, nd_capu: 0 }, {}],
+      ['một việc product new', [T('T-1', 'new', 'product')], { nd_intents: 1 }, { nd_intents: 'spec' }],
+      ['một việc product rework', [T('T-1', 'rework', 'product')], { nd_spec: 1 }, { nd_spec: 'spec' }],
+      ['một việc product review', [T('T-1', 'review', 'product')], { gt_spec: 1 }, { gt_spec: 'spec' }],
+      ['một việc state=spec', [T('T-1', 'spec', 'engineering', { holder: 'product' })], { nd_respec: 1 }, { nd_respec: 'back' }],
+      ['một việc engineering new', [T('T-1', 'new', 'engineering')], { nd_exec: 1 }, { nd_exec: 'code' }],
+      ['một việc engineering doing', [T('T-1', 'doing', 'engineering')], { nd_exec: 1 }, { nd_exec: 'code' }],
+      ['một việc engineering rework', [T('T-1', 'rework', 'engineering')], { nd_rework: 1, nd_exec: 0 }, { nd_rework: 'back' }],
+      ['một việc engineering review', [T('T-1', 'review', 'engineering')], { gt_code: 1 }, { gt_code: 'code' }],
+      ['một diff bậc B chờ đọc', [T('T-1', 'done', 'engineering', { tier: 'B', h: 5 })], { nd_capu: 1 }, { nd_capu: 'code' }],
+    ];
+    const errs = [];
+    for (const [name, tasks, want, colors] of cases) errs.push(...await judge(name, dash(tasks), want, colors));
+    return errs.length ? errs.join(' | ') : null;
   },
 };
 
