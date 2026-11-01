@@ -1,0 +1,21 @@
+{
+  "task": "T-028",
+  "at": "2026-11-01T04:58",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng dashboard/model",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-028/run.sh /home/user/tohong-hq-dashboard",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 109500,
+      "out": "ợt, không dot: nd_rel không sáng (viền 1.2px, cần 3px)\nFAIL C6 prefers-reduced-motion (5/7 ý sai)\nFAIL C7 P3 390px: số đếm trên khối hiển thị ≥ 9px: số đếm chỉ 7.1px\nFAIL C7 P6 390px: dot hiển thị đường kính 7–16px (đo được 2.9–2.9): dot quá nhỏ hoặc quá to để nhìn trên điện thoại\nFAIL C7 390px (2/8 ý sai)\nPASS C8 không lỗi console, không thư viện/mạng ngoài mới (31/31)\nPASS C9 các bảng khác giữ nguyên (1/1)\nFAIL C10 K1 docs/screenshots/T-028/ đã commit ở HEAD đủ 9 ảnh PNG: thiếu: idle.png (không có); lit-by-state.png (không có); dot-spec.png (không có); dot-code.png (không có); dot-back.png (không có); dot-bad.png (không có); dot-ins.png (không có); reduced-motion.png (không có); phone-390.png (không có)\nFAIL C10 ảnh chụp đã commit (1/1 ý sai)\nFAIL C1, C2, C3, C4, C5, C6, C7, C10 chưa đạt",
+      "tier": 1
+    }
+  ],
+  "hint": "code"
+}
