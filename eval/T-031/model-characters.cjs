@@ -510,7 +510,7 @@ async function runPhoneDark(paths, C) {
     await send(o, live({ ...ev, event: 'rejected', from: 'adversary', to: 'engineering', state: 'rework', holder: 'engineering', severity: 'blocker', round: 1, task: 'T-901' }));
     await o.page.waitForTimeout(1300); await o.page.setViewportSize({ width: 844, height: 390 }); await o.page.waitForTimeout(400);
     m = await sizes(); log = await logOf(o); const last = log[log.length - 1];
-    const small2 = m.hs.filter(([, h]) => h < 19 || h > 56); rec(8, 'P5 xoay 390 → 844 giữa lúc đang cử động: nhân vật vẫn cao 19–56px (không tính một lần; T-035 nâng sàn từ 9)', small2.length ? small2.map(([id, h]) => `${id} ${h.toFixed(1)}px`).join(', ') : null);
+    const small2 = m.hs.filter(([, h]) => h < 19 || h > 80); rec(8, 'P5 xoay 390 → 844 giữa lúc đang cử động: nhân vật vẫn cao 19–80px (không tính một lần; T-035/ADR-015 nâng sàn từ 9, trần từ 56: 100 đơn vị × 0,778 = 78px ở 844)', small2.length ? small2.map(([id, h]) => `${id} ${h.toFixed(1)}px`).join(', ') : null);
     rec(8, 'P6 xoay ngang: không cuộn ngang', m.over <= 0 ? null : `tràn ${m.over}px`);
     const fs2 = log.filter(r => r.t > last.t - 600).flatMap(r => r.b).map(b => b[6]); rec(8, 'P7 xoay ngang: chữ bong bóng vẫn 9–16px', fs2.length && (Math.min(...fs2) < 9 || Math.max(...fs2) > 16) ? `cỡ chữ ${Math.min(...fs2).toFixed(1)}–${Math.max(...fs2).toFixed(1)}px` : null);
     rec(8, 'phone console', o.errors.length ? o.errors[0] : null);
