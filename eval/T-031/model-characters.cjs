@@ -578,7 +578,7 @@ async function runOthers() {
         const b = document.body.cloneNode(true); b.querySelectorAll('#model').forEach(e => e.remove()); b.querySelectorAll('script').forEach(e => e.remove());
         const html = [...b.querySelectorAll('section, header, footer')].map(e => (e.id || e.className || e.tagName) + '::' + e.outerHTML.replace(/\s+/g, ' '));
         const names = new Set(); document.querySelectorAll('body *').forEach(e => { if (e.closest('#model')) return; const s = getComputedStyle(e); if (s.animationName !== 'none') names.add(s.animationName + '/' + s.animationDuration); });
-        const rules = []; const walk = (rs, pre) => { for (const r of rs) { if (r.cssRules && !r.selectorText) walk(r.cssRules, pre + (r.conditionText ? '@' + r.conditionText + ' ' : r.name ? '@kf ' + r.name + ' ' : '')); else { const t = pre + r.cssText; if (!/#model|mch|\.bub|fx_b/.test(t)) rules.push(t); } } };
+        const rules = []; const walk = (rs, pre) => { for (const r of rs) { if (r.cssRules && !r.selectorText) walk(r.cssRules, pre + (r.conditionText ? '@' + r.conditionText + ' ' : r.name ? '@kf ' + r.name + ' ' : '')); else { const t = pre + r.cssText; if (!/#model|mch|\.bub|fx_b|^@kf mc-/.test(t)) rules.push(t); } } };
         for (const sh of document.styleSheets) { try { walk(sh.cssRules, ''); } catch (_) { } }
         return { html, names: [...names].sort(), rules };
       }); }
