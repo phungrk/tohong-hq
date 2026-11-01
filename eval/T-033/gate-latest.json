@@ -1,6 +1,6 @@
 {
   "task": "T-033",
-  "at": "2026-11-01T06:44",
+  "at": "2026-11-01T06:53",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-032/run.sh /home/user/tohong-hq-dashboard",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 74432,
+      "ms": 74119,
       "out": "PASS C1 (14 ý)\nPASS C2 (19 ý)\nPASS C3 (10 ý)\nPASS C4 (3 ý)\nPASS C5 (4 ý)\nPASS C6 (4 ý)\nPASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "eval/invariants/dashboard/model/inv-001-khong-dot-gia.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9507,
+      "ms": 9458,
       "out": "PASS no-fake-dots",
       "tier": 2
     },
@@ -28,7 +28,7 @@
       "eval": "eval/invariants/dashboard/model/inv-002-tran-dot.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 18418,
+      "ms": 18436,
       "out": "PASS dot-cap",
       "tier": 2
     },
@@ -36,7 +36,7 @@
       "eval": "eval/invariants/dashboard/model/inv-003-dot-tren-duong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 8563,
+      "ms": 8660,
       "out": "PASS dot-on-path",
       "tier": 2
     },
@@ -44,7 +44,7 @@
       "eval": "eval/invariants/dashboard/model/inv-004-khong-ket-sang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 16865,
+      "ms": 16925,
       "out": "PASS no-stuck-lit",
       "tier": 2
     },
@@ -52,7 +52,7 @@
       "eval": "eval/invariants/dashboard/model/inv-005-reduced-motion-khong-dot.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 5406,
+      "ms": 5374,
       "out": "PASS reduced-no-dots",
       "tier": 2
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/dashboard/model/inv-006-khong-cuon-ngang-390.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 2399,
+      "ms": 2358,
       "out": "PASS no-hscroll-390",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/dashboard/model/inv-007-capu-sang-khi-escalated.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 13850,
+      "ms": 13818,
       "out": "PASS capu-escalated",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/dashboard/model/inv-008-dot-co-khi-doi-be-ngang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 7168,
+      "ms": 7153,
       "out": "PASS rotate",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/dashboard/model/inv-009-so-dem-thi-sang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 19813,
+      "ms": 19986,
       "out": "PASS count-lit",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/dashboard/model/inv-010-nhan-vat-khop-khoi-sang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 1745,
+      "ms": 1655,
       "out": "PASS char-match-lit (chưa áp dụng: trang chưa có nhân vật T-031)",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/dashboard/model/inv-011-ranh-thi-mo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 1717,
+      "ms": 1789,
       "out": "PASS idle-dim (chưa áp dụng: trang chưa có nhân vật T-031)",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/dashboard/model/inv-012-reduced-motion-nhan-vat-dung-yen.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 1670,
+      "ms": 1706,
       "out": "PASS reduced-still (chưa áp dụng: trang chưa có nhân vật T-031)",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/dashboard/model/inv-013-bong-bong-co-tran.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 1616,
+      "ms": 1743,
       "out": "PASS bubble-cap (chưa áp dụng: trang chưa có nhân vật T-031)",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/dashboard/model/inv-014-khong-giao-nhan-gia.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 1673,
+      "ms": 1794,
       "out": "PASS no-fake-handover (chưa áp dụng: trang chưa có nhân vật T-031)",
       "tier": 2
     },
@@ -132,9 +132,49 @@
       "eval": "eval/invariants/dashboard/model/inv-015-nhan-vat-giu-net-ve.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 1593,
+      "ms": 1690,
       "out": "PASS char-own-paint (chưa áp dụng: trang chưa có nhân vật T-031)",
       "tier": 2
+    },
+    {
+      "eval": "eval/T-033/adv-01.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 14875,
+      "out": "PASS newdoing",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-033/adv-02.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 9961,
+      "out": "PASS drain",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-033/adv-03.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 28886,
+      "out": "PASS rework",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-033/adv-04.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 19269,
+      "out": "PASS mixcolor",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-033/adv-05.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 14995,
+      "out": "PASS noowner",
+      "tier": 3
     }
   ],
   "hint": ""
