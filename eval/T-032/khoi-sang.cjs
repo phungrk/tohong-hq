@@ -117,10 +117,15 @@ async function c1() {
   // 1e: việc new của chủ khác không được đếm vào Ý định (số 0 thì tối)
   o = await open({ data: dash([T('T-1', 'new', 'engineering'), T('T-2', 'new', 'insight'), T('T-3', 'new', 'chief-of-staff')]) });
   try { const r = await read(o); rec(1, '1e việc new của engineering/insight/chief-of-staff: Ý định "0" và tắt', r.n.nd_intents === '0' ? wantOff(r, 'nd_intents', 'số đếm 0') : 'n=' + r.n.nd_intents); } finally { await o.ctx.close(); }
-  // 1f: ngược lại với ảnh: khối không có số lớn >0 thì tối, kể cả caption có "chờ": engineering new làm caption Thực thi ghi "1 chờ" nhưng số lớn là 0
+  // 1f (ADR-013): Thực thi có số lớn 0 nhưng chú thích "1 chờ" (việc engineering new) -> vẫn sáng code; số hiển thị không gộp
   o = await open({ data: dash([T('T-1', 'new', 'engineering')]) });
   try { const r = await read(o);
-    rec(1, '1f Thực thi: số lớn "0", chú thích "… 1 chờ" -> tắt (ngoại lệ E1: chỉ số lớn quyết định)', r.n.nd_exec === '0' && /1 chờ/.test(r.cap.nd_exec || '') ? wantOff(r, 'nd_exec', 'số lớn 0') : `n=${r.n.nd_exec} cap=${r.cap.nd_exec}`); } finally { await o.ctx.close(); }
+    rec(1, '1f Thực thi: số lớn "0", chú thích "… 1 chờ" -> sáng code (ADR-013), số không gộp', r.n.nd_exec === '0' && /0 đang code · 1 chờ/.test(r.cap.nd_exec || '') ? wantLit(r, 'nd_exec', 'code') : `n=${r.n.nd_exec} cap=${r.cap.nd_exec}`);
+    rec(1, '1f … và chỉ Thực thi sáng', others(r, ['nd_exec']).length ? 'sáng oan: ' + others(r, ['nd_exec']).join(', ') : null); } finally { await o.ctx.close(); }
+  // 1g: việc engineering new đi sang doing qua live: vẫn sáng (số lớn 1); rồi sang review: Thực thi tắt (cả hai số 0)
+  o = await open({ data: dash([T('T-1', 'new', 'engineering')]) });
+  try { send(o, { task: 'T-1', event: 'handoff', from: 'engineering', to: 'adversary', state: 'review', holder: 'adversary', owner: 'engineering' }); await o.page.waitForTimeout(1500);
+    const r = await read(o); rec(1, '1g Thực thi: cả "đang code" và "chờ" về 0 -> tắt', /0 đang code · 0 chờ/.test(r.cap.nd_exec || '') ? wantOff(r, 'nd_exec', 'cả hai số 0') : 'cap=' + r.cap.nd_exec); } finally { await o.ctx.close(); }
 }
 
 // ---------- Tiêu chí 2: mọi khối có số đếm việc: số > 0 <=> sáng, đúng màu loại ----------
@@ -136,14 +141,14 @@ async function c2() {
     rec(2, '2a nd_insight (việc insight doing, số báo cáo là tích luỹ nên không phải số đếm) sáng ins', wantLit(r, 'nd_insight', 'ins'));
   } finally { await o.ctx.close(); }
   // 2b: tất cả số đếm việc = 0 (chỉ có việc new/blocked của chủ khác, done bậc A, done quá 48 giờ) -> không khối nào sáng
-  const idle = [T('T-1', 'done', 'engineering', { tier: 'A', h: 5, holder: '-' }), T('T-2', 'blocked', 'engineering', { holder: 'chief-of-staff' }), T('T-3', 'new', 'engineering'),
+  const idle = [T('T-1', 'done', 'engineering', { tier: 'A', h: 5, holder: '-' }), T('T-2', 'blocked', 'engineering', { holder: 'chief-of-staff' }), T('T-3', 'new', 'insight'),
     T('T-4', 'done', 'engineering', { tier: 'B', h: 60, holder: '-' }), T('T-5', 'done', 'product', { tier: 'B', h: 5, holder: '-' }), T('T-6', 'doing', 'chief-of-staff')];
   o = await open({ data: dash(idle) });
   try { const r = await read(o); const on = BLOCKS.filter(id => isOn(r, id));
     rec(2, '2b mọi số đếm việc = 0: không khối nào sáng', on.length ? 'sáng oan: ' + on.join(', ') : null); } finally { await o.ctx.close(); }
   // 2c: từng khối đếm: thêm đúng một việc thì đúng khối đó (và Ý định riêng cho new) sáng, khối khác không
   const single = [['nd_spec', T('T-1', 'rework', 'product'), 'spec'], ['gt_spec', T('T-1', 'review', 'product'), 'spec'], ['nd_respec', T('T-1', 'spec', 'engineering', { holder: 'product' }), 'back'],
-    ['nd_exec', T('T-1', 'doing', 'engineering'), 'code'], ['nd_rework', T('T-1', 'rework', 'engineering'), 'back'], ['gt_code', T('T-1', 'review', 'engineering'), 'code'],
+    ['nd_exec', T('T-1', 'doing', 'engineering'), 'code'], ['nd_exec', T('T-1', 'new', 'engineering'), 'code'], ['nd_rework', T('T-1', 'rework', 'engineering'), 'back'], ['gt_code', T('T-1', 'review', 'engineering'), 'code'],
     ['nd_capu', T('T-1', 'done', 'engineering', { tier: 'B', h: 5, holder: '-' }), 'code'], ['nd_intents', NEWP('T-1'), 'spec']];
   for (const [id, t, ck] of single) { o = await open({ data: dash([t]) });
     try { const r = await read(o); const e = wantLit(r, id, ck) || (others(r, [id]).length ? 'sáng oan: ' + others(r, [id]).join(', ') : null); rec(2, `2c chỉ một việc ${t.owner}/${t.state}: chỉ ${id} sáng (${HEX[ck]})`, e); } finally { await o.ctx.close(); } }
