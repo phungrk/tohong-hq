@@ -373,12 +373,13 @@ async function crit4() {
   rec(4, `V0 bất biến inv-001..016 có đủ (${invs.length} file)`, invs.length >= 16 ? null : `chỉ ${invs.length} file`);
   const jobs = invs.map(f => () => runShell('bash', [path.join(invDir, f)], { TOHONG_DASHBOARD_REPO: REPO }, 400000).then(r => ({ f, ...r })));
   if (!NO_OLD) {
-    const ev = (name, rel, extra = []) => () => runShell('bash', [path.join(HQ, rel), REPO, ...extra], {}, 580000).then(r => ({ f: name, ...r }));
+    const ev = (name, rel, extra = []) => () => runShell('bash', [path.join(HQ, rel), REPO, ...extra], { T028_PAR: '3' }, 580000).then(r => ({ f: name, ...r }));
     // T-028 tiêu chí 3 (khối sáng) bị T-032 sửa có chủ đích (việc new của product/engineering sáng), nên eval T-028 C3 đỏ trên main từ T-032 (C5 của T-028 cũng kéo C3 theo, bỏ; phần không dot giả/trần dot do inv-001/002 giữ): chạy các tiêu chí còn lại của T-028; phần khối sáng do eval T-032 và inv-004/009 giữ.
     for (const c of [1, 2, 4, 6, 7, 8, 9, 10]) jobs.push(ev('eval T-028 C' + c, 'eval/T-028/run.sh', ['--criterion', String(c)]));
     jobs.push(ev('eval T-032', 'eval/T-032/run.sh'), ev('eval T-031', 'eval/T-031/run.sh', ['--task', 'T-034']));
   }
-  const rs = await pool(jobs, 2);
+  // Sửa eval cho T-036: bất biến chạy pool 2 như cũ; eval cũ (T-028/T-032/T-031) chạy TUẦN TỰ sau đó và T-028 chỉ 3 ca song song (T028_PAR=3), vì phép đo dot theo khung hình nhạy với tải máy.
+  const nInv = invs.length; const rs = (await pool(jobs.slice(0, nInv), 2)).concat(await pool(jobs.slice(nInv), 1));
   for (const r of rs) { const last = r.out.trim().split('\n').filter(l => /^(PASS|FAIL)/.test(l)).slice(-3).join(' / ') || r.out.trim().split('\n').slice(-2).join(' / ');
     rec(4, `V ${r.f}`, r.code === 0 ? null : `thoát ${r.code}: ${last.slice(0, 300)}`); }
   // console + khung hình khi dồn 40 sự kiện (thường và phóng to)
@@ -416,7 +417,10 @@ async function shots() {
   let before = null; try { const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 't035-')), f = path.join(tmp, 'index.html'); fs.writeFileSync(f, cp.execFileSync('git', ['-C', REPO, 'show', REF + ':index.html'], { maxBuffer: 64e6, stdio: ['ignore', 'pipe', 'ignore'] })); before = f; } catch (e) { console.log('CẢNH BÁO không lấy được bản trước ' + REF + ': ' + String(e.message).slice(0, 100)); }
   const freeze = o => o.page.evaluate(() => document.getAnimations().forEach(a => { try { a.pause(); } catch (_) { } }));
   const take = async (index, w, name) => { const o = await open({ vp: w === 390 ? { width: 390, height: 844 } : { width: 1280, height: 900 }, data: ACTIVE(), index });
-    send(o, 'M6'); await o.page.waitForTimeout(380); await freeze(o); const el = await o.page.$('#model'); await el.screenshot({ path: path.join(dir, name + '.png') }); await o.ctx.close(); console.log('ảnh ' + name); };
+    send(o, 'M6'); await o.page.waitForTimeout(380); await freeze(o);
+    // Chụp dải ngang toàn bề rộng khung nhìn (390 hoặc 1280) ở đúng chỗ và cao đúng bằng #model, KHÔNG chụp phần tử #model (hẹp hơn khung nhìn vì lề: 358px ở 390), để ảnh rộng đúng bằng khung nhìn và khớp S4.
+    const bb = await o.page.evaluate(() => { const b = document.querySelector('#model').getBoundingClientRect(); return { y: b.top + scrollY, h: b.height, w: document.documentElement.clientWidth }; });
+    await o.page.screenshot({ path: path.join(dir, name + '.png'), clip: { x: 0, y: bb.y, width: bb.w, height: bb.h }, fullPage: true }); await o.ctx.close(); console.log('ảnh ' + name); };
   if (before) { await take(before, 1280, 'truoc-1280'); await take(before, 390, 'truoc-390'); }
   await take(INDEX, 1280, 'sau-1280'); await take(INDEX, 390, 'sau-390');
   for (const w of [1280, 390]) { const o = await open({ vp: w === 390 ? { width: 390, height: 844 } : { width: 1280, height: 900 }, data: ACTIVE() });

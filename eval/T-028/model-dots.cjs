@@ -135,8 +135,14 @@ function analyzeDots(log, t0, t1, paths, legs, colorKey) {
     if (ts.length < 3) out.problems.push(`không thấy dot chạy trên ${id}`);
     else { const dur = ts[ts.length - 1] - ts[0]; if (dur < 700 || dur > 2800) out.problems.push(`dot chạy hết ${id} trong ${Math.round(dur)}ms (phải 0,7–2,8 giây)`); } });
   const p0 = paths[legs[0]], pN = paths[legs[legs.length - 1]];
-  if (p0 && dist(smp[0].p, [p0[0]]) > 16) out.problems.push(`dot không xuất phát từ đầu đường ${legs[0]}`);
-  if (pN && dist(smp[smp.length - 1].p, [pN[pN.length - 1]]) > 16) out.problems.push(`dot không tới cuối đường ${legs[legs.length - 1]}`);
+  // Sửa eval cho T-036 (xem spec T-035 "Nhật ký sửa eval"): mẫu là mỗi khung hình (rAF). Khi máy tải nặng, khung hình thưa; dot (chạy theo đồng hồ) đã đi thêm một đoạn giữa hai khung,
+  // nên mẫu đầu/cuối có thể cách đầu/cuối đường hơn 16 đơn vị dù dot xuất phát và tới cuối đúng. Dung sai = 16 + vận tốc dot × khoảng trống khung hình lớn nhất đo được (trần 250ms).
+  // Ngưỡng 16 khi máy rảnh không đổi. Dot dừng giữa đường vẫn đỏ: xa đích hơn nhiều so với vận tốc × 250ms.
+  const plen = poly => { let L = 0; for (let k = 1; k < poly.length; k++) L += Math.hypot(poly[k][0] - poly[k - 1][0], poly[k][1] - poly[k - 1][1]); return L; };
+  let maxGap = 0; for (let k = 1; k < seg.length; k++) maxGap = Math.max(maxGap, seg[k].t - seg[k - 1].t); maxGap = Math.min(maxGap, 250);
+  const tolFor = (id, i) => { const ts = smp.filter((s, k) => idx[k].i === i && idx[k].d <= 5).map(s => s.t); const dur = ts.length >= 3 ? Math.max(ts[ts.length - 1] - ts[0], 700) : 1500; return 16 + (paths[id] ? plen(paths[id]) : 0) / dur * maxGap; };
+  if (p0 && dist(smp[0].p, [p0[0]]) > tolFor(legs[0], 0)) out.problems.push(`dot không xuất phát từ đầu đường ${legs[0]}`);
+  if (pN && dist(smp[smp.length - 1].p, [pN[pN.length - 1]]) > tolFor(legs[legs.length - 1], legs.length - 1)) out.problems.push(`dot không tới cuối đường ${legs[legs.length - 1]}`);
   out.colorProblems = [];
   const want = RGB[colorKey]; const bad = smp.filter(s => !near(s.fill, want, 3));
   if (bad.length) out.colorProblems.push(`màu dot ${JSON.stringify(bad[0].fill)} khác ${HEX[colorKey]}`);
@@ -554,7 +560,8 @@ async function takeShots(dir, paths) {
     if (SHOTS) { await takeShots(path.resolve(SHOTS === true ? path.join(REPO, 'docs/screenshots/T-028') : SHOTS), paths); await browser.close(); console.log('PASS'); process.exit(0); }
     const par = (...fs) => Promise.all(fs);
     if (want(1) || want(2) || want(3) || want(8)) {
-      for (let i = 0; i < CASES.length; i += 9) await par(...CASES.slice(i, i + 9).map(c => runMapping(c, paths)));
+      const PAR = Math.max(1, Number(process.env.T028_PAR) || 9);   // số ca chạy song song (mặc định 9; T-035 tiêu chí 4 đặt nhỏ hơn cho đỡ tải)
+      for (let i = 0; i < CASES.length; i += PAR) await par(...CASES.slice(i, i + PAR).map(c => runMapping(c, paths)));
     }
     const B = [];
     if (want(1) || want(5)) B.push(runIgnored());
@@ -574,7 +581,8 @@ async function takeShots(dir, paths) {
   const TITLES = { 1: 'bảng ánh xạ: mỗi sự kiện một dot đúng đường, sự kiện bỏ qua không dot', 2: 'màu dot đúng 5 loại', 3: 'khối đang xử lý sáng, khối rảnh không tô', 4: 'chú giải màu và khối sáng',
     5: 'không dot giả, giới hạn dot, tải lại, kênh live tắt', 6: 'prefers-reduced-motion', 7: '390px', 8: 'không lỗi console, không thư viện/mạng ngoài mới', 9: 'các bảng khác giữ nguyên', 10: 'ảnh chụp đã commit' };
   let fails = 0; const failed = [];
-  for (const c of Object.keys(R).map(Number).sort((a, b) => a - b)) {
+  // Sửa eval cho T-036: --criterion N chỉ chấm tiêu chí N. Các ca ánh xạ ghi cả tiêu chí 3 (khối sáng) khi chạy C1/C2, nhưng tiêu chí 3 đã bị ADR-012/T-032 thay có chủ đích nên không được kéo C1/C2 đỏ.
+  for (const c of Object.keys(R).map(Number).filter(c => ONLY === null || c === ONLY).sort((a, b) => a - b)) {
     const bad = R[c].filter(x => !x.ok);
     for (const b of bad) console.log(`FAIL C${c} ${b.name}: ${b.msg}`);
     if (bad.length) { fails++; failed.push('C' + c); console.log(`FAIL C${c} ${TITLES[c]} (${bad.length}/${R[c].length} ý sai)`); } else console.log(`PASS C${c} ${TITLES[c]} (${R[c].length}/${R[c].length})`);

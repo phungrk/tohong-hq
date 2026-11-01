@@ -143,3 +143,6 @@ Vùng `dashboard/model`, mỗi cái viết được thành eval chạy được 
 
 ## Câu hỏi mở
 Các đường `p_kr_spec` và `p_kr_gate` (đọc bể), `p_res_insight` (sự cố → Insight) và `p_capu_res` (Capu merge bậc C) hiện không có dòng sổ cái nào tương ứng nên sẽ không bao giờ có dot; Capu có muốn tạo thêm sự kiện sổ cái cho chúng (một việc riêng ở `tohong-hq`) không, hay để vậy? Nếu không trả lời, spec giữ nguyên như trên.
+
+## Nhật ký sửa eval
+- 2026-11-01 (Spec Writer, gỡ chặn T-036): `eval/T-028/model-dots.cjs` (1) `--criterion N` chỉ chấm tiêu chí N (trước đây C1/C2 kéo theo C3 và nhau vì cùng ca ánh xạ); (2) kiểm "dot xuất phát từ đầu / tới cuối đường" dùng dung sai 16 + vận tốc × khoảng trống khung hình (trần 250ms) thay vì 16 cố định, vì mẫu theo khung hình thưa khi máy tải; (3) biến môi trường `T028_PAR` (mặc định 9) giới hạn số ca song song. Không đổi ngưỡng hành vi nào ở mặc định. Chi tiết: "Nhật ký sửa eval" của `products/T-035-bo-cuc-phong-to.md`.
