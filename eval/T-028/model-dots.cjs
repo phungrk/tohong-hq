@@ -175,6 +175,7 @@ const CASES = [
   { id: 'M8', name: 'accepted, việc của product (Spec Gate qua)', tasks: [T('T-901', 'review', 'product', { reviewer: 'spec-critic' })], ev: { task: 'T-901', event: 'accepted', from: 'spec-critic', to: 'done', state: 'done', holder: '-', owner: 'product', reviewer: 'spec-critic' }, legs: ['p_gate_kr'], color: 'spec', target: 'nd_kr', mode: 'ping' },
   { id: 'M9', name: 'accepted, việc của engineering, bậc A', tasks: [T('T-901', 'review', 'engineering', { tier: 'A' })], ev: { task: 'T-901', event: 'accepted', from: 'adversary', to: 'done', state: 'done', holder: '-', owner: 'engineering' }, legs: ['p_gate_rel', 'p_rel_res'], color: 'code', target: 'nd_prod', mode: 'ping', mid: 'nd_rel' },
   { id: 'M10', name: 'accepted, việc của engineering, bậc B', tasks: [T('T-901', 'review', 'engineering', { tier: 'B' })], ev: { task: 'T-901', event: 'accepted', from: 'adversary', to: 'done', state: 'done', holder: '-', owner: 'engineering' }, legs: ['p_gate_capu'], color: 'code', target: 'nd_capu', mode: 'hold' },
+  { id: 'M10b', name: 'accepted, việc của engineering, tier rỗng (coi là C)', tasks: [T('T-901', 'review', 'engineering', { tier: '' })], ev: { task: 'T-901', event: 'accepted', from: 'adversary', to: 'done', state: 'done', holder: '-', owner: 'engineering' }, legs: ['p_gate_capu'], color: 'code', target: 'nd_capu', mode: 'hold' },
   { id: 'M11', name: 'accepted, việc của insight', tasks: [T('T-901', 'review', 'insight')], ev: { task: 'T-901', event: 'accepted', from: 'reviewer', to: 'done', state: 'done', holder: '-', owner: 'insight' }, legs: ['p_insight_kr'], color: 'ins', target: 'nd_kr', mode: 'ping' },
   { id: 'M12', name: 'rejected state=spec, việc của product (Spec Gate chặn)', tasks: [T('T-901', 'review', 'product', { reviewer: 'spec-critic' })], ev: { task: 'T-901', event: 'rejected', from: 'spec-critic', to: 'product', state: 'spec', holder: 'product', owner: 'product', reviewer: 'spec-critic', severity: 'blocker', round: 1 }, legs: ['p_gate_respec'], color: 'back', target: 'nd_respec', mode: 'hold' },
   { id: 'M13', name: 'rejected state=spec, việc của engineering (Code Gate: spec lệch)', tasks: [T('T-901', 'review', 'engineering')], ev: { task: 'T-901', event: 'rejected', from: 'adversary', to: 'engineering', state: 'spec', holder: 'product', owner: 'engineering', severity: 'blocker', round: 1 }, legs: ['p_gate_respec2'], color: 'back', target: 'nd_respec', mode: 'hold' },
@@ -206,6 +207,15 @@ const IGNORED = [
   ['escalated không tới capu', { event: 'escalated', from: 'chief-of-staff', to: 'chief-of-staff', state: 'escalated', holder: 'chief-of-staff', owner: 'engineering' }],
 ];
 
+// khối giữa chuỗi: sáng từ lúc dot tới (cuối legA) tới lúc dot rời (đầu legB): 1,0–1,7 giây; tắt trong 0,5 giây sau đó
+function chainDwell(log, paths, legA, legB, block, colorKey, panel, t0, t1) {
+  const pts = (id) => between(log, t0, t1).map(r => r.d.map(d => ({ t: r.t, p: [d[0], d[1]] })).filter(x => dist(x.p, paths[id]) <= 5)).flat();
+  const a = pts(legA), b = pts(legB); if (!a.length || !b.length) return 'thiếu dot ở một trong hai chặng';
+  const arrive = a[a.length - 1].t, leave = b[0].t, dwell = leave - arrive;
+  if (dwell < 900 || dwell > 1900) return `dot dừng ở ${block} ${Math.round(dwell)}ms (cần 1,0–1,7 giây)`;
+  return checkLit(log, block, arrive + 350, colorKey, panel) || checkOn(log, block, leave - 100) || checkOff(log, block, leave + 600);
+}
+
 // ---------- kịch bản 1: từng dòng bảng ánh xạ (tiêu chí 1, 2, 3) ----------
 async function runMapping(c, paths) {
   const waitMs = c.ceiling ? 13500 : (c.legs.length > 1 ? 8500 : 4800);
@@ -221,11 +231,7 @@ async function runMapping(c, paths) {
     if (a.n) {
       const arrive = a.last;
       let err = checkLit(log, c.target, arrive + 350, c.color, panel);
-      if (!err && c.mid) { // khối giữa chuỗi (Release) cũng phải sáng khi dot ở đó
-        const midSmp = between(log, t0, t0 + waitMs).filter(r => r.d.length && dist([r.d[0][0], r.d[0][1]], paths[c.legs[1]].slice(0, 1)) < 16);
-        err = midSmp.length ? checkLit(log, c.mid, midSmp[0].t - 60, c.color, panel) || null : `không thấy dot ở khối ${c.mid}`;
-        if (err) err = `khối giữa chuỗi: ${err}`;
-      }
+      if (!err && c.mid) { const e2 = chainDwell(log, paths, c.legs[0], c.legs[1], c.mid, c.color, panel, t0, t0 + waitMs); if (e2) err = 'khối giữa chuỗi: ' + e2; }
       if (!err && c.mode === 'ping') err = checkOff(log, c.target, arrive + 1800 + PING_MS * 0);
       if (!err && c.mode === 'hold' && !c.ceiling) err = checkOn(log, c.target, arrive + 1800);
       if (!err && c.ceiling) { err = checkOn(log, c.target, arrive + 3000) || checkOff(log, c.target, arrive + HOLD_MAX_MS + 1500); if (err) err = 'giữ tối đa 10 giây rồi tắt: ' + err; }
@@ -320,13 +326,16 @@ async function runState() {
     rec(5, 'S2 mở trang với sự kiện cũ (dashboard.json + snapshot live), 7 giây không việc mới: không dot nào', st.created === 0 && st.maxTotal === 0 ? null : `đã tạo ${st.created} dot (tối đa ${st.maxTotal} cùng lúc) dù không có sự kiện mới`);
     rec(8, 'state console', o.errors.length ? o.errors[0] : null);
   } finally { await o.ctx.close(); }
+  { const o4 = await open({ data: dash([T('T-16', 'escalated', 'chief-of-staff', { holder: 'capu' })]) });
+    try { const panel = await panelOf(o4.page); const l4 = await logOf(o4); rec(3, 'S5 việc escalated của chief-of-staff (như T-016): Capu sáng đỏ lúc mở trang', checkLit([l4[l4.length - 1]], 'nd_capu', l4[l4.length - 1].t, 'bad', panel));
+      await o4.page.waitForTimeout(11500); const l5 = await logOf(o4); rec(3, 'S5 … và vẫn sáng đỏ sau 11 giây (chờ quyết, không tắt theo trần 10 giây)', checkLit([l5[l5.length - 1]], 'nd_capu', l5[l5.length - 1].t, 'bad', panel)); } finally { await o4.ctx.close(); } }
   // chỉ Capu: diff chờ đọc (done bậc B/C < 48 giờ) -> xanh code; mọi thứ rảnh -> không tô
   const o2 = await open({ data: dash([T('T-1', 'done', 'engineering', { tier: 'B', h: 5, holder: '-' })]) });
   try { const panel = await panelOf(o2.page); const log = await logOf(o2); const last = log[log.length - 1];
     rec(3, 'S3 diff hành vi chờ đọc (bậc B xong < 48 giờ) làm khối Capu sáng màu việc/code', checkLit([last], 'nd_capu', last.t, 'code', panel)); } finally { await o2.ctx.close(); }
-  const o3 = await open({ data: dash([T('T-1', 'done', 'engineering', { tier: 'A', h: 5, holder: '-' }), T('T-2', 'blocked', 'engineering', { holder: 'chief-of-staff' }), T('T-3', 'new', 'engineering'), T('T-4', 'doing', 'chief-of-staff'), T('T-5', 'new', 'product', { reviewer: 'spec-critic' }), T('T-6', 'done', 'engineering', { tier: 'B', h: 60, holder: '-' })]) });
+  const o3 = await open({ data: dash([T('T-1', 'done', 'engineering', { tier: 'A', h: 5, holder: '-' }), T('T-2', 'blocked', 'engineering', { holder: 'chief-of-staff' }), T('T-3', 'new', 'engineering'), T('T-4', 'doing', 'chief-of-staff'), T('T-5', 'new', 'product', { reviewer: 'spec-critic' }), T('T-6', 'done', 'engineering', { tier: 'B', h: 60, holder: '-' }), T('T-7', 'done', 'product', { tier: 'B', h: 5, holder: '-', reviewer: 'spec-critic' }), T('T-8', 'done', 'insight', { tier: 'B', h: 5, holder: '-' })]) });
   try { const log = await logOf(o3); const last = log[log.length - 1]; const on = BLOCKS.filter(id => litOf(last, id) && litOf(last, id).on);
-    rec(3, 'S4 chỉ có việc new, blocked, của chief-of-staff, done bậc A hoặc done quá 48 giờ: không khối nào sáng', on.length ? 'sáng oan: ' + on.join(', ') : null); } finally { await o3.ctx.close(); }
+    rec(3, 'S4 chỉ có việc new, blocked, của chief-of-staff, done bậc A, done quá 48 giờ, done bậc B của product/insight: không khối nào sáng', on.length ? 'sáng oan: ' + on.join(', ') : null); } finally { await o3.ctx.close(); }
 }
 
 // ---------- kịch bản 5: sự kiện bỏ qua không sinh dot (tiêu chí 1) ----------
@@ -381,6 +390,7 @@ async function runReload(liveOn, paths) {
     const seen = new Set(); for (const r of log.filter(r => r.t >= tReload)) for (const d of r.d) { let bi = null, bd = 1e9; for (const [id, poly] of Object.entries(paths)) { const q = dist([d[0], d[1]], poly); if (q < bd) { bd = q; bi = id; } } if (bd <= 5) seen.add(bi); }
     rec(1, `R1 ${tag}: sự kiện mới giữa hai lần tải (assigned → engineering) có dot trên p_gate_exec`, seen.has('p_gate_exec') ? null : `thấy dot trên: ${[...seen].join(', ') || 'không đường nào'}`);
     rec(1, `R2 ${tag}: báo cáo insight tăng (model.insight_reports 1 → 2) có một dot p_src1 → p_insight_intent`, seen.has('p_src1') && seen.has('p_insight_intent') ? null : `thấy dot trên: ${[...seen].join(', ') || 'không đường nào'}`);
+    { const pn = await panelOf(o.page); const t1 = await now(o); rec(3, `R5 ${tag}: Insight (giữa chuỗi M19) sáng khi dot tới, dot dừng 1,0–1,7 giây rồi Insight tắt`, chainDwell(log, paths, 'p_src1', 'p_insight_intent', 'nd_insight', 'ins', pn, tReload, t1)); }
     if (liveOn) {
       rec(5, 'R3 sự kiện đã chạy qua kênh live rồi mới vào dashboard.json: không chạy dot lần hai (p_exec_gate)', seen.has('p_exec_gate') ? 'dot chạy lần hai trên p_exec_gate' : null);
       const first = analyzeDots(log, t0, tAfterLive, paths, ['p_exec_gate'], 'code');
@@ -527,7 +537,7 @@ async function takeShots(dir, paths) {
   { const o = await open({ data: dash([]) }); await shot(o, 'idle'); await o.ctx.close(); }
   { const tasks = [T('T-1', 'doing', 'product', { reviewer: 'spec-critic' }), T('T-2', 'review', 'product', { reviewer: 'spec-critic' }), T('T-3', 'spec', 'engineering', { holder: 'product' }), T('T-4', 'doing', 'engineering'), T('T-5', 'rework', 'engineering'), T('T-6', 'review', 'engineering'), T('T-7', 'escalated', 'engineering', { holder: 'capu' }), T('T-8', 'doing', 'insight')];
     const o = await open({ data: dash(tasks) }); await shot(o, 'lit-by-state'); await o.ctx.close(); }
-  const evs = { 'dot-spec': CASES[4], 'dot-code': CASES[5], 'dot-back': CASES[13], 'dot-bad': CASES[16], 'dot-ins': CASES[15] };
+  const evs = { 'dot-spec': CASES[4], 'dot-code': CASES[5], 'dot-back': CASES[14], 'dot-bad': CASES[17], 'dot-ins': CASES[16] };
   for (const [name, c] of Object.entries(evs)) { const o = await open({ data: dash(c.tasks) }); await send(o, live(c.ev)); await waitDot(o); await shot(o, name); await o.ctx.close(); }
   { const o = await open({ reduce: true, data: dash(CASES[5].tasks) }); await send(o, live(CASES[5].ev)); await o.page.waitForTimeout(700); await shot(o, 'reduced-motion'); await o.ctx.close(); }
   { const o = await open({ vp: { width: 390, height: 844 }, data: dash(CASES[5].tasks) }); await send(o, live(CASES[5].ev)); await waitDot(o);
