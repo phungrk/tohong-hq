@@ -34,7 +34,7 @@ const CHARS = ['nd_intents', 'nd_spec', 'nd_respec', 'gt_spec', 'nd_exec', 'nd_r
 const NAME = { nd_intents: 'Ý định', nd_spec: 'Spec Writer', nd_respec: 'Spec rework', gt_spec: 'Spec Gate', nd_exec: 'Agent code', nd_rework: 'Code rework', gt_code: 'Code Gate', nd_capu: 'Capu (người)', nd_insight: 'Insight', nd_kr: 'Knowledge Reservoir', nd_prod: 'Production' };
 const WORD = { new: 'Mới giao', doing: 'Đang làm', review: 'Chờ duyệt', rework: 'Đang sửa', spec: 'Sửa spec', escalated: 'Chờ Capu', done: 'Chờ đọc diff' };
 const NO_RULE_A = new Set(['nd_kr', 'nd_prod']);
-const TITLE_MAX = 20, MAX_LINES = 3, CPS_MIN = 30, CPS_MAX = 50, FRAME_MAX = 300;
+const TITLE_MAX = 28, MAX_LINES = 3, CPS_MIN = 30, CPS_MAX = 50, FRAME_MAX = 300;
 const LATENCY = 200, FIRST_CHAR = 400, UPDATE_MS = 1000;
 const SHOT_NAMES = ['dang-go-1280', 'dang-go-1280-sau', 'xong-1280', 'ranh-1280', 'dang-go-390', 'phong-to-390', 'toi-390'];
 
@@ -53,7 +53,9 @@ const heldBy = {
 };
 const idNum = id => { const m = /(\d+)/.exec(String(id)); return m ? parseInt(m[1], 10) : Infinity; };
 function shortTitle(title) {
-  const a = Array.from(String(title || '').normalize('NFC').replace(/\s+/g, ' ').trim());
+  let t = String(title || '').normalize('NFC').replace(/\s+/g, ' ').trim();
+  const m = /^[^:]{1,24}:\s+/.exec(t); if (m && t.length > m[0].length) t = t.slice(m[0].length);   // ADR-017: bỏ tiền tố "<từ>:" đầu tên
+  const a = Array.from(t);
   if (!a.length) return '(không tên)';
   if (a.length <= TITLE_MAX) return a.join('');
   return a.slice(0, TITLE_MAX - 1).join('').trimEnd() + '…';
@@ -80,11 +82,11 @@ const nfd = s => s.normalize('NFD');
 // DATA_A: khối nhiều việc (nd_spec 5 việc, id lệch thứ tự), tên dài/ranh giới 20-21, khối rảnh (nd_rework, nd_insight, nd_kr, nd_prod), nd_capu có escalated lẫn diff chờ đọc.
 const TASKS_A = [
   T('T-1030', 'doing', 'product', { title: 'Việc id bốn chữ số' }),
-  T('T-106', 'doing', 'product', { title: 'Chuyện này dài hơn hai mươi ký tự rất nhiều' }),
-  T('T-104', 'doing', 'product', { title: '123456789012345678901' }),
+  T('T-106', 'doing', 'product', { title: 'Spec: Chuyện này dài hơn hai mươi ký tự rất nhiều' }),
+  T('T-104', 'doing', 'product', { title: '1234567890123456789012345678' }),
   T('T-102', 'rework', 'product', { title: '  Hai   khoảng  trắng  ' }),
-  T('T-105', 'doing', 'product', { title: '12345678901234567890' }),
-  T('T-101', 'new', 'product', { title: 'abcdefghijklmnopqr stuvwxyz' }),
+  T('T-105', 'doing', 'product', { title: '12345678901234567890123456789' }),
+  T('T-101', 'new', 'product', { title: 'abcdefghijklmnopqrstuvwxyz tiếp theo' }),
   T('T-107', 'review', 'product', { title: 'Chờ cổng spec' }),
   T('T-108', 'spec', 'product', { title: 'Spec bị trả về' }), T('T-117', 'spec', 'engineering', { title: '' }),
   T('T-110', 'new', 'engineering', { title: 'Chờ nhận' }), T('T-109', 'doing', 'engineering', { title: nfd('Hiển thị tóm tắt nhân vật khối') }),
@@ -96,7 +98,7 @@ const DATA_A = () => dash(TASKS_A.map(t => ({ ...t })));
 const DATA_IDLE = () => dash([T('T-1', 'done', 'engineering'), T('T-2', 'done', 'product')]);
 const DATA_L = () => dash([T('T-1', 'doing', 'product', { title: 'Việc một' }), T('T-2', 'doing', 'product', { title: 'Việc hai' }), T('T-9', 'doing', 'engineering', { title: 'Việc chín' })]);
 // DATA_W: xấu nhất cho bố cục: mọi khối nhiều việc, tên 20 chữ W, dòng dài nhất.
-const DATA_W = () => { const W = 'CẬP NHẬT BẢNG MÔ HÌN', out = [], add = (own, st, tier) => { for (let i = 0; i < 4; i++) out.push(T('T-' + (900 + out.length), st, own, { title: W, tier: tier || 'A', hours: 1 })); };
+const DATA_W = () => { const W = 'CẬP NHẬT BẢNG MÔ HÌNH ĐỒ THỊ', out = [], add = (own, st, tier) => { for (let i = 0; i < 4; i++) out.push(T('T-' + (900 + out.length), st, own, { title: W, tier: tier || 'A', hours: 1 })); };
   add('product', 'new'); add('product', 'doing'); add('product', 'review'); add('product', 'spec'); add('engineering', 'doing'); add('engineering', 'rework'); add('engineering', 'review'); add('engineering', 'done', 'B'); add('insight', 'doing'); return dash(out); };
 let evN = 0;
 const live = o => ({ type: 'event', id: 'E-' + (9800 + (++evN)), t: '2026-11-01T12:00', round: 0, severity: '', cost: 0, title: '', detail: 'SECRET-EVENT-DETAIL', link: 'SECRET-EVENT-LINK', ...o });
@@ -114,7 +116,8 @@ const INIT = `(() => {
       R.maxBub = Math.max(R.maxBub, bub); R.maxSum = Math.max(R.maxSum, gs.length); R.maxDots = Math.max(R.maxDots, dots);
       const s = { t, n: gs.length, bub, bb: [...document.querySelectorAll('#fx_b .bub')].map(b => b.getAttribute('data-block')) }; if (g) { const bg = g.querySelector('[data-part=sum-bg]'), r = bg && bg.getBoundingClientRect();
         s.block = g.getAttribute('data-block'); s.st = g.getAttribute('data-state'); s.vis = !!(bg && vis(bg) && r.width > 0); s.w = r ? r.width : 0; s.h = r ? r.height : 0; s.el = g === window.__sumEl;
-        s.lines = [...g.querySelectorAll('[data-part=sum-line]')].map(l => l.textContent); }
+        const ls = [...g.querySelectorAll('[data-part=sum-line]')]; s.lines = ls.map(l => l.textContent); s.nText = g.querySelectorAll('text').length;
+        s.lv = ls.every(l => !l.textContent || (vis(l) && getComputedStyle(l).fill !== 'none' && !/rgba\(\s*\d+,\s*\d+,\s*\d+,\s*0\s*\)/.test(getComputedStyle(l).fill))); }
       R.s.push(s); } else R.last = 0;
     requestAnimationFrame(tick); };
   requestAnimationFrame(tick);
@@ -157,6 +160,10 @@ const READ = () => {
   o.textOutside = lines.filter(l => { const q = l.getBoundingClientRect(); return q.width > 0 && (q.left < r.left - 1 || q.right > r.right + 1 || q.top < r.top - 1 || q.bottom > r.bottom + 1); }).length;
   const mch = document.querySelector('#model svg g.mch[data-block="' + o.block + '"]'), body = mch && mch.querySelector('[data-part=body]');
   if (body) { const b = body.getBoundingClientRect(), w = Math.min(r.right, b.right) - Math.max(r.left, b.left), h = Math.min(r.bottom, b.bottom) - Math.max(r.top, b.top); o.ownOverlap = (w > 0.5 * sc && h > 0.5 * sc) ? [w / sc, h / sc] : null; }
+  const own = document.getElementById(o.block); o.ownText = [];
+  if (own) own.querySelectorAll('text').forEach(t => { if (t.closest('.mch')) return; const q = t.getBoundingClientRect(); if (!q.width || !t.textContent.trim()) return; const w = Math.min(r.right, q.right) - Math.max(r.left, q.left), h = Math.min(r.bottom, q.bottom) - Math.max(r.top, q.top); if (w > 0.5 && h > 0.5) o.ownText.push(t.textContent.trim().slice(0, 20) + ' ' + w.toFixed(1) + '×' + h.toFixed(1) + 'px'); });
+  const vis2 = e => { let op = 1, n = e; while (n && n.nodeType === 1 && n.tagName.toLowerCase() !== 'svg') { const c = getComputedStyle(n); if (c.display === 'none' || c.visibility === 'hidden') return false; op *= parseFloat(c.opacity); n = n.parentNode; } const f = getComputedStyle(e).fill; return op > 0.05 && f !== 'none' && !/rgba\(\s*\d+,\s*\d+,\s*\d+,\s*0\s*\)/.test(f); };
+  o.hidden = lines.filter(l => l.textContent && !vis2(l)).length; o.nText = g.querySelectorAll('text').length;
   o.notTop = lines.filter(l => { const q = l.getBoundingClientRect(); if (!l.textContent || !q.width) return false; const e = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return !(e && e.closest('g.sum')); }).length;
   o.bgFill = getComputedStyle(bg).fill; o.txtFill = lines.length ? getComputedStyle(lines[0]).fill : null;
   o.parentOk = g.parentNode && g.parentNode.id === 'fx_s' && g.parentNode === svg.lastElementChild && !g.closest('#fx_b');
@@ -197,10 +204,10 @@ async function crit1() {
       rec(1, `A2 ${id}: nội dung đúng (${exp.length} dòng)`, joined(got) === joined(exp) ? null : `cần [${exp.join(' | ')}], thấy [${got.join(' | ')}]`);
       await o.page.keyboard.press('Escape'); await sleep(o, 80);
     }
-    const bad = []; const re = /^T-\d+ · .{1,20} · (Mới giao|Đang làm|Chờ duyệt|Đang sửa|Sửa spec|Chờ Capu|Chờ đọc diff)$/u;
+    const bad = []; const re = /^T-\d+ · .{1,28} · (Mới giao|Đang làm|Chờ duyệt|Đang sửa|Sửa spec|Chờ Capu|Chờ đọc diff)$/u;
     for (const id of CHARS) for (const l of shown[id].lines) { if (l === 'Đang rảnh' || /^\+\d+ việc nữa$/.test(l)) continue; if (!re.test(l)) bad.push(`${id}: "${l}"`); }
-    rec(1, 'A3 mỗi dòng việc đúng khuôn "T-xxx · tên ≤ 20 ký tự · trạng thái", tối đa 4 dòng', bad.length ? bad.slice(0, 3).join('; ') : (CHARS.some(id => shown[id].lines.length > 4) ? 'có khối quá 4 dòng' : null));
-    // khớp khối sáng (khối sáng theo quy tắc A khi và chỉ khi tóm tắt khác "Đang rảnh"; không dot nào đang chạy)
+    rec(1, 'A3 mỗi dòng việc đúng khuôn "T-xxx · tên ≤ 28 ký tự · trạng thái", tối đa 4 dòng', bad.length ? bad.slice(0, 3).join('; ') : (CHARS.some(id => shown[id].lines.length > 4) ? 'có khối quá 4 dòng' : null));
+    // khớp khối sáng (không dot nào đang chạy)
     const lit = await o.page.evaluate(ids => Object.fromEntries(ids.map(id => { const e = document.getElementById(id), sh = e && e.querySelector(':scope > rect, :scope > circle'); return [id, sh ? parseFloat(getComputedStyle(sh).strokeWidth) >= 2.5 : null]; })), CHARS);
     const mism = CHARS.filter(id => !NO_RULE_A.has(id) && lit[id] !== (shown[id].lines[0] !== 'Đang rảnh'));
     rec(1, 'A4 khối sáng (quy tắc A) khi và chỉ khi tóm tắt khác "Đang rảnh"; nd_kr, nd_prod luôn "Đang rảnh" và không sáng', mism.length || NO_RULE_A.size !== [...NO_RULE_A].filter(id => lit[id] === false && shown[id].lines.join() === 'Đang rảnh').length ? 'lệch ở ' + mism.join(', ') + ' (sáng=' + JSON.stringify(lit) + ')' : null);
@@ -222,6 +229,45 @@ async function crit1() {
     rec(1, 'A10 dữ liệu thiếu (title, state): không ném lỗi, "(không tên)", việc thiếu state không thuộc khối nào', isOpen(s, 'nd_spec') && joined(s.lines) === joined(want) && !o2.errors.length ? null : `thấy [${s && s.lines ? s.lines.join(' | ') : 'không mở'}] ${errsOf(o2) || ''}`); } finally { await close(o2).catch(() => { }); }
 }
 
+// ---------- tiêu chí 1 (tiếp): tên thật từ board/ và khối sáng vì dot (ADR-017) ----------
+// Tên lấy từ board/T-0xx.md (chụp 2026-11-01); kết quả mong đợi viết tay, không tính bằng oracle.
+const REAL = [
+  ['nd_spec', 'doing', 'product', [['T-028', 'Spec: bảng Mô hình Eval-Gated 2029 có dot chạy và khối sáng khi xử lý', 'bảng Mô hình Eval-Gated 202…'], ['T-031', 'Spec: nhân vật bot/người trong khối Mô hình sáng và cử động khi khối hoạt động', 'nhân vật bot/người trong kh…'], ['T-035', 'Spec: nới bố cục bảng Mô hình, chế độ phóng to, bot ở Spec/Code Gate nổi trên cùng', 'nới bố cục bảng Mô hình, ch…']]],
+  ['nd_exec', 'doing', 'engineering', [['T-029', 'Dashboard: bảng Mô hình Eval-Gated 2029 có dot chạy và khối sáng', 'bảng Mô hình Eval-Gated 202…'], ['T-034', 'Dashboard: nhân vật bot/người trong khối Mô hình sáng và cử động', 'nhân vật bot/người trong kh…'], ['T-036', 'Dashboard: nới bố cục Mô hình, chế độ phóng to, bot ở cổng nổi trên cùng', 'nới bố cục Mô hình, chế độ…']]],
+  ['nd_respec', 'spec', 'product', [['T-026', 'App Tơ Hồng responsive width, tối đa 768px', 'App Tơ Hồng responsive widt…'], ['T-030', 'App: Back trình duyệt về trang trước + cài app ra màn hình chính', 'Back trình duyệt về trang t…'], ['T-032', 'Spec sửa: khối Ý định (và khối tích luỹ) sáng khi có việc', 'khối Ý định (và khối tích l…']]],
+  ['nd_insight', 'doing', 'insight', [['T-201', 'export_dashboard.py: bỏ detail ở bản public', 'bỏ detail ở bản public'], ['T-202', 'Giờ họp 10:30 với Capu', 'Giờ họp 10:30 với Capu'], ['T-203', 'Một tiền tố rất dài hơn hai mươi bốn ký tự: nội dung', 'Một tiền tố rất dài hơn hai…']]],
+];
+async function dotRun(label, block, tasks, ev, need, re, waitMs) {
+  const o = await open({ data: dash(tasks) });
+  try {
+    await clickChar(o, block); const s0 = await waitSum(o, x => isOpen(x, block) && x.state === 'done', 3000);
+    if (!isOpen(s0, block)) { rec(1, label, 'không mở được tóm tắt để thử'); return; }
+    await o.page.evaluate(b => { const e = document.getElementById(b), sh = e.querySelector(':scope > rect, :scope > circle'); window.__B = { s: [], on: true };
+      const f = t => { if (!window.__B.on) return; const g = document.querySelector('#fx_s g.sum'), l = g && g.querySelector('[data-part=sum-line]');
+        window.__B.s.push({ t, lit: parseFloat(getComputedStyle(sh).strokeWidth) >= 2.5, n: g ? 1 : 0, st: g && g.getAttribute('data-state'), l0: l ? l.textContent : null }); requestAnimationFrame(f); }; requestAnimationFrame(f); }, block);
+    send(o, ev); await sleep(o, waitMs); const S = await o.page.evaluate(() => { window.__B.on = false; return window.__B.s; });
+    const bad = x => x.n === 0 ? 'tóm tắt đã đóng' : (x.st !== 'done' ? null : (x.lit && x.l0 === 'Đang rảnh' ? 'khối đang sáng mà nói "Đang rảnh"' : (!x.lit && x.l0 !== 'Đang rảnh' ? `khối đã tắt mà còn nói "${x.l0}"` : (x.lit && !re.test(x.l0) ? `khối sáng vì dot nhưng dòng là "${x.l0}"` : null))));
+    let worst = null, run0 = null, rb = null;
+    for (const x of S) { const b = bad(x); if (b) { if (b !== rb) { run0 = x.t; rb = b; } if (x.t - run0 > 300 && !worst) worst = b; } else { run0 = null; rb = null; } }
+    const seen = S.some(x => x.lit); const last = S[S.length - 1];
+    rec(1, label, worst || (need && !seen ? 'khối không sáng lần nào nên không thử được (dot không tới?)' : (last && last.l0 !== 'Đang rảnh' ? `hết sáng nhưng vẫn "${last && last.l0}"` : errsOf(o))));
+  } finally { await close(o).catch(() => { }); }
+}
+async function crit1b() {
+  const tasks = []; for (const [, st, own, list] of REAL) for (const [id, title] of list) tasks.push(T(id, st, own, { title }));
+  const o = await open({ data: dash(tasks) });
+  try {
+    for (const [blk, st, , list] of REAL) { const s = await fullText(o, blk); const exp = list.map(([id, , short]) => `${id} · ${short} · ${WORD[st]}`);
+      rec(1, `N1 ${blk}: tên thật từ board/ bỏ tiền tố "<từ>:" rồi cắt 27 ký tự + "…" (đúng chữ viết tay)`, isOpen(s, blk) && joined(s.lines) === joined(exp) ? null : `thấy [${s && s.lines ? s.lines.join(' | ') : 'không mở'}], cần [${exp.join(' | ')}]`); await o.page.keyboard.press('Escape'); await sleep(o, 80); }
+  } finally { await close(o).catch(() => { }); }
+  const ttl = 'Spec: bấm vào nhân vật Mô hình để nghe tóm tắt việc đang làm', tt = shortTitle(ttl);
+  const acc = (task, own, from) => ({ task, event: 'accepted', from, to: 'done', state: 'done', holder: '-', owner: own });
+  await dotRun('B1 nd_kr đang sáng vì dot (nhận insight/spec): tóm tắt là "Vừa nhận T-2 · tên", hết sáng thì "Đang rảnh", không khung nào đèn và lời lệch quá 300ms', 'nd_kr', [T('T-2', 'doing', 'product', { title: ttl })], acc('T-2', 'product', 'spec-critic'), true, new RegExp('^Vừa nhận T-2 · ' + tt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), 13500);
+  await dotRun('B2 nd_prod đang sáng vì dot (lên sóng): "Vừa nhận T-9 · tên", hết sáng thì "Đang rảnh"', 'nd_prod', [T('T-9', 'doing', 'engineering', { title: ttl, tier: 'A' })], acc('T-9', 'engineering', 'adversary'), true, /^Vừa nhận T-9 · .+$/, 13500);
+  await dotRun('B3 gt_spec (khối nguồn): bất cứ lúc nào đang sáng thì không nói "Đang rảnh" (nếu sáng: "Vừa giao/nhận T-2 · tên"), tắt thì "Đang rảnh"', 'gt_spec', [T('T-2', 'doing', 'product', { title: ttl })], acc('T-2', 'product', 'spec-critic'), false, /^Vừa (giao|nhận) T-2 · .+$/, 13500);
+  await dotRun('B4 gt_code (khối nguồn của chuỗi lên sóng): đèn và lời khớp nhau', 'gt_code', [T('T-9', 'doing', 'engineering', { title: ttl, tier: 'A' })], acc('T-9', 'engineering', 'adversary'), false, /^Vừa (giao|nhận) T-9 · .+$/, 13500);
+}
+
 // ---------- tiêu chí 2: gõ chữ và tương tác ----------
 async function crit2() {
   const full = joined(expectLines('nd_spec', TASKS_A)), N = nchars(expectLines('nd_spec', TASKS_A));
@@ -240,6 +286,8 @@ async function crit2() {
       rec(2, 'T4 có trạng thái typing thật (chữ gõ dở nhiều khung hình, không hiện hết ngay)', typing.filter(x => nchars(x.lines) > 0 && nchars(x.lines) < N).length >= 10 ? null : `chỉ ${typing.filter(x => nchars(x.lines) > 0 && nchars(x.lines) < N).length} khung hình gõ dở`);
       const notPrefix = S.filter(x => !full.startsWith(typed(x))), nonMono = S.filter((x, i) => i && nchars(x.lines) < nchars(S[i - 1].lines));
       rec(2, 'T5 chữ đã hiện luôn là tiền tố của chữ đầy đủ, dòng gõ lần lượt, không bao giờ giảm', notPrefix.length || nonMono.length ? `${notPrefix.length} khung không phải tiền tố (vd "${notPrefix[0] ? typed(notPrefix[0]).slice(0, 40) : ''}"), ${nonMono.length} khung giảm` : null);
+      const invis = S.filter(x => nchars(x.lines) > 0 && x.lv === false).length, extra = S.filter(x => x.nText !== x.lines.length).length;
+      rec(2, 'T5b mọi khung có chữ: dòng chữ nhìn thấy thật (opacity > 0,05, fill không trong suốt) và g.sum không có text nào ngoài sum-line', invis || extra ? `${invis} khung chữ không nhìn thấy, ${extra} khung có text lạ` : null);
       const wmin = Math.min(...S.map(x => x.w)), wmax = Math.max(...S.map(x => x.w)), hmin = Math.min(...S.map(x => x.h)), hmax = Math.max(...S.map(x => x.h));
       rec(2, 'T6 kích thước bong bóng không đổi trong lúc gõ (±0,5px)', wmax - wmin <= 0.5 && hmax - hmin <= 0.5 ? null : `rộng ${fmt(wmin)}–${fmt(wmax)}, cao ${fmt(hmin)}–${fmt(hmax)}`);
       const at1 = S.find(x => x.t - c1.t >= 1000); rec(2, 'T7 sau 1 giây gõ đã có khoảng 20 đến 60 ký tự (đang chạy, không ì)', at1 && nchars(at1.lines) >= 20 && nchars(at1.lines) <= 60 ? null : `có ${at1 ? nchars(at1.lines) : '?'} ký tự`);
@@ -354,7 +402,7 @@ async function geometryRun(o, label, ids = CHARS, dark = false) {
     if (!isOpen(s, id)) { bad.push(`${id}: không mở`); await o.page.keyboard.press('Escape'); continue; }
     await sleep(o, 330); const t = await read(o); const p = [];
     if (!t.parentOk) p.push('#fx_s không là con cuối của svg hoặc nằm trong #fx_b'); if (t.hasForeign) p.push('có foreignObject/svg/image');
-    if (!t.inside) p.push('ra ngoài svg'); if (t.ownOverlap) p.push(`đè thân bot ${t.ownOverlap.map(v => fmt(v)).join('×')}u`);
+    if (!t.inside) p.push('ra ngoài svg'); if (t.ownOverlap) p.push(`đè thân bot ${t.ownOverlap.map(v => fmt(v)).join('×')}u`); if (t.ownText && t.ownText.length) p.push('che chữ của chính khối: ' + t.ownText.slice(0, 2).join(', ')); if (t.hidden) p.push(t.hidden + ' dòng không nhìn thấy');
     const f = t.fontPx.filter(v => v < 9 - 0.05 || v > 16 + 0.05); if (f.length) p.push('chữ ' + t.fontPx.map(v => fmt(v)).join('/') + 'px');
     if (t.textOutside) p.push('chữ tràn khỏi bong bóng'); if (t.notTop) p.push(`${t.notTop} dòng bị phần tử khác che`);
     if (!t.inVp) p.push(`không nằm trọn khung nhìn (${fmt(t.bg.l, 0)},${fmt(t.bg.t, 0)} → ${fmt(t.bg.r, 0)},${fmt(t.bg.b, 0)} trong ${t.innerW}×${t.innerH})`);
@@ -415,7 +463,7 @@ async function crit4() {
   }
   // cỡ chữ, trọn svg, không đè thân bot, trên cùng, trong khung nhìn
   for (const [w, h] of [[320, 640], [390, 844], [1280, 900], [1920, 1080]]) { const o = await open({ vp: { width: w, height: h }, data: DATA_W() });
-    try { const bad = await geometryRun(o, `${w}px`); rec(4, `G1 ${w}px bản thường (dữ liệu xấu nhất: tên 20 ký tự chữ hoa): 11 tóm tắt đều 9-16px, trọn svg, không đè thân bot, trên cùng, trong khung nhìn, tương phản ≥ 4,5`, bad.length ? `${bad.length}/11: ${bad.slice(0, 3).join(' | ')}` : null); } finally { await close(o).catch(() => { }); } }
+    try { const bad = await geometryRun(o, `${w}px`); rec(4, `G1 ${w}px bản thường (dữ liệu xấu nhất: tên 28 ký tự chữ hoa): 11 tóm tắt đều 9-16px, trọn svg, không đè thân bot, không che chữ của chính khối (tên, số đếm, chú thích), trên cùng, trong khung nhìn, tương phản ≥ 4,5`, bad.length ? `${bad.length}/11: ${bad.slice(0, 3).join(' | ')}` : null); } finally { await close(o).catch(() => { }); } }
   for (const [w, h] of [[390, 844], [1280, 900]]) { const o = await open({ vp: { width: w, height: h }, data: DATA_W() });
     try { if (!(await enterZoom(o))) { rec(4, `G2 ${w}px phóng to: vào được chế độ phóng to`, 'không vào được (T-036)'); } else { const bad = await geometryRun(o, `${w}px phóng to`); rec(4, `G2 ${w}px phóng to: 11 tóm tắt đều 9-16px, trọn svg, không đè thân bot, trên cùng, trong khung nhìn`, bad.length ? `${bad.length}/11: ${bad.slice(0, 3).join(' | ')}` : null);
         const dx = await o.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 0.5 && window.scrollX === 0); rec(4, `G2b ${w}px phóng to: trang ngoài không cuộn ngang`, dx ? null : 'trang cuộn ngang'); } } finally { await close(o).catch(() => { }); } }
@@ -485,7 +533,7 @@ async function crit5() {
   if (!NO_INV) {
     const invDir = path.join(HQ, 'eval', 'invariants', 'dashboard', 'model');
     const invs = fs.readdirSync(invDir).filter(f => /^inv-\d+.*\.sh$/.test(f)).sort();
-    rec(5, `V0 bất biến inv-001..021 có đủ (${invs.length} file)`, invs.length >= 21 ? null : `chỉ ${invs.length} file`);
+    rec(5, `V0 bất biến vùng dashboard/model (inv-001..022 trở lên) có đủ (${invs.length} file)`, invs.length >= 22 ? null : `chỉ ${invs.length} file`);
     const rs = await pool(invs.map(f => () => runShell('bash', [path.join(invDir, f)], { TOHONG_DASHBOARD_REPO: REPO }, 400000).then(r => ({ f, ...r }))), 2);
     for (const r of rs) { const last = r.out.trim().split('\n').filter(l => /^(PASS|FAIL)/.test(l)).slice(-3).join(' / ') || r.out.trim().split('\n').slice(-2).join(' / ');
       rec(5, `V ${r.f}`, r.code === 0 ? null : `thoát ${r.code}: ${last.slice(0, 300)}`); }
@@ -534,7 +582,7 @@ async function shots() {
   try {
     if (SHOTS) { const ok = await shots(); await browser.close(); process.exit(ok ? 0 : 1); }
     const want = n => !ONLY || ONLY === n;
-    if (want(1)) await crit1();
+    if (want(1)) { await crit1(); await crit1b(); }
     if (want(2)) await crit2();
     if (want(3)) await crit3();
     if (want(4)) await crit4();
