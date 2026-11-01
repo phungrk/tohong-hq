@@ -449,7 +449,9 @@ async function runBurst() {
   const o = await open({ data: dash(tasks) });
   try {
     tasks.forEach((t, i) => o.sock.send(JSON.stringify(live({ task: t.id, owner: MIX[i % MIX.length][0], ...MIX[i % MIX.length][1] }))));
-    await o.page.waitForTimeout(3500); let log = await logOf(o); let st = await statsOf(o);
+    await o.page.waitForTimeout(3500);
+    // Đọc stats (maxGap) TRƯỚC log: việc kéo cả log qua CDP tự làm trang khựng 200–350ms, không được lọt vào phép đo.
+    let st = await statsOf(o); let log = await logOf(o);
     const maxB = Math.max(...log.map(r => r.b.length));
     rec(5, `B1 dồn 40 sự kiện: không quá 3 bong bóng cùng lúc (đo ${maxB})`, maxB <= 3 ? null : `${maxB} bong bóng cùng lúc`);
     rec(5, 'B2 dồn 40 sự kiện: vẫn có bong bóng (không nuốt hết)', maxB >= 1 ? null : 'không thấy bong bóng nào');

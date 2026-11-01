@@ -194,3 +194,6 @@ Vùng `dashboard/model`; mỗi cái viết được thành eval chạy được 
 
 ## Câu hỏi mở
 Video của Capu cho robot ôm giấy **chạy thật sang bàn của người nhận**; spec này làm `give` là nhân vật lao tại chỗ về phía khối đích (ôm giấy, vệt tốc độ) còn dot lo phần di chuyển giữa khối, vì cho nhân vật rời khối sẽ chồng lên dot, vi phạm "mỗi sự kiện một dot" và trần 12 phần tử của T-028. Capu có muốn nhân vật chạy thật qua đường (thêm một lớp "người chạy" riêng, có trần riêng) không, hay giữ lao tại chỗ? Nếu không trả lời, spec giữ nguyên lao tại chỗ.
+
+## Nhật ký sửa eval
+- 2026-11-01 (Spec Writer, theo báo của adversary trên T-034): C10/P5 (`runBurst` trong `eval/T-031/model-characters.cjs`) đỏ ngẫu nhiên vì đọc `logOf()` trước `statsOf()`, việc kéo cả log làm trang khựng 217–350ms lọt vào `maxGap`. Đổi thứ tự: đọc `statsOf()` trước. Giữ ngưỡng 300ms và mọi ý kiểm khác. Rà T-028 (đã đọc stats trước log), T-029 và invariants/dashboard/model (chỉ đọc stats, không đọc log), T-032 (không đo maxGap), T-034/lib/adv_chars.cjs (có biến maxGap nhưng không dùng để khẳng định): không cần sửa. Chứng minh: C10 xanh 5/5 trên head a62b047 của T-034; bản đột biến thêm vòng bận 400ms mỗi khung vẫn đỏ ở P5.
