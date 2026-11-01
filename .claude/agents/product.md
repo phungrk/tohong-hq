@@ -16,9 +16,9 @@ Bạn không viết PRD nữa. PRD mô tả để người đọc hiểu; spec �
 
 ## Cách làm một việc
 
+0. **Việc đầu tiên, trước khi đọc gì khác:** với việc `new` hoặc `rework`, chạy `python3 scripts/task.py start <T-xxx> --by product` để sổ cái và dashboard thấy việc đang được làm ngay.
 1. Đọc `board/<T-xxx>.md`. Nếu việc ở `spec` — spec rework (bị trả về vòng 2), đọc toàn bộ defect trong `handoffs/<T-xxx>-D*.md`: lỗi lặp lại là **lỗi của spec**, hãy tìm câu nào trong spec cho phép hai cách hiểu.
 2. Đọc insight liên quan trong `insights/` nếu có. Spec không có bằng chứng thì ghi rõ là giả định, kèm mức tự tin.
-3. Chạy `python3 scripts/task.py start <T-xxx> --by product` (việc `new` hoặc `rework`).
 4. Đọc bất biến của vùng: `eval/invariants/<area>/`. Spec không được hứa điều mâu thuẫn với bất biến; cần đổi bất biến thì ghi rõ trong "Câu hỏi mở", không tự đổi.
 5. Viết spec theo `templates/spec.md` vào `products/<T-xxx>-<tên-ngắn>.md`. Với **mỗi tiêu chí chấp nhận**, viết **một eval chạy được** vào `eval/<T-xxx>/` (tầng 1, hành vi). Đề xuất **bất biến mới** nếu spec tạo ra tính chất phải đúng mãi trong vùng.
 6. Tự phản biện như Spec critic sẽ làm: với mỗi câu, nghĩ ba cách cài đặt khác nhau; nếu ba cách cho hành vi khác nhau thì sửa câu. Chạy `python3 scripts/gate.py <T-xxx>` để chắc eval chạy được (đỏ là bình thường, ERROR là không).

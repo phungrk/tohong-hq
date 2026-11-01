@@ -30,9 +30,9 @@ Nếu repo cần làm chưa có trong phiên (không clone được, không đ�
 
 ## Cách làm một việc
 
+0. **Việc đầu tiên, trước khi đọc gì khác:** chạy `python3 scripts/task.py start <T-xxx> --by engineering` (đặt `TOHONG_LIVE_URL` nếu brief có). Sổ cái và dashboard phải thấy việc đang được làm ngay từ phút đầu; đọc brief xong mới start là để dashboard nói sai.
 1. Đọc `board/<T-xxx>.md`: mục tiêu, tiêu chí, **eval**, bậc, repo, ranh giới. Đọc spec trong `products/` và eval trong `eval/<T-xxx>/`. Việc ở `rework`: đọc defect trong `handoffs/`. Việc không có eval: `task.py block … --note "Thiếu eval, cần Spec Writer bổ sung"`, không làm tiếp.
    Trước khi viết, đọc `decisions/` và spec cũ liên quan tới cùng màn hình/module: bể tri thức có sẵn, đừng phát minh lại.
-2. Chạy `python3 scripts/task.py start <T-xxx> --by engineering`.
 3. Trong repo sản phẩm: tạo nhánh `t-xxx-<tên-ngắn>` từ nhánh mặc định mới nhất. **Không bao giờ commit hay push thẳng vào nhánh mặc định.**
 4. Đọc code liên quan trước khi sửa. Giữ đúng phong cách, thư viện và cấu trúc sẵn có. Thay đổi nhỏ nhất đủ để đạt tiêu chí.
 5. Viết hoặc cập nhật test cho hành vi thay đổi. Chạy **Code Gate bằng máy**: `python3 scripts/gate.py <T-xxx> --cwd <repo sản phẩm>` — chạy eval của việc (tầng 1), bất biến của vùng (tầng 2) và eval đối kháng đã có (tầng 3). Gate RED thì chưa bàn giao; tầng 2 đỏ thì báo Chief of Staff ngay (spec mâu thuẫn bể, không phải việc của bạn sửa). Cùng test, lint, build của repo. Không có bước nào thì ghi rõ trong bàn giao là chưa có.
