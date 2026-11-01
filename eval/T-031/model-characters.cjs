@@ -341,7 +341,7 @@ async function runStructure() {
       rec(1, `S4 ${id} đủ data-part (body, eye ≥ 2, lamp, sweat, paper, speed${KIND[id] === 'human' ? ', question' : ''})`, miss.length ? 'thiếu ' + miss.join(', ') : (KIND[id] === 'bot' && c.question ? 'bot không được có question' : null));
       rec(1, `S5 ${id} chỉ phần tử SVG nội tuyến, không ảnh/foreignObject/href ngoài, ≤ 40 phần tử (có ${c.nodes}), crispEdges`, c.bad.length ? 'có ' + c.bad.join(', ') : c.nodes > 40 ? `${c.nodes} phần tử` : c.crisp.toLowerCase() !== 'crispedges' ? `shape-rendering=${c.crisp}` : null);
       rec(1, `S6 ${id} tâm thân nằm trong khối, không che chữ của khối (${c.ov.join(' | ') || 'ok'})`, !c.cxIn ? 'tâm thân ngoài khối' : c.ov.length ? 'che chữ: ' + c.ov.join(', ') : null);
-      rec(1, `S7 ${id} cao ${c.h.toFixed(1)}px ở 1280px (20–56)`, c.h >= 20 && c.h <= 56 ? null : `cao ${c.h.toFixed(1)}px`);
+      rec(1, `S7 ${id} cao ${c.h.toFixed(1)}px ở 1280px (68–114; T-035 thay 20–56)`, c.h >= 68 && c.h <= 114 ? null : `cao ${c.h.toFixed(1)}px`);
       rec(1, `S8 ${id} có data-state hợp lệ`, ['idle', 'work', 'give', 'take', 'wait'].includes(c.state) ? null : `data-state=${c.state}`); }
   } finally { await o.ctx.close(); }
 }
@@ -501,7 +501,7 @@ async function runPhoneDark(paths, C) {
           document.querySelectorAll('#' + id + ' text').forEach(t => { if (t.closest('.mch,.bub')) return; const tr = t.getBoundingClientRect(); if (!tr.width) return; const w = Math.min(br.right, tr.right) - Math.max(br.left, tr.left), h = Math.min(br.bottom, tr.bottom) - Math.max(br.top, tr.top); if (w > 2 * sc && h > 2 * sc) n++; }); return n ? id : null; }).filter(Boolean) }; }, { CHARS });
     let m = await sizes();
     rec(8, 'P1 390px: trang không cuộn ngang', m.over <= 0 ? null : `tràn ngang ${m.over}px`);
-    const small = m.hs.filter(([, h]) => h < 9 || h > 56); rec(8, 'P2 390px: mọi nhân vật cao 9–56px', small.length ? small.map(([id, h]) => `${id} ${h.toFixed(1)}px`).join(', ') : null);
+    const small = m.hs.filter(([, h]) => h < 19 || h > 56); rec(8, 'P2 390px: mọi nhân vật cao 19–56px (T-035 nâng sàn từ 9)', small.length ? small.map(([id, h]) => `${id} ${h.toFixed(1)}px`).join(', ') : null);
     rec(8, 'P3 390px: nhân vật không che chữ của khối', m.ov.length ? 'che chữ ở ' + m.ov.join(', ') : null);
     const t0 = await send(o, live(ev)); await o.page.waitForTimeout(1900); let log = await logOf(o);
     const bs = log.filter(r => r.t >= t0).flatMap(r => r.b);
@@ -510,7 +510,7 @@ async function runPhoneDark(paths, C) {
     await send(o, live({ ...ev, event: 'rejected', from: 'adversary', to: 'engineering', state: 'rework', holder: 'engineering', severity: 'blocker', round: 1, task: 'T-901' }));
     await o.page.waitForTimeout(1300); await o.page.setViewportSize({ width: 844, height: 390 }); await o.page.waitForTimeout(400);
     m = await sizes(); log = await logOf(o); const last = log[log.length - 1];
-    const small2 = m.hs.filter(([, h]) => h < 9 || h > 56); rec(8, 'P5 xoay 390 → 844 giữa lúc đang cử động: nhân vật vẫn cao 9–56px (không tính một lần)', small2.length ? small2.map(([id, h]) => `${id} ${h.toFixed(1)}px`).join(', ') : null);
+    const small2 = m.hs.filter(([, h]) => h < 19 || h > 56); rec(8, 'P5 xoay 390 → 844 giữa lúc đang cử động: nhân vật vẫn cao 19–56px (không tính một lần; T-035 nâng sàn từ 9)', small2.length ? small2.map(([id, h]) => `${id} ${h.toFixed(1)}px`).join(', ') : null);
     rec(8, 'P6 xoay ngang: không cuộn ngang', m.over <= 0 ? null : `tràn ${m.over}px`);
     const fs2 = log.filter(r => r.t > last.t - 600).flatMap(r => r.b).map(b => b[6]); rec(8, 'P7 xoay ngang: chữ bong bóng vẫn 9–16px', fs2.length && (Math.min(...fs2) < 9 || Math.max(...fs2) > 16) ? `cỡ chữ ${Math.min(...fs2).toFixed(1)}–${Math.max(...fs2).toFixed(1)}px` : null);
     rec(8, 'phone console', o.errors.length ? o.errors[0] : null);
