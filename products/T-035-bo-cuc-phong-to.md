@@ -53,15 +53,18 @@ Hợp đồng quan sát (eval đọc đúng các thứ này; không ép cách c�
 
 **Vào:** bấm nút (chuột, chạm, Enter, Space khi nút có tiêu điểm). Không có cách vào nào khác. **Thoát, ba cách, mỗi cách một lần bấm/nhấn:** (a) bấm lại nút (lúc này ghi `Thu nhỏ`); (b) phím **Esc**; (c) nút **Back** của trình duyệt. Esc khi chưa phóng to **không làm gì** (không rời trang). Back khi đang phóng to **chỉ đóng phóng to và ở lại đúng trang**: không tải lại, địa chỉ (`location.href`) không đổi, mọi trạng thái (dot đang chạy, dữ liệu) giữ nguyên (cách cài gợi ý: `history.pushState` khi vào, `popstate` đóng; thoát bằng nút/Esc thì gọi `history.back()` để không để lại mục thừa; eval đo hành vi chứ không đo cách này).
 
-**Bố cục khi phóng to:** `#model` phủ **toàn bộ khung nhìn** (vị trí 0,0, rộng và cao đúng bằng khung nhìn, lớp phủ nằm trên mọi thứ khác của trang); svg rộng **≥ 94% khung nhìn** và **≥ bề rộng bản thường** cùng viewport (ở 1280: ≥ 1203px so với 1134px; ở 390: ≥ 367px so với 324px). Nếu svg cao hơn khung nhìn thì **cuộn dọc bên trong `#model`** (`overflow-y:auto`); **không cuộn ngang ở đâu cả**: `document.documentElement.scrollWidth ≤ innerWidth` và `#model.scrollWidth ≤ #model.clientWidth` (dung sai 1px). Nút `Thu nhỏ` luôn nằm trong màn hình và bấm được kể cả khi đã cuộn tới cuối `#model` (nút cố định, không bị che: `document.elementFromPoint` tại tâm nút trả về chính nút). Nhân vật khi phóng to cao ≥ bản thường và ≥ sàn 1.1 (≥ 68px ở 1280, ≥ 19px ở 390).
+**Bố cục khi phóng to:** `#model` phủ **toàn bộ khung nhìn** (vị trí 0,0, rộng và cao đúng bằng khung nhìn, nằm trên mọi thứ khác); `overflow:auto` cả hai chiều. **Trang ngoài không bao giờ cuộn ngang**: `document.documentElement.scrollWidth ≤ innerWidth` ở mọi cỡ.
+- **Khung nhìn rộng > 480px (vd 1280):** svg rộng **≥ 94% khung nhìn** và ≥ bề rộng bản thường (ở 1280: ≥ 1203px so với 1134px); cuộn dọc bên trong `#model` nếu cao hơn; `#model.scrollWidth ≤ clientWidth` (dung sai 1px), không cuộn ngang ở đâu cả.
+- **Khung nhìn ≤ 480px (điện thoại, 390):** svg rộng **≥ 870px** để chữ khối đọc được: `.t` hiển thị **≥ 10px** và `.cap` **≥ 9px** (ADR-015; 10,5 đơn vị × 0,87 = 9,1px). Vì rộng hơn khung nhìn, **`#model` cuộn được cả ngang lẫn dọc bên trong** (`scrollWidth > clientWidth`; `scrollLeft` đặt được > 0), còn trang ngoài không dịch (`window.scrollX = 0`, không tràn ngang). Kéo một ngón cuộn trong lớp phủ chứ không kéo trang: `#model` có `touch-action` khác `none` và `overscroll-behavior` là `contain` hoặc `none`. Hai ngón vẫn phóng được (meta viewport không chặn).
+- Nút `Thu nhỏ` cố định trong lớp phủ: luôn nằm trong màn hình và bấm được kể cả khi đã cuộn hết cả hai chiều (`document.elementFromPoint` tại tâm nút trả về chính nút). Nhân vật khi phóng to cao ≥ bản thường và ≥ sàn 1.1 (≥ 68px ở 1280, ≥ 19px ở 390).
 
 **Một bảng duy nhất.** Khi phóng to vẫn chỉ có **một** `svg` trong `#model` và **không id nào trùng** trong `#model` (không nhân bản bảng, không chép sang lớp phủ khác), để toàn bộ logic dot, khối sáng, nhân vật chạy nguyên.
 
 **Tiêu điểm:** khi vào, tiêu điểm chuyển vào nút (`document.activeElement.id === "model-zoom"`); Tab và Shift+Tab không ra khỏi `#model` (nội dung phía sau không nhận Tab); khi thoát (bằng cách nào cũng được) tiêu điểm về `#model-zoom`; vị trí cuộn của trang trở về như trước khi vào (±2px). Mở/thoát nhiều lần không để lại trạng thái (vẫn một svg, không id trùng, trang cuộn được).
 
-**390px (điện thoại), quyết định:** chế độ phóng to dùng **bề ngang khung nhìn** (svg ≥ 94%), không cuộn ngang. Với cỡ này chữ `.cap` chỉ lên tới ~4px, nên đọc chi tiết bằng **hai ngón** của trình duyệt: `<meta name="viewport">` **không được** có `user-scalable=no` hay `maximum-scale=1`. Phần chạy được: nhân vật ≥ 19px và dot, khối sáng rõ hơn bản thường (hơn ~15%). Câu hỏi mở bên dưới nói về phương án kéo trong lớp phủ.
+**390px (điện thoại), quyết định (ADR-015):** phóng to hiển thị bảng ở cỡ chữ đọc được (svg ≥ 870px), kéo ngang/dọc trong lớp phủ như trên; ngoài lớp phủ, bản thường 390 vẫn vừa bề ngang (1.9).
 
-**Đổi chiều màn hình khi đang phóng to** (390→844px hoặc 1280→390px): vẫn đang phóng to, svg lại rộng ≥ 94% khung nhìn mới, vẫn không cuộn ngang.
+**Đổi chiều màn hình khi đang phóng to** (390→844px hoặc 1280→390px): vẫn đang phóng to; svg đúng quy tắc của cỡ mới (≤ 480px: ≥ 870px; rộng hơn: ≥ 94%); trang không cuộn ngang.
 
 **Dot, khối sáng, nhân vật khi phóng to (chạy y như bản thường):** bắn các sự kiện M4–M18 khi đang phóng to thì (a) dot hiện ra thật (mục 5), đường kính 7–16px (inv-008), nằm trong svg; (b) khối đích sáng (viền ≥ 2,5px) như T-028; (c) nhân vật `give`/`take` với biên độ ≥ 8u; (d) nhân vật không che chữ; (e) 0 lỗi console; khung hình không trễ ≥ 300ms. `prefers-reduced-motion`: vào/thoát vẫn dùng được (nút, Esc); không dot, nhân vật đứng yên (`data-anim="none"`, như inv-005/inv-012).
 
@@ -141,10 +144,10 @@ Spec Critic rút vào bể khi spec qua cổng (mã mẫu: các hàm `gateViol`,
 - **INV-E (chế độ phóng to an toàn).** Khi `#model[data-zoom="on"]`: Esc và Back đều đóng; không cuộn ngang; chỉ một `svg` và không id trùng trong `#model`.
 
 ## Không làm
-Robot chạy thật qua đường; đổi màu hay ánh xạ dot; các bảng khác ngoài Mô hình; âm thanh; đổi dữ liệu `dashboard.json` hay kênh live; Fullscreen API (không dùng được trên iOS Safari: phóng to bằng lớp phủ CSS); kéo/thu phóng riêng bằng JS (dùng hai ngón của trình duyệt); thêm thư viện.
+Robot chạy thật qua đường; đổi màu hay ánh xạ dot; các bảng khác ngoài Mô hình; âm thanh; đổi dữ liệu `dashboard.json` hay kênh live; Fullscreen API (không dùng được trên iOS Safari: phóng to bằng lớp phủ CSS); kéo/thu phóng riêng bằng JS (cuộn gốc của trình duyệt trong lớp phủ, hai ngón của trình duyệt); thêm thư viện.
 
 ## Câu hỏi mở
-Trên điện thoại (390px), chế độ phóng to hiện chỉ làm bảng rộng thêm ~15% và đọc chữ khối phải dùng hai ngón. Anh có muốn phương án khác: lớp phủ phóng to hiển thị bảng ở cỡ **chữ đọc được** (svg rộng ~860px) và cho **kéo ngang/dọc bên trong lớp phủ** (trang vẫn không cuộn ngang, inv-006 vẫn đúng)? Nếu không trả lời, spec giữ nguyên như trên (vừa bề ngang, không kéo ngang trong lớp phủ).
+Không (đã chốt ở ADR-015: phương án kéo trong lớp phủ).
 
 ## Nhật ký sửa eval
 - 2026-11-01 (Spec Writer, T-035): đổi `eval/T-031/model-characters.cjs` S7 (20–56 → 68–114px ở 1280), C8 P2 và P5 (sàn 9 → 19px ở 390). Lý do: T-035 mục 1.1; xem bảng trên. Không đổi ý kiểm nào khác.

@@ -223,6 +223,8 @@ const zoomState = o => o.page.evaluate(() => { const m = document.querySelector(
   return { on: m.getAttribute('data-zoom') === 'on', role: m.getAttribute('role'), modal: m.getAttribute('aria-modal'), mlabel: m.getAttribute('aria-label'), bText: b ? b.textContent.trim() : null, bLabel: b ? b.getAttribute('aria-label') : null, bExp: b ? b.getAttribute('aria-expanded') : null,
     focus: document.activeElement ? document.activeElement.id || document.activeElement.tagName : '', focusIn: !!(document.activeElement && document.activeElement.closest('#model')),
     mr: { l: mr.left, t: mr.top, w: mr.width, h: mr.height }, sw: sr.width, iw: innerWidth, ih: innerHeight, dh: document.documentElement.scrollWidth, mh: m.scrollWidth - m.clientWidth,
+    ox: getComputedStyle(m).overflowX, oy: getComputedStyle(m).overflowY, ta: getComputedStyle(m).touchAction, ob: getComputedStyle(m).overscrollBehavior, sx: window.scrollX, mscrollW: m.scrollWidth, mclientW: m.clientWidth,
+    tpx: (() => { const e = document.querySelector('#nd_exec .t'); return e ? parseFloat(getComputedStyle(e).fontSize) * sr.width / 1000 : 0; })(), cpx: (() => { const e = document.querySelector('#nd_exec .cap'); return e ? parseFloat(getComputedStyle(e).fontSize) * sr.width / 1000 : 0; })(),
     svgN: document.querySelectorAll('#model svg').length, dup, y: window.scrollY, url: location.href, mark: window.__mark || 0,
     hpx: (() => { const b = svg.querySelector('g.mch[data-block="nd_exec"] [data-part="body"]'); return b ? b.getBoundingClientRect().height : 0; })(),
     btn: b ? (() => { const r = b.getBoundingClientRect(); return { w: r.width, h: r.height, l: r.left, t: r.top, r: r.right, b: r.bottom }; })() : null }; });
@@ -249,16 +251,26 @@ async function crit2() {
       if (z.on) {
         rec(2, `Z2 ${tag} nhãn khi phóng to: "Thu nhỏ", aria-label "Thu nhỏ bảng Mô hình", aria-expanded=true, #model là hộp thoại aria-modal có nhãn`, z.bText === 'Thu nhỏ' && z.bLabel === 'Thu nhỏ bảng Mô hình' && z.bExp === 'true' && z.role === 'dialog' && z.modal === 'true' && z.mlabel ? null : `chữ "${z.bText}", aria-label "${z.bLabel}", expanded ${z.bExp}, role ${z.role}, modal ${z.modal}, label "${z.mlabel}"`);
         rec(2, `Z3 ${tag} #model phủ khung nhìn (${fmt(z.mr.w, 0)}×${fmt(z.mr.h, 0)} / ${z.iw}×${z.ih})`, Math.abs(z.mr.l) <= 1 && Math.abs(z.mr.t) <= 1 && z.mr.w >= z.iw - 1 && z.mr.h >= z.ih - 1 ? null : 'không phủ khung nhìn');
-        rec(2, `Z3 ${tag} svg rộng ${fmt(z.sw, 0)}px = ${fmt(100 * z.sw / z.iw, 0)}% khung nhìn (≥ 94%, và ≥ bản thường ${fmt(inlineSvgW, 0)}px)`, z.sw >= 0.94 * z.iw && z.sw >= inlineSvgW - 1 ? null : 'svg không đủ rộng');
-        rec(2, `Z3 ${tag} không cuộn ngang (trang ${z.dh}/${z.iw}, #model dư ${z.mh}px)`, z.dh <= z.iw && z.mh <= 1 ? null : `tràn ngang: trang ${z.dh}/${z.iw}, #model ${z.mh}`);
+        if (w === 390) {
+          rec(2, `Z3 390px svg rộng ${fmt(z.sw, 0)}px (≥ 870px để chữ khối đọc được)`, z.sw >= 870 ? null : 'svg quá hẹp');
+          rec(2, `Z3 390px chữ khối khi phóng to: .t ${fmt(z.tpx, 1)}px (≥ 10), .cap ${fmt(z.cpx, 1)}px (≥ 9)`, z.tpx >= 10 && z.cpx >= 9 ? null : 'chữ khối chưa đọc được');
+          rec(2, `Z3 390px lớp phủ cuộn được cả hai chiều bên trong (overflow ${z.ox}/${z.oy}; rộng nội dung ${z.mscrollW} > ${z.mclientW}), trang ngoài không cuộn ngang (${z.dh}/${z.iw})`, (z.ox === 'auto' || z.ox === 'scroll') && (z.oy === 'auto' || z.oy === 'scroll') && z.mscrollW > z.mclientW && z.dh <= z.iw ? null : `overflow ${z.ox}/${z.oy}, nội dung ${z.mscrollW}/${z.mclientW}, trang ${z.dh}/${z.iw}`);
+          const dr = await o.page.evaluate(() => { const m = document.querySelector('#model'); m.scrollLeft = 120; m.scrollTop = 60; return { l: m.scrollLeft, t: m.scrollTop, px: window.scrollX, de: document.documentElement.scrollWidth - innerWidth }; });
+          rec(2, 'Z3 390px kéo trong lớp phủ: #model cuộn được cả ngang lẫn dọc, trang ngoài không dịch', dr.l > 0 && dr.px === 0 && dr.de <= 0 ? null : `scrollLeft ${dr.l}, trang scrollX ${dr.px}, tràn ${dr.de}`);
+          rec(2, `Z3 390px một ngón kéo cuộn trong lớp phủ, không kéo trang (touch-action "${z.ta}" không là none; overscroll-behavior "${z.ob}" là contain hoặc none)`, !/^none$/.test(z.ta) && /contain|none/.test(z.ob) ? null : `touch-action ${z.ta}, overscroll ${z.ob}`);
+          await o.page.evaluate(() => { const m = document.querySelector('#model'); m.scrollLeft = 0; m.scrollTop = 0; });
+        } else {
+          rec(2, `Z3 ${tag} svg rộng ${fmt(z.sw, 0)}px = ${fmt(100 * z.sw / z.iw, 0)}% khung nhìn (≥ 94%, và ≥ bản thường ${fmt(inlineSvgW, 0)}px)`, z.sw >= 0.94 * z.iw && z.sw >= inlineSvgW - 1 ? null : 'svg không đủ rộng');
+          rec(2, `Z3 ${tag} không cuộn ngang (trang ${z.dh}/${z.iw}, #model dư ${z.mh}px)`, z.dh <= z.iw && z.mh <= 1 ? null : `tràn ngang: trang ${z.dh}/${z.iw}, #model ${z.mh}`);
+        }
         rec(2, `Z3 ${tag} nhân vật khi phóng to cao ${fmt(z.hpx)}px (≥ bản thường ${fmt(inlineBody)}px và ≥ ${w === 1280 ? BODY_MIN_PX_1280 : BODY_MIN_PX_390}px)`, z.hpx >= inlineBody - 0.5 && z.hpx >= (w === 1280 ? BODY_MIN_PX_1280 : BODY_MIN_PX_390) ? null : 'nhân vật nhỏ');
         rec(2, `Z3 ${tag} đúng một svg và không trùng id khi phóng to (không nhân bản bảng)`, z.svgN === 1 && !z.dup.length ? null : `svg: ${z.svgN}, id trùng: ${z.dup.slice(0, 3).join(',')}`);
         rec(2, `Z4 ${tag} tiêu điểm chuyển vào nút (#${z.focus}), Tab/Shift+Tab không ra khỏi #model`, await (async () => { if (z.focus !== 'model-zoom') return `tiêu điểm ở ${z.focus}`; for (let i = 0; i < 4; i++) { await o.page.keyboard.press('Tab'); if (!(await zoomState(o)).focusIn) return `Tab lần ${i + 1} ra ngoài #model`; } for (let i = 0; i < 2; i++) { await o.page.keyboard.press('Shift+Tab'); if (!(await zoomState(o)).focusIn) return 'Shift+Tab ra ngoài #model'; } return null; })());
         if (w === 390) {
-          const vis = await o.page.evaluate(() => { const m = document.querySelector('#model'); m.scrollTop = 1e6; const b = document.querySelector('button#model-zoom'), r = b.getBoundingClientRect(), e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          const vis = await o.page.evaluate(() => { const m = document.querySelector('#model'); m.scrollTop = 1e6; m.scrollLeft = 1e6; const b = document.querySelector('button#model-zoom'), r = b.getBoundingClientRect(), e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
             return { inView: r.top >= -1 && r.bottom <= innerHeight + 1 && r.left >= -1 && r.right <= innerWidth + 1, top: !!(e && b.contains(e)), scrolled: m.scrollTop }; });
-          rec(2, 'Z5 390px cuộn hết chiều dọc trong #model thì nút Thu nhỏ vẫn nằm trong màn hình và bấm được', vis.inView && vis.top ? null : `nút ${vis.inView ? 'bị che' : 'ra ngoài màn hình'}`);
-          await o.page.evaluate(() => { document.querySelector('#model').scrollTop = 0; });
+          rec(2, 'Z5 390px cuộn hết cả hai chiều trong #model thì nút Thu nhỏ vẫn nằm trong màn hình và bấm được', vis.inView && vis.top ? null : `nút ${vis.inView ? 'bị che' : 'ra ngoài màn hình'}`);
+          await o.page.evaluate(() => { document.querySelector('#model').scrollTop = 0; document.querySelector('#model').scrollLeft = 0; });
         }
         // thoát bằng nút
         await o.page.click('button#model-zoom'); await o.page.waitForTimeout(500); z = await zoomState(o);
@@ -281,7 +293,7 @@ async function crit2() {
         // đổi chiều màn hình khi đang phóng to
         await o.page.click('button#model-zoom'); await o.page.waitForTimeout(300);
         const vp2 = w === 390 ? { width: 844, height: 390 } : { width: 390, height: 844 }; await o.page.setViewportSize(vp2); await o.page.waitForTimeout(500); z = await zoomState(o);
-        rec(2, `Z10 ${tag} đổi cỡ khung ${w}→${vp2.width}px khi đang phóng to: vẫn bật, svg rộng ≥ 94% khung nhìn, không cuộn ngang`, z.on && z.sw >= 0.94 * z.iw && z.dh <= z.iw && z.mh <= 1 ? null : `on=${z.on}, svg ${fmt(z.sw, 0)}/${z.iw}, tràn ${z.dh - z.iw}/${z.mh}`);
+        rec(2, `Z10 ${tag} đổi cỡ khung ${w}→${vp2.width}px khi đang phóng to: vẫn bật, svg đúng cỡ (≤ 480px: ≥ 870px; rộng hơn: ≥ 94%), trang không cuộn ngang`, z.on && (z.iw <= 480 ? z.sw >= 870 : z.sw >= 0.94 * z.iw) && z.dh <= z.iw && (z.iw <= 480 || z.mh <= 1) ? null : `on=${z.on}, svg ${fmt(z.sw, 0)}/${z.iw}, tràn ${z.dh - z.iw}/${z.mh}`);
         await o.page.keyboard.press('Escape'); await o.page.waitForTimeout(300);
       }
       const e = errsOf(o); rec(2, `Z11 ${tag} không lỗi console khi vào/ra phóng to`, e);
