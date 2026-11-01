@@ -1,10 +1,6 @@
 {
   "task": "T-026",
-<<<<<<< HEAD
   "at": "2026-11-01T02:24",
-=======
-  "at": "2026-11-01T02:18",
->>>>>>> origin/main
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -16,11 +12,7 @@
       "eval": "node ../tohong-hq/eval/T-025/check_width.cjs --repo . --only 1",
       "kind": "cmd",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 16956,
-=======
-      "ms": 16122,
->>>>>>> origin/main
       "out": "n giữa (lề trái 0.0, lề phải 0.0)\n  ok  [769] khung rộng 768px (đo 768.0)\n  ok  [769] khung căn giữa (lề trái 0.5, lề phải 0.5)\n  ok  [1024] khung rộng 768px (đo 768.0)\n  ok  [1024] khung căn giữa (lề trái 128.0, lề phải 128.0)\n  ok  [1280] khung rộng 768px (đo 768.0)\n  ok  [1280] khung căn giữa (lề trái 256.0, lề phải 256.0)\n  ok  [1440] khung rộng 768px (đo 768.0)\n  ok  [1440] khung căn giữa (lề trái 336.0, lề phải 336.0)\n  ok  [biến=600, vw 1024] khung rộng 600px (đo 600.0)\n  ok  [biến=600, vw 1024] khung căn giữa (lề trái 212.0, lề phải 212.0)\n  ok  [biến=600, vw 700] khung rộng 600px (đo 600.0)\n  ok  [biến=600, vw 700] khung căn giữa (lề trái 50.0, lề phải 50.0)\n  ok  [biến=600, vw 600] khung rộng 600px (đo 600.0)\n  ok  [biến=600, vw 600] khung căn giữa (lề trái 0.0, lề phải 0.0)\nPASS",
       "tier": 1
     },
@@ -28,11 +20,7 @@
       "eval": "node ../tohong-hq/eval/T-025/check_width.cjs --repo . --only 2",
       "kind": "cmd",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 54653,
-=======
-      "ms": 54422,
->>>>>>> origin/main
       "out": "v[div] z1000,div[Mời người ấy hoặc gia đình cùng xem] z1001,div[div] z300,div[div] z300,div[div] z500,button[Đóng menu] z50,div[div] z900\n  ok  [1280] sheet vendor ở Ngân sách: 7 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] sheet vendor ở Ngân sách hiện ra\n  ok  [1280] sheet Kết nối: 9 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] sheet Kết nối hiện ra\n  ok  [1280] chat AI: 5 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] chat AI sau khi trả lời: 5 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] ngăn kéo: 6 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] ngăn kéo hiện ra\n  ok  [biến=600, vw 1024] sheet Mời: 7 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\nPASS",
       "tier": 1
     },
@@ -40,11 +28,7 @@
       "eval": "node ../tohong-hq/eval/T-025/check_width.cjs --repo . --only 3",
       "kind": "cmd",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 10981,
-=======
-      "ms": 11507,
->>>>>>> origin/main
       "out": "ok  [320] không cuộn ngang  :: scrollWidth html=320 body=320 khung=320 vw=320\n  ok  [390] không cuộn ngang  :: scrollWidth html=390 body=390 khung=390 vw=390\n  ok  [767] không cuộn ngang  :: scrollWidth html=767 body=767 khung=767 vw=767\n  ok  [768] không cuộn ngang  :: scrollWidth html=768 body=768 khung=768 vw=768\n  ok  [769] không cuộn ngang  :: scrollWidth html=769 body=769 khung=766 vw=769\n  ok  [1024] không cuộn ngang  :: scrollWidth html=1024 body=1024 khung=766 vw=1024\n  ok  [1280] không cuộn ngang  :: scrollWidth html=1280 body=1280 khung=766 vw=1280\n  ok  [1440] không cuộn ngang  :: scrollWidth html=1440 body=1440 khung=766 vw=1440\nPASS",
       "tier": 1
     },
@@ -52,11 +36,7 @@
       "eval": "node ../tohong-hq/eval/T-025/check_width.cjs --repo . --only 4",
       "kind": "cmd",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 14848,
-=======
-      "ms": 16016,
->>>>>>> origin/main
       "out": " sáng sát khung 231.4 vs xa 235.1\n  ok  [1024] viewport 1024 > khung 768: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [1280] viewport 1280 > khung 768: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [1440] viewport 1440 > khung 768: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [biến=600, vw 1024] viewport 1024 > khung 600: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [biến=600, vw 700] viewport 700 > khung 600: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [biến=600, vw 600] viewport 600 <= khung 600: không viền  :: border 0/0\nPASS",
       "tier": 1
     },
@@ -64,11 +44,7 @@
       "eval": "node ../tohong-hq/eval/T-025/check_width.cjs --repo . --only 5",
       "kind": "cmd",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 14423,
-=======
-      "ms": 14470,
->>>>>>> origin/main
       "out": "ok  [390] bảng markdown trong chat vẫn render (BotMarkdown)\n  ok  [768] bảng markdown trong chat vẫn render (BotMarkdown)\n  ok  [1024] bảng markdown trong chat vẫn render (BotMarkdown)\n  ok  [1280] bảng markdown trong chat vẫn render (BotMarkdown)\nPASS",
       "tier": 1
     },
@@ -76,11 +52,7 @@
       "eval": "python3 ../tohong-hq/eval/T-025/check_5_guard.py --repo .",
       "kind": "cmd",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 19293,
-=======
-      "ms": 19175,
->>>>>>> origin/main
       "out": "lint: base 32 error/3 warning; hiện tại 32/3\nPASS",
       "tier": 1
     },
@@ -88,11 +60,7 @@
       "eval": "python3 ../tohong-hq/eval/T-025/check_6_shots.py --repo .",
       "kind": "cmd",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 119,
-=======
-      "ms": 142,
->>>>>>> origin/main
       "out": "PASS",
       "tier": 1
     },
@@ -108,11 +76,7 @@
       "eval": "eval/invariants/front/layout/inv-001-khung-min-viewport-appmax.sh",
       "kind": "sh",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 16626,
-=======
-      "ms": 17105,
->>>>>>> origin/main
       "out": "n giữa (lề trái 0.0, lề phải 0.0)\n  ok  [769] khung rộng 768px (đo 768.0)\n  ok  [769] khung căn giữa (lề trái 0.5, lề phải 0.5)\n  ok  [1024] khung rộng 768px (đo 768.0)\n  ok  [1024] khung căn giữa (lề trái 128.0, lề phải 128.0)\n  ok  [1280] khung rộng 768px (đo 768.0)\n  ok  [1280] khung căn giữa (lề trái 256.0, lề phải 256.0)\n  ok  [1440] khung rộng 768px (đo 768.0)\n  ok  [1440] khung căn giữa (lề trái 336.0, lề phải 336.0)\n  ok  [biến=600, vw 1024] khung rộng 600px (đo 600.0)\n  ok  [biến=600, vw 1024] khung căn giữa (lề trái 212.0, lề phải 212.0)\n  ok  [biến=600, vw 700] khung rộng 600px (đo 600.0)\n  ok  [biến=600, vw 700] khung căn giữa (lề trái 50.0, lề phải 50.0)\n  ok  [biến=600, vw 600] khung rộng 600px (đo 600.0)\n  ok  [biến=600, vw 600] khung căn giữa (lề trái 0.0, lề phải 0.0)\nPASS",
       "tier": 2
     },
@@ -120,11 +84,7 @@
       "eval": "eval/invariants/front/layout/inv-002-khong-cuon-ngang.sh",
       "kind": "sh",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 11044,
-=======
-      "ms": 11667,
->>>>>>> origin/main
       "out": "ok  [320] không cuộn ngang  :: scrollWidth html=320 body=320 khung=320 vw=320\n  ok  [390] không cuộn ngang  :: scrollWidth html=390 body=390 khung=390 vw=390\n  ok  [767] không cuộn ngang  :: scrollWidth html=767 body=767 khung=767 vw=767\n  ok  [768] không cuộn ngang  :: scrollWidth html=768 body=768 khung=768 vw=768\n  ok  [769] không cuộn ngang  :: scrollWidth html=769 body=769 khung=766 vw=769\n  ok  [1024] không cuộn ngang  :: scrollWidth html=1024 body=1024 khung=766 vw=1024\n  ok  [1280] không cuộn ngang  :: scrollWidth html=1280 body=1280 khung=766 vw=1280\n  ok  [1440] không cuộn ngang  :: scrollWidth html=1440 body=1440 khung=766 vw=1440\nPASS",
       "tier": 2
     },
@@ -132,11 +92,7 @@
       "eval": "eval/invariants/front/layout/inv-003-phu-nam-trong-khung.sh",
       "kind": "sh",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 53973,
-=======
-      "ms": 55288,
->>>>>>> origin/main
       "out": "v[div] z1000,div[Mời người ấy hoặc gia đình cùng xem] z1001,div[div] z300,div[div] z300,div[div] z500,button[Đóng menu] z50,div[div] z900\n  ok  [1280] sheet vendor ở Ngân sách: 7 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] sheet vendor ở Ngân sách hiện ra\n  ok  [1280] sheet Kết nối: 9 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] sheet Kết nối hiện ra\n  ok  [1280] chat AI: 5 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] chat AI sau khi trả lời: 5 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] ngăn kéo: 6 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] ngăn kéo hiện ra\n  ok  [biến=600, vw 1024] sheet Mời: 7 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\nPASS",
       "tier": 2
     },
@@ -144,11 +100,7 @@
       "eval": "eval/invariants/front/layout/inv-004-vien-bong-theo-khung.sh",
       "kind": "sh",
       "status": "PASS",
-<<<<<<< HEAD
       "ms": 15678,
-=======
-      "ms": 16093,
->>>>>>> origin/main
       "out": " sáng sát khung 231.4 vs xa 235.1\n  ok  [1024] viewport 1024 > khung 768: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [1280] viewport 1280 > khung 768: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [1440] viewport 1440 > khung 768: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [biến=600, vw 1024] viewport 1024 > khung 600: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [biến=600, vw 700] viewport 700 > khung 600: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [biến=600, vw 600] viewport 600 <= khung 600: không viền  :: border 0/0\nPASS",
       "tier": 2
     }
