@@ -1,0 +1,309 @@
+{
+  "task": "T-041",
+  "at": "2026-11-02T06:28",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/dashboard/model",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "bash eval/T-041/run.sh $TOHONG_DASHBOARD_REPO --criterion 1",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 2441,
+      "out": "FAIL C1 không có <select id=\"product-filter\">\nFAIL 1 tiêu chí đỏ",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-041/run.sh $TOHONG_DASHBOARD_REPO --criterion 2",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 2428,
+      "out": "FAIL C2 không có <select id=\"product-filter\">\nFAIL 1 tiêu chí đỏ",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-041/run.sh $TOHONG_DASHBOARD_REPO --criterion 3",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 2571,
+      "out": "FAIL C3 không có <select id=\"product-filter\">\nFAIL 1 tiêu chí đỏ",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-041/run.sh $TOHONG_DASHBOARD_REPO --criterion 4",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 2507,
+      "out": "FAIL C4 không có <select id=\"product-filter\">\nFAIL 1 tiêu chí đỏ",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 32,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 165,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-001-khong-dot-gia.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 9342,
+      "out": "PASS no-fake-dots",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-002-tran-dot.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 18858,
+      "out": "FAIL dot-cap: 40 circle cùng lúc trong #fx_f (tối đa 12)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-003-dot-tren-duong.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 8657,
+      "out": "PASS dot-on-path",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-004-khong-ket-sang.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 16968,
+      "out": "PASS no-stuck-lit",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-005-reduced-motion-khong-dot.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 5326,
+      "out": "PASS reduced-no-dots",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-006-khong-cuon-ngang-390.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2295,
+      "out": "PASS no-hscroll-390",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-007-capu-sang-khi-escalated.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 2277,
+      "out": "FAIL capu-escalated: lúc mở trang: Capu không sáng (viền 1.2px)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-008-dot-co-khi-doi-be-ngang.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 7355,
+      "out": "FAIL rotate: 1280→390px giữa lúc dot chạy: đường kính 2.9px ở bề ngang 390px (cần 7–16)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-009-so-dem-thi-sang.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 20779,
+      "out": "ền 1.2px) | đầy đủ: gt_code có số đếm 1 mà không sáng (viền 1.4px) | đầy đủ: nd_capu có số đếm 1 mà không sáng (viền 1.2px) | một việc product new: nd_intents có số đếm 1 mà không sáng (viền 1.2px) | một việc product rework: nd_spec có số đếm 1 mà không sáng (viền 1.2px) | một việc product review: gt_spec có số đếm 1 mà không sáng (viền 1.4px) | một việc state=spec: nd_respec có số đếm 1 mà không sáng (viền 1.2px) | một việc engineering new: nd_exec có số đếm 1 mà không sáng (viền 1.2px) | một việc engineering doing: nd_exec có số đếm 1 mà không sáng (viền 1.2px) | một việc engineering rework: nd_rework có số đếm 1 mà không sáng (viền 1.2px) | một việc engineering review: gt_code có số đếm 1 mà không sáng (viền 1.4px) | một diff bậc B chờ đọc: nd_capu có số đếm 1 mà không sáng (viền 1.2px)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-010-nhan-vat-khop-khoi-sang.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 1778,
+      "out": "PASS char-match-lit (chưa áp dụng: trang chưa có nhân vật T-031)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-011-ranh-thi-mo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 1808,
+      "out": "PASS idle-dim (chưa áp dụng: trang chưa có nhân vật T-031)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-012-reduced-motion-nhan-vat-dung-yen.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 1836,
+      "out": "PASS reduced-still (chưa áp dụng: trang chưa có nhân vật T-031)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-013-bong-bong-co-tran.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 1852,
+      "out": "PASS bubble-cap (chưa áp dụng: trang chưa có nhân vật T-031)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-014-khong-giao-nhan-gia.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 1873,
+      "out": "PASS no-fake-handover (chưa áp dụng: trang chưa có nhân vật T-031)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-015-nhan-vat-giu-net-ve.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 1842,
+      "out": "PASS char-own-paint (chưa áp dụng: trang chưa có nhân vật T-031)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-016-nhan-vat-khong-che-chu-khi-cu-dong.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 64339,
+      "out": "PASS overlap",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-017-dot-nhin-thay-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2418,
+      "out": "PASS dot-visible (chưa áp dụng: T-035 chưa vào, trang chưa có button#model-zoom)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-018-nhan-vat-khong-che-chu-nao.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2289,
+      "out": "PASS no-text-cover (chưa áp dụng: T-035 chưa vào, trang chưa có button#model-zoom)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-019-nhan-vat-du-to.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2544,
+      "out": "PASS char-size (chưa áp dụng: T-035 chưa vào, trang chưa có button#model-zoom)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-020-bot-cong-tren-cung.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2417,
+      "out": "PASS gate-on-top (chưa áp dụng: T-035 chưa vào, trang chưa có button#model-zoom)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-021-phong-to-an-toan.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2497,
+      "out": "PASS zoom-safe (chưa áp dụng: T-035 chưa vào, trang chưa có button#model-zoom)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-022-bong-bong-dung-co-khi-doi-phong-to.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 392,
+      "out": "PASS chưa có chế độ phóng to (chưa áp dụng)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-023-tom-tat-khop-den.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2536,
+      "out": "PASS lit-match (chưa áp dụng: T-037 chưa vào, trang chưa có #model-sum-live)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-024-tom-tat-khong-ro.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2547,
+      "out": "PASS no-leak (chưa áp dụng: T-037 chưa vào, trang chưa có #model-sum-live)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-025-tom-tat-mot-lop.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2385,
+      "out": "PASS one-layer (chưa áp dụng: T-037 chưa vào, trang chưa có #model-sum-live)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-026-tom-tat-khong-che-chu-khoi.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2381,
+      "out": "PASS own-text (chưa áp dụng: T-037 chưa vào, trang chưa có #model-sum-live)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-027-esc-tung-lop.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2408,
+      "out": "PASS esc-layers (chưa áp dụng: T-037 chưa vào, trang chưa có #model-sum-live)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-028-tom-tat-khong-de-bot-khi-cu-dong.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2472,
+      "out": "PASS motion (chưa áp dụng: trang chưa có #model-sum-live)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-029-moi-duong-co-mui-cuoi.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 350,
+      "out": "PASS chưa áp dụng (trang chưa có mũi tên [data-part=ah] của T-039)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-030-duong-dai-co-mui-giua.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 295,
+      "out": "PASS chưa áp dụng (trang chưa có mũi tên [data-part=ah] của T-039)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/model/inv-031-khong-ky-thuat-de-vo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 293,
+      "out": "PASS chưa áp dụng (trang chưa có mũi tên [data-part=ah] của T-039)",
+      "tier": 2
+    }
+  ],
+  "hint": "spec"
+}

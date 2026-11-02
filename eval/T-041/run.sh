@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Eval tầng 1 của T-041 (bộ lọc theo sản phẩm của dashboard). Một lệnh, in PASS/FAIL, mã thoát 0/1.
 #   cd /home/claude/tohong-hq && bash eval/T-041/run.sh <thư-mục-repo-dashboard> [--criterion N]
-# --criterion N: chỉ tiêu chí N (1..4). Không có thì chạy cả bốn.
+# --criterion N: chỉ tiêu chí N (1..5). Không có thì chạy cả năm. Tiêu chí 6 (export_dashboard.py) là python3 eval/T-041/export-product.py.
 # Cần Playwright (NODE_PATH mặc định lấy từ `npm root -g`) và d3.min.js cục bộ (biến D3, mặc định /opt/npm-tools/node_modules/d3/dist/d3.min.js).
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
