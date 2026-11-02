@@ -8,7 +8,7 @@ Cách kiểm chung: mở `index.html` của PR trên thiết bị nêu ở từn
 2. Safari: sáu đường dài (`eval hồi quy` từ Reservoir lên Code Gate, `bậc C`, `ống hồi`, `báo cáo insight tuần`, `đọc bể`, `spec mâu thuẫn → spec rework`) đều có thêm một mũi giữa đường, không đè chữ nhãn? ("có" là đạt) [tiêu chí 2, 3]
 3. Firefox (máy tính): như dòng 1 và 2? ("có" là đạt) [tiêu chí 1, 2, 3]
 4. Safari/Firefox ở chế độ tối (đổi giao diện hệ thống sang tối): mũi tên đổi sang màu sáng hơn cùng đường, vẫn đọc được trên nền tối? ("có" là đạt) [tiêu chí 1, 3]
-5. Mở `sau-1280.png` cạnh `truoc-1280.png`: nhìn lướt (không phóng to ảnh) thấy hướng của mọi đường, mũi tên "nhỏ nhưng rõ", không to đến mức che đường ngắn như "Ý định → Spec Writer"? ("có" là đạt) [tiêu chí 1]
+5. Mở `sau-1280.png` cạnh `truoc-1280.png`: nhìn lướt (không phóng to ảnh) thấy hướng của mọi đường, mũi tên "nhỏ nhưng rõ", mũi nhỏ gọn (5-7px), không nuốt đường ngắn như "Ý định → Spec Writer"? ("có" là đạt; phần đo được nằm trong eval B5/B5b) [tiêu chí 1]
 6. Mở `sau-390.png` trên điện thoại thật ở cỡ gốc: nhìn thấy mũi tên ở mọi đường, không có đường ngắn nào bị mũi tên chiếm gần hết? ("có" là đạt) [tiêu chí 1, 4]
 7. Chế độ phóng to trên điện thoại: kéo ngón tay quanh bảng, mũi tên không nhấp nháy, không lệch khỏi đường, không biến mất lúc cuộn? ("có" là đạt) [tiêu chí 4]
 8. Khi có dot chạy (đợi một sự kiện thật hoặc dùng bản có dữ liệu): dot đi ngang đầu mũi thì nằm trên mũi, không bị mũi che? ("có" là đạt) [tiêu chí 4]
