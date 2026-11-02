@@ -35,12 +35,13 @@ if ((ONLY === 5 || SHOTS) && !TASK) { console.log('FAIL cần tham số --task <
 if (SHOTS && !['truoc', 'sau'].includes(LABEL)) { console.log('FAIL --shots cần --label truoc|sau'); process.exit(1); }
 
 // ---------- hằng số theo spec (mục 0 và 1) ----------
-const LEN_MIN = 6, LEN_MAX = 10, WID_MIN = 5, WID_MAX = 10;   // px hiển thị của mũi tên: chiều dài dọc hướng đi, chiều rộng ngang
+const LEN_MIN = 5, LEN_MAX = 7, WID_MIN = 4, WID_MAX = 7;   // px hiển thị của mũi tên: chiều dài dọc hướng đi, chiều rộng ngang
 const GAP_MIN = 0.8, GAP_MAX = 3.5;                            // u: khoảng từ đầu mũi tới đường viền hình học của khối đích
 const LONG = 220;                                              // u: đường dài từ ngưỡng này có đúng một mũi giữa (đường ngắn nhất ≥ 220 là 268u, dài nhất < 220 là 176u)
 const ANG = 20;                                                // độ: lệch cho phép giữa trục mũi tên và tiếp tuyến của đường
 const MID_T = [0.25, 0.75], MID_END_MIN = 50, MID_START_MIN = 30;
 const OVER = 0.5;                                              // u: dung sai chồng lấn
+const VIS_FRAC = 0.5, VIS_PX = 7;                                // nét còn thấy (nguồn -> gốc mũi cuối) ≥ 50% chiều dài đường trên main và ≥ 7px
 const TRIM_MAX = 16, EXT_MAX = 8, LABEL_MOVE = 8;                                           // u: được rút ngắn cuối đường tối đa bao nhiêu để mũi không chui vào khối
 const SHOT_NAMES = ['truoc-1280', 'sau-1280', 'truoc-390', 'sau-390'];
 const TARGET = { p_intent_spec: 'nd_spec', p_spec_gate: 'gt_spec', p_gate_exec: 'nd_exec', p_gate_respec: 'nd_respec', p_respec_spec: 'nd_spec', p_exec_gate: 'gt_code',
@@ -117,7 +118,7 @@ const MEASURE = cfg => {
   const fxf = svg.querySelector('#fx_f'), later = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
   const out = { sc, heads: [], nPaths: paths.length, nHeads: heads.length, longPaths: 0 };
   // oracle tuyến đường
-  const tsvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); tsvg.setAttribute('style', 'position:absolute;left:0;top:0;width:10px;height:10px;visibility:hidden;pointer-events:none'); const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path'); tsvg.appendChild(tmp); document.body.appendChild(tsvg);
+  const tsvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); tsvg.setAttribute('style', 'position:absolute;left:0;top:0;width:10px;height:10px;visibility:hidden;pointer-events:none'); const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path'); tsvg.appendChild(tmp); document.body.appendChild(tsvg); const tmpLen = d => { tmp.setAttribute('d', d); return tmp.getTotalLength(); };
   for (const p of paths) {
     const id = p.id, L = p.getTotalLength(), pts = dense(p), mine = heads.filter(h => h.getAttribute('data-for') === id);
     const cs = getComputedStyle(p), strokeC = rgb(cs.stroke);
@@ -140,7 +141,7 @@ const MEASURE = cfg => {
       const o = vis(h), hs = getComputedStyle(h), r = h.getBoundingClientRect();
       const g = geom(h); if (!g) { P('C1.visible', `${tag}: không có hình (hull < 3 điểm)`); continue; }
       const fill = rgb(hs.fill), strk = rgb(hs.stroke);
-      const rec = { id, at, cx: g.c[0], cy: g.c[1], tip: g.tip, lenPx: g.len * sc, widPx: g.wid * sc, fill: hs.fill, ax: g.ax, ay: g.ay, client: [r.left + r.width / 2, r.top + r.height / 2], gc: g.c };
+      const rec = { id, at, cx: g.c[0], cy: g.c[1], tip: g.tip, lenPx: g.len * sc, widPx: g.wid * sc, fill: hs.fill, ax: g.ax, ay: g.ay, client: [r.left + r.width / 2, r.top + r.height / 2], gc: g.c, hull: g.hull };
       // nhìn thấy
       if (!(o >= 0.99) || r.width <= 0 || r.height <= 0) P('C1.visible', `${tag}: không nhìn thấy (độ đục ${o}, bbox ${r.width.toFixed(1)}x${r.height.toFixed(1)})`);
       if (!fill || fill[3] < 0.99 || parseFloat(hs.fillOpacity) < 0.99) P('C1.fill', `${tag}: fill = "${hs.fill}" (cần màu đặc, không trong suốt, không "none"/"context-*")`);
@@ -173,6 +174,9 @@ const MEASURE = cfg => {
       for (const t of texts) { const ov = overlapRect(g.hull, { l: t.l + 0, t: t.t + 0, r: t.r, b: t.b }); if (ov > cfg.OVER) { P('C4.text', `${tag}: che chữ "${t.s}" (chồng ${ov.toFixed(1)}u)`); break; } }
       for (const t of bots) { const ov = overlapRect(g.hull, t); if (ov > cfg.OVER) { P('C4.bot', `${tag}: đè ${t.s} (chồng ${ov.toFixed(1)}u)`); break; } }
       if (at === 'end') {
+        const bx = g.tip[0] - g.ax * g.len, by = g.tip[1] - g.ay * g.len, bi = Math.min(nearest(ext, [bx, by]).i, pts.length - 1), oL = cfg.ORACLE[id] ? (tmpLen(cfg.ORACLE[id])) : L;
+        rec.visU = bi; rec.visPx = bi * sc;
+        if (bi < cfg.VIS_FRAC * oL - 0.01 || bi * sc < cfg.VIS_PX - 0.01) P('C1.vstroke', `${tag}: nét còn thấy từ khối nguồn tới gốc mũi ${bi.toFixed(0)}u = ${(bi * sc).toFixed(1)}px = ${(100 * bi / oL).toFixed(0)}% chiều dài đường ${oL.toFixed(0)}u (cần ≥ ${cfg.VIS_FRAC * 100}% và ≥ ${cfg.VIS_PX}px)`);
         const gap = sd(tb, g.tip[0], g.tip[1]); rec.gap = gap;
         if (gap < cfg.GAP_MIN || gap > cfg.GAP_MAX) P('C1.edge', `${tag}: đầu mũi cách mép khối đích ${tb.id} ${gap.toFixed(1)}u (cần ${cfg.GAP_MIN}-${cfg.GAP_MAX}u, dương = ở ngoài khối)`);
         // mũi không được chỉ vào khối khác: tia từ đầu mũi theo trục đi 6u phải còn gần khối đích hơn mọi khối khác
@@ -190,7 +194,9 @@ const MEASURE = cfg => {
   tsvg.remove();
   const lbls = [...svg.querySelectorAll(':scope > text.lbl')]; const seen = new Set();
   for (const t of lbls) { const k = t.textContent.trim(), o0 = cfg.LABELS[k]; if (!o0) continue; seen.add(k); const m0 = t.getCTM(), x = (parseFloat(t.getAttribute('x')) || 0) + (m0 ? m0.e : 0), y = (parseFloat(t.getAttribute('y')) || 0) + (m0 ? m0.f : 0);
-    const dx = Math.abs(x - o0[0]), dy = Math.abs(y - o0[1]); if (dx > cfg.LABEL_MOVE + 0.01 || dy > cfg.LABEL_MOVE + 0.01) P('C4.label', `nhãn "${k}" bị dời (${dx.toFixed(1)}u, ${dy.toFixed(1)}u) quá ${cfg.LABEL_MOVE}u`); }
+    const dx = Math.abs(x - o0[0]), dy = Math.abs(y - o0[1]); if (dx > cfg.LABEL_MOVE + 0.01 || dy > cfg.LABEL_MOVE + 0.01) P('C4.label', `nhãn "${k}" bị dời (${dx.toFixed(1)}u, ${dy.toFixed(1)}u) quá ${cfg.LABEL_MOVE}u`);
+    if (dx > 0.5 || dy > 0.5) { const q = rectU(t), r0 = { l: q.l - (x - o0[0]), r: q.r - (x - o0[0]), t: q.t - (y - o0[1]), b: q.b - (y - o0[1]) };   // hộp bao ở vị trí main
+      const hit = out.heads.find(h => overlapRect(h.hull, r0) > cfg.OVER); if (!hit) P('C4.label', `nhãn "${k}" bị dời (${dx.toFixed(1)}u, ${dy.toFixed(1)}u) nhưng ở vị trí cũ không mũi tên nào chạm nó (chỉ được nhích khi có va chạm)`); } }
   for (const k of Object.keys(cfg.LABELS)) if (!seen.has(k) && !/Spec Gate: agent critic/.test(k)) P('C4.label', `mất nhãn "${k}"`);
   for (const h of heads) if (!TARGET_OK(cfg.TARGET, h)) P('C1.count', `mũi tên mồ côi: data-for="${h.getAttribute('data-for')}" không phải đường p_* nào`);
   function TARGET_OK(T, h) { return !!T[h.getAttribute('data-for')] || !!svg.querySelector('path#' + CSS.escape(h.getAttribute('data-for') || '_')); }
@@ -215,7 +221,7 @@ async function open(opt = {}) {
   return o;
 }
 const close = async o => { ALLERR.push(...o.errors); await o.ctx.close(); };
-const CFG = { LEN_MIN, LEN_MAX, WID_MIN, WID_MAX, GAP_MIN, GAP_MAX, LONG, ANG, MID_T, MID_END_MIN, MID_START_MIN, OVER, TRIM_MAX, EXT_MAX, LABEL_MOVE, LABELS, TARGET, ORACLE };
+const CFG = { LEN_MIN, LEN_MAX, WID_MIN, WID_MAX, GAP_MIN, GAP_MAX, LONG, ANG, MID_T, MID_END_MIN, MID_START_MIN, OVER, VIS_FRAC, VIS_PX, TRIM_MAX, EXT_MAX, LABEL_MOVE, LABELS, TARGET, ORACLE };
 const measure = o => o.page.evaluate(MEASURE, CFG);
 // viewport cao bằng cả trang (không cuộn, không đổi bề rộng) rồi đo lại: toạ độ trang = toạ độ viewport
 async function tall(o) { const vp = o.page.viewportSize(); const h = await o.page.evaluate(() => Math.ceil(document.documentElement.scrollHeight)); await o.page.setViewportSize({ width: vp.width, height: Math.min(h + 20, 12000) }); await o.page.waitForTimeout(700); await o.page.evaluate(() => window.scrollTo(0, 0)); return measure(o); }
@@ -226,7 +232,7 @@ async function pixels(o, buf, pts) {
   const pg = await o.ctx.newPage(); try { await pg.goto('about:blank');
     return await pg.evaluate(async ([b64, pts]) => { const img = new Image(); await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = 'data:image/png;base64,' + b64; });
       const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const x = c.getContext('2d'); x.drawImage(img, 0, 0);
-      return pts.map(([px, py]) => { const d = x.getImageData(Math.round(px), Math.round(py), 1, 1).data; return [d[0], d[1], d[2], d[3]]; }); }, [buf.toString('base64'), pts]); } finally { await pg.close(); }
+      return pts.map(([px, py, wr, wg, wb]) => { const D = x.getImageData(Math.round(px) - 1, Math.round(py) - 1, 3, 3).data; let best = null, bd = 1e9; for (let i = 0; i < 9; i++) { const d = Math.abs(D[i * 4] - wr) + Math.abs(D[i * 4 + 1] - wg) + Math.abs(D[i * 4 + 2] - wb); if (d < bd) { bd = d; best = [D[i * 4], D[i * 4 + 1], D[i * 4 + 2], D[i * 4 + 3]]; } } return best; }); }, [buf.toString('base64'), pts]); } finally { await pg.close(); }
 }
 const rgbOf = s => { const m = /rgba?\(\s*([\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)/.exec(s || ''); return m ? [+m[1], +m[2], +m[3]] : null; };
 const sumProbs = (probs, codes) => probs.filter(p => codes.some(c => p[0].startsWith(c)));
@@ -244,13 +250,13 @@ async function crit1() {
     try {
       rec(1, `A1 có đủ 24 đường p_* và mỗi đường có đúng một mũi cuối (${v.k})`, m.nPaths === 24 ? (sumProbs(m.probs, ['C1.count']).length ? sumProbs(m.probs, ['C1.count']).slice(0, 4).map(p => p[1]).join(' | ') : null) : `chỉ thấy ${m.nPaths} đường p_*`);
       reportProbs(1, v.k, m, [['C1.visible', 'B1 mũi nhìn thấy (bbox > 0, không ẩn)'], ['C1.fill', 'B2 fill đặc, không trong suốt, không none'], ['C1.solid', 'B3 đặc (không nét đứt)'], ['C1.color', 'B4 cùng màu đường'],
-        ['C1.size', 'B5 kích thước 6-10px dài, 5-10px rộng'], ['C1.dir', 'B6 đúng hướng, chỉ về khối đích'], ['C1.onpath', 'B7 đầu mũi nằm trên đường'], ['C1.edge', 'B8 đầu mũi sát mép khối đích (0,8-3,5u)'], ['C1.stub', 'B9 nét đường không chui vào khối đích'],
+        ['C1.size', 'B5 kích thước 5-7px dài, 4-7px rộng'], ['C1.vstroke', 'B5b nét còn thấy ≥ 50% đường và ≥ 7px'], ['C1.dir', 'B6 đúng hướng, chỉ về khối đích'], ['C1.onpath', 'B7 đầu mũi nằm trên đường'], ['C1.edge', 'B8 đầu mũi sát mép khối đích (0,8-3,5u)'], ['C1.stub', 'B9 nét đường không chui vào khối đích'],
         ['C1.covered', 'B10 không bị phần tử nào vẽ đè'], ['C1.inblock', 'B11 mũi không chồng vào khối'], ['C1.pe', 'B12 pointer-events none'], ['C1.aria', 'B13 aria-hidden'], ['C1.static', 'B14 đứng yên'], ['C1.attr', 'B15 thuộc tính'], ['C1.dup', 'B16 không chồng nhau'], ['C1.target', 'B17 khối đích có trong trang']]);
       if (!v.zoom) { // pixel: tâm mũi đúng màu fill (chứng minh thật sự được vẽ, không bị khối/đường khác đè)
         const m2 = await tall(o);
         const ptsAll = await o.page.evaluate(() => [...document.querySelectorAll('#model svg [data-part=ah]')].map(h => { const r = h.getBoundingClientRect(); return { id: h.getAttribute('data-for') + '/' + h.getAttribute('data-at'), x: r.left + r.width / 2 + scrollX, y: r.top + r.height / 2 + scrollY, fill: getComputedStyle(h).fill, gc: null }; }));
         // dùng tâm hình lồi thay vì tâm bbox (mũi nghiêng): đổi toạ độ u -> trang
-        const cp = await o.page.evaluate(arr => { const svg = document.querySelector('#model svg'), m = svg.getScreenCTM(); return arr.map(([x, y]) => [m.a * x + m.e + scrollX, m.d * y + m.f + scrollY]); }, m2.heads.map(h => h.gc));
+        const cp = await o.page.evaluate(arr => { const svg = document.querySelector('#model svg'), m = svg.getScreenCTM(); return arr.map(([x, y]) => [m.a * x + m.e + scrollX, m.d * y + m.f + scrollY]); }, m2.heads.map(h => h.gc)).then(c => c.map((q, i) => [q[0], q[1], ...(rgbOf(m2.heads[i].fill) || [0, 0, 0])]));
         const buf = await o.page.screenshot(); const px = await pixels(o, buf, cp);
         const bad = []; m2.heads.forEach((h, i) => { const want = rgbOf(h.fill), got = px[i]; if (!want || !got || Math.abs(got[0] - want[0]) + Math.abs(got[1] - want[1]) + Math.abs(got[2] - want[2]) > 45) bad.push(`${h.id}/${h.at} thấy [${got && got.slice(0, 3)}] cần ${h.fill}`); });
         rec(1, `B18 điểm ảnh ở tâm mỗi mũi đúng màu mũi (thật sự được vẽ, không bị đè) (${v.k})`, bad.length ? `${bad.length}/${m2.heads.length}: ` + bad.slice(0, 3).join(' | ') : (m2.heads.length ? null : 'không có mũi nào để đo')); }
@@ -262,7 +268,7 @@ async function crit1() {
     try { const seq = [[{ width: 1280, height: 900 }, 0], [{ width: 390, height: 844 }, 0], [{ width: 390, height: 844 }, 1], [{ width: 1280, height: 900 }, 0]]; const bad = []; let z = false;
       for (const [vp, zoom] of seq) { if (zoom && !z) { if (!(await enterZoom(o))) { bad.push('không vào được phóng to'); continue; } z = true; } if (!zoom && z) { await o.page.keyboard.press('Escape'); await o.page.waitForTimeout(300); if (await zoomOn(o)) await o.page.click('#model-zoom'); await o.page.waitForTimeout(400); z = false; }
         await o.page.setViewportSize(vp); await o.page.waitForTimeout(700); const m = await measure(o); const sz = m.probs.filter(p => p[0] === 'C1.size'); if (sz.length || !m.heads.length) bad.push(`${vp.width}${zoom ? ' phóng to' : ''}: ${sz.length ? sz[0][1] : 'không có mũi nào'}`); }
-      rec(1, 'D1 đổi cỡ cửa sổ 1280 -> 390 -> phóng to -> 1280 không tải lại: cỡ mũi tên luôn 6-10px', bad.length ? bad.slice(0, 3).join(' | ') : null); } finally { await close(o).catch(() => { }); }
+      rec(1, 'D1 đổi cỡ cửa sổ 1280 -> 390 -> phóng to -> 1280 không tải lại: cỡ mũi tên luôn 5-7px', bad.length ? bad.slice(0, 3).join(' | ') : null); } finally { await close(o).catch(() => { }); }
   }
   { // chế độ tối: màu mũi theo token tối và khác màu sáng
     const L = await viewData(VIEWS[0], false), Dk = await viewData(VIEWS[0], true);
@@ -270,7 +276,7 @@ async function crit1() {
       const bad = []; for (const k of Object.keys(colL)) { const id = k.split('/')[0]; if (colD[k] === undefined) bad.push(k + ' mất ở chế độ tối'); else if (colD[k] === colL[k]) bad.push(`${k} cùng màu ${colL[k]} ở sáng và tối (màu mũi phải theo token --axis/--warn)`); }
       const dk = Dk.m.probs.filter(p => p[0].startsWith('C1.') && !['C1.count'].includes(p[0])); if (dk.length) bad.push('chế độ tối: ' + dk[0][1]);
       rec(1, 'D2 chế độ tối: mọi mũi đổi màu theo token tối, vẫn đạt B1-B17', !Object.keys(colL).length ? 'không có mũi nào' : (bad.length ? `${bad.length}: ` + bad.slice(0, 3).join(' | ') : null));
-      const m2 = await tall(Dk.o); const cp = await Dk.o.page.evaluate(arr => { const svg = document.querySelector('#model svg'), m = svg.getScreenCTM(); return arr.map(([x, y]) => [m.a * x + m.e + scrollX, m.d * y + m.f + scrollY]); }, m2.heads.map(h => h.gc));
+      const m2 = await tall(Dk.o); const cp = await Dk.o.page.evaluate(arr => { const svg = document.querySelector('#model svg'), m = svg.getScreenCTM(); return arr.map(([x, y]) => [m.a * x + m.e + scrollX, m.d * y + m.f + scrollY]); }, m2.heads.map(h => h.gc)).then(c => c.map((q, i) => [q[0], q[1], ...(rgbOf(m2.heads[i].fill) || [0, 0, 0])]));
       const buf = await Dk.o.page.screenshot(); const px = await pixels(Dk.o, buf, cp); const bd = []; m2.heads.forEach((h, i) => { const want = rgbOf(h.fill), got = px[i]; if (!want || !got || Math.abs(got[0] - want[0]) + Math.abs(got[1] - want[1]) + Math.abs(got[2] - want[2]) > 45) bd.push(`${h.id}/${h.at} thấy [${got && got.slice(0, 3)}] cần ${h.fill}`); });
       rec(1, 'D3 chế độ tối: điểm ảnh ở tâm mỗi mũi đúng màu mũi', bd.length ? `${bd.length}: ` + bd.slice(0, 3).join(' | ') : (m2.heads.length ? null : 'không có mũi nào')); } finally { if (L.o) await close(L.o).catch(() => { }); if (Dk.o) await close(Dk.o).catch(() => { }); }
   }
@@ -283,7 +289,7 @@ async function crit2() {
     try { rec(2, `M0 có ${m.longPaths} đường dài ≥ ${LONG}u (cần đúng 6: p_gate_respec2, p_kr_gate, p_kr_spec, p_capu_res, p_res_insight, p_insight_intent) (${v.k})`, m.longPaths === 6 ? null : `đo được ${m.longPaths}`);
       reportProbs(2, v.k, m, [['C2.count', 'M1 đường ≥ 220u có đúng một mũi giữa, đường ngắn hơn không có'], ['C2.place', 'M2 mũi giữa nằm 25-75% chiều dài, cách đầu ≥ 30u, cách cuối ≥ 50u, ngoài khối']]);
       const mids = m.heads.filter(h => h.at === 'mid'), probs = m.probs.filter(p => /^C(1|4)\.(size|dir|onpath|fill|covered|text|bot|visible)/.test(p[0]) && /\/mid/.test(p[1]));
-      rec(2, `M3 mũi giữa cùng chuẩn với mũi cuối: nhìn thấy, đúng hướng, 6-10px, không đè, không che chữ/bot (${v.k})`, probs.length ? probs.slice(0, 3).map(p => p[1]).join(' | ') : (mids.length ? null : 'không có mũi giữa nào')); } finally { await close(o).catch(() => { }); }
+      rec(2, `M3 mũi giữa cùng chuẩn với mũi cuối: nhìn thấy, đúng hướng, 5-7px, không đè, không che chữ/bot (${v.k})`, probs.length ? probs.slice(0, 3).map(p => p[1]).join(' | ') : (mids.length ? null : 'không có mũi giữa nào')); } finally { await close(o).catch(() => { }); }
   }
 }
 
@@ -305,7 +311,7 @@ async function pool(jobs, n) { const res = []; let i = 0; await Promise.all(Arra
 async function crit4() {
   for (const v of VIEWS) {
     const { o, m, err } = await viewData(v, false); if (err) { rec(4, 'V0 vào chế độ phóng to', err); continue; }
-    try { reportProbs(4, v.k, m, [['C4.text', 'K1 mũi tên không che chữ nào'], ['C4.bot', 'K2 mũi tên không đè thân bot (inv-020)'], ['C4.order', 'K3 mũi tên nằm dưới dot (#fx_f)'], ['C4.route', 'K4 không đổi tuyến đường (chỉ rút cuối ≤ 16u)'], ['C4.label', 'K8 nhãn đường còn đủ, chỉ nhích ≤ 8u']]);
+    try { reportProbs(4, v.k, m, [['C4.text', 'K1 mũi tên không che chữ nào'], ['C4.bot', 'K2 mũi tên không đè thân bot (inv-020)'], ['C4.order', 'K3 mũi tên nằm dưới dot (#fx_f)'], ['C4.route', 'K4 không đổi tuyến đường (chỉ rút cuối ≤ 16u)'], ['C4.label', 'K8 nhãn đường còn đủ, chỉ nhích ≤ 8u và chỉ khi mũi tên chạm ở vị trí cũ']]);
       rec(4, `K5 không cuộn ngang ở ${v.vp.width}px`, await o.page.evaluate(() => (document.documentElement.scrollWidth <= innerWidth + 1) ? null : `scrollWidth ${document.documentElement.scrollWidth} > ${innerWidth}`));
       rec(4, `K6 console không lỗi (${v.k})`, o.errors.length ? o.errors.slice(0, 2).join(' | ') : null); } finally { await close(o).catch(() => { }); }
   }
