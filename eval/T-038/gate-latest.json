@@ -1,7 +1,7 @@
 {
   "task": "T-038",
-  "at": "2026-11-02T00:58",
-  "verdict": "RED",
+  "at": "2026-11-02T02:06",
+  "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng dashboard/model",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-037/run.sh /home/user/tohong-hq-dashboard --task T-037 --criterion 1",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 100224,
+      "ms": 100234,
       "out": " chữ viết tay)\nPASS C1 N1 nd_exec: tên thật từ board/ bỏ tiền tố \"<từ>:\" rồi cắt 27 ký tự + \"…\" (đúng chữ viết tay)\nPASS C1 N1 nd_respec: tên thật từ board/ bỏ tiền tố \"<từ>:\" rồi cắt 27 ký tự + \"…\" (đúng chữ viết tay)\nPASS C1 N1 nd_insight: tên thật từ board/ bỏ tiền tố \"<từ>:\" rồi cắt 27 ký tự + \"…\" (đúng chữ viết tay)\nPASS C1 B1 nd_kr đang sáng vì dot (nhận insight/spec): tóm tắt là \"Vừa nhận T-2 · tên\", hết sáng thì \"Đang rảnh\", không khung nào đèn và lời lệch quá 300ms\nPASS C1 B2 nd_prod đang sáng vì dot (lên sóng): \"Vừa nhận T-9 · tên\", hết sáng thì \"Đang rảnh\"\nPASS C1 B3 gt_spec (khối nguồn): bất cứ lúc nào đang sáng thì không nói \"Đang rảnh\" (nếu sáng: \"Vừa giao/nhận T-2 · tên\"), tắt thì \"Đang rảnh\"\nPASS C1 B4 gt_code (khối nguồn của chuỗi lên sóng): đèn và lời khớp nhau\nPASS 28/28",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-037/run.sh /home/user/tohong-hq-dashboard --task T-037 --criterion 2",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 38662,
+      "ms": 38652,
       "out": "a (đã xong): đóng tóm tắt, aria-expanded=\"false\"\nPASS C2 B3 bấm vào chính bong bóng khi đang gõ: hiện ngay toàn bộ\nPASS C2 B4 bấm vào bong bóng khi đã xong: không đóng, không đổi\nPASS C2 B5 bấm ra ngoài đóng tóm tắt\nPASS C2 B6 Esc đóng tóm tắt và tiêu điểm về nhân vật đó\nPASS C2 B7 mở nhân vật khác: cái cũ đóng ngay, không khung nào có hai tóm tắt\nPASS C2 B8 không tự tắt: vẫn mở sau 12 giây\nPASS C2 B9 không lỗi console\nPASS C2 E1 tóm tắt đang mở: bong bóng sự kiện của cùng khối (nd_spec) không được tạo; của khối khác (gt_spec) vẫn hiện; #fx_s đứng sau #fx_b\nPASS C2 E2 mở tóm tắt của khối đang có bong bóng sự kiện: bong bóng sự kiện cùng khối bị gỡ ngay\nPASS C2 E3 bong bóng sự kiện vẫn ≤ 3 cùng lúc khi có tóm tắt đang mở; tóm tắt không nằm trong #fx_b\nPASS C2 E4 không lỗi console\nPASS 22/22",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-037/run.sh /home/user/tohong-hq-dashboard --task T-037 --criterion 3",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 10006,
+      "ms": 10207,
       "out": "PASS C3 L1 trạng thái ban đầu đúng\nPASS C3 L2 việc mới vào khối (T-3 doing): dòng mới hiện ngay đủ, cùng phần tử, vùng đọc cập nhật, trong ≤ 1 giây\nPASS C3 L3 việc rời khối (T-1 sang review): dòng mất\nPASS C3 L4 việc đổi trạng thái (T-2 sang rework): chữ trạng thái đổi thành \"Đang sửa\"\nPASS C3 L5 vượt 3 việc: ba dòng + \"+2 việc nữa\"\nPASS C3 L6 khối hết việc: thành \"Đang rảnh\", vẫn mở (không tự đóng)\nPASS C3 L7 vẫn mở sau 2,5 giây dù khối đã rảnh\nPASS C3 L8 rảnh rồi lại có việc: dòng việc hiện lại\nPASS C3 L9 không lỗi console\nPASS C3 G1 sự kiện không liên quan (khối khác đổi) khi đang gõ: gõ tiếp, không bắt đầu lại, cùng phần tử\nPASS C3 G2 nội dung đổi khi đang gõ: hiện ngay đủ nội dung mới (không gõ lại) trong ≤ 1 giây\nPASS C3 G3 không lỗi console\nPASS 12/12",
       "tier": 1
     },
@@ -36,23 +36,23 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-037/run.sh /home/user/tohong-hq-dashboard --task T-037 --criterion 4",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 70747,
+      "ms": 71343,
       "out": "-16px, trọn svg, không đè thân bot, trên cùng, trong khung nhìn\nPASS C4 G2b 1280px phóng to: trang ngoài không cuộn ngang\nPASS C4 G4 320px, tên toàn chữ W rộng nhất: vẫn trọn svg, chữ ≥ 9px; nếu vẫn quá rộng ở 9px thì tên bị cắt thêm bằng \"…\" (không tràn)\nPASS C4 G3 390px chế độ tối: 11 tóm tắt đạt cỡ chữ, bố cục, tương phản ≥ 4,5\nPASS C4 W1 đổi bề ngang 1280 → 390 → 1280 khi đang mở: vẫn mở cùng nhân vật, bố cục và cỡ chữ vẫn đúng trong 700ms\nPASS C4 Z1 phóng to: Tab xoay vòng nút → 11 nhân vật → nút, không ra ngoài #model\nPASS C4 Z2 phóng to: Shift+Tab từ nút về nd_prod\nPASS C4 Z3 phóng to + tóm tắt mở: Esc lần 1 chỉ đóng tóm tắt (phóng to còn), Esc lần 2 đóng phóng to\nPASS C4 Z4 bấm \"Phóng to\" khi tóm tắt đang mở: tóm tắt đóng và phóng to bật (bấm ngoài vẫn thực hiện việc đó)\nPASS 28/28",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && bash eval/T-037/run.sh /home/user/tohong-hq-dashboard --task T-037 --criterion 5",
       "kind": "cmd",
-      "status": "FAIL",
-      "ms": 359592,
-      "out": " inv-018-nhan-vat-khong-che-chu-nao.sh\nPASS C5 V inv-019-nhan-vat-du-to.sh\nPASS C5 V inv-020-bot-cong-tren-cung.sh\nPASS C5 V inv-021-phong-to-an-toan.sh\nPASS C5 V inv-022-bong-bong-dung-co-khi-doi-phong-to.sh\nPASS C5 V inv-023-tom-tat-khop-den.sh\nPASS C5 V inv-024-tom-tat-khong-ro.sh\nPASS C5 V inv-025-tom-tat-mot-lop.sh\nPASS C5 V inv-026-tom-tat-khong-che-chu-khoi.sh\nPASS C5 V inv-027-esc-tung-lop.sh\nFAIL C5.V inv-028-tom-tat-khong-de-bot-khi-cu-dong.sh thoát 1: FAIL motion: 1280px nd_kr: tóm tắt đè thân bot 25/300 khung khi nhân vật 'take' (chồng 48.4×0.6u > 0,5u); 1280px nd_rework: tóm tắt đè thân bot 25/297 khung khi nhân vật 'take' (chồng 48.4×0.6u > 0,5u); 1280px nd_respec: tóm tắt đè thân bot 25/299 khung khi nhân vật 'take' (chồng 48.4×0.6u > 0,5u)\nFAIL 1/35 kiểm tra đỏ (tiêu chí 5)",
+      "status": "PASS",
+      "ms": 359074,
+      "out": "-khop-khoi-sang.sh\nPASS C5 V inv-011-ranh-thi-mo.sh\nPASS C5 V inv-012-reduced-motion-nhan-vat-dung-yen.sh\nPASS C5 V inv-013-bong-bong-co-tran.sh\nPASS C5 V inv-014-khong-giao-nhan-gia.sh\nPASS C5 V inv-015-nhan-vat-giu-net-ve.sh\nPASS C5 V inv-016-nhan-vat-khong-che-chu-khi-cu-dong.sh\nPASS C5 V inv-017-dot-nhin-thay-duoc.sh\nPASS C5 V inv-018-nhan-vat-khong-che-chu-nao.sh\nPASS C5 V inv-019-nhan-vat-du-to.sh\nPASS C5 V inv-020-bot-cong-tren-cung.sh\nPASS C5 V inv-021-phong-to-an-toan.sh\nPASS C5 V inv-022-bong-bong-dung-co-khi-doi-phong-to.sh\nPASS C5 V inv-023-tom-tat-khop-den.sh\nPASS C5 V inv-024-tom-tat-khong-ro.sh\nPASS C5 V inv-025-tom-tat-mot-lop.sh\nPASS C5 V inv-026-tom-tat-khong-che-chu-khoi.sh\nPASS C5 V inv-027-esc-tung-lop.sh\nPASS C5 V inv-028-tom-tat-khong-de-bot-khi-cu-dong.sh\nPASS 35/35",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && bash eval/T-037/run.sh /home/user/tohong-hq-dashboard --task T-037 --criterion 6",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 657,
+      "ms": 685,
       "out": "PASS C6 S1 docs/screenshots/T-037/ đã commit ở HEAD đủ 7 ảnh (dang-go-1280, dang-go-1280-sau, xong-1280, ranh-1280, dang-go-390, phong-to-390, toi-390)\nPASS C6 S2 mỗi ảnh khác nhau (không chụp trùng)\nPASS C6 S3 ảnh không rỗng (≥ 5 KB mỗi ảnh)\nPASS C6 S4 dang-go-390.png rộng đúng 390px (đo 390)\nPASS C6 S4 phong-to-390.png rộng đúng 390px (đo 390)\nPASS C6 S4 toi-390.png rộng đúng 390px (đo 390)\nPASS 6/6",
       "tier": 1
     },
@@ -65,10 +65,18 @@
       "tier": 1
     },
     {
+      "eval": "eval/T-038/adv-01.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 139390,
+      "out": "(thông tin) 1280 nd_spec: không thấy give/take trong 5 giây\n  (thông tin) 1280 gt_spec: không thấy give/take trong 5 giây\n  (thông tin) 1280 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 1280 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 1280 nd_capu: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_capu: không thấy give/take trong 5 giây\nPASS motion\nPASS xss\nPASS rapid\nPASS esc",
+      "tier": 1
+    },
+    {
       "eval": "eval/invariants/dashboard/model/inv-001-khong-dot-gia.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9464,
+      "ms": 9398,
       "out": "PASS no-fake-dots",
       "tier": 2
     },
@@ -76,7 +84,7 @@
       "eval": "eval/invariants/dashboard/model/inv-002-tran-dot.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 18501,
+      "ms": 18508,
       "out": "PASS dot-cap",
       "tier": 2
     },
@@ -84,7 +92,7 @@
       "eval": "eval/invariants/dashboard/model/inv-003-dot-tren-duong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 8601,
+      "ms": 8609,
       "out": "PASS dot-on-path",
       "tier": 2
     },
@@ -92,7 +100,7 @@
       "eval": "eval/invariants/dashboard/model/inv-004-khong-ket-sang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 16830,
+      "ms": 16838,
       "out": "PASS no-stuck-lit",
       "tier": 2
     },
@@ -100,7 +108,7 @@
       "eval": "eval/invariants/dashboard/model/inv-005-reduced-motion-khong-dot.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 5298,
+      "ms": 5379,
       "out": "PASS reduced-no-dots",
       "tier": 2
     },
@@ -108,7 +116,7 @@
       "eval": "eval/invariants/dashboard/model/inv-006-khong-cuon-ngang-390.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 2413,
+      "ms": 2368,
       "out": "PASS no-hscroll-390",
       "tier": 2
     },
@@ -116,7 +124,7 @@
       "eval": "eval/invariants/dashboard/model/inv-007-capu-sang-khi-escalated.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 13840,
+      "ms": 13866,
       "out": "PASS capu-escalated",
       "tier": 2
     },
@@ -124,7 +132,7 @@
       "eval": "eval/invariants/dashboard/model/inv-008-dot-co-khi-doi-be-ngang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 7373,
+      "ms": 7275,
       "out": "PASS rotate",
       "tier": 2
     },
@@ -132,7 +140,7 @@
       "eval": "eval/invariants/dashboard/model/inv-009-so-dem-thi-sang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 20042,
+      "ms": 20366,
       "out": "PASS count-lit",
       "tier": 2
     },
@@ -140,7 +148,7 @@
       "eval": "eval/invariants/dashboard/model/inv-010-nhan-vat-khop-khoi-sang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 24662,
+      "ms": 24936,
       "out": "PASS char-match-lit",
       "tier": 2
     },
@@ -148,7 +156,7 @@
       "eval": "eval/invariants/dashboard/model/inv-011-ranh-thi-mo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 8412,
+      "ms": 8537,
       "out": "PASS idle-dim",
       "tier": 2
     },
@@ -156,7 +164,7 @@
       "eval": "eval/invariants/dashboard/model/inv-012-reduced-motion-nhan-vat-dung-yen.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 7763,
+      "ms": 7874,
       "out": "PASS reduced-still",
       "tier": 2
     },
@@ -164,7 +172,7 @@
       "eval": "eval/invariants/dashboard/model/inv-013-bong-bong-co-tran.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 14211,
+      "ms": 14359,
       "out": "PASS bubble-cap",
       "tier": 2
     },
@@ -172,7 +180,7 @@
       "eval": "eval/invariants/dashboard/model/inv-014-khong-giao-nhan-gia.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9697,
+      "ms": 9953,
       "out": "PASS no-fake-handover",
       "tier": 2
     },
@@ -180,7 +188,7 @@
       "eval": "eval/invariants/dashboard/model/inv-015-nhan-vat-giu-net-ve.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 12040,
+      "ms": 12219,
       "out": "PASS char-own-paint",
       "tier": 2
     },
@@ -188,7 +196,7 @@
       "eval": "eval/invariants/dashboard/model/inv-016-nhan-vat-khong-che-chu-khi-cu-dong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 64239,
+      "ms": 64909,
       "out": "PASS overlap",
       "tier": 2
     },
@@ -196,7 +204,7 @@
       "eval": "eval/invariants/dashboard/model/inv-017-dot-nhin-thay-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 27390,
+      "ms": 27720,
       "out": "PASS dot-visible",
       "tier": 2
     },
@@ -204,7 +212,7 @@
       "eval": "eval/invariants/dashboard/model/inv-018-nhan-vat-khong-che-chu-nao.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 35950,
+      "ms": 35895,
       "out": "PASS no-text-cover",
       "tier": 2
     },
@@ -212,7 +220,7 @@
       "eval": "eval/invariants/dashboard/model/inv-019-nhan-vat-du-to.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 5879,
+      "ms": 5801,
       "out": "PASS char-size",
       "tier": 2
     },
@@ -220,7 +228,7 @@
       "eval": "eval/invariants/dashboard/model/inv-020-bot-cong-tren-cung.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 36119,
+      "ms": 36127,
       "out": "PASS gate-on-top",
       "tier": 2
     },
@@ -228,7 +236,7 @@
       "eval": "eval/invariants/dashboard/model/inv-021-phong-to-an-toan.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9655,
+      "ms": 9739,
       "out": "PASS zoom-safe",
       "tier": 2
     },
@@ -236,7 +244,7 @@
       "eval": "eval/invariants/dashboard/model/inv-022-bong-bong-dung-co-khi-doi-phong-to.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 10337,
+      "ms": 10389,
       "out": "PASS 390px bản thường, trước khi bấm nd_exec 12px\nPASS 390px vừa bấm Phóng to, bong bóng đang hiện nd_exec 12px\nPASS 390px vừa bấm Thu nhỏ, bong bóng đang hiện gt_code 12px, nd_spec 12px\nPASS 1280px bản thường, trước khi bấm nd_exec 12px\nPASS 1280px vừa bấm Phóng to, bong bóng đang hiện nd_exec 12px\nPASS 1280px vừa bấm Thu nhỏ, bong bóng đang hiện gt_code 12px, nd_spec 12px\nPASS",
       "tier": 2
     },
@@ -244,7 +252,7 @@
       "eval": "eval/invariants/dashboard/model/inv-023-tom-tat-khop-den.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 19660,
+      "ms": 19505,
       "out": "PASS lit-match",
       "tier": 2
     },
@@ -252,7 +260,7 @@
       "eval": "eval/invariants/dashboard/model/inv-024-tom-tat-khong-ro.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 5395,
+      "ms": 5549,
       "out": "PASS no-leak",
       "tier": 2
     },
@@ -260,7 +268,7 @@
       "eval": "eval/invariants/dashboard/model/inv-025-tom-tat-mot-lop.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 7241,
+      "ms": 7284,
       "out": "PASS one-layer",
       "tier": 2
     },
@@ -268,7 +276,7 @@
       "eval": "eval/invariants/dashboard/model/inv-026-tom-tat-khong-che-chu-khoi.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 14751,
+      "ms": 14821,
       "out": "PASS own-text",
       "tier": 2
     },
@@ -276,26 +284,18 @@
       "eval": "eval/invariants/dashboard/model/inv-027-esc-tung-lop.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 6737,
+      "ms": 6702,
       "out": "PASS esc-layers",
       "tier": 2
     },
     {
       "eval": "eval/invariants/dashboard/model/inv-028-tom-tat-khong-de-bot-khi-cu-dong.sh",
       "kind": "sh",
-      "status": "FAIL",
-      "ms": 130065,
-      "out": "ong 5 giây\n  (thông tin) 1280 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 1280 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 1280 nd_capu: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_capu: không thấy give/take trong 5 giây\nFAIL motion: 1280px nd_kr: tóm tắt đè thân bot 25/300 khung khi nhân vật 'take' (chồng 48.4×0.6u > 0,5u); 1280px nd_rework: tóm tắt đè thân bot 25/299 khung khi nhân vật 'take' (chồng 48.4×0.6u > 0,5u); 1280px nd_respec: tóm tắt đè thân bot 25/300 khung khi nhân vật 'take' (chồng 48.4×0.6u > 0,5u)",
+      "status": "PASS",
+      "ms": 130494,
+      "out": "(thông tin) 1280 nd_spec: không thấy give/take trong 5 giây\n  (thông tin) 1280 gt_spec: không thấy give/take trong 5 giây\n  (thông tin) 1280 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 1280 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 1280 nd_capu: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_capu: không thấy give/take trong 5 giây\nPASS motion",
       "tier": 2
-    },
-    {
-      "eval": "eval/T-038/adv-01.sh",
-      "kind": "sh",
-      "status": "FAIL",
-      "ms": 138846,
-      "out": " nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 1280 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 1280 nd_capu: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_capu: không thấy give/take trong 5 giây\nFAIL motion: 1280px nd_kr: tóm tắt đè thân bot 25/299 khung khi nhân vật 'take' (chồng 48.4×0.6u > 0,5u); 1280px nd_rework: tóm tắt đè thân bot 25/299 khung khi nhân vật 'take' (chồng 48.4×0.6u > 0,5u); 1280px nd_respec: tóm tắt đè thân bot 25/301 khung khi nhân vật 'take' (chồng 48.4×0.6u > 0,5u)\nPASS xss\nPASS rapid\nPASS esc",
-      "tier": 3
     }
   ],
-  "hint": "spec"
+  "hint": ""
 }
