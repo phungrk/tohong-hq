@@ -61,7 +61,7 @@ EVENT_VI = {
     "assigned": "Giao việc", "started": "Bắt đầu", "handoff": "Bàn giao", "rejected": "Trả về",
     "accepted": "Chấp nhận", "blocked": "Báo bị chặn", "unblocked": "Gỡ chặn",
     "escalated": "Leo thang", "decided": "Capu quyết định", "cost": "Ghi chi phí", "requested": "Capu yêu cầu",
-    "respec": "Sửa spec xong", "evalplus": "Thêm eval, chạy lại",
+    "respec": "Sửa spec xong", "evalplus": "Thêm eval, chạy lại", "evals": "Đăng ký eval",
 }
 SPEC_OWNER = "product"  # bộ phận giữ spec + eval (Spec Writer)
 GATE_OF = {"product": "spec-critic", "engineering": "adversary"}   # ai gác cổng cho việc của bộ phận nào
@@ -384,10 +384,25 @@ def cmd_handoff(a):
 
     def bump(m):
         m["version"] += 1
+        m["eval"] = list(m["eval"]) + [e for e in a.eval if e not in m["eval"]]
     meta, _ = transition(a.task, ["doing", "rework"], "review", "handoff", a.by, rev,
                          holder=rev, detail=a.note or "", cost=a.cost, link=a.link or "",
                          mutate=bump)
-    print(f"{a.task}: Chờ review (bản v{meta['version']}) → {rev}")
+    print(f"{a.task}: Chờ review (bản v{meta['version']}, {len(meta['eval'])} eval) → {rev}")
+
+
+def cmd_evals(a):
+    """Đăng ký eval tầng 1 cho việc chưa xong (Spec Writer quên --eval lúc handoff, hay Chief of Staff bổ sung)."""
+    if not a.eval:
+        raise LedgerError("evals phải có ít nhất một --eval.")
+    meta, body = read_task(a.task)
+    if meta["state"] in ("done", "escalated"):
+        raise LedgerError(f"{a.task} đã {meta['state']}, không thêm eval được.")
+    new = [e for e in a.eval if e not in meta["eval"]]
+    meta["eval"] = list(meta["eval"]) + new
+    row = log_event(meta, "evals", a.by, meta["holder"], a.note or f"đăng ký {len(new)} eval tầng 1")
+    write_task(meta, append_history(body, row))
+    print(f"{a.task}: {len(new)} eval mới, tổng {len(meta['eval'])}")
 
 
 def cmd_reject(a):
@@ -675,6 +690,8 @@ def main(argv=None):
                           ("unblock", cmd_unblock, "Gỡ chặn"), ("escalate", cmd_escalate, "Leo thang lên Capu")]:
         sp = sub.add_parser(name, help=hlp)
         common(sp)
+        if name == "handoff":
+            sp.add_argument("--eval", action="append", default=[], help="Eval tầng 1 kèm spec (Spec Writer đăng ký lúc bàn giao)")
         sp.set_defaults(fn=fn)
 
     sp = sub.add_parser("reject", help="Cổng trả về, có phân loại lỗi")
@@ -684,6 +701,11 @@ def main(argv=None):
     sp.add_argument("--kind", choices=["code", "spec"], default="code",
                     help="code: code sai eval → code rework; spec: spec mâu thuẫn bất biến / hai cách hiểu → spec rework")
     sp.set_defaults(fn=cmd_reject)
+
+    sp = sub.add_parser("evals", help="Đăng ký eval tầng 1 cho việc chưa xong")
+    sp.add_argument("task"); sp.add_argument("--by", required=True); sp.add_argument("--note", default="")
+    sp.add_argument("--eval", action="append", default=[], required=True)
+    sp.set_defaults(fn=cmd_evals)
 
     sp = sub.add_parser("evalplus", help="Adversary thêm eval tầng 3, việc chạy lại, không tính vòng")
     common(sp, by_default="adversary")

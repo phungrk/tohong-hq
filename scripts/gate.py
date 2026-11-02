@@ -8,7 +8,7 @@ Eval là gì (xem templates/spec.md):
 
 Tầng:
   1  eval ghi trong board/T-xxx.md (hành vi của việc)
-  2  eval/invariants/<area>/*  (bất biến của vùng; area ghi trong board)
+  2  eval/invariants/_shared + mọi cấp cha của <area> (ADR-011)
   3  eval/T-xxx/adv-*.*        (eval đối kháng do adversary thêm bằng `task.py evalplus`)
 
 Ví dụ:
