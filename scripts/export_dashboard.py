@@ -27,6 +27,16 @@ ROOT = task.ROOT
 PRIVATE_EVENT_FIELDS = ("detail", "link")
 
 
+def product_of(area: str) -> str:
+    """Sản phẩm của một việc: phần trước dấu '/' đầu của normalize_area; vùng rỗng hoặc lạ -> ''."""
+    if not area:
+        return ""
+    try:
+        return task.normalize_area(area).split("/", 1)[0]
+    except task.LedgerError:
+        return ""
+
+
 def export(out: Path, public: bool = False):
     out.mkdir(parents=True, exist_ok=True)
     as_of = task.now()
@@ -41,7 +51,7 @@ def export(out: Path, public: bool = False):
             "version": t["version"], "deadline": t.get("deadline", ""), "budget": t.get("budget", ""),
             "cost": t["cost"], "created": t["created"], "updated": t["updated"],
             "hours_since_update": hours, "pipeline": f"{t['owner']} → {t['reviewer']}", "as_of": stamp,
-            "tier": t.get("tier", ""), "area": t.get("area", ""), "evals": len(t.get("eval", [])),
+            "tier": t.get("tier", ""), "area": t.get("area", ""), "product": product_of(t.get("area", "")), "evals": len(t.get("eval", [])),
             "spec_returns": t.get("spec_returns", 0), "evals_added": t.get("evals_added", 0),
         })
 
