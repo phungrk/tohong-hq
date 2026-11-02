@@ -1,0 +1,117 @@
+{
+  "task": "T-044",
+  "at": "2026-11-02T15:32",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/admin/members",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-back && node --test --test-name-pattern='TC1 ' /home/user/tohong-hq/eval/T-043/members_list.test.js && cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-043/check_members_ui.cjs --repo . --only 1",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 4700,
+      "out": "chú rể có dấu, vai trò \"Chủ cặp đôi\", ngày dd/MM/yyyy\n  ok  [TC1] dòng 2: vai trò \"Thành viên\"\n  ok  [TC1] dòng khách: ghi \"khách\", không có email\n  ok  [TC1] một tài khoản nhiều cặp đôi: liệt kê đủ 3 cặp, theo thứ tự máy chủ trả về\n  ok  [TC1] nhiều cặp đôi: mỗi cặp có vai trò và ngày của nó (Chỉ xem 10/10/2026; 15/09/2026)\n  ok  [TC1] thiếu tên chú rể -> \"Chú rể: chưa điền\" (cô dâu vẫn hiện)\n  ok  [TC1] thiếu cả hai tên -> hai chỗ \"chưa điền\"\n  ok  [TC1] dòng chủ sở hữu không rõ: \"không rõ chủ sở hữu\", vai trò \"Không rõ vai trò\", vẫn có tên\n  ok  [TC1] thứ tự dòng đúng thứ tự máy chủ trả về (không tự sắp xếp lại)\n  ok  [TC1] vị trí: danh sách nằm dưới các con số (dưới thẻ \"Cặp đôi\" và nút \"Làm mới\")\n  ok  [TC1] con số tổng quan vẫn còn (Tài khoản đã đăng nhập, Cập nhật lúc, Làm mới)\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-back && node --test --test-name-pattern='TC2 ' /home/user/tohong-hq/eval/T-043/members_list.test.js && cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-043/check_members_ui.cjs --repo . --only 2",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 10101,
+      "out": " · 38 khách dùng thử · 1 không rõ chủ. Tài khoản chưa vào cặp đôi nào không hiện ở đây.\"\n  ok  [TC2] trang đầu: \"Trang trước\" bị khoá, \"Trang sau\" bấm được\n  ok  [TC2] bấm \"Trang sau\" -> request page 2 và hiện \"Trang 2/3\" với 20 dòng khác\n  ok  [TC2] trang cuối: 5 dòng, \"Trang sau\" bị khoá\n  ok  [TC2] gõ 14 ký tự liên tục chỉ gửi vài request (debounce), request cuối có q đúng như gõ và page 1\n  ok  [TC2] kết quả tìm: 1 dòng của Nguyễn Thị Lan, \"1 thành viên\", không còn phân trang thừa\n  ok  [TC2] q gửi đi đã cắt khoảng trắng hai đầu và giữ nguyên dấu, hoa thường (\"NGUYỄN\")\n  ok  [TC2] không có kết quả: hiện \"Không tìm thấy thành viên nào khớp\", không có dòng nào\n  ok  [TC2] xoá ô tìm -> trở lại danh sách đầy đủ, trang 1\n  ok  [TC2] chưa có thành viên nào: hiện \"Chưa có thành viên nào\"\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-back && node --test --test-name-pattern='TC3 ' /home/user/tohong-hq/eval/T-043/members_list.test.js && cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-043/check_members_ui.cjs --repo . --only 3",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 6425,
+      "out": "oại, R2 y nguyên sau mọi lời gọi\nok 2 - TC3 chỉ đọc: không ghi, không xoá, không đọc nhật ký admin hay hội thoại, R2 y nguyên sau mọi lời gọi\n  ---\n  duration_ms: 17.501088\n  type: 'test'\n  ...\n# Subtest: TC3 route cũ members-summary không đổi (chỉ số tổng vẫn đúng)\nok 3 - TC3 route cũ members-summary không đổi (chỉ số tổng vẫn đúng)\n  ---\n  duration_ms: 2.895204\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 289.792455\n  ok  [TC3] mọi lời gọi danh sách là POST tới đúng /api/admin/members-list, không query string, có Authorization\n  ok  [TC3] giao diện chỉ gọi các route đọc: không PUT/PATCH/DELETE, không POST nào ngoài members-list\n  ok  [TC3] danh sách bị 403: hiện thông báo lỗi trong vùng danh sách, không có dòng nào\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-back && node --test --test-name-pattern='TC4 ' /home/user/tohong-hq/eval/T-043/members_list.test.js && cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-043/check_members_ui.cjs --repo . --only 4",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 6903,
+      "out": "\n  ...\n1..5\n# tests 5\n# suites 0\n# pass 5\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 259.975943\n  ok  [TC4] không hiện số điện thoại dù máy chủ giả có nhét thêm trường phone\n  ok  [TC4] không hiện mã người dùng hay mã cặp đôi\n  ok  [TC4] địa chỉ trang không đổi khi tìm và chuyển trang (vẫn /?admin, không chứa từ khoá)\n  ok  [TC4] request danh sách không mang từ khoá trên URL (từ khoá chỉ ở thân POST)\n  ok  [TC4] console của trình duyệt không chứa tên hay email\n  ok  [TC4] không request nào ra ngoài (analytics, bên thứ ba) mang tên hay email\n  ok  [TC4] trang admin không gọi host lạ nào ngoài máy chủ API (không analytics)\n  ok  [TC4] tiêu đề trang không đổi so với lúc mở\n  ok  [TC4] không lưu tên, email hay từ khoá vào localStorage/sessionStorage, tiêu đề trang không đổi\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-back && node --test --test-name-pattern='TC5 ' /home/user/tohong-hq/eval/T-043/members_list.test.js && cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-043/check_members_ui.cjs --repo . --only 5",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 14092,
+      "out": "TC5] bấm \"Thử lại\" -> gửi lại cùng page, q và hiện danh sách\n  ok  [TC5] lỗi khi đang tìm \"hoa.le\": Thử lại gửi lại đúng q \"hoa.le\" trang 1 rồi hiện kết quả\n  ok  [TC5] Clerk lỗi: dòng tài khoản ghi \"chưa lấy được email\" và vẫn đủ tên cô dâu, chú rể\n  ok  [TC5] Clerk lỗi: dòng khách vẫn ghi \"khách\"\n  ok  [TC5] Clerk lỗi, chưa tìm: có ghi chú \"Một số email chưa lấy được.\" (không nói chuyện tìm kiếm)\n  ok  [TC5] Clerk lỗi và đang tìm: có ghi chú \"Một số email chưa lấy được nên tìm theo email có thể thiếu kết quả.\"\n  ok  [TC5] 390px: không cuộn ngang (kể cả dòng có email dài 90 ký tự)\n  ok  [TC5] 390px: mọi dòng nằm trong bề ngang màn hình\n  ok  [TC5] 390px: ô tìm cao >= 40px và rộng >= 200px; hai nút chia trang cao >= 40px\n  ok  [TC5] 390px: email dài vẫn hiện đủ (xuống dòng, không cắt)\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 /home/user/tohong-hq/eval/T-043/check_6_gates.py --back /home/user/tohong-back --front /home/user/tohong-front && python3 /home/user/tohong-hq/eval/T-043/check_6_shots.py --repo /home/user/tohong-front",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 31240,
+      "out": "lint front: base 32 error/3 warning; hiện tại 32/3\nPASS\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "/home/user/tohong-hq/eval/T-043/checklist.md",
+      "kind": "manual",
+      "status": "MANUAL",
+      "ms": 0,
+      "out": "checklist: người kiểm",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/planner/admin/members/inv-001-khong-dien-thoai-khong-ma.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 307,
+      "out": "TAP version 13\n# Subtest: INV-001 route members-* không trả điện thoại, mã người dùng, mã cặp đôi hay email cũ trong members.json\nok 1 - INV-001 route members-* không trả điện thoại, mã người dùng, mã cặp đôi hay email cũ trong members.json\n  ---\n  duration_ms: 55.89051\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 249.168156",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/members/inv-002-khong-admin-403-truoc-du-lieu.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 303,
+      "out": "TAP version 13\n# Subtest: INV-002 không phải admin -> 403 forbidden ở mọi route members-*, mọi phương thức, trước khi đọc/liệt kê R2 hay gọi Clerk\nok 1 - INV-002 không phải admin -> 403 forbidden ở mọi route members-*, mọi phương thức, trước khi đọc/liệt kê R2 hay gọi Clerk\n  ---\n  duration_ms: 54.317577\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 235.93348",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/members/inv-003-chi-doc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 305,
+      "out": "TAP version 13\n# Subtest: INV-003 route members-* không ghi hay xoá R2, R2 y nguyên (kể cả refresh, Clerk lỗi)\nok 1 - INV-003 route members-* không ghi hay xoá R2, R2 y nguyên (kể cả refresh, Clerk lỗi)\n  ---\n  duration_ms: 61.705396\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 257.90594",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/members/inv-004-no-store.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 269,
+      "out": "TAP version 13\n# Subtest: INV-004 phản hồi 200 của mọi route members-* (và 405 của members-list) có Cache-Control: no-store, không public/max-age\nok 1 - INV-004 phản hồi 200 của mọi route members-* (và 405 của members-list) có Cache-Control: no-store, không public/max-age\n  ---\n  duration_ms: 50.529089\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 224.587302",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/members/inv-005-thu-tu-khong-phu-thuoc-clerk.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 303,
+      "out": "TAP version 13\n# Subtest: INV-005 thứ tự danh sách thành viên không phụ thuộc Clerk hay bộ nhớ đệm: cùng dữ liệu R2 thì cùng thứ tự\nok 1 - INV-005 thứ tự danh sách thành viên không phụ thuộc Clerk hay bộ nhớ đệm: cùng dữ liệu R2 thì cùng thứ tự\n  ---\n  duration_ms: 82.674207\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 256.484241",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/members/inv-006-du-lieu-ca-nhan-khong-ra-khoi-man-admin.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 6598,
+      "out": "ok  [TC4] không hiện số điện thoại dù máy chủ giả có nhét thêm trường phone\n  ok  [TC4] không hiện mã người dùng hay mã cặp đôi\n  ok  [TC4] địa chỉ trang không đổi khi tìm và chuyển trang (vẫn /?admin, không chứa từ khoá)\n  ok  [TC4] request danh sách không mang từ khoá trên URL (từ khoá chỉ ở thân POST)\n  ok  [TC4] console của trình duyệt không chứa tên hay email\n  ok  [TC4] không request nào ra ngoài (analytics, bên thứ ba) mang tên hay email\n  ok  [TC4] trang admin không gọi host lạ nào ngoài máy chủ API (không analytics)\n  ok  [TC4] tiêu đề trang không đổi so với lúc mở\n  ok  [TC4] không lưu tên, email hay từ khoá vào localStorage/sessionStorage, tiêu đề trang không đổi\nPASS",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
