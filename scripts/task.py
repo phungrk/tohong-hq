@@ -61,7 +61,7 @@ EVENT_VI = {
     "assigned": "Giao việc", "started": "Bắt đầu", "handoff": "Bàn giao", "rejected": "Trả về",
     "accepted": "Chấp nhận", "blocked": "Báo bị chặn", "unblocked": "Gỡ chặn",
     "escalated": "Leo thang", "decided": "Capu quyết định", "cost": "Ghi chi phí", "requested": "Capu yêu cầu",
-    "respec": "Sửa spec xong", "evalplus": "Thêm eval, chạy lại", "evals": "Đăng ký eval",
+    "respec": "Sửa spec xong", "evalplus": "Thêm eval, chạy lại", "evals": "Đăng ký eval", "area": "Đổi vùng",
 }
 SPEC_OWNER = "product"  # bộ phận giữ spec + eval (Spec Writer)
 GATE_OF = {"product": "spec-critic", "engineering": "adversary"}   # ai gác cổng cho việc của bộ phận nào
@@ -455,6 +455,19 @@ def cmd_reject(a):
     print(f"{a.task}: Code rework → {meta['owner']} (lần {rounds})")
 
 
+def cmd_area(a):
+    """Chief of Staff đổi vùng của việc chưa xong (bất biến áp dụng theo cây ADR-011)."""
+    meta, body = read_task(a.task)
+    if meta["state"] in ("done", "escalated"):
+        raise LedgerError(f"{a.task} đã {meta['state']}, không đổi vùng được.")
+    new = normalize_area(a.area)
+    old = meta["area"]
+    meta["area"] = new
+    row = log_event(meta, "area", a.by, meta["holder"], a.note or f"vùng {old or '—'} → {new}")
+    write_task(meta, append_history(body, row))
+    print(f"{a.task}: vùng {old or '—'} → {new}")
+
+
 def cmd_evalplus(a):
     """Agent đối kháng tìm được input phá mà eval chưa bắt: thêm eval, việc chạy lại. Không ai bị tính lỗi."""
     if not a.eval:
@@ -706,6 +719,10 @@ def main(argv=None):
     sp.add_argument("task"); sp.add_argument("--by", required=True); sp.add_argument("--note", default="")
     sp.add_argument("--eval", action="append", default=[], required=True)
     sp.set_defaults(fn=cmd_evals)
+
+    sp = sub.add_parser("area", help="Chief of Staff đổi vùng của việc chưa xong")
+    sp.add_argument("task"); sp.add_argument("area"); sp.add_argument("--by", default="chief-of-staff"); sp.add_argument("--note", default="")
+    sp.set_defaults(fn=cmd_area)
 
     sp = sub.add_parser("evalplus", help="Adversary thêm eval tầng 3, việc chạy lại, không tính vòng")
     common(sp, by_default="adversary")
