@@ -29,7 +29,7 @@ PRIVATE_EVENT_FIELDS = ("detail", "link")
 
 def product_of(area: str) -> str:
     """Sản phẩm của một việc: phần trước dấu '/' đầu của normalize_area; vùng rỗng hoặc lạ -> ''."""
-    if not area:
+    if not area or not isinstance(area, str):
         return ""
     try:
         return task.normalize_area(area).split("/", 1)[0]
