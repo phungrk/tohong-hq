@@ -3,7 +3,7 @@
 # Bất biến: không phần tử nào có fill/stroke tính ra context-*, index.html không chứa chuỗi context-stroke/context-fill; p_* không dùng marker; mũi tên không nằm trong defs/marker/symbol, không mồ côi (data-for trỏ tới p_* có thật); không id trùng trong tài liệu.
 # Khối đích suy bằng hình học (khối có khoảng cách có dấu nhỏ nhất tới đầu mũi cuối), không dùng bảng cố định: đường p_* thêm sau này tự được kiểm.
 # Áp dụng khi index.html có mũi tên [data-part=ah] hoặc repo có docs/screenshots/T-039/; trước đó PASS "chưa áp dụng".
-# Chạy: bash eval/invariants/hq/dashboard/model/inv-031-khong-ky-thuat-de-vo.sh   (repo = $TOHONG_DASHBOARD_REPO, hoặc cwd nếu có index.html, hoặc /home/user/tohong-hq-dashboard)
+# Chạy: bash eval/invariants/dashboard/model/inv-031-khong-ky-thuat-de-vo.sh   (repo = $TOHONG_DASHBOARD_REPO, hoặc cwd nếu có index.html, hoặc /home/user/tohong-hq-dashboard)
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="${TOHONG_DASHBOARD_REPO:-}"
