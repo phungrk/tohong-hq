@@ -20,7 +20,7 @@ Tạo **áp** cho cột nước: spec chỉ tốt khi xuất phát từ pain th�
 | Truy vấn tìm kiếm và kết quả 0 | PostHog, khi app có event tìm kiếm kèm `result_count` | Tín hiệu pain mạnh nhất: người tìm mà không thấy. Chưa có event này → ghi "chưa đo được" và đề xuất đo |
 | Sự cố, lỗi runtime | PostHog `$exception` (error tracking); issue trên các repo sản phẩm | Đầu vào của ống hồi |
 | Phản hồi người dùng, Slack | `inbox/`, kênh Slack do Capu chuyển vào | Không liên hệ người thật |
-| Sổ cái công ty | `ledger/events.jsonl`, `decisions/` | Để biết việc gì đã thử, kết quả ra sao |
+| Sổ cái công ty | `ledger/events.jsonl`, `decisions/`, `eval/*/gate-latest.json` | Với sản phẩm `planner/`: để biết việc gì đã thử. Với sản phẩm `hq/` (dashboard, công cụ quản lý): đây **là** dữ liệu sản phẩm — người dùng là Capu, pain đo bằng thời gian qua cổng, số lần rework, cảnh báo đứng yên |
 
 ### Cách đọc PostHog
 
