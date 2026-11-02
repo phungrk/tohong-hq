@@ -1,0 +1,237 @@
+{
+  "task": "T-039",
+  "at": "2026-11-02T03:28",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng dashboard/model",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "eval/invariants/dashboard/model/inv-001-khong-dot-gia.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 9414,
+      "out": "PASS no-fake-dots",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-002-tran-dot.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 18522,
+      "out": "PASS dot-cap",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-003-dot-tren-duong.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 8674,
+      "out": "PASS dot-on-path",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-004-khong-ket-sang.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 16916,
+      "out": "PASS no-stuck-lit",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-005-reduced-motion-khong-dot.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 5462,
+      "out": "PASS reduced-no-dots",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-006-khong-cuon-ngang-390.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 2423,
+      "out": "PASS no-hscroll-390",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-007-capu-sang-khi-escalated.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 13961,
+      "out": "PASS capu-escalated",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-008-dot-co-khi-doi-be-ngang.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 7367,
+      "out": "PASS rotate",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-009-so-dem-thi-sang.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 20237,
+      "out": "PASS count-lit",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-010-nhan-vat-khop-khoi-sang.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 24540,
+      "out": "PASS char-match-lit",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-011-ranh-thi-mo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 8264,
+      "out": "PASS idle-dim",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-012-reduced-motion-nhan-vat-dung-yen.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 7802,
+      "out": "PASS reduced-still",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-013-bong-bong-co-tran.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 14272,
+      "out": "PASS bubble-cap",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-014-khong-giao-nhan-gia.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 10027,
+      "out": "PASS no-fake-handover",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-015-nhan-vat-giu-net-ve.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 12076,
+      "out": "PASS char-own-paint",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-016-nhan-vat-khong-che-chu-khi-cu-dong.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 64461,
+      "out": "PASS overlap",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-017-dot-nhin-thay-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 27753,
+      "out": "PASS dot-visible",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-018-nhan-vat-khong-che-chu-nao.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 36053,
+      "out": "PASS no-text-cover",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-019-nhan-vat-du-to.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 6085,
+      "out": "PASS char-size",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-020-bot-cong-tren-cung.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 36201,
+      "out": "PASS gate-on-top",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-021-phong-to-an-toan.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 9833,
+      "out": "PASS zoom-safe",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-022-bong-bong-dung-co-khi-doi-phong-to.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 10284,
+      "out": "PASS 390px bản thường, trước khi bấm nd_exec 12px\nPASS 390px vừa bấm Phóng to, bong bóng đang hiện nd_exec 12px\nPASS 390px vừa bấm Thu nhỏ, bong bóng đang hiện gt_code 12px, nd_spec 12px\nPASS 1280px bản thường, trước khi bấm nd_exec 12px\nPASS 1280px vừa bấm Phóng to, bong bóng đang hiện nd_exec 12px\nPASS 1280px vừa bấm Thu nhỏ, bong bóng đang hiện gt_code 12px, nd_spec 12px\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-023-tom-tat-khop-den.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 19573,
+      "out": "PASS lit-match",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-024-tom-tat-khong-ro.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 5390,
+      "out": "PASS no-leak",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-025-tom-tat-mot-lop.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 7222,
+      "out": "PASS one-layer",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-026-tom-tat-khong-che-chu-khoi.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 14926,
+      "out": "PASS own-text",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-027-esc-tung-lop.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 6833,
+      "out": "PASS esc-layers",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/dashboard/model/inv-028-tom-tat-khong-de-bot-khi-cu-dong.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 130301,
+      "out": "(thông tin) 1280 nd_spec: không thấy give/take trong 5 giây\n  (thông tin) 1280 gt_spec: không thấy give/take trong 5 giây\n  (thông tin) 1280 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 1280 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 1280 nd_capu: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_capu: không thấy give/take trong 5 giây\nPASS motion",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
