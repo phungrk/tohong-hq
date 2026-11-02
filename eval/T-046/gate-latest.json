@@ -1,6 +1,6 @@
 {
   "task": "T-046",
-  "at": "2026-11-02T23:48",
+  "at": "2026-11-02T23:53",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-045/run.sh /home/user/tohong-front --only 1",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 27769,
+      "ms": 28053,
       "out": " giá 5-15tr/bàn -> lấy giữa khoảng 10tr -> 100tr: dòng hạng mục ở danh sách hiện 100tr\n  ok  [TC1] e 100 khách, khoảng giá 5-15tr/bàn -> lấy giữa khoảng 10tr -> 100tr: dòng hạng mục không hiện giá/bàn 5tr như tiền chi\n  ok  [TC1] f 7 khách, giá 6tr/bàn -> 1 bàn -> 6tr: thân PUT ngân sách ghi khoản vendor = 6\n  ok  [TC1] f 7 khách, giá 6tr/bàn -> 1 bàn -> 6tr: khoản vendor trong Mục con của màn chi tiết hiện 6tr\n  ok  [TC1] f 7 khách, giá 6tr/bàn -> 1 bàn -> 6tr: chênh lệch với dự toán 200tr tính trên tiền chi: \"Còn dư 194tr\"\n  ok  [TC1] f 7 khách, giá 6tr/bàn -> 1 bàn -> 6tr: tổng \"Đã chốt\" = 6tr (vendor duy nhất đã chốt)\n  ok  [TC1] f 7 khách, giá 6tr/bàn -> 1 bàn -> 6tr: dòng hạng mục ở danh sách hiện 6tr\n  ok  [TC1] hủy chốt: không còn khoản vendor, khoản \"Bánh cưới\" 3tr còn nguyên\nPASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-045/run.sh /home/user/tohong-front --only 2",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 12767,
+      "ms": 13093,
       "out": "ok  [TC2] màn chi tiết hạng mục có dòng \"Số bàn: 21\"\n  ok  [TC2] dòng hạng mục ở danh sách có \"Số bàn: 21\"\n  ok  [TC2] đúng một dòng \"Số bàn\" trong dòng hạng mục, nằm riêng một dòng\n  ok  [TC2] trên cả màn Ngân sách chỉ có đúng một \"Số bàn\" (không lặp ở hạng mục khác)\n  ok  [TC2] 390px: dòng Số bàn thấy được, nằm trong khung, không cuộn ngang, chữ nhỏ hơn 16px\n  ok  [TC2] sau khi hủy chốt, không còn dòng \"Số bàn\"\n  ok  [TC2] chưa chốt vendor nào: không có \"Số bàn\" trên màn Ngân sách\n  ok  [TC2] 1024px: vẫn có \"Số bàn: 21\"\nPASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-045/run.sh /home/user/tohong-front --only 3",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 8334,
+      "ms": 8467,
       "out": "ok  [TC3] chốt vendor chụp ảnh giá 12tr: khoản vendor = 12 (không nhân số bàn)\n  ok  [TC3] chốt vendor chụp ảnh: khoản \"Album\" 5tr còn nguyên\n  ok  [TC3] chi tiết chụp ảnh không có \"Số bàn\"\n  ok  [TC3] sau khi chốt cả nhà hàng: chụp ảnh vẫn 12 + Album 5\n  ok  [TC3] dự toán (allocated_tr) các hạng mục không đổi: nhà hàng 200, chụp ảnh 40, trang trí 30, dự phòng 50\n  ok  [TC3] khoản thủ công \"Bánh cưới\" 3tr của hạng mục nhà hàng còn nguyên và vẫn là khoản riêng\n  ok  [TC3] tổng ngân sách và số khách trong PUT không đổi (500tr, 205 khách)\n  ok  [TC3] danh sách Ngân sách: \"Số bàn\" chỉ có ở nhà hàng (đúng 1 lần)\nPASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-045/run.sh /home/user/tohong-front --only 4",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 13148,
+      "ms": 13220,
       "out": "TC4] b giá vendor = 0 (chưa có giá): dòng hạng mục hiện lý do chưa tính được\n  ok  [TC4] b giá vendor = 0 (chưa có giá): dòng \"Số bàn\" đúng chữ\n  ok  [TC4] b giá vendor = 0 (chưa có giá): dòng hạng mục không lấy giá/bàn 6tr làm tiền chi\n  ok  [TC4] b giá vendor = 0 (chưa có giá): không có NaN, undefined, Infinity trên màn Ngân sách\n  ok  [TC4] c cả hai thiếu: không đoán số, khoản vendor trong PUT là 0 hoặc không có\n  ok  [TC4] c cả hai thiếu: khoản vendor trong Mục con của màn chi tiết nói rõ lý do chưa tính được\n  ok  [TC4] c cả hai thiếu: dòng hạng mục hiện lý do chưa tính được\n  ok  [TC4] c cả hai thiếu: dòng \"Số bàn\" đúng chữ\n  ok  [TC4] c cả hai thiếu: dòng hạng mục không lấy giá/bàn 6tr làm tiền chi\n  ok  [TC4] c cả hai thiếu: không có NaN, undefined, Infinity trên màn Ngân sách\nPASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-045/run.sh /home/user/tohong-front --only 5",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 19892,
+      "ms": 19823,
       "out": "ok  [TC5] trước khi đổi: 21 bàn, 126tr\n  ok  [TC5] sau khi đổi 205 -> 230 khách, không chốt lại: dòng hạng mục hiện \"Số bàn: 23\" và 138tr\n  ok  [TC5] khoản vendor được lưu lại = 138 (số lưu khớp số hiển thị, trong 2,5 giây sau khi mở)\n  ok  [TC5] khoản \"Bánh cưới\" 3tr không bị đụng\n  ok  [TC5] đổi về 0 khách: không còn hiện 138tr, hiện lý do thiếu số khách\n  ok  [TC5] race autosave: không có PUT nào mang số cũ của khoản vendor (mọi PUT sau khi mở có amt 138)\n  ok  [TC5] race autosave: cuối cùng máy chủ có vendor 138 và \"Bánh cưới\" 7 (sửa của người dùng không mất)\nPASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-045/run.sh /home/user/tohong-front --only 6",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 7158,
+      "ms": 7169,
       "out": "ok  [TC6] hạng mục nhà hàng đã đổi tên \"Tiệc nhà gái\": vẫn tính 126tr\n  ok  [TC6] hạng mục đã đổi tên: vẫn có \"Số bàn: 21\" và 126tr\n  ok  [TC6] hạng mục khác tên \"Nhà hàng tiệc cưới\" (người dùng tự thêm) KHÔNG có \"Số bàn\" (đúng 1 dòng Số bàn trên cả màn)\n  ok  [TC6] hạng mục tự thêm tên \"Nhà hàng tiệc cưới\" giữ nguyên khoản 4tr\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-045/run.sh /home/user/tohong-front --only 9",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 17272,
+      "ms": 17380,
       "out": "ok  [TC9] máy không có trạng thái chốt: sau 3,5 giây máy chủ không đổi một byte và không có PUT\n  ok  [TC9] máy không có trạng thái chốt: khoản X vẫn hiện đúng số lưu 99, không bị thay bằng số tính\n  ok  [TC9] máy không có trạng thái chốt: không có dòng \"Số bàn\"\n  ok  [TC9] máy chốt Y: app đã tải xong (khoản X của máy chủ hiện với số lưu 99)\n  ok  [TC9] máy chốt Y còn máy chủ chỉ có khoản X: máy chủ không đổi, không thêm khoản Y, không đụng X\n  ok  [TC9] máy chốt Y và máy chủ có khoản Y: amt của Y thành 138, vẫn đúng 2 khoản, các trường khác của Y và khoản \"Bánh cưới\" không đổi\n  ok  [TC9] hạng mục khác trong máy chủ không đổi sau lần tự cập nhật\nPASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-045/run.sh /home/user/tohong-front --only 10",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 11545,
+      "ms": 11462,
       "out": "ok  [TC10] khoản vendor nhà hàng đã chốt: không có ô nhập số tiền nào sửa được\n  ok  [TC10] khoản vendor nhà hàng đã chốt: có chú thích \"tính theo số bàn\" trong cùng khối dòng khoản (cùng phần tử chứa tên khoản)\n  ok  [TC10] khoản vendor nhà hàng đã chốt: vẫn hiện 126tr và vẫn có nút bỏ khoản\n  ok  [TC10] đối chứng: khoản thủ công \"Bánh cưới\" vẫn sửa tay được số tiền\n  ok  [TC10] xóa khoản vendor: máy chủ không còn khoản vendor, \"Bánh cưới\" 3tr còn nguyên\n  ok  [TC10] mở lại màn sau khi xóa: app không tự tạo lại khoản vendor\n  ok  [TC10] sau khi xóa khoản, vendor vẫn đang chốt: dòng hạng mục vẫn có \"Số bàn: 21\"\nPASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "python3 /home/user/tohong-hq/eval/T-045/check_7_gates.py --back /home/user/tohong-back --front /home/user/tohong-front",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 23754,
+      "ms": 22689,
       "out": "PASS",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "eval/T-046/adv-01.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 17648,
+      "ms": 17706,
       "out": "ok  a 150 khách, 4.1tr/bàn -> 15 bàn -> 61,5 -> 62tr: khoản vendor lưu ở máy chủ = 62\n  ok  a 150 khách, 4.1tr/bàn -> 15 bàn -> 61,5 -> 62tr: dòng hạng mục hiện 62tr\n  ok  a 150 khách, 4.1tr/bàn -> 15 bàn -> 61,5 -> 62tr: dòng \"Số bàn: 15\"\n  ok  b 250 khách, 2.3tr/bàn -> 25 bàn -> 57,5 -> 58tr: khoản vendor lưu ở máy chủ = 58\n  ok  b 250 khách, 2.3tr/bàn -> 25 bàn -> 57,5 -> 58tr: dòng hạng mục hiện 58tr\n  ok  b 250 khách, 2.3tr/bàn -> 25 bàn -> 57,5 -> 58tr: dòng \"Số bàn: 25\"\n  ok  c 205 khách, 3.9tr/bàn -> 21 bàn -> 82tr (đối chứng): khoản vendor lưu ở máy chủ = 82\n  ok  c 205 khách, 3.9tr/bàn -> 21 bàn -> 82tr (đối chứng): dòng hạng mục hiện 82tr\n  ok  c 205 khách, 3.9tr/bàn -> 21 bàn -> 82tr (đối chứng): dòng \"Số bàn: 21\"\nPASS",
       "tier": 1
     },
@@ -100,7 +100,7 @@
       "eval": "eval/T-046/adv-02.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 17653,
+      "ms": 17543,
       "out": "ok  a 390 khách, khoảng 3.000-3.025tr/bàn -> 117,4875 -> 117tr: khoản vendor lưu ở máy chủ = 117\n  ok  a 390 khách, khoảng 3.000-3.025tr/bàn -> 117,4875 -> 117tr: dòng hạng mục hiện 117tr\n  ok  b 30 khách, 4.1666tr/bàn -> 12,4998 -> 12tr: khoản vendor lưu ở máy chủ = 12\n  ok  b 30 khách, 4.1666tr/bàn -> 12,4998 -> 12tr: dòng hạng mục hiện 12tr\n  ok  c 150 khách, 4.1tr/bàn -> 62tr (đối chứng): khoản vendor lưu ở máy chủ = 62\n  ok  c 150 khách, 4.1tr/bàn -> 62tr (đối chứng): dòng hạng mục hiện 62tr\nPASS",
       "tier": 1
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-001-mot-con-so-cho-khoan-vendor.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 10543,
+      "ms": 10522,
       "out": "ok  [TC1] photography: có khoản vendor lưu ở máy chủ với số hữu hạn\n  ok  [TC1] photography: số ở dòng khoản vendor trong Mục con = số lưu 12\n  ok  [TC1] photography: dòng hạng mục ở danh sách chỉ hiện đúng số lưu 12 làm tiền chi\n  ok  [TC1] venue: có khoản vendor lưu ở máy chủ với số hữu hạn\n  ok  [TC1] venue: số ở dòng khoản vendor trong Mục con = số lưu 126\n  ok  [TC1] venue: dòng hạng mục ở danh sách chỉ hiện đúng số lưu 126 làm tiền chi\n  ok  [TC1] tổng \"Đã chốt\" = tổng số lưu của các khoản vendor (138)\nPASS",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-002-khong-doan-so-khi-thieu-dau-vao.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9632,
+      "ms": 9582,
       "out": "ok  [TC2] thiếu số khách: số lưu của khoản vendor là 0 hoặc không có\n  ok  [TC2] thiếu số khách: màn chi tiết không có NaN/undefined/Infinity\n  ok  [TC2] thiếu số khách: dòng hạng mục không hiện số tiền chi nào\n  ok  [TC2] thiếu số khách: danh sách Ngân sách không có NaN/undefined/Infinity\n  ok  [TC2] vendor chưa có giá: số lưu của khoản vendor là 0 hoặc không có\n  ok  [TC2] vendor chưa có giá: màn chi tiết không có NaN/undefined/Infinity\n  ok  [TC2] vendor chưa có giá: dòng hạng mục không hiện số tiền chi nào\n  ok  [TC2] vendor chưa có giá: danh sách Ngân sách không có NaN/undefined/Infinity\nPASS",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-003-mo-man-khong-dung-du-lieu-chung.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 29184,
+      "ms": 29220,
       "out": "] máy chốt Y, máy chủ chỉ có khoản X của vendor khác: app đã tải xong (dòng \"Nhà hàng X của máy kia\" hiện trong Mục con)\n  ok  [TC3] máy chốt Y, máy chủ chỉ có khoản X của vendor khác: không thêm/xoá khoản, không đổi gì ngoài amt của khoản trùng vendor đang chốt\n  ok  [TC3] máy chốt Y, máy chủ chỉ có khoản X của vendor khác: sau khi về danh sách vẫn không thêm/xoá/đổi khoản\n  ok  [TC3] máy chốt Y, máy chủ có khoản Y cũ: app đã tải xong (dòng \"Nhà hàng Hoa Sen\" hiện trong Mục con)\n  ok  [TC3] máy chốt Y, máy chủ có khoản Y cũ: không thêm/xoá khoản, không đổi gì ngoài amt của khoản trùng vendor đang chốt\n  ok  [TC3] máy chốt Y, máy chủ có khoản Y cũ: sau khi về danh sách vẫn không thêm/xoá/đổi khoản\n  ok  [TC3] chụp ảnh: mở màn không thêm/xoá khoản, chỉ có thể đổi amt khoản vendor trùng\nPASS",
       "tier": 2
     }
