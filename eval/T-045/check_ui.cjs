@@ -96,20 +96,25 @@ async function scenario(opts = {}) {
   await page.goto(S.base + '/#/ngan-sach'); await page.waitForTimeout(600);
   return S;
 }
-// Chữ của tab Ngân sách đang thấy (danh sách hoặc chi tiết hạng mục), KHÔNG gồm các tab khác vẫn gắn trong trang.
-const text = (page) => page.evaluate(() => {
-  const lab = [...document.querySelectorAll('.ds-label')].find((e) => /^(Mục con|Hạng mục)$/.test(e.textContent.trim()));
-  const root = (lab && lab.closest('[style*="opacity"]')) || document.body;
-  return root.innerText + '\n' + [...root.querySelectorAll('input')].map((i) => i.value).join(' ');
-});
-// Dòng khoản vendor trong "Mục con" của màn chi tiết (chữ + giá trị ô nhập), tìm theo tên vendor. null nếu không có dòng.
-const ROW = 'div[style*="padding: 7px"]';   // một dòng khoản trong "Mục con"; tên khoản là chữ, số tiền là ô nhập hoặc chữ
-const vendorRow = (page, name = 'Nhà hàng Hoa Sen') => page.evaluate(([nm, sel]) => {
-  const row = [...document.querySelectorAll(sel)].find((r) => r.innerText.includes(nm));
-  if (!row) return null;
+// Bộ chọn theo CHỮ và VAI TRÒ, không theo style hay cấu trúc component:
+//  - tab Ngân sách = tổ tiên lớn nhất của nhãn "Mục con"/"Hạng mục" mà chưa chứa chữ của tab Trang chủ ("TỔNG QUAN");
+//  - dòng khoản = phần tử nhỏ nhất trong tab đó chứa cả tên khoản (chữ) lẫn nút bỏ khoản (button có tên "Bỏ").
+const HELPERS = `(() => {
+  const leaf = (re) => [...document.querySelectorAll('*')].find((e) => e.children.length === 0 && re.test(e.textContent.trim()));
+  const root = () => { const lab = leaf(/^(Mục con|Hạng mục)$/); if (!lab) return document.body; let el = lab;
+    while (el.parentElement && el.parentElement !== document.body && !/TỔNG QUAN/.test(el.parentElement.innerText || '')) el = el.parentElement; return el; };
+  const isBo = (b) => /^Bỏ$/.test((b.getAttribute('aria-label') || b.getAttribute('title') || b.textContent || '').trim());
+  const row = (name) => { const r = root(); const ok = (e) => (e.innerText || '').includes(name) && [...e.querySelectorAll('button')].some(isBo);
+    const c = [...r.querySelectorAll('*')].filter(ok); return c.find((e) => ![...e.children].some(ok)) || null; };
+  return { root, row, isBo };
+})()`;
+const text = (page) => page.evaluate((h) => { const H = eval(h); const root = H.root();
+  return root.innerText + '\n' + [...root.querySelectorAll('input')].map((i) => i.value).join(' '); }, HELPERS);
+// Dòng khoản trong "Mục con" của màn chi tiết (chữ + giá trị ô nhập), tìm theo tên. null nếu không có dòng.
+const vendorRow = (page, name = 'Nhà hàng Hoa Sen') => page.evaluate(([h, nm]) => { const H = eval(h); const row = H.row(nm); if (!row) return null;
   const amtInputs = [...row.querySelectorAll('input')].map((i) => ({ v: i.value, editable: !i.readOnly && !i.disabled }));
-  return { text: row.innerText + ' ' + amtInputs.map((i) => i.v).join(' '), amtInputs, hasRemove: !!row.querySelector('button[title="Bỏ"]') };
-}, [name, ROW]);
+  return { text: row.innerText + ' ' + amtInputs.map((i) => i.v).join(' '), amtInputs, hasRemove: [...row.querySelectorAll('button')].some(H.isBo) };
+}, [HELPERS, name]);
 const rowHas = (r, n) => !!r && new RegExp(`(^|[^\\d.,])${String(n).replace('.', '\\.')}(\\s*tr)?([^\\d.,]|$)`).test(r.text);
 const hasTr = (t, n) => new RegExp(`(^|[^\\d.,])${String(n).replace('.', '\\.')}\\s*tr`).test(t);
 const venueItemAmt = (S) => { const c = ((S.puts.at(-1) || S.store).categories || []).find((x) => x.id === 'venue'); const it = (c?.items || []).find((i) => i.vendor); return it ? it.amt : undefined; };
@@ -232,7 +237,7 @@ async function main() {
     // Race với autosave 800ms: sửa một khoản khác ngay sau khi mở, số cũ của khoản vendor không được ghi đè lại.
     const R = await scenario({ guests: 205 }); await confirmFirst(R); await backToList(R);
     R.store = { ...R.store, guests: 230 }; R.puts.length = 0; await R.page.reload(); await R.page.waitForTimeout(150); await openCat(R);
-    const bi = await R.page.evaluateHandle((sel) => { const row = [...document.querySelectorAll(sel)].find((r) => r.innerText.includes('Bánh cưới')); return row && row.querySelector('input'); }, ROW);
+    const bi = await R.page.evaluateHandle((h) => { const row = eval(h).row('Bánh cưới'); return row && row.querySelector('input'); }, HELPERS);
     const bel = bi.asElement(); if (bel) { await bel.fill('7'); await bel.press('Tab'); }
     await R.page.waitForTimeout(3500);
     const vAmts = R.puts.map((b) => (b.categories.find((c) => c.id === 'venue').items || []).find((i) => i.vendor)?.amt);
@@ -271,6 +276,7 @@ async function main() {
     // (ii) máy này chốt Y, máy chủ chỉ có khoản X của vendor khác: không thêm Y, không đổi X, không xoá gì.
     S = await scenario({ guests: 230, venueItems: [keep, X], saved: { venue: { shortlisted: [venueV()], confirmed: venueV() } } });
     const b2 = snap(S); await openCat(S); await S.page.waitForTimeout(3500);
+    const vx2 = await vendorRow(S.page, X.name); check('máy chốt Y: app đã tải xong (khoản X của máy chủ hiện với số lưu 99)', rowHas(vx2, 99), vx2 && vx2.text);
     check('máy chốt Y còn máy chủ chỉ có khoản X: máy chủ không đổi, không thêm khoản Y, không đụng X', snap(S) === b2, JSON.stringify(S.store.categories[0].items));
     await S.ctx.close();
     // (iii) máy chốt Y và máy chủ có khoản Y cũ (amt 100): chỉ amt của Y đổi thành 138; số khoản và các khoản khác giữ nguyên.
@@ -289,12 +295,12 @@ async function main() {
     const S = await scenario({ guests: 205 }); await confirmFirst(S);
     const vr = await vendorRow(S.page);
     check('khoản vendor nhà hàng đã chốt: không có ô nhập số tiền nào sửa được', !!vr && !vr.amtInputs.some((i) => i.editable), JSON.stringify(vr && vr.amtInputs));
-    check('khoản vendor nhà hàng đã chốt: có chú thích "tính theo số bàn" ngay trên dòng', !!vr && /tính theo số bàn/i.test(vr.text), vr && vr.text);
+    check('khoản vendor nhà hàng đã chốt: có chú thích "tính theo số bàn" trong cùng khối dòng khoản (cùng phần tử chứa tên khoản)', !!vr && /tính theo số bàn/i.test(vr.text), vr && vr.text);
     check('khoản vendor nhà hàng đã chốt: vẫn hiện 126tr và vẫn có nút bỏ khoản', rowHas(vr, 126) && !!vr.hasRemove, vr && vr.text);
-    const ctl = await S.page.evaluate((sel) => { const row = [...document.querySelectorAll(sel)].find((r) => r.innerText.includes('Bánh cưới')); if (!row) return null; return [...row.querySelectorAll('input')].map((i) => !i.readOnly && !i.disabled); }, ROW);
+    const ctl = await S.page.evaluate((h) => { const row = eval(h).row('Bánh cưới'); if (!row) return null; return [...row.querySelectorAll('input')].map((i) => !i.readOnly && !i.disabled); }, HELPERS);
     check('đối chứng: khoản thủ công "Bánh cưới" vẫn sửa tay được số tiền', !!ctl && ctl.some(Boolean), JSON.stringify(ctl));
     // Xóa khoản vendor: khoản mất khỏi máy chủ; vendor vẫn chốt trên máy này; app KHÔNG tự tạo lại khoản; Số bàn và tổng Đã chốt theo vendor đang chốt vẫn hiện.
-    await S.page.evaluate((sel) => { [...document.querySelectorAll(sel)].find((r) => r.innerText.includes('Nhà hàng Hoa Sen')).querySelector('button[title="Bỏ"]').click(); }, ROW);
+    await S.page.evaluate((h) => { const H = eval(h); [...H.row('Nhà hàng Hoa Sen').querySelectorAll('button')].find(H.isBo).click(); }, HELPERS);
     await S.page.waitForTimeout(2000);
     const after = S.store.categories.find((c) => c.id === 'venue').items;
     check('xóa khoản vendor: máy chủ không còn khoản vendor, "Bánh cưới" 3tr còn nguyên', !after.some((i) => i.vendor) && after.some((i) => i.id === 'i-keep-venue' && i.amt === 3), JSON.stringify(after));
