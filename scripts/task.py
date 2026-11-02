@@ -70,6 +70,23 @@ TIERS = ["A", "B", "C"]   # bậc lưới lọc: A tự merge, B Chief of Staff 
 TIER_VI = {"A": "A — tự merge khi eval xanh", "B": "B — Chief of Staff merge sau accept",
            "C": "C — Capu duyệt"}
 NEEDS_EVAL = {"engineering"}   # bộ phận chỉ nhận việc khi đã có eval chạy được
+PRODUCTS = {"planner": "Wedding planner (cặp đôi)", "hq": "Dashboard và công cụ quản lý Tơ Hồng HQ"}   # ADR-011
+LEGACY_AREAS = {"front": "planner/front", "back": "planner/back", "dashboard": "hq/dashboard"}   # vùng cũ chưa có tiền tố sản phẩm
+
+
+def normalize_area(area):
+    """Vùng dạng <sản phẩm>/<vùng>/… (ADR-011). Vùng cũ không có tiền tố được ánh xạ theo LEGACY_AREAS."""
+    area = (area or "").strip().strip("/")
+    if not area:
+        return ""
+    head, _, rest = area.partition("/")
+    if head in PRODUCTS:
+        return area
+    if head in LEGACY_AREAS:
+        return LEGACY_AREAS[head] + ("/" + rest if rest else "")
+    raise LedgerError(
+        f"Vùng '{area}' không có tiền tố sản phẩm. Dùng {' | '.join(p + '/…' for p in sorted(PRODUCTS))} "
+        f"(ADR-011). Bất biến của vùng nằm ở eval/invariants/<sản phẩm>/<vùng>/.")
 REQUESTER = "capu"      # người duy nhất được ghi là bên yêu cầu (--requested-by)
 REQUEST_TO = "chief-of-staff"
 FIELDS = ["id", "title", "state", "holder", "owner", "reviewer", "rounds", "version",
@@ -313,7 +330,7 @@ def cmd_new(a):
         "id": tid, "title": a.title, "state": "new", "holder": a.to, "owner": a.to,
         "reviewer": a.reviewer or GATE_OF.get(a.to, "adversary"), "rounds": 0, "version": 0, "deadline": a.deadline or "",
         "budget": a.budget or "", "escalation": a.escalation, "tier": tier, "eval": list(a.eval),
-        "area": a.area or "", "spec_returns": 0, "evals_added": 0, "created": ts, "updated": ts, "prev_state": "", "cost": round(a.cost, 2),
+        "area": normalize_area(a.area), "spec_returns": 0, "evals_added": 0, "created": ts, "updated": ts, "prev_state": "", "cost": round(a.cost, 2),
     }
     if not a.criteria:
         raise LedgerError("Việc mới phải có ít nhất một --criteria (tiêu chí chấp nhận).")
@@ -327,7 +344,7 @@ def cmd_new(a):
             f"**Mục tiêu:** {a.goal or a.title}\n\n"
             f"**Bối cảnh:** {a.context or '—'}\n\n"
             f"**Bậc lưới lọc:** {TIER_VI[tier]}\n\n"
-            f"**Vùng (bất biến áp dụng):** {a.area or '—'}\n\n"
+            f"**Vùng (bất biến áp dụng):** {meta['area'] or '—'}\n\n"
             f"### Tiêu chí chấp nhận\n\n{crit}\n\n"
             f"### Eval (lưới lọc chạy được)\n\n{evl}\n\n"
             f"### Không làm\n\n{a.out_of_scope or '—'}\n\n## Lịch sử\n")
@@ -636,7 +653,7 @@ def main(argv=None):
     sp.add_argument("--deadline", default="")
     sp.add_argument("--budget", default="", help="Ngân sách dự kiến cho cả việc, vd '$2'")
     sp.add_argument("--reviewer", default="", help="Mặc định theo bộ phận: product → spec-critic, engineering → adversary")
-    sp.add_argument("--area", default="", help="Vùng sản phẩm, vd front/vendor-list; gate.py chạy thêm eval/invariants/<area>")
+    sp.add_argument("--area", default="", help="Vùng: <sản phẩm>/<vùng>, vd planner/front/budget hay hq/dashboard; gate.py chạy _shared + mọi cấp cha của vùng")
     sp.add_argument("--escalation", default="tu-lam", choices=["tu-lam", "bao-sau", "hoi-truoc"])
     sp.add_argument("--tier", choices=TIERS, default="",
                     help="Bậc lưới lọc: A tự merge khi eval xanh, B Chief of Staff merge, C Capu duyệt. Mặc định B; hoi-truoc → C")
