@@ -1,6 +1,6 @@
 {
   "task": "T-043",
-  "at": "2026-11-02T15:18",
+  "at": "2026-11-02T15:21",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,47 +12,47 @@
       "eval": "cd /home/user/tohong-back && node --test --test-name-pattern='TC1 ' /home/user/tohong-hq/eval/T-043/members_list.test.js && cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-043/check_members_ui.cjs --repo . --only 1",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 280,
-      "out": ":744:7)\n  ...\n# Subtest: TC1 chưa có cặp đôi nào: 200, danh sách rỗng\nnot ok 5 - TC1 chưa có cặp đôi nào: 200, danh sách rỗng\n  ---\n  duration_ms: 1.336054\n  type: 'test'\n  location: '/home/user/tohong-hq/eval/T-043/members_list.test.js:342:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    {\"error\":\"not found\"}\n    \n    404 !== 200\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 200\n  actual: 404\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///home/user/tohong-hq/eval/T-043/members_list.test.js:344:10)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ...\n1..5\n# tests 5\n# suites 0\n# pass 0\n# fail 5\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 236.641592",
+      "ms": 347,
+      "out": "t:744:7)\n  ...\n# Subtest: TC1 chưa có cặp đôi nào: 200, danh sách rỗng\nnot ok 5 - TC1 chưa có cặp đôi nào: 200, danh sách rỗng\n  ---\n  duration_ms: 2.48261\n  type: 'test'\n  location: '/home/user/tohong-hq/eval/T-043/members_list.test.js:342:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    {\"error\":\"not found\"}\n    \n    404 !== 200\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 200\n  actual: 404\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///home/user/tohong-hq/eval/T-043/members_list.test.js:344:10)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ...\n1..5\n# tests 5\n# suites 0\n# pass 0\n# fail 5\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 288.995351",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-back && node --test --test-name-pattern='TC2 ' /home/user/tohong-hq/eval/T-043/members_list.test.js && cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-043/check_members_ui.cjs --repo . --only 2",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 365,
-      "out": "ok 12 - TC2 vượt trần 20 lần gọi Clerk: không gọi quá 20, phần chưa tra được là unavailable, email_complete=false, vẫn 200\n  ---\n  duration_ms: 1.596554\n  type: 'test'\n  location: '/home/user/tohong-hq/eval/T-043/members_list.test.js:723:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    {\"error\":\"not found\"}\n    \n    404 !== 200\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 200\n  actual: 404\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///home/user/tohong-hq/eval/T-043/members_list.test.js:728:10)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ...\n1..12\n# tests 12\n# suites 0\n# pass 0\n# fail 12\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 321.643585",
+      "ms": 430,
+      "out": "ok 12 - TC2 vượt trần 20 lần gọi Clerk: không gọi quá 20, phần chưa tra được là unavailable, email_complete=false, vẫn 200\n  ---\n  duration_ms: 2.058617\n  type: 'test'\n  location: '/home/user/tohong-hq/eval/T-043/members_list.test.js:723:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    {\"error\":\"not found\"}\n    \n    404 !== 200\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 200\n  actual: 404\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///home/user/tohong-hq/eval/T-043/members_list.test.js:728:10)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ...\n1..12\n# tests 12\n# suites 0\n# pass 0\n# fail 12\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 367.623023",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-back && node --test --test-name-pattern='TC3 ' /home/user/tohong-hq/eval/T-043/members_list.test.js && cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-043/check_members_ui.cjs --repo . --only 3",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 286,
-      "out": "T-043/members_list.test.js:587:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    route phải tồn tại và trả 200 cho admin\n    \n    404 !== 200\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 200\n  actual: 404\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///home/user/tohong-hq/eval/T-043/members_list.test.js:590:10)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ...\n# Subtest: TC3 route cũ members-summary không đổi (chỉ số tổng vẫn đúng)\nok 3 - TC3 route cũ members-summary không đổi (chỉ số tổng vẫn đúng)\n  ---\n  duration_ms: 6.23426\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 1\n# fail 2\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 233.131897",
+      "ms": 343,
+      "out": "-043/members_list.test.js:587:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    route phải tồn tại và trả 200 cho admin\n    \n    404 !== 200\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 200\n  actual: 404\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///home/user/tohong-hq/eval/T-043/members_list.test.js:590:10)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ...\n# Subtest: TC3 route cũ members-summary không đổi (chỉ số tổng vẫn đúng)\nok 3 - TC3 route cũ members-summary không đổi (chỉ số tổng vẫn đúng)\n  ---\n  duration_ms: 5.357952\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 1\n# fail 2\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 270.278522",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-back && node --test --test-name-pattern='TC4 ' /home/user/tohong-hq/eval/T-043/members_list.test.js && cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-043/check_members_ui.cjs --repo . --only 4",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 299,
-      "out": " - TC4 members-summary cũng có Cache-Control: no-store (bất biến cả vùng); 405 của route mới cũng vậy\n  ---\n  duration_ms: 5.109106\n  type: 'test'\n  location: '/home/user/tohong-hq/eval/T-043/members_list.test.js:734:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    The input did not match the regular expression /no-store/. Input:\n    \n    ''\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected:\n  actual: ''\n  operator: 'match'\n  stack: |-\n    TestContext.<anonymous> (file:///home/user/tohong-hq/eval/T-043/members_list.test.js:738:10)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ...\n1..5\n# tests 5\n# suites 0\n# pass 0\n# fail 5\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 256.273832",
+      "ms": 302,
+      "out": " - TC4 members-summary cũng có Cache-Control: no-store (bất biến cả vùng); 405 của route mới cũng vậy\n  ---\n  duration_ms: 5.578658\n  type: 'test'\n  location: '/home/user/tohong-hq/eval/T-043/members_list.test.js:734:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    The input did not match the regular expression /no-store/. Input:\n    \n    ''\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected:\n  actual: ''\n  operator: 'match'\n  stack: |-\n    TestContext.<anonymous> (file:///home/user/tohong-hq/eval/T-043/members_list.test.js:738:10)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ...\n1..5\n# tests 5\n# suites 0\n# pass 0\n# fail 5\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 250.387439",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-back && node --test --test-name-pattern='TC5 ' /home/user/tohong-hq/eval/T-043/members_list.test.js && cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-043/check_members_ui.cjs --repo . --only 5",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 312,
-      "out": "tài khoản đã xoá): chỉ dòng đó unavailable, các dòng khác bình thường\nnot ok 3 - TC5 Clerk trả 404 cho một người (tài khoản đã xoá): chỉ dòng đó unavailable, các dòng khác bình thường\n  ---\n  duration_ms: 2.415218\n  type: 'test'\n  location: '/home/user/tohong-hq/eval/T-043/members_list.test.js:570:1'\n  failureType: 'testCodeFailure'\n  error: \"Cannot read properties of undefined (reading 'find')\"\n  code: 'ERR_TEST_FAILURE'\n  name: 'TypeError'\n  stack: |-\n    TestContext.<anonymous> (file:///home/user/tohong-hq/eval/T-043/members_list.test.js:575:29)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 0\n# fail 3\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 251.351365",
+      "ms": 270,
+      "out": "tài khoản đã xoá): chỉ dòng đó unavailable, các dòng khác bình thường\nnot ok 3 - TC5 Clerk trả 404 cho một người (tài khoản đã xoá): chỉ dòng đó unavailable, các dòng khác bình thường\n  ---\n  duration_ms: 1.563113\n  type: 'test'\n  location: '/home/user/tohong-hq/eval/T-043/members_list.test.js:570:1'\n  failureType: 'testCodeFailure'\n  error: \"Cannot read properties of undefined (reading 'find')\"\n  code: 'ERR_TEST_FAILURE'\n  name: 'TypeError'\n  stack: |-\n    TestContext.<anonymous> (file:///home/user/tohong-hq/eval/T-043/members_list.test.js:575:29)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 0\n# fail 3\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 224.884891",
       "tier": 1
     },
     {
       "eval": "python3 /home/user/tohong-hq/eval/T-043/check_6_gates.py --back /home/user/tohong-back --front /home/user/tohong-front && python3 /home/user/tohong-hq/eval/T-043/check_6_shots.py --repo /home/user/tohong-front",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 31812,
+      "ms": 32532,
       "out": "lint front: base 32 error/3 warning; hiện tại 32/3\nFAIL back: script \"test\" không chạy file test nào nhắc tới route members-list",
       "tier": 1
     },
