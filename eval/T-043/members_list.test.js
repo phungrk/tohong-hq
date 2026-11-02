@@ -35,6 +35,9 @@ let clerkUrls; // mọi URL gọi ra ngoài
 let clerkLookups; // user id đã tra email (cả tra từng người lẫn tra theo lô)
 let clerkMode; // "ok" | "throw" | "http500"
 let deletes;
+let lists; // số lần bucket.list (liệt kê R2)
+let clerkNoUserIdFilter = false; // Clerk bỏ qua tham số user_id (giả lập khi tham số này không tồn tại)
+let manyUsers = 0; // số user_x… có thật ở Clerk (bộ dữ liệu lớn)
 
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -45,6 +48,7 @@ const EMAILS = {
   user_a1: "lan.nguyen@example.com",
   user_a2: "hoa.le@example.com",
   user_a3: "binh.vo@example.com",
+  user_a4: "tu.ha@example.com",
   user_a5: "zung.do@example.com",
   user_a6: "an.pham@example.com",
 };
@@ -64,6 +68,11 @@ function clerkUser(id) {
   };
 }
 
+// Clerk giả theo hành vi Clerk thật (đã biết/giả định): GET /v1/users mặc định trả 10 người mỗi trang,
+// tôn trọng limit (tối đa 500) và offset; tham số user_id (lặp lại) lọc theo mã. /v1/users/<id> trả một người.
+function allUsers() {
+  return [...Object.keys(EMAILS), ...Array.from({ length: manyUsers }, (_, i) => `user_x${i}`)].filter((id) => emailOf(id));
+}
 function installFetch() {
   globalThis.fetch = async (url) => {
     const u = String(url);
@@ -77,9 +86,15 @@ function installFetch() {
       return emailOf(id) ? json(clerkUser(id)) : json({ errors: [] }, 404);
     }
     if (u.startsWith("https://api.clerk.com/v1/users?")) {
-      const ids = new URL(u).searchParams.getAll("user_id");
-      clerkLookups.push(...ids);
-      return json(ids.filter((i) => emailOf(i)).map(clerkUser));
+      const sp = new URL(u).searchParams;
+      const limit = Math.min(500, Math.max(1, parseInt(sp.get("limit") || "10", 10) || 10));
+      const offset = Math.max(0, parseInt(sp.get("offset") || "0", 10) || 0);
+      const wanted = sp.getAll("user_id");
+      let pool = allUsers();
+      if (wanted.length && !clerkNoUserIdFilter) pool = pool.filter((id) => wanted.includes(id));
+      const page = pool.slice(offset, offset + limit);
+      clerkLookups.push(...page);
+      return json(page.map(clerkUser));
     }
     throw new Error(`fetch ngoài dự kiến: ${u}`);
   };
@@ -110,6 +125,8 @@ const C = {
   C2: "couple_20261020_bbbbbb", // user_a2 chủ
   C9: "couple_20261010_hhhhhh", // user_a3 chủ, user_a2 người xem
   C3: "couple_20260915_cccccc", // user_a2 chủ, thiếu tên chú rể
+  C11: "couple_20261025_kkkkkk", // user_a4, cùng ngày với C7, C8, C12
+  C12: "couple_20261025_nnnnnn", // không có members.json, cùng ngày
   C6: "couple_20260802_ffffff", // không có members.json
   C5: "couple_20260801_eeeeee", // user_a3 chủ, không có profile.yaml
 };
@@ -124,19 +141,24 @@ function seedWorld() {
   seedCouple(C.C9, [["user_a3", "owner"], ["user_a2", "viewer"]], "Mai Phương", "Hồ Trung Kiên");
   seedCouple(C.C3, [["user_a2", "owner"]], "Đặng Thu Hằng", undefined);
   seedCouple(C.C6, null, "Hoàng Yến", "Ngô Quang Vinh");
+  seedCouple(C.C11, [["user_a4", "owner"]], "Kiều Thanh Tú", "Lương Bảo Long");
+  seedCouple(C.C12, null, "Tạ Minh Anh", "Giang Hữu Phước");
   seedCouple(C.C5, [["user_a3", "owner"]], undefined, undefined, false);
   bucket.putLog.length = 0;
   bucket.reads.length = 0;
 }
 
-// Thứ tự đúng của 9 dòng (mới nhất trước; cùng couple mới nhất thì chủ trước; cùng ngày thì id lớn trước).
+// Thứ tự đúng của 11 dòng: ngày cặp đôi mới nhất giảm dần; cùng ngày thì account > guest > unknown;
+// cùng loại thì khoá nội bộ ổn định (user_id tăng dần; dòng unknown theo mã cặp đôi tăng dần). Không phụ thuộc email/Clerk.
 const EXPECTED = [
   { kind: "account", email: EMAILS.user_a5, status: "ok", couples: [[C.C10, "Trương Mỹ Linh", "Đinh Công Sơn", "owner", "2026-11-01"]] },
   { kind: "account", email: EMAILS.user_a6, status: "ok", couples: [[C.C10, "Trương Mỹ Linh", "Đinh Công Sơn", "member", "2026-11-01"]] },
   { kind: "guest", email: null, status: "guest", couples: [[C.C4, "Võ Ngọc Ánh", "Bùi Văn Đông", "owner", "2026-10-31"]] },
   { kind: "account", email: EMAILS.user_a1, status: "ok", couples: [[C.C1, "Nguyễn Thị Lan", "Trần Đức Minh", "owner", "2026-10-30"]] },
-  { kind: "guest", email: null, status: "guest", couples: [[C.C8, "Cao Bảo Châu", "Lý Hải Nam", "owner", "2026-10-25"]] },
+  { kind: "account", email: EMAILS.user_a4, status: "ok", couples: [[C.C11, "Kiều Thanh Tú", "Lương Bảo Long", "owner", "2026-10-25"]] },
   { kind: "guest", email: null, status: "guest", couples: [[C.C7, "Âu Dương Mai", "Quách Tuấn Kiệt", "owner", "2026-10-25"]] },
+  { kind: "guest", email: null, status: "guest", couples: [[C.C8, "Cao Bảo Châu", "Lý Hải Nam", "owner", "2026-10-25"]] },
+  { kind: "unknown", email: null, status: "none", couples: [[C.C12, "Tạ Minh Anh", "Giang Hữu Phước", null, "2026-10-25"]] },
   {
     kind: "account",
     email: EMAILS.user_a2,
@@ -213,6 +235,14 @@ beforeEach(() => {
     deletes++;
     return origDelete(k);
   };
+  lists = 0;
+  const origList = bucket.list.bind(bucket);
+  bucket.list = async (...a) => {
+    lists++;
+    return origList(...a);
+  };
+  clerkNoUserIdFilter = false;
+  manyUsers = 0;
   clerkUrls = [];
   clerkLookups = [];
   clerkMode = "ok";
@@ -248,6 +278,7 @@ test("TC3 mọi lý do không phải admin -> 403 forbidden, trước khi đọc
     }
   }
   assert.deepEqual(bucket.reads, [], "từ chối không được đọc dữ liệu");
+  assert.equal(lists, 0, "từ chối không được liệt kê R2 (list)");
   assert.deepEqual(bucket.putLog, []);
   assert.deepEqual(clerkUrls, [], "từ chối không được gọi Clerk");
   const ok = await list({ page: 1, size: 5 });
@@ -260,12 +291,13 @@ test("TC1 mỗi dòng một tài khoản/khách/không rõ, đủ cặp đôi, t
   seedWorld();
   const r = await list({ page: 1, size: 50 });
   assert.equal(r.status, 200, r.text);
-  assert.equal(r.json.total, 9);
+  assert.equal(r.json.total, 11);
+  assert.deepEqual(r.json.counts, { account: 6, guest: 3, unknown: 2 });
   assert.equal(r.json.total_pages, 1);
   assert.equal(r.json.page, 1);
   assert.equal(r.json.size, 50);
   assert.equal(r.json.email_complete, true);
-  assert.equal(r.json.items.length, 9);
+  assert.equal(r.json.items.length, 11);
   assert.deepEqual(r.json.items.map(shape), EXPECTED.map(expectShape));
 });
 
@@ -276,7 +308,7 @@ test("TC1 mặc định không gửi gì: trang 1, cỡ 20; thân rỗng cũng �
     assert.equal(r.status, 200, r.text);
     assert.equal(r.json.page, 1);
     assert.equal(r.json.size, 20);
-    assert.equal(r.json.items.length, 9);
+    assert.equal(r.json.items.length, 11);
   }
 });
 
@@ -303,8 +335,8 @@ test("TC1 members.json hỏng hoặc không có chủ hợp lệ -> dòng 'unkno
   bucket.seedJson("data/couples/couple_20260702_hhhhhh/members.json", { khong: "phai mang" });
   const r = await list({ size: 50 });
   assert.equal(r.status, 200, r.text);
-  assert.equal(r.json.total, 11);
-  assert.equal(r.json.items.filter((i) => i.kind === "unknown").length, 3);
+  assert.equal(r.json.total, 13);
+  assert.equal(r.json.items.filter((i) => i.kind === "unknown").length, 4);
 });
 
 test("TC1 chưa có cặp đôi nào: 200, danh sách rỗng", async () => {
@@ -327,7 +359,7 @@ test("TC2 chia trang: cỡ 4 -> 4,4,1; ghép lại bằng danh sách đầy đ�
     clerkLookups.length = 0;
     const r = await list({ page, size: 4 });
     assert.equal(r.status, 200, r.text);
-    assert.equal(r.json.total, 9);
+    assert.equal(r.json.total, 11);
     assert.equal(r.json.total_pages, 3);
     assert.equal(r.json.page, page);
     sizes.push(r.json.items.length);
@@ -337,12 +369,12 @@ test("TC2 chia trang: cỡ 4 -> 4,4,1; ghép lại bằng danh sách đầy đ�
     for (const id of clerkLookups) assert.ok(wanted.includes(id), `trang ${page} tra Clerk người không nằm trên trang: ${id}`);
     assert.ok(new Set(clerkLookups).size <= wanted.length);
   }
-  assert.deepEqual(sizes, [4, 4, 1]);
+  assert.deepEqual(sizes, [4, 4, 3]);
   assert.deepEqual(got, full);
   const past = await list({ page: 4, size: 4 });
   assert.equal(past.status, 200);
   assert.deepEqual(past.json.items, []);
-  assert.equal(past.json.total, 9);
+  assert.equal(past.json.total, 11);
 });
 
 test("TC2 đầu vào sai -> 400 bad_request, không đọc dữ liệu", async () => {
@@ -360,6 +392,7 @@ test("TC2 đầu vào sai -> 400 bad_request, không đọc dữ liệu", async 
     assert.match(r.headers.get("cache-control") || "", /no-store/);
   }
   assert.deepEqual(bucket.reads, []);
+  assert.equal(lists, 0, "đầu vào sai không được liệt kê R2");
   // ranh giới hợp lệ
   for (const body of [{ size: 1 }, { size: 50 }, { q: "a".repeat(100) }, { q: "" }, { q: "   " }]) {
     const r = await list(body);
@@ -372,8 +405,10 @@ test("TC2 chỉ POST: GET (kể cả ?q=) và PUT, DELETE, PATCH -> 405, không 
   for (const [method, p] of [["GET", ROUTE], ["GET", `${ROUTE}?q=lan&page=2`], ["PUT", ROUTE], ["DELETE", ROUTE], ["PATCH", ROUTE]]) {
     const r = await call(method, p, { body: method === "GET" ? undefined : {} });
     assert.equal(r.status, 405, `${method} ${p} -> ${r.status}`);
+    assert.match(r.headers.get("cache-control") || "", /no-store/, `405 ${method}`);
   }
   assert.deepEqual(bucket.reads, []);
+  assert.equal(lists, 0);
 });
 
 async function ids(q) {
@@ -405,7 +440,7 @@ test("TC2 tìm theo email; dòng khớp vẫn hiện đủ mọi cặp đôi c�
   assert.equal(z.total, 1);
   assert.equal(z.items[0].email, EMAILS.user_a5);
   const ex = await ids("example.com");
-  assert.equal(ex.total, 5);
+  assert.equal(ex.total, 6);
   assert.ok(ex.items.every((i) => i.kind === "account"));
   const hang = await ids("hang");
   assert.equal(hang.total, 1);
@@ -426,14 +461,14 @@ test("TC2 nhãn hiển thị và ký tự đặc biệt không phải là nội 
 test("TC2 tìm có phân trang: total và total_pages theo kết quả đã lọc", async () => {
   seedWorld();
   const r = await list({ q: "example.com", page: 2, size: 2 });
-  assert.equal(r.json.total, 5);
+  assert.equal(r.json.total, 6);
   assert.equal(r.json.total_pages, 3);
-  assert.deepEqual(r.json.items.map((i) => i.email), [EMAILS.user_a1, EMAILS.user_a2]);
+  assert.deepEqual(r.json.items.map((i) => i.email), [EMAILS.user_a1, EMAILS.user_a4]);
 });
 
 /* ───────────── tiêu chí 4: riêng tư ───────────── */
 
-const ALLOWED_TOP = ["cached", "computed_at", "email_complete", "items", "page", "size", "total", "total_pages"];
+const ALLOWED_TOP = ["cached", "computed_at", "counts", "email_complete", "items", "page", "size", "total", "total_pages"];
 const ALLOWED_ITEM = ["couples", "email", "email_status", "kind"];
 const ALLOWED_COUPLE = ["bride_name", "created_at", "groom_name", "role"];
 
@@ -508,7 +543,7 @@ test("TC5 Clerk lỗi (ném lỗi, HTTP 500) hoặc thiếu khoá: vẫn 200, đ
     resetClerkCache();
     const r = await list({ size: 50 }, { env });
     assert.equal(r.status, 200, `${label}: ${r.text}`);
-    assert.equal(r.json.total, 9, label);
+    assert.equal(r.json.total, 11, label);
     assert.equal(r.json.email_complete, false, label);
     const got = r.json.items.map(shape);
     const want = EXPECTED.map(expectShape).map((e) =>
@@ -540,7 +575,7 @@ test("TC5 Clerk trả 404 cho một người (tài khoản đã xoá): chỉ dò
     const a3 = r.json.items.find((i) => i.couples.some((c) => c.created_at === "2026-08-01"));
     assert.equal(a3.email_status, "unavailable");
     assert.equal(a3.email, null);
-    assert.equal(r.json.items.filter((i) => i.email_status === "ok").length, 4);
+    assert.equal(r.json.items.filter((i) => i.email_status === "ok").length, 5);
     assert.equal(r.json.email_complete, false);
   } finally {
     EMAILS.user_a3 = "binh.vo@example.com";
@@ -568,15 +603,15 @@ test("TC3 route cũ members-summary không đổi (chỉ số tổng vẫn đún
   const r = await call("GET", "/api/admin/members-summary");
   assert.equal(r.status, 200, r.text);
   assert.deepEqual(Object.keys(r.json).sort(), ["accounts", "cached", "computed_at", "couples"]);
-  assert.equal(r.json.couples.total, 10);
+  assert.equal(r.json.couples.total, 12);
 });
 
 /* ───────────── hiệu năng: quét R2 có cache ───────────── */
 
-function seedMany(n) {
+function seedMany(n, off = 0) {
   for (let i = 0; i < n; i++) {
     const id = `couple_20261001_${String(i).padStart(6, "0")}`;
-    bucket.seedJson(`data/couples/${id}/members.json`, [{ user_id: i % 3 === 0 ? `guest_x${i}` : `user_x${i}`, role: "owner" }]);
+    bucket.seedJson(`data/couples/${id}/members.json`, [{ user_id: i % 3 === 0 ? `guest_x${i}` : `user_x${i + off}`, role: "owner" }]);
     bucket.seedText(`data/couples/${id}/profile.yaml`, `couple:\n  bride_name: "Cô Dâu ${i}"\n  groom_name: "Chú Rể ${i}"\n`);
   }
   bucket.putLog.length = 0;
@@ -585,10 +620,16 @@ function seedMany(n) {
 
 test("TC2 hiệu năng: 1.000 cặp đôi, lần đầu <= 2 lần đọc R2 mỗi cặp và < 5 giây; lần sau trong 5 phút không đọc R2; refresh đọc lại; mỗi request <= 20 lần gọi Clerk, mỗi tài khoản tra tối đa một lần", async () => {
   seedMany(1000);
+  manyUsers = 1000;
   const t0 = Date.now();
-  const first = await list({ page: 1, size: 20 });
+  const first = await list({ page: 1, size: 50 });
   assert.equal(first.status, 200, first.text);
   assert.equal(first.json.total, 1000);
+  const acc = first.json.items.filter((i) => i.kind === "account");
+  assert.ok(acc.length > 10, "trang 50 dòng phải có hơn 10 tài khoản (Clerk thật mặc định trả 10 mỗi trang nếu quên limit)");
+  assert.ok(acc.every((i) => i.email_status === "ok" && i.email), "mọi tài khoản trên trang phải có email");
+  assert.equal(first.json.email_complete, true);
+  assert.ok(clerkUrls.length <= 20, `không tìm: ${clerkUrls.length} lần gọi Clerk > 20`);
   assert.ok(Date.now() - t0 < 5000, "lần đầu quá 5 giây");
   assert.ok(bucket.reads.length <= 2000, `đọc R2 ${bucket.reads.length} lần > 2 x 1000`);
   assert.equal(first.json.cached, false);
@@ -601,6 +642,7 @@ test("TC2 hiệu năng: 1.000 cặp đôi, lần đầu <= 2 lần đọc R2 m�
   assert.ok(clerkUrls.length - callsBefore <= 20, `một request tìm kiếm gọi Clerk ${clerkUrls.length - callsBefore} lần > 20 (phải tra theo lô)`);
   assert.equal(second.json.cached, true);
   assert.ok(second.json.total >= 1);
+  assert.equal(second.json.email_complete, true, "tìm: mọi 667 email phải tra được trong trần 20 lần gọi (phải đặt limit)");
 
   const third = await list({ page: 1, size: 20, refresh: true });
   assert.equal(third.json.cached, false);
@@ -612,4 +654,88 @@ test("TC2 hiệu năng: 1.000 cặp đôi, lần đầu <= 2 lần đọc R2 m�
     seen.add(id);
   }
   assert.deepEqual(bucket.putLog, []);
+});
+
+/* ───────────── bổ sung theo D1 ───────────── */
+
+test("TC2 thứ tự ổn định: giống nhau khi Clerk lên/xuống, cache email trống/đầy, cache danh sách hết hạn giữa các trang; ca hoà theo kind rồi khoá nội bộ", async () => {
+  seedWorld();
+  const want = EXPECTED.map(expectShape);
+  const orderOf = (r) => r.json.items.map(shape).map((x) => x.couples.map((c) => `${c[1]}:${c[3]}`).join("/")); // tên cô dâu + vai trò theo thứ tự
+  const wantNames = want.map((x) => x.couples.map((c) => `${c[1]}:${c[3]}`).join("/"));
+  // 1) Clerk lên
+  assert.deepEqual(orderOf(await list({ size: 50 })), wantNames);
+  // 2) Clerk xuống (thứ tự không được đổi vì email không có)
+  clerkMode = "throw";
+  resetMemberStatsCache();
+  resetClerkCache();
+  assert.deepEqual(orderOf(await list({ size: 50 })), wantNames);
+  // 3) ghép các trang cỡ 3, mỗi trang dựng lại danh sách và xoá cache email: phải bằng danh sách đầy đủ, không trùng, không sót
+  clerkMode = "ok";
+  const got = [];
+  for (const page of [1, 2, 3, 4]) {
+    resetMemberStatsCache();
+    resetClerkCache();
+    const r = await list({ page, size: 3 });
+    got.push(...orderOf(r));
+  }
+  assert.deepEqual(got, wantNames);
+  // 4) cache email chỉ có một phần (đã tra trang 2) rồi tra trang 1
+  resetMemberStatsCache();
+  resetClerkCache();
+  await list({ page: 2, size: 3 });
+  const p1 = await list({ page: 1, size: 3 });
+  assert.deepEqual(orderOf(p1), wantNames.slice(0, 3));
+  // 5) cache email đã đầy (ai cũng có email) nhưng danh sách dựng lại: thứ tự vẫn không đổi theo email
+  await list({ size: 50 });
+  resetMemberStatsCache();
+  assert.deepEqual(orderOf(await list({ size: 50 })), wantNames);
+  assert.equal(EMAILS.user_a6 < EMAILS.user_a5, true, "dữ liệu thử phải có email đảo ngược user_id để bắt cách xếp theo email");
+  // ca hoà cụ thể: cùng ngày 2026-10-25: account (a4) trước guest (g2, g3 theo user_id) trước unknown
+  assert.deepEqual(want.slice(4, 8).map((x) => x.kind), ["account", "guest", "guest", "unknown"]);
+});
+
+test("TC2 dòng chữ đếm: counts theo loại của các dòng khớp (account, guest, unknown)", async () => {
+  seedWorld();
+  assert.deepEqual((await list({})).json.counts, { account: 6, guest: 3, unknown: 2 });
+  assert.deepEqual((await list({ q: "example.com" })).json.counts, { account: 6, guest: 0, unknown: 0 });
+  assert.deepEqual((await list({ q: "dong" })).json.counts, { account: 0, guest: 1, unknown: 0 });
+  assert.deepEqual((await list({ q: "khong-co-ai" })).json.counts, { account: 0, guest: 0, unknown: 0 });
+  assert.deepEqual((await list({ page: 3, size: 4 })).json.counts, { account: 6, guest: 3, unknown: 2 }, "counts tính trên mọi dòng khớp, không chỉ trang hiện tại");
+});
+
+test("TC2 Clerk không hiểu user_id (trả danh sách không lọc, mặc định 10/trang): vẫn đủ email nhờ đọc theo trang có limit, trong trần 20 lần", async () => {
+  seedMany(300);
+  manyUsers = 300;
+  clerkNoUserIdFilter = true;
+  const r = await list({ page: 1, size: 50 });
+  assert.equal(r.status, 200, r.text);
+  const acc = r.json.items.filter((i) => i.kind === "account");
+  assert.ok(acc.length > 10);
+  assert.ok(acc.every((i) => i.email_status === "ok"), "đường lui phải lấy đủ email");
+  assert.equal(r.json.email_complete, true);
+  assert.ok(clerkUrls.length <= 20, `${clerkUrls.length} lần gọi Clerk > 20`);
+  const t = await list({ q: "co dau 7", size: 50 });
+  assert.equal(t.status, 200);
+  assert.ok(clerkUrls.length <= 40, "request thứ hai cũng <= 20 lần");
+});
+
+test("TC2 vượt trần 20 lần gọi Clerk: không gọi quá 20, phần chưa tra được là unavailable, email_complete=false, vẫn 200", async () => {
+  seedMany(30, 15000); // người cần tra nằm sau vị trí 15.000 trong danh sách Clerk, đọc theo trang 500 cần > 20 lần
+  manyUsers = 16000;
+  clerkNoUserIdFilter = true;
+  const r = await list({ size: 50 });
+  assert.equal(r.status, 200, r.text);
+  assert.ok(clerkUrls.length <= 20, `${clerkUrls.length} lần gọi Clerk > 20`);
+  assert.equal(r.json.email_complete, false);
+  assert.ok(r.json.items.some((i) => i.kind === "account" && i.email_status === "unavailable" && i.email === null));
+});
+
+test("TC4 members-summary cũng có Cache-Control: no-store (bất biến cả vùng); 405 của route mới cũng vậy", async () => {
+  seedWorld();
+  const r = await call("GET", "/api/admin/members-summary");
+  assert.equal(r.status, 200, r.text);
+  assert.match(r.headers.get("cache-control") || "", /no-store/);
+  const bad = await call("GET", "/api/admin/members-summary?refresh=1");
+  assert.match(bad.headers.get("cache-control") || "", /no-store/);
 });
