@@ -3,7 +3,7 @@ type: decision
 id: ADR-018
 date: 2026-11-02
 decided_by: capu
-tasks: [T-041]
+tasks: [T-043]
 ---
 # Admin được xem danh sách thành viên kèm tên cô dâu, chú rể
 
