@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Eval tầng 1 của T-045. Một lệnh, in PASS/FAIL, mã thoát 0/1.
 #   cd /home/user/tohong-hq && bash eval/T-045/run.sh <thư-mục-tohong-front> [--only N] [--shots DIR]
-# N = 1..6 là tiêu chí 1..6 của spec (UI, dữ liệu giả). Tiêu chí 7 (cổng hai repo): python3 eval/T-045/check_7_gates.py. Tiêu chí 8: checklist.md.
+# N = 1..6, 9, 10 là tiêu chí cùng số của spec (UI, dữ liệu giả). Tiêu chí 7 (cổng hai repo): python3 eval/T-045/check_7_gates.py. Tiêu chí 8: checklist.md.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 FRONT="${1:-}"
