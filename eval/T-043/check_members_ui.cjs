@@ -130,7 +130,8 @@ async function scenario(opts = {}) {
       const size = body.size || 20; const pg = body.page || 1;
       const rows = (q ? data.filter((r) => hay(r).includes(q)) : data)
         .map((r) => (emailsDown && r.kind === 'account' ? { ...r, email: null, email_status: 'unavailable' } : r));
-      return json({ page: pg, size, total: rows.length, total_pages: Math.ceil(rows.length / size), email_complete: !emailsDown,
+      const counts = rows.reduce((c, r) => { c[r.kind]++; return c; }, { account: 0, guest: 0, unknown: 0 });
+      return json({ page: pg, size, total: rows.length, counts, total_pages: Math.ceil(rows.length / size), email_complete: !emailsDown,
         computed_at: new Date().toISOString(), cached: false, items: rows.slice((pg - 1) * size, pg * size) });
     }
     S.other.push({ method: m, path: u.pathname + u.search });
@@ -140,6 +141,7 @@ async function scenario(opts = {}) {
   });
   S.base = `http://127.0.0.1:${server.address().port}`;
   await page.goto(`${S.base}/?admin`);
+  S.title0 = await page.title();
   S.region = page.getByRole('region', { name: 'Danh sách thành viên' });
   S.rows = () => S.region.getByRole('listitem');
   S.search = page.getByRole('searchbox', { name: 'Tìm theo email hoặc tên' });
@@ -197,7 +199,10 @@ const settle = (S, ms = 700) => S.page.waitForTimeout(ms);
       const first = S.listReqs[0];
       check('lần tải đầu: một request POST /api/admin/members-list với page 1, size 20, q rỗng', !!first && first.method === 'POST' && first.body.page === 1 && first.body.size === 20 && (first.body.q || '') === '', JSON.stringify(first && first.body));
       const body = await pageText(S);
-      check('hiện "Trang 1/3" và "45 thành viên"', /Trang 1\/3/.test(body) && /45 thành viên/.test(body));
+      const cnt = ALL.reduce((c, r) => { c[r.kind]++; return c; }, { account: 0, guest: 0, unknown: 0 });
+      const line = (c) => `${c.account} tài khoản · ${c.guest} khách dùng thử · ${c.unknown} không rõ chủ`;
+      check('hiện "Trang 1/3" và nhãn trung thực "45 dòng" (không dùng chữ "thành viên" cho số dòng)', /Trang 1\/3/.test(body) && /\b45 dòng\b/.test(body) && !/\b45 thành viên/.test(body));
+      check(`có dòng giải thích số lệch: "${line(cnt)}. Tài khoản chưa vào cặp đôi nào không hiện ở đây."`, body.replace(/\s+/g, ' ').includes(line(cnt) + '. Tài khoản chưa vào cặp đôi nào không hiện ở đây.'));
       const prev = S.page.getByRole('button', { name: 'Trang trước' }); const next = S.page.getByRole('button', { name: 'Trang sau' });
       check('trang đầu: "Trang trước" bị khoá, "Trang sau" bấm được', (await prev.count()) === 1 && (await prev.isDisabled()) && (await next.isEnabled().catch(() => false)));
       const n0 = S.listReqs.length;
@@ -214,7 +219,7 @@ const settle = (S, ms = 700) => S.page.waitForTimeout(ms);
       const sent = S.listReqs.slice(n1);
       check('gõ 14 ký tự liên tục chỉ gửi vài request (debounce), request cuối có q đúng như gõ và page 1', sent.length >= 1 && sent.length <= 4 && sent[sent.length - 1].body.q === 'nguyen thi lan' && sent[sent.length - 1].body.page === 1, JSON.stringify(sent.map((s) => s.body)));
       const t = await texts(S);
-      check('kết quả tìm: 1 dòng của Nguyễn Thị Lan, "1 thành viên", không còn phân trang thừa', t.length === 1 && t[0].includes('lan.nguyen@example.com') && /1 thành viên/.test(await pageText(S)), t.join(' | '));
+      check('kết quả tìm: 1 dòng của Nguyễn Thị Lan, "1 thành viên", không còn phân trang thừa', t.length === 1 && t[0].includes('lan.nguyen@example.com') && /\b1 dòng\b/.test(await pageText(S)) && (await pageText(S)).replace(/\s+/g, ' ').includes(line({ account: 1, guest: 0, unknown: 0 }) + '.'), t.join(' | '));
       // có dấu, hoa: gửi nguyên văn (máy chủ lo chuẩn hoá)
       const n2 = S.listReqs.length;
       await S.search.fill('  NGUYỄN  ');
@@ -269,6 +274,7 @@ const settle = (S, ms = 700) => S.page.waitForTimeout(ms);
       check('không request nào ra ngoài (analytics, bên thứ ba) mang tên hay email', ext.length === 0, ext[0] && ext[0].url);
       check('trang admin không gọi host lạ nào ngoài máy chủ API (không analytics)', S.external.filter((r) => !/fonts\.(googleapis|gstatic)\.com/.test(r.url)).length === 0, S.external.map((r) => r.url).join(' '));
       const stored = await S.page.evaluate(() => JSON.stringify([localStorage, sessionStorage]) + document.title);
+      check('tiêu đề trang không đổi so với lúc mở', (await S.page.title()) === S.title0, S.title0);
       check('không lưu tên, email hay từ khoá vào localStorage/sessionStorage, tiêu đề trang không đổi', !/Hằng|Nguyễn|@example/.test(stored), stored.slice(0, 120));
       await S.ctx.close();
     } catch (e) { stepFail(e); }
@@ -310,7 +316,8 @@ const settle = (S, ms = 700) => S.page.waitForTimeout(ms);
       const t = await texts(C);
       check('Clerk lỗi: dòng tài khoản ghi "chưa lấy được email" và vẫn đủ tên cô dâu, chú rể', (t[0] || '').includes('chưa lấy được email') && (t[0] || '').includes('Trương Mỹ Linh') && (t[0] || '').includes('Đinh Công Sơn') && !/@/.test(t[0] || ''), t[0]);
       check('Clerk lỗi: dòng khách vẫn ghi "khách"', (t[2] || '').includes('khách'));
-      check('Clerk lỗi, chưa tìm: không có ghi chú về tìm theo email', !/tìm theo email có thể thiếu/.test(await pageText(C)));
+      { const t0 = await pageText(C);
+        check('Clerk lỗi, chưa tìm: có ghi chú "Một số email chưa lấy được." (không nói chuyện tìm kiếm)', /Một số email chưa lấy được\./.test(t0) && !/nên tìm theo email/.test(t0)); }
       await C.search.fill('hoa'); await settle(C, 900);
       check('Clerk lỗi và đang tìm: có ghi chú "Một số email chưa lấy được nên tìm theo email có thể thiếu kết quả."', /Một số email chưa lấy được nên tìm theo email có thể thiếu kết quả\./.test(await pageText(C)));
       await C.ctx.close();
