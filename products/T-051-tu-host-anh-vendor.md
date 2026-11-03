@@ -1,0 +1,116 @@
+# Spec T-051: Tự host ảnh vendor trên Cloudflare Pages thay hotlink www.marry.vn
+
+## Ý định
+Capu (ADR-021, 2026-11-03): "a chọn A, hướng cloudflare pages". Tự host toàn bộ ảnh vendor hiện có trên Cloudflare Pages (project `tohong-img`), miễn phí, thay cho hotlink www.marry.vn. Rủi ro bản quyền đã báo và Capu chấp nhận; xin phép hoặc thay ảnh vendor là việc sau, ngoài spec này.
+
+## Bằng chứng
+- Đếm bằng Node trên `tohong-back/lib/vendorPool.generated.js` (2026-11-03): 968 vendor, 2.812 lượt ảnh, 2.467 URL duy nhất, tất cả `https://www.marry.vn/images/detailed/...`; đuôi: jpg 2.220, png 186, jpeg 54, gif 7. Brief ghi 2.810/2.465, lệch 2; spec và eval dùng số đếm thật và không cứng số.
+- Có URL chứa chữ Unicode hoặc khoảng trắng (vd `.../Logo-công-nghệ-cưới.jpg`): phải mã hoá khi tải.
+- Nguồn sinh: `phungrk/tohong` `tools/generate-vendor-pool.js` đọc `tools/scraper/output/pool-vendors.json` (do `build_pool.py` dựng; file này KHÔNG có trong repo), lấy `portfolio_urls.slice(0,4)` thành `photos:[{url}]`. Generator ghi ra `edge/lib/vendorPool.generated.js`; `edge` là submodule trỏ `phungrk/tohong-back`, `wedding-front` trỏ `phungrk/tohong-front` (`.gitmodules`). Chạy lại generator sẽ ghi đè mọi URL đã sửa tay, nên sửa pool mà không sửa generator là vô nghĩa.
+- Ảnh vendor chỉ đến front từ pool này: `tohong-back/lib/vendorMatcher.js` import `GENERATED_VENDOR_POOL`; `matcher-service` (pool B) không trả ảnh. Front dùng ảnh ở `tohong-front/src/screens/chat/VendorChatCards.jsx` qua CSS `background` (`adaptVendor` tạo `gallery`, `grad`); CSS background không báo lỗi tải ảnh, nên hiện nay ảnh hỏng thành ô trống. `api/admin.js` cũng đọc `photos[0].url` để hiện ảnh đại diện vendor ở màn admin.
+- Giới hạn Cloudflare Pages: 20.000 file/lần deploy, 25MB/file (brief). Direct Upload mỗi lần deploy thay cả site, nên mỗi lần phải đủ mọi file. Mức tự tin về giới hạn: ~85% (lấy từ brief, chưa đối chiếu tài liệu Cloudflare).
+- Mức tự tin chung của spec: ~75%. Chưa kiểm được: marry.vn có chặn IP GitHub Actions không (phiên cloud bị 403; Actions chưa thử). Đó là rủi ro chính, xử lý ở "Hành vi" mục E.
+
+## Giả thuyết
+Nếu ảnh vendor phục vụ từ `tohong-img.pages.dev` thì app không còn phụ thuộc marry.vn (không vỡ ảnh khi họ chặn hotlink hoặc đổi đường dẫn) và ảnh nhẹ hơn (WebP ≤ 800px) nên thẻ vendor hiện nhanh hơn. Chỉ số bảo vệ: số vendor hiện có ảnh trong danh sách gợi ý không giảm; test back vẫn xanh. Đo tải nhanh hơn là việc riêng.
+
+## Hành vi
+Mọi câu dưới đây là quyết định đã chốt; mỗi câu chỉ có một cách hiểu. "URL gốc" = chuỗi URL đúng từng ký tự như nằm trong pool lúc chưa sửa. "Ảnh xong" = entry `ok` trong manifest. "Pages URL" = `<baseUrl>/<file>`.
+
+### A. Chuyển ảnh
+1. Mỗi URL gốc duy nhất được tải một lần, giải mã, rồi ghi ra đúng một file WebP. Định dạng là WebP lossy, `quality` 80 (thang 0-100).
+2. Ảnh rộng hơn 800px thu nhỏ về rộng đúng 800px, cao theo tỷ lệ (làm tròn về số nguyên gần nhất). Ảnh rộng ≤ 800px giữ nguyên kích thước, không phóng to. Chiều rộng 800 tính sau khi áp hướng EXIF.
+3. Áp hướng EXIF trước khi thu nhỏ, rồi bỏ toàn bộ metadata (EXIF, GPS). Ảnh trong suốt (PNG có alpha) giữ độ trong suốt. GIF động và ảnh nhiều khung chỉ lấy khung đầu.
+4. Một nguồn tải về chỉ tính là ảnh khi: HTTP 200, thân giải mã được thành ảnh. Trả 200 nhưng là HTML, ảnh cụt, hoặc dữ liệu không giải mã được thì là lỗi `not-image`. Thân nguồn lớn hơn 30MB là lỗi `too-large`. Không giới hạn host của URL nguồn (eval dùng host giả).
+5. URL nguồn có ký tự ngoài ASCII hoặc khoảng trắng được mã hoá phần-trăm khi gửi yêu cầu; URL gốc trong pool và manifest giữ nguyên chuỗi chưa mã hoá.
+6. Tải tối đa 4 yêu cầu song song (`--workers` mặc định 4), timeout mỗi yêu cầu 20 giây (`--timeout`), theo dõi chuyển hướng tối đa 3 lần.
+
+### B. Tên file và manifest
+7. Tên file là `v/<vendorId>-<h>.webp`, `<h>` là 12 ký tự hex thường đầu tiên của SHA-256 trên byte UTF-8 của URL gốc. `<vendorId>` là id nhỏ nhất theo thứ tự chuỗi trong các vendor đang dùng URL đó lúc entry được tạo lần đầu. Một URL gốc dùng bởi nhiều vendor vẫn chỉ có một file; mọi vendor đó nhận cùng một Pages URL.
+8. Tên file của entry đã tồn tại không bao giờ đổi, kể cả khi sau đó xuất hiện vendor có id nhỏ hơn dùng cùng URL.
+9. Manifest là một file JSON `scripts/vendor-images/manifest.json` trong `tohong-back`: `{"version":1,"baseUrl":"<địa chỉ Pages không có dấu / cuối>","entries":{"<URL gốc>":<entry>}}`. Khoá `entries` là URL gốc, có đúng một khoá cho mỗi URL ảnh duy nhất đang có trong pool (kể cả ảnh lỗi) cộng mọi khoá đã có từ trước. Entry thành công: `{"status":"ok","file":"v/…webp","width":<số>,"height":<số>,"bytes":<số>}` với width/height/bytes khớp file thật. Entry lỗi: `{"status":"failed","reason":"<mã>","attempts":<số>}`, không có `file`. `reason` là một trong `http-<mã HTTP>`, `not-image`, `too-large`, `timeout`, `network`.
+10. `baseUrl` mặc định `https://tohong-img.pages.dev`. Nếu Cloudflare cấp tên khác thì Capu điền địa chỉ thật khi chạy workflow (ô `base_url`); mọi Pages URL dùng `baseUrl` trong manifest, không viết cứng ở chỗ nào khác.
+
+### C. Chạy lại được (idempotent)
+11. Chạy lại `mirror` với cùng đầu vào không tải lại ảnh đã xong, không ghi lại file ảnh đã có (nội dung và thời gian sửa giữ nguyên), không đổi entry `ok` nào. Thêm ảnh mới vào pool thì lần chạy sau chỉ tải ảnh mới.
+12. Entry `failed` luôn được thử lại ở mọi lần chạy sau (không bao giờ bị coi là cuối cùng); thử lại thành công thì thành `ok` và `attempts` đặt lại.
+13. URL trong pool bắt đầu bằng `baseUrl + "/"` là ảnh đã chuyển (pool đã rewrite): `mirror` không coi nó là nguồn để tải. Danh sách việc của `mirror` là: mọi URL không phải Pages URL trong pool, hợp với mọi khoá đã có trong manifest.
+14. Thư mục ra (`--out`) sau `mirror` chứa một file cho MỌI entry `ok` của manifest (không chỉ entry mà pool đang nhắc), vì Direct Upload thay cả site. Entry `ok` mà thiếu file trong `--out` thì `mirror` tải file đó từ `<restore-from>/<file>` (mặc định `--restore-from` = `baseUrl`); tải không được thì tải lại từ URL gốc và chuyển lại như ảnh mới; vẫn không được thì entry thành `failed`. Đếm: `restored` = số file khôi phục từ Pages.
+15. `rewrite` chạy lại trên pool đã rewrite không đổi file nào (`replaced=0`).
+
+### D. Ảnh lỗi
+16. Ảnh lỗi (mọi `failed`) giữ nguyên URL gốc trong pool sau `rewrite`; app tiếp tục hotlink ảnh đó. Mỗi ảnh lỗi được đếm trong `SUMMARY failed=` (đếm theo URL duy nhất) và `REWRITE kept_original=` (đếm theo lượt ảnh trong pool) và có một dòng `FAILED <URL gốc> <reason>` ở stdout.
+17. Lỗi 5xx, timeout và lỗi mạng được thử lại tối đa `--retries` lần (mặc định 2) trong cùng lần chạy, `attempts` ghi tổng số yêu cầu đã gửi. Lỗi 4xx, `not-image` và `too-large` không thử lại trong cùng lần chạy.
+18. `mirror` thoát với mã 0 dù có ảnh lỗi; mã 2 chỉ khi thiếu tham số hoặc không đọc được pool/manifest. Ảnh lỗi không làm hỏng ảnh khác. Workflow ghi `SUMMARY` vào trang tóm tắt của run và đánh dấu cảnh báo (không đỏ) nếu `failed` > 5% `total`.
+
+### E. Rewrite pool và generator
+19. `rewrite` thay URL của mọi lượt ảnh có entry `ok` thành Pages URL, và không đổi byte nào khác trong `vendorPool.generated.js` (định dạng một dòng, thứ tự, tên, mô tả giữ nguyên). `rewrite --check` không ghi gì, thoát 1 nếu còn lượt ảnh có entry `ok` mà URL chưa phải Pages URL.
+20. Sau khi `rewrite`, file vẫn là module ES hợp lệ xuất `GENERATED_VENDOR_POOL`, đúng 968 vendor (số hiện tại; không đổi số vendor, số lượt ảnh mỗi vendor).
+21. `node tools/generate-vendor-pool.js` (repo `phungrk/tohong`) sau khi sinh pool tự áp manifest (`edge/scripts/vendor-images/manifest.json`) bằng đúng lệnh `rewrite`, nên chạy lại generator không đưa URL gốc trở lại cho ảnh `ok`. Generator nhận thêm `--in <file>` và `--out <file>` (mặc định như cũ: `tools/scraper/output/pool-vendors.json` và `edge/lib/vendorPool.generated.js`).
+22. Nếu marry.vn chặn cả GitHub Actions (hầu hết ảnh `failed` với `http-403`): kết quả đúng là pool giữ nguyên link cũ, workflow xanh kèm cảnh báo, không có PR nào đổi ảnh. Không thử lách chặn (đổi User-Agent giả mạo, proxy) trong spec này; Capu quyết nếu gặp.
+
+### F. Deploy lên Pages
+23. `deploy` chạy `pages deploy <dir> --project-name <project> --branch main` bằng wrangler (lệnh wrangler lấy từ biến `WRANGLER_BIN`, mặc định `npx wrangler@3`), đúng một lần, chỉ sau khi mọi kiểm tra dưới đây đạt; `--dry-run` làm hết kiểm tra, in kế hoạch (có tên project), không gọi wrangler.
+24. Kiểm tra trước deploy, mỗi cái thất bại thì thoát khác 0, nêu lý do, không gọi wrangler: (a) thiếu biến môi trường `CLOUDFLARE_API_TOKEN` hoặc `CLOUDFLARE_ACCOUNT_ID` (thông báo nêu tên biến, không bao giờ in giá trị); (b) có entry `ok` mà thiếu file trong `--dir` (thông báo nêu tên file); (c) số file trong `--dir` vượt `--max-files` (mặc định 19.000, chừa chỗ cho giới hạn 20.000); (d) có file lớn hơn 25MiB.
+25. Giá trị token và account id chỉ truyền cho wrangler qua biến môi trường, không nằm trên dòng lệnh, không in ra log.
+26. Thư mục deploy có file `_headers` đặt `Cache-Control: public, max-age=31536000, immutable` cho đường dẫn `/v/*` (tên file chứa hash của URL nguồn nên bất biến).
+
+### G. Workflow, nơi đặt, không commit ảnh
+27. Mọi thứ nằm trong repo `phungrk/tohong-back`: công cụ `scripts/vendor-images/` (`vendor-images.mjs` + README.md), manifest, workflow `.github/workflows/mirror-vendor-images.yml`, và hai secret `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. Khác với hướng dẫn ban đầu (secret ở `phungrk/tohong`), vì: pool và manifest nằm ở tohong-back; `edge` là submodule nên checkout `phungrk/tohong` bằng `GITHUB_TOKEN` mặc định không đọc được repo con riêng tư; đặt ở tohong-back thì workflow không cần PAT nào. Phần generator (tiêu chí 8) là thay đổi nhỏ ở `phungrk/tohong`, không cần secret.
+28. Workflow `Mirror vendor images` chỉ chạy bằng tay (`workflow_dispatch`), không `schedule`, không `push`. Hai ô nhập: `deploy` (true/false, mặc định false) và `base_url` (mặc định `https://tohong-img.pages.dev`). Chạy với `deploy=false`: `mirror` + `rewrite`, đăng `SUMMARY` và để lại artifact gồm `manifest.json` + `vendorPool.generated.js` đã rewrite; không gọi wrangler, không mở PR. Chạy với `deploy=true`: như trên, rồi `deploy`, rồi (chỉ khi deploy thành công và manifest/pool có thay đổi) đẩy nhánh `vendor-images/run-<run_id>` và mở một PR vào `main` chứa `manifest.json` + `lib/vendorPool.generated.js`. Workflow không đẩy thẳng `main` và khai quyền `contents: write`, `pull-requests: write`. Thứ tự có chủ ý: ảnh lên Pages trước, app đổi link sau khi Capu merge PR.
+29. Thư mục ra `scripts/vendor-images/out/` nằm trong `.gitignore`. Không file ảnh nào (webp/jpg/png/gif) được thêm vào `tohong-back`, `tohong-front`, `phungrk/tohong`; PR của workflow chỉ chứa hai file nói ở mục 28. Ảnh sống ở Pages (và được khôi phục từ Pages khi cần, mục 14), không sống trong git.
+30. `scripts/vendor-images/README.md` là hướng dẫn từng bước cho Capu, các bước đánh số (ít nhất 6): tạo project Pages tên `tohong-img` kiểu Direct Upload; tạo API token quyền duy nhất "Cloudflare Pages: Edit"; lấy Account ID; đặt hai secret ở Settings > Secrets and variables > Actions của `phungrk/tohong-back`; chạy Actions > Mirror vendor images > Run workflow với `deploy=false` rồi đọc SUMMARY; chạy lại với `deploy=true`; kiểm tra địa chỉ `*.pages.dev` thật; duyệt và merge PR. Hướng dẫn nêu cách chạy bằng một lệnh trên máy Capu (`node scripts/vendor-images/vendor-images.mjs mirror …` rồi `deploy …`) làm đường dự phòng nếu GitHub Actions bị marry.vn chặn, và không chứa giá trị secret nào.
+
+### H. Hiển thị ở front
+31. Khi một ảnh vendor không tải được ở trình duyệt (HTTP lỗi, hoặc trả về thứ không phải ảnh), người dùng không thấy khung ảnh vỡ hay ô trống: ảnh đó bị bỏ khỏi bộ ảnh của vendor. Nếu vendor còn ảnh tốt thì hiện các ảnh tốt (ảnh tốt đầu tiên làm ảnh đại diện, chấm chuyển ảnh chỉ có khi còn ≥ 2 ảnh tốt). Nếu không còn ảnh nào (hoặc vendor vốn không có ảnh) thì hiện ảnh mặc định.
+32. Ảnh mặc định là nền gradient theo hạng mục đã có sẵn (`CAT_FALLBACK_GRAD`; hạng mục không có thì gradient chung hiện tại). Không thêm file ảnh, không gọi thêm host nào. Áp dụng ở mọi chỗ hiện ảnh vendor: thẻ danh sách gợi ý, thẻ chi tiết (gallery), thẻ chọn/so sánh, danh sách vendor đã lưu và màn ngân sách.
+33. Front không gọi tới host nào khác ngoài API của app và host ảnh có trong dữ liệu vendor (không viết cứng `marry.vn` hay `pages.dev` trong front). Front không đổi gì khác (bố cục, chữ, hành vi lưu/chốt).
+
+## Giao diện dòng lệnh (hợp đồng với eval; chi tiết cài đặt do Engineering)
+Chạy từ gốc `tohong-back`: `node scripts/vendor-images/vendor-images.mjs <lệnh>`. Công cụ chỉ là devDependency/script, không thêm gì vào bundle chạy thật của worker (không thêm dependency runtime).
+- `mirror --pool <vendorPool.generated.js> --manifest <manifest.json> --out <thư mục> --base-url <baseUrl> [--restore-from <url>] [--workers 4] [--timeout 20] [--retries 2]`. Cập nhật manifest tại chỗ, ghi file vào `--out` và `--out/_headers`. In `FAILED …` rồi dòng cuối đúng khuôn `SUMMARY total=<n> ok=<n> new=<n> reused=<n> restored=<n> failed=<n>`: `total` = số URL ở mục 13; `ok = new + reused + restored`; `new` = số file vừa tải và chuyển; `reused` = số file đã có sẵn trong `--out`.
+- `rewrite --pool <file> --manifest <manifest.json> [--check]`. In `REWRITE refs=<n> replaced=<n> kept_original=<n>` (`--check` in số tương tự và thoát 1 khi còn ảnh `ok` chưa rewrite).
+- `deploy --dir <thư mục> --manifest <manifest.json> --project <tên> [--dry-run] [--max-files 19000]`.
+
+## Ràng buộc (vòi)
+- Repo: `phungrk/tohong-back` (công cụ, workflow, manifest, pool), `phungrk/tohong` (generator, một thay đổi nhỏ + bump submodule), `phungrk/tohong-front` (ảnh mặc định) · Nhánh: `t-051-tu-host-anh-vendor` ở cả ba · Vùng (`area`): `planner/vendor/images`.
+- Bất biến của vùng đã đọc: `eval/invariants/planner/vendor/images/` chưa tồn tại (vùng mới); `_shared/inv-001` (không secret trong repo) áp dụng và không bị vi phạm: hướng dẫn và workflow chỉ nhắc tên secret. `_shared/inv-002` (sổ cái đọc được) không liên quan. Các bất biến `planner/front/*` (layout, navigation, budget) không bị chạm: spec không đổi bố cục.
+- Không chạm: payment, auth, schema DB, dữ liệu cá nhân người dùng. Không đặt secret, không chi tiền (gói Pages free), không liên hệ vendor hay marry.vn ngoài việc tải ảnh công khai.
+- Bậc lưới lọc: C (theo board) vì: dịch vụ ngoài của Capu (Cloudflare), token, và hành động không đảo ngược hoàn toàn (ảnh đã sao chép). Capu tự tạo project + token + secret và tự merge PR.
+- Hạn xét lại (ADR-021): khi có vendor hoặc marry.vn yêu cầu gỡ ảnh, hoặc vượt giới hạn gói free. Gỡ một ảnh = xoá entry khỏi manifest, thêm vào danh sách bỏ qua, deploy lại; cơ chế danh sách bỏ qua KHÔNG nằm trong spec này.
+
+## Tiêu chí chấp nhận và eval
+Chạy tất cả (offline, server ảnh giả thay marry.vn, wrangler giả): `cd /home/user/tohong-hq && bash eval/T-051/run.sh --back <tohong-back> --front <tohong-front> --tohong <tohong>`. Từng cái chạy riêng bằng lệnh ở cột eval, thay đường dẫn repo.
+
+| # | Tiêu chí (có/không) | Eval |
+| --- | --- | --- |
+| 1 | Sau `mirror` + `rewrite`, mọi lượt ảnh là Pages URL (ảnh xong) hoặc URL gốc (ảnh lỗi); file không đổi byte nào ngoài URL; pool thật vẫn nạp được, 968 vendor, số lượt ảnh giữ nguyên; `rewrite` lần hai không đổi gì (mục 15-16, 19-20) | `python3 eval/T-051/check_1_pool_tro_ve_pages.py --back <tohong-back>` |
+| 2 | Ảnh ra là WebP, rộng ≤ 800px, không phóng to, đúng hướng và đúng nội dung, quality ~80, bỏ EXIF, giữ alpha, GIF thành 1 khung, URL Unicode/khoảng trắng tải được (mục 1-5) | `python3 eval/T-051/check_2_webp_800.py --back <tohong-back>` |
+| 3 | Tên file `v/<id>-<sha256[:12]>.webp` đúng và ổn định; manifest đủ khoá, đủ trường, khớp file thật (mục 7-9) | `python3 eval/T-051/check_3_ten_file_manifest.py --back <tohong-back>` |
+| 4 | Chạy lại không tải lại, không ghi lại; ảnh mới chỉ tải ảnh mới; máy sạch khôi phục từ Pages; pool đã rewrite chạy lại vẫn đủ file cho deploy (mục 11-15) | `python3 eval/T-051/check_4_chay_lai.py --back <tohong-back>` |
+| 5 | Ảnh lỗi (404, HTML, cụt, 500, quá chậm) giữ link cũ, có lý do, có đếm, thử lại lần sau (mục 16-18) | `python3 eval/T-051/check_5_anh_loi.py --back <tohong-back>` |
+| 6 | Deploy dừng trước wrangler khi thiếu secret / thiếu file / quá giới hạn; secret không lộ; `_headers` đúng; `--dry-run` (mục 23-26) | `python3 eval/T-051/check_6_deploy.py --back <tohong-back>` |
+| 7 | Không `.webp` trong 3 repo; thư mục ra bị ignore; workflow chỉ chạy tay, dùng đúng hai secret và project `tohong-img`, không đẩy `main`; có README đánh số đủ từ khoá (mục 27-30) | `python3 eval/T-051/check_7_ve_sinh_repo.py --back <tohong-back> --front <tohong-front> --tohong <tohong>` |
+| 8 | Chạy lại generator không đưa URL gốc trở lại cho ảnh đã mirror (mục 21) | `python3 eval/T-051/check_8_generator.py --back <tohong-back> --tohong <tohong>` |
+| 9 | Front: ảnh lỗi (404, HTML) không còn hiện, thay bằng ảnh mặc định; ảnh tốt thay chỗ ảnh hỏng; gallery không còn chấm thừa; không gọi host lạ (mục 31-33). Dùng Playwright + thẻ thật `VMatchChatCard`/`VDetailChatCard` | `NODE_PATH=$(npm root -g) node eval/T-051/check_9_front_anh_mac_dinh.cjs <tohong-front>` |
+| 10 | Test back xanh (chính tiêu chí 5 của board) | `cd <tohong-back> && npm test` |
+| 11 | Deploy thật: dự án Pages, secret, workflow chạy trên dữ liệu thật, ảnh mở được từ `pages.dev`, app không còn gọi marry.vn | `eval/T-051/checklist.md` (checklist: cần tài khoản Cloudflare thật và đường ra marry.vn từ Actions; phiên cloud không có và không được đặt secret thay Capu) |
+
+Ánh xạ tiêu chí của board: (1) → 1, 8, 11; (2) → 2; (3) → 4, 5, 6, 7 và hướng dẫn ở 7, 11; (4) → 9; (5) → 7, 10.
+
+Đã kiểm khả thi: dựng cài đặt tham chiếu nháp ngoài repo (Python + Pillow, không commit) và bản vá front nháp trên bản sao; check 1-9 xanh với bản nháp, đỏ với repo hiện tại (thiếu công cụ / front hiện ảnh hỏng). Check 10 xanh trên `tohong-back` hiện tại (114/114).
+
+## Bất biến đề xuất (tầng 2), vùng `planner/vendor/images`
+1. INV-A: mọi URL ảnh trong `lib/vendorPool.generated.js` hoặc bắt đầu bằng `manifest.baseUrl + "/"` và file đó có trong manifest ở trạng thái `ok`, hoặc nằm trong danh sách `failed` của manifest. Không host lạ, không ảnh `ok` nào còn ở host gốc. Bản chạy được: `eval/T-051/inv-proposed-pool-chi-tro-pages.py --back <tohong-back>` (đỏ cho tới khi T-051 ship vì pool hiện toàn marry.vn; Spec critic rút vào bể khi spec qua).
+2. INV-B: workflow nhắc secret chỉ qua `${{ secrets.NAME }}`, không file ảnh nào được git theo dõi trong ba repo (phần của check 7; chuyển thành `.sh` độc lập khi rút vào bể).
+3. INV-C: ảnh vendor hỏng không bao giờ hiện thành khung vỡ ở front (phần của check 9; cần front dựng được, nên chạy chậm).
+
+## Không làm
+- Xin phép hoặc thay ảnh vendor, cơ chế gỡ ảnh theo yêu cầu, gắn ghi công/watermark: việc sau (ADR-021).
+- Tên miền riêng (`img.tohong...`), Cloudflare Images/R2, CDN khác. Đổi `baseUrl` sau khi đã deploy.
+- Lách chặn của marry.vn (mục 22). Tải lại định kỳ theo lịch. Lấy thêm ảnh ngoài các `photos` đang có trong pool (scraper không đổi).
+- Đổi bố cục, chữ, hành vi lưu/chốt ở front. Sửa schema pool (`photos:[{url}]` giữ nguyên).
+- Ảnh vendor ở nguồn khác (logo, ảnh review) và `matcher-service` (không trả ảnh).
+
+## Câu hỏi mở
+Capu có đồng ý đặt hai secret ở `phungrk/tohong-back` (không phải `phungrk/tohong` như Chief of Staff đã hướng dẫn) vì lý do ở mục 27 không? Nếu không, đường dự phòng là PAT đọc submodule, thêm một secret và thêm việc cho Capu.
