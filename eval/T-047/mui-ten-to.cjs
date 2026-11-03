@@ -4,6 +4,7 @@
 //   1. cỡ mũi (LEN/WID) đổi từ 5-7 x 4-7px sang 1,5 x mốc dfe8a20 +-10%; thêm viewport 844;
 //   2. nét còn thấy (1.9): hệ số hiển thị < 0,5 (390 không phóng to) chỉ cần >= 25% và >= 3px; các viewport khác giữ >= 50% và >= 7px;
 //   3. tiêu chí 4 chạy bất biến từ eval/invariants/hq/dashboard/model/ (cây mới theo ADR-011), bỏ inv-029/030 (đang cứng 5-7px; thay bằng tiêu chí 1-2);
+//   3b. thêm B5c (và trong M3 của tiêu chí 2): tỉ lệ dài/rộng 1,106-1,352 (giữ hình cũ, phóng đều);
 //   4. tiêu chí 5: sáu ảnh docs/screenshots/T-047/{truoc,sau}-{1280,844,390}.png.
 //
 //   cd /home/user/tohong-hq && bash eval/T-047/run.sh <thư-mục-repo-dashboard> --task T-047 [--criterion N] [--engines chromium,webkit,firefox] [--require-engines] [--no-inv]
@@ -41,6 +42,7 @@ if (SHOTS && !['truoc', 'sau'].includes(LABEL)) { console.log('FAIL --shots cầ
 const BASE_LEN = 5.10, BASE_WID = 4.15, SCALE = 1.5, TOL = 0.10;
 const LEN_MIN = +(BASE_LEN * SCALE * (1 - TOL)).toFixed(3), LEN_MAX = +(BASE_LEN * SCALE * (1 + TOL)).toFixed(3);   // 6,885 .. 8,415px
 const WID_MIN = +(BASE_WID * SCALE * (1 - TOL)).toFixed(3), WID_MAX = +(BASE_WID * SCALE * (1 + TOL)).toFixed(3);   // 5,603 .. 6,848px
+const RATIO_BASE = BASE_LEN / BASE_WID, RATIO_MIN = +(RATIO_BASE * (1 - TOL)).toFixed(3), RATIO_MAX = +(RATIO_BASE * (1 + TOL)).toFixed(3);   // dài/rộng giữ hình cũ: 1,106 .. 1,352 (phóng đều)
 const GAP_MIN = 0.8, GAP_MAX = 3.5;                            // u: khoảng từ đầu mũi tới đường viền hình học của khối đích
 const LONG = 220;                                              // u: đường dài từ ngưỡng này có đúng một mũi giữa (đường ngắn nhất ≥ 220 là 268u, dài nhất < 220 là 176u)
 const ANG = 20;                                                // độ: lệch cho phép giữa trục mũi tên và tiếp tuyến của đường
@@ -161,6 +163,7 @@ const MEASURE = cfg => {
       if (document.getAnimations().some(a => a.effect && a.effect.target && (a.effect.target === h || h.contains(a.effect.target)))) P('C1.static', `${tag}: mũi tên có animation (phải đứng yên)`);
       // kích thước
       if (g.len * sc < cfg.LEN_MIN - 0.01 || g.len * sc > cfg.LEN_MAX + 0.01) P('C1.size', `${tag}: dài ${(g.len * sc).toFixed(1)}px (cần ${cfg.LEN_MIN}-${cfg.LEN_MAX}px)`);
+      { const rt = g.len / g.wid; if (rt < cfg.RATIO_MIN - 0.005 || rt > cfg.RATIO_MAX + 0.005) P('C1.ratio', `${tag}: tỉ lệ dài/rộng ${rt.toFixed(2)} (${(g.len * sc).toFixed(1)}x${(g.wid * sc).toFixed(1)}px), cần ${cfg.RATIO_MIN}-${cfg.RATIO_MAX} (giữ hình cũ 1,23 +-10%)`); }
       if (g.wid * sc < cfg.WID_MIN - 0.01 || g.wid * sc > cfg.WID_MAX + 0.01) P('C1.size', `${tag}: rộng ${(g.wid * sc).toFixed(1)}px (cần ${cfg.WID_MIN}-${cfg.WID_MAX}px)`);
       // hướng và vị trí trên đường
       const ref = at === 'end' ? g.tip : g.c, nn = nearest(at === 'end' ? ext : pts, ref);
@@ -228,7 +231,7 @@ async function open(opt = {}) {
   return o;
 }
 const close = async o => { ALLERR.push(...o.errors); await o.ctx.close(); };
-const CFG = { VIS_FRAC_LOW, VIS_PX_LOW, LOW_SC, LEN_MIN, LEN_MAX, WID_MIN, WID_MAX, GAP_MIN, GAP_MAX, LONG, ANG, MID_T, MID_END_MIN, MID_START_MIN, OVER, VIS_FRAC, VIS_PX, TRIM_MAX, EXT_MAX, LABEL_MOVE, LABELS, TARGET, ORACLE };
+const CFG = { RATIO_MIN, RATIO_MAX, VIS_FRAC_LOW, VIS_PX_LOW, LOW_SC, LEN_MIN, LEN_MAX, WID_MIN, WID_MAX, GAP_MIN, GAP_MAX, LONG, ANG, MID_T, MID_END_MIN, MID_START_MIN, OVER, VIS_FRAC, VIS_PX, TRIM_MAX, EXT_MAX, LABEL_MOVE, LABELS, TARGET, ORACLE };
 const measure = o => o.page.evaluate(MEASURE, CFG);
 // viewport cao bằng cả trang (không cuộn, không đổi bề rộng) rồi đo lại: toạ độ trang = toạ độ viewport
 async function tall(o) { const vp = o.page.viewportSize(); const h = await o.page.evaluate(() => Math.ceil(document.documentElement.scrollHeight)); await o.page.setViewportSize({ width: vp.width, height: Math.min(h + 20, 12000) }); await o.page.waitForTimeout(700); await o.page.evaluate(() => window.scrollTo(0, 0)); return measure(o); }
@@ -257,7 +260,7 @@ async function crit1() {
     try {
       rec(1, `A1 có đủ 24 đường p_* và mỗi đường có đúng một mũi cuối (${v.k})`, m.nPaths === 24 ? (sumProbs(m.probs, ['C1.count']).length ? sumProbs(m.probs, ['C1.count']).slice(0, 4).map(p => p[1]).join(' | ') : null) : `chỉ thấy ${m.nPaths} đường p_*`);
       reportProbs(1, v.k, m, [['C1.visible', 'B1 mũi nhìn thấy (bbox > 0, không ẩn)'], ['C1.fill', 'B2 fill đặc, không trong suốt, không none'], ['C1.solid', 'B3 đặc (không nét đứt)'], ['C1.color', 'B4 cùng màu đường'],
-        ['C1.size', 'B5 kích thước 1,5 x mốc dfe8a20: dài 6,89-8,41px, rộng 5,60-6,85px'], ['C1.vstroke', 'B5b nét còn thấy ≥ 50% đường và ≥ 7px (390 không phóng to: ≥ 25% và ≥ 3px)'], ['C1.dir', 'B6 đúng hướng, chỉ về khối đích'], ['C1.onpath', 'B7 đầu mũi nằm trên đường'], ['C1.edge', 'B8 đầu mũi sát mép khối đích (0,8-3,5u)'], ['C1.stub', 'B9 nét đường không chui vào khối đích'],
+        ['C1.size', 'B5 kích thước 1,5 x mốc dfe8a20: dài 6,89-8,41px, rộng 5,60-6,85px'], ['C1.ratio', 'B5c tỉ lệ dài/rộng 1,106-1,352 (phóng đều, không đổi hình mũi)'], ['C1.vstroke', 'B5b nét còn thấy ≥ 50% đường và ≥ 7px (390 không phóng to: ≥ 25% và ≥ 3px)'], ['C1.dir', 'B6 đúng hướng, chỉ về khối đích'], ['C1.onpath', 'B7 đầu mũi nằm trên đường'], ['C1.edge', 'B8 đầu mũi sát mép khối đích (0,8-3,5u)'], ['C1.stub', 'B9 nét đường không chui vào khối đích'],
         ['C1.covered', 'B10 không bị phần tử nào vẽ đè'], ['C1.inblock', 'B11 mũi không chồng vào khối'], ['C1.pe', 'B12 pointer-events none'], ['C1.aria', 'B13 aria-hidden'], ['C1.static', 'B14 đứng yên'], ['C1.attr', 'B15 thuộc tính'], ['C1.dup', 'B16 không chồng nhau'], ['C1.target', 'B17 khối đích có trong trang']]);
       if (!v.zoom) { // pixel: tâm mũi đúng màu fill (chứng minh thật sự được vẽ, không bị khối/đường khác đè)
         const m2 = await tall(o);
@@ -274,7 +277,7 @@ async function crit1() {
     const o = await open({ vp: { width: 1280, height: 900 } });
     try { const seq = [[{ width: 1280, height: 900 }, 0], [{ width: 390, height: 844 }, 0], [{ width: 390, height: 844 }, 1], [{ width: 1280, height: 900 }, 0]]; const bad = []; let z = false;
       for (const [vp, zoom] of seq) { if (zoom && !z) { if (!(await enterZoom(o))) { bad.push('không vào được phóng to'); continue; } z = true; } if (!zoom && z) { await o.page.keyboard.press('Escape'); await o.page.waitForTimeout(300); if (await zoomOn(o)) await o.page.click('#model-zoom'); await o.page.waitForTimeout(400); z = false; }
-        await o.page.setViewportSize(vp); await o.page.waitForTimeout(700); const m = await measure(o); const sz = m.probs.filter(p => p[0] === 'C1.size'); if (sz.length || !m.heads.length) bad.push(`${vp.width}${zoom ? ' phóng to' : ''}: ${sz.length ? sz[0][1] : 'không có mũi nào'}`); }
+        await o.page.setViewportSize(vp); await o.page.waitForTimeout(700); const m = await measure(o); const sz = m.probs.filter(p => /^C1\.(size|ratio)$/.test(p[0])); if (sz.length || !m.heads.length) bad.push(`${vp.width}${zoom ? ' phóng to' : ''}: ${sz.length ? sz[0][1] : 'không có mũi nào'}`); }
       rec(1, 'D1 đổi cỡ cửa sổ 1280 -> 390 -> phóng to -> 1280 không tải lại: cỡ mũi tên luôn 1,5 x mốc (dài 6,89-8,41px, rộng 5,60-6,85px)', bad.length ? bad.slice(0, 3).join(' | ') : null); } finally { await close(o).catch(() => { }); }
   }
   { // chế độ tối: màu mũi theo token tối và khác màu sáng
@@ -295,8 +298,8 @@ async function crit2() {
     const { o, m, err } = await viewData(v, false); if (err) { rec(2, 'V0 vào chế độ phóng to', err); continue; }
     try { rec(2, `M0 có ${m.longPaths} đường dài ≥ ${LONG}u (cần đúng 6: p_gate_respec2, p_kr_gate, p_kr_spec, p_capu_res, p_res_insight, p_insight_intent) (${v.k})`, m.longPaths === 6 ? null : `đo được ${m.longPaths}`);
       reportProbs(2, v.k, m, [['C2.count', 'M1 đường ≥ 220u có đúng một mũi giữa, đường ngắn hơn không có'], ['C2.place', 'M2 mũi giữa nằm 25-75% chiều dài, cách đầu ≥ 30u, cách cuối ≥ 50u, ngoài khối']]);
-      const mids = m.heads.filter(h => h.at === 'mid'), probs = m.probs.filter(p => /^C(1|4)\.(size|dir|onpath|fill|covered|text|bot|visible)/.test(p[0]) && /\/mid/.test(p[1]));
-      rec(2, `M3 mũi giữa cùng chuẩn với mũi cuối: nhìn thấy, đúng hướng, 1,5 x mốc, không đè, không che chữ/bot (${v.k})`, probs.length ? probs.slice(0, 3).map(p => p[1]).join(' | ') : (mids.length ? null : 'không có mũi giữa nào')); } finally { await close(o).catch(() => { }); }
+      const mids = m.heads.filter(h => h.at === 'mid'), probs = m.probs.filter(p => /^C(1|4)\.(size|ratio|dir|onpath|fill|covered|text|bot|visible)/.test(p[0]) && /\/mid/.test(p[1]));
+      rec(2, `M3 mũi giữa cùng chuẩn với mũi cuối: nhìn thấy, đúng hướng, 1,5 x mốc kể cả tỉ lệ dài/rộng, không đè, không che chữ/bot (${v.k})`, probs.length ? probs.slice(0, 3).map(p => p[1]).join(' | ') : (mids.length ? null : 'không có mũi giữa nào')); } finally { await close(o).catch(() => { }); }
   }
 }
 
