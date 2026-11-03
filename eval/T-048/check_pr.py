@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Eval tiêu chí 7 của T-048: có ảnh chụp 390px màn chi tiết hạng mục, đã commit vào repo front và nhúng trong mô tả PR.
-Chạy: python3 eval/T-048/check_pr.py <tohong-front> [--pr N]   (không có --pr: PR của nhánh hiện tại, qua `gh pr view`)
+Chạy: python3 eval/T-048/check_pr.py <tohong-front> [--pr N]   (không có --pr: PR của nhánh hiện tại, qua REST `gh api`, ADR-020)
 Ảnh: docs/screenshots/T-048/*390*.png, được git theo dõi ở HEAD, rộng 390/780/1170 px. PR body phải có ảnh markdown trỏ tới đúng tên file đó.
 In PASS hoặc FAIL <lý do>; mã thoát 0/1."""
 import json, struct, subprocess, sys, re, os
@@ -40,11 +40,22 @@ code, out, err = run(["git", "diff", "--quiet", "HEAD", "--"] + good, repo)
 if code != 0:
     fail("ảnh có thay đổi chưa commit")
 
-cmd = ["gh", "pr", "view"] + ([pr] if pr else []) + ["--json", "body"]
+# Đọc PR qua REST (GraphQL/`gh pr view` bị chặn ở phiên cloud, ADR-020).
+R = "phungrk/tohong-front"
+if pr:
+    cmd = ["gh", "api", f"repos/{R}/pulls/{pr}"]
+else:
+    _, br, _ = run(["git", "rev-parse", "--abbrev-ref", "HEAD"], repo)
+    cmd = ["gh", "api", f"repos/{R}/pulls?head=phungrk:{br.strip()}&state=all"]
 code, out, err = run(cmd, repo)
 if code != 0:
     fail("chưa có PR (hoặc gh lỗi): " + (err.strip().splitlines() or ["?"])[-1])
-body = json.loads(out).get("body") or ""
+data = json.loads(out)
+if isinstance(data, list):
+    if not data:
+        fail("chưa có PR cho nhánh hiện tại")
+    data = data[0]
+body = data.get("body") or ""
 names = [os.path.basename(f) for f in good]
 if not any(re.search(r"!\[[^\]]*\]\([^)]*" + re.escape(n) + r"[^)]*\)", body) or re.search(r"<img[^>]+" + re.escape(n), body) for n in names):
     fail("mô tả PR không nhúng ảnh nào trong: " + ", ".join(names))
