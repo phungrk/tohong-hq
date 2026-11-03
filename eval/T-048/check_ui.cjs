@@ -2,7 +2,7 @@
 /*
  * Eval tầng 1 của T-048 (front): khối "Cách hoạt động" (Tìm, Lưu, Chốt, Vào ngân sách) trong màn chi tiết hạng mục ngân sách.
  * Spec: products/T-048-cach-hoat-dong-chi-tiet-hang-muc.md. --only N = tiêu chí N (1 vị trí và hạng mục nào hiện, 2 hình khối và token màu,
- * 3 truy cập, 4 390px, 5 "Chi tiết" mở/đóng, 6 không đổi hành vi ngân sách). Tiêu chí 7 (ảnh): python3 eval/T-048/check_pr.py.
+ * 3 truy cập, 4 390px, 5 "Chi tiết" mở/đóng và bước Back, 6 không đổi hành vi ngân sách). Tiêu chí 7 (ảnh): python3 eval/T-048/check_pr.py. Tiêu chí 8 (bất biến layout + navigation): bash eval/T-048/run_invariants.sh <front>.
  *
  * Chạy: cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-048/check_ui.cjs --repo . [--only 1] [--shots DIR] [--dist DIR]
  * Tự `vite build` ra thư mục tạm, VITE_API_BASE=http://api.test, mạng ngoài bị chặn, API giả trong bộ nhớ. Dữ liệu là bịa.
@@ -97,7 +97,7 @@ async function scenario(opts = {}) {
     if (p === '/api/vendors/status') return json({ vendors: {} });
     return json({});
   });
-  const saved = { venue: { shortlisted: [venueV()], confirmed: null }, photography: { shortlisted: [], confirmed: null }, decor: { shortlisted: [photoV()], confirmed: null } };
+  const saved = { venue: { shortlisted: [venueV()], confirmed: null }, photography: { shortlisted: [], confirmed: null }, decor: { shortlisted: [photoV()], confirmed: opts.confirmDecor ? photoV() : null } };
   await page.addInitScript(([cid, sv]) => { try { if (!sessionStorage.getItem('t048-seeded')) { localStorage.setItem('th_vendors_' + cid, JSON.stringify(sv)); localStorage.setItem('th_user', JSON.stringify({ bride: 'An', groom: 'Bình' })); sessionStorage.setItem('t048-seeded', '1'); } } catch { /* bỏ qua */ } }, [CID, saved]);
   await page.goto(BASE + '/#/ngan-sach'); await page.waitForTimeout(500);
   return S;
@@ -133,18 +133,28 @@ async function main() {
 
   /* TC1: vị trí và hạng mục nào hiện */
   await run(1, async () => {
-    for (const [id, note] of [['venue', 'hạng mục vendor có 1 vendor đã lưu'], ['photography', 'hạng mục vendor chưa lưu vendor nào'], ['decor', 'hạng mục vendor khác']]) {
-      const S = await scenario(); await openCat(S, id);
-      const g = await P(S.page, (H) => { const c = H.card(), h = H.heading(); const d = H.leaves().find((e) => H.norm(e.textContent) === 'Dự toán' && !H.inDialog(e));
-        return { card: c && H.rect(c), head: h && H.rect(h), duToan: d && H.rect(d), n: H.leaves().filter((e) => H.norm(e.textContent) === 'Cách hoạt động' && !H.inDialog(e)).length }; });
-      check(`${id} (${note}): có đúng một khối "Cách hoạt động"`, !!g.card && g.n === 1, JSON.stringify(g));
-      check(`${id}: có mục "Vendor đã lưu" (điều kiện của phép đo)`, !!g.head, norm(await S.page.evaluate(() => location.hash + ' | ' + document.body.innerText)).slice(0, 200));
+    const cases = [
+      ['venue', 'hạng mục vendor có 1 vendor đã lưu', 1, 'Nhà hàng Hoa Sen', {}],
+      ['photography', 'hạng mục vendor chưa lưu vendor nào', 0, null, {}],
+      ['decor', 'hạng mục vendor khác, 1 vendor đã lưu', 1, 'Studio Ánh Dương', {}],
+      ['decor', 'hạng mục đã CHỐT vendor (khối vẫn hiện)', 1, 'Studio Ánh Dương', { confirmDecor: true }],
+    ];
+    for (const [id, note, wantN, wantName, o] of cases) {
+      const S = await scenario(o); await openCat(S, id);
+      const g = await P(S.page, (H) => { const c = H.card(), h = H.heading();
+        const dt = H.leaves().find((e) => H.norm(e.textContent) === 'Dự toán' && !H.inDialog(e)), nb = H.leaves().find((e) => H.norm(e.textContent) === 'Ngân sách cưới' && !H.inDialog(e));
+        let du = null; if (dt && nb) { du = dt; while (du && du !== document.body && !du.contains(nb)) du = du.parentElement; }
+        return { card: c && H.rect(c), head: h && H.rect(h), headText: h && H.norm(h.textContent), duCard: du && du !== document.body ? H.rect(du) : null, duContainsCard: !!(du && c && du.contains(c)),
+          bodyHas: H.norm(document.body.innerText), n: H.leaves().filter((e) => H.norm(e.textContent) === 'Cách hoạt động' && !H.inDialog(e)).length }; });
+      check(`${id} (${note}): có đúng một khối "Cách hoạt động"`, !!g.card && g.n === 1, JSON.stringify([g.card, g.n]));
+      check(`${id} (${note}): dữ liệu gieo đúng: tiêu đề hiện "Vendor đã lưu · ${wantN}"`, !!g.headText && new RegExp(`·\\s*${wantN}$`).test(g.headText), g.headText);
+      if (wantName) check(`${id} (${note}): tên vendor đã gieo "${wantName}" hiện trên màn`, g.bodyHas.includes(wantName), g.bodyHas.slice(0, 120));
       if (g.card && g.head) {
         const gap = g.head.t - g.card.b;
-        check(`${id}: khối nằm trên tiêu đề "Vendor đã lưu", cách 0-40px (không có gì chen giữa)`, gap >= -1 && gap <= 40, 'gap=' + gap);
-        check(`${id}: khối nằm dưới thẻ "Dự toán"`, !!g.duToan && g.duToan.b <= g.card.t + 1, JSON.stringify([g.duToan, g.card]));
+        check(`${id} (${note}): khối nằm trên tiêu đề "Vendor đã lưu", cách 0-40px`, gap >= -1 && gap <= 40, 'gap=' + gap);
+        check(`${id} (${note}): khối nằm ngoài và dưới đáy thẻ "Dự toán" (thẻ nhỏ nhất chứa "Dự toán" và "Ngân sách cưới")`, !!g.duCard && !g.duContainsCard && g.duCard.b <= g.card.t + 1, JSON.stringify([g.duCard, g.card]));
         const between = await P(S.page, (H, k) => H.leaves().filter((e) => { const r = H.rect(e); return r.t >= k.b - 1 && r.b <= k.t + 1 && !H.card().contains(e); }).map((e) => H.norm(e.textContent)).slice(0, 4), { b: g.card.b, t: g.head.t });
-        check(`${id}: không có chữ nào nằm giữa khối và tiêu đề "Vendor đã lưu"`, between.length === 0, JSON.stringify(between));
+        check(`${id} (${note}): không có chữ nào nằm giữa khối và tiêu đề "Vendor đã lưu"`, between.length === 0, JSON.stringify(between));
       }
       await S.ctx.close();
     }
@@ -199,6 +209,13 @@ async function main() {
     check('các bước nằm trong ul/ol/role=list', !!t && t.list, JSON.stringify(t));
     check('mọi icon svg trong khối là trang trí (aria-hidden="true"), tên đọc chỉ có chữ', !!t && t.svgs.length >= 5 && t.svgs.every((s) => s.aria === 'true'), JSON.stringify(t && t.svgs));
     check('nút "Chi tiết" cao >= 32px và là phần tử bấm được thật (button hoặc role=button)', !!t && t.btnH >= 32 && t.btnW >= 32, JSON.stringify(t && [t.btnH, t.btnW, t.tag]));
+    // chạm phần thẻ ngoài nút "Chi tiết" không mở gì (click thật bằng toạ độ)
+    const pts = await P(S.page, (H) => { const c = H.card(), cr = H.rect(c); const t = H.rect(H.title()); const lab = (l) => { const li = H.items(c).find((i) => H.norm(i.innerText) === l); return H.rect(H.labelLeaf(li, l)); };
+      const mid = (r) => ({ x: (r.l + r.r) / 2, y: (r.t + r.b) / 2 });
+      const circ = (l) => { const li = H.items(c).find((i) => H.norm(i.innerText) === l); const r = H.rect(li.querySelector('svg')); return mid(r); };
+      return { 'nhãn Tìm': mid(lab('Tìm')), 'nhãn Vào ngân sách': mid(lab('Vào ngân sách')), 'icon Lưu': circ('Lưu'), 'tiêu đề': mid(t), 'lề trong của thẻ': { x: cr.l + 4, y: cr.t + 4 }, 'giữa nét đứt': { x: (lab('Tìm').r + lab('Lưu').l) / 2, y: lab('Tìm').t - 14 } }; });
+    for (const [nm, pt] of Object.entries(pts)) { await S.page.mouse.click(pt.x, pt.y); await S.page.waitForTimeout(350);
+      const n = await S.page.getByRole('dialog').count(); check(`click thật vào ${nm} (ngoài nút "Chi tiết") không mở hộp thoại`, n === 0, 'dialog=' + n); if (n) { await S.page.keyboard.press('Escape'); await S.page.waitForTimeout(350); } }
     // bàn phím
     const btn = chiTietBtn(S.page).first(); await btn.focus();
     const focused = await S.page.evaluate(() => (document.activeElement && (document.activeElement.getAttribute('aria-label') || document.activeElement.innerText || '').trim()));
@@ -273,6 +290,27 @@ async function main() {
     await reopen(); const nav = await S.page.evaluate(() => history.length); await S.page.goBack(); await S.page.waitForTimeout(600);
     check('nút Back của trình duyệt chỉ đóng hộp thoại: vẫn ở màn hạng mục cũ', await closed() && await S.page.evaluate(() => location.hash) === hashBefore && await P(S.page, (H) => !!H.heading()), await S.page.evaluate(() => location.hash));
     check('đóng bằng chữ rồi mở lại vẫn mở được (lần thứ năm)', (await reopen(), await S.page.getByRole('dialog').count()) === 1, '');
+    for (const how of ['Đóng', 'Đã hiểu', 'Escape', 'chạm vùng tối']) {
+      const B = await scenario(); await openCat(B, 'venue'); await chiTietBtn(B.page).first().click(); await B.page.waitForTimeout(450);
+      if (how === 'Escape') await B.page.keyboard.press('Escape'); else if (how === 'chạm vùng tối') await B.page.mouse.click(195, 20); else await B.page.getByRole('dialog').getByRole('button', { name: how, exact: true }).click();
+      await B.page.waitForTimeout(600);
+      const closedOk = (await B.page.getByRole('dialog').count()) === 0; await B.page.goBack(); await B.page.waitForTimeout(700);
+      const h = await B.page.evaluate(() => location.hash);
+      check(`đóng bằng "${how}" rồi bấm Back MỘT lần: rời hạng mục về #/ngan-sach (không để bước Back chết)`, closedOk && h === '#/ngan-sach', 'hash=' + h);
+      await B.ctx.close();
+    }
+    { const B = await scenario(); await openCat(B, 'venue'); await chiTietBtn(B.page).first().click(); await B.page.waitForTimeout(450);
+      await B.page.reload(); await B.page.waitForTimeout(1500);
+      const closedOk = (await B.page.getByRole('dialog').count()) === 0; await B.page.goBack(); await B.page.waitForTimeout(700);
+      const h = await B.page.evaluate(() => location.hash);
+      check('mở hộp thoại, tải lại trang, rồi Back MỘT lần: hộp thoại đã đóng và không còn bước chết (rời hạng mục về #/ngan-sach)', closedOk && h === '#/ngan-sach', 'closed=' + closedOk + ' hash=' + h);
+      await B.ctx.close(); }
+    { const W = await scenario({ viewport: { width: 1280, height: 900 } }); await openCat(W, 'venue'); await chiTietBtn(W.page).first().click(); await W.page.waitForTimeout(500);
+      const bb = await W.page.getByRole('dialog').first().boundingBox().catch(() => null);
+      check('1280px: hộp thoại nằm trong khung app (rộng <= 768px), không phủ tràn cả màn hình', !!bb && bb.width <= 768.5, JSON.stringify(bb));
+      await W.page.mouse.click(30, 450); await W.page.waitForTimeout(500);
+      check('1280px: chạm ngoài khung app đóng hộp thoại', (await W.page.getByRole('dialog').count()) === 0, '');
+      await W.ctx.close(); }
     check('không có yêu cầu mạng ra ngoài (trừ phông chữ có sẵn của app), không có lỗi trang', S.external.filter((u) => !/fonts\.(googleapis|gstatic)\.com/.test(u)).length === 0 && S.errors.length === 0, JSON.stringify([S.external.map((u) => u.slice(0, 60)), S.errors]));
     await S.ctx.close();
   });
