@@ -15,7 +15,7 @@ async function open(b, vp, o = {}) {
   await page.route('**/cdnjs.cloudflare.com/**', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(D3) }));
   await page.route('**/fonts.g*apis.com/**', r => { if (!o.font) return r.fulfill({ contentType: 'text/css', body: '' });
     r.fulfill({ contentType: 'text/css', body: ["400", "500", "600", "700"].map(w => `@font-face{font-family:'Be Vietnam Pro';font-weight:${w};font-display:swap;src:url(https://fonts.gstatic.com/x.ttf) format('truetype')}`).join('') }); });
-  await page.route('**/fonts.gstatic.com/**', async r => { await new Promise(s => setTimeout(s, o.fontDelay || 2500)); r.fulfill({ contentType: 'font/ttf', body: fs.readFileSync(o.font) }); });
+  await page.route('**/fonts.gstatic.com/**', async r => { await new Promise(s => setTimeout(s, o.fontDelay || 2500)); if (o.fontFail) return r.fulfill({ status: 404, body: '' }); r.fulfill({ contentType: 'font/ttf', body: fs.readFileSync(o.font) }); });
   await page.route('**/raw.githubusercontent.com/**', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(o.data || DATA) }));
   await page.routeWebSocket(/\/ws$/, ws => { ws.send(JSON.stringify({ type: 'snapshot', server_time: Date.now(), events: [], activity: [] })); });
   await page.goto('file://' + INDEX); await page.waitForSelector('#model svg'); await page.waitForTimeout(o.settle || 1500);
