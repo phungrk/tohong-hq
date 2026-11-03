@@ -17,7 +17,7 @@ if (!D3) { console.log('FAIL thiếu d3.min.js cục bộ: đặt D3=/đường/
 const CHECKS = ['end-arrow', 'mid-arrow', 'no-fragile'];
 if (!CHECKS.includes(CHECK)) { console.log('FAIL --check phải là một trong ' + CHECKS.join(', ')); process.exit(1); }
 
-const CFG = { LEN: [5, 7], WID: [4, 7], GAP: [0.8, 3.5], ANG: 20, EXT: 8, LONG: 220, OVER: 0.5, ONPATH: 1.5 };
+const CFG = { LEN: [6.89, 8.41], WID: [5.60, 6.85], RATIO: [1.106, 1.352], GAP: [0.8, 3.5], ANG: 20, EXT: 8, LONG: 220, OVER: 0.5, ONPATH: 1.5 };
 const DATA = { generated_at: '2026-11-01T11:00', timezone: 'Asia/Ho_Chi_Minh', public: true, tasks: [], events: [], roster: [],
   model: { invariants: { 'dashboard/model': 1 }, invariants_total: 1, adversarial_evals: 0, regression_evals: 0, insight_reports: 0, last_insight: '', specs: 0 } };
 
@@ -79,6 +79,7 @@ const MEASURE = cfg => {
       const lp = g.len * sc, wp = g.wid * sc;
       if (lp < cfg.LEN[0] - 0.01 || lp > cfg.LEN[1] + 0.01) P(`${tag}: dài ${lp.toFixed(1)}px (cần ${cfg.LEN[0]}-${cfg.LEN[1]}px)`);
       if (wp < cfg.WID[0] - 0.01 || wp > cfg.WID[1] + 0.01) P(`${tag}: rộng ${wp.toFixed(1)}px (cần ${cfg.WID[0]}-${cfg.WID[1]}px)`);
+      if (cfg.RATIO && wp > 0 && (lp / wp < cfg.RATIO[0] - 0.001 || lp / wp > cfg.RATIO[1] + 0.001)) P(`${tag}: tỉ lệ dài/rộng ${(lp / wp).toFixed(3)} (cần ${cfg.RATIO[0]}-${cfg.RATIO[1]}, ADR-019)`);
       const ref = at === 'end' ? g.tip : g.c, nn = nearest(at === 'end' ? ext : pts, ref);
       if (nn.d > cfg.ONPATH) P(`${tag}: cách đường ${nn.d.toFixed(1)}u`);
       const tg = tangent(ext, nn.i), cos = g.ax * tg[0] + g.ay * tg[1];
