@@ -1,7 +1,7 @@
 {
   "task": "T-052",
-  "at": "2026-11-03T15:54",
-  "verdict": "GREEN",
+  "at": "2026-11-03T16:05",
+  "verdict": "RED",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/vendor/images",
@@ -12,7 +12,7 @@
       "eval": "bash eval/T-051/run.sh --back /home/user/tohong-back --front /home/user/tohong-front --tohong /home/user/tohong",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 132626,
+      "ms": 136483,
       "out": "; manifest đủ trường\nC4 PASS chạy lại: 0 yêu cầu thừa, file không đổi, ảnh mới chỉ tải 1 lần, máy sạch khôi phục từ Pages, ca mất ảnh dừng chứ không xoá\nC5 PASS 6 ảnh lỗi: giữ link cũ, có lý do, có đếm (SUMMARY/REWRITE), thử lại lần sau\nC6 PASS chốt chặn deploy: thiếu secret/thiếu file/quá giới hạn dừng trước wrangler; secret không lộ; _headers đúng\nC7 PASS không .webp trong repo, workflow đúng secret/chỉ chạy tay, thư mục ra bị ignore, có hướng dẫn đánh số\nC8 PASS generator giữ 9 URL Pages sau khi sinh lại\nC9 PASS ảnh lỗi -> ảnh mặc định ở thẻ danh sách và gallery chi tiết; ảnh hỏng bị bỏ khỏi gallery\nC10 PASS vendor đã lưu: ảnh theo pool hiện tại, không gọi marry.vn, localStorage nguyên vẹn, ảnh hỏng ra mặc định ở danh sách đã lưu và Ngân sách\nC11 PASS npm test (tohong-back)\nPASS toàn bộ",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 52,
+      "ms": 45,
       "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
       "tier": 2
     },
@@ -36,10 +36,34 @@
       "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 62,
+      "ms": 61,
       "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
       "tier": 2
+    },
+    {
+      "eval": "eval/T-052/adv-01-rewrite-pool-co-khoang-trang.py",
+      "kind": "py",
+      "status": "FAIL",
+      "ms": 9160,
+      "out": "FAIL `rewrite --check` thoát 0 dù còn 3 lượt ảnh ok chưa rewrite (pool có dấu cách sau ':'); stdout: REWRITE refs=0 replaced=0 kept_original=0 pending=0",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-052/adv-02-workflow-deploy-chi-tu-nhanh-mac-dinh.py",
+      "kind": "py",
+      "status": "FAIL",
+      "ms": 58,
+      "out": "FAIL workflow không chặn deploy=true khi chạy từ nhánh khác nhánh mặc định (job mirror): deploy từ nhánh cũ thay cả site Pages, xoá file mà pool trên main đang trỏ tới (spec T-051 mục 24b, 14)",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-052/adv-03-deploy-secret-cat-doi-khi-ghi.py",
+      "kind": "py",
+      "status": "FAIL",
+      "ms": 728,
+      "out": "FAIL deploy để lọt secret ra log khi wrangler ghi nó qua hai lần ghi: token trong stdout, account id trong stderr",
+      "tier": 3
     }
   ],
-  "hint": ""
+  "hint": "code"
 }
