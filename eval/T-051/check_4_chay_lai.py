@@ -62,8 +62,34 @@ try:
         if e["status"] == "ok" and man5.get(u) != e: fail("pool đã rewrite: manifest mất/đổi entry ok của " + u)
     for e in man5.values():
         if e["status"] == "ok" and not os.path.isfile(os.path.join(out3, e["file"])): fail("pool đã rewrite: thư mục ra thiếu " + e["file"])
-    # rewrite hai lần = một lần (đã kiểm ở tiêu chí 1)
-    ok("chạy lại: 0 yêu cầu thừa, file không đổi, ảnh mới chỉ tải 1 lần, máy sạch khôi phục từ Pages")
+    # CA MẤT ẢNH (mục 14, 16, 24): entry đã ok + đã deploy không bao giờ bị hạ; không khôi phục được thì dừng, không xoá site.
+    ents3 = {u: e for u, e in w.man()["entries"].items() if e["status"] == "ok"}
+    victim_url = w.fm.url("/ok/big.jpg"); victim = ents3[victim_url]["file"]
+    man_before = json.dumps(w.man(), sort_keys=True)
+    # (i) lỗi tạm thời khi khôi phục (503 hai lần) -> --retries 2 áp dụng cho bước khôi phục: khôi phục được, thoát 0
+    pages.flaky["/" + victim] = 2; pages.hits.clear(); w.fm.hits.clear(); out4 = os.path.join(w.tmp, "out4")
+    p4 = w.mirror(back, out=out4, extra=["--restore-from", pages.origin])
+    s6 = need_summary(p4, "ca lỗi tạm thời")
+    if p4.returncode != 0 or s6["restored"] != nok or s6["new"] != 0: fail(f"lỗi tạm thời 503 khi khôi phục phải được thử lại (--retries áp dụng cho khôi phục) và thoát 0; thấy exit={p4.returncode} {s6}")
+    if pages.hits.count("/" + victim) != 3: fail(f"file lỗi tạm thời phải được yêu cầu 3 lần (1 + 2 lần thử lại), thấy {pages.hits.count('/' + victim)}")
+    if w.fm.hits.get("/ok/big.jpg", 0): fail("khôi phục được từ Pages thì không được tải nguồn")
+    # (ii) Pages mất hẳn file (404) + nguồn trả 403 -> không hạ entry, không xoá, thoát 3, nêu file thiếu, deploy bị chặn
+    pages.gone.add("/" + victim); w.fm.forbid.add("/ok/big.jpg"); out5 = os.path.join(w.tmp, "out5")
+    p5 = w.mirror(back, out=out5, extra=["--restore-from", pages.origin])
+    s7 = need_summary(p5, "ca Pages mất file + nguồn 403")
+    if p5.returncode != 3: fail(f"entry ok không khôi phục được từ Pages lẫn nguồn phải thoát mã 3, thấy {p5.returncode}")
+    if s7.get("missing") != 1: fail(f"SUMMARY phải có missing=1, thấy {s7}")
+    if not any(l.startswith("MISSING ") and victim in l for l in p5.stdout.splitlines()): fail("thiếu dòng 'MISSING <file> <lý do>' cho " + victim)
+    if json.dumps(w.man(), sort_keys=True) != man_before: fail("entry ok bị hạ/đổi trong manifest khi khôi phục thất bại (mục 14: không bao giờ hạ entry ok)")
+    if os.path.isfile(os.path.join(out5, victim)): fail("file thiếu không được tự xuất hiện")
+    if w.rewrite(back, ["--check"]).returncode != 0: fail("pool đã rewrite vẫn phải qua rewrite --check")
+    vs_now, _ = read_pool(w.pool)
+    if not any(u == BASE_URL + "/" + victim for _, u in refs(vs_now)): fail("pool không được đổi ngược Pages URL của ảnh thiếu về URL gốc")
+    fake = os.path.join(w.tmp, "wr.sh"); log = os.path.join(w.tmp, "wr.log")
+    open(fake, "w").write('#!/usr/bin/env bash\necho CALLED >> "%s"\n' % log); os.chmod(fake, 0o755)
+    dp = run(cli(back) + ["deploy", "--dir", out5, "--manifest", w.manifest, "--project", "tohong-img"], env={"WRANGLER_BIN": fake, "CLOUDFLARE_API_TOKEN": "t-aaaaaaaaaa", "CLOUDFLARE_ACCOUNT_ID": "a-bbbbbbbbbb"})
+    if dp.returncode == 0 or os.path.isfile(log): fail("thiếu file của entry ok: deploy phải bị chặn, không gọi wrangler (site cũ còn nguyên)")
+    ok("chạy lại: 0 yêu cầu thừa, file không đổi, ảnh mới chỉ tải 1 lần, máy sạch khôi phục từ Pages, ca mất ảnh dừng chứ không xoá")
 finally:
     if pages: pages.stop()
     w.stop()

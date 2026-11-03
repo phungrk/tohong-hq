@@ -30,8 +30,18 @@ if re.search(r"(CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID)\s*[:=]\s*['\"]?[A-Za
 if "tohong-img" not in t: fail("workflow phải dùng project Pages tên tohong-img")
 if re.search(r"git add[^\n]*(out|\.webp)", t): fail("workflow không được git add thư mục ảnh")
 if not re.search(r"pull-requests:\s*write", t) or not re.search(r"contents:\s*write", t): fail("workflow phải khai quyền contents: write và pull-requests: write (mở PR, không đẩy thẳng main)")
-if re.search(r"git push[^\n]*\bmain\b", t): fail("workflow không được đẩy thẳng lên main")
-if not re.search(r"upload-artifact", t) or "manifest" not in t: fail("workflow phải để lại manifest + pool đã rewrite làm artifact (hoặc mở PR) để Capu lấy")
+# MỌI lệnh git push phải nêu rõ ref đích nằm dưới vendor-images/run- (workflow đứng ở main sau checkout nên `git push` trần hay `HEAD` là đẩy main)
+BR = r"vendor-images/run-"
+varnames = set(re.findall(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*[:=]\s*['\"]?" + BR, t, re.M))
+for line in t.splitlines():
+    if re.search(r"\bgit\s+push\b", line):
+        if re.search(r"--force|-f\b|--mirror|:main\b|\bmain\b", line): fail("git push nhắm main hoặc ép đẩy: " + line.strip())
+        dest = line.split("push", 1)[1]
+        ok_dest = re.search(BR, dest) or any(re.search(r"\$\{?\{?\s*(env\.)?" + v + r"\b", dest) for v in varnames)
+        if not ok_dest: fail("git push phải nêu ref đích vendor-images/run-… (trực tiếp hoặc qua biến gán giá trị đó): " + line.strip())
+for m in re.finditer(r"^\s*branch:\s*(\S+)", t, re.M):
+    if not m.group(1).strip("'\"").startswith(BR): fail("input branch của action phải bắt đầu bằng vendor-images/run-: " + m.group(1))
+if "pull-requests: write" not in t and not re.search(r"pull-requests:\s*write", t): fail("thiếu quyền pull-requests: write")
 # 4. toàn repo không chứa giá trị giống token Cloudflare (40 ký tự) trong file theo dõi của 3 repo
 for repo in (back, front, tohong):
     r = subprocess.run(f"git -C {repo} ls-files -z | xargs -0 grep -nIE '(CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID)[\"\\x27]?\\s*[:=]\\s*[\"\\x27]?[A-Za-z0-9_-]{{30,}}' || true", shell=True, capture_output=True, text=True)
@@ -40,7 +50,7 @@ for repo in (back, front, tohong):
 g = os.path.join(back, "scripts", "vendor-images", "README.md")
 if not os.path.isfile(g): fail("thiếu scripts/vendor-images/README.md (hướng dẫn từng bước cho Capu)")
 gt = open(g, encoding="utf-8").read()
-for must in ("tohong-img", "Direct Upload", "CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID", "Settings", "Actions", "Run workflow", "pages.dev"):
+for must in ("tohong-img", "Direct Upload", "CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID", "Settings", "Actions", "Run workflow", "pages.dev", "Allow GitHub Actions to create and approve pull requests"):
     if must not in gt: fail(f"hướng dẫn thiếu '{must}'")
 steps = re.findall(r"^\s*(\d+)\.\s+\S", gt, re.M)
 if len(steps) < 6: fail("hướng dẫn phải là các bước đánh số (>= 6 bước)")

@@ -110,6 +110,27 @@ let b;
       if (!det2.some(s => s.includes('good2'))) fail('chi tiết: gallery phải hiện ảnh tốt');
       if (dots > 0) fail('chi tiết: gallery chỉ còn 1 ảnh tốt thì không được có chấm chuyển ảnh (thấy ' + dots + ')');
     } catch (e) { fail('không mở được chi tiết vendor để kiểm gallery: ' + String(e.message).split('\n')[0]); }
+    // thẻ chọn so sánh (anchor + hàng) và bảng so sánh
+    try {
+      const bgsIn = async (k) => pg.evaluate((k) => [...document.querySelectorAll(`[data-card="${k}"] *`)].map(x => getComputedStyle(x).backgroundImage).filter(s => s && s !== 'none'), k);
+      await pg.locator('[data-card="1"]').getByText('So sánh', { exact: true }).first().click({ timeout: 5000 });
+      await pg.waitForSelector('[data-card="2"]', { timeout: 5000 });
+      await pg.waitForFunction(() => document.querySelector('[data-card="2"]').innerText.includes('Vendor Anh Hong'), null, { timeout: 8000 });
+      await pg.waitForTimeout(2500);
+      const pk = await bgsIn(2);
+      if (pk.some(s => /404-|html-a/.test(s))) fail('thẻ chọn so sánh: còn hiện ảnh hỏng (anchor hoặc hàng)');
+      if (!pk.some(s => s.includes('good2'))) fail('thẻ chọn so sánh: anchor phải hiện ảnh tốt còn lại (good2)');
+      if (!pk.some(s => s.includes('good1'))) fail('thẻ chọn so sánh: hàng Vendor Tot phải hiện ảnh tốt');
+      await pg.locator('[data-card="2"]').getByText('Vendor Anh Hong', { exact: false }).first().click({ timeout: 5000 });
+      await pg.locator('[data-card="2"]').getByText('Vendor Tot', { exact: false }).first().click({ timeout: 5000 });
+      await pg.locator('[data-card="2"]').getByText(/So sánh \d+ vendor/).first().click({ timeout: 5000 });
+      await pg.waitForSelector('[data-card="3"]', { timeout: 5000 });
+      await pg.waitForTimeout(2500);
+      const cmp = await bgsIn(3);
+      if (cmp.some(s => /404-|html-a/.test(s))) fail('bảng so sánh: còn hiện ảnh hỏng');
+      if (!cmp.some(s => s.includes('good1')) || !cmp.some(s => s.includes('good2'))) fail('bảng so sánh: cột có ảnh tốt phải hiện ảnh');
+      if (!cmp.some(s => s.includes('linear-gradient'))) fail('bảng so sánh: cột Vendor Anh Hong (ảnh hỏng) phải hiện gradient mặc định');
+    } catch (e) { fail('không dựng được thẻ chọn/bảng so sánh để kiểm: ' + String(e.message).split('\n')[0]); }
     if (external.length) fail('front gọi ra ngoài ngoài app/ảnh: ' + external.slice(0, 2).join(', '));
     if (!process.exitCode) console.log('PASS ảnh lỗi -> ảnh mặc định ở thẻ danh sách và gallery chi tiết; ảnh hỏng bị bỏ khỏi gallery');
     await b.close();

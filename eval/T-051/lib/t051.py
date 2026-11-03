@@ -91,6 +91,7 @@ class FakeMarry:
     def __init__(self):
         self.hits = {}
         self.late_ready = False
+        self.forbid = set()
         outer = self
 
         class H(BaseHTTPRequestHandler):
@@ -100,6 +101,8 @@ class FakeMarry:
                 path = urllib.parse.unquote(self.path.split("?")[0])
                 outer.hits[path] = outer.hits.get(path, 0) + 1
                 n = outer.hits[path]
+                if path in outer.forbid:
+                    return self._send(403, b"forbidden", "text/plain")
                 if path == "/ok/flaky.jpg" and n == 1:
                     return self._send(500, b"boom", "text/plain")
                 if path == "/ok/late.jpg" and not outer.late_ready:
@@ -146,6 +149,8 @@ class FakePages:
 
     def __init__(self, root):
         self.hits = []
+        self.gone = set()    # đường dẫn (vd '/v/xxx.webp') trả 404
+        self.flaky = {}      # đường dẫn -> số lần trả 503 trước khi trả đúng
         outer = self
         import functools, http.server
 
@@ -154,6 +159,11 @@ class FakePages:
 
             def do_GET(self):
                 outer.hits.append(self.path)
+                if self.path in outer.gone:
+                    return self.send_error(404)
+                if outer.flaky.get(self.path, 0) > 0:
+                    outer.flaky[self.path] -= 1
+                    return self.send_error(503)
                 super().do_GET()
 
         self.srv = ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(H, directory=root))
