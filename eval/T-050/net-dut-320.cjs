@@ -4,7 +4,7 @@
  * hành vi 7: khối phải đúng "Ở mọi chiều rộng từ 320px". Eval tầng 1 (TC2) chỉ đo nét đứt ở 390px.
  * Input phá: chiều rộng 320px (và 360px). Mong đợi: giữa mỗi cặp vòng tròn liền kề, phần được vẽ là một NÉT ĐỨT thật,
  * tức thấy được ít nhất 2 đoạn vẽ tách nhau bởi khoảng trống (đọc từ pixel ảnh chụp), không chỉ một chấm.
- * Chạy: cd /home/user/tohong-hq && node eval/T-050/adv-01-net-dut-320.cjs /home/user/tohong-front
+ * Chạy: cd /home/user/tohong-hq && bash eval/T-050/adv-01-net-dut-320.sh /home/user/tohong-front
  * Dùng chung build + API giả với eval/T-048/check_ui.cjs (không sửa file đó). Tìm phần tử theo chữ/vai trò; đọc pixel để đếm đoạn nét.
  * Dòng cuối PASS / FAIL; mã thoát 0/1 (2 = không chạy được).
  */
