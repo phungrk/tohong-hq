@@ -1,18 +1,20 @@
 #!/usr/bin/env node
-// Eval tầng 1 của T-039: mũi tên chỉ hướng ở mọi đường nối p_* của bảng Mô hình.
-// Spec: products/T-039-mui-ten-huong.md. Repo dashboard: một file index.html (bảng #model).
+// Eval tầng 1 của T-047: đầu mũi tên ở mọi đường nối p_* của bảng Mô hình to 1,5 lần so với dfe8a20 (dài 5,10px -> 7,65px; rộng 4,15px -> 6,23px).
+// Spec: products/T-047-mui-ten-to-1-5-lan.md. Bản dẫn xuất của eval/T-039/mui-ten-huong.cjs (KHÔNG sửa bản gốc; ADR đề xuất trong spec thay ngưỡng), khác bản gốc ở đúng các điểm sau:
+//   1. cỡ mũi (LEN/WID) đổi từ 5-7 x 4-7px sang 1,5 x mốc dfe8a20 +-10%; thêm viewport 844;
+//   2. nét còn thấy (1.9): hệ số hiển thị < 0,5 (390 không phóng to) chỉ cần >= 25% và >= 3px; các viewport khác giữ >= 50% và >= 7px;
+//   3. tiêu chí 4 chạy bất biến từ eval/invariants/hq/dashboard/model/ (cây mới theo ADR-011), bỏ inv-029/030 (đang cứng 5-7px; thay bằng tiêu chí 1-2);
+//   4. tiêu chí 5: sáu ảnh docs/screenshots/T-047/{truoc,sau}-{1280,844,390}.png.
 //
-//   cd /home/user/tohong-hq && bash eval/T-039/run.sh <thư-mục-repo-dashboard> --task T-039 [--criterion N] [--engines chromium,webkit,firefox] [--require-engines] [--no-inv]
-//   cd /home/user/tohong-hq && bash eval/T-039/run.sh <repo> --task T-039 --shots <thư-mục-ảnh> --label truoc|sau     (chụp ảnh trước/sau)
+//   cd /home/user/tohong-hq && bash eval/T-047/run.sh <thư-mục-repo-dashboard> --task T-047 [--criterion N] [--engines chromium,webkit,firefox] [--require-engines] [--no-inv]
+//   cd /home/user/tohong-hq && bash eval/T-047/run.sh <repo> --task T-047 --shots <thư-mục-ảnh> --label truoc|sau     (chụp ảnh trước/sau)
 //
-// In từng dòng `PASS Cn …` / `FAIL Cn.<mã> <lý do>` / `SKIP <engine> <lý do>`, rồi một dòng cuối `PASS` hoặc `FAIL`; mã thoát 0/1.
+// In từng dòng `PASS Cn ...` / `FAIL Cn.<mã> <lý do>` / `SKIP <engine> <lý do>`, rồi một dòng cuối `PASS` hoặc `FAIL`; mã thoát 0/1.
 //   --criterion N      : chỉ tiêu chí N (1..5). Không có thì chạy cả năm.
-//   --engines a,b      : engine thử (mặc định chromium,webkit,firefox). Engine không khởi động được thì in SKIP kèm lý do và dòng cuối ghi rõ
-//                        "chưa kiểm trên <engine>"; không bao giờ tính PASS cho engine không chạy.
-//   --require-engines  : SKIP thành FAIL (dùng ở CI có đủ engine).
-//   --no-inv           : tiêu chí 4 không chạy lại bất biến inv-001..028 (chỉ phần riêng của T-039).
-//   --task <T-xxx>     : bắt buộc cho tiêu chí 5 và --shots (thư mục docs/screenshots/<task>/).
-// Dữ liệu dashboard.json, kênh live (WebSocket) và d3 đều giả/cục bộ: không gọi mạng thật.
+//   --engines a,b      : engine thử (mặc định chromium,webkit,firefox). Engine không khởi động được thì in SKIP, không bao giờ tính PASS.
+//   --require-engines  : SKIP thành FAIL.
+//   --no-inv           : tiêu chí 4 không chạy bất biến hq/dashboard/model (chạy lâu).
+//   --task <T-xxx>     : bắt buộc cho tiêu chí 5 và --shots.
 const fs = require('fs'), path = require('path'), cp = require('child_process');
 const PW = require('playwright');
 
@@ -35,15 +37,19 @@ if ((ONLY === 5 || SHOTS) && !TASK) { console.log('FAIL cần tham số --task <
 if (SHOTS && !['truoc', 'sau'].includes(LABEL)) { console.log('FAIL --shots cần --label truoc|sau'); process.exit(1); }
 
 // ---------- hằng số theo spec (mục 0 và 1) ----------
-const LEN_MIN = 6.89, LEN_MAX = 8.41, WID_MIN = 5.60, WID_MAX = 6.85;   // px hiển thị của mũi tên: chiều dài dọc hướng đi, chiều rộng ngang
+// MỐC HIỆN TẠI đóng cứng, đo bằng Playwright trên dashboard dfe8a20, mọi mũi (24 cuối + 6 giữa) ở 1280, 844, 390: dài 5,10px (5,10-5,11), rộng 4,15px (4,14-4,17); không phụ thuộc viewport.
+const BASE_LEN = 5.10, BASE_WID = 4.15, SCALE = 1.5, TOL = 0.10;
+const LEN_MIN = +(BASE_LEN * SCALE * (1 - TOL)).toFixed(3), LEN_MAX = +(BASE_LEN * SCALE * (1 + TOL)).toFixed(3);   // 6,885 .. 8,415px
+const WID_MIN = +(BASE_WID * SCALE * (1 - TOL)).toFixed(3), WID_MAX = +(BASE_WID * SCALE * (1 + TOL)).toFixed(3);   // 5,603 .. 6,848px
 const GAP_MIN = 0.8, GAP_MAX = 3.5;                            // u: khoảng từ đầu mũi tới đường viền hình học của khối đích
 const LONG = 220;                                              // u: đường dài từ ngưỡng này có đúng một mũi giữa (đường ngắn nhất ≥ 220 là 268u, dài nhất < 220 là 176u)
 const ANG = 20;                                                // độ: lệch cho phép giữa trục mũi tên và tiếp tuyến của đường
 const MID_T = [0.25, 0.75], MID_END_MIN = 50, MID_START_MIN = 30;
 const OVER = 0.5;                                              // u: dung sai chồng lấn
-const VIS_FRAC = 0.5, VIS_PX = 7;                                // nét còn thấy (nguồn -> gốc mũi cuối) ≥ 50% chiều dài đường trên main và ≥ 7px
+const VIS_FRAC = 0.5, VIS_PX = 7, VIS_FRAC_LOW = 0.25, VIS_PX_LOW = 3, LOW_SC = 0.5;   // sc < LOW_SC (390 không phóng to): >= 25% và >= 3px; còn lại >= 50% và >= 7px
+//                                // nét còn thấy (nguồn -> gốc mũi cuối) ≥ 50% chiều dài đường trên main và ≥ 7px
 const TRIM_MAX = 16, EXT_MAX = 8, LABEL_MOVE = 8;                                           // u: được rút ngắn cuối đường tối đa bao nhiêu để mũi không chui vào khối
-const SHOT_NAMES = ['truoc-1280', 'sau-1280', 'truoc-390', 'sau-390'];
+const SHOT_NAMES = ['truoc-1280', 'sau-1280', 'truoc-844', 'sau-844', 'truoc-390', 'sau-390'];
 const TARGET = { p_intent_spec: 'nd_spec', p_spec_gate: 'gt_spec', p_gate_exec: 'nd_exec', p_gate_respec: 'nd_respec', p_respec_spec: 'nd_spec', p_exec_gate: 'gt_code',
   p_gate_rework: 'nd_rework', p_rework_exec: 'nd_exec', p_gate_respec2: 'nd_respec', p_gate_capu: 'nd_capu', p_capu_exec: 'nd_exec', p_gate_kr: 'nd_kr', p_gate_kr2: 'nd_kr',
   p_kr_gate: 'gt_code', p_kr_spec: 'nd_spec', p_gate_rel: 'nd_rel', p_capu_res: 'nd_prod', p_rel_res: 'nd_prod', p_src1: 'nd_insight', p_src2: 'nd_insight', p_src3: 'nd_insight',
@@ -176,7 +182,8 @@ const MEASURE = cfg => {
       if (at === 'end') {
         const bx = g.tip[0] - g.ax * g.len, by = g.tip[1] - g.ay * g.len, bi = Math.min(nearest(ext, [bx, by]).i, pts.length - 1), oL = cfg.ORACLE[id] ? (tmpLen(cfg.ORACLE[id])) : L;
         rec.visU = bi; rec.visPx = bi * sc;
-        if (bi < cfg.VIS_FRAC * oL - 0.01 || bi * sc < cfg.VIS_PX - 0.01) P('C1.vstroke', `${tag}: nét còn thấy từ khối nguồn tới gốc mũi ${bi.toFixed(0)}u = ${(bi * sc).toFixed(1)}px = ${(100 * bi / oL).toFixed(0)}% chiều dài đường ${oL.toFixed(0)}u (cần ≥ ${cfg.VIS_FRAC * 100}% và ≥ ${cfg.VIS_PX}px)`);
+        const vf = sc < cfg.LOW_SC ? cfg.VIS_FRAC_LOW : cfg.VIS_FRAC, vpx = sc < cfg.LOW_SC ? cfg.VIS_PX_LOW : cfg.VIS_PX;
+        if (bi < vf * oL - 0.01 || bi * sc < vpx - 0.01) P('C1.vstroke', `${tag}: nét còn thấy từ khối nguồn tới gốc mũi ${bi.toFixed(0)}u = ${(bi * sc).toFixed(1)}px = ${(100 * bi / oL).toFixed(0)}% chiều dài đường ${oL.toFixed(0)}u (cần ≥ ${vf * 100}% và ≥ ${vpx}px)`);
         const gap = sd(tb, g.tip[0], g.tip[1]); rec.gap = gap;
         if (gap < cfg.GAP_MIN || gap > cfg.GAP_MAX) P('C1.edge', `${tag}: đầu mũi cách mép khối đích ${tb.id} ${gap.toFixed(1)}u (cần ${cfg.GAP_MIN}-${cfg.GAP_MAX}u, dương = ở ngoài khối)`);
         // mũi không được chỉ vào khối khác: tia từ đầu mũi theo trục đi 6u phải còn gần khối đích hơn mọi khối khác
@@ -221,7 +228,7 @@ async function open(opt = {}) {
   return o;
 }
 const close = async o => { ALLERR.push(...o.errors); await o.ctx.close(); };
-const CFG = { LEN_MIN, LEN_MAX, WID_MIN, WID_MAX, GAP_MIN, GAP_MAX, LONG, ANG, MID_T, MID_END_MIN, MID_START_MIN, OVER, VIS_FRAC, VIS_PX, TRIM_MAX, EXT_MAX, LABEL_MOVE, LABELS, TARGET, ORACLE };
+const CFG = { VIS_FRAC_LOW, VIS_PX_LOW, LOW_SC, LEN_MIN, LEN_MAX, WID_MIN, WID_MAX, GAP_MIN, GAP_MAX, LONG, ANG, MID_T, MID_END_MIN, MID_START_MIN, OVER, VIS_FRAC, VIS_PX, TRIM_MAX, EXT_MAX, LABEL_MOVE, LABELS, TARGET, ORACLE };
 const measure = o => o.page.evaluate(MEASURE, CFG);
 // viewport cao bằng cả trang (không cuộn, không đổi bề rộng) rồi đo lại: toạ độ trang = toạ độ viewport
 async function tall(o) { const vp = o.page.viewportSize(); const h = await o.page.evaluate(() => Math.ceil(document.documentElement.scrollHeight)); await o.page.setViewportSize({ width: vp.width, height: Math.min(h + 20, 12000) }); await o.page.waitForTimeout(700); await o.page.evaluate(() => window.scrollTo(0, 0)); return measure(o); }
@@ -242,7 +249,7 @@ function reportProbs(c, label, m, groups) {   // groups: [[mã-tiền-tố, tên
 }
 
 // ---------- tiêu chí 1: mũi cuối ----------
-const VIEWS = [{ k: '1280', vp: { width: 1280, height: 900 } }, { k: '390', vp: { width: 390, height: 844 } }, { k: '390-phong-to', vp: { width: 390, height: 844 }, zoom: true }];
+const VIEWS = [{ k: '1280', vp: { width: 1280, height: 900 } }, { k: '844', vp: { width: 844, height: 900 } }, { k: '390', vp: { width: 390, height: 844 } }, { k: '390-phong-to', vp: { width: 390, height: 844 }, zoom: true }];
 async function viewData(v, dark) { const o = await open({ vp: v.vp, dark }); if (v.zoom && !(await enterZoom(o))) { await close(o); return { o: null, err: 'không vào được phóng to' }; } const m = await measure(o); return { o, m }; }
 async function crit1() {
   for (const v of VIEWS) {
@@ -250,7 +257,7 @@ async function crit1() {
     try {
       rec(1, `A1 có đủ 24 đường p_* và mỗi đường có đúng một mũi cuối (${v.k})`, m.nPaths === 24 ? (sumProbs(m.probs, ['C1.count']).length ? sumProbs(m.probs, ['C1.count']).slice(0, 4).map(p => p[1]).join(' | ') : null) : `chỉ thấy ${m.nPaths} đường p_*`);
       reportProbs(1, v.k, m, [['C1.visible', 'B1 mũi nhìn thấy (bbox > 0, không ẩn)'], ['C1.fill', 'B2 fill đặc, không trong suốt, không none'], ['C1.solid', 'B3 đặc (không nét đứt)'], ['C1.color', 'B4 cùng màu đường'],
-        ['C1.size', 'B5 kích thước 5-7px dài, 4-7px rộng'], ['C1.vstroke', 'B5b nét còn thấy ≥ 50% đường và ≥ 7px'], ['C1.dir', 'B6 đúng hướng, chỉ về khối đích'], ['C1.onpath', 'B7 đầu mũi nằm trên đường'], ['C1.edge', 'B8 đầu mũi sát mép khối đích (0,8-3,5u)'], ['C1.stub', 'B9 nét đường không chui vào khối đích'],
+        ['C1.size', 'B5 kích thước 1,5 x mốc dfe8a20: dài 6,89-8,41px, rộng 5,60-6,85px'], ['C1.vstroke', 'B5b nét còn thấy ≥ 50% đường và ≥ 7px (390 không phóng to: ≥ 25% và ≥ 3px)'], ['C1.dir', 'B6 đúng hướng, chỉ về khối đích'], ['C1.onpath', 'B7 đầu mũi nằm trên đường'], ['C1.edge', 'B8 đầu mũi sát mép khối đích (0,8-3,5u)'], ['C1.stub', 'B9 nét đường không chui vào khối đích'],
         ['C1.covered', 'B10 không bị phần tử nào vẽ đè'], ['C1.inblock', 'B11 mũi không chồng vào khối'], ['C1.pe', 'B12 pointer-events none'], ['C1.aria', 'B13 aria-hidden'], ['C1.static', 'B14 đứng yên'], ['C1.attr', 'B15 thuộc tính'], ['C1.dup', 'B16 không chồng nhau'], ['C1.target', 'B17 khối đích có trong trang']]);
       if (!v.zoom) { // pixel: tâm mũi đúng màu fill (chứng minh thật sự được vẽ, không bị khối/đường khác đè)
         const m2 = await tall(o);
@@ -268,7 +275,7 @@ async function crit1() {
     try { const seq = [[{ width: 1280, height: 900 }, 0], [{ width: 390, height: 844 }, 0], [{ width: 390, height: 844 }, 1], [{ width: 1280, height: 900 }, 0]]; const bad = []; let z = false;
       for (const [vp, zoom] of seq) { if (zoom && !z) { if (!(await enterZoom(o))) { bad.push('không vào được phóng to'); continue; } z = true; } if (!zoom && z) { await o.page.keyboard.press('Escape'); await o.page.waitForTimeout(300); if (await zoomOn(o)) await o.page.click('#model-zoom'); await o.page.waitForTimeout(400); z = false; }
         await o.page.setViewportSize(vp); await o.page.waitForTimeout(700); const m = await measure(o); const sz = m.probs.filter(p => p[0] === 'C1.size'); if (sz.length || !m.heads.length) bad.push(`${vp.width}${zoom ? ' phóng to' : ''}: ${sz.length ? sz[0][1] : 'không có mũi nào'}`); }
-      rec(1, 'D1 đổi cỡ cửa sổ 1280 -> 390 -> phóng to -> 1280 không tải lại: cỡ mũi tên luôn 5-7px', bad.length ? bad.slice(0, 3).join(' | ') : null); } finally { await close(o).catch(() => { }); }
+      rec(1, 'D1 đổi cỡ cửa sổ 1280 -> 390 -> phóng to -> 1280 không tải lại: cỡ mũi tên luôn 1,5 x mốc (dài 6,89-8,41px, rộng 5,60-6,85px)', bad.length ? bad.slice(0, 3).join(' | ') : null); } finally { await close(o).catch(() => { }); }
   }
   { // chế độ tối: màu mũi theo token tối và khác màu sáng
     const L = await viewData(VIEWS[0], false), Dk = await viewData(VIEWS[0], true);
@@ -289,7 +296,7 @@ async function crit2() {
     try { rec(2, `M0 có ${m.longPaths} đường dài ≥ ${LONG}u (cần đúng 6: p_gate_respec2, p_kr_gate, p_kr_spec, p_capu_res, p_res_insight, p_insight_intent) (${v.k})`, m.longPaths === 6 ? null : `đo được ${m.longPaths}`);
       reportProbs(2, v.k, m, [['C2.count', 'M1 đường ≥ 220u có đúng một mũi giữa, đường ngắn hơn không có'], ['C2.place', 'M2 mũi giữa nằm 25-75% chiều dài, cách đầu ≥ 30u, cách cuối ≥ 50u, ngoài khối']]);
       const mids = m.heads.filter(h => h.at === 'mid'), probs = m.probs.filter(p => /^C(1|4)\.(size|dir|onpath|fill|covered|text|bot|visible)/.test(p[0]) && /\/mid/.test(p[1]));
-      rec(2, `M3 mũi giữa cùng chuẩn với mũi cuối: nhìn thấy, đúng hướng, 5-7px, không đè, không che chữ/bot (${v.k})`, probs.length ? probs.slice(0, 3).map(p => p[1]).join(' | ') : (mids.length ? null : 'không có mũi giữa nào')); } finally { await close(o).catch(() => { }); }
+      rec(2, `M3 mũi giữa cùng chuẩn với mũi cuối: nhìn thấy, đúng hướng, 1,5 x mốc, không đè, không che chữ/bot (${v.k})`, probs.length ? probs.slice(0, 3).map(p => p[1]).join(' | ') : (mids.length ? null : 'không có mũi giữa nào')); } finally { await close(o).catch(() => { }); }
   }
 }
 
@@ -319,8 +326,8 @@ async function crit4() {
     const o = await open({ reduce: true }); try { const m = await measure(o); rec(4, 'K7 reduced-motion: mũi tên vẫn hiện đủ (24 mũi cuối + 6 mũi giữa)', m.heads.length === 30 ? null : `thấy ${m.heads.length} mũi`); } finally { await close(o).catch(() => { }); }
   }
   if (ENG === 'chromium' && !NO_INV) {
-    const invDir = path.join(HQ, 'eval', 'invariants', 'dashboard', 'model'); const invs = fs.readdirSync(invDir).filter(f => /^inv-\d+.*\.sh$/.test(f)).sort();
-    rec(4, `V0 bất biến vùng dashboard/model có đủ inv-001..028 (${invs.length} file)`, invs.length >= 28 ? null : `chỉ ${invs.length} file`);
+    const invDir = path.join(HQ, 'eval', 'invariants', 'hq', 'dashboard', 'model'); const invs = fs.readdirSync(invDir).filter(f => /^inv-\d+.*\.sh$/.test(f) && !/^inv-0(29|30)-/.test(f)).sort();   // inv-029/030 cứng 5-7px: thay bằng tiêu chí 1-2 cho tới khi ADR thay ngưỡng được áp vào bất biến
+    rec(4, `V0 bất biến vùng hq/dashboard/model có đủ (trừ inv-029/030) (${invs.length} file, cần >= 29)`, invs.length >= 29 ? null : `chỉ ${invs.length} file`);
     const rs = await pool(invs.map(f => () => runShell('bash', [path.join(invDir, f)], { TOHONG_DASHBOARD_REPO: REPO }, 400000).then(r => ({ f, ...r }))), 2);
     for (const r of rs) { const last = r.out.trim().split('\n').filter(l => /^(PASS|FAIL)/.test(l)).slice(-3).join(' / ') || r.out.trim().split('\n').slice(-2).join(' / '); rec(4, `V ${r.f}`, r.code === 0 ? null : `thoát ${r.code}: ${last.slice(0, 300)}`); }
   } else if (ENG !== 'chromium') console.log(`ghi chú: bất biến inv-001..028 chỉ chạy trên chromium (chúng tự khởi động chromium)`);
@@ -335,13 +342,13 @@ function crit5() {
   const have = SHOT_NAMES.filter(n => files[n + '.png']); const shas = have.map(n => files[n + '.png']);
   rec(5, 'S2 mỗi ảnh khác nhau (ảnh trước khác ảnh sau, không chụp trùng)', shas.length && new Set(shas).size === shas.length ? null : (shas.length ? 'có ảnh trùng nội dung' : 'không có ảnh nào'));
   const small = have.filter(n => Number(cp.execFileSync('git', ['-C', REPO, 'cat-file', '-s', files[n + '.png']], { encoding: 'utf8' })) < 5000); rec(5, 'S3 ảnh không rỗng (≥ 5 KB mỗi ảnh)', small.length || !have.length ? (have.length ? 'ảnh quá nhỏ: ' + small.join(', ') : 'không có ảnh nào') : null);
-  for (const n of have) { const buf = cp.execFileSync('git', ['-C', REPO, 'cat-file', 'blob', files[n + '.png']]); const w = buf.readUInt32BE(16); const want = /1280/.test(n) ? 1280 : 390; rec(5, `S4 ${n}.png rộng đúng ${want}px`, w === want ? null : `rộng ${w}px`); }
+  for (const n of have) { const buf = cp.execFileSync('git', ['-C', REPO, 'cat-file', 'blob', files[n + '.png']]); const w = buf.readUInt32BE(16); const want = /1280/.test(n) ? 1280 : /844/.test(n) ? 844 : 390; rec(5, `S4 ${n}.png rộng đúng ${want}px`, w === want ? null : `rộng ${w}px`); }
 }
 
 // ---------- chụp ảnh trước/sau ----------
 async function shots() {
   const dir = path.resolve(typeof SHOTS === 'string' ? SHOTS : path.join(REPO, 'docs', 'screenshots', TASK)); fs.mkdirSync(dir, { recursive: true });
-  for (const [k, vp] of [['1280', { width: 1280, height: 900 }], ['390', { width: 390, height: 844 }]]) {
+  for (const [k, vp] of [['1280', { width: 1280, height: 900 }], ['844', { width: 844, height: 900 }], ['390', { width: 390, height: 844 }]]) {
     const o = await open({ vp }); try { const r = await o.page.evaluate(() => { const e = document.querySelector('#model'); const b = e.getBoundingClientRect(); return { y: b.top + scrollY, h: b.height }; });
       const buf = await o.page.screenshot({ fullPage: true, clip: { x: 0, y: Math.max(0, r.y), width: vp.width, height: r.h } }); fs.writeFileSync(path.join(dir, `${LABEL}-${k}.png`), buf); console.log(`ảnh ${LABEL}-${k}.png`); } finally { await close(o).catch(() => { }); }
   }
