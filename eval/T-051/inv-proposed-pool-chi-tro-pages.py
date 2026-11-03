@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """BẤT BIẾN ĐỀ XUẤT (vùng planner/vendor/images), chưa nằm trong bể; Spec critic rút vào eval/invariants/planner/vendor/images/ khi spec qua cổng.
-Chạy không tham số dưới `python3 -I` (như gate.py), cwd = repo tohong-back; đổi repo bằng biến môi trường TOHONG_BACK_REPO. Tự đứng một mình (không import thư viện eval).
+Chạy không tham số dưới `python3 -I` (như gate.py), cwd = repo tohong-back; repo lấy từ TOHONG_BACK_REPO, nếu không có thì cwd, nếu cwd không phải repo back (thiếu lib/vendorPool.generated.js) thì thử ../tohong-back. Tự đứng một mình (không import thư viện eval).
 Tính chất (spec T-051 mục 13, 19, 21):
   (i)   mọi URL ảnh trong pool bắt đầu bằng manifest.baseUrl + "/" phải có file đó trong một entry `ok` của manifest;
   (ii)  URL gốc đã có entry `ok` thì không còn nằm trong pool (đã rewrite);
@@ -8,7 +8,8 @@ Tính chất (spec T-051 mục 13, 19, 21):
 Chưa có manifest hoặc chưa có pool: PASS "chưa áp dụng". In PASS hoặc FAIL <lý do>; mã thoát 0/1."""
 import json, os, sys
 
-repo = os.path.abspath(os.environ.get("TOHONG_BACK_REPO") or os.getcwd())
+cands = [os.environ.get("TOHONG_BACK_REPO"), os.getcwd(), os.path.join(os.getcwd(), "..", "tohong-back")]
+repo = os.path.abspath(next((c for c in cands if c and os.path.isfile(os.path.join(c, "lib", "vendorPool.generated.js"))), os.getcwd()))
 pool = os.path.join(repo, "lib", "vendorPool.generated.js")
 man = os.path.join(repo, "scripts", "vendor-images", "manifest.json")
 if not os.path.isfile(man) or not os.path.isfile(pool):

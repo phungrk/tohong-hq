@@ -2,6 +2,7 @@
 // T-051 tiêu chí 10: vendor ĐÃ LƯU trong localStorage (mang URL marry.vn cũ) khi pool đã chuyển sang Pages:
 //  - danh sách "Vendor đã lưu" và tiêu đề Chi tiết vendor ở màn Ngân sách dùng ảnh của pool hiện tại (tra theo id), không gửi request nào tới marry.vn;
 //  - id không còn trong pool (404/5xx) thì dùng ảnh đã lưu; ảnh hỏng nào cũng ra ảnh mặc định (danh sách: gradient danh mục; Ngân sách: nền sage/sand hiện có);
+//  - mọi request tra ảnh `GET /api/vendors/<id>` KHÔNG mang coupleId có giá trị (mang là gọi LLM trả phí), mỗi id tối đa một lần mỗi lần mở trang;
 //  - localStorage không bị đổi (so sánh chuỗi trước/sau).
 // Chạy: NODE_PATH=$(npm root -g) node eval/T-051/check_10_front_vendor_da_luu.cjs <thư-mục-tohong-front>. In PASS hoặc FAIL <lý do>; mã thoát 0/1.
 // Dựng trang thử tạm __t051b.html/.jsx trong thư mục front (xoá khi xong); chặn API; ảnh phục vụ bằng server giả.
@@ -58,7 +59,7 @@ let b;
       seed = seeds[v];
       const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
       await ctx.addInitScript(([s]) => { if (!localStorage.getItem('th_vendors_t051')) localStorage.setItem('th_vendors_t051', s); window.__seed = s; }, [seed]);
-      const pg = await ctx.newPage(); const marry = [], logs = [];
+      const pg = await ctx.newPage(); const marry = [], logs = [], lookups = [];
       pg.on('request', q => { if (/marry\.vn/.test(q.url())) marry.push(q.url()); });
       pg.on('pageerror', e => logs.push(String(e.message).slice(0, 150)));
       await pg.route(/marry\.vn/, r => r.abort());
@@ -67,7 +68,7 @@ let b;
         if (m === 'OPTIONS') return r.fulfill({ status: 204, headers: CORS });
         const mm = u.pathname.match(/^\/api\/vendors\/([^/]+)$/);
         if (mm && m === 'GET' && !['match', 'categories', 'status'].includes(mm[1])) {
-          const id = mm[1];
+          const id = mm[1]; lookups.push({ id, couple: u.searchParams.get('coupleId') });
           if (id === 'v_s5') return r.fulfill({ status: 500, headers: CORS, body: 'err' });
           if (pool[id]) return r.fulfill({ headers: CORS, contentType: 'application/json', body: JSON.stringify({ vendor: { id, name: id, category: 'photography', photos: pool[id].map(url => ({ url })) }, match: null }) });
           return r.fulfill({ status: 404, headers: CORS, contentType: 'application/json', body: '{"error":"vendor not found"}' });
@@ -77,7 +78,7 @@ let b;
         return r.fulfill({ status: 404, headers: CORS, contentType: 'application/json', body: '{}' });
       });
       await pg.goto(`http://127.0.0.1:${port}/__t051b.html?v=${v}`);
-      return { pg, marry, logs, ctx };
+      return { pg, marry, logs, ctx, lookups };
     };
     const bgsOf = (pg, name) => pg.evaluate((n) => {
       const all = [...document.querySelectorAll('*')].filter(e => (e.innerText || '').includes(n));
@@ -88,9 +89,16 @@ let b;
       let el = leaf; while (el.parentElement && cnt(el.parentElement) === 1 && el.parentElement.tagName !== 'BODY') el = el.parentElement;
       return [el, ...el.querySelectorAll('*')].map(x => getComputedStyle(x).backgroundImage).filter(s => s && s !== 'none');
     }, name);
+    const checkLookups = (where, ls) => {
+      const withCouple = ls.filter(l => l.couple);
+      if (withCouple.length) fail(`${where}: tra ảnh mang coupleId=${withCouple[0].couple} (endpoint sẽ tính ghép và gọi LLM trả phí; phải gọi không kèm coupleId)`);
+      const cnt = {}; ls.forEach(l => { cnt[l.id] = (cnt[l.id] || 0) + 1; });
+      const dup = Object.entries(cnt).filter(([, c]) => c > 1);
+      if (dup.length) fail(`${where}: id ${dup[0][0]} bị tra ${dup[0][1]} lần (tối đa 1)`);
+    };
     // --- danh sách "Vendor đã lưu" ---
     {
-      const { pg, marry, logs } = await open('list');
+      const { pg, marry, logs, lookups } = await open('list');
       try { await pg.waitForFunction(() => document.body.innerText.includes('Luu Pool Tot'), null, { timeout: 15000 }); } catch (e) { throw new Error('danh sách đã lưu không hiện vendor: ' + logs.join(' ; ')); }
       await pg.waitForTimeout(3000);
       const g = n => bgsOf(pg, n);
@@ -103,13 +111,14 @@ let b;
         if (bgs.some(s => s.includes('url(') && /404-|marry/.test(s))) fail(`danh sách đã lưu: ${n} còn hiện ảnh hỏng/marry.vn`);
       }
       if (marry.length) fail('danh sách đã lưu: có request tới marry.vn: ' + marry[0]);
+      checkLookups('danh sách đã lưu', lookups);
       const after = await pg.evaluate(() => localStorage.getItem('th_vendors_t051'));
       if (after !== seed) fail('danh sách đã lưu: localStorage th_vendors_* bị đổi');
     }
     // --- màn Ngân sách: tiêu đề Chi tiết vendor ---
     const BT = { 'Luu Pool Tot': ['good1', 'url'], 'Luu Mat Pool Tot': ['good3', 'url'], 'Luu Pool Hong': [null, 'none'], 'Luu Mat Pool Hong': [null, 'none'], 'Luu Pool Rong': [null, 'sage'] };
     for (const [n, [want, mode]] of Object.entries(BT)) {
-      const { pg, marry, logs } = await open('budget');
+      const { pg, marry, logs, lookups } = await open('budget');
       try {
         try { await pg.waitForFunction((x) => document.body.innerText.includes(x), n, { timeout: 15000 }); } catch (e) { throw new Error('màn Ngân sách không hiện ' + n + ': ' + logs.join(' ; ')); }
         await pg.waitForTimeout(1500);
@@ -121,6 +130,7 @@ let b;
         if (mode !== 'url' && (bg.includes('url(') || bg.includes('rgb(122, 154, 181)') || bg.includes('rgb(212, 160, 160)'))) fail(`Ngân sách: ${n} không có ảnh tốt phải giữ nền sage/sand hiện có của màn này (không ảnh, không gradient danh mục), thấy ${bg.slice(0, 100)}`);
         if (/url\(.*(404-|marry)/.test(bg)) fail(`Ngân sách: ${n} còn hiện ảnh hỏng`);
         if (marry.length) fail(`Ngân sách ${n}: có request tới marry.vn: ` + marry[0]);
+        checkLookups('Ngân sách ' + n, lookups);
         const after = await pg.evaluate(() => localStorage.getItem('th_vendors_t051'));
         if (after !== seed) fail(`Ngân sách ${n}: localStorage th_vendors_* bị đổi`);
       } catch (e) { fail('Ngân sách ' + n + ': ' + String(e.message).split('\n')[0]); }
