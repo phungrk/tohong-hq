@@ -1,6 +1,6 @@
 {
   "task": "T-052",
-  "at": "2026-11-03T16:36",
+  "at": "2026-11-03T16:49",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "bash eval/T-051/run.sh --back /home/user/tohong-back --front /home/user/tohong-front --tohong /home/user/tohong",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 124447,
+      "ms": 130727,
       "out": "; manifest đủ trường\nC4 PASS chạy lại: 0 yêu cầu thừa, file không đổi, ảnh mới chỉ tải 1 lần, máy sạch khôi phục từ Pages, ca mất ảnh dừng chứ không xoá\nC5 PASS 6 ảnh lỗi: giữ link cũ, có lý do, có đếm (SUMMARY/REWRITE), thử lại lần sau\nC6 PASS chốt chặn deploy: thiếu secret/thiếu file/quá giới hạn dừng trước wrangler; secret không lộ; _headers đúng\nC7 PASS không .webp trong repo, workflow đúng secret/chỉ chạy tay, thư mục ra bị ignore, có hướng dẫn đánh số\nC8 PASS generator giữ 9 URL Pages sau khi sinh lại\nC9 PASS ảnh lỗi -> ảnh mặc định ở thẻ danh sách và gallery chi tiết; ảnh hỏng bị bỏ khỏi gallery\nC10 PASS vendor đã lưu: ảnh theo pool hiện tại, không gọi marry.vn, localStorage nguyên vẹn, ảnh hỏng ra mặc định ở danh sách đã lưu và Ngân sách\nC11 PASS npm test (tohong-back)\nPASS toàn bộ",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "eval/T-052/adv-01-rewrite-pool-co-khoang-trang.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 8377,
+      "ms": 8894,
       "out": "PASS pool có dấu cách: --check thoát 1, rewrite thay đủ 3 URL ok, refs=4",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "eval/T-052/adv-02-workflow-deploy-chi-tu-nhanh-mac-dinh.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 81,
+      "ms": 137,
       "out": "PASS deploy chỉ chạy từ nhánh mặc định: bước deploy if",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "eval/T-052/adv-03-deploy-secret-cat-doi-khi-ghi.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 735,
+      "ms": 713,
       "out": "PASS token và account id không lọt ra stdout/stderr, kể cả khi bị cắt đôi",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "eval/T-052/adv-04-deploy-secret-vat-qua-cho-cat-8kb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 14771,
+      "ms": 15231,
       "out": "PASS 80 ca, secret không lọt kể cả khi nằm ngang chỗ cắt bộ đệm",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 29,
+      "ms": 47,
       "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 47,
+      "ms": 53,
       "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
       "tier": 2
     }
