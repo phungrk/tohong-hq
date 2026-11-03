@@ -1,6 +1,6 @@
 {
   "task": "T-050",
-  "at": "2026-11-03T05:38",
+  "at": "2026-11-03T05:46",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-048/run.sh /home/user/tohong-front --only 1",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 10292,
+      "ms": 11375,
       "out": "(hạng mục đã CHỐT vendor (khối vẫn hiện)): có đúng một khối \"Cách hoạt động\"\n  ok  [TC1] decor (hạng mục đã CHỐT vendor (khối vẫn hiện)): dữ liệu gieo đúng: tiêu đề hiện \"Vendor đã lưu · 1\"\n  ok  [TC1] decor (hạng mục đã CHỐT vendor (khối vẫn hiện)): tên vendor đã gieo \"Studio Ánh Dương\" hiện trên màn\n  ok  [TC1] decor (hạng mục đã CHỐT vendor (khối vẫn hiện)): khối nằm trên tiêu đề \"Vendor đã lưu\", cách 0-40px\n  ok  [TC1] decor (hạng mục đã CHỐT vendor (khối vẫn hiện)): khối nằm ngoài và dưới đáy thẻ \"Dự toán\" (thẻ nhỏ nhất chứa \"Dự toán\" và \"Ngân sách cưới\")\n  ok  [TC1] decor (hạng mục đã CHỐT vendor (khối vẫn hiện)): không có chữ nào nằm giữa khối và tiêu đề \"Vendor đã lưu\"\n  ok  [TC1] reserve (hạng mục không có mục \"Vendor đã lưu\"): màn có mở được và không có khối \"Cách hoạt động\"\nPASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-048/run.sh /home/user/tohong-front --only 2",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 5044,
+      "ms": 4925,
       "out": "ok  [TC2] có khối \"Cách hoạt động\" (tiêu đề + nút \"Chi tiết\" + danh sách bước)\n  ok  [TC2] đúng 4 bước theo thứ tự chữ: Tìm, Lưu, Chốt, Vào ngân sách\n  ok  [TC2] 4 bước xếp ngang một hàng, trái sang phải đúng thứ tự\n  ok  [TC2] mỗi bước có một icon tròn (nền đặc, hình tròn, rộng >= 28px)\n  ok  [TC2] màu icon lấy đúng token: Tìm --kim-500, Lưu --kim-600, Chốt --sage-500, Vào ngân sách --son-500\n  ok  [TC2] 3 nét đứt nối 4 icon, màu token --son-300, nằm giữa hai icon liền kề\n  ok  [TC2] tiêu đề có icon (i) bên trái, trang trí (aria-hidden)\n  ok  [TC2] nút \"Chi tiết\" nằm bên phải hàng tiêu đề, có mũi tên \">\" (svg) và màu chữ --son-500\n  ok  [TC2] khối là thẻ bo góc có viền/nền riêng (không trong suốt)\nPASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-048/run.sh /home/user/tohong-front --only 3",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 8440,
+      "ms": 8571,
       "out": "on)\n  ok  [TC3] click thật vào nhãn Tìm (ngoài nút \"Chi tiết\") không mở hộp thoại\n  ok  [TC3] click thật vào nhãn Vào ngân sách (ngoài nút \"Chi tiết\") không mở hộp thoại\n  ok  [TC3] click thật vào icon Lưu (ngoài nút \"Chi tiết\") không mở hộp thoại\n  ok  [TC3] click thật vào tiêu đề (ngoài nút \"Chi tiết\") không mở hộp thoại\n  ok  [TC3] click thật vào lề trong của thẻ (ngoài nút \"Chi tiết\") không mở hộp thoại\n  ok  [TC3] click thật vào giữa nét đứt (ngoài nút \"Chi tiết\") không mở hộp thoại\n  ok  [TC3] nút \"Chi tiết\" nhận focus bàn phím\n  ok  [TC3] Enter trên \"Chi tiết\" mở hộp thoại (role=dialog)\n  ok  [TC3] khi mở, focus chuyển vào trong hộp thoại\n  ok  [TC3] Escape đóng hộp thoại\n  ok  [TC3] sau khi đóng, focus quay lại nút \"Chi tiết\"\n  ok  [TC3] Space trên \"Chi tiết\" cũng mở hộp thoại\nPASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-048/run.sh /home/user/tohong-front --only 4",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 7462,
+      "ms": 9313,
       "out": "ok  [TC4] 390px: có khối để đo\n  ok  [TC4] 390px: trang không cuộn ngang (html, body, thẻ)\n  ok  [TC4] 390px: thẻ nằm trọn trong màn hình\n  ok  [TC4] 390px: bốn nhãn nằm trong thẻ, không bị cắt (không tràn, không dấu ...)\n  ok  [TC4] 390px: \"Vào ngân sách\" xuống tối đa 2 dòng, ba nhãn kia 1 dòng\n  ok  [TC4] 390px: \"Vào ngân sách\" đúng 2 dòng như mẫu của Capu\n  ok  [TC4] 320px: có khối để đo\n  ok  [TC4] 320px: trang không cuộn ngang (html, body, thẻ)\n  ok  [TC4] 320px: thẻ nằm trọn trong màn hình\n  ok  [TC4] 320px: bốn nhãn nằm trong thẻ, không bị cắt (không tràn, không dấu ...)\n  ok  [TC4] 320px: \"Vào ngân sách\" xuống tối đa 2 dòng, ba nhãn kia 1 dòng\n  ok  [TC4] 1024px: có khối và không cuộn ngang\nPASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-048/run.sh /home/user/tohong-front --only 5",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 29742,
+      "ms": 33447,
       "out": "đóng bằng \"Đóng\" rồi bấm Back MỘT lần: rời hạng mục về #/ngan-sach (không để bước Back chết)\n  ok  [TC5] đóng bằng \"Đã hiểu\" rồi bấm Back MỘT lần: rời hạng mục về #/ngan-sach (không để bước Back chết)\n  ok  [TC5] đóng bằng \"Escape\" rồi bấm Back MỘT lần: rời hạng mục về #/ngan-sach (không để bước Back chết)\n  ok  [TC5] đóng bằng \"chạm vùng tối\" rồi bấm Back MỘT lần: rời hạng mục về #/ngan-sach (không để bước Back chết)\n  ok  [TC5] mở hộp thoại, tải lại trang, rồi Back MỘT lần: hộp thoại đã đóng và không còn bước chết (rời hạng mục về #/ngan-sach)\n  ok  [TC5] 1280px: hộp thoại nằm trong khung app (rộng <= 768px), không phủ tràn cả màn hình\n  ok  [TC5] 1280px: chạm ngoài khung app đóng hộp thoại\n  ok  [TC5] không có yêu cầu mạng ra ngoài (trừ phông chữ có sẵn của app), không có lỗi trang\nPASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-048/run.sh /home/user/tohong-front --only 6",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 11162,
+      "ms": 10750,
       "out": "ok  [TC6] venue: mở rồi đóng \"Chi tiết\" không đổi chữ nào trên màn (số dự toán, danh sách vendor, trạng thái)\n  ok  [TC6] venue: không có PUT/POST nào ra API khi mở màn và mở/đóng \"Chi tiết\"\n  ok  [TC6] venue: các thành phần cũ vẫn còn: \"Dự toán\", \"Ngân sách cưới\", \"Vendor đã lưu\"\n  ok  [TC6] photography: mở rồi đóng \"Chi tiết\" không đổi chữ nào trên màn (số dự toán, danh sách vendor, trạng thái)\n  ok  [TC6] photography: không có PUT/POST nào ra API khi mở màn và mở/đóng \"Chi tiết\"\n  ok  [TC6] photography: các thành phần cũ vẫn còn: \"Dự toán\", \"Ngân sách cưới\", \"Vendor đã lưu\"\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-048/check_pr.py /home/user/tohong-front",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 679,
+      "ms": 747,
       "out": "PASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-048/run_invariants.sh /home/user/tohong-front",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 260395,
+      "ms": 275315,
       "out": "ok layout/inv-001-khung-min-viewport-appmax\n  ok layout/inv-002-khong-cuon-ngang\n  ok layout/inv-003-phu-nam-trong-khung\n  ok layout/inv-004-vien-bong-theo-khung\n  ok layout/inv-005-cham-ngoai-khung-dong-sheet\n  ok layout/inv-006-cham-ngoai-khung-chi-dong-lop-tren\n  ok navigation/inv-001-thu-tu-back-mot-buoc\n  ok navigation/inv-002-back-dong-lop-tren-truoc\n  ok navigation/inv-003-khong-bay-goc\n  ok navigation/inv-004-hash-dung-man\n  ok navigation/inv-005-manifest-cai-duoc\n  ok navigation/inv-006-goi-y-cai-ton-trong-lua-chon\nPASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "eval/T-050/adv-01-net-dut-320.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 8847,
+      "ms": 8817,
       "out": "ok  [ADV1] 320px: nét nối Tìm-Lưu là nét đứt thấy được (>= 2 đoạn vẽ)\n  ok  [ADV1] 320px: nét nối Lưu-Chốt là nét đứt thấy được (>= 2 đoạn vẽ)\n  ok  [ADV1] 320px: nét nối Chốt-Vào ngân sách là nét đứt thấy được (>= 2 đoạn vẽ)\n  ok  [ADV1] 360px: nét nối Tìm-Lưu là nét đứt thấy được (>= 2 đoạn vẽ)\n  ok  [ADV1] 360px: nét nối Lưu-Chốt là nét đứt thấy được (>= 2 đoạn vẽ)\n  ok  [ADV1] 360px: nét nối Chốt-Vào ngân sách là nét đứt thấy được (>= 2 đoạn vẽ)\n  ok  [ADV1] 390px: nét nối Tìm-Lưu là nét đứt thấy được (>= 2 đoạn vẽ)\n  ok  [ADV1] 390px: nét nối Lưu-Chốt là nét đứt thấy được (>= 2 đoạn vẽ)\n  ok  [ADV1] 390px: nét nối Chốt-Vào ngân sách là nét đứt thấy được (>= 2 đoạn vẽ)\nPASS",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "eval/T-050/adv-02-nhan-trong-le.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9735,
+      "ms": 9512,
       "out": ")\n  ok  [ADV2] 390px: chữ nhãn \"Tìm\" nằm trong hàng tiêu đề (từ icon (i) tới mép phải \"Chi tiết\")\n  ok  [ADV2] 390px: chữ nhãn \"Lưu\" nằm trong hàng tiêu đề (từ icon (i) tới mép phải \"Chi tiết\")\n  ok  [ADV2] 390px: chữ nhãn \"Chốt\" nằm trong hàng tiêu đề (từ icon (i) tới mép phải \"Chi tiết\")\n  ok  [ADV2] 390px: chữ nhãn \"Vào ngân sách\" nằm trong hàng tiêu đề (từ icon (i) tới mép phải \"Chi tiết\")\n  ok  [ADV2] 1280px: chữ nhãn \"Tìm\" nằm trong hàng tiêu đề (từ icon (i) tới mép phải \"Chi tiết\")\n  ok  [ADV2] 1280px: chữ nhãn \"Lưu\" nằm trong hàng tiêu đề (từ icon (i) tới mép phải \"Chi tiết\")\n  ok  [ADV2] 1280px: chữ nhãn \"Chốt\" nằm trong hàng tiêu đề (từ icon (i) tới mép phải \"Chi tiết\")\n  ok  [ADV2] 1280px: chữ nhãn \"Vào ngân sách\" nằm trong hàng tiêu đề (từ icon (i) tới mép phải \"Chi tiết\")\nPASS",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-001-mot-con-so-cho-khoan-vendor.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 11116,
+      "ms": 11691,
       "out": "ok  [TC1] photography: có khoản vendor lưu ở máy chủ với số hữu hạn\n  ok  [TC1] photography: số ở dòng khoản vendor trong Mục con = số lưu 12\n  ok  [TC1] photography: dòng hạng mục ở danh sách chỉ hiện đúng số lưu 12 làm tiền chi\n  ok  [TC1] venue: có khoản vendor lưu ở máy chủ với số hữu hạn\n  ok  [TC1] venue: số ở dòng khoản vendor trong Mục con = số lưu 126\n  ok  [TC1] venue: dòng hạng mục ở danh sách chỉ hiện đúng số lưu 126 làm tiền chi\n  ok  [TC1] tổng \"Đã chốt\" = tổng số lưu của các khoản vendor (138)\nPASS",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-002-khong-doan-so-khi-thieu-dau-vao.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 10794,
+      "ms": 10531,
       "out": "ok  [TC2] thiếu số khách: số lưu của khoản vendor là 0 hoặc không có\n  ok  [TC2] thiếu số khách: màn chi tiết không có NaN/undefined/Infinity\n  ok  [TC2] thiếu số khách: dòng hạng mục không hiện số tiền chi nào\n  ok  [TC2] thiếu số khách: danh sách Ngân sách không có NaN/undefined/Infinity\n  ok  [TC2] vendor chưa có giá: số lưu của khoản vendor là 0 hoặc không có\n  ok  [TC2] vendor chưa có giá: màn chi tiết không có NaN/undefined/Infinity\n  ok  [TC2] vendor chưa có giá: dòng hạng mục không hiện số tiền chi nào\n  ok  [TC2] vendor chưa có giá: danh sách Ngân sách không có NaN/undefined/Infinity\nPASS",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-003-mo-man-khong-dung-du-lieu-chung.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 29692,
+      "ms": 30051,
       "out": "] máy chốt Y, máy chủ chỉ có khoản X của vendor khác: app đã tải xong (dòng \"Nhà hàng X của máy kia\" hiện trong Mục con)\n  ok  [TC3] máy chốt Y, máy chủ chỉ có khoản X của vendor khác: không thêm/xoá khoản, không đổi gì ngoài amt của khoản trùng vendor đang chốt\n  ok  [TC3] máy chốt Y, máy chủ chỉ có khoản X của vendor khác: sau khi về danh sách vẫn không thêm/xoá/đổi khoản\n  ok  [TC3] máy chốt Y, máy chủ có khoản Y cũ: app đã tải xong (dòng \"Nhà hàng Hoa Sen\" hiện trong Mục con)\n  ok  [TC3] máy chốt Y, máy chủ có khoản Y cũ: không thêm/xoá khoản, không đổi gì ngoài amt của khoản trùng vendor đang chốt\n  ok  [TC3] máy chốt Y, máy chủ có khoản Y cũ: sau khi về danh sách vẫn không thêm/xoá/đổi khoản\n  ok  [TC3] chụp ảnh: mở màn không thêm/xoá khoản, chỉ có thể đổi amt khoản vendor trùng\nPASS",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-004-lop-cach-hoat-dong-la-hop-thoai.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 38911,
+      "ms": 38838,
       "out": "k  photography: mở lớp không đổi địa chỉ\n  ok  photography: Back đóng lớp, vẫn ở hạng mục\n  ok  photography: đóng bằng Escape: lớp đóng, không còn role=dialog, vẫn ở hạng mục\n  ok  photography: sau khi đóng bằng Escape, Back MỘT lần rời hạng mục về #/ngan-sach (không có bước chết)\n  ok  photography: đóng bằng chạm vùng tối: lớp đóng, không còn role=dialog, vẫn ở hạng mục\n  ok  photography: sau khi đóng bằng chạm vùng tối, Back MỘT lần rời hạng mục về #/ngan-sach (không có bước chết)\n  ok  photography: đóng bằng Đóng: lớp đóng, không còn role=dialog, vẫn ở hạng mục\n  ok  photography: sau khi đóng bằng Đóng, Back MỘT lần rời hạng mục về #/ngan-sach (không có bước chết)\n  ok  1280px: chạm ngoài khung app đóng lớp\n  ok  không có PUT/POST nào ra API trong lúc mở và đóng lớp (mọi cách đóng)\nPASS",
       "tier": 2
     }
