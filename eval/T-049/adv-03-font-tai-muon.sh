@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Adversary T-049: font "Be Vietnam Pro" tải muộn 2,5s và rộng hơn mặc định (thay bằng DejaVu Sans / DejaVu Sans Mono): chữ rộng ra sau khi mũi đã dựng. Ở 1280, 844, 390, 390 phóng to: mũi không che chữ (K1), nhãn chỉ nhích khi chạm (K8), cỡ và các kiểm tra khác giữ.
+# Trên PR #16 @006098d: DejaVu Sans Mono ở 390 đỏ (mũi giữa p_kr_gate che "spec mâu thuẫn → spec rework" 1,5u; dfe8a20 xanh). Nguyên nhân chung với adv-05: mũi/nhãn không dựng lại khi font nạp xong; dựng lại (giả lập bằng đổi cỡ) thì xanh hết.
 export NODE_PATH="${NODE_PATH:-$(npm root -g 2>/dev/null)}"; H="$(cd "$(dirname "$0")" && pwd)"
 exec node -e '
 const A=require(process.argv[1]);(async()=>{const b=await A.chromium.launch();
