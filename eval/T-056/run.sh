@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Eval tầng 1 của T-056. Một lệnh, in PASS/FAIL, mã thoát 0/1.
 #   cd /home/user/tohong-hq && bash eval/T-056/run.sh <thư-mục-tohong-front> [--only N]
-# N = 1,2,3,4,6 (check_vv.cjs, visualViewport giả lập) hoặc 5 (eval T-054 đầy đủ: Safari/Back/cuộn/khoá nền + bất biến).
+# N = 1,2,3,4,6,8 (check_vv.cjs, visualViewport giả lập) hoặc 5 (eval T-054 đầy đủ: Safari/Back/cuộn/khoá nền + bất biến).
 # Tiêu chí 7 (iPhone thật, Chrome và Safari): eval/T-056/checklist-iphone.md.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
