@@ -176,6 +176,7 @@ const gotoHash = async (S, hash) => { await S.page.goto(S.base + '/#/' + hash); 
           const tag = `${name}${withHint ? ' (có khối gợi ý cài app, iPhone)' : ''}`;
           await goTabTap(p, name); await toTop(p);
           const h0 = await btn(p, 'Mở menu'); check(`${tag}: ở đầu trang thấy nút "Mở menu" (header)`, !!h0);
+          if (withHint) { check(`${tag}: khối gợi ý cài hiện trên iPhone (đầu trang)`, await hintVisible(p)); }
           const cov0 = await coveredText(p, 'top'); check(`${tag}: ở đầu trang, header không che chữ nào của nội dung`, cov0.length === 0, cov0.slice(0, 2).join('; '));
           for (const where of ['giữa', 'cuối']) {
             if (where === 'giữa') await wheel(p, Math.max(60, Math.floor((await maxScroll(p)) / 2))); else await toEnd(p);
@@ -185,7 +186,6 @@ const gotoHash = async (S, hash) => { await S.page.goto(S.base + '/#/' + hash); 
             check(`${tag}: cuộn tới ${where}: header (nút "Mở menu") vẫn ở đầu màn hình`, !!hr && hr.top >= -1 && hr.bottom < 110, hr && JSON.stringify(hr));
           }
           const cov1 = await coveredText(p, 'bottom', await barTopOf(p)); check(`${tag}: ở cuối trang, thanh tab ${withHint ? 'và khối gợi ý ' : ''}không che chữ nào của nội dung`, cov1.length === 0, cov1.slice(0, 2).join('; '));
-          if (withHint) { const hint = await p.getByRole('region', { name: 'Thêm Tơ Hồng vào màn hình chính' }).count(); check(`${tag}: khối gợi ý cài hiện trên iPhone`, hint > 0); }
           // chạm được thanh tab khi đang cuộn tới cuối
           const next = TABS[(TABS.findIndex((t) => t[0] === name) + 1) % 4][0]; await goTabTap(p, next);
           check(`${tag}: đang ở cuối trang vẫn chạm tab "${next}" chuyển được trang`, true);
@@ -252,18 +252,18 @@ const gotoHash = async (S, hash) => { await S.page.goto(S.base + '/#/' + hash); 
         { name: 'Sheet "Mời người ấy"', tab: 'Trang chủ', open: (p) => tap(p, 'Mời người ấy / gia đình cùng xem'), isOpen: (p) => p.getByRole('dialog', { name: 'Mời người ấy hoặc gia đình cùng xem' }).isVisible(), close: 'back', scrim: true },
         { name: 'Ngăn kéo menu', tab: 'Kế hoạch', open: (p) => tap(p, 'Mở menu'), isOpen: (p) => btn(p, 'Đóng menu').then((b) => !!b), close: 'Đóng menu' },
         { name: 'Chat AI', tab: 'Ngân sách', open: (p) => tap(p, 'AI'), isOpen: (p) => btn(p, 'Đóng').then((b) => !!b), close: 'Đóng' },
-        { name: 'Sheet "Thêm việc" (Kế hoạch)', tab: 'Kế hoạch', prep: async (p) => toEnd(p), open: (p) => tap(p, 'Thêm việc'), scrim: true, close: 'back',
+        { name: 'Sheet "Thêm việc" (Kế hoạch)', vp: { width: 390, height: 844 }, tab: 'Kế hoạch', prep: async (p) => toEnd(p), open: (p) => tap(p, 'Thêm việc'), scrim: true, close: 'back',
           isOpen: (p) => p.evaluate(`(() => { const i = document.querySelector('input[placeholder="VD: Chốt số bàn với nhà hàng"]'); if (!i) return false; const r = i.getBoundingClientRect();
             for (let a = i; a && a !== document.documentElement; a = a.parentElement) { if (parseFloat(getComputedStyle(a).opacity) < 0.05) return false; } return r.width > 20 && r.top >= 0 && r.bottom <= innerHeight; })()`),
           anchor: (p) => p.evaluate(`(() => { const i = document.querySelector('input[placeholder="VD: Chốt số bàn với nhà hàng"]'); const need = Math.min(document.documentElement.clientWidth, 768) - 4;
             for (let a = i; a && a !== document.documentElement; a = a.parentElement) { const r = a.getBoundingClientRect(); if (r.width >= need && Math.abs(r.bottom - innerHeight) <= 1.5) return true; } return false; })()`) },
-        { name: 'Hộp thoại "Cách hoạt động" (trang con Nhà hàng)', hash: 'ngan-sach/venue', prep: async (p) => { await toTop(p); for (let i = 0; i < 20 && !(await btn(p, 'Chi tiết')); i++) await wheel(p, 60); return sy(p); },
+        { name: 'Hộp thoại "Cách hoạt động" (trang con Nhà hàng)', hash: 'ngan-sach/venue', prep: async (p) => { await toTop(p); await wheel(p, 80); for (let i = 0; i < 20 && !(await btn(p, 'Chi tiết')); i++) await wheel(p, 60); return sy(p); },
           open: (p) => tap(p, 'Chi tiết'), isOpen: (p) => p.getByRole('dialog', { name: 'Cách hoạt động' }).isVisible(), close: 'back',
           anchor: (p) => p.evaluate(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return false; const r = d.getBoundingClientRect(); return r.top >= -1 && r.bottom <= innerHeight + 1; }) },
         // Không mở được trong harness: sheet vendor ở Ngân sách (cần danh sách vendor từ API tìm vendor và thao tác chọn nhiều bước); đã có INV-003/005/006 (bề rộng, chạm ngoài) và budget/inv-004.
       ];
       for (const lay of layers) {
-        const S = await mk({ viewport: SHORT, hash: lay.hash }); const p = S.page;
+        const S = await mk({ viewport: lay.vp || SHORT, hash: lay.hash }); const p = S.page;
         if (lay.tab) await goTabTap(p, lay.tab); await settle(p, 10);
         let y0; if (lay.prep) y0 = await lay.prep(p); else { await toTop(p); y0 = await wheel(p, 70); } const pr = await probe(p);
         check(`${lay.name}: có chỗ để thử (đã cuộn ${y0}px, có mốc nội dung)`, y0 > 20 && !!pr);
@@ -287,7 +287,7 @@ const gotoHash = async (S, hash) => { await S.page.goto(S.base + '/#/' + hash); 
         check(`${lay.name}: đóng được`, !(await lay.isOpen(p)));
         const yC = await settle(p, 30); const tC = await probeNow(p);
         check(`${lay.name}: đóng xong giữ đúng vị trí cũ, không nhảy (scrollY ${yC} so với ${y0}; mốc ${tC === null ? 'mất' : tC.toFixed(0)} so với ${pr.top.toFixed(0)})`, near(yC, y0, 1) && tC !== null && near(tC, pr.top, 1));
-        const yA = await wheel(p, 40); check(`${lay.name}: đóng xong lăn lại bình thường (scrollY ${yA})`, yA !== y0 && yA > 0);
+        const atEnd = y0 >= (await maxScroll(p)) - 1; const yA = await wheel(p, atEnd ? -40 : 40); check(`${lay.name}: đóng xong lăn lại bình thường (scrollY ${yA})`, yA !== y0 && yA > 0);
         const inner = await innerScrolled(p); check(`${lay.name}: đóng xong không để lại khung con đang cuộn`, inner.length === 0, inner.join('; '));
         await S.ctx.close();
       }
