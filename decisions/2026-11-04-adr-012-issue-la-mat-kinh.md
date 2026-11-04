@@ -21,3 +21,11 @@ Capu đề xuất vòng đời: ý định → file + issue → Chief of Staff �
 - `scripts/mirror_project.py`: chạy khi có `secrets.PROJECTS_TOKEN` (PAT scope `project`) và `vars.PROJECT_NUMBER`; Capu tạo Project và trường (Status với 8 option trên, Bậc, Vùng, Vòng, Cổng) một lần.
 - Eval `eval/T-063/eval-mirror.py` kiểm 4 mốc, đóng khi done, không ghi sổ cái.
 - Sau pilot: nếu 4 mốc quá ồn hay quá ít, chỉnh `milestone()` — không thêm chiều ngược.
+
+## Bổ sung sau Code Gate lần 1 của T-063 (2026-11-04, Chief of Staff)
+
+- **Bậc C đóng issue khi nào:** sau khi Capu merge, Chief of Staff ghi `task.py merged T-xxx --by capu --link <PR>` (sự kiện `merged`, trạng thái vẫn `done`). Mốc ④ của bậc C bám vào sự kiện này. Bậc A/B: mốc ④ bám vào `accepted` của adversary (Chief of Staff merge ngay sau).
+- `decided --close` cũng là `done` → mốc ④ và đóng issue. Việc chỉ có spec, bậc C, qua Spec Gate → gán Capu, không đóng.
+- Trường `issue` phải rỗng hoặc số nguyên dương (bất biến `hq/ledger/inv-001`); `task.py new --issue` từ chối giá trị khác. Một issue hỏng không được chặn phản chiếu của việc khác.
+- Marker chỉ được tính khi comment do bot (`github-actions[bot]` hoặc tác giả chạy workflow) viết và có đúng dạng `<!-- tohong-mirror:… -->`.
+- Thời gian so sánh 48h dùng giờ sổ cái (`ledger.now()`), không dùng giờ runner.
