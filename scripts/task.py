@@ -91,7 +91,7 @@ REQUESTER = "capu"      # người duy nhất được ghi là bên yêu cầu (
 REQUEST_TO = "chief-of-staff"
 FIELDS = ["id", "title", "state", "holder", "owner", "reviewer", "rounds", "version",
           "deadline", "budget", "escalation", "tier", "area", "eval", "spec_returns", "evals_added",
-          "created", "updated", "prev_state", "cost"]
+          "issue", "created", "updated", "prev_state", "cost"]
 STALL_HOURS = 24        # quá ngưỡng này không có sự kiện = đứng yên
 
 
@@ -151,6 +151,7 @@ def read_task(tid):
         meta["eval"] = [x for x in [meta.get("eval")] if x]
     meta["tier"] = meta.get("tier") or ""
     meta["area"] = meta.get("area") or ""
+    meta["issue"] = str(meta.get("issue") or "").strip()   # số issue GitHub chứa ý định gốc (mặt kính, ADR-012)
     return meta, m.group(2)
 
 
@@ -330,7 +331,7 @@ def cmd_new(a):
         "id": tid, "title": a.title, "state": "new", "holder": a.to, "owner": a.to,
         "reviewer": a.reviewer or GATE_OF.get(a.to, "adversary"), "rounds": 0, "version": 0, "deadline": a.deadline or "",
         "budget": a.budget or "", "escalation": a.escalation, "tier": tier, "eval": list(a.eval),
-        "area": normalize_area(a.area), "spec_returns": 0, "evals_added": 0, "created": ts, "updated": ts, "prev_state": "", "cost": round(a.cost, 2),
+        "area": normalize_area(a.area), "issue": str(a.issue or "").lstrip("#"), "spec_returns": 0, "evals_added": 0, "created": ts, "updated": ts, "prev_state": "", "cost": round(a.cost, 2),
     }
     if not a.criteria:
         raise LedgerError("Việc mới phải có ít nhất một --criteria (tiêu chí chấp nhận).")
@@ -340,11 +341,14 @@ def cmd_new(a):
             f"Chưa có eval thì chưa phải spec: giao {SPEC_OWNER} viết spec + eval trước.")
     crit = "\n".join(f"{i}. {c}" for i, c in enumerate(a.criteria, 1))
     evl = "\n".join(f"- `{e}`" for e in a.eval) or "— (chưa có; bộ phận giữ spec bổ sung trước khi giao Engineering)"
+    origin = (f"**Ý định gốc:** [issue #{meta['issue']}](https://github.com/phungrk/tohong-hq/issues/{meta['issue']})\n\n"
+              if meta["issue"] else "")
     body = (f"\n# {tid} · {a.title}\n\n## Brief\n\n"
             f"**Mục tiêu:** {a.goal or a.title}\n\n"
             f"**Bối cảnh:** {a.context or '—'}\n\n"
             f"**Bậc lưới lọc:** {TIER_VI[tier]}\n\n"
             f"**Vùng (bất biến áp dụng):** {meta['area'] or '—'}\n\n"
+            f"{origin}"
             f"### Tiêu chí chấp nhận\n\n{crit}\n\n"
             f"### Eval (lưới lọc chạy được)\n\n{evl}\n\n"
             f"### Không làm\n\n{a.out_of_scope or '—'}\n\n## Lịch sử\n")
@@ -399,8 +403,12 @@ def cmd_evals(a):
     if meta["state"] in ("done", "escalated"):
         raise LedgerError(f"{a.task} đã {meta['state']}, không thêm eval được.")
     new = [e for e in a.eval if e not in meta["eval"]]
-    meta["eval"] = list(meta["eval"]) + new
-    row = log_event(meta, "evals", a.by, meta["holder"], a.note or f"đăng ký {len(new)} eval tầng 1")
+    if a.replace:
+        meta["eval"] = list(a.eval)
+    else:
+        meta["eval"] = list(meta["eval"]) + new
+    row = log_event(meta, "evals", a.by, meta["holder"],
+                    a.note or (f"thay danh sách eval ({len(a.eval)})" if a.replace else f"đăng ký {len(new)} eval tầng 1"))
     write_task(meta, append_history(body, row))
     print(f"{a.task}: {len(new)} eval mới, tổng {len(meta['eval'])}")
 
@@ -682,6 +690,7 @@ def main(argv=None):
     sp.add_argument("--budget", default="", help="Ngân sách dự kiến cho cả việc, vd '$2'")
     sp.add_argument("--reviewer", default="", help="Mặc định theo bộ phận: product → spec-critic, engineering → adversary")
     sp.add_argument("--area", default="", help="Vùng: <sản phẩm>/<vùng>, vd planner/front/budget hay hq/dashboard; gate.py chạy _shared + mọi cấp cha của vùng")
+    sp.add_argument("--issue", default="", help="Số issue GitHub chứa ý định gốc của Capu (ADR-012); workflow mirror-issue phản chiếu 4 mốc lên đó")
     sp.add_argument("--escalation", default="tu-lam", choices=["tu-lam", "bao-sau", "hoi-truoc"])
     sp.add_argument("--tier", choices=TIERS, default="",
                     help="Bậc lưới lọc: A tự merge khi eval xanh, B Chief of Staff merge, C Capu duyệt. Mặc định B; hoi-truoc → C")
@@ -718,6 +727,7 @@ def main(argv=None):
     sp = sub.add_parser("evals", help="Đăng ký eval tầng 1 cho việc chưa xong")
     sp.add_argument("task"); sp.add_argument("--by", required=True); sp.add_argument("--note", default="")
     sp.add_argument("--eval", action="append", default=[], required=True)
+    sp.add_argument("--replace", action="store_true", help="Thay toàn bộ danh sách thay vì thêm (Chief of Staff sửa eval ghi sai)")
     sp.set_defaults(fn=cmd_evals)
 
     sp = sub.add_parser("area", help="Chief of Staff đổi vùng của việc chưa xong")
