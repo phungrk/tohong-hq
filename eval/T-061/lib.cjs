@@ -8,7 +8,9 @@ const { spawn } = require('child_process');
 const T = require('../T-054/lib.cjs');
 
 const groups = new Set();
-const killAll = () => { for (const pid of groups) { try { process.kill(-pid, 'SIGKILL'); } catch { /* đã chết */ } } groups.clear(); };
+const dists = [];
+const killAll = () => { for (const d of dists.splice(0)) { try { fs.rmSync(d, { recursive: true, force: true }); } catch { /* */ } }
+  for (const pid of groups) { try { process.kill(-pid, 'SIGKILL'); } catch { /* đã chết */ } } groups.clear(); };
 process.on('exit', killAll);
 for (const s of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(s, () => { killAll(); process.exit(130); });
 
@@ -22,7 +24,7 @@ function runGroup(cmd, argv, opts, timeoutMs = 240000) {
   });
 }
 async function buildDist(repo) {
-  const dist = fs.mkdtempSync(path.join(os.tmpdir(), 't061-dist-'));
+  const dist = fs.mkdtempSync(path.join(os.tmpdir(), 't061-dist-')); dists.push(dist);
   const r = await runGroup(path.join(repo, 'node_modules/.bin/vite'), ['build', '--outDir', dist, '--emptyOutDir'],
     { cwd: repo, env: { ...process.env, VITE_CLERK_PUBLISHABLE_KEY: '', VITE_API_BASE: 'http://api.test', VITE_ADMIN_DEV_TOKEN: 'dev:eval' } });
   if (r.code !== 0) { console.log('FAIL build lỗi: ' + r.out.split('\n').filter(Boolean).slice(-2).join(' | ')); process.exit(1); }
@@ -46,7 +48,7 @@ const ADMIN_SUM = { accounts: { status: 'ok', total: 12, new_7d: 2 }, couples: {
 
 // Mọi yêu cầu được phép (tiêu chí 12: không đổi API). Dạng "METHOD /đường-dẫn".
 const ALLOWED = [/^GET \/api\/me$/, /^GET \/api\/couples\/c-test\/(summary|budget|timeline|timeline\/suggestions|guests|conversations|subscription|upgrade-request|connect-requests|briefing|budget\/proposal|shortlist|members)$/,
-  /^PUT \/api\/couples\/c-test\/(timeline|budget)$/, /^GET \/api\/couples\/c-test\/conversations\/[^/]+\/messages$/, /^POST \/api\/vendors\/status$/, /^GET \/api\/vendors\/(match|categories|[^/]+)$/,
+  /^PUT \/api\/couples\/c-test\/(timeline|budget)$/, /^POST \/api\/couples\/c-test\/chat$/, /^GET \/api\/couples\/c-test\/conversations\/[^/]+\/messages$/, /^POST \/api\/vendors\/status$/, /^GET \/api\/vendors\/(match|categories|[^/]+)$/,
   /^GET \/api\/admin\/(me|members-summary)$/, /^POST \/api\/admin\/members-list$/];
 
 const DATA_PATHS = /\/api\/(me$|couples\/c-test\/(summary|budget|timeline|guests|conversations\/[^/]+\/messages)$|vendors\/match|admin\/)/;
@@ -58,7 +60,7 @@ const DATA_PATHS = /\/api\/(me$|couples\/c-test\/(summary|budget|timeline|guests
 async function scenario(browser, base, opts = {}) {
   const ctx = await browser.newContext({ viewport: opts.viewport || { width: 390, height: 844 }, reducedMotion: opts.reduced ? 'reduce' : 'no-preference' });
   const page = await ctx.newPage(); page.setDefaultTimeout(8000);
-  const S = { page, ctx, reqs: [], t0: null, errors: [], external: [], fail: { on: false, match: null, status: 500, ...(opts.fail || {}) }, delay: opts.delay ?? 0, noBudget: !!opts.noBudget };
+  const S = { page, ctx, reqs: [], t0: null, errors: [], external: [], fail: { on: false, match: null, status: 500, ...(opts.fail || {}) }, delay: opts.delay ?? 0, noBudget: !!opts.noBudget, meDone: false };
   page.on('pageerror', (e) => S.errors.push(String(e)));
   await page.route('**/*', async (route) => {
     const req = route.request(), url = req.url();
@@ -71,6 +73,7 @@ async function scenario(browser, base, opts = {}) {
     S.reqs.push({ t: now, key: `${m} ${p}` });
     if (DATA_PATHS.test(p)) { const d = typeof S.delay === 'function' ? S.delay(p) : S.delay; if (d) await new Promise((r) => setTimeout(r, d)); }
     if (S.fail.on && S.fail.match && S.fail.match.test(p)) return json({ error: 'boom' }, S.fail.status);
+    if (p === '/api/me') S.meDone = true;
     if (p === '/api/me') return json({ couples: [{ couple_id: CID, role: 'owner' }] });
     const c = `/api/couples/${CID}`;
     if (p === c + '/summary') return json({ profile: { bride_name: 'An', groom_name: 'Bình', wedding_date: '2027-03-20', city: 'TP.HCM' }, days_left: 200, total_days: 300, done_days: 100,
@@ -82,6 +85,7 @@ async function scenario(browser, base, opts = {}) {
     if (p === c + '/conversations') return json({ conversations: [{ id: 'cv1', title: 'Chọn nhà hàng', updated_at: '2026-11-01T00:00:00Z' }] });
     if (p.startsWith(c + '/conversations/') && p.endsWith('/messages')) return json({ messages: [{ id: 'm1', role: 'user', content: 'Gợi ý nhà hàng giúp mình' }, { id: 'm2', role: 'assistant', content: 'Đây là gợi ý từ máy chủ giả' }] });
     if (p === '/api/vendors/match') return json({ vendors: VENDORS, total: 3, whyThoseVendors: '' });
+    if (p === c + '/chat' && m === 'POST') return route.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'text/event-stream' }, body: `event: action\ndata: ${JSON.stringify({ type: S.chatAction || 'add_guest', success: true })}\n\nevent: chunk\ndata: {"text":"Mình đã thêm xong rồi nhé"}\n\nevent: done\ndata: {}\n\n` });
     if (p === '/api/vendors/status') return json({ vendors: {} });
     if (p === '/api/admin/me') return json({ counts: {} });
     if (p === '/api/admin/members-summary') return json(ADMIN_SUM);
@@ -89,7 +93,7 @@ async function scenario(browser, base, opts = {}) {
     return json({});
   });
   await page.addInitScript(([cid]) => { try { localStorage.setItem('th_user', JSON.stringify({ bride: 'An', groom: 'Bình' })); } catch { /* */ } }, [CID]);
-  if (opts.init) await page.addInitScript(opts.init);
+  if (opts.init) await page.addInitScript(...[].concat(opts.init));
   await page.goto(base + (opts.admin ? '/?admin' : '/') + (opts.hash ? '#/' + opts.hash : ''));
   return S;
 }

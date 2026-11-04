@@ -13,6 +13,10 @@ if [ -z "$FRONT" ] || [ ! -f "$FRONT/package.json" ]; then echo "FAIL cần đư
 FRONT="$(cd "$FRONT" && pwd)"; shift
 if [ "${1:-}" = "--only" ] && [ "${2:-}" = "13" ]; then
   bash "$HERE/../T-054/run_invariants.sh" "$FRONT"; a=$?
+  # Thư mục bất biến của chính vùng planner/front/loading (run_invariants.sh của T-054 không có): chạy ở đây; bể trống thì báo và không tính đỏ.
+  n=0; for f in "$HERE"/../invariants/planner/front/loading/inv-*.sh; do [ -f "$f" ] || continue; n=$((n+1))
+    if (cd "$FRONT" && TOHONG_FRONT_REPO="$FRONT" bash "$f") >/tmp/t061-inv.$$ 2>&1; then echo "  ok loading/$(basename "$f" .sh)"; else echo "  XX loading/$(basename "$f" .sh) :: $(tail -1 /tmp/t061-inv.$$ | cut -c1-200)"; a=1; fi; done; rm -f /tmp/t061-inv.$$
+  [ $n -eq 0 ] && echo "  (planner/front/loading: chưa có bất biến nào trong bể)"
   bash "$HERE/../T-054/run.sh" "$FRONT" --only 1,2,3,4,5,6,7,8 >/tmp/t061-t054.$$ 2>&1; b=$?
   tail -1 /tmp/t061-t054.$$; rm -f /tmp/t061-t054.$$
   if [ $a -eq 0 ] && [ $b -eq 0 ]; then echo PASS; exit 0; fi

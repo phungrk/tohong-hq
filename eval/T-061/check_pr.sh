@@ -6,7 +6,7 @@
 set -u
 PR="${1:-}"; REPO="${2:-phungrk/tohong-front}"
 if [ -z "$PR" ]; then echo "FAIL cần số PR"; exit 1; fi
-BODY="$(gh pr view "$PR" --repo "$REPO" --json body -q .body 2>/dev/null)" || { echo "FAIL không đọc được PR $PR của $REPO (gh chưa đăng nhập hoặc sai số)"; exit 1; }
+BODY="$(gh api "repos/$REPO/pulls/$PR" --jq .body 2>/dev/null)" || { echo "FAIL không đọc được PR $PR của $REPO (gh chưa đăng nhập hoặc sai số)"; exit 1; }
 IMGS="$(printf '%s' "$BODY" | grep -o -E '!\[[^]]*\]\([^)]+\)|<img [^>]*src=' | wc -l)"
 [ "$IMGS" -ge 10 ] || { echo "FAIL PR có $IMGS ảnh, cần >= 10"; exit 1; }
 printf '%s' "$BODY" | grep -q '390' || { echo "FAIL mô tả PR không ghi rõ khung 390"; exit 1; }
