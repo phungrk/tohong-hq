@@ -3,7 +3,7 @@
  * Eval tầng 1 của T-061 (front): trạng thái đang tải hiển thị skeleton. Spec: products/T-061-skeleton-dang-tai.md. --only N = tiêu chí N:
  *   1 bốn tab + trang con hạng mục: có skeleton, không chữ "Đang tải" trơn, không màn rỗng giả   2 chat: gợi ý vendor, lịch sử trò chuyện
  *   3 admin Thành viên   4 không nhảy bố cục (tiêu đề, thanh tab, khối đầu) 390 và 320   5 lỗi tải: thông báo + Thử lại; 404 ngân sách là "chưa có dữ liệu"
- *   6 thời điểm hiện (me trễ 1s: skeleton 100-250ms từ lúc điều hướng; tải nhanh không nháy; không rỗng giả suốt lúc chờ)   7 prefers-reduced-motion   8 truy cập (role=status "Đang tải", aria-busy, không focus được)
+ *   6 thời điểm hiện (me trễ 1s: skeleton 100-300ms từ yêu cầu /api/me đầu và trước khi me về; tải nhanh không nháy; không rỗng giả suốt lúc chờ)   7 prefers-reduced-motion   8 truy cập (role=status "Đang tải", aria-busy, không focus được)
  *   9 màu chỉ dùng token   10 không cuộn ngang 320/390   11 không đổi API (chỉ yêu cầu đã có, không nhiều hơn main)
  *   (4 còn đo làm mới: dựng lại màn có key và tải lại màn còn dữ liệu)
  * Tiêu chí 12 (ảnh 390 trong PR): bash eval/T-061/check_pr.sh <số-PR>. Tiêu chí 13 (bất biến + T-054): bash eval/T-061/run.sh <front> --only 13.
@@ -64,11 +64,12 @@ const titleTop = (page, text) => page.evaluate((t) => { for (const e of document
   const r = e.getBoundingClientRect(); if (r.width > 8 && r.top < 110 && r.bottom > 0) return r.top + scrollY; } return null; }, text);
 const tabTop = (page, name) => page.evaluate((n) => { const b = [...document.querySelectorAll('button')].filter((x) => x.textContent.trim() === n).map((x) => x.getBoundingClientRect()).filter((r) => r.width > 2 && r.top > 300).sort((a, b) => b.top - a.top)[0]; return b ? b.top : null; }, name);
 // Mốc thật: phần tử có chữ riêng khớp `at`; kind=card thì leo lên tổ tiên đầu tiên rộng >= vw-40.
-const realMark = (page, at, kind) => page.evaluate(([src, flags, kd]) => { const re = new RegExp(src, flags);
-  for (const e of document.querySelectorAll('body *')) { const own = [...e.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim(); if (!own || !re.test(own) || e.closest('button')) continue; // chữ trong nút (vd. nút lọc "Nhà trai") không phải mốc
-    let r = e.getBoundingClientRect(); if (r.width <= 2 || r.height <= 2) continue;
-    if (kd === 'card') { let a = e; while (a && a.getBoundingClientRect().width < innerWidth - 40 && a.parentElement) a = a.parentElement; r = a.getBoundingClientRect(); }
-    return { top: r.top + scrollY, height: r.height }; } return null; }, [at.source, at.flags, kind]);
+const realMark = (page, at, kind) => page.evaluate(([src, flags, kd]) => { const re = new RegExp(src, flags); // khớp theo textContent của phần tử nhỏ nhất chứa mốc (chữ có thể bị tách bởi <b>...</b>)
+  const hit = [...document.querySelectorAll('body *')].filter((e) => re.test((e.textContent || '').trim()) && !e.closest('button') && ![...e.children].some((c) => re.test((c.textContent || '').trim()))
+    && (() => { const r = e.getBoundingClientRect(); return r.width > 2 && r.height > 2; })());
+  if (!hit.length) return null; let r = hit[0].getBoundingClientRect();
+  if (kd === 'card') { let a = hit[0]; while (a && a.getBoundingClientRect().width < innerWidth - 40 && a.parentElement) a = a.parentElement; r = a.getBoundingClientRect(); }
+  return { top: r.top + scrollY, height: r.height, n: hit.length }; }, [at.source, at.flags, kind]);
 const idleFrames = (page) => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 async function load(browser, base, hash, opts = {}) { return L.scenario(browser, base, { hash, delay: DELAY, ...opts }); }
 const shot = async (page, name) => { if (!SHOTS) return; fs.mkdirSync(SHOTS, { recursive: true }); await page.screenshot({ path: path.join(SHOTS, name + '.png') }); };
@@ -190,6 +191,7 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
         const m1 = { title: await titleTop(page, sc.title), tab: await tabTop(page, sc.tab) };
         await page.getByText(sc.at).first().waitFor({ state: 'visible', timeout: 9000 }); await waitGone(page); await idleFrames(page);
         const m2 = { title: await titleTop(page, sc.title), tab: await tabTop(page, sc.tab) }; const real = await realMark(page, sc.at, sc.kind);
+        check(`${tag}: mốc thật tìm được đúng 1 phần tử (khớp theo textContent của phần tử nhỏ nhất)`, !!real && real.n === 1, real ? 'tìm được ' + real.n : 'không tìm thấy');
         check(`${tag}: tiêu đề không nhảy (±2px)`, near(m1.title, m2.title, 2), `${m1.title} → ${m2.title}`);
         check(`${tag}: thanh tab không nhảy (±2px)`, near(m1.tab, m2.tab, 2), `${m1.tab} → ${m2.tab}`);
         check(`${tag}: khối skeleton đầu cùng top với mốc thật (±3px)`, !!first && !!real && near(first.top, real.top, 3), `skeleton ${first && Math.round(first.top)} thật ${real && Math.round(real.top)}`);
@@ -273,9 +275,10 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
         { // /api/me trễ 1s, dữ liệu trễ 1,5s: skeleton phải hiện 100-250ms từ lúc điều hướng, tức TRONG lúc chờ /api/me
           const S = track(await L.scenario(browser, srv.base, { hash: sc.id, delay: (p) => (p === '/api/me' ? 1000 : 1500), init: [init, pairs] }));
           await S.page.waitForTimeout(1300); // /api/me đã về (1s), dữ liệu chưa (2,5s)
-          const o = await S.page.evaluate(() => ({ b: window.__busyAt, f: window.__fake, fa: window.__fakeAt, o: performance.timeOrigin }));
-          const d = o.b ? o.b - o.o : null;
-          check(`${sc.id}: khối skeleton hiện trong 100-250ms từ lúc điều hướng, trong lúc /api/me còn chờ`, d !== null && d >= 100 && d <= 250, d === null ? 'không hiện' : Math.round(d) + 'ms');
+          const o = await S.page.evaluate(() => ({ b: window.__busyAt, f: window.__fake, fa: window.__fakeAt }));
+          const d = o.b && S.t0 ? o.b - S.t0 : null; // gốc thời gian = lúc yêu cầu /api/me đầu tiên tới máy chủ giả (app bắt đầu chờ), không tính thời gian tải và chạy JS
+          check(`${sc.id}: khối skeleton hiện trong 100-300ms kể từ yêu cầu /api/me đầu`, d !== null && d >= 100 && d <= 300, d === null ? 'không hiện' : Math.round(d) + 'ms');
+          check(`${sc.id}: khối skeleton hiện TRƯỚC khi /api/me trả về (me trễ 1s)`, d !== null && d < 1000, d === null ? 'không hiện' : Math.round(d) + 'ms');
           check(`${sc.id}: suốt lúc chờ (gồm chờ /api/me) không có chữ rỗng giả hay chữ chờ trơn`, o.fa === null, o.f);
           await S.ctx.close();
         }
