@@ -53,6 +53,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           CAPU_LOGIN: ${{ github.repository_owner }}
+          MIRROR_AUTHOR: ${{ github.repository_owner }}   # marker do Capu/phiên chạy tay cũng được tính, tránh ghi trùng
         run: |
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             python3 scripts/mirror_issue.py --state "$RUNNER_TEMP/state" --dry-run
@@ -60,8 +61,7 @@ jobs:
             python3 scripts/mirror_issue.py --state "$RUNNER_TEMP/state"
           fi
 
-      - name: Đồng bộ Project board (chỉ khi có PROJECTS_TOKEN)
-        if: ${{ secrets.PROJECTS_TOKEN != '' }}
+      - name: Đồng bộ Project board (script tự bỏ qua khi chưa có PROJECTS_TOKEN / PROJECT_NUMBER)
         env:
           PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
           PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}

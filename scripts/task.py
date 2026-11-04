@@ -61,7 +61,7 @@ EVENT_VI = {
     "assigned": "Giao việc", "started": "Bắt đầu", "handoff": "Bàn giao", "rejected": "Trả về",
     "accepted": "Chấp nhận", "blocked": "Báo bị chặn", "unblocked": "Gỡ chặn",
     "escalated": "Leo thang", "decided": "Capu quyết định", "cost": "Ghi chi phí", "requested": "Capu yêu cầu",
-    "respec": "Sửa spec xong", "evalplus": "Thêm eval, chạy lại", "evals": "Đăng ký eval", "area": "Đổi vùng",
+    "merged": "Đã merge", "respec": "Sửa spec xong", "evalplus": "Thêm eval, chạy lại", "evals": "Đăng ký eval", "area": "Đổi vùng",
 }
 SPEC_OWNER = "product"  # bộ phận giữ spec + eval (Spec Writer)
 GATE_OF = {"product": "spec-critic", "engineering": "adversary"}   # ai gác cổng cho việc của bộ phận nào
@@ -321,7 +321,18 @@ def transition(tid, allowed_from, new_state, event, by, to, *, holder=None, deta
 
 
 # ---------- lệnh ----------
+def parse_issue(raw):
+    """Số issue: rỗng, hoặc số nguyên dương (nhận '#11', ' 11 '). Giá trị khác là LedgerError (bất biến hq/ledger/inv-001)."""
+    v = str(raw or "").strip()
+    if v.startswith("#"):
+        v = v[1:].strip()
+    if v and not re.fullmatch(r"[1-9]\d*", v):
+        raise LedgerError(f"--issue phải là số nguyên dương (vd 11 hoặc #11), nhận được: {raw!r}")
+    return v
+
+
 def cmd_new(a):
+    issue = parse_issue(a.issue)
     tid = next_id()
     ts = stamp()
     tier = a.tier or ("C" if a.escalation == "hoi-truoc" else "B")
@@ -331,7 +342,7 @@ def cmd_new(a):
         "id": tid, "title": a.title, "state": "new", "holder": a.to, "owner": a.to,
         "reviewer": a.reviewer or GATE_OF.get(a.to, "adversary"), "rounds": 0, "version": 0, "deadline": a.deadline or "",
         "budget": a.budget or "", "escalation": a.escalation, "tier": tier, "eval": list(a.eval),
-        "area": normalize_area(a.area), "issue": str(a.issue or "").lstrip("#"), "spec_returns": 0, "evals_added": 0, "created": ts, "updated": ts, "prev_state": "", "cost": round(a.cost, 2),
+        "area": normalize_area(a.area), "issue": issue, "spec_returns": 0, "evals_added": 0, "created": ts, "updated": ts, "prev_state": "", "cost": round(a.cost, 2),
     }
     if not a.criteria:
         raise LedgerError("Việc mới phải có ít nhất một --criteria (tiêu chí chấp nhận).")
@@ -474,6 +485,20 @@ def cmd_area(a):
     row = log_event(meta, "area", a.by, meta["holder"], a.note or f"vùng {old or '—'} → {new}")
     write_task(meta, append_history(body, row))
     print(f"{a.task}: vùng {old or '—'} → {new}")
+
+
+def cmd_merged(a):
+    """Ghi PR đã được merge cho việc done (sự kiện merged, không đổi trạng thái). Mốc ④ của bậc C bám vào đây (ADR-012)."""
+    if a.by not in ("capu", "chief-of-staff"):
+        raise LedgerError("merged chỉ do capu hoặc chief-of-staff ghi.")
+    if not a.link:
+        raise LedgerError("merged phải có --link: PR đã merge.")
+    meta, body = read_task(a.task)
+    if meta["state"] != "done":
+        raise LedgerError(f"{a.task} chưa done ('{STATE_VI.get(meta['state'], meta['state'])}'); chỉ ghi merged cho việc done.")
+    row = log_event(meta, "merged", a.by, "done", a.note or "", link="", extra={"pr": a.link})
+    write_task(meta, append_history(body, dict(row, detail=(a.note + " · " if a.note else "") + a.link)))
+    print(f"{a.task}: ghi merged {a.link} (trạng thái không đổi)")
 
 
 def cmd_evalplus(a):
@@ -715,6 +740,13 @@ def main(argv=None):
         if name == "handoff":
             sp.add_argument("--eval", action="append", default=[], help="Eval tầng 1 kèm spec (Spec Writer đăng ký lúc bàn giao)")
         sp.set_defaults(fn=fn)
+
+    sp = sub.add_parser("merged", help="Ghi PR đã merge cho việc done (không đổi trạng thái)")
+    sp.add_argument("task")
+    sp.add_argument("--by", required=True, choices=["capu", "chief-of-staff"])
+    sp.add_argument("--link", required=True, help="URL PR đã merge")
+    sp.add_argument("--note", default="")
+    sp.set_defaults(fn=cmd_merged)
 
     sp = sub.add_parser("reject", help="Cổng trả về, có phân loại lỗi")
     common(sp)

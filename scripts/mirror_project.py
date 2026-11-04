@@ -16,9 +16,10 @@ Projects v2 chỉ có GraphQL; vì vậy script này chỉ chạy trong GitHub A
 """
 import json
 import os
+import re
 import sys
 import urllib.request
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -50,13 +51,13 @@ def column_of(meta):
     st = meta["state"]
     if st == "review":
         return "Spec Gate" if meta.get("reviewer") == "spec-critic" else "Code Gate"
-    if st == "doing" and meta.get("owner") == "product":
+    if st in ("doing", "rework") and meta.get("owner") == "product":
         return "Spec"
     if st == "done" and meta.get("tier") == "C":
         return "Chờ Capu"
     if st == "done" and meta.get("tier") == "B":
         try:
-            if datetime.now() - datetime.strptime(meta["updated"], "%Y-%m-%dT%H:%M") < timedelta(hours=48):
+            if ledger.now() - ledger.parse_stamp(meta["updated"]) < timedelta(hours=48):   # giờ sổ cái, không phải giờ runner
                 return "Chờ Capu"
         except Exception:
             pass
@@ -108,10 +109,14 @@ def main():
             meta, _ = ledger.read_task(p.stem)
         except ledger.LedgerError:
             continue
-        if not meta.get("issue"):
+        raw = str(meta.get("issue") or "").strip()
+        if not raw:
+            continue
+        if not re.fullmatch(r"[1-9]\d*", raw):
+            print(f"CẢNH BÁO: {meta['id']} có issue không hợp lệ {raw!r}; bỏ qua.", file=sys.stderr)
             continue
         iss = gql("""query($o:String!,$r:String!,$n:Int!){ repository(owner:$o,name:$r){ issue(number:$n){ id } } }""",
-                  {"o": OWNER, "r": REPO, "n": int(meta["issue"])})["repository"]["issue"]["id"]
+                  {"o": OWNER, "r": REPO, "n": int(raw)})["repository"]["issue"]["id"]
         item = gql("""mutation($p:ID!,$c:ID!){ addProjectV2ItemById(input:{projectId:$p,contentId:$c}){ item{ id } } }""",
                    {"p": proj["id"], "c": iss})["addProjectV2ItemById"]["item"]["id"]
         set_field(item, "Status", column_of(meta))
