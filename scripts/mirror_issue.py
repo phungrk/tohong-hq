@@ -23,6 +23,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -38,6 +39,40 @@ BOT = os.environ.get("BOT_LOGIN", "")
 TOKEN = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN") or ""
 API = "https://api.github.com"
 MARK = "<!-- tohong-mirror:{key} -->"   # chống ghi trùng khi chạy lại
+MARK_RE = re.compile(r"\A<!-- tohong-mirror:([A-Za-z0-9._-]+) -->")   # chỉ nhận đúng dạng ở ĐẦU thân comment
+ISSUE_RE = re.compile(r"[1-9]\d*")   # bất biến hq/ledger/inv-001
+ZWSP = "\u200b"
+
+
+class GhError(Exception):
+    pass
+
+
+def safe(text, n=300):
+    """Văn bản từ sổ cái đưa lên issue: cắt n ký tự, chèn ký tự rộng 0 sau '@' để không ping ai."""
+    return str(text or "")[:n].replace("@", "@" + ZWSP)
+
+
+def is_bot(user):
+    user = user or {}
+    login = user.get("login", "")
+    mine = os.environ.get("MIRROR_AUTHOR", "")
+    return user.get("type") == "Bot" or login.endswith("[bot]") or (bool(mine) and login == mine)
+
+
+def list_markers(issue):
+    """Khoá marker hợp lệ trên issue: comment của bot, bắt đầu đúng bằng marker. Phân trang 100/trang."""
+    keys, page = set(), 1
+    while page <= 100:
+        cs = gh("GET", f"/repos/{REPO}/issues/{issue}/comments?per_page=100&page={page}")
+        for c in cs if isinstance(cs, list) else []:
+            m = MARK_RE.match(c.get("body") or "")
+            if m and is_bot(c.get("user")):
+                keys.add(m.group(1))
+        if not isinstance(cs, list) or len(cs) < 100:
+            break
+        page += 1
+    return keys
 
 
 def gh(method, path, body=None, dry=False):
@@ -52,7 +87,7 @@ def gh(method, path, body=None, dry=False):
         with urllib.request.urlopen(req, timeout=30) as r:
             return json.loads(r.read().decode() or "{}")
     except urllib.error.HTTPError as e:
-        raise SystemExit(f"GitHub {e.code} {method} {path}: {e.read().decode()[:300]}")
+        raise GhError(f"GitHub {e.code} {method} {path}: {e.read().decode()[:300]}")
 
 
 def blob(path):
@@ -72,28 +107,38 @@ def gate_line(tid):
         return ""
 
 
+def done_text(tid):
+    return f"④ **Xong** · `{tid}` done · sổ cái: [{tid}]({blob(f'board/{tid}.md')}). Đóng issue từ sổ cái."
+
+
 def milestone(e, meta):
-    """Trả về (key, comment, hành động) cho một sự kiện, hoặc None."""
+    """Trả về (key, comment, hành động) cho một sự kiện, hoặc None.
+    Hành động: assign-bot | assign-capu | close (đăng thêm ④ rồi đóng) | finish (comment này là ④, rồi đóng) | ''."""
     tid, ev, frm = e["task"], e.get("event"), e.get("from", "")
     tier = meta.get("tier") or "B"
-    state = meta.get("state", "")
+    ends_done = e.get("state") == "done"
     if ev == "assigned":
         return (f"{tid}-1", f"① **Đã nhận** → `{tid}` · bậc **{tier}** · vùng `{meta.get('area') or '—'}` · "
                 f"giữ: {e.get('to')}\n\nBrief: [{tid}]({blob(f'board/{tid}.md')})", "assign-bot")
     if ev == "accepted" and frm == "spec-critic":
-        spec = next((p for p in (ROOT / "products").glob(f"{tid}-*.md")), None)
-        inv = e.get("detail", "")
-        return (f"{tid}-2", f"② **Qua Spec Gate** · {inv[:300]}" + (f"\n\nSpec: [{spec.name}]({blob('products/' + spec.name)})" if spec else ""),
-                "close" if state == "done" and tier != "C" else "")
+        spec = next((p for p in sorted((ROOT / "products").glob(f"{tid}-*.md"))), None)
+        txt = f"② **Qua Spec Gate** · {safe(e.get('detail'))}" + (f"\n\nSpec: [{spec.name}]({blob('products/' + spec.name)})" if spec else "")
+        if ends_done and tier == "C":
+            return (f"{tid}-2", txt + f"\n\n@{CAPU} bậc C: việc chỉ có spec, cần anh duyệt.", "assign-capu")
+        return (f"{tid}-2", txt, "close" if ends_done else "")
     if ev == "accepted" and frm == "adversary":
         hand = sorted((ROOT / "handoffs").glob(f"{tid}-v*.md"))
         link = f"\n\nDiff hành vi: [{hand[-1].name}]({blob('handoffs/' + hand[-1].name)})" if hand else ""
-        txt = f"③ **Qua Code Gate** · {gate_line(tid)} · {e.get('detail', '')[:300]}{link}"
+        txt = f"③ **Qua Code Gate** · {gate_line(tid)} · {safe(e.get('detail'))}{link}"
         if tier == "C":
             return (f"{tid}-3", txt + f"\n\n@{CAPU} bậc C: cần anh đọc diff hành vi và tự merge.", "assign-capu")
         return (f"{tid}-3", txt, "close")
+    if ev == "decided" and ends_done:
+        return (f"{tid}-4", done_text(tid) + f"\n\nCapu quyết định đóng: {safe(e.get('detail'))}", "finish")
+    if ev == "merged" and tier == "C":
+        return (f"{tid}-4", done_text(tid) + f"\n\nPR đã merge: {safe(e.get('pr') or e.get('detail'), 200)}", "finish")
     if ev == "escalated":
-        return (f"{tid}-esc-{e['id']}", f"⚠️ **Leo thang** · {e.get('detail', '')[:300]}\n\n@{CAPU} có Decision Request trong `inbox/capu/`.", "assign-capu")
+        return (f"{tid}-esc-{e['id']}", f"⚠️ **Leo thang** · {safe(e.get('detail'))}\n\n@{CAPU} có Decision Request trong `inbox/capu/`.", "assign-capu")
     return None
 
 
@@ -113,11 +158,7 @@ def main():
 
     def has_marker(issue, mkey):
         if issue not in markers:
-            if a.dry_run:
-                markers[issue] = set()
-            else:
-                cs = gh("GET", f"/repos/{REPO}/issues/{issue}/comments?per_page=100")
-                markers[issue] = {m for c in cs for m in [c.get("body", "").split("-->")[0].replace("<!-- tohong-mirror:", "").strip()]}
+            markers[issue] = set() if a.dry_run else list_markers(issue)
         return mkey in markers[issue]
 
     boards = {}
@@ -126,36 +167,49 @@ def main():
             meta, _ = ledger.read_task(p.stem)
         except ledger.LedgerError:
             continue
-        if meta.get("issue"):
-            boards[meta["id"]] = meta
-    done_keys, n = [], 0
+        raw = str(meta.get("issue") or "").strip()
+        if not raw:
+            continue
+        if not ISSUE_RE.fullmatch(raw):
+            print(f"CẢNH BÁO: {meta['id']} có issue không hợp lệ {raw!r}; bỏ qua việc này.", file=sys.stderr)
+            continue
+        boards[meta["id"]] = meta
+    done_keys, n, failed = [], 0, set()
     for e in ledger.read_events():
         tid = e.get("task")
-        if tid not in boards:
+        if tid not in boards or tid in failed:
             continue
         key = hashlib.sha1(json.dumps(e, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-        done_keys.append(key)
         if key in seen:
+            done_keys.append(key)
             continue
         m = milestone(e, boards[tid])
-        if not m:
-            continue
-        mkey, text, action = m
-        issue = boards[tid]["issue"]
-        if has_marker(issue, mkey):
-            continue
-        markers[issue].add(mkey)
-        print(f"{tid} → issue #{issue}: {text.splitlines()[0][:80]} [{action or '-'}]")
-        gh("POST", f"/repos/{REPO}/issues/{issue}/comments", {"body": MARK.format(key=mkey) + "\n" + text}, a.dry_run)
-        if action == "assign-bot" and BOT:
-            gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"assignees": [BOT]}, a.dry_run)
-        elif action == "assign-capu":
-            gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"assignees": [CAPU]}, a.dry_run)
-        elif action == "close":
-            gh("POST", f"/repos/{REPO}/issues/{issue}/comments",
-               {"body": MARK.format(key=f"{tid}-4") + f"④ **Xong** · `{tid}` done · sổ cái: [{tid}]({blob(f'board/{tid}.md')}). Đóng issue từ sổ cái."}, a.dry_run)
-            gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"state": "closed", "state_reason": "completed"}, a.dry_run)
-        n += 1
+        if m:
+            mkey, text, action = m
+            issue = boards[tid]["issue"]
+            try:
+                if has_marker(issue, mkey):
+                    done_keys.append(key)
+                    continue
+                print(f"{tid} → issue #{issue}: {text.splitlines()[0][:80]} [{action or '-'}]")
+                gh("POST", f"/repos/{REPO}/issues/{issue}/comments", {"body": MARK.format(key=mkey) + "\n" + text}, a.dry_run)
+                markers[issue].add(mkey)
+                if action == "assign-bot" and BOT:
+                    gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"assignees": [BOT]}, a.dry_run)
+                elif action == "assign-capu":
+                    gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"assignees": [CAPU]}, a.dry_run)
+                elif action in ("close", "finish"):
+                    if action == "close" and not has_marker(issue, f"{tid}-4"):
+                        gh("POST", f"/repos/{REPO}/issues/{issue}/comments",
+                           {"body": MARK.format(key=f"{tid}-4") + "\n" + done_text(tid)}, a.dry_run)
+                        markers[issue].add(f"{tid}-4")
+                    gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"state": "closed", "state_reason": "completed"}, a.dry_run)
+            except GhError as err:
+                print(f"CẢNH BÁO: {tid} → issue #{issue}: {err}; bỏ qua phần còn lại của việc này.", file=sys.stderr)
+                failed.add(tid)
+                continue
+            n += 1
+        done_keys.append(key)
     if not a.dry_run:
         seen_f.write_text("\n".join(sorted(seen | set(done_keys))) + "\n")
     print(f"Đã phản chiếu {n} mốc.")

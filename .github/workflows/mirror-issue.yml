@@ -53,6 +53,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           CAPU_LOGIN: ${{ github.repository_owner }}
+          MIRROR_AUTHOR: ${{ github.repository_owner }}   # marker do Capu/phiên chạy tay cũng được tính, tránh ghi trùng
         run: |
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             python3 scripts/mirror_issue.py --state "$RUNNER_TEMP/state" --dry-run
