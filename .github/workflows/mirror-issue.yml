@@ -1,0 +1,80 @@
+name: Phản chiếu sổ cái lên Issue
+
+# ADR-012: issue là mặt kính, sổ cái là sự thật. Mỗi khi sổ cái trên main đổi, việc nào có
+# trường `issue` thì issue đó nhận bốn mốc (nhận · qua Spec Gate · qua Code Gate · xong) và
+# được đóng khi việc done. Chiều ngược lại không tồn tại: không gì trên issue đổi được sổ cái.
+# Trạng thái "đã phản chiếu tới đâu" lưu trên nhánh mirror-state (giống notify-slack).
+
+on:
+  push:
+    branches: [main]
+    paths: ["ledger/**", "board/**"]
+  workflow_run:
+    workflows: ["Đồng bộ sổ cái vào main"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Chỉ in ra, không ghi lên issue"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: issue-mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Lấy trạng thái đã phản chiếu
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          S="$RUNNER_TEMP/state"
+          URL="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if ! git clone -q --depth 1 -b mirror-state "$URL" "$S" 2>/dev/null; then
+            mkdir -p "$S" && git -C "$S" init -q -b mirror-state
+          fi
+
+      - name: Phản chiếu
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CAPU_LOGIN: ${{ github.repository_owner }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python3 scripts/mirror_issue.py --state "$RUNNER_TEMP/state" --dry-run
+          else
+            python3 scripts/mirror_issue.py --state "$RUNNER_TEMP/state"
+          fi
+
+      - name: Đồng bộ Project board (chỉ khi có PROJECTS_TOKEN)
+        if: ${{ secrets.PROJECTS_TOKEN != '' }}
+        env:
+          PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
+        run: python3 scripts/mirror_project.py
+
+      - name: Lưu trạng thái
+        if: ${{ inputs.dry_run != true }}
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP/state"
+          git add -A
+          if git diff --cached --quiet; then echo "Không có gì mới."; exit 0; fi
+          git -c user.name="tohong-ledger-bot" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Đã phản chiếu tới main@${GITHUB_SHA::7}"
+          git push -q "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:mirror-state

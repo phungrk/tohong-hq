@@ -8,7 +8,7 @@ Eval là gì (xem templates/spec.md):
 
 Tầng:
   1  eval ghi trong board/T-xxx.md (hành vi của việc)
-  2  eval/invariants/<area>/*  (bất biến của vùng; area ghi trong board)
+  2  eval/invariants/_shared + mọi cấp cha của <area> (ADR-011)
   3  eval/T-xxx/adv-*.*        (eval đối kháng do adversary thêm bằng `task.py evalplus`)
 
 Ví dụ:
@@ -71,16 +71,27 @@ def run_one(entry, cwd, timeout):
     return {"eval": entry, "kind": kind, "status": status, "ms": int((time.time() - t0) * 1000), "out": out[-800:]}
 
 
+def invariant_dirs(area):
+    """Cây bất biến cho một vùng (ADR-011): _shared/ → <sản phẩm>/ → … → <vùng đầy đủ>/.
+
+    Vùng cũ chưa có tiền tố sản phẩm được ánh xạ theo LEGACY_AREAS để việc cũ chạy lại được."""
+    area = ledger.normalize_area(area)
+    dirs = ["_shared"]
+    if area:
+        parts = area.split("/")
+        dirs += ["/".join(parts[:i]) for i in range(1, len(parts) + 1)]
+    return dirs
+
+
 def collect(meta):
     tiers = []
     for e in meta["eval"]:
         tiers.append((1, e))
-    area = (meta.get("area") or "").strip("/")
-    if area:
-        inv_dir = ROOT / "eval" / "invariants" / area
+    for d in invariant_dirs(meta.get("area") or ""):
+        inv_dir = ROOT / "eval" / "invariants" / d
         if inv_dir.exists():
             for f in sorted(inv_dir.iterdir()):
-                if f.is_file() and not f.name.startswith("."):
+                if f.is_file() and not f.name.startswith(".") and f.name.startswith("inv-"):
                     tiers.append((2, str(f.relative_to(ROOT))))
     adv_dir = ROOT / "eval" / meta["id"]
     if adv_dir.exists():

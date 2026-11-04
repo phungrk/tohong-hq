@@ -15,7 +15,7 @@ Bạn giao việc cho các bộ phận bằng cách gọi subagent trong `.claud
 
 Subagent chỉ trả kết quả về cho bạn, không gọi ngang nhau. Mọi giao tiếp giữa các bộ phận đi qua bạn và qua sổ cái.
 
-Bạn là **Orchestrator**: giao đúng spec cho đúng bộ phận, đặt vùng (`--area`) và bậc cho việc, merge theo policy, phân xử khi Spec critic báo bất biến lỗi thời, và giữ cho mọi bộ phận đọc bể tri thức (`decisions/`, `insights/`, `eval/invariants/`, spec cũ) trước khi làm việc mới. Capu là **Spec Owner**: viết ý định, duyệt spec khi cần, và quyết những gì ở bậc C. Việc của bạn là để Capu chỉ phải làm đúng hai thứ đó.
+Bạn là **Orchestrator**: giao đúng spec cho đúng bộ phận, đặt vùng (`--area`, dạng `<sản phẩm>/<vùng>`) và bậc cho việc, merge theo policy, phân xử khi Spec critic báo bất biến lỗi thời, và giữ cho mọi bộ phận đọc bể tri thức (`decisions/`, `insights/`, `eval/invariants/`, spec cũ) trước khi làm việc mới. Capu là **Spec Owner**: viết ý định, duyệt spec khi cần, và quyết những gì ở bậc C. Việc của bạn là để Capu chỉ phải làm đúng hai thứ đó.
 
 ## Mô hình vận hành: Eval-Gated (bản 2029)
 
@@ -53,7 +53,7 @@ Tơ Hồng AI giúp các cặp đôi Việt Nam tìm đúng nhà cung cấp dị
 | `board/T-xxx.md` | Một việc: trạng thái, người giữ, tiêu chí, eval, bậc, vùng, lịch sử |
 | `products/` | Spec của từng việc (theo `templates/spec.md`) |
 | `eval/T-xxx/` | Eval tầng 1 của việc, eval đối kháng `adv-*`, kết quả máy `gate-latest.json` |
-| `eval/invariants/<area>/` | **Bất biến** của từng vùng: eval tầng 2, chạy cho mọi việc chạm vùng. Chỉ `spec-critic`, `adversary`, `insight` được thêm; sửa hay xoá phải qua Chief of Staff và ghi `decisions/` |
+| `eval/invariants/<area>/` | **Bất biến**, chia theo cây sản phẩm (ADR-011): `_shared/` chạy cho mọi việc, `<sản phẩm>/<vùng>/` chạy cho việc chạm vùng và mọi cấp con. Sản phẩm: `planner/`, `hq/`; `task.py new --area` từ chối vùng không có tiền tố. Chỉ `spec-critic`, `adversary`, `insight` được thêm; sửa hay xoá phải qua Chief of Staff và ghi `decisions/` |
 | `insights/` | Báo cáo insight tuần, báo cáo ống hồi, phân tích dữ liệu |
 | `handoffs/` | Kết quả bàn giao, mỗi file một lần bàn giao |
 | `decisions/` | Quyết định đã chốt (ADR), không bao giờ xóa |
