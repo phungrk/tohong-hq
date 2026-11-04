@@ -28,14 +28,15 @@ Có skeleton:
 Không có skeleton (không phải "chờ dữ liệu của màn"): chấm gõ khi AI đang trả lời; chữ AI đang viết trong thẻ chi tiết vendor (`whyLoading`); nút "Xem thêm" đang tải; các tab admin khác (Hộp kết nối, Nâng cấp gói, Gói tự kích hoạt, Dữ liệu vendor, Nhật ký, Số liệu `AdminApp`); màn trắng của Clerk (`AuthedApp` trả `null`); thẻ GuestCard/TimelineCard/ChecklistCard (không có đường mở).
 
 ### 2. Khi nào hiện và biến mất
-- Một màn "đang chờ" từ lúc nó bắt đầu chờ dữ liệu (mở app, đổi tab, mở trang con, mở thẻ chat), kể cả khoảng chờ `/api/me`, tới lúc yêu cầu dữ liệu chính của màn trả lời (thành công, 404, hoặc lỗi).
-- Skeleton hiện sau khoảng 150ms kể từ lúc bắt đầu chờ, không hiện ngay. Trong 150ms đầu chỉ có nền giấy, header và thanh tab thật; không hiện nội dung rỗng giả. Tải xong trong 150ms thì skeleton không hề xuất hiện. Đã hiện thì giữ tới khi tải xong (không có thời gian tối thiểu).
-- Khi tải lại ngầm lúc màn đã có dữ liệu (ví dụ `refreshKey`, nút "Làm mới" của admin) không hiện skeleton; dữ liệu cũ ở nguyên tới khi có bản mới (như main).
+- Một màn "đang chờ" từ lúc nó bắt đầu chờ dữ liệu (mở app, đổi tab, mở trang con, mở thẻ chat, hoặc màn được dựng lại), kể cả khoảng chờ `/api/me`, tới lúc yêu cầu dữ liệu chính của màn trả lời (thành công, 404, hoặc lỗi).
+- Mốc thời gian: các khối skeleton, vùng `role="status"` và `aria-busy="true"` **xuất hiện cùng một lúc**, khoảng 150ms sau lúc bắt đầu chờ (eval đo 100–250ms từ lúc điều hướng, kể cả khi `/api/me` còn chờ 1s). Không được bật "chỉ sau khi `/api/me` về". Trong lúc đó (kể cả lúc chờ `/api/me`) chỉ có nền giấy, header và thanh tab; không hiện nội dung rỗng giả. Tải xong trong 150ms thì skeleton không hề xuất hiện. Đã hiện thì giữ tới khi tải xong (không có thời gian tối thiểu).
+- **Header được phép đổi khi `/api/me` về** (ví dụ ở 320px nút "Mời cùng xem" xuất hiện làm header cao thêm khoảng 17px; đó là header thật, không phải skeleton). Dịch chuyển giữa skeleton và nội dung thật (tiêu chí 4) được đo **kể từ lúc `/api/me` đã về**, ở cả 390 và 320. Spec không đòi giữ chỗ cho nút đó.
+- **Làm mới và dựng lại** (luật mới, thay câu cũ "dữ liệu cũ ở nguyên như main"): Kế hoạch và Khách mời được dựng lại bằng `key` mỗi khi chat thêm việc/khách (main hiện màn rỗng giả "0 người"). Khi một màn dựng lại hoặc tải lại mà chưa có dữ liệu thì áp cùng luật: skeleton sau ~150ms, không rỗng giả. Khi màn vẫn còn dữ liệu (ví dụ Ngân sách tải lại theo `refreshKey`) thì giữ dữ liệu đang hiện tới khi có bản mới và không chèn skeleton. Cơ chế (giữ `key` hay bỏ) do Engineering chọn, miễn đúng hai câu trên.
 - 404 của `budget`/`timeline` nghĩa là "chưa có dữ liệu", không phải lỗi: hiện trạng thái rỗng như main (Ngân sách: "Chưa có hạng mục ngân sách…"). Skeleton không được quay mãi.
-- Lúc chờ, các giá trị phụ thuộc dữ liệu ở header (số khách, "0 người", "0/0 việc xong", "Chưa có số khách", "Chưa đặt sức chứa") không hiện giá trị giả: để trống đúng chiều cao dòng hoặc thay bằng khối skeleton cùng dòng. Nút hành động của trạng thái rỗng ("Thêm khách mời", "Thêm hạng mục", "Thêm việc") không hiện lúc chờ.
+- Lúc chờ, các giá trị phụ thuộc dữ liệu ở header không hiện giá trị giả: "0 người", "0 xác nhận · 0 chờ", thanh RSVP (phần tô), "0/0 việc xong", "Chưa có số khách", "Chưa đặt mục tiêu", "Chưa đặt sức chứa". Để trống đúng chiều cao dòng hoặc thay bằng khối skeleton cùng dòng. Nút hành động của trạng thái rỗng ("Thêm khách mời", "Thêm hạng mục", "Thêm việc") không hiện lúc chờ.
 
 ### 3. Hình dạng, bám bố cục thật (khung 390; ở 320 cũng phải khớp)
-Header và thanh tab luôn là bản thật, không thành skeleton. Skeleton chỉ nằm dưới header. Mỗi khối skeleton là một hình chữ nhật đặc (phần tử rỗng, nền tô, bo theo `--r-sm`/`--r-lg`); khối có thể gồm nhiều hình, không có chữ trong khối.
+Header và thanh tab là bản thật, không thành skeleton (header có thể đổi khi `/api/me` về, xem mục 2). Skeleton chỉ nằm dưới header. Mỗi khối skeleton là một hình chữ nhật đặc (phần tử rỗng, nền tô, bo theo `--r-sm`/`--r-lg`); khối có thể gồm nhiều hình, không có chữ trong khối.
 
 | Màn | Khối đầu của skeleton phải khớp | Các khối sau (tối thiểu) |
 | --- | --- | --- |
@@ -49,14 +50,16 @@ Header và thanh tab luôn là bản thật, không thành skeleton. Skeleton ch
 | Chat: lịch sử | bong bóng tin nhắn (trái và phải xen kẽ) | >= 3 bong bóng |
 | Admin Thành viên | hai thẻ số liệu cao bằng thẻ thật | >= 3 hàng danh sách; ô tìm kiếm không nhảy |
 
-Dung sai: tiêu đề và thanh tab lệch tối đa 2px; top của khối đầu so với mốc thật tối đa 3px; chiều cao khối đầu (chỉ Trang chủ, Kế hoạch, và ảnh bìa chat) tối đa 4px; Số hàng skeleton khác số hàng thật là được (số mục chưa biết), không đo.
+**Chỉ các dòng Trang chủ, Kế hoạch, Ngân sách, Khách mời và ảnh bìa vendor trong chat có eval đo hình học (tiêu chí 2 và 4). Các dòng trang con hạng mục, so sánh vendor, lịch sử chat, admin là hướng dẫn, nghiệm thu bằng ảnh 390 của tiêu chí 12 (trang con: eval chỉ đo thanh tab; admin: ô tìm kiếm ±4px). Code Gate không được trả `--kind spec` vì "hình dạng sai" ở các dòng này.**
+
+Dung sai (đo từ lúc `/api/me` đã về): tiêu đề và thanh tab lệch tối đa 2px; top của khối đầu so với mốc thật tối đa 3px; chiều cao khối đầu (chỉ Trang chủ, Kế hoạch, và ảnh bìa chat) tối đa 4px; Số hàng skeleton khác số hàng thật là được (số mục chưa biết), không đo.
 
 ### 4. Màu và chuyển động
 - Màu chỉ lấy từ token có sẵn: `--line-100` (mặc định), `--line-200`, `--sand`, `--linen`. Không màu cứng, không màu mới.
 - Hiệu ứng là **pulse** (độ mờ 0,55 ↔ 1, chu kỳ ~1,3s, như `dbPulse` đang có), không shimmer: một hiệu ứng, một cách đo, không cần màu mới. Khi người dùng bật `prefers-reduced-motion: reduce`, không animation nào chạy trong skeleton; khối vẫn hiện tĩnh.
 
 ### 5. Truy cập
-- Mỗi vùng chờ là một phần tử có `role="status"`, tên truy cập "Đang tải…" (nhãn, không phải chữ nhìn thấy), và nằm trong (hoặc là) phần tử `aria-busy="true"`. Cây truy cập của vùng chỉ có nhãn đó: các khối skeleton không được đọc, không có nút/liên kết/ô nhập.
+- Mỗi vùng chờ là một phần tử có `role="status"`, tên truy cập "Đang tải…" (nhãn, không phải chữ nhìn thấy), và nằm trong (hoặc là) phần tử `aria-busy="true"`. **`aria-busy="true"` chỉ đặt trên vùng nội dung đang chờ (phần dưới header): không phủ header, thanh tab, nút "Mở menu"/AI hay bất kỳ phần tử focus được nào.** Không đặt `aria-busy` ở gốc màn. Cây truy cập của vùng chỉ có nhãn đó: các khối skeleton không được đọc, không có nút/liên kết/ô nhập.
 - Không phần tử nào trong vùng chờ focus được; nhấn Tab không bao giờ đưa focus vào vùng chờ.
 - Tải xong: `aria-busy` bỏ (hoặc "false"), vùng `status` "Đang tải" biến mất.
 - Chữ "Đang tải…" nhìn thấy (rộng và cao > 8px) không còn ở bất kỳ màn nào trong phạm vi.
@@ -68,7 +71,7 @@ Dung sai: tiêu đề và thanh tab lệch tối đa 2px; top của khối đầ
 - Lịch sử cuộc trò chuyện: giữ hành vi hiện có (`chatSession.error` hiện thành tin nhắn lỗi của AI).
 
 ### 7. Không đổi API
-Cùng các yêu cầu như main: không endpoint mới, không đổi phương thức, không thêm lần gọi (trần mỗi đường dẫn khi mở một màn = số đo trên main, tiêu chí 11). Thử lại sau lỗi là yêu cầu cũ gọi lại.
+Cùng các yêu cầu như main: không endpoint mới, không đổi phương thức, không thêm lần gọi (trần từng đường dẫn khi mở một màn = số đo trên main: summary 3, budget 3, còn lại 1; tiêu chí 11). Thử lại sau lỗi là yêu cầu cũ gọi lại.
 
 ## Ràng buộc (vòi)
 - Repo: `tohong-front` · Nhánh: `t-061-skeleton` · Vùng (`area`): `planner/front/loading`
@@ -83,26 +86,26 @@ Chạy từ `/home/user/tohong-hq`; `<front>` = `/home/user/tohong-front` (đã 
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
 | 1 | Bốn tab và trang con hạng mục: khi API trễ 1,5s có vùng `role=status` "Đang tải" nhìn thấy, `aria-busy="true"`, >= 3 khối skeleton; không có chữ chờ trơn, trạng thái rỗng giả hay nút thêm; dữ liệu về thì nội dung thật hiện và skeleton biến mất | `bash eval/T-061/run.sh <front> --only 1` |
-| 2 | Chat: gợi ý vendor và lịch sử trò chuyện có skeleton, không chữ chờ trơn, tiêu đề thẻ không nhảy (±2), ảnh bìa đầu khớp (top/rộng/cao ±4) | `bash eval/T-061/run.sh <front> --only 2` (danh sách so sánh vendor: `eval/T-061/checklist.md`, vì cần luồng nhiều bước) |
-| 3 | Admin Thành viên: vùng danh sách và vùng số liệu đều có skeleton, không chữ chờ trơn, ô tìm kiếm không nhảy (±4) | `bash eval/T-061/run.sh <front> --only 3` |
-| 4 | Không nhảy bố cục ở 390 và 320: tiêu đề ±2, thanh tab ±2, top khối đầu ±3, chiều cao khối đầu ±4 (Trang chủ, Kế hoạch); trang con: thanh tab ±2 | `bash eval/T-061/run.sh <front> --only 4` |
+| 2 | Chat (kiểm ở mốc cố định 700ms sau khi mở): gợi ý vendor và lịch sử trò chuyện có skeleton, không chữ chờ trơn, tiêu đề thẻ không nhảy (±2), ảnh bìa đầu khớp (top/rộng/cao ±4) | `bash eval/T-061/run.sh <front> --only 2` (danh sách so sánh vendor: `eval/T-061/checklist.md`, vì cần luồng nhiều bước) |
+| 3 | Admin Thành viên (kiểm ở mốc cố định 700ms sau khi mở): vùng danh sách và vùng số liệu đều có skeleton, không chữ chờ trơn, ô tìm kiếm không nhảy (±4) | `bash eval/T-061/run.sh <front> --only 3` |
+| 4 | Không nhảy bố cục ở 390 và 320, đo từ lúc `/api/me` đã về: tiêu đề ±2, thanh tab ±2, top khối đầu ±3, chiều cao khối đầu ±4 (Trang chủ, Kế hoạch); trang con: thanh tab ±2. Làm mới: Khách mời (dựng lại, chưa có dữ liệu) hiện skeleton không rỗng giả; Ngân sách (còn dữ liệu) không chèn skeleton và giữ dữ liệu cũ | `bash eval/T-061/run.sh <front> --only 4` |
 | 5 | Lỗi tải: bốn tab và `/api/me` hiện "Không tải được…" + "Thử lại", không rỗng giả, Thử lại hoạt động; ngân sách 404 là trạng thái rỗng; chat và admin giữ thông báo như cũ | `bash eval/T-061/run.sh <front> --only 5` |
-| 6 | Thời điểm: tải nhanh (~20ms) không hề hiện skeleton; tải chậm hiện sau 100–400ms kể từ yêu cầu đầu | `bash eval/T-061/run.sh <front> --only 6` |
+| 6 | Thời điểm: tải nhanh (~20ms) không hề hiện skeleton; với `/api/me` trễ 1s và dữ liệu trễ 1,5s, khối skeleton nhìn thấy trong 100–250ms từ lúc điều hướng (tức trong lúc chờ `/api/me`) và suốt lúc chờ không có chữ rỗng giả | `bash eval/T-061/run.sh <front> --only 6` |
 | 7 | `prefers-reduced-motion`: mặc định có animation chạy trong skeleton; bật reduce thì không animation nào chạy mà khối vẫn hiện | `bash eval/T-061/run.sh <front> --only 7` |
-| 8 | Truy cập: `role=status` tên "Đang tải", trong `aria-busy="true"`, cây truy cập chỉ có nhãn, không focus được, Tab 14 lần không vào vùng; xong thì biến mất | `bash eval/T-061/run.sh <front> --only 8` |
+| 8 | Truy cập: `role=status` tên "Đang tải", trong `aria-busy="true"` chỉ bọc vùng nội dung (không chứa header, thanh tab, nút Mở menu/AI), cây truy cập chỉ có nhãn, không focus được, Tab 14 lần không vào vùng; xong thì biến mất | `bash eval/T-061/run.sh <front> --only 8` |
 | 9 | Mọi khối skeleton tô bằng `--line-100`/`--line-200`/`--sand`/`--linen` | `bash eval/T-061/run.sh <front> --only 9` |
 | 10 | 320 và 390: lúc chờ không cuộn ngang | `bash eval/T-061/run.sh <front> --only 10` |
-| 11 | Không đổi API: chỉ gọi endpoint đã có; không đường dẫn nào gọi nhiều hơn 3 lần (số đo trên main) khi mở một màn | `bash eval/T-061/run.sh <front> --only 11` |
+| 11 | Không đổi API: chỉ gọi endpoint đã có; trần từng đường dẫn khi mở một màn = số đo trên main (GET summary 3, GET budget 3, mọi đường khác 1) | `bash eval/T-061/run.sh <front> --only 11` |
 | 12 | PR có ảnh 390 trước (main) và sau cho từng màn trong phạm vi (>= 10 ảnh, ghi rõ "390", mục Trước, mục Sau) | `bash eval/T-061/check_pr.sh <số-PR>`; tạo ảnh: `bash eval/T-061/run.sh <front> --only 1,2,3 --shots <thư-mục>` |
 | 13 | Bất biến planner/front/* và _shared, cộng eval T-054 (cuộn cấp trang) vẫn xanh | `bash eval/T-061/run.sh <front> --only 13` (gồm `bash eval/T-054/run_invariants.sh <front>`) |
 
 Chạy tất cả (trừ 12): `bash eval/T-061/run.sh <front>`. Đo trên main `218e623` phải ĐỎ ở tiêu chí 1–10 (đã thấy), tiêu chí 11 và 13 XANH (chốt hồi quy).
-Chạy riêng các bất biến: `bash eval/T-054/run_invariants.sh /home/user/tohong-front` (hoặc `python3 scripts/gate.py T-061 --cwd /home/user/tohong-front`, vùng `planner/front/loading` chạy cả bất biến cha `planner/front`, `planner`).
+Chạy riêng các bất biến: `bash eval/T-061/run.sh <front> --only 13` (chạy cả `planner/front/layout|navigation|budget`, `_shared` và thư mục `planner/front/loading` khi có; hoặc `python3 scripts/gate.py T-061 --cwd /home/user/tohong-front`, vùng `planner/front/loading` chạy cả bất biến cha `planner/front`, `planner`).
 
 ## Bất biến đề xuất (tầng 2)
 INV đề xuất (vùng `planner/front/loading`, viết thành script sau khi spec qua cổng; Spec critic quyết):
 1. **Trạng thái chờ không nói dối**: ở bốn tab, trong lúc API chưa trả lời, không có chữ trạng thái rỗng ("Chưa có khách mời", "Chưa có hạng mục", "0 người"…) và không có nút "Thêm …" nhìn thấy. Đo bằng khung TC1 (API trễ).
-2. **Skeleton có nhãn và không focus được**: mọi `[aria-busy="true"]` nhìn thấy chứa `role=status` tên "Đang tải" và không phần tử focus được (TC8).
+2. **Skeleton có nhãn và không focus được**: mọi `[aria-busy="true"]` nhìn thấy chứa `role=status` tên "Đang tải", không chứa header/thanh tab và không phần tử focus được (TC8).
 3. **Skeleton tôn trọng reduced-motion**: bật `prefers-reduced-motion: reduce` thì không animation nào chạy trong vùng `aria-busy="true"` (TC7).
 Các tính chất hình học (không nhảy) gắn với dữ liệu giả cụ thể nên giữ ở tầng 1, không đề nghị thành bất biến.
 

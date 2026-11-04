@@ -3,8 +3,9 @@
  * Eval tầng 1 của T-061 (front): trạng thái đang tải hiển thị skeleton. Spec: products/T-061-skeleton-dang-tai.md. --only N = tiêu chí N:
  *   1 bốn tab + trang con hạng mục: có skeleton, không chữ "Đang tải" trơn, không màn rỗng giả   2 chat: gợi ý vendor, lịch sử trò chuyện
  *   3 admin Thành viên   4 không nhảy bố cục (tiêu đề, thanh tab, khối đầu) 390 và 320   5 lỗi tải: thông báo + Thử lại; 404 ngân sách là "chưa có dữ liệu"
- *   6 thời điểm hiện (~150ms; tải nhanh thì không nháy)   7 prefers-reduced-motion   8 truy cập (role=status "Đang tải", aria-busy, không focus được)
+ *   6 thời điểm hiện (me trễ 1s: skeleton 100-250ms từ lúc điều hướng; tải nhanh không nháy; không rỗng giả suốt lúc chờ)   7 prefers-reduced-motion   8 truy cập (role=status "Đang tải", aria-busy, không focus được)
  *   9 màu chỉ dùng token   10 không cuộn ngang 320/390   11 không đổi API (chỉ yêu cầu đã có, không nhiều hơn main)
+ *   (4 còn đo làm mới: dựng lại màn có key và tải lại màn còn dữ liệu)
  * Tiêu chí 12 (ảnh 390 trong PR): bash eval/T-061/check_pr.sh <số-PR>. Tiêu chí 13 (bất biến + T-054): bash eval/T-061/run.sh <front> --only 13.
  * Chạy: cd /home/user/tohong-hq && node eval/T-061/check_skel.cjs --repo /home/user/tohong-front [--only 1,4] [--shots <thư-mục>]
  * Tìm phần tử theo CHỮ và VAI TRÒ; chỉ đọc màu và hình học (vị trí, kích thước) khi tiêu chí nói về màu/hình học. Không bộ chọn theo class/style, không đọc mã nguồn.
@@ -34,7 +35,7 @@ const TABS = [
   { id: 'trang-chu', tab: 'Trang chủ', title: 'Tơ Hồng', at: /ngày nữa/, kind: 'card', empty: [/Chọn ngày/] },
   { id: 'ke-hoach', tab: 'Kế hoạch', title: 'Kế hoạch', at: /việc trong giai đoạn/, kind: 'card', empty: [/^Thêm việc$/, /0\/0 việc/] },
   { id: 'ngan-sach', tab: 'Ngân sách', title: 'Ngân sách', at: /^Đã phân bổ$/i, kind: 'text', empty: [/Chưa có hạng mục/, /^Thêm hạng mục$/, /Chưa đặt mục tiêu/, /Chưa có số khách/] },
-  { id: 'khach-moi', tab: 'Khách mời', title: 'Khách mời', at: /^Nhà trai$/, kind: 'text', empty: [/Chưa có khách mời/, /^Thêm khách mời$/, /^0 người$/, /Chưa đặt sức chứa/] },
+  { id: 'khach-moi', tab: 'Khách mời', title: 'Khách mời', at: /^Nhà trai$/, kind: 'text', empty: [/Chưa có khách mời/, /^Thêm khách mời$/, /^0 người$/, /Chưa đặt sức chứa/, /xác nhận ·\s+chờ/] },
 ];
 const SUB = { id: 'ngan-sach/venue', title: null, empty: [/Chưa có hạng mục/, /^Thêm hạng mục$/], ready: (p) => p.getByRole('button', { name: 'Thêm mục con' }) };
 const PLAIN = /Đang tải|Đang tìm vendor phù hợp/; // chữ chờ trơn: không còn nhìn thấy được
@@ -43,6 +44,8 @@ const DELAY = (p) => (p === '/api/me' ? 300 : 1500);
 /* ---------- trợ giúp ---------- */
 const statusOf = (page) => page.getByRole('status', { name: /Đang tải/ });
 async function waitStatus(page, ms = 3500) { try { await statusOf(page).first().waitFor({ state: 'visible', timeout: ms }); return true; } catch { return false; } }
+// Mốc cố định (m5): đợi `ms` kể từ lúc bắt đầu chờ rồi hỏi thẳng status có đang hiện không, không đợi tới khi nó xuất hiện.
+async function statusAt(page, ms) { await page.waitForTimeout(ms); return statusOf(page).first().isVisible().catch(() => false); }
 async function waitGone(page, ms = 9000) { try { await page.waitForFunction(() => !document.querySelector('[aria-busy="true"]'), null, { timeout: ms }); return true; } catch { return false; } }
 // Văn bản nhìn thấy thật (rộng và cao > 8px, không ẩn) có chữ riêng khớp: chống chữ chờ trơn / trạng thái rỗng giả / nút thêm.
 const visibleHits = (page, regexes) => page.evaluate((src) => { const res = src.map((s) => new RegExp(s[0], s[1])); const out = [];
@@ -115,8 +118,8 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
         const S = track(await load(browser, srv.base, 'ngan-sach', { delay: (p) => (/vendors\/match/.test(p) ? 1500 : 0) })); const { page } = S;
         await page.getByRole('button', { name: /Nhà hàng tiệc cưới/ }).first().click();
         await page.getByRole('button', { name: 'Tìm nhà hàng tiệc cưới' }).click();
-        const got = await waitStatus(page);
-        check('gợi ý vendor: lúc chờ có role=status "Đang tải"', got);
+        const got = await statusAt(page, 700);
+        check('gợi ý vendor: 700ms sau khi mở thẻ (API trễ 1,5s) có role=status "Đang tải"', got);
         let sk = null, t1 = null;
         { const hits = await visibleHits(page, [PLAIN]); check('gợi ý vendor: không còn chữ "Đang tìm vendor…"/"Đang tải…" trơn', hits.length === 0, hits.join(' | ')); }
         if (got) {
@@ -143,8 +146,8 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
         await page.getByText(/ngày nữa/).first().waitFor();
         await page.getByRole('button', { name: 'Mở menu' }).first().click();
         await page.getByRole('button', { name: /Chọn nhà hàng/ }).click();
-        const got = await waitStatus(page);
-        check('lịch sử trò chuyện: lúc chờ có role=status "Đang tải"', got);
+        const got = await statusAt(page, 700);
+        check('lịch sử trò chuyện: 700ms sau khi mở (API trễ 1,5s) có role=status "Đang tải"', got);
         { const hits = await visibleHits(page, [PLAIN]); check('lịch sử trò chuyện: không có chữ chờ trơn', hits.length === 0, hits.join(' | ')); }
         if (got) await shot(page, 'chat-lich-su-390-dang-tai');
         let ok = true; try { await page.getByText('Đây là gợi ý từ máy chủ giả').first().waitFor({ state: 'visible', timeout: 9000 }); } catch { ok = false; }
@@ -158,8 +161,9 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
     if (wants(3)) { crit = 3; try {
       const S = track(await L.scenario(browser, srv.base, { admin: true, delay: (p) => (/members-/.test(p) ? 1500 : 0) })); const { page } = S;
       const list = page.getByRole('region', { name: 'Danh sách thành viên' });
-      let got = true; try { await list.getByRole('status', { name: /Đang tải/ }).first().waitFor({ state: 'visible', timeout: 5000 }); } catch { got = false; }
-      check('admin: vùng danh sách thành viên có role=status "Đang tải" lúc chờ', got);
+      await page.waitForTimeout(700);
+      const got = await list.getByRole('status', { name: /Đang tải/ }).first().isVisible().catch(() => false);
+      check('admin: 700ms sau khi mở (API trễ 1,5s) vùng danh sách thành viên có role=status "Đang tải"', got);
       const nStatus = await statusOf(page).count();
       check('admin: số liệu tổng hợp cũng có skeleton riêng (>= 2 vùng status)', nStatus >= 2, 'có ' + nStatus);
       const hits = await visibleHits(page, [PLAIN]); check('admin: lúc chờ không còn chữ "Đang tải…" trơn', hits.length === 0, hits.join(' | '));
@@ -175,12 +179,13 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
       await S.ctx.close();
     } catch (e) { check('luồng đo gặp lỗi: ' + String(e.message).split('\n')[0], false); } }
 
-    /* ===== TC4: không nhảy bố cục ===== */
+    /* ===== TC4: không nhảy bố cục (từ lúc /api/me đã về; header được phép đổi trước đó) ===== */
     if (wants(4)) { crit = 4; try {
       for (const w of [390, 320]) for (const sc of TABS) {
-        const S = track(await load(browser, srv.base, sc.id, { viewport: { width: w, height: 844 } })); const { page } = S; const tag = `${sc.id}@${w}`;
+        const S = track(await load(browser, srv.base, sc.id, { viewport: { width: w, height: 844 }, delay: (p) => (p === '/api/me' ? 50 : 1500) })); const { page } = S; const tag = `${sc.id}@${w}`;
         const got = await waitStatus(page);
         if (!got) { check(`${tag}: có skeleton để đo`, false, 'không thấy role=status "Đang tải"'); await S.ctx.close(); continue; }
+        for (let k = 0; k < 50 && !S.meDone; k++) await page.waitForTimeout(40); await idleFrames(page); // header được đổi khi /api/me về (vd. nút "Mời cùng xem" ở 320): đo từ lúc /api/me đã về
         const sk = await skelLeaves(page); const first = sk?.leaves?.[0];
         const m1 = { title: await titleTop(page, sc.title), tab: await tabTop(page, sc.tab) };
         await page.getByText(sc.at).first().waitFor({ state: 'visible', timeout: 9000 }); await waitGone(page); await idleFrames(page);
@@ -194,9 +199,9 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
     } catch (e) { check('luồng đo gặp lỗi: ' + String(e.message).split('\n')[0], false); } }
 
     if (wants(4)) { crit = 4; try { // trang con hạng mục: chỉ đo thanh tab (tiêu đề hạng mục chưa biết lúc chờ); hình dạng xem ảnh trong PR (tiêu chí 12)
-      const S = track(await load(browser, srv.base, SUB.id)); const { page } = S;
+      const S = track(await load(browser, srv.base, SUB.id, { delay: (p) => (p === '/api/me' ? 50 : 1500) })); const { page } = S;
       if (!(await waitStatus(page))) check('ngan-sach/venue: có skeleton để đo', false, 'không thấy role=status "Đang tải"');
-      else { const t1 = await tabTop(page, 'Ngân sách'); await SUB.ready(page).waitFor({ state: 'visible', timeout: 9000 }); await waitGone(page); await idleFrames(page); const t2 = await tabTop(page, 'Ngân sách');
+      else { for (let k = 0; k < 50 && !S.meDone; k++) await page.waitForTimeout(40); const t1 = await tabTop(page, 'Ngân sách'); await SUB.ready(page).waitFor({ state: 'visible', timeout: 9000 }); await waitGone(page); await idleFrames(page); const t2 = await tabTop(page, 'Ngân sách');
         check('ngan-sach/venue: thanh tab không nhảy (±2px)', near(t1, t2, 2), `${t1} → ${t2}`); }
       await S.ctx.close();
     } catch (e) { check('luồng đo gặp lỗi: ' + String(e.message).split('\n')[0], false); } }
@@ -248,22 +253,64 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
 
     /* ===== TC6: thời điểm hiện ===== */
     if (wants(6)) { crit = 6; try {
-      const init = () => { window.__busyAt = null; new MutationObserver(() => { if (window.__busyAt === null && [...document.querySelectorAll('[aria-busy="true"]')].some((e) => e.getBoundingClientRect().height > 0)) window.__busyAt = Date.now(); }).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-busy'] }); };
+      // init chạy trong trang: ghi lúc đầu tiên có vùng aria-busy nhìn thấy CÓ khối skeleton tô màu (busyAt) và lúc đầu tiên có chữ rỗng giả/chữ chờ nhìn thấy (fakeAt), tính từ timeOrigin (lúc bắt đầu điều hướng).
+      const init = (src) => { window.__busyAt = null; window.__fakeAt = null; window.__fake = null; const res = src.map((x) => new RegExp(x[0], x[1]));
+        const painted = (root) => [...root.querySelectorAll('*')].some((e) => { if (e.children.length || (e.textContent || '').trim()) return false; const r = e.getBoundingClientRect(); const m = getComputedStyle(e).backgroundColor.match(/rgba?\(([^)]+)\)/); const p = m ? m[1].split(',').map(parseFloat) : null; return r.width >= 8 && r.height >= 4 && p && (p.length < 4 || p[3] > 0); });
+        const scan = () => { const now = Date.now();
+          if (window.__busyAt === null && [...document.querySelectorAll('[aria-busy="true"]')].some((e) => e.getBoundingClientRect().height > 0 && painted(e))) window.__busyAt = now;
+          if (window.__fakeAt === null) for (const e of document.querySelectorAll('body *')) { const own = [...e.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim(); if (!own || !res.some((r) => r.test(own))) continue;
+            const r = e.getBoundingClientRect(); if (r.width <= 8 || r.height <= 8) continue; const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.05) continue; window.__fakeAt = now; window.__fake = own.slice(0, 40); break; } };
+        new MutationObserver(scan).observe(document, { subtree: true, childList: true, attributes: true, characterData: true }); };
       for (const sc of TABS) {
+        const pairs = [PLAIN, ...sc.empty].map((r) => [r.source, r.flags]);
         { // tải nhanh: không nháy
-          const S = track(await L.scenario(browser, srv.base, { hash: sc.id, delay: () => 20, init }));
+          const S = track(await L.scenario(browser, srv.base, { hash: sc.id, delay: () => 20, init: [init, pairs] }));
           await S.page.getByText(sc.at).first().waitFor({ state: 'visible', timeout: 9000 }); await S.page.waitForTimeout(400);
-          const at = await S.page.evaluate(() => window.__busyAt);
-          check(`${sc.id}: tải nhanh (~20ms mỗi yêu cầu) thì skeleton không hề hiện`, at === null, 'skeleton hiện lúc ' + at);
+          const o = await S.page.evaluate(() => ({ b: window.__busyAt, f: window.__fake }));
+          check(`${sc.id}: tải nhanh (~20ms mỗi yêu cầu) thì skeleton không hề hiện`, o.b === null, 'skeleton hiện lúc ' + o.b);
           await S.ctx.close();
         }
-        { // tải chậm: hiện sau ~150ms
-          const S = track(await L.scenario(browser, srv.base, { hash: sc.id, delay: DELAY, init }));
-          await S.page.getByRole('status', { name: /Đang tải/ }).first().waitFor({ state: 'visible', timeout: 4000 }).catch(() => {});
-          const at = await S.page.evaluate(() => window.__busyAt); const d = at && S.t0 ? at - S.t0 : null;
-          check(`${sc.id}: tải chậm thì skeleton hiện sau khoảng 150ms kể từ yêu cầu đầu (trong 100-400ms)`, d !== null && d >= 100 && d <= 400, d === null ? 'không hiện' : d + 'ms');
+        { // /api/me trễ 1s, dữ liệu trễ 1,5s: skeleton phải hiện 100-250ms từ lúc điều hướng, tức TRONG lúc chờ /api/me
+          const S = track(await L.scenario(browser, srv.base, { hash: sc.id, delay: (p) => (p === '/api/me' ? 1000 : 1500), init: [init, pairs] }));
+          await S.page.waitForTimeout(1300); // /api/me đã về (1s), dữ liệu chưa (2,5s)
+          const o = await S.page.evaluate(() => ({ b: window.__busyAt, f: window.__fake, fa: window.__fakeAt, o: performance.timeOrigin }));
+          const d = o.b ? o.b - o.o : null;
+          check(`${sc.id}: khối skeleton hiện trong 100-250ms từ lúc điều hướng, trong lúc /api/me còn chờ`, d !== null && d >= 100 && d <= 250, d === null ? 'không hiện' : Math.round(d) + 'ms');
+          check(`${sc.id}: suốt lúc chờ (gồm chờ /api/me) không có chữ rỗng giả hay chữ chờ trơn`, o.fa === null, o.f);
           await S.ctx.close();
         }
+      }
+    } catch (e) { check('luồng đo gặp lỗi: ' + String(e.message).split('\n')[0], false); } }
+
+    /* ===== TC4b: làm mới (B4) ===== */
+    if (wants(4)) { crit = 4; try {
+      { // màn dựng lại bằng key (Khách mời) mà chưa có dữ liệu: cùng luật skeleton, không rỗng giả
+        let slow = false;
+        const S = track(await load(browser, srv.base, 'khach-moi', { delay: (p) => (slow && /guests$/.test(p) ? 1500 : 0) })); const { page } = S;
+        await page.getByText(/^Nhà trai$/).first().waitFor({ state: 'visible', timeout: 9000 });
+        slow = true; S.chatAction = 'add_guest';
+        await page.getByRole('button', { name: 'AI', exact: true }).first().click();
+        await page.getByRole('textbox', { name: 'Nhắn cho Tơ Hồng' }).fill('thêm khách'); await page.keyboard.press('Enter');
+        await page.getByText('Mình đã thêm xong rồi nhé').first().waitFor({ state: 'visible', timeout: 6000 }).catch(async (e) => { throw new Error('không thấy trả lời giả của chat; nút: ' + (await page.getByRole('textbox').count()) + ' ô nhập, yêu cầu chat ' + S.reqs.filter((r) => /chat/.test(r.key)).length); });
+        await page.getByRole('button', { name: 'Đóng', exact: true }).first().click(); await page.waitForTimeout(500);
+        const got = await statusOf(page).first().isVisible().catch(() => false);
+        check('làm mới Khách mời (màn dựng lại, chưa có dữ liệu): hiện skeleton, không phải màn rỗng giả', got);
+        const hits = await visibleHits(page, [PLAIN, ...TABS[3].empty]); check('làm mới Khách mời: lúc chờ không có chữ rỗng giả hay nút thêm', hits.length === 0, hits.join(' | '));
+        await S.ctx.close();
+      }
+      { // màn còn dữ liệu (Ngân sách, không dựng lại): giữ dữ liệu, không chèn skeleton
+        let slow = false;
+        const S = track(await load(browser, srv.base, 'ngan-sach', { delay: (p) => (slow && /budget$/.test(p) ? 1500 : 0) })); const { page } = S;
+        const row = page.getByRole('button', { name: /Nhà hàng tiệc cưới/ }).first(); await row.waitFor({ state: 'visible', timeout: 9000 });
+        slow = true; S.chatAction = 'add_budget_item';
+        await page.getByRole('button', { name: 'AI', exact: true }).first().click();
+        await page.getByRole('textbox', { name: 'Nhắn cho Tơ Hồng' }).fill('thêm khoản'); await page.keyboard.press('Enter');
+        await page.getByText('Mình đã thêm xong rồi nhé').first().waitFor({ state: 'visible', timeout: 6000 }).catch(async (e) => { throw new Error('không thấy trả lời giả của chat; nút: ' + (await page.getByRole('textbox').count()) + ' ô nhập, yêu cầu chat ' + S.reqs.filter((r) => /chat/.test(r.key)).length); });
+        await page.getByRole('button', { name: 'Đóng', exact: true }).first().click(); await page.waitForTimeout(500);
+        const n0 = S.reqs.filter((r) => r.key === 'GET /api/couples/c-test/budget').length;
+        check('làm mới Ngân sách (còn dữ liệu): đang tải lại thì không chèn skeleton', !(await statusOf(page).first().isVisible().catch(() => false)));
+        check('làm mới Ngân sách: dữ liệu cũ vẫn nhìn thấy trong lúc tải lại', await row.isVisible().catch(() => false), 'đã gọi budget ' + n0 + ' lần');
+        await S.ctx.close();
       }
     } catch (e) { check('luồng đo gặp lỗi: ' + String(e.message).split('\n')[0], false); } }
 
@@ -289,6 +336,7 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
         if (!got) { check(`${sc.id}: có role=status "Đang tải" để kiểm`, false); await S.ctx.close(); continue; }
         const st = statusOf(page).first();
         check(`${sc.id}: status nằm trong (hoặc là) vùng aria-busy="true"`, await st.evaluate((e) => !!e.closest('[aria-busy="true"]')));
+        check(`${sc.id}: vùng aria-busy chỉ bọc nội dung chờ, không chứa header (tiêu đề, nút Mở menu, AI) hay thanh tab`, await page.evaluate(`(() => { const R = ${REGION_JS}; if (!R) return false; const r = R.root; return !r.querySelector('button[aria-label="Mở menu"]') && ![...r.querySelectorAll('button')].some((b) => ['AI', 'Trang chủ', 'Kế hoạch', 'Ngân sách', 'Khách mời'].includes(b.textContent.trim().replace(/^\\W+/, ''))); })()`));
         const snap = await st.ariaSnapshot().catch(() => '');
         check(`${sc.id}: cây truy cập của vùng chờ chỉ có nhãn "Đang tải" (không nút, liên kết, ô nhập, chữ thừa)`, /Đang tải/.test(snap) && !/\b(button|link|textbox|searchbox|checkbox|img)\b/.test(snap) && snap.split('\n').length <= 3, snap);
         check(`${sc.id}: không phần tử nào trong vùng chờ focus được`, await page.evaluate(`(() => { const R = ${REGION_JS}; return !R || R.root.querySelectorAll('a,button,input,select,textarea,[tabindex],[contenteditable]').length === 0; })()`));
@@ -326,16 +374,16 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
 
     /* ===== TC11: không đổi API ===== */
     if (wants(11)) { crit = 11; try {
-      // Trần số lần gọi mỗi đường dẫn khi mở một màn: số đo trên main 218e623, xem BASE (đo bằng T061_COUNTS=1).
-      const BASE = { 'trang-chu': 3, 'ke-hoach': 3, 'ngan-sach': 3, 'khach-moi': 3, 'ngan-sach/venue': 3 }; // đo trên main: summary 3, budget 3, các đường dẫn còn lại 1
+      // Trần theo từng đường dẫn = số đo trên main 218e623: GET summary 3, GET budget 3, mọi đường khác 1 (me, timeline, guests, conversations, subscription, upgrade-request, connect-requests, PUT timeline).
+      const capOf = (k) => (/^GET \/api\/couples\/c-test\/(summary|budget)$/.test(k) ? 3 : 1);
       for (const sc of [...TABS, SUB]) {
         const S = track(await load(browser, srv.base, sc.id, { delay: () => 30 })); const { page } = S;
         try { await (sc.ready ? sc.ready(page) : page.getByText(sc.at).first()).waitFor({ state: 'visible', timeout: 9000 }); } catch { /* đo cả khi chưa hiện */ }
         await page.waitForTimeout(600);
         const keys = S.reqs.map((r) => r.key); const stray = [...new Set(keys.filter((k) => !L.ALLOWED.some((re) => re.test(k))))];
         check(`${sc.id}: chỉ gọi các endpoint đã có`, stray.length === 0, stray.join(' | '));
-        const cnt = {}; keys.forEach((k) => { cnt[k] = (cnt[k] || 0) + 1; }); const over = Object.entries(cnt).filter(([, n]) => n > BASE[sc.id]).map(([k, n]) => `${k} x${n}`);
-        check(`${sc.id}: không gọi lặp nhiều hơn main (tối đa ${BASE[sc.id]} lần mỗi đường dẫn)`, over.length === 0, over.join(' | ') + ' ' + JSON.stringify(cnt))
+        const cnt = {}; keys.forEach((k) => { cnt[k] = (cnt[k] || 0) + 1; }); const over = Object.entries(cnt).filter(([k, n]) => n > capOf(k)).map(([k, n]) => `${k} x${n} (trần ${capOf(k)})`);
+        check(`${sc.id}: không đường dẫn nào gọi nhiều hơn số đo trên main (summary 3, budget 3, còn lại 1)`, over.length === 0, over.join(' | ') + ' ' + JSON.stringify(cnt))
         if (process.env.T061_COUNTS) console.log('     đếm', sc.id, JSON.stringify(cnt));;
         await S.ctx.close();
       }
@@ -343,7 +391,7 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
 
     for (const S of allScenarios) { if (S.errors.length) { crit = 0; check('không lỗi JavaScript trong trang', false, S.errors[0]); break; } }
     for (const S of allScenarios) { if (S.external.filter((u) => !/fonts\.(googleapis|gstatic)\.com/.test(u)).length) { crit = 0; check('không gọi ra mạng ngoài (trừ phông chữ)', false, S.external[0]); break; } }
-  } finally { await browser.close().catch(() => {}); await srv.close().catch(() => {}); L.killAll(); }
+  } finally { await browser.close().catch(() => {}); try { fs.rmSync(dist, { recursive: true, force: true }); } catch { /* */ } await srv.close().catch(() => {}); L.killAll(); }
   if (fails.length) { console.log('FAIL ' + fails[0] + (fails.length > 1 ? ` (+${fails.length - 1} lỗi nữa)` : '')); process.exit(1); }
   console.log('PASS'); process.exit(0);
 })().catch((e) => { console.log('FAIL harness: ' + (e && e.stack || e)); process.exit(2); });
