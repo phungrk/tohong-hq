@@ -20,11 +20,7 @@ try:
     def mirror():
         r = subprocess.run([sys.executable, "scripts/mirror_issue.py", "--state", str(state), "--dry-run"], cwd=tmp, env=env, capture_output=True, text=True)
         assert r.returncode == 0, r.stderr; return r.stdout
-    out = mirror()  # lần đầu: chỉ ghi nhận
-    assert "Lần đầu" in out, out
-    # dry-run không lưu state → giả lập state bằng cách ghi rỗng rồi chạy lại
-    state.mkdir(exist_ok=True); (state / "mirrored.txt").write_text("")
-    out = mirror()
+    out = mirror()  # lần đầu cũng phản chiếu (chống trùng bằng marker trên issue)
     assert "①" in out and "②" in out and "T-001 → issue #7" in out, out
     assert "T-002" not in out, "việc không có issue bị phản chiếu"
     assert out.count("PATCH") >= 1 and '"state": "closed"' in out, "done bậc B sau Spec Gate phải đóng issue:\n" + out
