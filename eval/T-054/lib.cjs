@@ -94,7 +94,7 @@ async function scenario(browser, base, opts = {}) {
     if (p === '/api/vendors/status') return json({ vendors: {} });
     return json({});
   });
-  await page.addInitScript(([cid]) => { try { if (!sessionStorage.getItem('t054-seeded')) { localStorage.setItem('th_user', JSON.stringify({ bride: 'An', groom: 'Bình' })); sessionStorage.setItem('t054-seeded', '1'); } } catch { /* */ } }, [CID]);
+  await page.addInitScript(([cid]) => { try { if (!sessionStorage.getItem('t054-seeded')) { localStorage.setItem('th_user', JSON.stringify({ bride: 'An', groom: 'Bình' })); localStorage.setItem('th_vendors_' + cid, JSON.stringify({ venue: { shortlisted: [{ id: 'v-venue', name: 'Nhà hàng Hoa Sen', priceTotal: 6, spec: '10 người/bàn' }], confirmed: null } })); sessionStorage.setItem('t054-seeded', '1'); } } catch { /* */ } }, [CID]);
   await page.goto(base + '/#/' + (opts.hash || 'trang-chu'));
   await page.getByRole('button', { name: 'Khách mời', exact: true }).first().waitFor();
   return S;

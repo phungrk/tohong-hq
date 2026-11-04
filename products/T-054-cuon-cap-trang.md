@@ -33,34 +33,35 @@ Nếu document là thứ cuộn (header dính trên, thanh tab dính dưới) th
 
 ### 1. Document cuộn, không còn khung con cuộn nội dung chính
 1.1 Ở mỗi trang (bốn tab và trang con), khi nội dung dài hơn vùng nhìn thấy, kéo hoặc lăn nội dung làm `window.scrollY` tăng. Lăn ngược thì giảm về 0. Cuộn tới cuối được bằng document (`scrollY + innerHeight = scrollHeight`).
-1.2 Khi **không có lớp nào mở**, không phần tử nào ngoài document có `scrollTop > 0` sau khi cuộn trang, nghĩa là không còn khung con tự cuộn nội dung chính. (Cuộn **ngang** của dải chip, bảng so sánh có cột dính trái vẫn được phép. Cuộn dọc **bên trong lớp** vẫn được phép, xem mục 5.)
+1.2 Sau khi cuộn trang, không **phần tử nằm ngoài mọi lớp** nào có `scrollTop > 0`, nghĩa là không còn khung con tự cuộn nội dung chính. **Phần tử nằm trong một lớp được miễn, dù lớp đang mở hay đang đóng (kể cả lớp luôn mount như chat AI và ngăn kéo)**: lớp giữ vị trí cuộn bên trong của nó như hiện nay, mở lại chat hay ngăn kéo thì danh sách ở chỗ cũ; **không đổi hành vi bên trong lớp** (quyết định của Chief of Staff, phân xử D1). Lớp nhận diện theo hành vi: cây con của `role=dialog`, hoặc cây con nhỏ nhất quanh nút "Đóng"/"Đóng menu" mà chưa chứa header của trang (nút "Mở menu"). (Cuộn **ngang** của dải chip, bảng so sánh có cột dính trái vẫn được phép.)
 1.3 Kéo bằng cảm ứng và lăn bằng chuột đều làm document cuộn như nhau.
 
 ### 2. Chiều cao trang chỉ là nội dung của trang đang xem
-2.1 Bốn màn vẫn mount sẵn (giữ state, không tải lại). Màn không xem **không chiếm chiều cao cuộn**, không hiện, không nhận chạm. Hệ quả đo được: trang ngắn (vd Trang chủ, hoặc Khách mời khi chưa có khách) ở màn 844px **không cuộn được** (`scrollHeight - innerHeight <= 1`) dù Kế hoạch đang dài hàng nghìn px.
+2.1 Bốn màn vẫn mount sẵn (giữ state, không tải lại). Màn không xem **không chiếm chiều cao cuộn**, không hiện, không nhận chạm, **không nhận focus bàn phím** (bấm Tab không bao giờ rơi vào phần tử của màn đang ẩn). Với lớp đang đóng thì không quy định thêm (mục 1.2). Hệ quả đo được: trang ngắn (vd Trang chủ, hoặc Khách mời khi chưa có khách) ở màn 844px **không cuộn được** (`scrollHeight - innerHeight <= 1`) dù Kế hoạch đang dài hàng nghìn px.
 2.2 Chuyển từ tab dài sang tab ngắn thì khoảng cuộn co lại theo tab ngắn ngay.
 2.3 Trang ngắn hơn vùng nhìn thấy: thanh tab vẫn nằm sát đáy vùng nhìn thấy (khung kéo dài ít nhất bằng vùng nhìn thấy, nền giấy `--paper` phủ đầy).
 
 ### 3. Header và thanh tab luôn thấy, không che nội dung
 3.1 **Header dính đầu** vùng nhìn thấy ở mọi vị trí cuộn, kể cả header của trang con (nút "Quay lại" không còn cuộn đi theo nội dung). Header không tự ẩn khi cuộn.
-3.2 **Thanh tab dính đáy** vùng nhìn thấy ở mọi vị trí cuộn: đáy bốn nút trùng đáy vùng nhìn thấy (sai số 1,5px), rộng đúng bằng khung và căn giữa. Chạm tab khi đang cuộn tới cuối vẫn đổi trang.
+3.2 **Thanh tab dính đáy** vùng nhìn thấy ở mọi vị trí cuộn: **mép dưới thanh tab trùng đáy vùng nhìn thấy** (sai số 1,5px; trên iPhone thật mép dưới gồm đệm `env(safe-area-inset-bottom)`, trong Chromium safe-area = 0 nên đo là đáy bốn nút), rộng đúng bằng khung và căn giữa. Chạm tab khi đang cuộn tới cuối vẫn đổi trang.
 3.3 **Vùng an toàn.** Thanh tab giữ `padding-bottom: env(safe-area-inset-bottom, 8px)` như hiện nay; header giữ `var(--header-pt)` (có `env(safe-area-inset-top)`). Giữ `viewport-fit=cover` trong `index.html`. Không thêm khoảng đệm cố định nào nhằm "bù" thanh Safari. Chromium không có safe-area thật nên mục này kiểm bằng checklist (B8, B12).
 3.4 **Không che chữ**: ở **đầu** trang (`scrollY = 0`) không chữ nào của nội dung nằm dưới header; ở **cuối** trang (`scrollY` lớn nhất) không chữ nào của nội dung nằm dưới thanh tab hay dưới khối gợi ý cài. (Đo: điểm giữa của mỗi lá văn bản trong vùng 110px đầu/ vùng đáy mà `elementFromPoint` trả về chính nó hoặc tổ tiên/hậu duệ của nó.)
-3.5 **Khối gợi ý cài** giữ nguyên hành vi T-027/ADR-011: nằm ngay trên thanh tab, dính cùng thanh tab, rộng bằng khung, ẩn khi có lớp mở, hiện lại khi đóng hết lớp, "Không nhắc lại" vẫn hoạt động. Nó vẫn chiếm chỗ của vùng nhìn thấy như trước; không che nội dung cuối trang (3.4).
+3.5 **Khối gợi ý cài** (đổi theo quyết định mới của Capu: "Ẩn khi cuộn lên"). Vẫn dính ngay trên thanh tab, cùng thanh tab, rộng bằng khung, không đổi chỗ trong DOM; ẩn khi có lớp mở (ADR-011); "Không nhắc lại" vẫn hoạt động. Khi **hiện**, nó chiếm chỗ như trước và không che nội dung cuối trang (3.4). Ẩn/hiện theo hướng cuộn xem mục 8.
 
 ### 4. Nhớ và khôi phục vị trí cuộn
 4.1 **Nhớ theo trang (theo địa chỉ hash), không theo bước lịch sử.** Khi rời trang X, vị trí `scrollY` lúc rời được nhớ cho địa chỉ X. Ghi đè mỗi lần rời.
-4.2 Trang X hiện lại bằng **chạm thanh tab, Back, Forward, nút "Quay lại" của trang con, hoặc chọn tab trong ngăn kéo**: về đúng vị trí đã nhớ (sai số 2px), xong trong 500ms kể từ khi trang hiện, và không để lại phần nào của trang cũ.
+4.2 Trang X hiện lại bằng **chạm thanh tab, Back, Forward, nút "Quay lại" của trang con, hoặc chọn tab trong ngăn kéo**: về đúng vị trí đã nhớ (sai số 2px). **Khung hình đầu tiên có địa chỉ mới đã ở đúng vị trí đó và mọi khung hình sau giữ nguyên; không vẽ trang ở đầu rồi nhảy, không hoạt ảnh cuộn** (đo bằng `requestAnimationFrame` ghi `location.hash` và `scrollY` mỗi khung hình). Checklist C10 đã đúng ý này.
 4.3 Hai bước lịch sử khác nhau cùng địa chỉ X dùng chung một vị trí nhớ (vị trí rời gần nhất của X), không phải mỗi bước một vị trí.
 4.4 Trang **chưa từng xem** bắt đầu ở 0. Trang con mở bằng cách **chạm một hạng mục** trong danh sách cũng bắt đầu ở 0 (dù từng xem hạng mục đó rồi); danh sách phía dưới giữ vị trí nhớ của nó.
 4.5 Chạm tab Ngân sách khi đang ở trang con vẫn sang danh sách `#/ngan-sach` (luật T-027 mục 2 không đổi) và danh sách về đúng vị trí nhớ của nó.
 4.6 Mở hay đóng lớp **không** là rời trang: không ghi đè vị trí nhớ, không đổi `scrollY`.
 4.7 Thời hạn nhớ: trong phiên của tab trình duyệt. Tải lại trang hoặc mở link mới: **không quy định** (0 hay vị trí do trình duyệt khôi phục đều được). Nội dung chưa đủ dài lúc khôi phục (đang tải): kẹp ở cuối trang, không báo lỗi.
-4.8 Không thêm, không bớt một bước lịch sử nào so với T-030; cuộn không bao giờ tạo bước lịch sử và không đổi địa chỉ.
+4.8 **Chạm tab đang xem: đứng yên.** `scrollY` không đổi, không cuộn về đầu, không thêm bước lịch sử (khớp `goTab` cùng địa chỉ không làm gì).
+4.9 Không thêm, không bớt một bước lịch sử nào so với T-030; cuộn không bao giờ tạo bước lịch sử và không đổi địa chỉ.
 
 ### 5. Lớp mở thì khoá cuộn nền
 5.1 Khi có **ít nhất một lớp** mở: lăn, kéo, hay phím cuộn trên lớp tối, trên phần nền lộ ra, hoặc trên chính lớp **không làm `window.scrollY` đổi** và không làm nội dung nền dịch (mốc nội dung nền giữ nguyên toạ độ trong màn hình, sai số 1px) từ lúc mở tới lúc đóng. Lúc **vừa mở** nền cũng không nhảy (cùng sai số).
-5.2 Đóng lớp bằng **bất kỳ cách nào** (Back, nút đóng, chạm lớp tối, chạm ngoài khung theo INV-005/006) → `scrollY` và mốc nền về đúng như trước khi mở (sai số 1px); lăn lại bình thường được; không có khung con nào bị kẹt `scrollTop > 0`.
+5.2 Đóng lớp bằng **bất kỳ cách nào** (Back, nút đóng, chạm lớp tối, chạm ngoài khung theo INV-005/006) → `scrollY` và mốc nền về đúng như trước khi mở (sai số 1px); lăn lại bình thường được; không có khung con **nằm ngoài lớp** nào bị kẹt `scrollTop > 0` (bên trong lớp được miễn, mục 1.2).
 5.3 Lớp có nội dung dài (sheet, danh sách tin nhắn chat) vẫn **cuộn bên trong chính nó**; cuộn tới đầu/cuối lớp rồi tiếp tục lăn **không** chuyển sang cuộn nền.
 5.4 **Đặt theo vùng nhìn thấy, không theo chiều cao trang**: sheet dính đáy vùng nhìn thấy; lớp tối (scrim) phủ cả vùng nhìn thấy trong bề rộng khung, nên chạm vào mép trên màn hình (vẫn trong khung) đóng sheet; mọi phần tử phủ rộng đúng bằng khung và căn giữa (INV-003). Không dựa vào việc khung là containing block của `position: fixed`.
 5.5 Nhiều lớp chồng nhau (INV-006): khoá giữ tới khi lớp cuối cùng đóng.
@@ -76,6 +77,16 @@ Nếu document là thứ cuộn (header dính trên, thanh tab dính dưới) th
 7.2 Không cuộn ngang ở 320-1280 ở mọi trang, kể cả sau khi cuộn tới cuối và lăn ngang (`scrollWidth <= clientWidth`, `scrollX = 0`).
 7.3 Ở viewport rộng hơn khung, lăn chuột trong khung cuộn document. Viền/bóng quanh khung vẫn theo INV-004.
 
+### 8. Khối gợi ý cài ẩn khi kéo nội dung lên, hiện khi kéo xuống
+(Quyết định của Capu: "Ẩn khi cuộn lên", giống thanh của Safari. "Kéo nội dung lên" = `scrollY` tăng.)
+8.1 **Hiện** ở `scrollY = 0` và lúc mới tải/đổi trang.
+8.2 **Ẩn** khi `scrollY` đã tăng **≥ 8px** kể từ điểm thấp nhất gần nhất (điểm mà hướng cuộn đổi từ xuống sang lên, hoặc đầu trang). Tăng dưới 8px thì giữ nguyên trạng thái (chống rung).
+8.3 **Hiện lại** khi `scrollY` đã giảm **≥ 8px** kể từ điểm cao nhất gần nhất, hoặc khi về `scrollY = 0`. Giảm dưới 8px thì giữ nguyên.
+8.4 Đổi trang (chạm tab, Back, Forward) đưa khối về **hiện**; việc khôi phục vị trí cuộn của mục 4 **không** tính là người dùng kéo nên không làm khối ẩn.
+8.5 Khi **ẩn**: khối không thấy được trong vùng nhìn thấy, không nhận chạm, không nhận focus; thanh tab vẫn dính đáy; không chữ nào bị che (3.4). Ẩn hay hiện **không làm `scrollY` đổi và không làm nội dung dịch** (mốc nội dung nền sai số 1px), và không tạo vòng ẩn-hiện-ẩn ở cuối trang: ở cuối trang khối ẩn rồi đứng yên (không dao động). Cách đạt (ví dụ vẫn để chỗ trống dưới nội dung) do Engineering chọn.
+8.6 Có lớp mở thì khối ẩn (ADR-011). Đóng hết lớp thì khối **trở về đúng trạng thái trước khi mở lớp** (đang ẩn thì vẫn ẩn, đang hiện thì hiện); lớp khoá cuộn nên trong lúc đó không đổi theo hướng cuộn.
+8.7 "Không nhắc lại" bấm ở đầu trang vẫn tắt khối (và nhớ ở `localStorage`, không gửi đi) như T-027. Bất biến `navigation/inv-006` (gợi ý cài tôn trọng lựa chọn) **vẫn đúng**: nó chỉ đo khối ở đầu trang chưa cuộn (hiện, bấm "Không nhắc lại", biến mất, nhớ qua tải lại), đã đọc `lib/nav_check.cjs` mục 6; điều kiện là khối **phải hiện ở đầu trang chưa cuộn**.
+
 ## Ràng buộc (vòi)
 - Repo: `phungrk/tohong-front` · Nhánh: `t-054-cuon-cap-trang` · Vùng (`area`): `planner/front/layout`
 - Bất biến của vùng đã đọc: `eval/invariants/_shared`, `planner/front/layout`, `navigation`, `budget` (đều xanh trên main). Spec này **không vi phạm** INV nào theo cách đọc; xem "Bất biến bị thay hay bị đe doạ" cho những chỗ cài sai sẽ làm đỏ.
@@ -84,7 +95,7 @@ Nếu document là thứ cuộn (header dính trên, thanh tab dính dưới) th
 - Bậc lưới lọc đề xuất: **B**. Lý do: đổi bố cục toàn app nhưng không chạm ranh giới cứng; eval tự động phủ tiêu chí 1-8; tiêu chí 9 (Safari thật) là checklist của Capu nên Capu đọc diff hành vi và tự chạy checklist trước 48 giờ.
 
 ## Tiêu chí chấp nhận và eval
-Từ thư mục `/home/user/tohong-hq`. `<front>` = thư mục `tohong-front` (vd `/home/user/tohong-front`). Harness build bằng `node_modules/.bin/vite build` ra thư mục tạm, phục vụ bằng máy chủ tĩnh **trong tiến trình eval** (cổng `listen(0)`, kiểm nonce `/__nonce`), kill cả nhóm tiến trình khi xong hoặc khi bị ngắt (bài học T-053), chặn mạng ngoài, API giả trong bộ nhớ, dữ liệu bịa. Một lệnh cho tất cả: `bash eval/T-054/run.sh <front>` (chạy 1-7 rồi 8; dòng cuối PASS hoặc FAIL).
+Từ thư mục `/home/user/tohong-hq`. `<front>` = thư mục `tohong-front` (vd `/home/user/tohong-front`). Harness build bằng `node_modules/.bin/vite build` ra thư mục tạm, phục vụ bằng máy chủ tĩnh **trong tiến trình eval** (cổng `listen(0)`, kiểm nonce `/__nonce`), kill cả nhóm tiến trình khi xong hoặc khi bị ngắt (bài học T-053), chặn mạng ngoài, API giả trong bộ nhớ, dữ liệu bịa. Một lệnh cho tất cả: `bash eval/T-054/run.sh <front>` (chạy 1-8 rồi 9; dòng cuối PASS hoặc FAIL).
 
 | # | Tiêu chí (có/không) | Eval (lệnh hoặc file chạy được) |
 | --- | --- | --- |
@@ -92,15 +103,16 @@ Từ thư mục `/home/user/tohong-hq`. `<front>` = thư mục `tohong-front` (v
 | 2 | Mục 2: tab ngắn không cuộn được dù tab khác dài; chuyển tab dài sang ngắn thì khoảng cuộn co lại; trang ngắn thì thanh tab sát đáy | `bash eval/T-054/run.sh <front> --only 2` |
 | 3 | Mục 3 (trừ safe-area thật): header dính đầu, thanh tab dính đáy, không che chữ ở đầu/cuối, có và không có khối gợi ý cài (UA iPhone), header "Quay lại" của trang con dính | `bash eval/T-054/run.sh <front> --only 3` |
 | 4 | Mục 4: nhớ và khôi phục vị trí khi chạm tab, Back, Forward, "Quay lại", từ trang con sang tab khác; trang mới và trang con mở từ danh sách bắt đầu ở 0; hai bước cùng trang dùng chung vị trí | `bash eval/T-054/run.sh <front> --only 4` |
-| 5 | Mục 5: lớp mở (sheet Mời, ngăn kéo, chat AI) thì nền không trôi và không nhảy, đóng giữ đúng vị trí, chạm lớp tối ở mép trên đóng sheet, lăn lại được | `bash eval/T-054/run.sh <front> --only 5` |
+| 5 | Mục 5: lớp mở (sheet Mời, ngăn kéo, chat AI, sheet "Thêm việc" ở Kế hoạch, hộp thoại "Cách hoạt động" ở trang con) thì nền không trôi và không nhảy, đóng giữ đúng vị trí, sheet nằm trong vùng nhìn thấy và dính đáy theo bề rộng khung, chạm lớp tối ở mép trên đóng sheet, lăn lại được | `bash eval/T-054/run.sh <front> --only 5` |
 | 6 | Mục 6: chat AI ở 390 và 1024: "Đóng" và ô nhập thấy trọn trong vùng nhìn thấy, mở chat nền đứng yên, đóng nền về chỗ cũ | `bash eval/T-054/run.sh <front> --only 6` |
 | 7 | Mục 7: không cuộn ngang ở 320/360/390/768/1024/1280 sau khi cuộn tới cuối và lăn ngang; khung rộng `min(vw,768)` căn giữa; lăn giữa khung cuộn document | `bash eval/T-054/run.sh <front> --only 7` |
-| 8 | Toàn bộ bất biến `_shared`, `planner/front/layout`, `navigation`, `budget` xanh (bản gốc, chưa sửa) | `bash eval/T-054/run.sh <front> --only 8` (= `bash eval/T-054/run_invariants.sh <front>`) |
-| 9 | Safari iPhone thật: thanh địa chỉ thu gọn, thanh dưới ẩn khi vuốt lên và hiện lại khi vuốt xuống; header, thanh tab, safe-area, Back, lớp phủ, chat với bàn phím, khối gợi ý cài | `eval/T-054/checklist.md` (checklist, vì Chromium không có thanh Safari, safe-area thật hay bàn phím iOS; Capu tự kiểm 18 dòng) |
+| 8 | Mục 8: khối gợi ý cài (UA iPhone) ẩn khi kéo nội dung lên ≥ 8px, hiện khi kéo xuống ≥ 8px hay về đầu trang, ngưỡng chống rung, không đổi scrollY, không dao động ở cuối trang, ẩn khi có lớp và trả đúng trạng thái khi đóng, khôi phục vị trí không làm ẩn, "Không nhắc lại" vẫn tắt được | `bash eval/T-054/run.sh <front> --only 8` |
+| 9 | Toàn bộ bất biến `_shared`, `planner/front/layout`, `navigation`, `budget` xanh (bản gốc, chưa sửa) | `bash eval/T-054/run.sh <front> --only 9` (= `bash eval/T-054/run_invariants.sh <front>`) |
+| 10 | Safari iPhone thật: thanh địa chỉ thu gọn, thanh dưới ẩn khi vuốt lên và hiện lại khi vuốt xuống; header, thanh tab, safe-area, Back, lớp phủ, chat với bàn phím, khối gợi ý cài | `eval/T-054/checklist.md` (checklist, vì Chromium không có thanh Safari, safe-area thật hay bàn phím iOS; Capu tự kiểm 21 dòng) |
 
-Trạng thái đã đo (Spec Writer, 2026-11-04): trên main `3f11d8b` lệnh `--only 1..7` **đỏ** (36 dòng XX trên 154 dòng đo: TC1 và TC3 và TC4 và TC5 và TC7 đỏ; TC2 đỏ ở dòng chuyển tab dài sang ngắn; TC6 xanh vì chat hiện đã đúng hình dạng, giữ làm chốt chặn không hồi quy); `--only 8` **xanh**.
+Trạng thái đã đo (Spec Writer, lần sửa v2, 2026-11-04): trên main `3f11d8b` lệnh `--only 1..8` **đỏ** (49 dòng XX trên 181 dòng; TC1, 3, 4, 5, 7, 8 đỏ; TC2 đỏ ở dòng chuyển tab dài sang ngắn và dòng focus Tab vào màn ẩn; TC6 xanh vì chat hiện đã đúng hình dạng, giữ làm chốt chặn); `--only 9` (bất biến) **xanh** (15 file).
 
-Kiểm khả thi: harness và dòng đo được thử với một bản "giả lập" ngoài repo (CSS ghi đè + đoạn JS nhớ vị trí, không phải gợi ý cài đặt, nằm ở scratchpad của phiên, không commit): tiêu chí 1 xanh hoàn toàn, tiêu chí 4 xanh tới bước trang con (dừng ở nút "Quay lại" vì bản giả lập không có header dính cho trang con). **Tiêu chí 2, 3, 5, 7 chưa được thử với một cài đặt chạy được**; chúng chỉ thử được là chạy hết và đỏ đúng chỗ trên main. Spec critic và Engineering là người chạy chúng xanh lần đầu; nếu một dòng đo có vẻ đòi điều không làm được, `reject --kind spec` và nêu dòng nào.
+Kiểm khả thi: ở v1 Spec critic đã chạy một bản thử riêng (clone của main, ngoài repo) với eval cũ: 185 dòng ok, chỉ 9 dòng `innerScrolled` đỏ (đã sửa ở v2 theo mục 1.2: miễn phần tử trong lớp). **Các dòng mới của v2 chưa được chạy xanh với cài đặt nào**: khung hình đầu tiên (mục 4.2), chạm tab đang xem (4.8), focus Tab (2.1), sheet "Thêm việc" và hộp thoại "Cách hoạt động" (mục 5), toàn bộ tiêu chí 8. Chúng đã chạy hết và đỏ đúng chỗ trên main; bản giả lập CSS của Spec Writer không đủ để kiểm hai lớp mới (thừa chiều cao ảo làm chúng không tới được). Nếu một dòng đo có vẻ đòi điều không làm được, `reject --kind spec` và nêu dòng nào.
 
 ## Bất biến bị thay hay bị đe doạ (đề xuất ADR; Chief of Staff ghi, Spec Writer không sửa eval cũ)
 Đọc kỹ: **không bất biến nào hiện tại cần sửa hay xoá** để spec này cài được. Hai thứ **không phải bất biến** nhưng bị thay đổi và cần ADR:
@@ -113,7 +125,7 @@ Bất biến có nguy cơ **đỏ do cài sai** (không phải để sửa eval,
 Spec critic rút vào bể khi spec qua cổng; mỗi cái là một dòng đã chạy được của `check_ui.cjs`, chụp cố định vào `lib/` của thư mục bất biến như T-025.
 - **INV-A** (`planner/front/layout`): không có khung con cuộn dọc nội dung chính khi không có lớp mở; document là thứ cuộn (mục 1.1, 1.2; `--only 1`).
 - **INV-B** (`planner/front/layout`): thanh tab dính đáy vùng nhìn thấy và header dính đầu ở mọi vị trí cuộn; không che chữ ở đầu/cuối (mục 3; `--only 3`).
-- **INV-C** (`planner/front/layout`): lớp mở thì nền không trôi và không nhảy, đóng trả đúng vị trí (mục 5; `--only 5`). Chỉ phủ ba lớp mà harness mở được: ai thêm lớp mới phải thêm bước mở nó vào đây (qua Chief of Staff), như INV-003.
+- **INV-C** (`planner/front/layout`): lớp mở thì nền không trôi và không nhảy, đóng trả đúng vị trí (mục 5; `--only 5`). Phủ năm lớp: sheet Mời, ngăn kéo, chat AI, sheet "Thêm việc", hộp thoại "Cách hoạt động". **Không mở được trong harness: sheet vendor ở Ngân sách** (cần dữ liệu tìm vendor từ API và nhiều bước chọn); nó có INV-003/005/006 (bề rộng, chạm ngoài) và `budget/inv-004`. Ai thêm lớp mới phải thêm bước mở nó vào đây (qua Chief of Staff), như INV-003.
 - **INV-D** (`planner/front/navigation`): vị trí cuộn của mỗi trang được khôi phục khi chạm tab, Back, Forward, "Quay lại"; trang con mở từ danh sách bắt đầu ở 0 (mục 4; `--only 4`).
 
 ## Không làm
@@ -125,4 +137,4 @@ Spec critic rút vào bể khi spec qua cổng; mỗi cái là một dòng đã 
 - Không khôi phục vị trí cuộn sau khi tải lại trang (mục 4.7: không quy định).
 
 ## Câu hỏi mở
-Khối gợi ý cài app (iPhone chưa thêm vào MH chính) hiện chiếm khoảng 82px dính trên thanh tab, nên vùng đọc ngắn đi tới khi người dùng bấm "Không nhắc lại". Spec **giữ nguyên** vị trí đó (an toàn cho T-027/ADR-011, đảo ngược được). Nếu Capu muốn khối này không chiếm chỗ khi cuộn (ví dụ chỉ hiện ở cuối nội dung), cần quyết riêng; việc này không chặn T-054.
+Không. (Câu về khối gợi ý cài đã được Capu quyết: "Ẩn khi cuộn lên", mục 8.)
