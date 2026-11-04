@@ -1,0 +1,141 @@
+{
+  "task": "T-054",
+  "at": "2026-11-04T00:46",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/front/layout",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-054/run.sh /home/user/tohong-front --only 1",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 11402,
+      "out": " cuộn được (dài thêm 0px)  :: document không có chỗ để cuộn: chiều cao trang không vượt màn hình\n  XX  [TC1] Khách mời: lăn nội dung thì window.scrollY tăng (đo 0)\n  XX  [TC1] Khách mời: không phần tử con nào tự cuộn nội dung  :: DIV top=109; DIV top=1120; DIV top=625\n  XX  [TC1] Khách mời: cuộn tới cuối được bằng document (scrollY 0/0)\n  ok  [TC1] Khách mời: lăn ngược về đầu trang (scrollY 0)\n  XX  [TC1] Ngân sách: chạm được hạng mục \"Nhà hàng tiệc cưới\" để mở trang con\n  XX  [TC1] Cảm ứng: kéo nội dung lên thì window.scrollY tăng (đo 0)\n  XX  [TC1] Cảm ứng: không phần tử con nào tự cuộn nội dung  :: DIV top=163\nFAIL [TC1] Trang chủ: nội dung dài hơn màn hình thấp 360px nên document cuộn được (dài thêm 0px) [document không có chỗ để cuộn: chiều cao trang không vượt màn hình] (+18 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-054/run.sh /home/user/tohong-front --only 2",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 5989,
+      "out": "trôi (scrollY 0)\n  ok  [TC2] Trang chủ: nội dung ngắn thì thanh tab vẫn nằm sát đáy màn hình (đáy 844 / 844)\n  ok  [TC2] Khách mời (nội dung ngắn, màn 844px): không có khoảng cuộn thừa do các tab khác dài (thừa 0px)\n  ok  [TC2] Khách mời: lăn không làm trang trôi (scrollY 0)\n  ok  [TC2] Khách mời: nội dung ngắn thì thanh tab vẫn nằm sát đáy màn hình (đáy 844 / 844)\n  XX  [TC2] Bấm Tab 45 lần ở Kế hoạch: focus không rơi vào phần tử của màn đang ẩn  :: BUTTON \"Mở menu\" trong phần tử ẩn; BUTTON \"Mời cùng xem\" trong phần tử ẩn\n  XX  [TC2] Từ tab dài (Kế hoạch dài thêm 0px) sang tab ngắn: khoảng cuộn co lại theo tab ngắn (0px)\nFAIL [TC2] Bấm Tab 45 lần ở Kế hoạch: focus không rơi vào phần tử của màn đang ẩn [BUTTON \"Mở menu\" trong phần tử ẩn; BUTTON \"Mời cùng xem\" trong phần tử ẩn] (+1 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-054/run.sh /home/user/tohong-front --only 3",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 19284,
+      "out": " (có khối gợi ý cài app, iPhone): ở cuối trang, thanh tab và khối gợi ý không che chữ nào của nội dung  :: \"K\" bị che bởi div; \"Khách số 31\" bị che bởi strong\n  ok  [TC3] Khách mời (có khối gợi ý cài app, iPhone): khối gợi ý cài hiện trên iPhone\n  ok  [TC3] Khách mời (có khối gợi ý cài app, iPhone): đang ở cuối trang vẫn chạm tab \"Trang chủ\" chuyển được trang\n  ok  [TC3] Trang con: thấy nút \"Quay lại\" ở đầu trang\n  XX  [TC3] Trang con: cuộn tới cuối vẫn thấy nút \"Quay lại\" dính đầu màn hình (top null)\n  ok  [TC3] Trang con: thanh tab dính đáy\n  XX  [TC3] Trang con: ở cuối trang không có chữ bị che  :: \"Khoản số 14\" bị che bởi button; \"tr\" bị che bởi button\nFAIL [TC3] Kế hoạch: ở cuối trang, thanh tab không che chữ nào của nội dung [\"Chọn ban nhạc / DJ (nếu \" bị che bởi button] (+5 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-054/run.sh /home/user/tohong-front --only 4",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 6589,
+      "out": "ok  [TC4] Tab chưa từng xem bắt đầu ở đầu trang (scrollY 0)\n  XX  [TC4] Ba tab ở ba vị trí khác nhau (0, 0, 0)\n  ok  [TC4] Chạm tab \"Trang chủ\": về đúng vị trí đã rời (0 so với 0)\n  ok  [TC4] Chạm tab \"Ngân sách\": về đúng vị trí đã rời (0 so với 0)\n  ok  [TC4] Chạm tab \"Kế hoạch\": về đúng vị trí đã rời (0 so với 0)\nFAIL [TC4] Ba tab ở ba vị trí khác nhau (0, 0, 0)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-054/run.sh /home/user/tohong-front --only 5",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 8083,
+      "out": "XX  [TC5] Sheet \"Mời người ấy\": có chỗ để thử (đã cuộn 0px, có mốc nội dung)\n  XX  [TC5] Ngăn kéo menu: có chỗ để thử (đã cuộn 0px, có mốc nội dung)\n  XX  [TC5] Chat AI: có chỗ để thử (đã cuộn 0px, có mốc nội dung)\n  XX  [TC5] Sheet \"Thêm việc\" (Kế hoạch): có chỗ để thử (đã cuộn 0px, có mốc nội dung)\n  XX  [TC5] Hộp thoại \"Cách hoạt động\" (trang con Nhà hàng): có chỗ để thử (đã cuộn 0px, có mốc nội dung)\nFAIL [TC5] Sheet \"Mời người ấy\": có chỗ để thử (đã cuộn 0px, có mốc nội dung) (+4 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-054/run.sh /home/user/tohong-front --only 6",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 7330,
+      "out": "ok  [TC6] 390px: chat AI mở ra, thấy nút \"Đóng\"\n  ok  [TC6] 390px: nút \"Đóng\" của chat nằm trong vùng nhìn thấy, ở nửa trên (top 88)\n  ok  [TC6] 390px: ô nhập tin nhắn thấy trọn trong màn hình, sát đáy vùng nhìn (đáy 610 / 640)\n  ok  [TC6] Chat mở: lăn không làm nền trôi\n  ok  [TC6] 390px: đóng chat, nền về đúng vị trí (0 so với 0)\n  ok  [TC6] 1024px: chat AI mở ra, thấy nút \"Đóng\"\n  ok  [TC6] 1024px: nút \"Đóng\" của chat nằm trong vùng nhìn thấy, ở nửa trên (top 88)\n  ok  [TC6] 1024px: ô nhập tin nhắn thấy trọn trong màn hình, sát đáy vùng nhìn (đáy 610 / 640)\n  ok  [TC6] Chat mở: lăn không làm nền trôi\n  ok  [TC6] 1024px: đóng chat, nền về đúng vị trí (0 so với 0)\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-054/run.sh /home/user/tohong-front --only 7",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 30369,
+      "out": "ng cuộn ngang (scrollWidth 1024, màn 1024, scrollX 0)\n  ok  [TC7] 1024px, Khách mời: không cuộn ngang (scrollWidth 1024, màn 1024, scrollX 0)\n  ok  [TC7] 1024px: khung rộng 768px (thanh tab 766), căn giữa\n  XX  [TC7] 1024px: lăn giữa khung thì document cuộn (0)\n  ok  [TC7] 1280px, Trang chủ: không cuộn ngang (scrollWidth 1280, màn 1280, scrollX 0)\n  ok  [TC7] 1280px, Kế hoạch: không cuộn ngang (scrollWidth 1280, màn 1280, scrollX 0)\n  ok  [TC7] 1280px, Ngân sách: không cuộn ngang (scrollWidth 1280, màn 1280, scrollX 0)\n  ok  [TC7] 1280px, Khách mời: không cuộn ngang (scrollWidth 1280, màn 1280, scrollX 0)\n  ok  [TC7] 1280px: khung rộng 768px (thanh tab 766), căn giữa\n  XX  [TC7] 1280px: lăn giữa khung thì document cuộn (0)\nFAIL [TC7] 320px: lăn giữa khung thì document cuộn (0) (+5 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-054/run.sh /home/user/tohong-front --only 8",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 12367,
+      "out": "C8] Ở cuối trang khối ẩn không làm trang dao động (scrollY 0 -> 0, vẫn ẩn)\n  XX  [TC8] Khối ẩn ở cuối trang: không chữ nào bị che  :: \"Mua nhẫn cưới\" bị che bởi p; \"Chọn MC đám cưới\" bị che bởi div\n  ok  [TC8] Khối ẩn: thanh tab vẫn dính đáy\n  ok  [TC8] Từ cuối trang kéo xuống 30px: khối hiện\n  XX  [TC8] Chuẩn bị: khối đang ẩn\n  ok  [TC8] Mở ngăn kéo: khối ẩn\n  XX  [TC8] Đóng ngăn kéo: khối trở về trạng thái ẩn như trước khi mở (không tự hiện)\n  ok  [TC8] Sau khi đóng lớp, kéo xuống 30px: khối hiện\n  ok  [TC8] Đổi sang trang khác: khối hiện\n  XX  [TC8] Quay lại trang đã cuộn (scrollY 0): khôi phục vị trí không làm khối ẩn\n  ok  [TC8] Ở đầu trang chạm được \"Không nhắc lại\"\n  ok  [TC8] Bấm \"Không nhắc lại\": khối biến mất\nFAIL [TC8] Kéo nội dung lên thêm 40px (scrollY 0): khối ẩn (+9 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-054/run.sh /home/user/tohong-front --only 9",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 317354,
+      "out": "hong-secret-trong-repo\n  ok _shared/inv-002-so-cai-doc-duoc\n  ok layout/inv-001-khung-min-viewport-appmax\n  ok layout/inv-002-khong-cuon-ngang\n  ok layout/inv-003-phu-nam-trong-khung\n  ok layout/inv-004-vien-bong-theo-khung\n  ok layout/inv-005-cham-ngoai-khung-dong-sheet\n  ok layout/inv-006-cham-ngoai-khung-chi-dong-lop-tren\n  ok navigation/inv-001-thu-tu-back-mot-buoc\n  ok navigation/inv-002-back-dong-lop-tren-truoc\n  ok navigation/inv-003-khong-bay-goc\n  ok navigation/inv-004-hash-dung-man\n  ok navigation/inv-005-manifest-cai-duoc\n  ok navigation/inv-006-goi-y-cai-ton-trong-lua-chon\n  ok budget/inv-001-mot-con-so-cho-khoan-vendor\n  ok budget/inv-002-khong-doan-so-khi-thieu-dau-vao\n  ok budget/inv-003-mo-man-khong-dung-du-lieu-chung\n  ok budget/inv-004-lop-cach-hoat-dong-la-hop-thoai\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-054/checklist.md",
+      "kind": "manual",
+      "status": "MANUAL",
+      "ms": 0,
+      "out": "checklist: người kiểm",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-001-khung-min-viewport-appmax.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 38,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-002-khong-cuon-ngang.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 34,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-003-phu-nam-trong-khung.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 36,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-004-vien-bong-theo-khung.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 34,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-005-cham-ngoai-khung-dong-sheet.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 31,
+      "out": "FAIL thiếu --repo",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-006-cham-ngoai-khung-chi-dong-lop-tren.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 33,
+      "out": "FAIL thiếu --repo",
+      "tier": 2
+    }
+  ],
+  "hint": "spec"
+}
