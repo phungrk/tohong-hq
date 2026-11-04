@@ -90,6 +90,25 @@ def gh(method, path, body=None, dry=False):
         raise GhError(f"GitHub {e.code} {method} {path}: {e.read().decode()[:300]}")
 
 
+def apply_action(issue, action, dry, blind_ok=True):
+    """Làm nốt hành động (gán bot / gán Capu / đóng) dựa trên trạng thái thật của issue; đã đúng thì không làm."""
+    cur = {} if dry else gh("GET", f"/repos/{REPO}/issues/{issue}")
+    if not isinstance(cur, dict):   # không đọc được trạng thái thật: chỉ làm khi biết chắc còn dở (blind_ok)
+        if not blind_ok:
+            return
+        cur = {}
+    logins = {(u or {}).get("login") for u in cur.get("assignees") or []}
+    if action == "assign-bot":
+        if BOT and BOT not in logins:
+            gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"assignees": [BOT]}, dry)
+    elif action == "assign-capu":
+        if CAPU not in logins:
+            gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"assignees": [CAPU]}, dry)
+    elif action in ("close", "finish"):
+        if cur.get("state") != "closed":
+            gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"state": "closed", "state_reason": "completed"}, dry)
+
+
 def blob(path):
     return f"https://github.com/{REPO}/blob/main/{path}"
 
@@ -153,6 +172,8 @@ def main():
     state.mkdir(parents=True, exist_ok=True)
     seen_f = state / "mirrored.txt"
     seen = set(seen_f.read_text().split()) if seen_f.exists() else set()
+    pend_f = state / "pending.txt"   # mốc đã comment nhưng hành động chưa chắc xong (lỗi GitHub giữa chừng)
+    pending = set(pend_f.read_text().split()) if pend_f.exists() else set()
     # Chống trùng hai lớp: state file (nhanh) + marker đã có trên issue (chắc, kể cả lần chạy đầu hay mất state)
     markers = {}
 
@@ -175,6 +196,7 @@ def main():
             continue
         boards[meta["id"]] = meta
     done_keys, n, failed = [], 0, set()
+    pending_before = set(pending)
     for e in ledger.read_events():
         tid = e.get("task")
         if tid not in boards or tid in failed:
@@ -188,22 +210,25 @@ def main():
             mkey, text, action = m
             issue = boards[tid]["issue"]
             try:
-                if has_marker(issue, mkey):
-                    done_keys.append(key)
-                    continue
-                print(f"{tid} → issue #{issue}: {text.splitlines()[0][:80]} [{action or '-'}]")
-                gh("POST", f"/repos/{REPO}/issues/{issue}/comments", {"body": MARK.format(key=mkey) + "\n" + text}, a.dry_run)
-                markers[issue].add(mkey)
-                if action == "assign-bot" and BOT:
-                    gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"assignees": [BOT]}, a.dry_run)
-                elif action == "assign-capu":
-                    gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"assignees": [CAPU]}, a.dry_run)
-                elif action in ("close", "finish"):
-                    if action == "close" and not has_marker(issue, f"{tid}-4"):
-                        gh("POST", f"/repos/{REPO}/issues/{issue}/comments",
-                           {"body": MARK.format(key=f"{tid}-4") + "\n" + done_text(tid)}, a.dry_run)
-                        markers[issue].add(f"{tid}-4")
-                    gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"state": "closed", "state_reason": "completed"}, a.dry_run)
+                # Hai bước idempotent: (1) comment chỉ đăng khi chưa có marker; (2) hành động luôn kiểm
+                # trên trạng thái thật của issue và làm nốt phần thiếu (kể cả khi marker đã có từ lần chạy hỏng giữa chừng)
+                had = has_marker(issue, mkey)
+                if had:
+                    if not action:
+                        done_keys.append(key)
+                        continue
+                else:
+                    print(f"{tid} → issue #{issue}: {text.splitlines()[0][:80]} [{action or '-'}]")
+                    gh("POST", f"/repos/{REPO}/issues/{issue}/comments", {"body": MARK.format(key=mkey) + "\n" + text}, a.dry_run)
+                    markers[issue].add(mkey)
+                if action == "close" and not has_marker(issue, f"{tid}-4"):
+                    gh("POST", f"/repos/{REPO}/issues/{issue}/comments",
+                       {"body": MARK.format(key=f"{tid}-4") + "\n" + done_text(tid)}, a.dry_run)
+                    markers[issue].add(f"{tid}-4")
+                if action:
+                    pending.add(key)
+                    apply_action(issue, action, a.dry_run, blind_ok=(not had) or key in pending_before)
+                    pending.discard(key)
             except GhError as err:
                 print(f"CẢNH BÁO: {tid} → issue #{issue}: {err}; bỏ qua phần còn lại của việc này.", file=sys.stderr)
                 failed.add(tid)
@@ -212,6 +237,7 @@ def main():
         done_keys.append(key)
     if not a.dry_run:
         seen_f.write_text("\n".join(sorted(seen | set(done_keys))) + "\n")
+        pend_f.write_text("\n".join(sorted(pending)) + "\n")
     print(f"Đã phản chiếu {n} mốc.")
 
 
