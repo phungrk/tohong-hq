@@ -37,5 +37,6 @@ Cách kiểm chung: iPhone, Safari (không phải app đã thêm vào MH chính,
 
 18. Ở đầu trang khối "Thêm Tơ Hồng vào màn hình chính" hiện ngay trên thanh tab, không che chữ cuối khi cuộn tới cuối? ("có" là đạt)
 19. Vuốt nội dung lên để đọc tiếp: khối trượt ẩn đi cùng lúc thanh Safari thu gọn, không giật, không làm trang nhảy? Vuốt xuống một chút (hoặc về đầu trang): khối hiện lại? Rung nhẹ ngón tay vài px không làm khối chớp? ("có" cho cả ba là đạt)
-20. Khi khối đang ẩn, ở cuối trang không có khoảng trống lạ hay chữ bị thanh tab che? ("có" là đạt)
+20. Khi khối đang ẩn, ở cuối trang không có chữ bị thanh tab che? Dải trống cao bằng khối (~82px) phía trên thanh tab là CHỦ Ý, không tính là lỗi. ("có" là đạt)
 21. Mở một lớp (sheet, ngăn kéo, chat) khi khối đang hiện hay đang ẩn: khối ẩn khi lớp mở; đóng lớp thì khối về đúng trạng thái trước khi mở? ("có" là đạt)
+22. Kéo quá đà (rubber-band): ở cuối trang kéo quá đà rồi thả, khối gợi ý không hiện lại; ở đầu trang kéo quá đà rồi thả, khối vẫn hiện (không ẩn)? ("có" cho cả hai là đạt)
