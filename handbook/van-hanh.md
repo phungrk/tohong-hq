@@ -137,6 +137,7 @@ task.py, log_hook.py, activity_hook.py ──POST──▶ Cloudflare Worker toh
 - `scripts/activity_hook.py` (PreToolUse) phát nhịp "đang làm gì" của từng agent, tối đa một nhịp mỗi 10 giây: đọc tài liệu, sửa file, chạy lệnh, tra cứu, giao việc. Không gửi lệnh hay nội dung.
 - `python3 scripts/live.py --done T-xxx` gửi nhịp `status: done` của Chief of Staff: dashboard tắt sáng node và hiện "Task [tên] đã hoàn thành"; Worker giữ thông báo này 10 phút, nhịp mới của agent sẽ ghi đè.
 - Mã Worker nằm trong `live/`. Workflow `deploy-live` tự deploy khi `live/` thay đổi.
+- Đường truyền trực tiếp chỉ bù được sự kiện đã phát. Vì vậy: agent chạy `task.py start` **trước tiên** khi nhận việc, và Chief of Staff commit + push sổ cái **ngay sau mỗi lần trạng thái việc đổi** (start, handoff, accept, reject, evalplus, respec, block), không gom tới lúc bàn giao. Thay đổi đang viết dở của agent (spec, eval chưa bàn giao) thì để lại, chỉ commit phần board và nhật ký.
 
 Cấu hình:
 

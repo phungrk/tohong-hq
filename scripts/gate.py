@@ -37,6 +37,8 @@ ROOT = ledger.ROOT
 
 def classify(entry):
     e = entry.strip()
+    if any(c.isspace() for c in e):
+        return "cmd"  # lệnh shell có tham số (vd "cd ... && bash x.sh"), không phải đường dẫn file
     if e.endswith(".md"):
         return "manual"
     if e.endswith(".py"):

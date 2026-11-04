@@ -41,8 +41,7 @@ def export(out: Path, public: bool = False):
             "version": t["version"], "deadline": t.get("deadline", ""), "budget": t.get("budget", ""),
             "cost": t["cost"], "created": t["created"], "updated": t["updated"],
             "hours_since_update": hours, "pipeline": f"{t['owner']} → {t['reviewer']}", "as_of": stamp,
-            "tier": t.get("tier", ""), "area": t.get("area", ""), "evals": len(t.get("eval", [])),
-            "spec_returns": t.get("spec_returns", 0), "evals_added": t.get("evals_added", 0),
+            "tier": str(t.get("tier") or ""),
         })
 
     events = []
@@ -75,21 +74,11 @@ def export(out: Path, public: bool = False):
             "agent_file": f, "status": "Hired" if hired else "Need Hiring", "as_of": stamp,
         })
 
-    # Bể tri thức: bất biến theo vùng, eval đối kháng, báo cáo insight
-    inv_root = ROOT / "eval" / "invariants"
-    invariants = {}
-    if inv_root.exists():
-        for f in inv_root.rglob("inv-*"):
-            if f.is_file():
-                area = str(f.parent.relative_to(inv_root)).replace("\\", "/")
-                invariants[area] = invariants.get(area, 0) + 1
-    adv = sum(1 for f in (ROOT / "eval").rglob("adv-*") if f.is_file()) if (ROOT / "eval").exists() else 0
-    regression = sum(1 for f in (ROOT / "eval" / "regression").glob("*") if f.is_file() and f.name != ".gitkeep") if (ROOT / "eval" / "regression").exists() else 0
-    insights_dir = ROOT / "insights"
-    reports = sorted(f.name for f in insights_dir.glob("*-weekly.md")) if insights_dir.exists() else []
-    model = {"invariants": invariants, "invariants_total": sum(invariants.values()), "adversarial_evals": adv,
-             "regression_evals": regression, "insight_reports": len(reports), "last_insight": reports[-1] if reports else "",
-             "specs": sum(1 for _ in (ROOT / "products").glob("T-*.md")) if (ROOT / "products").exists() else 0}
+    # Số eval hồi quy: mục cấp một của eval/regression/ (trừ tên bắt đầu '.' và README.md); null nếu thiếu thư mục
+    reg_dir = ROOT / "eval" / "regression"
+    regression_evals = None
+    if reg_dir.is_dir():
+        regression_evals = sum(1 for p in reg_dir.iterdir() if not p.name.startswith(".") and p.name != "README.md")
 
     if public:
         # Bản công khai: bỏ nội dung chi tiết (defect, ghi chú, đường dẫn file)
@@ -100,7 +89,7 @@ def export(out: Path, public: bool = False):
     for name, rows in (("tasks", tasks), ("events", events), ("roster", roster)):
         (out / f"{name}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
     bundle = {"generated_at": stamp, "timezone": "Asia/Ho_Chi_Minh", "public": public,
-              "tasks": tasks, "events": events, "roster": roster, "model": model}
+              "regression_evals": regression_evals, "tasks": tasks, "events": events, "roster": roster}
     (out / "dashboard.json").write_text(json.dumps(bundle, ensure_ascii=False), encoding="utf-8")
     print(f"Đã xuất lúc {stamp}{' (bản công khai)' if public else ''}: {len(tasks)} việc, {len(events)} sự kiện, "
           f"{sum(r['status'] == 'Hired' for r in roster)}/{len(roster)} vị trí đã có người → {out}")
