@@ -1,0 +1,141 @@
+{
+  "task": "T-062",
+  "at": "2026-11-04T14:42",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/front/loading",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 1",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 13834,
+      "out": "ok  [TC1] khach-moi: vùng chờ đặt aria-busy=\"true\"\n  ok  [TC1] khach-moi: có >= 3 khối skeleton (mô phỏng bố cục)\n  ok  [TC1] khach-moi: lúc chờ không có chữ chờ trơn, trạng thái rỗng giả hay nút thêm\n  ok  [TC1] khach-moi: dữ liệu về thì nội dung thật hiện\n  ok  [TC1] khach-moi: dữ liệu về thì skeleton biến mất (không còn aria-busy=\"true\")\n  ok  [TC1] ngan-sach/venue: lúc chờ có vùng role=status \"Đang tải\" nhìn thấy\n  ok  [TC1] ngan-sach/venue: vùng chờ đặt aria-busy=\"true\"\n  ok  [TC1] ngan-sach/venue: có >= 3 khối skeleton (mô phỏng bố cục)\n  ok  [TC1] ngan-sach/venue: lúc chờ không có chữ chờ trơn, trạng thái rỗng giả hay nút thêm\n  ok  [TC1] ngan-sach/venue: dữ liệu về thì nội dung thật hiện\n  ok  [TC1] ngan-sach/venue: dữ liệu về thì skeleton biến mất (không còn aria-busy=\"true\")\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 2",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 6979,
+      "out": "status \"Đang tải\"\n  ok  [TC2] gợi ý vendor: không còn chữ \"Đang tìm vendor…\"/\"Đang tải…\" trơn\n  ok  [TC2] gợi ý vendor: có >= 3 khối skeleton\n  ok  [TC2] gợi ý vendor: dữ liệu về thì danh sách thật hiện\n  ok  [TC2] gợi ý vendor: skeleton biến mất\n  XX  [TC2] gợi ý vendor: tiêu đề thẻ không nhảy (±2px)  :: null → null\n  XX  [TC2] gợi ý vendor: khối đầu của skeleton khớp ảnh bìa vendor đầu (top ±4, rộng ±4, cao ±4)  :: skeleton 320/100x100 thật 324/100x100\n  ok  [TC2] lịch sử trò chuyện: 700ms sau khi mở (API trễ 1,5s) có role=status \"Đang tải\"\n  ok  [TC2] lịch sử trò chuyện: không có chữ chờ trơn\n  ok  [TC2] lịch sử trò chuyện: dữ liệu về thì tin nhắn thật hiện\n  ok  [TC2] lịch sử trò chuyện: skeleton biến mất\nFAIL [TC2] gợi ý vendor: tiêu đề thẻ không nhảy (±2px) [null → null] (+1 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 3",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 5088,
+      "out": "ok  [TC3] admin: 700ms sau khi mở (API trễ 1,5s) vùng danh sách thành viên có role=status \"Đang tải\"\n  ok  [TC3] admin: số liệu tổng hợp cũng có skeleton riêng (>= 2 vùng status)\n  ok  [TC3] admin: lúc chờ không còn chữ \"Đang tải…\" trơn\n  ok  [TC3] admin: có >= 3 khối skeleton\n  ok  [TC3] admin: dữ liệu về thì danh sách thật hiện\n  ok  [TC3] admin: skeleton biến mất\n  ok  [TC3] admin: ô tìm kiếm không nhảy khi số liệu về (±4px)\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 4",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 28100,
+      "out": "4] ngan-sach@320: thanh tab không nhảy (±2px)\n  ok  [TC4] ngan-sach@320: khối skeleton đầu cùng top với mốc thật (±3px)\n  ok  [TC4] khach-moi@320: mốc thật tìm được đúng 1 phần tử (khớp theo textContent của phần tử nhỏ nhất)\n  ok  [TC4] khach-moi@320: tiêu đề không nhảy (±2px)\n  ok  [TC4] khach-moi@320: thanh tab không nhảy (±2px)\n  ok  [TC4] khach-moi@320: khối skeleton đầu cùng top với mốc thật (±3px)\n  ok  [TC4] ngan-sach/venue: thanh tab không nhảy (±2px)\n  ok  [TC4] làm mới Khách mời (màn dựng lại, chưa có dữ liệu): hiện skeleton, không phải màn rỗng giả\n  ok  [TC4] làm mới Khách mời: lúc chờ không có chữ rỗng giả hay nút thêm\n  ok  [TC4] làm mới Ngân sách (còn dữ liệu): đang tải lại thì không chèn skeleton\n  ok  [TC4] làm mới Ngân sách: dữ liệu cũ vẫn nhìn thấy trong lúc tải lại\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 5",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 8642,
+      "out": " ok  [TC5] khach-moi (lỗi /api/me): có nút \"Thử lại\"\n  ok  [TC5] khach-moi (lỗi /api/me): skeleton không quay mãi khi đã lỗi\n  ok  [TC5] khach-moi (lỗi /api/me): không hiện trạng thái rỗng giả khi lỗi\n  ok  [TC5] khach-moi (lỗi /api/me): bấm Thử lại thì gửi lại yêu cầu và nội dung thật hiện\n  ok  [TC5] khach-moi (lỗi /api/me): nội dung về thì thông báo lỗi biến mất\n  ok  [TC5] ngân sách trả 404: hiện trạng thái rỗng như cũ, không skeleton quay mãi\n  ok  [TC5] ngân sách trả 404: không hiện thông báo lỗi\n  ok  [TC5] chat gợi ý vendor lỗi: vẫn hiện \"Không tải được gợi ý. Thử lại sau giúp Tơ Hồng nhé.\"\n  ok  [TC5] chat gợi ý vendor lỗi: không còn skeleton\n  ok  [TC5] admin lỗi: hiện thông báo lỗi (role=alert) kèm nút \"Thử lại\"\n  ok  [TC5] admin lỗi: không còn skeleton trong vùng danh sách\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 6",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 11485,
+      "out": " khi /api/me trả về (me trễ 1s)\n  ok  [TC6] ke-hoach: suốt lúc chờ (gồm chờ /api/me) không có chữ rỗng giả hay chữ chờ trơn\n  ok  [TC6] ngan-sach: tải nhanh (~20ms mỗi yêu cầu) thì skeleton không hề hiện\n  ok  [TC6] ngan-sach: khối skeleton hiện trong 100-300ms kể từ yêu cầu /api/me đầu\n  ok  [TC6] ngan-sach: khối skeleton hiện TRƯỚC khi /api/me trả về (me trễ 1s)\n  ok  [TC6] ngan-sach: suốt lúc chờ (gồm chờ /api/me) không có chữ rỗng giả hay chữ chờ trơn\n  ok  [TC6] khach-moi: tải nhanh (~20ms mỗi yêu cầu) thì skeleton không hề hiện\n  ok  [TC6] khach-moi: khối skeleton hiện trong 100-300ms kể từ yêu cầu /api/me đầu\n  ok  [TC6] khach-moi: khối skeleton hiện TRƯỚC khi /api/me trả về (me trễ 1s)\n  ok  [TC6] khach-moi: suốt lúc chờ (gồm chờ /api/me) không có chữ rỗng giả hay chữ chờ trơn\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 7",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 6186,
+      "out": " nào chạy trong skeleton\n  ok  [TC7] trang-chu: reduced-motion vẫn còn khối skeleton tĩnh nhìn thấy\n  ok  [TC7] ke-hoach: mặc định skeleton có chuyển động (pulse/shimmer)\n  ok  [TC7] ke-hoach: bật reduced-motion thì không animation nào chạy trong skeleton\n  ok  [TC7] ke-hoach: reduced-motion vẫn còn khối skeleton tĩnh nhìn thấy\n  ok  [TC7] ngan-sach: mặc định skeleton có chuyển động (pulse/shimmer)\n  ok  [TC7] ngan-sach: bật reduced-motion thì không animation nào chạy trong skeleton\n  ok  [TC7] ngan-sach: reduced-motion vẫn còn khối skeleton tĩnh nhìn thấy\n  ok  [TC7] khach-moi: mặc định skeleton có chuyển động (pulse/shimmer)\n  ok  [TC7] khach-moi: bật reduced-motion thì không animation nào chạy trong skeleton\n  ok  [TC7] khach-moi: reduced-motion vẫn còn khối skeleton tĩnh nhìn thấy\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 8",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 13675,
+      "out": "hập, chữ thừa)\n  ok  [TC8] khach-moi: không phần tử nào trong vùng chờ focus được\n  ok  [TC8] khach-moi: nhấn Tab 14 lần, focus không vào vùng chờ\n  ok  [TC8] khach-moi: tải xong thì không còn aria-busy=\"true\" và role=status \"Đang tải\"\n  ok  [TC8] ngan-sach/venue: status nằm trong (hoặc là) vùng aria-busy=\"true\"\n  ok  [TC8] ngan-sach/venue: vùng aria-busy chỉ bọc nội dung chờ, không chứa header (tiêu đề, nút Mở menu, AI) hay thanh tab\n  ok  [TC8] ngan-sach/venue: cây truy cập của vùng chờ chỉ có nhãn \"Đang tải\" (không nút, liên kết, ô nhập, chữ thừa)\n  ok  [TC8] ngan-sach/venue: không phần tử nào trong vùng chờ focus được\n  ok  [TC8] ngan-sach/venue: nhấn Tab 14 lần, focus không vào vùng chờ\n  ok  [TC8] ngan-sach/venue: tải xong thì không còn aria-busy=\"true\" và role=status \"Đang tải\"\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 9",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 5174,
+      "out": "ok  [TC9] trang-chu: mọi khối skeleton tô bằng token có sẵn (--line-100, --line-200, --sand, --linen)\n  ok  [TC9] ke-hoach: mọi khối skeleton tô bằng token có sẵn (--line-100, --line-200, --sand, --linen)\n  ok  [TC9] ngan-sach: mọi khối skeleton tô bằng token có sẵn (--line-100, --line-200, --sand, --linen)\n  ok  [TC9] khach-moi: mọi khối skeleton tô bằng token có sẵn (--line-100, --line-200, --sand, --linen)\n  ok  [TC9] ngan-sach/venue: mọi khối skeleton tô bằng token có sẵn (--line-100, --line-200, --sand, --linen)\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 10",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 7138,
+      "out": "ok  [TC10] trang-chu@390: lúc chờ có skeleton và không cuộn ngang\n  ok  [TC10] ke-hoach@390: lúc chờ có skeleton và không cuộn ngang\n  ok  [TC10] ngan-sach@390: lúc chờ có skeleton và không cuộn ngang\n  ok  [TC10] khach-moi@390: lúc chờ có skeleton và không cuộn ngang\n  ok  [TC10] ngan-sach/venue@390: lúc chờ có skeleton và không cuộn ngang\n  ok  [TC10] trang-chu@320: lúc chờ có skeleton và không cuộn ngang\n  ok  [TC10] ke-hoach@320: lúc chờ có skeleton và không cuộn ngang\n  ok  [TC10] ngan-sach@320: lúc chờ có skeleton và không cuộn ngang\n  ok  [TC10] khach-moi@320: lúc chờ có skeleton và không cuộn ngang\n  ok  [TC10] ngan-sach/venue@320: lúc chờ có skeleton và không cuộn ngang\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 11",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 7574,
+      "out": "  [TC11] trang-chu: chỉ gọi các endpoint đã có\n  ok  [TC11] trang-chu: không đường dẫn nào gọi nhiều hơn số đo trên main (summary 3, budget 3, còn lại 1)\n  ok  [TC11] ke-hoach: chỉ gọi các endpoint đã có\n  ok  [TC11] ke-hoach: không đường dẫn nào gọi nhiều hơn số đo trên main (summary 3, budget 3, còn lại 1)\n  ok  [TC11] ngan-sach: chỉ gọi các endpoint đã có\n  ok  [TC11] ngan-sach: không đường dẫn nào gọi nhiều hơn số đo trên main (summary 3, budget 3, còn lại 1)\n  ok  [TC11] khach-moi: chỉ gọi các endpoint đã có\n  ok  [TC11] khach-moi: không đường dẫn nào gọi nhiều hơn số đo trên main (summary 3, budget 3, còn lại 1)\n  ok  [TC11] ngan-sach/venue: chỉ gọi các endpoint đã có\n  ok  [TC11] ngan-sach/venue: không đường dẫn nào gọi nhiều hơn số đo trên main (summary 3, budget 3, còn lại 1)\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/check_pr.sh",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 1001,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-061/run.sh /home/user/tohong-front --only 13",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 612342,
+      "out": "en\n  ok layout/inv-010-thanh-tab-tron-trong-vung-nhin-thay\n  ok layout/inv-011-mep-tren-khong-nen-sam-khi-khong-lop\n  ok navigation/inv-001-thu-tu-back-mot-buoc\n  ok navigation/inv-002-back-dong-lop-tren-truoc\n  ok navigation/inv-003-khong-bay-goc\n  ok navigation/inv-004-hash-dung-man\n  ok navigation/inv-005-manifest-cai-duoc\n  ok navigation/inv-006-goi-y-cai-ton-trong-lua-chon\n  ok navigation/inv-007-khoi-phuc-vi-tri-cuon\n  ok budget/inv-001-mot-con-so-cho-khoan-vendor\n  ok budget/inv-002-khong-doan-so-khi-thieu-dau-vao\n  ok budget/inv-003-mo-man-khong-dung-du-lieu-chung\n  ok budget/inv-004-lop-cach-hoat-dong-la-hop-thoai\nPASS\n  ok loading/inv-001-trang-thai-cho-khong-noi-doi\n  ok loading/inv-002-vung-cho-co-nhan-khong-focus\n  ok loading/inv-003-vung-cho-ton-trong-reduced-motion\nPASS\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/planner/front/loading/inv-001-trang-thai-cho-khong-noi-doi.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 8349,
+      "out": "ok  trang-chu: lúc chờ (gồm chờ /api/me) không có chữ rỗng giả, chữ chờ trơn hay nút thêm nhìn thấy\n  ok  ke-hoach: lúc chờ (gồm chờ /api/me) không có chữ rỗng giả, chữ chờ trơn hay nút thêm nhìn thấy\n  ok  ngan-sach: lúc chờ (gồm chờ /api/me) không có chữ rỗng giả, chữ chờ trơn hay nút thêm nhìn thấy\n  ok  khach-moi: lúc chờ (gồm chờ /api/me) không có chữ rỗng giả, chữ chờ trơn hay nút thêm nhìn thấy\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/loading/inv-002-vung-cho-co-nhan-khong-focus.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 12266,
+      "out": "ocus được (không phủ header, thanh tab)\n  ok  ke-hoach: Tab 14 lần không đưa focus vào vùng chờ\n  ok  ke-hoach: tải xong thì không còn aria-busy=\"true\"\n  ok  ngan-sach: lúc chờ có vùng aria-busy=\"true\" nhìn thấy\n  ok  ngan-sach: vùng chờ #2 có role=status tên \"Đang tải\"\n  ok  ngan-sach: vùng chờ #2 không chứa phần tử focus được (không phủ header, thanh tab)\n  ok  ngan-sach: Tab 14 lần không đưa focus vào vùng chờ\n  ok  ngan-sach: tải xong thì không còn aria-busy=\"true\"\n  ok  khach-moi: lúc chờ có vùng aria-busy=\"true\" nhìn thấy\n  ok  khach-moi: vùng chờ #3 có role=status tên \"Đang tải\"\n  ok  khach-moi: vùng chờ #3 không chứa phần tử focus được (không phủ header, thanh tab)\n  ok  khach-moi: Tab 14 lần không đưa focus vào vùng chờ\n  ok  khach-moi: tải xong thì không còn aria-busy=\"true\"\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/loading/inv-003-vung-cho-ton-trong-reduced-motion.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 6855,
+      "out": "ok  trang-chu: reduced-motion: có vùng chờ với khối tô màu nhìn thấy\n  ok  trang-chu: reduced-motion: không animation nào chạy trong vùng chờ\n  ok  ke-hoach: reduced-motion: có vùng chờ với khối tô màu nhìn thấy\n  ok  ke-hoach: reduced-motion: không animation nào chạy trong vùng chờ\n  ok  ngan-sach: reduced-motion: có vùng chờ với khối tô màu nhìn thấy\n  ok  ngan-sach: reduced-motion: không animation nào chạy trong vùng chờ\n  ok  khach-moi: reduced-motion: có vùng chờ với khối tô màu nhìn thấy\n  ok  khach-moi: reduced-motion: không animation nào chạy trong vùng chờ\nPASS",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
