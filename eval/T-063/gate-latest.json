@@ -1,0 +1,37 @@
+{
+  "task": "T-063",
+  "at": "2026-11-04T14:29",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/ledger",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "python3 -I eval/T-063/eval-mirror.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 624,
+      "out": "PASS 4 mốc, đóng khi done, không chạm sổ cái",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 56,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 122,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
