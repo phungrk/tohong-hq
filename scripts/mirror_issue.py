@@ -9,8 +9,9 @@ Việc nào có trường `issue` trong board/T-xxx.md thì issue đó nhận đ
 Ngoài ra: escalated, hoặc done bậc C chưa merge → gán Capu, comment "cần anh". Không có gì khác.
 
 Issue KHÔNG BAO GIỜ đổi trạng thái việc. Script chỉ đọc ledger/events.jsonl + board/, không ghi sổ cái.
-Chạy trong GitHub Actions (mirror-issue.yml) sau mỗi lần sổ cái vào main; trạng thái "đã phản chiếu
-tới sự kiện nào" lưu ở thư mục --state (nhánh mirror-state), như notify_slack.py.
+Chạy trong GitHub Actions (mirror-issue.yml) sau mỗi lần sổ cái vào main. Chống trùng hai lớp: trạng thái
+"đã phản chiếu tới sự kiện nào" ở --state (nhánh mirror-state), và marker ẩn trong comment trên issue —
+nên mất state hay chạy lại từ đầu cũng không ghi trùng.
 
   python3 scripts/mirror_issue.py --state /tmp/state --dry-run   # chỉ in
   GH_TOKEN=… python3 scripts/mirror_issue.py --state /tmp/state  # ghi thật
@@ -107,7 +108,17 @@ def main():
     state.mkdir(parents=True, exist_ok=True)
     seen_f = state / "mirrored.txt"
     seen = set(seen_f.read_text().split()) if seen_f.exists() else set()
-    first = not seen_f.exists()
+    # Chống trùng hai lớp: state file (nhanh) + marker đã có trên issue (chắc, kể cả lần chạy đầu hay mất state)
+    markers = {}
+
+    def has_marker(issue, mkey):
+        if issue not in markers:
+            if a.dry_run:
+                markers[issue] = set()
+            else:
+                cs = gh("GET", f"/repos/{REPO}/issues/{issue}/comments?per_page=100")
+                markers[issue] = {m for c in cs for m in [c.get("body", "").split("-->")[0].replace("<!-- tohong-mirror:", "").strip()]}
+        return mkey in markers[issue]
 
     boards = {}
     for p in sorted((ROOT / "board").glob("T-*.md")):
@@ -124,13 +135,16 @@ def main():
             continue
         key = hashlib.sha1(json.dumps(e, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
         done_keys.append(key)
-        if key in seen or first:
+        if key in seen:
             continue
         m = milestone(e, boards[tid])
         if not m:
             continue
         mkey, text, action = m
         issue = boards[tid]["issue"]
+        if has_marker(issue, mkey):
+            continue
+        markers[issue].add(mkey)
         print(f"{tid} → issue #{issue}: {text.splitlines()[0][:80]} [{action or '-'}]")
         gh("POST", f"/repos/{REPO}/issues/{issue}/comments", {"body": MARK.format(key=mkey) + "\n" + text}, a.dry_run)
         if action == "assign-bot" and BOT:
@@ -142,8 +156,6 @@ def main():
                {"body": MARK.format(key=f"{tid}-4") + f"④ **Xong** · `{tid}` done · sổ cái: [{tid}]({blob(f'board/{tid}.md')}). Đóng issue từ sổ cái."}, a.dry_run)
             gh("PATCH", f"/repos/{REPO}/issues/{issue}", {"state": "closed", "state_reason": "completed"}, a.dry_run)
         n += 1
-    if first:
-        print(f"Lần đầu: ghi nhận {len(done_keys)} sự kiện cũ, không phản chiếu lại lịch sử.")
     if not a.dry_run:
         seen_f.write_text("\n".join(sorted(seen | set(done_keys))) + "\n")
     print(f"Đã phản chiếu {n} mốc.")
