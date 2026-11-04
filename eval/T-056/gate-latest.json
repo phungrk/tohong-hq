@@ -1,0 +1,85 @@
+{
+  "task": "T-056",
+  "at": "2026-11-04T05:44",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/front/layout",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-001-khung-min-viewport-appmax.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 53,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-002-khong-cuon-ngang.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 43,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-003-phu-nam-trong-khung.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 38,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-004-vien-bong-theo-khung.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 53,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-005-cham-ngoai-khung-dong-sheet.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 53,
+      "out": "FAIL thiếu --repo",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-006-cham-ngoai-khung-chi-dong-lop-tren.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 43,
+      "out": "FAIL thiếu --repo",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-007-document-la-thu-cuon.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 63,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-008-header-va-thanh-tab-dinh.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 63,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/layout/inv-009-lop-mo-khoa-cuon-nen.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 58,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    }
+  ],
+  "hint": "spec"
+}
