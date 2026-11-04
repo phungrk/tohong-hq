@@ -6,7 +6,8 @@
  *   2 thanh Chrome đổi chiều cao khi đang xem (83 -> 30 -> 0 -> 83): thanh tab đi theo; khi 0 thì như T-055 (sát đáy cửa sổ)
  *   3 đang zoom (scale != 1): không bù
  *   4 thanh Chrome 83px: khối gợi ý cài nằm trên thanh tab và trong vùng nhìn thấy; chữ cuối trang không bị che
- *   6 ?vvdebug=1 hiện dòng số đo; không có cờ thì không hiện
+ *   6 ?vvdebug=1 hiện các số đo có nhãn (tab.top, tab.bottom, innerHeight, vv.height, vv.offsetTop, vv.scale, 100svh, 100lvh, 100dvh, safe-bottom, bu, dpr, scrollY, maxScroll, ua); không có cờ thì không hiện
+ *   8 ô nhập đang focus (input chữ, textarea, contenteditable): không bù dù thanh Chrome hay bàn phím; nút/checkbox focus thì vẫn bù
  * Tiêu chí 5 (Safari/T-054 không đổi): bash eval/T-054/run.sh <front>. Tiêu chí 7 (iPhone thật): eval/T-056/checklist-iphone.md.
  *
  * Cách giả lập: Chromium headless không có thanh Chrome iOS. Eval thay window.visualViewport bằng một đối tượng giả
@@ -104,12 +105,43 @@ const coveredBottom = (p, barTop, vvBottom) => p.evaluate(([bt, vb]) => { const 
         check(`${name}, cuối trang: thanh tab trọn trong vùng nhìn thấy (đáy ${bb.bottom} / ${bb.vvBottom}) và không chữ nào nằm giữa đỉnh thanh tab và đáy vùng nhìn thấy bị che`, bb.bottom <= bb.vvBottom + 1.5 && cov.length === 0, cov.slice(0, 2).join('; ')); }
       await S.ctx.close(); }
     if (wants(6)) { crit = 6;
-      const S = await open(browser, srv.base, { query: '?vvdebug=1' }); const p = S.page; await setVV(p, VP.height - 83, 5);
-      const ok = await p.waitForFunction(() => /innerHeight\s*=\s*640/.test(document.body.innerText) && /vv\.height\s*=\s*557/.test(document.body.innerText) && /vv\.offsetTop\s*=\s*5/.test(document.body.innerText), null, { timeout: 3000 }).then(() => true, () => false);
-      check('Có ?vvdebug=1: màn hình hiện chữ "innerHeight=640", "vv.height=557", "vv.offsetTop=5" (đổi theo sự kiện)', ok, await p.evaluate(() => document.body.innerText.slice(0, 200)));
+      const S = await open(browser, srv.base, { query: '?vvdebug=1', ua: IOS_UA }); const p = S.page; await goTab(p, 'Ngân sách'); await toEnd(p); await setVV(p, VP.height - 83, 12);
+      const getDbg = () => p.evaluate(() => { const e = [...document.querySelectorAll('body *')].filter((x) => /innerHeight\s*=/.test(x.innerText || '') && ![...x.children].some((c) => /innerHeight\s*=/.test(c.innerText || '')))[0];
+        if (!e) return null; const r = e.getBoundingClientRect(); return { text: e.innerText, bottom: r.bottom, top: r.top, left: r.left, right: r.right }; });
+      const num = (t, k) => { const m = new RegExp('(^|[\\s,;|])' + k.replace(/[.]/g, '\\.') + '\\s*=\\s*(-?[\\d.]+)', 'i').exec(t || ''); return m ? parseFloat(m[2]) : null; };
+      await waitBar(p, () => /vv\.offsetTop\s*=\s*12/.test(document.body.innerText), null);
+      const d = await getDbg(); const t = d && d.text; const b = await bar(p);
+      check(`Có ?vvdebug=1: hiện đủ nhãn số đo (${['tab.top', 'tab.bottom', 'innerHeight', 'vv.height', 'vv.offsetTop', 'vv.scale', '100svh', '100lvh', '100dvh', 'safe-bottom', 'bù', 'dpr', 'scrollY', 'maxScroll'].filter((k) => num(t, k) === null).join(', ') || 'đủ'} thiếu) và ua`, !!d && ['tab.top', 'tab.bottom', 'innerHeight', 'vv.height', 'vv.offsetTop', 'vv.scale', '100svh', '100lvh', '100dvh', 'safe-bottom', 'bù', 'dpr', 'scrollY', 'maxScroll'].every((k) => num(t, k) !== null) && /ua\s*=\s*\S*CriOS\/130/.test(t), t);
+      check(`Số đo đúng: innerHeight=640, vv.height=557, vv.offsetTop=12, vv.scale=1, bù=71 (đo ${num(t, 'innerHeight')}, ${num(t, 'vv.height')}, ${num(t, 'vv.offsetTop')}, ${num(t, 'vv.scale')}, ${num(t, 'bù')})`, num(t, 'innerHeight') === 640 && num(t, 'vv.height') === 557 && num(t, 'vv.offsetTop') === 12 && num(t, 'vv.scale') === 1 && num(t, 'bù') === 71, t);
+      check(`tab.top/tab.bottom in ra khớp hộp bao thật của thanh tab trong 1px (in ${num(t, 'tab.top')}/${num(t, 'tab.bottom')}, thật ${b && b.top}/${b && b.bottom}); scrollY khớp (in ${num(t, 'scrollY')}, thật ${await sy(p)})`, !!b && near(num(t, 'tab.top') ?? -999, b.top, 1) && near(num(t, 'tab.bottom') ?? -999, b.bottom, 1) && near(num(t, 'scrollY') ?? -999, await sy(p), 1), t);
+      check(`Dòng số đo nằm ở mép trên, không đè thanh tab (đáy dòng ${d && d.bottom}, đỉnh thanh tab ${b && b.top})`, !!d && !!b && d.bottom <= 120 && d.bottom <= b.top, JSON.stringify(d));
       await S.ctx.close();
       const S2 = await open(browser, srv.base); await setVV(S2.page, VP.height - 83);
-      check('Không có cờ: không hiện dòng số đo nào', !(await S2.page.evaluate(() => /innerHeight\s*=|vv\.height\s*=/.test(document.body.innerText)))); await S2.ctx.close(); }
+      check('Không có cờ: không hiện dòng số đo nào', !(await S2.page.evaluate(() => /innerHeight\s*=|vv\.height\s*=|tab\.bottom\s*=/.test(document.body.innerText)))); await S2.ctx.close(); }
+    if (wants(8)) { crit = 8;
+      const SAFARI_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1';
+      for (const [uaName, ua] of [['Safari iPhone', SAFARI_UA], ['Chrome iPhone', IOS_UA]]) {
+        const S = await open(browser, srv.base, { ua }); const p = S.page; await goTab(p, 'Kế hoạch'); await toEnd(p);
+        await p.evaluate(() => { const mk = (tag, id, attrs) => { const e = document.createElement(tag); e.id = id; Object.entries(attrs || {}).forEach(([k, v]) => e.setAttribute(k, v)); e.style.cssText = 'position:absolute;left:0;top:0;width:10px;height:10px;opacity:.01'; document.body.appendChild(e); return e; };
+          mk('input', 'kb-text', { type: 'text' }); mk('input', 'kb-search', { type: 'search' }); mk('textarea', 'kb-area'); mk('div', 'kb-ce', { contenteditable: 'true', tabindex: '0' }); mk('input', 'kb-check', { type: 'checkbox' }); });
+        // Thanh Chrome 83px, chưa focus: bù (bar ở 557)
+        await setVV(p, VP.height - 83); let b = await barAt(p, VP.height - 83);
+        check(`${uaName}: thanh Chrome 83px, chưa focus ô nhập: thanh tab sát đáy vùng nhìn thấy (đáy ${b && b.bottom}, cần ${VP.height - 83})`, !!b && near(b.bottom, VP.height - 83), b && JSON.stringify(b));
+        for (const id of ['kb-text', 'kb-search', 'kb-area', 'kb-ce']) {
+          // focus trước, bàn phím mở sau (vv nhỏ đi 300px so với trước)
+          await p.evaluate((i) => document.getElementById(i).focus(), id); b = await barAt(p, VP.height);
+          check(`${uaName}, #${id} đang focus (chưa đổi vv): thanh tab sát đáy cửa sổ, không bù (đáy ${b && b.bottom}, cần ${VP.height})`, !!b && near(b.bottom, VP.height), b && JSON.stringify(b));
+          await setVV(p, VP.height - 83 - 300); await p.waitForTimeout(200); b = await bar(p);
+          check(`${uaName}, #${id} đang focus, bàn phím mở (vv nhỏ đi 300px, cao ${VP.height - 383}): thanh tab không bị đẩy lên, vẫn sát đáy cửa sổ (đáy ${b && b.bottom})`, !!b && near(b.bottom, VP.height), b && JSON.stringify(b));
+          await p.evaluate((i) => document.getElementById(i).blur(), id); await setVV(p, VP.height - 83); b = await barAt(p, VP.height - 83);
+          check(`${uaName}, #${id} hết focus, bàn phím đóng: thanh tab về sát đáy vùng nhìn thấy (đáy ${b && b.bottom}, cần ${VP.height - 83})`, !!b && near(b.bottom, VP.height - 83), b && JSON.stringify(b)); }
+        await p.evaluate(() => document.getElementById('kb-check').focus()); b = await barAt(p, VP.height - 83);
+        check(`${uaName}: focus một checkbox (không bật bàn phím): vẫn bù, thanh tab sát đáy vùng nhìn thấy (đáy ${b && b.bottom})`, !!b && near(b.bottom, VP.height - 83), b && JSON.stringify(b));
+        await p.evaluate(() => document.getElementById('kb-check').blur());
+        const tabBtn = await btn(p, 'Kế hoạch'); if (tabBtn) { await p.evaluate(() => [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === 'Khách mời').focus()); b = await barAt(p, VP.height - 83);
+          check(`${uaName}: focus một nút: vẫn bù (đáy ${b && b.bottom})`, !!b && near(b.bottom, VP.height - 83), b && JSON.stringify(b)); }
+        await S.ctx.close(); }
+    }
   } catch (e) { console.log('  XX [lỗi chạy] ' + String(e.stack || e).split('\n').slice(0, 3).join(' | ')); fails.push(`[TC${crit}] lỗi chạy: ${String(e.message || e).split('\n')[0].slice(0, 160)}`);
   } finally { await browser.close().catch(() => {}); await srv.close().catch(() => {}); }
   if (fails.length) { console.log(`FAIL ${fails[0]}${fails.length > 1 ? ` (+${fails.length - 1} lỗi nữa)` : ''}`); process.exit(1); }
