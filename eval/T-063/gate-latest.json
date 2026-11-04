@@ -1,7 +1,7 @@
 {
   "task": "T-063",
-  "at": "2026-11-04T14:34",
-  "verdict": "RED",
+  "at": "2026-11-04T14:36",
+  "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng hq/ledger",
@@ -12,55 +12,55 @@
       "eval": "python3 -I eval/T-063/eval-mirror.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 594,
+      "ms": 648,
       "out": "PASS 4 mốc, đóng khi done, không chạm sổ cái",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-063/adv-01-decide-close.py",
       "kind": "cmd",
-      "status": "FAIL",
-      "ms": 428,
-      "out": "Traceback (most recent call last):\n  File \"/home/claude/tohong-hq/eval/T-063/adv-01-decide-close.py\", line 16, in <module>\n    assert any(\"④\" in b for b in bodies), \"done qua decide --close không có comment ④:\\n\" + \"\\n\".join(bodies)\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: done qua decide --close không có comment ④:\n<!-- tohong-mirror:T-001-1 -->\n① **Đã nhận** → `T-001` · bậc **B** · vùng `hq/ledger` · giữ: engineering\n\nBrief: [T-001](https://github.com/o/r/blob/main/board/T-001.md)\n<!-- tohong-mirror:T-001-esc-E-0003 -->\n⚠️ **Leo thang** · hỏi Capu\n\n@capu-login có Decision Request trong `inbox/capu/`.",
+      "status": "PASS",
+      "ms": 474,
+      "out": "PASS done qua decide --close → ④ và đóng issue",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-063/adv-02-specgate-bac-c.py",
       "kind": "cmd",
-      "status": "FAIL",
-      "ms": 505,
-      "out": "Traceback (most recent call last):\n  File \"/home/claude/tohong-hq/eval/T-063/adv-02-specgate-bac-c.py\", line 17, in <module>\n    assert any(x.get(\"assignees\") == [\"capu-login\"] for x in p), \"done bậc C (sau Spec Gate) không gán Capu: \" + str(p)\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: done bậc C (sau Spec Gate) không gán Capu: []",
+      "status": "PASS",
+      "ms": 508,
+      "out": "PASS done bậc C sau Spec Gate → gán Capu, không đóng",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-063/adv-03-issue-gia-tri-la.py",
       "kind": "cmd",
-      "status": "FAIL",
-      "ms": 961,
-      "out": "Traceback (most recent call last):\n  File \"/home/claude/tohong-hq/eval/T-063/adv-03-issue-gia-tri-la.py\", line 44, in <module>\n    assert not fails, \"\\n\".join(fails)\n           ^^^^^^^^^\nAssertionError: --issue ' #11' lưu thành '#11', mong đợi '11'\n--issue 'abc' được nhận (phải từ chối)\n--issue '0' được nhận (phải từ chối)\n--issue '-3' được nhận (phải từ chối)\n--issue '11.0' được nhận (phải từ chối)\n--issue 'https://github.com/o/r/issues/11' được nhận (phải từ chối)\nissue rác ở T-001 chặn phản chiếu T-002 (rc=1): GitHub 404 GET /repos/o/r/issues/abc/comments?per_page=100: {\"message\":\"Not Found\"}",
+      "status": "PASS",
+      "ms": 1265,
+      "out": "PASS --issue chuẩn hoá/từ chối đúng, issue rác không chặn việc khác",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-063/adv-04-marker-gia.py",
       "kind": "cmd",
-      "status": "FAIL",
-      "ms": 229,
-      "out": "Traceback (most recent call last):\n  File \"/home/claude/tohong-hq/eval/T-063/adv-04-marker-gia.py\", line 15, in <module>\n    assert any(\"①\" in b for b in posted(calls, \"7\")), \"comment thường 'T-001-1' của người bị coi là marker, mốc ① bị nuốt\"\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: comment thường 'T-001-1' của người bị coi là marker, mốc ① bị nuốt",
+      "status": "PASS",
+      "ms": 228,
+      "out": "PASS comment thường không bị coi là marker",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-063/adv-05-project-cho-capu-tz.py",
       "kind": "cmd",
-      "status": "FAIL",
-      "ms": 102,
-      "out": "Traceback (most recent call last):\n  File \"/home/claude/tohong-hq/eval/T-063/adv-05-project-cho-capu-tz.py\", line 21, in <module>\n    assert r.returncode == 0, \"column_of sai trên runner UTC:\\n\" + r.stdout + r.stderr\n           ^^^^^^^^^^^^^^^^^\nAssertionError: column_of sai trên runner UTC:\n{'state': 'done', 'tier': 'B', 'reviewer': 'adversary', 'owner': 'engineering', 'updated': '2026-11-02T19:33'} → 'Chờ Capu', mong đợi 'Xong'",
+      "status": "PASS",
+      "ms": 114,
+      "out": "PASS column_of đúng cột, cửa sổ 48h tính theo giờ sổ cái",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-063/adv-06-khong-on.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1913,
+      "ms": 2291,
       "out": "PASS không ồn, không trùng, board mất không vỡ",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 19,
+      "ms": 23,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 117,
+      "ms": 176,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,58 +84,58 @@
       "eval": "eval/invariants/hq/ledger/inv-001-issue-la-so-nguyen-duong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 66,
+      "ms": 76,
       "out": "PASS mọi trường issue rỗng hoặc là số nguyên dương",
       "tier": 2
     },
     {
       "eval": "eval/T-063/adv-01-decide-close.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 425,
-      "out": "Traceback (most recent call last):\n  File \"/home/claude/tohong-hq/eval/T-063/adv-01-decide-close.py\", line 16, in <module>\n    assert any(\"④\" in b for b in bodies), \"done qua decide --close không có comment ④:\\n\" + \"\\n\".join(bodies)\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: done qua decide --close không có comment ④:\n<!-- tohong-mirror:T-001-1 -->\n① **Đã nhận** → `T-001` · bậc **B** · vùng `hq/ledger` · giữ: engineering\n\nBrief: [T-001](https://github.com/o/r/blob/main/board/T-001.md)\n<!-- tohong-mirror:T-001-esc-E-0003 -->\n⚠️ **Leo thang** · hỏi Capu\n\n@capu-login có Decision Request trong `inbox/capu/`.",
+      "status": "PASS",
+      "ms": 471,
+      "out": "PASS done qua decide --close → ④ và đóng issue",
       "tier": 3
     },
     {
       "eval": "eval/T-063/adv-02-specgate-bac-c.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 483,
-      "out": "Traceback (most recent call last):\n  File \"/home/claude/tohong-hq/eval/T-063/adv-02-specgate-bac-c.py\", line 17, in <module>\n    assert any(x.get(\"assignees\") == [\"capu-login\"] for x in p), \"done bậc C (sau Spec Gate) không gán Capu: \" + str(p)\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: done bậc C (sau Spec Gate) không gán Capu: []",
+      "status": "PASS",
+      "ms": 449,
+      "out": "PASS done bậc C sau Spec Gate → gán Capu, không đóng",
       "tier": 3
     },
     {
       "eval": "eval/T-063/adv-03-issue-gia-tri-la.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 967,
-      "out": "Traceback (most recent call last):\n  File \"/home/claude/tohong-hq/eval/T-063/adv-03-issue-gia-tri-la.py\", line 44, in <module>\n    assert not fails, \"\\n\".join(fails)\n           ^^^^^^^^^\nAssertionError: --issue ' #11' lưu thành '#11', mong đợi '11'\n--issue 'abc' được nhận (phải từ chối)\n--issue '0' được nhận (phải từ chối)\n--issue '-3' được nhận (phải từ chối)\n--issue '11.0' được nhận (phải từ chối)\n--issue 'https://github.com/o/r/issues/11' được nhận (phải từ chối)\nissue rác ở T-001 chặn phản chiếu T-002 (rc=1): GitHub 404 GET /repos/o/r/issues/abc/comments?per_page=100: {\"message\":\"Not Found\"}",
+      "status": "PASS",
+      "ms": 933,
+      "out": "PASS --issue chuẩn hoá/từ chối đúng, issue rác không chặn việc khác",
       "tier": 3
     },
     {
       "eval": "eval/T-063/adv-04-marker-gia.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 199,
-      "out": "Traceback (most recent call last):\n  File \"/home/claude/tohong-hq/eval/T-063/adv-04-marker-gia.py\", line 15, in <module>\n    assert any(\"①\" in b for b in posted(calls, \"7\")), \"comment thường 'T-001-1' của người bị coi là marker, mốc ① bị nuốt\"\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: comment thường 'T-001-1' của người bị coi là marker, mốc ① bị nuốt",
+      "status": "PASS",
+      "ms": 222,
+      "out": "PASS comment thường không bị coi là marker",
       "tier": 3
     },
     {
       "eval": "eval/T-063/adv-05-project-cho-capu-tz.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 128,
-      "out": "Traceback (most recent call last):\n  File \"/home/claude/tohong-hq/eval/T-063/adv-05-project-cho-capu-tz.py\", line 21, in <module>\n    assert r.returncode == 0, \"column_of sai trên runner UTC:\\n\" + r.stdout + r.stderr\n           ^^^^^^^^^^^^^^^^^\nAssertionError: column_of sai trên runner UTC:\n{'state': 'done', 'tier': 'B', 'reviewer': 'adversary', 'owner': 'engineering', 'updated': '2026-11-02T19:34'} → 'Chờ Capu', mong đợi 'Xong'",
+      "status": "PASS",
+      "ms": 119,
+      "out": "PASS column_of đúng cột, cửa sổ 48h tính theo giờ sổ cái",
       "tier": 3
     },
     {
       "eval": "eval/T-063/adv-06-khong-on.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1978,
+      "ms": 2117,
       "out": "PASS không ồn, không trùng, board mất không vỡ",
       "tier": 3
     }
   ],
-  "hint": "code"
+  "hint": ""
 }

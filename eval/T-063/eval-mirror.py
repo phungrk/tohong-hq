@@ -9,6 +9,7 @@ try:
         shutil.copytree(ROOT / d, tmp / d)
     (tmp / "board").mkdir(); (tmp / "ledger").mkdir(); (tmp / "eval").mkdir(); (tmp / "handoffs").mkdir(); (tmp / "products").mkdir()
     env = dict(os.environ, TOHONG_ROOT=str(tmp))
+    env.pop("TOHONG_LIVE_URL", None)   # sổ cái giả không đẩy lên dashboard thật
     def task(*args):
         r = subprocess.run([sys.executable, "scripts/task.py", *args], cwd=tmp, env=env, capture_output=True, text=True)
         assert r.returncode == 0, r.stderr + r.stdout
