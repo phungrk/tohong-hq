@@ -62,8 +62,8 @@ const REGION_JS = `(() => { const vis = (e) => { const r = e.getBoundingClientRe
     return { e, top: r.top + scrollY, left: r.left, width: r.width, height: r.height, bg: cs.backgroundColor, alpha }; }).filter((l) => l.alpha > 0 && l.width >= 8 && l.height >= 4);
   return { root, leaves, count: regs.length }; })()`;
 const skelLeaves = (page) => page.evaluate(`(() => { const R = ${REGION_JS}; if (!R) return null; return { count: R.count, rootTop: R.root.getBoundingClientRect().top + scrollY, leaves: R.leaves.map(({ e, ...o }) => o) }; })()`);
-const titleTop = (page, text) => page.evaluate((t) => { for (const e of document.querySelectorAll('body *')) { const own = [...e.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim(); if (own !== t) continue;
-  const r = e.getBoundingClientRect(); if (r.width > 8 && r.top < 110 && r.bottom > 0) return r.top + scrollY; } return null; }, text);
+const titleTop = (page, text, maxTop = 110) => page.evaluate(([t, mt]) => { for (const e of document.querySelectorAll('body *')) { const own = [...e.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim(); if (own !== t) continue;
+  const r = e.getBoundingClientRect(); if (r.width > 8 && r.top < mt && r.bottom > 0) return r.top + scrollY; } return null; }, [text, maxTop]);
 const tabTop = (page, name) => page.evaluate((n) => { const b = [...document.querySelectorAll('button')].filter((x) => x.textContent.trim() === n).map((x) => x.getBoundingClientRect()).filter((r) => r.width > 2 && r.top > 300).sort((a, b) => b.top - a.top)[0]; return b ? b.top : null; }, name);
 // Mốc thật: phần tử có chữ riêng khớp `at`; kind=card thì leo lên tổ tiên đầu tiên rộng >= vw-40.
 const realMark = (page, at, kind) => page.evaluate(([src, flags, kd]) => { const re = new RegExp(src, flags); // khớp theo textContent của phần tử nhỏ nhất chứa mốc (chữ có thể bị tách bởi <b>...</b>)
@@ -128,7 +128,7 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
         if (got) {
           check('gợi ý vendor: có >= 3 khối skeleton', ((await skelLeaves(page))?.leaves?.length || 0) >= 3);
           await shot(page, 'chat-vendor-390-dang-tai');
-          sk = await skelLeaves(page); t1 = await titleTop(page, 'Tiệc & nhà hàng');
+          sk = await skelLeaves(page); t1 = await titleTop(page, 'Tiệc & nhà hàng', 100000); // tiêu đề nằm trong sheet chat (cách đỉnh ~269px), không dùng ngưỡng 110 của header
         }
         const row = page.getByRole('link', { name: /Nhà hàng Hoa Sen 1/ });
         let ok = true; try { await row.first().waitFor({ state: 'visible', timeout: 9000 }); } catch { ok = false; }
@@ -137,7 +137,7 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
         await shot(page, 'chat-vendor-390-da-tai');
         if (got && ok && sk?.leaves?.length) {
           const real = await row.first().evaluate((a) => { const d = [...a.querySelectorAll('*')].find((e) => { const r = e.getBoundingClientRect(); return Math.abs(r.width - 100) <= 1 && r.height >= 100; }); const r = d && d.getBoundingClientRect(); return r ? { top: r.top + scrollY, width: r.width, height: r.height } : null; });
-          const f = sk.leaves[0]; const t2 = await titleTop(page, 'Tiệc & nhà hàng');
+          const f = sk.leaves[0]; const t2 = await titleTop(page, 'Tiệc & nhà hàng', 100000);
           check('gợi ý vendor: tiêu đề thẻ không nhảy (±2px)', near(t1, t2, 2), `${t1} → ${t2}`);
           check('gợi ý vendor: khối đầu của skeleton khớp ảnh bìa vendor đầu (top ±4, rộng ±4, cao ±4)', !!real && near(f.top, real.top, 4) && near(f.width, real.width, 4) && near(f.height, real.height, 4), `skeleton ${Math.round(f.top)}/${Math.round(f.width)}x${Math.round(f.height)} thật ${real && Math.round(real.top)}/${real && Math.round(real.width)}x${real && Math.round(real.height)}`);
         }
