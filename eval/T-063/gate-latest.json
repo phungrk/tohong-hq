@@ -1,6 +1,6 @@
 {
   "task": "T-063",
-  "at": "2026-11-04T14:41",
+  "at": "2026-11-04T14:42",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 -I eval/T-063/eval-mirror.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 669,
+      "ms": 614,
       "out": "PASS 4 mốc, đóng khi done, không chạm sổ cái",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 -I eval/T-063/adv-01-decide-close.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 437,
+      "ms": 470,
       "out": "PASS done qua decide --close → ④ và đóng issue",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 -I eval/T-063/adv-02-specgate-bac-c.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 485,
+      "ms": 441,
       "out": "PASS done bậc C sau Spec Gate → gán Capu, không đóng",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "python3 -I eval/T-063/adv-03-issue-gia-tri-la.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 982,
+      "ms": 1068,
       "out": "PASS --issue chuẩn hoá/từ chối đúng, issue rác không chặn việc khác",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "python3 -I eval/T-063/adv-04-marker-gia.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 239,
+      "ms": 250,
       "out": "PASS comment thường không bị coi là marker",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "python3 -I eval/T-063/adv-05-project-cho-capu-tz.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 114,
+      "ms": 122,
       "out": "PASS column_of đúng cột, cửa sổ 48h tính theo giờ sổ cái",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "python3 -I eval/T-063/adv-06-khong-on.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1991,
+      "ms": 2268,
       "out": "PASS không ồn, không trùng, board mất không vỡ",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/T-063/adv-10-dong-do-dang.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 887,
+      "ms": 876,
       "out": "PASS lỗi PATCH giữa chừng được hoàn tất ở lần sau, không trùng",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "eval/T-063/adv-07-merged-bien.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1427,
+      "ms": 1292,
       "out": "PASS merged: từ chối khi chưa done/sai người, hai lần chỉ một ④, bậc A không thêm ④",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "eval/T-063/adv-08-mirror-author.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 667,
+      "ms": 752,
       "out": "PASS marker chỉ tính khi tác giả là bot hoặc MIRROR_AUTHOR, đúng dạng ở đầu",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "eval/T-063/adv-09-issue-hong-xen-giua.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 512,
+      "ms": 558,
       "out": "PASS issue lỗi xen giữa không chặn việc khác, được thử lại, không trùng",
       "tier": 1
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 35,
+      "ms": 25,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 147,
+      "ms": 126,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/hq/ledger/inv-001-issue-la-so-nguyen-duong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 76,
+      "ms": 72,
       "out": "PASS mọi trường issue rỗng hoặc là số nguyên dương",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/T-063/adv-01-decide-close.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 440,
+      "ms": 437,
       "out": "PASS done qua decide --close → ④ và đóng issue",
       "tier": 3
     },
@@ -132,7 +132,7 @@
       "eval": "eval/T-063/adv-02-specgate-bac-c.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 482,
+      "ms": 454,
       "out": "PASS done bậc C sau Spec Gate → gán Capu, không đóng",
       "tier": 3
     },
@@ -140,7 +140,7 @@
       "eval": "eval/T-063/adv-03-issue-gia-tri-la.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 889,
+      "ms": 1002,
       "out": "PASS --issue chuẩn hoá/từ chối đúng, issue rác không chặn việc khác",
       "tier": 3
     },
@@ -148,7 +148,7 @@
       "eval": "eval/T-063/adv-04-marker-gia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 192,
+      "ms": 215,
       "out": "PASS comment thường không bị coi là marker",
       "tier": 3
     },
@@ -164,7 +164,7 @@
       "eval": "eval/T-063/adv-06-khong-on.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2139,
+      "ms": 1865,
       "out": "PASS không ồn, không trùng, board mất không vỡ",
       "tier": 3
     }
