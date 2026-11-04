@@ -51,7 +51,9 @@ async function waitGone(page, ms = 9000) { try { await page.waitForFunction(() =
 const visibleHits = (page, regexes) => page.evaluate((src) => { const res = src.map((s) => new RegExp(s[0], s[1])); const out = [];
   for (const e of document.querySelectorAll('body *')) { const own = [...e.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim(); if (!own) continue;
     if (!res.some((r) => r.test(own))) continue; const r = e.getBoundingClientRect(); if (r.width <= 8 || r.height <= 8) continue;
-    const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.05) continue; out.push(own.slice(0, 40)); } return out; }, regexes.map((r) => [r.source, r.flags]));
+    const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none') continue;
+    let eo = 1; for (let a = e; a && a.nodeType === 1; a = a.parentElement) eo *= parseFloat(getComputedStyle(a).opacity); if (eo < 0.05) continue; // độ mờ hiệu dụng = tích opacity mọi tổ tiên (sheet đóng vẫn mount)
+    if (r.bottom <= 0 || r.top >= innerHeight || r.right <= 0 || r.left >= innerWidth) continue; out.push(own.slice(0, 40)); } return out; }, regexes.map((r) => [r.source, r.flags]));
 // Khối skeleton = lá rỗng có nền tô, trong vùng aria-busy="true" nhìn thấy đầu tiên.
 const REGION_JS = `(() => { const vis = (e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
   const regs = [...document.querySelectorAll('[aria-busy="true"]')].filter(vis); const root = regs[0]; if (!root) return null;
@@ -261,7 +263,7 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
         const scan = () => { const now = Date.now();
           if (window.__busyAt === null && [...document.querySelectorAll('[aria-busy="true"]')].some((e) => e.getBoundingClientRect().height > 0 && painted(e))) window.__busyAt = now;
           if (window.__fakeAt === null) for (const e of document.querySelectorAll('body *')) { const own = [...e.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim(); if (!own || !res.some((r) => r.test(own))) continue;
-            const r = e.getBoundingClientRect(); if (r.width <= 8 || r.height <= 8) continue; const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.05) continue; window.__fakeAt = now; window.__fake = own.slice(0, 40); break; } };
+            const r = e.getBoundingClientRect(); if (r.width <= 8 || r.height <= 8) continue; const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none') continue; let eo = 1; for (let a = e; a && a.nodeType === 1; a = a.parentElement) eo *= parseFloat(getComputedStyle(a).opacity); if (eo < 0.05) continue; if (r.bottom <= 0 || r.top >= innerHeight || r.right <= 0 || r.left >= innerWidth) continue; window.__fakeAt = now; window.__fake = own.slice(0, 40); break; } };
         new MutationObserver(scan).observe(document, { subtree: true, childList: true, attributes: true, characterData: true }); };
       for (const sc of TABS) {
         const pairs = [PLAIN, ...sc.empty].map((r) => [r.source, r.flags]);
@@ -272,7 +274,7 @@ async function chip(page, name) { // nút cùng tên có thể nằm sau lớp p
           check(`${sc.id}: tải nhanh (~20ms mỗi yêu cầu) thì skeleton không hề hiện`, o.b === null, 'skeleton hiện lúc ' + o.b);
           await S.ctx.close();
         }
-        { // /api/me trễ 1s, dữ liệu trễ 1,5s: skeleton phải hiện 100-250ms từ lúc điều hướng, tức TRONG lúc chờ /api/me
+        { // /api/me trễ 1s, dữ liệu trễ 1,5s: skeleton phải hiện 100-300ms kể từ yêu cầu /api/me đầu và trước khi /api/me về, tức TRONG lúc chờ /api/me
           const S = track(await L.scenario(browser, srv.base, { hash: sc.id, delay: (p) => (p === '/api/me' ? 1000 : 1500), init: [init, pairs] }));
           await S.page.waitForTimeout(1300); // /api/me đã về (1s), dữ liệu chưa (2,5s)
           const o = await S.page.evaluate(() => ({ b: window.__busyAt, f: window.__fake, fa: window.__fakeAt }));
