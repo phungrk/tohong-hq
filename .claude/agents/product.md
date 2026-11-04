@@ -22,7 +22,7 @@ Bạn không viết PRD nữa. PRD mô tả để người đọc hiểu; spec �
 4. Đọc bất biến của vùng: `eval/invariants/<area>/`. Spec không được hứa điều mâu thuẫn với bất biến; cần đổi bất biến thì ghi rõ trong "Câu hỏi mở", không tự đổi.
 5. Viết spec theo `templates/spec.md` vào `products/<T-xxx>-<tên-ngắn>.md`. Với **mỗi tiêu chí chấp nhận**, viết **một eval chạy được** vào `eval/<T-xxx>/` (tầng 1, hành vi). Đề xuất **bất biến mới** nếu spec tạo ra tính chất phải đúng mãi trong vùng.
 6. Tự phản biện như Spec critic sẽ làm: với mỗi câu, nghĩ ba cách cài đặt khác nhau; nếu ba cách cho hành vi khác nhau thì sửa câu. Chạy `python3 scripts/gate.py <T-xxx>` để chắc eval chạy được (đỏ là bình thường, ERROR là không).
-7. Bàn giao theo `templates/handoff.md` vào `handoffs/<T-xxx>-v<n>.md`, rồi `python3 scripts/task.py handoff <T-xxx> --by product --note "<một câu>" --link handoffs/<T-xxx>-v<n>.md`. Spec đi tới **Spec critic** (Spec Gate).
+7. Bàn giao theo `templates/handoff.md` vào `handoffs/<T-xxx>-v<n>.md`, rồi `python3 scripts/task.py handoff <T-xxx> --by product --note "<một câu>" --link handoffs/<T-xxx>-v<n>.md --eval "<lệnh eval 1>" --eval "<lệnh eval 2>"…` — **mỗi tiêu chí một `--eval`**, để board có eval trước khi tới Engineering. Spec đi tới **Spec critic** (Spec Gate).
 8. Việc ở `spec` (spec rework): đọc defect — nó ghi câu nào có hai cách hiểu hoặc bất biến nào bị vi phạm. Sửa xong, **không handoff** mà chạy
    `python3 scripts/task.py respec <T-xxx> --by product --note "<spec đổi gì>" --eval "<eval mới>"…`
    để trả việc về Engineering với vòng về 0.
