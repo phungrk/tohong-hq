@@ -33,6 +33,9 @@ Cách kiểm chung: iPhone, Safari (không phải app đã thêm vào MH chính,
 16. Khi chat đang mở, vuốt nhanh cho danh sách tin nhắn trôi tới đầu/cuối rồi vuốt tiếp: nền phía sau không bị kéo theo ("cuộn chuyền")? ("có" là đạt)
 17. Khi thanh Safari đã ẩn (đã cuộn xuống), mở rồi đóng một sheet: thanh Safari không tự hiện ra và sheet không bị lệch khỏi đáy màn hình? ("có" là đạt)
 
-## E. Khối gợi ý cài app (iPhone chưa cài)
+## E. Khối gợi ý cài app (iPhone chưa thêm vào MH chính; quyết định của Capu: "Ẩn khi cuộn lên")
 
-18. Khối "Thêm Tơ Hồng vào màn hình chính" vẫn nằm ngay trên thanh tab, không che chữ cuối của trang khi cuộn tới cuối? Khi mở lớp (sheet, ngăn kéo, chat) khối ẩn, đóng lớp khối hiện lại? ("có" là đạt)
+18. Ở đầu trang khối "Thêm Tơ Hồng vào màn hình chính" hiện ngay trên thanh tab, không che chữ cuối khi cuộn tới cuối? ("có" là đạt)
+19. Vuốt nội dung lên để đọc tiếp: khối trượt ẩn đi cùng lúc thanh Safari thu gọn, không giật, không làm trang nhảy? Vuốt xuống một chút (hoặc về đầu trang): khối hiện lại? Rung nhẹ ngón tay vài px không làm khối chớp? ("có" cho cả ba là đạt)
+20. Khi khối đang ẩn, ở cuối trang không có khoảng trống lạ hay chữ bị thanh tab che? ("có" là đạt)
+21. Mở một lớp (sheet, ngăn kéo, chat) khi khối đang hiện hay đang ẩn: khối ẩn khi lớp mở; đóng lớp thì khối về đúng trạng thái trước khi mở? ("có" là đạt)
