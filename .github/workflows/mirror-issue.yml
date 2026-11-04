@@ -60,8 +60,7 @@ jobs:
             python3 scripts/mirror_issue.py --state "$RUNNER_TEMP/state"
           fi
 
-      - name: Đồng bộ Project board (chỉ khi có PROJECTS_TOKEN)
-        if: ${{ secrets.PROJECTS_TOKEN != '' }}
+      - name: Đồng bộ Project board (script tự bỏ qua khi chưa có PROJECTS_TOKEN / PROJECT_NUMBER)
         env:
           PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
           PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
