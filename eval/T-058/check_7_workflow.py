@@ -4,7 +4,7 @@ không rewrite/deploy/PR sau mã 4. Chạy các đoạn script của workflow v�
 Chạy: cd /home/user/tohong-hq && python3 -I eval/T-058/check_7_workflow.py --back /home/user/tohong-back"""
 import os, subprocess, sys, tempfile
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib"))
-from t058 import fail, ok, parse_args
+from t058 import fail, ok, parse_args, tmpdir
 import yaml
 
 back = parse_args().get("back") or fail("cần --back <tohong-back>")
@@ -21,7 +21,7 @@ for s in steps[idx_m + 1:]:
     if s is not sstep and any(w in str(s.get("if", "")) for w in ("always()", "failure()")):
         fail("bước '%s' sau mirror không được chạy khi mirror đỏ" % s.get("name"))
 
-tmp = tempfile.mkdtemp(prefix="t058wf-")
+tmp = tmpdir("wf-")
 def sh(script, env_extra, cwd):
     e = {"PATH": os.environ["PATH"], "HOME": tmp, "POOL": "p.js", "MANIFEST": "m.json", "OUT": "out", "BASE_URL": "https://tohong-img.pages.dev"}
     e.update(env_extra)
