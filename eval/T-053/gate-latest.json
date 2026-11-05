@@ -1,6 +1,6 @@
 {
   "task": "T-053",
-  "at": "2026-11-05T23:17",
+  "at": "2026-11-05T23:45",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_1_khong_fail_gia.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 158732,
+      "ms": 159059,
       "out": "FAIL 10/10 lần chạy ra FAIL giả; đầu tiên: lần 1 C9: FAIL lỗi chạy eval: page.waitForFunction: Timeout 15000ms exceeded. | BODY=vite-la",
       "tier": 1
     },
@@ -20,15 +20,15 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_2_khong_mo_coi.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 51127,
-      "out": "te --port 5402 --strictPort --host 127.0.0.1) | C9 bị SIGTERM giữa chừng: để lại ['__t051.html', '__t051.jsx', 'git:__t051.html'] trong repo front | C10 bị SIGINT giữa chừng: còn 3 tiến trình do eval tạo (npm exec vite --port 5835 --strictPort --host 127.0.0.1) | C10 bị SIGINT giữa chừng: để lại ['__t051b.html', '__t051b.jsx', 'git:__t051b.html'] trong repo front | C9 bị SIGHUP giữa chừng: còn 3 tiến trình do eval tạo (npm exec vite --port 5163 --strictPort --host 127.0.0.1) | C9 bị SIGHUP giữa chừng: để lại ['__t051.html', '__t051.jsx', 'git:__t051.html'] trong repo front | C10 bị SIGTERM giữa chừng: còn 3 tiến trình do eval tạo (npm exec vite --port 5794 --strictPort --host 127.0.0.1) | C10 bị SIGTERM giữa chừng: để lại ['__t051b.html', '__t051b.jsx', 'git:__t051b.html'] trong repo front",
+      "ms": 51053,
+      "out": "/vite --port 5207 --stri) | C10 chạy xong: còn 1 tiến trình do eval tạo (node /home/user/tohong-front/node_modules/.bin/vite --port 5612 --stri) | C9 bị SIGTERM giữa chừng: còn 3 tiến trình do eval tạo (npm exec vite --port 5165 --strictPort --host 127.0.0.1) | C9 bị SIGTERM giữa chừng: để lại ['__t051.html', '__t051.jsx', 'git:__t051.html'] trong repo front | C10 bị SIGINT giữa chừng: còn 3 tiến trình do eval tạo (npm exec vite --port 5667 --strictPort --host 127.0.0.1) | C10 bị SIGINT giữa chừng: để lại ['__t051b.html', '__t051b.jsx', 'git:__t051b.html'] trong repo front | C10 bị SIGTERM giữa chừng: còn 3 tiến trình do eval tạo (npm exec vite --port 5831 --strictPort --host 127.0.0.1) | C10 bị SIGTERM giữa chừng: để lại ['__t051b.html', '__t051b.jsx', 'git:__t051b.html'] trong repo front",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_3_ket_qua_khong_doi.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 135714,
+      "ms": 134604,
       "out": "PASS C9, C10: PASS trên code hiện tại, FAIL trên cả ba đột biến (ảnh hỏng, marry.vn, localStorage)",
       "tier": 1
     },
@@ -36,15 +36,15 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_4_cho_theo_dieu_kien.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 48,
-      "out": "Dev(; eval/T-068/_advlib.cjs còn gọi npx/npm exec; eval/T-068/_advlib.cjs còn bốc cổng bằng Math.random / dải cổng cố định; eval/invariants/planner/front/vendor-images/lib/vendor_img_inv.cjs chưa require vite_dev và gọi startViteDev(; eval/invariants/planner/front/vendor-images/lib/vendor_img_inv.cjs còn gọi npx/npm exec; eval/invariants/planner/front/vendor-images/lib/vendor_img_inv.cjs còn bốc cổng bằng Math.random / dải cổng cố định; eval/invariants/planner/front/vendor-images/lib/small_tile_tooltip.cjs chưa require vite_dev và gọi startViteDev(; eval/invariants/planner/front/vendor-images/lib/small_tile_tooltip.cjs còn gọi npx/npm exec; eval/invariants/planner/front/vendor-images/lib/small_tile_tooltip.cjs còn bốc cổng bằng Math.random / dải cổng cố định; chưa có eval/_lib/vite_dev.cjs",
+      "ms": 125,
+      "out": "nvariants/planner/front/vendor-images/lib/vendor_img_inv.cjs chưa require/import module vite_dev (đường dẫn literal hoặc hằng) và dùng startViteDev; eval/invariants/planner/front/vendor-images/lib/vendor_img_inv.cjs còn spawn npx / npm exec / vite trực tiếp; eval/invariants/planner/front/vendor-images/lib/vendor_img_inv.cjs còn bốc cổng bằng Math.random / dải cổng cố định; eval/invariants/planner/front/vendor-images/lib/small_tile_tooltip.cjs chưa require/import module vite_dev (đường dẫn literal hoặc hằng) và dùng startViteDev; eval/invariants/planner/front/vendor-images/lib/small_tile_tooltip.cjs còn spawn npx / npm exec / vite trực tiếp; eval/invariants/planner/front/vendor-images/lib/small_tile_tooltip.cjs còn bốc cổng bằng Math.random / dải cổng cố định; chưa có eval/_lib/vite_dev.cjs",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_5_bat_bien_vendor_images.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 284358,
+      "ms": 283252,
       "out": "FAIL INV-vendor_img_inv trên main (vite lạ chiếm dải cổng) đáng ra PASS, thấy: FAIL có tiêu chí đỏ | INV-small_tile_tooltip trên main (vite lạ chiếm dải cổng) đáng ra PASS, thấy: FAIL 1 kiểm đỏ: lỗi chạy eval",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_6_helper_nonce.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 39,
+      "ms": 32,
       "out": "FAIL chưa có eval/_lib/vite_dev.cjs",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 25,
+      "ms": 32,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 124,
+      "ms": 117,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 25,
+      "ms": 21,
       "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 38,
+      "ms": 32,
       "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 580,
+      "ms": 542,
       "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1794,
+      "ms": 1771,
       "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 6326,
+      "ms": 6324,
       "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-006-wayback-chi-khi-bat-co-va-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 7216,
+      "ms": 7177,
       "out": "PASS Wayback chỉ khi bật cờ; 4 yêu cầu, giãn cách nhỏ nhất 2.00 giây, tối đa 1 cùng lúc",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-007-khong-goi-wayback-available.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 682,
+      "ms": 709,
       "out": "PASS 6 yêu cầu tới Wayback, không có /wayback/available",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-008-san-toc-do-wayback.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 584,
+      "ms": 557,
       "out": "PASS 6 cách hạ tốc độ / dùng --wayback-* sai đều bị từ chối mã 2, không yêu cầu, không ghi manifest",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-009-wayback-429-khong-go-cua-mai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 16288,
+      "ms": 16276,
       "out": "PASS 429 mọi yêu cầu: 20 yêu cầu tổng, tối đa 4 liên tiếp cùng đường dẫn, lần gửi lại sớm nhất sau 1.00 giây, 1 cùng lúc",
       "tier": 2
     }
