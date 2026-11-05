@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""T-058 tiêu chí 5: dưới 50 URL: tất cả lỗi thì dừng sớm (k = tổng); có 1 ok thì chạy tiếp.
+"""T-058 tiêu chí 5: định nghĩa mẫu. Dưới 50 URL: tất cả lỗi thì dừng sớm (k = tổng); có 1 ok thì chạy tiếp. Entry failed vĩnh viễn và entry mồ côi không thuộc mẫu; entry failed tạm thời thuộc mẫu.
 Chạy: cd /home/user/tohong-hq && python3 -I eval/T-058/check_5_duoi_50.py --back /home/user/tohong-back"""
 import os, sys, time
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib"))
@@ -29,4 +29,48 @@ try:
     need_stop(p, e, 1, "http-403", e.pool_bytes(), None)
 finally:
     e.stop()
-ok("dưới 50 URL: xét toàn bộ")
+import json
+def fent(reason): return {"status": "failed", "reason": reason, "attempts": 1}
+# a. nguồn khoẻ, 7 entry failed vĩnh viễn (vẫn 404), không có ảnh mới: mã 0, không dừng sớm
+e = Env(["/nope/%d" % i for i in range(7)])
+try:
+    write_manifest(e.manifest, {e.fk.url("/nope/%d" % i): fent("http-404") for i in range(7)})
+    p = e.mirror(back)
+    if p.returncode != 0: fail("7 entry failed vĩnh viễn, không URL mới: phải thoát 0, thấy %s" % p.returncode)
+    if "stopped" in (summary_line(p.stdout) or ""): fail("không được dừng sớm khi mẫu rỗng")
+finally:
+    e.stop()
+# b. nguồn khoẻ, 60 entry failed vĩnh viễn đứng trước 5 URL mới: 5 URL mới được mirror, mã 0
+e = Env(["/nope/%d" % i for i in range(60)] + ["/ok/new%d.png" % i for i in range(5)])
+try:
+    write_manifest(e.manifest, {e.fk.url("/nope/%d" % i): fent(["http-404", "http-410", "not-image", "too-large", "http-400"][i % 5]) for i in range(60)})
+    p = e.mirror(back)
+    if p.returncode != 0: fail("60 entry vĩnh viễn + 5 URL mới: phải thoát 0, thấy %s; %s" % (p.returncode, (summary_line(p.stdout) or p.stderr[-150:])))
+    s = kv(summary_line(p.stdout))
+    if (s.get("ok"), s.get("failed"), s.get("new")) != ("5", "60", "5") or "stopped" in s: fail("5 URL mới phải được mirror: " + str(s))
+    ents = json.load(open(e.manifest, encoding="utf-8"))["entries"]
+    if sum(1 for v in ents.values() if v["status"] == "ok") != 5: fail("manifest phải có 5 entry ok mới")
+    if any(e.fk.paths_hit().count("/nope/%d" % i) < 1 for i in range(60)): fail("entry failed vĩnh viễn vẫn phải được thử lại (T-051 mục 12), ngoài mẫu")
+finally:
+    e.stop()
+# c. 50 entry failed tạm thời (timeout) thuộc mẫu, đều timeout lại, kèm 10 URL mới đứng sau: dừng sớm, mã 4, URL mới không bị gọi
+e = Env(["/hang/%d" % i for i in range(50)] + ["/ok/new%d.png" % i for i in range(10)], hang_secs=4)
+try:
+    write_manifest(e.manifest, {e.fk.url("/hang/%d" % i): fent("timeout") for i in range(50)})
+    man0, pool0 = e.man_bytes(), e.pool_bytes()
+    p = e.mirror(back, ["--timeout", "1"], timeout=90)
+    need_stop(p, e, 50, "timeout", pool0, man0)
+    if any(x.startswith("/ok/") for x in e.fk.paths_hit()): fail("URL mới thứ 51 trở đi bị gọi trước khi quyết định dừng")
+finally:
+    e.stop()
+# d. entry mồ côi (URL đã rời pool, lý do tạm thời) không thuộc mẫu và không gây dừng sớm
+e = Env(["/ok/%d.png" % i for i in range(3)])
+try:
+    write_manifest(e.manifest, {"http://127.0.0.1:9/gone/%d" % i: fent("timeout") for i in range(60)})
+    p = e.mirror(back)
+    if p.returncode != 0: fail("entry mồ côi không được gây dừng sớm, thấy mã %s" % p.returncode)
+    if "stopped" in (summary_line(p.stdout) or ""): fail("SUMMARY không được có stopped=")
+    if any("/gone/" in x for x in e.fk.paths_hit()): fail("entry mồ côi không được gửi yêu cầu")
+finally:
+    e.stop()
+ok("mẫu: dưới 50 URL xét toàn bộ; failed vĩnh viễn và mồ côi không thuộc mẫu; failed tạm thời thuộc mẫu")

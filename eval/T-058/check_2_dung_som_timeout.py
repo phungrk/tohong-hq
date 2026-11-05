@@ -9,20 +9,25 @@ a = parse_args()
 back = a.get("back") or fail("cần --back <tohong-back>")
 
 # A. 50 URL treo rồi 30 URL tốt. --timeout 1, 4 luồng: 13 đợt × 1 giây.
-e = Env(["/hang/%d" % i for i in range(50)] + ["/ok/%d.png" % i for i in range(30)], hang_secs=4)
+# Sau 50 URL treo có 2 entry ok (1 đã có file = reused, 1 thiếu file nhưng Pages giả có = restored): được xử lý bình thường trong lúc chờ mẫu.
+e = Env(["/hang/%d" % i for i in range(50)] + ["/ok/r1.png", "/ok/r2.png"] + ["/ok/%d.png" % i for i in range(30)], hang_secs=4)
 try:
-    pool0 = e.pool_bytes()
-    pr, lines, secs = e.stream(back, ["--timeout", "1"])
-    need_stop(type("P", (), {"returncode": pr.returncode, "stdout": "\n".join(l for _, l in lines), "stderr": pr.stderr.read()})(), e, 50, "timeout", pool0, None)
+    f1, f2 = "v/marry_0050-111111111111.webp", "v/marry_0051-222222222222.webp"
+    write_manifest(e.manifest, {e.fk.url("/ok/r1.png"): ok_entry(f1), e.fk.url("/ok/r2.png"): ok_entry(f2)})
+    os.makedirs(os.path.join(e.out, "v"), exist_ok=True); open(os.path.join(e.out, f1), "wb").write(WEBP)
+    man0, pool0 = e.man_bytes(), e.pool_bytes()
+    pr, lines, secs = e.stream(back, ["--timeout", "1", "--restore-from", e.fk.url("/webp")])
+    d, _ = need_stop(type("P", (), {"returncode": pr.returncode, "stdout": "\n".join(l for _, l in lines), "stderr": pr.stderr.read()})(), e, 50, "timeout", pool0, man0)
+    if (d.get("reused"), d.get("restored"), d.get("ok"), d.get("failed")) != ("1", "1", "2", "50"): fail("entry ok sau URL thứ 51 phải được xử lý trong lúc chờ mẫu: reused=1 restored=1 ok=2 failed=50, thấy " + str(d))
     if secs > 25: fail("dừng sớm mất %.1f giây: phải ≤ ceil(50/4)×timeout cộng vài giây (≤ 25 giây với --timeout 1)" % secs)
     hits = e.fk.paths_hit()
     for i in range(50):
         n = hits.count("/hang/%d" % i)
         if n != 1: fail("/hang/%d bị gọi %d lần: lỗi timeout trong mẫu không được thử lại (phải đúng 1)" % (i, n))
-    if any(p.startswith("/ok/") for p in hits): fail("URL thứ 51 trở đi bị gọi trước khi quyết định dừng")
+    if any(p.startswith("/ok/") and p not in ("/ok/r1.png", "/ok/r2.png") for p in hits): fail("URL thứ 51 trở đi bị gọi trước khi quyết định dừng")
     if os.path.exists(e.manifest): fail("dừng sớm không được tạo manifest")
     last = [x for x in progress_lines([l for _, l in lines])][-1]
-    if (last[0], last[2], last[3], last[4]) != (50, 0, 50, {"timeout": 50}): fail("PROGRESS cuối phải done=50 ok=0 failed=50 (timeout=50): " + last[5])
+    if (last[0], last[2], last[3], last[4]) != (52, 2, 50, {"timeout": 50}): fail("PROGRESS cuối phải done=52 ok=2 failed=50 (timeout=50): " + last[5])
 finally:
     e.stop()
 

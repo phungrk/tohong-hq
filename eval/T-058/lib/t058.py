@@ -1,12 +1,23 @@
 """Thư viện dùng chung cho eval T-058 (offline). Dùng lại ảnh và pool của T-051 (eval/T-051/lib/t051.py), thêm server ảnh giả
 có đường dẫn: /ok/<n>.png (ảnh tốt), /forbid/<n> (403), /hang/<n> (treo HANG_SECS giây rồi mới trả), /slow/<n> (0,6 giây rồi trả ảnh tốt).
 Chỉ gọi CLI trong spec (products/T-058-mirror-tien-do-dung-som.md); không biết gì về cách cài đặt."""
-import json, os, subprocess, sys, tempfile, threading, time, urllib.parse
+import atexit, json, os, shutil, subprocess, sys, tempfile, threading, time, urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "T-051", "lib"))
 from t051 import fail, ok, parse_args, cli, run, vendor, write_pool, read_pool, IMAGES, BASE_URL  # noqa: E402,F401
+
+_ROOT = []
+
+
+def tmpdir(prefix="t"):
+    """Mọi thư mục tạm của eval nằm dưới MỘT thư mục gốc riêng, xoá khi thoát (kể cả fail()/sys.exit) và khi Env.stop()."""
+    if not _ROOT:
+        _ROOT.append(tempfile.mkdtemp(prefix="t058-eval-"))
+        atexit.register(shutil.rmtree, _ROOT[0], True)
+    return tempfile.mkdtemp(prefix=prefix, dir=_ROOT[0])
+
 
 GOOD = IMAGES["/ok/small.png"]
 def _webp():
@@ -68,7 +79,7 @@ class Env:
     """Thư mục tạm + server giả + pool dựng từ danh sách đường dẫn (mỗi URL một vendor, đúng thứ tự)."""
 
     def __init__(self, paths, hang_secs=HANG_SECS):
-        self.tmp = tempfile.mkdtemp(prefix="t058-")
+        self.tmp = tmpdir("env-")
         self.fk = Fake(hang_secs)
         self.pool = os.path.join(self.tmp, "vendorPool.generated.js")
         self.manifest = os.path.join(self.tmp, "manifest.json")
@@ -104,7 +115,9 @@ class Env:
         return open(self.manifest, "rb").read() if os.path.exists(self.manifest) else None
 
     def pool_bytes(self): return open(self.pool, "rb").read()
-    def stop(self): self.fk.stop()
+    def stop(self):
+        self.fk.stop()
+        shutil.rmtree(self.tmp, True)
 
 
 def kv(line):
