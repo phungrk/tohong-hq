@@ -1,6 +1,6 @@
 {
   "task": "T-069",
-  "at": "2026-11-05T15:16",
+  "at": "2026-11-05T15:25",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,39 +12,39 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-069/check_1_lay_anh.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 10038,
-      "out": "FAIL mã thoát phải 0, thấy 4; stdout cuối: //127.0.0.1:44009/dead/0 http-522\nFAILED http://127.0.0.1:44009/gone/1 http-404\nPROGRESS done=2 total=2 ok=0 failed=2 (http-404=1, http-522=1)\nSUMMARY total=2 ok=0 new=0 reused=0 restored=0 failed=2 missing=0 wayback=0 stopped=early reason=mixed-2/2\n; stderr:",
+      "ms": 10339,
+      "out": "r.py\", line 362, in finish_request\n    self.RequestHandlerClass(request, client_address, self)\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/socketserver.py\", line 766, in __init__\n    self.handle()\n    ~~~~~~~~~~~^^\n  File \"/usr/lib/python3.13/http/server.py\", line 453, in handle\n    self.handle_one_request()\n    ~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib/python3.13/http/server.py\", line 419, in handle_one_request\n    self.raw_requestline = self.rfile.readline(65537)\n                           ~~~~~~~~~~~~~~~~~~~^^^^^^^\n  File \"/usr/lib/python3.13/socket.py\", line 723, in readinto\n    return self._sock.recv_into(b)\n           ~~~~~~~~~~~~~~~~~~~~^^^\nConnectionResetError: [Errno 104] Connection reset by peer\n----------------------------------------",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-069/inv-proposed-khong-goi-availability.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 728,
-      "out": "FAIL công cụ gọi API availability của Wayback: /wayback/available?url=http%3A%2F%2F127.0.0.1%3A36601%2Fgone%2F0.png",
+      "ms": 770,
+      "out": "FAIL công cụ gọi API availability của Wayback: /wayback/available?url=http%3A%2F%2F127.0.0.1%3A39319%2Fgone%2F0.png",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-069/check_2_ly_do.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 9961,
-      "out": "FAIL không bản lưu: entry phải failed reason=http-522 wayback=none, thấy {'status': 'failed', 'reason': 'http-522', 'attempts': 1, 'fail_runs': 1, 'wayback': 'http-429'}",
+      "ms": 8925,
+      "out": "r.py\", line 362, in finish_request\n    self.RequestHandlerClass(request, client_address, self)\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/socketserver.py\", line 766, in __init__\n    self.handle()\n    ~~~~~~~~~~~^^\n  File \"/usr/lib/python3.13/http/server.py\", line 453, in handle\n    self.handle_one_request()\n    ~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib/python3.13/http/server.py\", line 419, in handle_one_request\n    self.raw_requestline = self.rfile.readline(65537)\n                           ~~~~~~~~~~~~~~~~~~~^^^^^^^\n  File \"/usr/lib/python3.13/socket.py\", line 723, in readinto\n    return self._sock.recv_into(b)\n           ~~~~~~~~~~~~~~~~~~~~^^^\nConnectionResetError: [Errno 104] Connection reset by peer\n----------------------------------------",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-069/check_3_dung_som.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 13128,
-      "out": "FAIL A: archive.org 429 không được gây mã thoát khác 0, thấy 4; stdout cuối: ://127.0.0.1:44803/dead/8 http-522\nFAILED http://127.0.0.1:44803/dead/9 http-522\nPROGRESS done=50 total=60 ok=0 failed=50 (http-522=50)\nSUMMARY total=60 ok=0 new=0 reused=0 restored=0 failed=50 missing=0 wayback=0 stopped=early reason=http-522-50/50",
+      "ms": 12977,
+      "out": "FAIL A: archive.org 429 không được gây mã thoát khác 0, thấy 4; stdout cuối: ://127.0.0.1:39653/dead/8 http-522\nFAILED http://127.0.0.1:39653/dead/9 http-522\nPROGRESS done=50 total=60 ok=0 failed=50 (http-522=50)\nSUMMARY total=60 ok=0 new=0 reused=0 restored=0 failed=50 missing=0 wayback=0 stopped=early reason=http-522-50/50",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-069/check_4_toc_do.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 52764,
+      "ms": 52316,
       "out": "r.py\", line 362, in finish_request\n    self.RequestHandlerClass(request, client_address, self)\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/socketserver.py\", line 766, in __init__\n    self.handle()\n    ~~~~~~~~~~~^^\n  File \"/usr/lib/python3.13/http/server.py\", line 453, in handle\n    self.handle_one_request()\n    ~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib/python3.13/http/server.py\", line 419, in handle_one_request\n    self.raw_requestline = self.rfile.readline(65537)\n                           ~~~~~~~~~~~~~~~~~~~^^^^^^^\n  File \"/usr/lib/python3.13/socket.py\", line 723, in readinto\n    return self._sock.recv_into(b)\n           ~~~~~~~~~~~~~~~~~~~~^^^\nConnectionResetError: [Errno 104] Connection reset by peer\n----------------------------------------",
       "tier": 1
     },
@@ -52,15 +52,15 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-069/check_5_manifest_bat_bien.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 10338,
-      "out": "FAIL /dead/1: source=wayback snapshot=20240730154649, thấy {'status': 'failed', 'reason': 'http-522', 'attempts': 1, 'fail_runs': 1, 'wayback': 'http-429'}",
+      "ms": 10776,
+      "out": "r.py\", line 362, in finish_request\n    self.RequestHandlerClass(request, client_address, self)\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/socketserver.py\", line 766, in __init__\n    self.handle()\n    ~~~~~~~~~~~^^\n  File \"/usr/lib/python3.13/http/server.py\", line 453, in handle\n    self.handle_one_request()\n    ~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib/python3.13/http/server.py\", line 419, in handle_one_request\n    self.raw_requestline = self.rfile.readline(65537)\n                           ~~~~~~~~~~~~~~~~~~~^^^^^^^\n  File \"/usr/lib/python3.13/socket.py\", line 723, in readinto\n    return self._sock.recv_into(b)\n           ~~~~~~~~~~~~~~~~~~~~^^^\nConnectionResetError: [Errno 104] Connection reset by peer\n----------------------------------------",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-069/check_6_workflow_readme_npm.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 7781,
+      "ms": 7944,
       "out": "FAIL SUMMARY có circuit=open thì Summary phải có một dòng bắt đầu 'Wayback ngắt mạch' (nêu retry-later và chạy lại sau)",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 3705,
+      "ms": 30,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 228,
+      "ms": 175,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 29,
+      "ms": 30,
       "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 57,
+      "ms": 43,
       "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 927,
+      "ms": 836,
       "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1951,
+      "ms": 1979,
       "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 6474,
+      "ms": 6379,
       "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
       "tier": 2
     },
@@ -124,8 +124,24 @@
       "eval": "eval/invariants/planner/vendor/images/inv-006-wayback-chi-khi-bat-co-va-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 3759,
-      "out": "PASS Wayback chỉ khi bật cờ; 4 yêu cầu, giãn cách nhỏ nhất 1.00 giây, tối đa 1 cùng lúc",
+      "ms": 4340,
+      "out": "PASS Wayback chỉ khi bật cờ; 4 yêu cầu, giãn cách nhỏ nhất 0.99 giây, tối đa 1 cùng lúc",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-008-san-toc-do-wayback.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 588,
+      "out": "PASS 6 cách hạ tốc độ / dùng --wayback-* sai đều bị từ chối mã 2, không yêu cầu, không ghi manifest",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-009-wayback-429-khong-go-cua-mai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 16348,
+      "out": "PASS 429 mọi yêu cầu: 20 yêu cầu tổng, tối đa 4 liên tiếp cùng đường dẫn, lần gửi lại sớm nhất sau 1.00 giây, 1 cùng lúc",
       "tier": 2
     }
   ],
