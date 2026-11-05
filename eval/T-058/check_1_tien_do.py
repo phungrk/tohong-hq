@@ -28,7 +28,7 @@ last = pl[-1]
 if (last[2], last[3]) != (225, 25): fail("dòng cuối phải ok=225 failed=25, thấy %s" % last[5])
 if last[4] != {"http-403": 20, "http-404": 5}: fail("lý do dòng cuối sai: %s" % last[5])
 if not last[5].endswith("(http-403=20, http-404=5)"): fail("lý do phải xếp tên tăng dần, phân cách ', ': " + last[5])
-s = summary_line(pr.stdout)
+s = summary_line("\n".join(texts))
 if not s or kv(s).get("ok") != "225" or kv(s).get("failed") != "25": fail("SUMMARY lệch PROGRESS cuối: %s" % s)
 if texts.index(last[5]) > texts.index(s): fail("PROGRESS cuối phải nằm trước SUMMARY")
 
