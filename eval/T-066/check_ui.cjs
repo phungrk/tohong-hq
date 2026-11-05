@@ -198,7 +198,7 @@ async function rowInfo(pg, scope, names, n) {
         // sáng/tối: đảo toàn bộ token màu, ô vẫn phải có cặp nét/nền tương phản >= 3:1 và màu phải đổi theo token
         if (!lightDark[cat]) {
           const ld = await pg.evaluate(() => { const t = window.__L.tiles(document.querySelector('[data-card="0"]'))[0]; if (!t) return null; const light = window.__L.describe(t).paintsLight, dark = window.__L.darkPaints(t); return { light, dark, cl: window.__L.bestContrast(light), cd: window.__L.bestContrast(dark || []) }; });
-          lightDark[cat] = ld; if (process.env.DBG) console.log(cat, JSON.stringify(ld), (svgByCat[cat]||'').slice(0,400));
+          lightDark[cat] = ld;
           if (!ld) bad(3, `S1 ${cat}: không có ô để đo sáng/tối`);
           else {
             if (ld.cl < 3) bad(3, `S1 ${cat}: nền sáng, cặp màu nét/nền tương phản tối đa ${ld.cl.toFixed(1)}:1 < 3:1`);
