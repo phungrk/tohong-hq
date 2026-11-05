@@ -1,0 +1,133 @@
+{
+  "task": "T-064",
+  "at": "2026-11-05T06:39",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/vendor/images",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_1_tien_do.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 15195,
+      "out": "PASS PROGRESS đúng khuôn, nhịp 100, dòng cuối, ghi ngay",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_2_dung_som_timeout.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 22281,
+      "out": "PASS 50/50 timeout dừng sớm nhanh, không thử lại, không gọi URL 51+, huỷ yêu cầu treo",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_3_dung_som_403.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 9991,
+      "out": "PASS 50/50 lỗi 403 và hỗn hợp dừng sớm với mã 4 và reason đúng",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_4_chay_tiep.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 23183,
+      "out": "PASS có 1 ok trong mẫu thì chạy tiếp, ghi manifest, mã 0",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_5_duoi_50.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 26414,
+      "out": "PASS mẫu: dưới 50 URL xét toàn bộ; failed vĩnh viễn và mồ côi không thuộc mẫu; failed tạm thời (fail_runs<3) thuộc mẫu, từ fail_runs>=3 thì ra khỏi mẫu",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_6_entry_ok_cu.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 9576,
+      "out": "PASS entry ok cũ nguyên vẹn và không tính vào mẫu",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_7_workflow.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 7812,
+      "out": "PASS workflow xử lý mã 4 và Summary hiện PROGRESS cuối, lý do dừng",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_8_readme.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 8255,
+      "out": "PASS README có mục tiến độ và mã 4",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && cd /home/user/tohong-back && npm test",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 3875,
+      "out": " duration_ms: 0.498284\n  type: 'test'\n  ...\n# Subtest: callMatcher: 500 → service_error with status\nok 117 - callMatcher: 500 → service_error with status\n  ---\n  duration_ms: 0.318616\n  type: 'test'\n  ...\n# Subtest: callMatcher: AbortError → timeout\nok 118 - callMatcher: AbortError → timeout\n  ---\n  duration_ms: 0.405631\n  type: 'test'\n  ...\n# Subtest: callMatcher: generic throw → network_error\nok 119 - callMatcher: generic throw → network_error\n  ---\n  duration_ms: 0.394857\n  type: 'test'\n  ...\n# Subtest: callMatcher: malformed JSON body still returns shape on ok\nok 120 - callMatcher: malformed JSON body still returns shape on ok\n  ---\n  duration_ms: 0.310969\n  type: 'test'\n  ...\n1..120\n# tests 120\n# suites 0\n# pass 120\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 3632.661133",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 30,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 266,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 45,
+      "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 58,
+      "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 913,
+      "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1948,
+      "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
