@@ -9,6 +9,11 @@ sys.path.insert(0, os.path.join(HERE, "..", "..", "T-051", "lib"))
 from t051 import fail, ok, parse_args, cli, run, vendor, write_pool, read_pool, IMAGES, BASE_URL  # noqa: E402,F401
 
 GOOD = IMAGES["/ok/small.png"]
+def _webp():
+    import io
+    from PIL import Image
+    b = io.BytesIO(); Image.new("RGB", (8, 8), (200, 10, 10)).save(b, "WEBP"); return b.getvalue()
+WEBP = _webp()
 HANG_SECS = 25
 
 
@@ -29,6 +34,8 @@ class Fake:
                 with outer.lock:
                     outer.hits.append((time.time(), path)); outer.cur += 1; outer.max_cur = max(outer.max_cur, outer.cur)
                 try:
+                    if path.startswith("/webp/"):
+                        return self._send(200, WEBP, "image/webp")
                     if path.startswith("/forbid/"):
                         return self._send(403, b"forbidden", "text/plain")
                     if path.startswith("/hang/"):
@@ -135,22 +142,27 @@ def progress_lines(lines):
     return out
 
 
-def assert_stopped(p, env, back, prefix, hung_prefix, sample, reason_code, manifest_before=None, pool_before=None):
-    """Kiểm chung cho ca dừng sớm: mã 4, SUMMARY stopped=early reason, không ghi manifest/pool, chỉ đúng `sample` URL đầu bị gọi."""
+def ok_entry(file):
+    return {"status": "ok", "file": file, "width": 8, "height": 8, "bytes": len(WEBP)}
+
+
+def write_manifest(path, entries):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"version": 1, "baseUrl": BASE_URL, "entries": entries}, f, ensure_ascii=False, indent=2)
+
+
+def need_stop(p, env, k, code, pool_before, man_before):
+    """Kiểm chung cho ca dừng sớm: mã 4, SUMMARY stopped=early reason=<code>-<k>/<k>, PROGRESS cuối, manifest/pool nguyên byte."""
     if p.returncode != 4: fail(f"phải thoát mã 4, thấy {p.returncode}; stderr: {p.stderr[-200:]}")
     s = summary_line(p.stdout)
     if not s: fail("thiếu dòng SUMMARY khi dừng sớm")
+    if p.stdout.splitlines()[-1] != s: fail("SUMMARY phải là dòng cuối của stdout")
     d = kv(s)
-    if d.get("stopped") != "early": fail("SUMMARY thiếu 'stopped=early': " + s)
-    want = f"{reason_code}-{sample}/{sample}"
-    if d.get("reason") != want: fail(f"SUMMARY reason phải = {want}, thấy {d.get('reason')!r}: {s}")
-    if env.man_bytes() != manifest_before: fail("dừng sớm không được tạo hay đổi manifest")
+    if d.get("stopped") != "early": fail("SUMMARY thiếu stopped=early: " + s)
+    if d.get("reason") != f"{code}-{k}/{k}": fail(f"reason phải = {code}-{k}/{k}, thấy {d.get('reason')!r}: {s}")
+    if env.man_bytes() != man_before: fail("dừng sớm không được tạo hay đổi manifest")
     if env.pool_bytes() != pool_before: fail("dừng sớm không được đổi pool")
-    hit = set(p for p in env.fk.paths_hit() if p.startswith(prefix))
-    allowed = set(env.paths[:0])
-    first = [x for x in env.paths if x.startswith(prefix)][:sample]
-    extra = hit - set(first)
-    if extra: fail(f"URL ngoài {sample} URL đầu bị gọi trước khi quyết định dừng: {sorted(extra)[:3]}")
-    last = progress_lines(p.stdout.splitlines())
-    if not last: fail("dừng sớm vẫn phải in dòng PROGRESS cuối")
-    if last[-1][3] != sample or last[-1][2] != 0 and manifest_before is None and False: fail("PROGRESS cuối sai")
+    pl = progress_lines(p.stdout.splitlines())
+    if not pl: fail("dừng sớm vẫn phải in dòng PROGRESS cuối")
+    if len(set(x[0] for x in pl)) != len(pl): fail("có hai dòng PROGRESS cùng done")
+    return d, pl
