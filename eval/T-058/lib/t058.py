@@ -88,7 +88,7 @@ class Env:
 
     def set_pool(self, paths):
         self.paths = list(paths)
-        write_pool(self.pool, [vendor("marry_%04d" % i, [self.fk.url(p)]) for i, p in enumerate(self.paths)])
+        write_pool(self.pool, [vendor("marry_%04d" % i, [p if p.startswith("http") else self.fk.url(p)]) for i, p in enumerate(self.paths)])
 
     def cmd(self, back, extra=None, out=None):
         return cli(back) + ["mirror", "--pool", self.pool, "--manifest", self.manifest, "--out", out or self.out, "--base-url", BASE_URL] + (extra or [])
