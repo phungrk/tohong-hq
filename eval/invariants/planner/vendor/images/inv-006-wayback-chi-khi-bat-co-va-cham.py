@@ -47,7 +47,7 @@ try:
     if reqs: print("FAIL không có --fallback wayback mà vẫn gửi %d yêu cầu tới Wayback" % len(reqs)); sys.exit(1)
     r = subprocess.run(base + ["--fallback", "wayback", "--wayback-base", W], capture_output=True, text=True, timeout=120, env=env)
     if not reqs and "Tham số lạ: --fallback" in r.stderr: print("PASS chưa áp dụng (công cụ chưa có --fallback wayback, chưa T-065)"); sys.exit(0)
-    if len(reqs) < 4: print("FAIL có cờ mà chỉ thấy %d yêu cầu Wayback (mong >= 4, mỗi URL một availability); stderr: %s" % (len(reqs), r.stderr[-200:])); sys.exit(1)
+    if len(reqs) < 4: print("FAIL có cờ mà chỉ thấy %d yêu cầu Wayback (mong >= 4, mỗi URL ít nhất một yêu cầu mốc + bản lưu, ADR-023); stderr: %s" % (len(reqs), r.stderr[-200:])); sys.exit(1)
     if cur[1] > 1: print("FAIL %d yêu cầu tới Wayback cùng lúc" % cur[1]); sys.exit(1)
     g = min(b - a for a, b in zip(reqs, reqs[1:]))
     if g < 0.9: print("FAIL hai yêu cầu tới Wayback cách nhau %.2f giây (< 0,9)" % g); sys.exit(1)
