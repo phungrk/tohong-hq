@@ -1,5 +1,11 @@
 # Spec T-053: Sửa phép đo vite của eval front (T-051 check 9/10 và các eval cùng lỗi)
 
+## Đã sửa ở v2 (spec rework lần 1, defect `handoffs/T-053-D1.md`)
+- D1.1: check_4 giờ áp ĐỦ ba kiểm (có `vite_dev`, không `spawn npx`, không `Math.random` gần `port`/dải cố định) cho cả sáu file tiêu thụ kể cả C9/C10, đo sau khi bỏ comment, không phân biệt hoa thường; bỏ điều kiện chữ "nonce" (một comment là thoả). "Nonce kiểm thật" chuyển sang kiểm bằng hành vi: tiêu chí 6 (check_6) cho helper chạy với một vite giả trả 200 cho mọi đường dẫn; helper nào không kiểm thật nonce sẽ báo sẵn sàng và bị FAIL, bất kể đổi dải cổng. Decoy của check_1 mở rộng sang 5100-8999 (gồm 7000-7999 mà cách (b) của critic dùng).
+- D1.2: "do eval tạo" nhận diện bằng dấu riêng mỗi lần chạy `T053_RUN=<uuid>` truyền qua biến môi trường tới harness, helper, vite con; lọc bằng `/proc/<pid>/environ`. Không còn nhận diện theo cwd/dòng lệnh; `kill_pids` chỉ kill pid mang dấu. Helper bắt buộc truyền `process.env` xuống vite con (câu "Sản phẩm của việc" bên dưới).
+- D1.3: hành vi 2 chốt MỘT cách hiểu: `stop()` và handler tín hiệu xoá file nonce và file thử; sau mọi lần chạy `git status` front không thêm mục `__*`. check_2 gửi SIGTERM, SIGINT, SIGHUP (C9: SIGTERM, SIGHUP; C10: SIGINT, SIGTERM) và đo tiến trình + file TRƯỚC khi harness eval dọn.
+- D1.4: check_3 thêm đột biến cho từng nhóm kiểm mà C10 có thể làm yếu (M2 gọi `www.marry.vn`, M3 ghi đè localStorage vendor đã lưu), mỗi đột biến phải FAIL đúng lý do. Hai nhóm không dựng đột biến (id tra tối đa một lần, tra ảnh không mang coupleId của C10, các kiểm gallery riêng của C9) GIAO ADVERSARY đọc diff của C9/C10 và xác nhận thay `waitForTimeout` không làm yếu chúng.
+
 ## Ý định
 Eval T-051 check 9/10 không được FAIL giả vì môi trường (vite mồ côi, cổng trùng); lỗi là của phép đo, không của code. Nguồn: adversary T-052 (`handoffs/T-052-v3.md` ghi nghi flake; `board/T-052.md`).
 
@@ -13,16 +19,16 @@ Nếu dùng một helper dựng vite dùng chung (nhóm tiến trình riêng, c�
 
 ## Hành vi (người dùng của spec = người/agent chạy eval front)
 1. Chạy C9 hoặc C10 khi máy còn vite lạ giữ cổng bất kỳ (kể cả cả dải 5100-6199 trả 200): vẫn ra kết quả đúng của code (PASS trên code T-052/hiện tại). Không bao giờ dùng nhầm máy chủ lạ.
-2. Chạy xong (PASS, FAIL, lỗi, quá hạn) hoặc harness bị SIGTERM/SIGINT/SIGHUP giữa chừng: không còn tiến trình vite (kể cả npx/npm exec) do eval tạo, và các file thử `__t051*.{jsx,html}` bị xoá.
+2. Chạy xong (PASS, FAIL, lỗi, quá hạn) hoặc harness bị SIGTERM/SIGINT/SIGHUP giữa chừng: không còn tiến trình nào do eval tạo (vite, npx, esbuild... mọi tiến trình mang dấu `T053_RUN` của lần chạy đó), và không còn file nào do eval tạo trong repo front: cả file thử `__t051*.{jsx,html}` lẫn file nonce `__nonce-*`; `git status` của front không thêm mục nào. Eval không bao giờ kill tiến trình không mang dấu của chính lần chạy đó (vite của phiên khác chạy cùng lúc trong cùng repo không bị đếm, không bị kill).
 3. Code front bị phá thật (ảnh hỏng không ra ảnh mặc định) vẫn FAIL: không nới ngưỡng, không đổi phép đo nội dung.
 4. Không còn chờ cố định (`waitForTimeout`) trong C9/C10; chờ bằng điều kiện (ảnh đã xong/lỗi, phần tử xuất hiện), có hạn tổng.
 
 ## Sản phẩm của việc (Engineering làm theo spec này)
-- Helper dùng chung `eval/_lib/vite_dev.cjs` (mẫu: `eval/T-054/lib.cjs` đã làm đúng cho build + máy chủ tĩnh): `startViteDev({repo, files})` trả `{port, url, stop()}`.
-  - Chạy `<repo>/node_modules/.bin/vite` trực tiếp (không qua npx), `detached: true`; `stop()` và handler `exit/SIGINT/SIGTERM/SIGHUP` kill cả nhóm (`process.kill(-pid, 'SIGKILL')`), không `pkill -f`.
+- Helper dùng chung `eval/_lib/vite_dev.cjs` (mẫu: `eval/T-054/lib.cjs` đã làm đúng cho build + máy chủ tĩnh): `startViteDev({repo, files})` trả Promise của `{port, url, stop()}`; `files` = object `{tên-file-tương-đối-trong-repo: nội-dung-chuỗi}` (helper ghi vào repo, `stop()` xoá); `stop()` có thể trả Promise, gọi lặp lại không lỗi; hết hạn/nonce sai thì Promise reject bằng `Error` (đã dọn sạch).
+  - Chạy `<repo>/node_modules/.bin/vite --port <N> --strictPort --host 127.0.0.1` trực tiếp (không qua npx) với `cwd = repo`, `detached: true`, và **truyền `process.env` của tiến trình cha xuống vite con** (không đặt `env:` thiếu `process.env`: eval nhận diện tiến trình do chính nó tạo bằng biến `T053_RUN` trong môi trường); `stop()` và handler `exit/SIGINT/SIGTERM/SIGHUP` kill cả nhóm (`process.kill(-pid, 'SIGKILL')`), không `pkill -f`.
   - Cổng: mở `listen(0)` lấy cổng trống, đóng, đưa cho vite với `--strictPort`; vite thoát hoặc nonce sai thì thử lại cổng khác tối đa 3 lần, rồi FAIL rõ ràng.
   - Sẵn sàng = `GET /__nonce-<random>.txt` (harness ghi file đó trong thư mục repo cùng file thử) trả đúng chuỗi random, VÀ tiến trình vite con còn sống. 200 từ nơi khác không tính.
-  - Hạn tổng khi chờ (vd 60s), hết hạn thì FAIL kèm lý do, vẫn dọn sạch.
+  - Hạn tổng khi chờ (vd 60s), hết hạn thì FAIL kèm lý do, vẫn dọn sạch. `stop()` và handler `exit/SIGINT/SIGTERM/SIGHUP` cũng xoá file nonce và mọi file trong `files` (cả khi lỗi).
 - Sửa `eval/T-051/check_9_*.cjs`, `check_10_*.cjs`, `eval/T-066/check_ui.cjs`, `eval/T-068/_advlib.cjs` và hai lib bất biến `vendor_img_inv.cjs`, `small_tile_tooltip.cjs` dùng helper (ADR-024); thay `waitForTimeout` bằng `waitForFunction`/điều kiện. Không đổi bất kỳ ngưỡng, chuỗi kiểm hay dữ liệu thử nào; riêng hai bất biến chỉ đổi phần dựng vite/cổng/thăm dò/kill, không đổi `inv-00x.sh` hay nội dung kiểm.
 
 ## Phạm vi: các eval khác cùng cách (đã grep `'vite'`/`npx vite`, đọc từng chỗ)
@@ -44,15 +50,16 @@ Nếu dùng một helper dựng vite dùng chung (nhóm tiến trình riêng, c�
 ## Tiêu chí chấp nhận và eval
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Khi vite lạ chiếm cả dải cổng cũ, 5 lần liên tiếp chạy C9 và C10 (10 lần): 0 FAIL giả (cả 10 PASS) | `cd /home/user/tohong-hq && python3 eval/T-053/check_1_khong_fail_gia.py` |
-| 2 | Sau mỗi lần chạy C9/C10 (xong, hoặc bị SIGTERM giữa chừng) không còn tiến trình vite do eval tạo | `cd /home/user/tohong-hq && python3 eval/T-053/check_2_khong_mo_coi.py` |
-| 3 | PASS/FAIL không đổi: PASS trên code front hiện tại (gồm T-052), vẫn FAIL trên bản front bị phá có chủ đích | `cd /home/user/tohong-hq && python3 eval/T-053/check_3_ket_qua_khong_doi.py` |
-| 4 | C9/C10 không còn `waitForTimeout`; C9, C10, T-066 `check_ui.cjs`, T-068 `_advlib.cjs` và hai lib bất biến dùng `vite_dev.cjs` (không còn `spawn npx`, không bốc cổng `Math.random`) (tiêu chí thêm từ brief và ADR-024; kiểm tĩnh vì chờ cố định chỉ đỏ khi máy chậm, không dựng ổn định được) | `cd /home/user/tohong-hq && python3 eval/T-053/check_4_cho_theo_dieu_kien.py` |
+| 1 | Khi vite lạ chiếm cả dải cổng cũ (5100-8999, gồm 7000-8999), 5 lần liên tiếp chạy C9 và C10 (10 lần): 0 FAIL giả (cả 10 PASS) | `cd /home/user/tohong-hq && python3 eval/T-053/check_1_khong_fail_gia.py` |
+| 2 | Sau mỗi lần chạy C9/C10 (xong, hoặc bị SIGTERM, SIGINT, SIGHUP giữa chừng) không còn tiến trình nào mang dấu `T053_RUN` và không còn file `__*` do eval tạo trong repo front (đo trước khi eval dọn); chỉ tiến trình mang dấu mới bị đếm/kill | `cd /home/user/tohong-hq && python3 eval/T-053/check_2_khong_mo_coi.py` |
+| 3 | PASS/FAIL không đổi: PASS trên code front hiện tại (gồm T-052), vẫn FAIL đúng lý do trên ba bản front đột biến (ảnh hỏng không ra mặc định; gọi `www.marry.vn`; ghi đè localStorage vendor đã lưu) | `cd /home/user/tohong-hq && python3 eval/T-053/check_3_ket_qua_khong_doi.py` |
+| 4 | C9/C10 không còn `waitForTimeout`; cả sáu file (C9, C10, T-066 `check_ui.cjs`, T-068 `_advlib.cjs`, hai lib bất biến) gọi `startViteDev` từ `vite_dev.cjs`, không `spawn npx`, không bốc cổng `Math.random`/dải cố định (đo sau khi bỏ comment); helper có các tính chất tĩnh nêu ở trên (tiêu chí thêm từ brief và ADR-024; kiểm tĩnh vì chờ cố định chỉ đỏ khi máy chậm, không dựng ổn định được) | `cd /home/user/tohong-hq && python3 eval/T-053/check_4_cho_theo_dieu_kien.py` |
 | 5 | Hai bất biến vendor-images (`vendor_img_inv.cjs --only 1`, `small_tile_tooltip.cjs`): PASS trên front main khi vite lạ chiếm dải cổng, vẫn FAIL trên bản front bị phá, không để lại vite (ADR-024) | `cd /home/user/tohong-hq && python3 eval/T-053/check_5_bat_bien_vendor_images.py` |
+| 6 | Nonce là kiểm thật và helper dọn sạch: với "vite lạ" trả 200 cho mọi đường dẫn, `startViteDev` reject (không báo sẵn sàng); với vite thật thì phục vụ đúng file thử, và sau `stop()`/reject không còn tiến trình mang dấu hay file `__*` | `cd /home/user/tohong-hq && python3 eval/T-053/check_6_helper_nonce.py` |
 
-Chạy cả bộ: `cd /home/user/tohong-hq && EVAL_TMPDIR=<scratchpad> bash eval/T-053/run.sh` (~12 phút). "Code T-052" = front hiện tại (main a7e5807, gồm #58); baseline ở `eval/T-053/baseline.txt`. Lưu ý: tiêu chí 3(a) thực chất là hồi quy: nếu sau này code front đổi hành vi ảnh, eval này đỏ đúng chỗ.
+Chạy cả bộ: `cd /home/user/tohong-hq && EVAL_TMPDIR=<scratchpad> bash eval/T-053/run.sh` (~11 phút). "Code T-052" = front hiện tại (main a7e5807, gồm #58); baseline ở `eval/T-053/baseline.txt`. Lưu ý: tiêu chí 3(a) thực chất là hồi quy: nếu sau này code front đổi hành vi ảnh, eval này đỏ đúng chỗ.
 
-Kết quả trên hiện trạng (trước khi sửa): 1 ĐỎ (10/10 FAIL giả), 2 ĐỎ (4/4 điểm kiểm còn vite), 3 XANH (đúng ý: nền không đổi), 4 ĐỎ (8 waitForTimeout), 5 ĐỎ (cả hai bất biến FAIL giả khi có vite lạ; không vite lạ thì cả hai PASS, đã đo). Tiêu chí 5 gọi thẳng file lib với `--repo` vì các `inv-00x.sh` in "chưa áp dụng" trên repo không có git (bản front bị phá).
+Kết quả trên hiện trạng v2 (đo 2026-11-05, đỏ đúng lý do): 1 ĐỎ (10/10 FAIL giả, `BODY=vite-la`, 158s), 2 ĐỎ (sau chạy xong còn vite mang dấu; sau SIGTERM/SIGINT còn `npm exec vite` và `__t051*` còn trong repo; 52s), 3 XANH (đúng ý: nền PASS, cả ba đột biến FAIL đúng lý do, 135s), 4 ĐỎ (cả sáu file chưa dùng helper, helper chưa có, 8 waitForTimeout), 5 ĐỎ (cả hai bất biến FAIL giả khi vite lạ chiếm dải; 284s), 6 ĐỎ (chưa có helper). Tiêu chí 6 đã kiểm chứng với hai helper tham chiếu ngoài repo: helper đúng PASS, helper nhận mọi 200 FAIL "helper đáng ra reject". Tổng ~10,5 phút, mỗi eval < 600s (check_5 cần dư địa: timeout mỗi lần chạy con 300s). Phần chưa chứng minh được trước khi có helper: nhánh xanh của check_2 (C9/C10 thật dùng helper); chỉ chạy được sau Engineering.
 
 ## Bất biến đề xuất (tầng 2)
 Có, cho Spec critic rút vào bể (vùng `_shared` hoặc `planner/front`): "mọi eval front dựng vite dev dùng helper `eval/_lib/vite_dev.cjs` (không `cp.spawn('npx', ['vite'`, không bốc cổng bằng `Math.random`)". Kiểm bằng grep trên `eval/`. Theo ADR-024, bật được ngay sau khi T-053 qua Code Gate (hai bất biến vendor-images đã được sửa nên không đỏ ở bể). Trước Code Gate nó sẽ đỏ, nên chưa viết file bất biến.
