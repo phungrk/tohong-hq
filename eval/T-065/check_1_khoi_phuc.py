@@ -94,16 +94,36 @@ try:
     finally:
         e2.stop()
 
-    # 7. không bật cờ: không hỏi Wayback, hành vi cũ
+    # 7. không bật cờ: hành vi cũ, không trường wayback; tham số thử nghiệm bị từ chối (mã 2, một dòng lỗi rõ, không traceback)
     e3 = Env(["/ok/live.png", "/gone/z.png"])
     try:
         e3.wb.snaps = {"/gone/z.png": GOOD}
-        # chỉ truyền --wayback-base để chắc Wayback giả không bị gọi nếu công cụ tự ý bật
-        p3 = e3.mirror(back, ["--retries", "0", "--wayback-base", e3.wb.base], wayback=False)
-        if e3.wb.total(): fail("không có --fallback wayback thì không được gửi yêu cầu nào tới Wayback (thấy %d)" % e3.wb.total())
+        p3 = e3.mirror(back, ["--retries", "0"], wayback=False)
+        if p3.returncode != 0: fail("không bật cờ: chạy như T-051, mã 0, thấy %s; stderr %s" % (p3.returncode, p3.stderr[-200:]))
         en = e3.man()["entries"][e3.url("/gone/z.png")]
         if en.get("status") != "failed" or en.get("reason") != "http-404" or "wayback" in en: fail("không bật cờ: failed như T-051, không có trường wayback: %s" % en)
         if "wayback" in (summary_line(p3.stdout) or ""): fail("không bật cờ thì SUMMARY không có wayback=")
+        def reject(args, what, mention):
+            os.path.exists(e3.manifest) and os.remove(e3.manifest)
+            r = run(cli(back) + ["mirror", "--pool", e3.pool, "--manifest", e3.manifest, "--out", e3.out, "--base-url", BASE_URL] + args, timeout=60)
+            if r.returncode != 2: fail("%s: phải thoát mã 2, thấy %s (stderr: %s)" % (what, r.returncode, r.stderr[-200:]))
+            err = r.stderr.strip()
+            if not err or "Traceback" in err or "    at " in err or len(err.splitlines()) > 3: fail("%s: stderr phải là một dòng lỗi rõ (<= 3 dòng, không stack trace), thấy: %r" % (what, err[-300:]))
+            if mention not in err: fail("%s: dòng lỗi phải nêu %r, thấy %r" % (what, mention, err))
+            if os.path.exists(e3.manifest): fail("%s: từ chối thì không ghi manifest" % what)
+        reject(["--wayback-base", e3.wb.base], "--wayback-base khi không có --fallback wayback", "--wayback-base")
+        reject(["--wayback-interval", "50"], "--wayback-interval khi không có --fallback wayback", "--wayback-interval")
+        reject(["--wayback-backoff", "50"], "--wayback-backoff khi không có --fallback wayback", "--wayback-backoff")
+        reject(["--fallback", "wayback", "--wayback-base", "http://wayback.invalid", "--wayback-interval", "10"], "base không phải loopback + interval < 1000", "--wayback-interval")
+        reject(["--fallback", "wayback", "--wayback-interval", "10"], "base mặc định + interval < 1000", "--wayback-interval")
+        reject(["--fallback", "wayback", "--wayback-backoff", "100"], "base mặc định + backoff < 2000", "--wayback-backoff")
+        reject(["--fallback", "khac"], "--fallback giá trị lạ", "--fallback")
+        if e3.wb.total(): fail("các lần bị từ chối không được gửi yêu cầu nào tới Wayback (thấy %d)" % e3.wb.total())
+        # base loopback thì interval/backoff thấp được nhận
+        os.path.exists(e3.manifest) and os.remove(e3.manifest)
+        r = run(cli(back) + ["mirror", "--pool", e3.pool, "--manifest", e3.manifest, "--out", e3.out, "--base-url", BASE_URL, "--retries", "0", "--fallback", "wayback",
+                             "--wayback-base", e3.wb.base, "--wayback-interval", "10", "--wayback-backoff", "10"], timeout=60)
+        if r.returncode != 0: fail("base loopback thì --wayback-interval/--wayback-backoff thấp được nhận: mã %s, %s" % (r.returncode, r.stderr[-200:]))
     finally:
         e3.stop()
 finally:

@@ -103,6 +103,106 @@ try:
 finally:
     e.stop()
 
+# H. hai lần chạy liên tiếp trên cùng manifest: nguồn chết, Wayback có một phần. Lần 1 ngắt mạch; lần 2 phải mã 0 (entry đã có trường wayback không vào mẫu dừng sớm)
+paths = ["/dead/%d" % i for i in range(60)]
+e = Env(paths)
+try:
+    e.wb.snaps = {"/dead/%d" % i: GOOD for i in range(20)}
+    e.wb.pre = lambda kind, n, path: (429, {}) if path in {"/dead/%d" % i for i in range(20, 25)} else None
+    p = e.mirror(back, ["--retries", "0", "--workers", "1"])
+    if p.returncode != 0: fail("lần 1: 20 ảnh qua Wayback trong mẫu, mã 0, thấy %s" % p.returncode)
+    ents = e.man()["entries"]
+    cb = [i for i in range(60) if ents[e.url("/dead/%d" % i)].get("wayback") == "circuit-open"]
+    if len(cb) != 35: fail("lần 1: 35 URL (25..59) bị ngắt mạch wayback=circuit-open, thấy %d" % len(cb))
+    # lần 2: Wayback hết 429, có bản lưu cho 20..39, không có cho 40..59
+    e.wb.pre = None; e.wb.reqs.clear(); e.og.hits.clear()
+    e.wb.snaps = {"/dead/%d" % i: GOOD for i in range(40)}
+    p = e.mirror(back, ["--retries", "0", "--workers", "1"])
+    if p.returncode != 0: fail("lần 2: entry failed đã được hỏi Wayback không vào mẫu dừng sớm, mẫu rỗng thì không dừng sớm: mã 0, thấy %s; stdout cuối: %s" % (p.returncode, p.stdout[-200:]))
+    s2 = need_summary(p, "H2")
+    if "stopped" in s2 or s2.get("wayback") != "20": fail("lần 2: không stopped=, wayback=20 (URL 20..39), thấy %s" % s2)
+    ents = e.man()["entries"]
+    if [i for i in range(60) if ents[e.url("/dead/%d" % i)].get("status") == "ok"] != list(range(40)): fail("lần 2: URL 0..39 là ok (circuit-open ở lần 1 được hỏi lại và thành ok)")
+    if any(ents[e.url("/dead/%d" % i)].get("wayback") != "none" for i in range(40, 60)): fail("lần 2: URL 40..59 failed với wayback=none")
+    if len([r for r in e.wb.of("avail") if r["path"] in {"/dead/%d" % i for i in range(20, 60)}]) != 40: fail("lần 2: 40 URL failed phải được hỏi lại Wayback")
+    # lần 3: giữ nguyên, vẫn mã 0
+    p = e.mirror(back, ["--retries", "0", "--workers", "1"])
+    if p.returncode != 0: fail("lần 3: vẫn mã 0, thấy %s" % p.returncode)
+finally:
+    e.stop()
+
+# I. ghi manifest theo mốc: giết tiến trình giữa chừng, manifest vẫn đọc được và có các entry ok đã xong (mỗi 100 URL xử lý xong, sau khi mẫu dừng sớm đã qua)
+import signal, json as _json
+n_fast = 130
+paths = ["/ok/live.png"] + ["/gone/%d.png" % i for i in range(1, n_fast)] + ["/gone/slow%d.png" % i for i in range(5)]
+e = Env(paths)
+try:
+    e.wb.snaps = {p_: GOOD for p_ in paths}
+    e.wb.pre = lambda kind, n, path: ("hang", 60) if path.startswith("/gone/slow") else None
+    pr = subprocess.Popen(e.cmd(back, ["--retries", "0", "--workers", "1", "--timeout", "50"]), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    t0 = time.time()
+    try:
+        while time.time() - t0 < 120 and not any(r["path"].startswith("/gone/slow") for r in e.wb.reqs): time.sleep(0.2)
+        if not any(r["path"].startswith("/gone/slow") for r in e.wb.reqs): fail("chưa tới URL chậm sau 120 giây")
+        time.sleep(0.5)
+    finally:
+        pr.kill(); pr.wait(); pr.stdout.close(); pr.stderr.close()
+    if not os.path.exists(e.manifest): fail("đã xử lý 130 URL (> 100) mà bị giết thì manifest phải có sẵn từ mốc 100")
+    try: m = _json.load(open(e.manifest, encoding="utf-8"))
+    except Exception as ex: fail("manifest sau khi bị giết phải đọc được: %s" % ex)
+    oks = [(u_, en) for u_, en in m["entries"].items() if en.get("status") == "ok"]
+    if len(oks) < 100: fail("manifest theo mốc phải có >= 100 entry ok đã xong, thấy %d" % len(oks))
+    if any(not os.path.isfile(os.path.join(e.out, en["file"])) for _, en in oks): fail("mọi entry ok trong manifest theo mốc phải có file trong --out")
+finally:
+    e.stop()
+
+# J. chưa qua mẫu dừng sớm thì không ghi manifest theo mốc: 50 URL treo đứng đầu, 120 entry ok sau đó (xử lý trong lúc chờ mẫu, done vượt 100) rồi mẫu lỗi hết -> mã 4, manifest nguyên byte
+hang = ["/hang/%d" % i for i in range(50)]
+oks_p = ["/ok/r%d.png" % i for i in range(120)]
+e = Env(hang + oks_p, hang_secs=6)
+try:
+    ents0 = {}
+    os.makedirs(os.path.join(e.out, "v"), exist_ok=True)
+    for i, p_ in enumerate(oks_p):
+        f_ = "v/marry_%04d-%s.webp" % (50 + i, ("%012x" % i)); ents0[e.url(p_)] = ok_entry(f_); open(os.path.join(e.out, f_), "wb").write(WEBP)
+    write_manifest(e.manifest, ents0)
+    man0 = e.man_bytes()
+    p = e.mirror(back, ["--timeout", "1", "--retries", "0"])
+    if p.returncode != 4: fail("mẫu 50 treo, Wayback không có: mã 4, thấy %s" % p.returncode)
+    if e.man_bytes() != man0: fail("mã 4 không đổi manifest từng byte, kể cả khi done đã vượt 100 trước lúc dừng (chưa qua mẫu thì không ghi theo mốc)")
+finally:
+    e.stop()
+
+# K. origin-skipped áp ngay trong lần chạy: URL mẫu dừng sớm bị bỏ qua nguồn gốc ra khỏi mẫu; mẫu rỗng thì không dừng sớm (mã 0, ghi manifest)
+old = ["/dead/%d" % i for i in range(60)]
+new = ["/dead/new%d" % i for i in range(5)]
+e = Env(old + new)
+try:
+    write_manifest(e.manifest, {e.url(p_): {"status": "failed", "reason": "http-404", "attempts": 1, "fail_runs": 1} for p_ in old})
+    p = e.mirror(back, ["--retries", "0"])
+    if p.returncode != 0: fail("5 URL mới đều bị bỏ qua nguồn gốc (nguồn chết) và Wayback không có: ra khỏi mẫu, mẫu rỗng, mã 0, thấy %s; stdout cuối %s" % (p.returncode, p.stdout[-200:]))
+    s = need_summary(p, "K")
+    if "stopped" in s or s["failed"] != "65": fail("không stopped=, failed=65, thấy %s" % s)
+    en = e.man()["entries"][e.url("/dead/new0")]
+    if (en.get("reason"), en.get("attempts"), en.get("wayback")) != ("origin-skipped", 0, "none"): fail("URL mới: origin-skipped attempts=0 wayback=none, thấy %s" % en)
+    # nhưng mẫu còn URL thật sự hỏi nguồn gốc mà lỗi hết thì vẫn dừng sớm: 1 URL mới nằm trong 50 đầu
+finally:
+    e.stop()
+
+# L. 522 (5xx) trong mẫu nguồn thử lại theo --retries (chỉ timeout không thử lại): nguồn gốc nhận <= 50 x (1 + retries) yêu cầu, không URL nào từ thứ 51
+paths = ["/dead/%d" % i for i in range(70)]
+e = Env(paths)
+try:
+    e.wb.snaps = {p_: GOOD for p_ in paths}
+    p = e.mirror(back, ["--retries", "2"])
+    if p.returncode != 0: fail("mã 0, thấy %s" % p.returncode)
+    hits = e.og.paths_hit()
+    if len(hits) > 150: fail("nguồn gốc nhận tối đa 50 x (1 + retries) = 150 yêu cầu, thấy %d" % len(hits))
+    if any(int(x.split("/")[-1]) >= 50 for x in hits): fail("URL thứ 51+ không được gọi nguồn gốc")
+    if any(e.og.count("/dead/%d" % i) != 3 for i in range(50)): fail("522 thuộc 5xx: mỗi URL mẫu nguồn nhận 1 + 2 yêu cầu")
+finally:
+    e.stop()
+
 # G. bất biến inv-001..005 của vùng xanh (chạy đúng tệp trong bể)
 inv = os.path.join(HQ, "eval", "invariants", "planner", "vendor", "images")
 files = sorted(f for f in os.listdir(inv) if f[:4] == "inv-" and f.endswith(".py") and f[4:7] in ("001", "002", "003", "004", "005"))

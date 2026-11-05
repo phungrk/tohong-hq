@@ -99,7 +99,7 @@ class OriginFake:
 class WaybackFake:
     """snaps: {đường dẫn gốc (vd '/dead/3'): spec}. spec: bytes ảnh | ('img', bytes, ts) | ('html', ts) | ('closest', status, ts) = availability báo status khác 200
     | ('nojson',) availability trả HTML | ('raw404', ts) có bản lưu nhưng tải raw trả 404 | ('big',) ảnh 2000x1000.
-    pre(kind, n, path) -> None hoặc (mã, {header}) để ép lỗi; kind 'avail' | 'raw'; n = số thứ tự yêu cầu (từ 1)."""
+    pre(kind, n, path) -> None hoặc (mã, {header}) để ép lỗi, hoặc ('hang', giây) để treo rồi trả; kind 'avail' | 'raw'; n = số thứ tự yêu cầu (từ 1)."""
 
     def __init__(self):
         self.reqs = []; self.snaps = {}; self.pre = None; self.lock = threading.Lock(); self.cur = 0; self.max_cur = 0; self.n = 0
@@ -119,6 +119,7 @@ class WaybackFake:
                         path = urllib.parse.urlsplit(orig).path
                         outer._rec("avail", orig, path, n, self.headers.get("User-Agent", ""), raw)
                         forced = outer.pre and outer.pre("avail", n, path)
+                        if forced and forced[0] == "hang": time.sleep(forced[1]); return self._send(200, b'{"archived_snapshots":{}}', "application/json")
                         if forced: return self._send(forced[0], b"slow down", "text/plain", forced[1])
                         sp = outer.snaps.get(path)
                         if sp is None or (isinstance(sp, tuple) and sp[0] == "none"):
@@ -133,6 +134,7 @@ class WaybackFake:
                         orig = m.group(2); path = urllib.parse.urlsplit(orig).path
                         outer._rec("raw", orig, path, n, self.headers.get("User-Agent", ""), raw, ts=m.group(1))
                         forced = outer.pre and outer.pre("raw", n, path)
+                        if forced and forced[0] == "hang": time.sleep(forced[1]); return self._send(404, b"x", "text/plain")
                         if forced: return self._send(forced[0], b"slow down", "text/plain", forced[1])
                         sp = outer.snaps.get(path)
                         if sp is None or (isinstance(sp, tuple) and sp[0] in ("raw404", "none", "nojson", "closest")):

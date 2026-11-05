@@ -14,8 +14,10 @@ try:
     e.wb.snaps = {"/gone/d-nojson.png": ("nojson",), "/gone/e-raw404.png": ("raw404", TS)}
     pool0 = e.pool_bytes()
     p = e.mirror(back, ["--retries", "1"])
+    if e.og.count("/dead/b.png") != 2: fail("522 thử lại theo --retries 1: nguồn gốc nhận 2 yêu cầu, thấy %d" % e.og.count("/dead/b.png"))
     if p.returncode != 0: fail("có ảnh lỗi (không cứu được) vẫn thoát 0, thấy %s; stderr %s" % (p.returncode, p.stderr[-200:]))
     ents = e.man()["entries"]
+    # /dead/b.png (522, 5xx) thuộc mẫu: vẫn thử lại theo --retries (chỉ timeout không thử lại): attempts = 1 + retries = 2
     exp = {"/gone/a.png": ("http-404", 1, "none"), "/dead/b.png": ("http-522", 2, "none"), "/html/c.png": ("not-image", 1, "none"),
            "/gone/d-nojson.png": ("http-404", 1, "none"), "/gone/e-raw404.png": ("http-404", 1, "http-404")}
     for path, (why, att, wb) in exp.items():
