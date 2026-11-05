@@ -6,6 +6,6 @@ Cách kiểm chung: trong nhánh của việc, mở thẻ mã nguồn dựng min
 
 - [ ] Hạng mục `reserve` (có ở Ngân sách, không có vendor) cho ra một minh hoạ svg, không ô trống, không lỗi console?
 - [ ] Hạng mục `mc`, chuỗi rỗng, `undefined`, `null` đều cho ra cùng một minh hoạ chung đó?
-- [ ] Minh hoạ chung khác cả 10 minh hoạ hạng mục (so `outerHTML` svg)?
+- [ ] Minh hoạ chung khác cả 10 minh hoạ hạng mục khi nhìn (render 96px cạnh contact sheet, không so markup)?
 - [ ] Tên truy cập của minh hoạ chung đúng bằng "Ảnh minh hoạ" (không kèm tên hạng mục)?
 - [ ] Minh hoạ chung nhẹ <= 4096 byte, chỉ dùng token màu, không tham chiếu mạng (cùng ràng buộc tiêu chí 3)?
