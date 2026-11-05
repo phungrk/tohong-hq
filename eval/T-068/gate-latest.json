@@ -1,6 +1,6 @@
 {
   "task": "T-068",
-  "at": "2026-11-05T11:15",
+  "at": "2026-11-05T11:34",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-066/run.sh /home/user/tohong-front --only 1",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 66688,
+      "ms": 65108,
       "out": "C1 PASS ảnh hỏng/thiếu ra minh hoạ đúng hạng mục ở 6 bề mặt\nPASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-066/run.sh /home/user/tohong-front --only 2",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 65452,
+      "ms": 65250,
       "out": "C2 PASS nhãn \"Ảnh minh hoạ\" (chữ trên ảnh >= 80px; tên truy cập + title ở mọi ô)\nPASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-066/run.sh /home/user/tohong-front --only 3",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 64904,
+      "ms": 66384,
       "out": "C3 PASS minh hoạ svg nội bộ, token màu, nhẹ, sáng/tối, riêng từng hạng mục, không mạng ngoài\nPASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-066/run.sh /home/user/tohong-front --only 4",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 65056,
+      "ms": 66153,
       "out": "C4 PASS ảnh tốt vẫn là ảnh thật; đang kiểm ảnh giữ cách hiện cũ\nPASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-066/run.sh /home/user/tohong-front --only 5",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 65837,
+      "ms": 65295,
       "out": "C5 PASS khung 390 không cuộn ngang\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-066/run.sh /home/user/tohong-front --only 7",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 476581,
+      "ms": 472788,
       "out": "uon-nen\n  ok layout/inv-010-thanh-tab-tron-trong-vung-nhin-thay\n  ok layout/inv-011-mep-tren-khong-nen-sam-khi-khong-lop\n  ok navigation/inv-001-thu-tu-back-mot-buoc\n  ok navigation/inv-002-back-dong-lop-tren-truoc\n  ok navigation/inv-003-khong-bay-goc\n  ok navigation/inv-004-hash-dung-man\n  ok navigation/inv-005-manifest-cai-duoc\n  ok navigation/inv-006-goi-y-cai-ton-trong-lua-chon\n  ok navigation/inv-007-khoi-phuc-vi-tri-cuon\n  ok budget/inv-001-mot-con-so-cho-khoan-vendor\n  ok budget/inv-002-khong-doan-so-khi-thieu-dau-vao\n  ok budget/inv-003-mo-man-khong-dung-du-lieu-chung\n  ok budget/inv-004-lop-cach-hoat-dong-la-hop-thoai\nPASS\n  ok loading/inv-001-trang-thai-cho-khong-noi-doi\n  ok loading/inv-002-vung-cho-co-nhan-khong-focus\n  ok loading/inv-003-vung-cho-ton-trong-reduced-motion\nPASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-066/check_pr.py /home/user/tohong-front",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 750,
+      "ms": 812,
       "out": "PASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 51,
+      "ms": 48,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 234,
+      "ms": 256,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/planner/front/vendor-images/inv-001-anh-khong-dung-duoc-co-minh-hoa-dung-hang-muc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 66386,
+      "ms": 65724,
       "out": "C1 PASS ảnh hỏng/thiếu ra minh hoạ đúng hạng mục ở 6 bề mặt\nPASS",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/planner/front/vendor-images/inv-002-minh-hoa-noi-bo-token-moi-hang-muc-mot-hinh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 64859,
+      "ms": 64462,
       "out": "C3 PASS minh hoạ svg nội bộ, token màu, nhẹ, sáng/tối, riêng từng hạng mục, không mạng ngoài\nPASS",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/planner/front/vendor-images/inv-003-anh-tot-va-dang-kiem-khong-minh-hoa.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 65610,
+      "ms": 65219,
       "out": "C4 PASS ảnh tốt vẫn là ảnh thật; đang kiểm ảnh giữ cách hiện cũ\nPASS",
       "tier": 2
     }
