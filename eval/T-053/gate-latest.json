@@ -1,0 +1,101 @@
+{
+  "task": "T-053",
+  "at": "2026-11-05T22:25",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/vendor/images",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 3512,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 152,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 22,
+      "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 32,
+      "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 684,
+      "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1845,
+      "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 6302,
+      "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-006-wayback-chi-khi-bat-co-va-cham.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 7176,
+      "out": "PASS Wayback chỉ khi bật cờ; 4 yêu cầu, giãn cách nhỏ nhất 2.00 giây, tối đa 1 cùng lúc",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-007-khong-goi-wayback-available.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 672,
+      "out": "PASS 6 yêu cầu tới Wayback, không có /wayback/available",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-008-san-toc-do-wayback.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 559,
+      "out": "PASS 6 cách hạ tốc độ / dùng --wayback-* sai đều bị từ chối mã 2, không yêu cầu, không ghi manifest",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-009-wayback-429-khong-go-cua-mai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 16293,
+      "out": "PASS 429 mọi yêu cầu: 20 yêu cầu tổng, tối đa 4 liên tiếp cùng đường dẫn, lần gửi lại sớm nhất sau 1.00 giây, 1 cùng lúc",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}

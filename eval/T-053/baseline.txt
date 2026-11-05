@@ -1,0 +1,4 @@
+Đo 2026-11-05 trên /home/user/tohong-front (nhánh main, a7e5807, gồm code T-052 front #58 và T-066/T-068), không có vite lạ:
+C9  PASS ảnh lỗi -> ảnh mặc định ở thẻ danh sách và gallery chi tiết; ảnh hỏng bị bỏ khỏi gallery   (28s)
+C10 PASS vendor đã lưu: ảnh theo pool hiện tại, không gọi marry.vn, localStorage nguyên vẹn, ảnh hỏng ra mặc định ở danh sách đã lưu và Ngân sách   (28s)
+Sau hai lần chạy còn 2 tiến trình vite mồ côi (cổng 5543, 5704) - đã kill theo pid.
