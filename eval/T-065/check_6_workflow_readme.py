@@ -24,7 +24,11 @@ if set(on) - {"workflow_dispatch"}: fail("workflow vẫn chỉ chạy tay")
 if re.search(r"--wayback-(interval|backoff|base)", text): fail("workflow không được truyền --wayback-interval/--wayback-backoff/--wayback-base (giữ tốc độ mặc định)")
 job = wf["jobs"]["mirror"]
 tm = job.get("timeout-minutes")
-if not (isinstance(tm, int) and tm >= 180): fail("timeout-minutes của job phải >= 180 (Wayback 1 yêu cầu/giây x 2 yêu cầu x 2.467 ảnh ~ 82 phút), thấy %r" % (tm,))
+if tm != 360: fail("timeout-minutes của job phải đúng 360 (tối đa của GitHub; Wayback chậm hơn 82 phút ước tính nếu mỗi yêu cầu > 1 giây), thấy %r" % (tm,))
+lines = text.splitlines()
+li = next(i for i, l in enumerate(lines) if re.search(r"timeout-minutes:\s*360", l))
+near = " ".join(lines[max(0, li - 4):li + 1])
+if "#" not in near or not re.search(r"wayback", near, re.I): fail("phải ghi lý do của timeout-minutes: 360 bằng một dòng chú thích (#) nhắc Wayback ngay phía trên hoặc cùng dòng")
 if "secrets." in text.replace("secrets.CLOUDFLARE_API_TOKEN", "").replace("secrets.CLOUDFLARE_ACCOUNT_ID", ""): fail("Wayback không cần secret nào mới")
 steps = job["steps"]
 mstep = next((s for s in steps if "tee mirror.log" in s.get("run", "")), None)
@@ -79,8 +83,8 @@ need = [(r"--fallback wayback", "lệnh --fallback wayback"), (r"1 yêu cầu/gi
         (r"429", "xử lý 429"), (r"503", "xử lý 503"), (r"source", "trường source trong manifest"), (r"snapshot", "trường snapshot"),
         (r"wayback=", "wayback= trong SUMMARY"), (r"origin-skipped", "origin-skipped"), (r"mã 4|dừng sớm", "tương tác với dừng sớm"),
         (r"availability", "API availability"), (r"id_", "URL raw hậu tố id_"), (r"ô .?wayback|input .?wayback|wayback.{0,20}(ô|tick|bật)", "ô bật Wayback trong workflow"),
-        (r"bản quyền|ADR-021", "nhắc ADR-021 / bản quyền không đổi"), (r"403", "phiên cloud bị chặn archive.org (403), chạy trên Actions hoặc máy Capu")]
+        (r"mốc|theo mốc|checkpoint", "ghi manifest theo mốc (mỗi 100 ảnh)"), (r"bản quyền|ADR-021", "nhắc ADR-021 / bản quyền không đổi"), (r"403", "phiên cloud bị chặn archive.org (403), chạy trên Actions hoặc máy Capu")]
 for rx, what in need:
     if not re.search(rx, sec, re.I): fail("mục Wayback của README thiếu: " + what)
 if not re.search(r"(?m)^## Đường dự phòng", rd) or "## Theo dõi tiến độ và dừng sớm" not in rd: fail("README mất mục cũ")
-ok("workflow có ô wayback (mặc định tắt) truyền --fallback wayback, timeout >= 180, Summary 'Wayback: n'; README có mục Wayback đủ nội dung")
+ok("workflow có ô wayback (mặc định tắt) truyền --fallback wayback, timeout 360, Summary 'Wayback: n'; README có mục Wayback đủ nội dung")

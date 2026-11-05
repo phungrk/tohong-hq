@@ -87,4 +87,17 @@ try:
     if okc != [4, 9, 11]: fail("URL 4, 9, 11 có bản lưu, các URL khác 429: chỉ 4, 9, 11 thành ok (ngắt mạch chỉ khi 5 URL LIÊN TIẾP hết lần thử), thấy %s" % okc)
 finally:
     e.stop()
+# F. ngắt mạch đếm cả timeout / lỗi mạng tới archive.org (không chỉ 429/503): Wayback treo 5 URL liên tiếp thì URL thứ 6 trở đi không có yêu cầu nào
+paths = ["/ok/live.png"] + ["/gone/%d.png" % i for i in range(8)]
+e = Env(paths)
+try:
+    e.wb.snaps = {"/gone/%d.png" % i: GOOD for i in range(8)}
+    e.wb.pre = lambda kind, n, path: ("hang", 3)
+    p = e.mirror(back, ["--retries", "0", "--workers", "1", "--timeout", "1"])
+    if p.returncode != 0: fail("mã 0, thấy %s" % p.returncode)
+    if e.wb.total() != 5: fail("5 URL liên tiếp timeout tới archive.org thì ngắt mạch: đúng 5 yêu cầu (mỗi URL 1, timeout không thử lại), thấy %d" % e.wb.total())
+    got = [e.man()["entries"][e.url("/gone/%d.png" % i)].get("wayback") for i in range(8)]
+    if got != ["timeout"] * 5 + ["circuit-open"] * 3: fail("5 URL wayback=timeout rồi 3 URL wayback=circuit-open, thấy %s" % got)
+finally:
+    e.stop()
 ok("tốc độ <= 1 yêu cầu/giây, 1 yêu cầu một lúc, UA tự nhận, lùi theo Retry-After / gấp đôi, tối đa 3 lần thử lại, ngắt mạch sau 5 URL liên tiếp")
