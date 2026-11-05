@@ -1,6 +1,6 @@
 {
   "task": "T-065",
-  "at": "2026-11-05T09:11",
+  "at": "2026-11-05T09:26",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_1_khoi_phuc.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 9047,
+      "ms": 8996,
       "out": "FAIL có ảnh thành công thì mirror phải thoát 0, thấy 2; stderr: Tham số lạ: --fallback",
       "tier": 1
     },
@@ -20,15 +20,15 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_2_khong_ban_luu.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 9429,
-      "out": "FAIL có ảnh lỗi (không cứu được) vẫn thoát 0, thấy 2; stderr Tham số lạ: --fallback",
+      "ms": 9069,
+      "out": "FAIL 522 thử lại theo --retries 1: nguồn gốc nhận 2 yêu cầu, thấy 0",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_3_toc_do.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 9538,
+      "ms": 9728,
       "out": "FAIL mã thoát 2; stderr Tham số lạ: --fallback",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_4_manifest.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 9182,
+      "ms": 8983,
       "out": "FAIL entry ok thiếu file, khôi phục lỗi, nguồn gốc lỗi: MISSING, mã 3 như T-051 (Wayback không dùng để khôi phục entry ok), thấy 2; stderr Tham số lạ: --fallback",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_5_dung_som_bat_bien.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 9931,
+      "ms": 9550,
       "out": "FAIL nguồn gốc chết nhưng Wayback có ảnh: phải chạy tiếp và thoát 0, thấy 2; stdout cuối:",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_6_workflow_readme.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 9589,
+      "ms": 8803,
       "out": "FAIL workflow thiếu ô nhập 'wayback'",
       "tier": 1
     },
@@ -60,8 +60,8 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_7_npm_test.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 12599,
-      "out": "FAIL npm test xanh nhưng chỉ có 0 ca kiểm thử nêu 'wayback' trong tên (cần >= 3, dùng server HTTP cục bộ, không gọi archive.org)",
+      "ms": 12891,
+      "out": "FAIL npm test đỏ (mã 1): # Subtest: callMatcher: malformed JSON body still returns shape on ok\nok 120 - callMatcher: malformed JSON body still returns shape on ok\n  ---\n  duration_ms: 0.465078\n  type: 'test'\n  ...\n1..120\n# tests 120\n# suites 0\n# pass 119\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 3956.268682",
       "tier": 1
     },
     {
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 202,
+      "ms": 204,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 52,
+      "ms": 31,
       "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 45,
+      "ms": 49,
       "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 995,
+      "ms": 866,
       "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1976,
+      "ms": 1980,
       "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 6481,
+      "ms": 6470,
       "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
       "tier": 2
     }
