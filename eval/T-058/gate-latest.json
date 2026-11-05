@@ -1,0 +1,125 @@
+{
+  "task": "T-058",
+  "at": "2026-11-05T06:23",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/vendor/images",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_1_tien_do.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 10149,
+      "out": "FAIL done phải lần lượt 100, 200, 250, thấy []",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_2_dung_som_timeout.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 47993,
+      "out": "FAIL phải thoát mã 4, thấy 0; stderr:",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_3_dung_som_403.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 8579,
+      "out": "FAIL phải thoát mã 4, thấy 0; stderr:",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_4_chay_tiep.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 49304,
+      "out": "FAIL 49 entry timeout phải có attempts=1: [{'status': 'failed', 'reason': 'timeout', 'attempts': 3}, {'status': 'failed', 'reason': 'timeout', 'attempts': 3}]",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_5_duoi_50.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 9137,
+      "out": "FAIL phải thoát mã 4, thấy 0; stderr:",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_6_entry_ok_cu.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 9653,
+      "out": "FAIL phải thoát mã 4, thấy 0; stderr:",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_7_workflow.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 9661,
+      "out": "FAIL mã 4 thiếu thông báo 'nguồn chặn hoặc treo, xem README đường dự phòng'",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-058/check_8_readme.py --back /home/user/tohong-back",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 8517,
+      "out": "FAIL README thiếu mục '## … tiến độ …'",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && cd /home/user/tohong-back && npm test",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 3926,
+      "out": "  duration_ms: 0.371464\n  type: 'test'\n  ...\n# Subtest: callMatcher: 500 → service_error with status\nok 116 - callMatcher: 500 → service_error with status\n  ---\n  duration_ms: 0.31719\n  type: 'test'\n  ...\n# Subtest: callMatcher: AbortError → timeout\nok 117 - callMatcher: AbortError → timeout\n  ---\n  duration_ms: 0.391377\n  type: 'test'\n  ...\n# Subtest: callMatcher: generic throw → network_error\nok 118 - callMatcher: generic throw → network_error\n  ---\n  duration_ms: 0.351739\n  type: 'test'\n  ...\n# Subtest: callMatcher: malformed JSON body still returns shape on ok\nok 119 - callMatcher: malformed JSON body still returns shape on ok\n  ---\n  duration_ms: 0.309463\n  type: 'test'\n  ...\n1..119\n# tests 119\n# suites 0\n# pass 119\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 3632.189588",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 3227,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 184,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 30,
+      "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 61,
+      "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 772,
+      "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
