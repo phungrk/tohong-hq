@@ -54,10 +54,10 @@ Nếu `mirror` biết lấy ảnh từ Wayback khi nguồn gốc lỗi thì ph�
 24. `timeout-minutes` của job **đúng 360** (tối đa của GitHub), kèm một dòng chú thích (`#`) ngay trên hoặc cùng dòng, nhắc Wayback, ghi lý do: 2 yêu cầu × 2.467 ảnh ở 1 yêu cầu/giây là ≥ 82 phút và dài hơn nếu archive.org trả lời chậm. Bước Summary: nếu dòng `SUMMARY` có `wayback=<n>` thì ghi thêm một dòng bắt đầu bằng `Wayback: <n>` (vd `Wayback: 412 ảnh khôi phục từ bản lưu Internet Archive`) vào trang tóm tắt; không có `wayback=` thì không có dòng này. Dòng `Dừng sớm: reason=…` và các thứ cũ giữ nguyên.
 
 ### G. README
-25. `scripts/vendor-images/README.md` có một mục tiêu đề (`## …`) chứa "Wayback", nêu: khi nào dùng; bật bằng ô `wayback` của workflow hoặc `--fallback wayback`; thứ tự (nguồn gốc rồi Wayback, bỏ qua nguồn gốc sau 50 URL đầu khi nó chết, `origin-skipped`); API availability và URL raw `id_`, chỉ nhận bản lưu mã 200; giới hạn 1 yêu cầu/giây, xử lý 429 và 503, ngắt mạch; trường `source`/`snapshot` trong manifest và `wayback=n` trong SUMMARY; tương tác với dừng sớm mã 4; phiên cloud bị chặn archive.org (403) nên chạy trên Actions hoặc máy Capu; ADR-021 và bản quyền không đổi. Các mục cũ ("Đường dự phòng", "Theo dõi tiến độ và dừng sớm") giữ nguyên.
+25. `scripts/vendor-images/README.md` có một mục tiêu đề (`## …`) chứa "Wayback", nêu: khi nào dùng; bật bằng ô `wayback` của workflow hoặc `--fallback wayback`; thứ tự (nguồn gốc rồi Wayback, bỏ qua nguồn gốc sau 50 URL đầu khi nó chết, `origin-skipped`); API availability và URL raw `id_`, chỉ nhận bản lưu mã 200; giới hạn 1 yêu cầu/giây, xử lý 429 và 503, ngắt mạch; trường `source`/`snapshot` trong manifest và `wayback=n` trong SUMMARY; tương tác với dừng sớm mã 4 (entry đã hỏi Wayback không vào mẫu, nên chạy lại ra mã 0); ghi manifest theo mốc mỗi 100 ảnh; phiên cloud bị chặn archive.org (403) nên chạy trên Actions hoặc máy Capu; ADR-021 và bản quyền không đổi. Các mục cũ ("Đường dự phòng", "Theo dõi tiến độ và dừng sớm") giữ nguyên.
 
 ## Giao diện dòng lệnh (hợp đồng với eval)
-Như T-051/T-058, thêm cho `mirror`: `[--fallback wayback] [--wayback-base <url>] [--wayback-interval <ms>] [--wayback-backoff <ms>]`. Eval chạy `node scripts/vendor-images/vendor-images.mjs mirror …` với nguồn gốc giả (`/ok/`, `/dead/` 522, `/forbid/` 403, `/gone/` 404, `/html/` 200 HTML, `/hang/` treo, `/huge/` khai 31MB) và Wayback giả (`/wayback/available`, `/web/<14 số>id_/…`; có bản lưu, không có, `closest` mã 404, API trả HTML, raw trả HTML, raw 404, 429/503 kèm hoặc không `Retry-After`) ở `eval/T-065/lib/t065.py`. Eval không bao giờ gọi archive.org thật.
+Như T-051/T-058, thêm cho `mirror`: `[--fallback wayback] [--wayback-base <url>] [--wayback-interval <ms>] [--wayback-backoff <ms>]`. Eval chạy `node scripts/vendor-images/vendor-images.mjs mirror …` với nguồn gốc giả (`/ok/`, `/dead/` 522, `/forbid/` 403, `/gone/` 404, `/html/` 200 HTML, `/hang/` treo, `/huge/` khai 31MB) và Wayback giả (`/wayback/available`, `/web/<14 số>id_/…`; có bản lưu, không có, `closest` mã 404, API trả HTML, raw trả HTML, raw 404, 429/503 kèm hoặc không `Retry-After`, treo) ở `eval/T-065/lib/t065.py`. Eval không bao giờ gọi archive.org thật.
 
 ## Ràng buộc (vòi)
 - Repo: `phungrk/tohong-back` · Nhánh: `t-065-wayback` · Vùng (`area`): `planner/vendor/images`.
@@ -72,16 +72,16 @@ Mọi lệnh offline. Không có `--back` thì eval tự tìm `tohong-back` (bi�
 
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | URL gốc lỗi (404, 522, 403, HTML, treo) mà Wayback có bản lưu 200 → tải bằng availability + raw `id_`, chuyển WebP ≤ 800px, entry `ok` kèm `source`/`snapshot`, tên file theo URL gốc; bản lưu mã khác 200, raw lỗi, raw là HTML không được nhận; nguồn gốc ok hoặc `too-large` không hỏi Wayback; không cờ thì không hỏi (mục 1-6, 11, 13) | `cd /home/user/tohong-hq && python3 -I eval/T-065/check_1_khoi_phuc.py` |
+| 1 | URL gốc lỗi (404, 522, 403, HTML, treo) mà Wayback có bản lưu 200 → tải bằng availability + raw `id_`, chuyển WebP ≤ 800px, entry `ok` kèm `source`/`snapshot`, tên file theo URL gốc; bản lưu mã khác 200, raw lỗi, raw là HTML không được nhận; nguồn gốc ok hoặc `too-large` không hỏi Wayback; không cờ thì không hỏi; tham số thử nghiệm bị từ chối mã 2 đúng ba trường hợp (mục 1-6, 10, 11, 13) | `cd /home/user/tohong-hq && python3 -I eval/T-065/check_1_khoi_phuc.py` |
 | 2 | Không có bản lưu → giữ `failed` như cũ (reason, attempts của nguồn gốc), mã 0, thử lại lần sau; cả mẫu 50 lỗi dù đã hỏi Wayback thì dừng sớm mã 4 (mục 6, 15-18) | `cd /home/user/tohong-hq && python3 -I eval/T-065/check_2_khong_ban_luu.py` |
-| 3 | Giới hạn tốc độ: ≤ 1 yêu cầu/giây, một URL một lúc, User-Agent tự nhận, 429/503 lùi (Retry-After; gấp đôi), ≤ 3 lần thử lại, ngắt mạch sau 5 URL liên tiếp (mục 7-10) | `cd /home/user/tohong-hq && python3 -I eval/T-065/check_3_toc_do.py` |
+| 3 | Giới hạn tốc độ: ≤ 1 yêu cầu/giây, một URL một lúc, User-Agent tự nhận, 429/503 lùi (Retry-After; gấp đôi), ≤ 3 lần thử lại, ngắt mạch sau 5 URL liên tiếp, đếm cả 429/503 và timeout (mục 7-9) | `cd /home/user/tohong-hq && python3 -I eval/T-065/check_3_toc_do.py` |
 | 4 | Manifest: trường `source`/`snapshot`, tên file theo URL gốc và id nhỏ nhất, entry `ok` cũ không đổi và không hỏi Wayback (thiếu file → `MISSING`, mã 3), chạy lại không tải gì, `rewrite` dùng được (mục 11-17) | `cd /home/user/tohong-hq && python3 -I eval/T-065/check_4_manifest.py` |
-| 5 | Nguồn gốc chết mà Wayback có ảnh → chạy tiếp, mã 0, không dừng sớm, nguồn gốc chỉ nhận 50 yêu cầu; Wayback cũng không có → mã 4; nguồn còn sống hoặc lỗi 404 thì không bỏ qua nguồn gốc; inv-001..005 xanh (mục 18-22) | `cd /home/user/tohong-hq && python3 -I eval/T-065/check_5_dung_som_bat_bien.py` |
+| 5 | Nguồn gốc chết mà Wayback có ảnh → chạy tiếp, mã 0, không dừng sớm, nguồn gốc chỉ nhận 50 yêu cầu; Wayback cũng không có → mã 4; nguồn còn sống hoặc lỗi 404 thì không bỏ qua nguồn gốc; 522 thử lại theo `--retries`; chạy hai-ba lần liên tiếp trên cùng manifest (ngắt mạch rồi hỏi lại) vẫn mã 0; `origin-skipped` làm mẫu rỗng thì mã 0; ghi manifest theo mốc (bị giết vẫn đọc được, mã 4 không đổi manifest); inv-001..005 xanh (mục 15, 17-22a) | `cd /home/user/tohong-hq && python3 -I eval/T-065/check_5_dung_som_bat_bien.py` |
 | 6 | Workflow có ô `wayback` (mặc định tắt) truyền `--fallback wayback`, `timeout-minutes` đúng 360 kèm lý do, Summary có `Wayback: n`; README có mục Wayback đủ nội dung (mục 23-25) | `cd /home/user/tohong-hq && python3 -I eval/T-065/check_6_workflow_readme.py` |
 | 7 | `npm test` xanh và có ≥ 3 ca "wayback" | `cd /home/user/tohong-hq && python3 -I eval/T-065/check_7_npm_test.py` |
 
 Ánh xạ tiêu chí board (T-065): (1) → 1, 4; (2) → 2; (3) → 3; (4) → 5 (và inv-001..005 trong bể, tầng 2); (5) → 6; (6) → 7.
-Chạy lần lượt cần khoảng 6-8 phút (check_5 và check_3 chờ timeout/giãn cách thật). Đã kiểm khả thi: cài đặt tham chiếu nháp ngoài repo (bản sao `tohong-back` ở thư mục tạm, không commit) làm cả 7 eval xanh; trên `tohong-back` origin/main 7569b74 cả 7 đỏ (công cụ không biết `--fallback`; chưa có ô workflow, mục README, ca test).
+Chạy lần lượt cần khoảng 8-12 phút (check_5 và check_3 chờ timeout/giãn cách thật). Đã kiểm khả thi (bản v2): cài đặt tham chiếu nháp ngoài repo (bản sao `tohong-back` ở thư mục tạm, không commit) làm cả 7 eval xanh; trên `tohong-back` origin/main 7569b74 cả 7 đỏ (công cụ không biết `--fallback`; chưa có ô workflow, mục README, ca test).
 
 ## Bất biến đề xuất (tầng 2), vùng `planner/vendor/images`
 - INV-F: `mirror` không gửi yêu cầu nào tới Wayback khi không có `--fallback wayback`; khi có cờ, hai yêu cầu tới archive.org cách nhau ≥ 0,9 giây và không có hai yêu cầu cùng lúc (mục 1, 7). Bản chạy được, tự đứng một mình, chạy không tham số dưới `python3 -I`: `eval/T-065/inv-proposed-wayback-chi-khi-bat-co.py` (PASS "chưa áp dụng" trên main hiện tại). Spec Gate rút vào bể khi spec qua.
@@ -93,6 +93,14 @@ Chạy lần lượt cần khoảng 6-8 phút (check_5 và check_3 chờ timeout
 - Lách chặn của archive.org (đổi User-Agent giả, proxy, nhiều IP), tăng tốc vượt 1 yêu cầu/giây, tham số tốc độ trong workflow.
 - Liên hệ vendor hay Internet Archive, xin phép bản quyền (việc sau, ADR-021), thay ảnh vendor, ảnh nguồn khác ngoài `photos` trong pool.
 - Đổi front, pool schema, deploy, ngưỡng 50 hay nhịp 100.
+
+## Lịch sử sửa (spec rework, defect T-065-D1)
+- v2, mục 18 và 17: entry `failed` đã có trường `wayback` ra khỏi mẫu dừng sớm khi có cờ; vì v1 hứa "thử lại lần sau" nhưng lần chạy thứ hai luôn ra mã 4 (mẫu = đúng những URL Wayback không có). Eval: `check_5` ca H (ba lần chạy liên tiếp).
+- v2, mục 22a, 24, 7: manifest ghi theo mốc 100 sau khi mẫu qua, `timeout-minutes` đúng 360 kèm lý do; v1 "≥ 180" cho phép giá trị làm mất cả lần chạy khi Wayback chậm. Eval: `check_5` ca I, J; `check_6`.
+- v2, mục 9: ngắt mạch đếm cả timeout và lỗi mạng tới archive.org. Eval: `check_3` ca F.
+- v2, mục 15: `origin-skipped` áp ngay trong lần chạy (ra khỏi mẫu, mẫu rỗng thì mã 0). Eval: `check_5` ca K.
+- v2, mục 21, 18: nguồn gốc nhận tối đa 50 × (1 + retries) yêu cầu (522 thử lại, chỉ timeout không); bỏ ước lượng "5,5 phút". Eval: `check_5` ca L, `check_2` ca A.
+- v2, mục 10: tham số thử nghiệm bị từ chối mã 2 khi thiếu `--fallback wayback`, hoặc base không phải loopback mà interval < 1000 / backoff < 2000; giới hạn áp cho mọi host chuyển hướng. Eval: `check_1` phần 7.
 
 ## Câu hỏi mở
 Không.
