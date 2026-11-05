@@ -12,6 +12,7 @@
  *   multi     M1 "ảnh treo": vendor nhiều ảnh (404+treo, treo+chậm-tốt, 404+html+404, tốt+treo) và ảnh về ở giây 9.
  *   switch    Thẻ chi tiết (bề mặt 2) khi prop vendor đổi giữa chừng: hỏng -> tốt (3 ảnh, đang ở ảnh 3) -> rỗng
  *             -> URL mới chưa kiểm (chậm 3,5s) -> hỏng -> tốt 1 ảnh.
+ *   touch     v2: ô < 80px nhận chuột. Chạm/bấm qua ô vẫn chọn hàng (bề mặt 3), chạm kéo trên ô vẫn cuộn (3, 5), ô không vào Tab, nút cạnh ô (5) bấm được.
  *   many      50 vendor trong thẻ danh sách (mở rộng): mỗi ô hỏng/thiếu đúng 1 minh hoạ, ô tốt không; không cuộn ngang;
  *             ô hạng 1 cao > 100px (giá rất dài) vẫn không đè dải "PHÙ HỢP NHẤT"; bấm tim trên ô minh hoạ vẫn lưu;
  *             bấm giữa ô minh hoạ vẫn mở chi tiết; thời gian mở rộng.
@@ -342,8 +343,105 @@ createRoot(document.getElementById('root')).render(<App />);
   await pg.context().close();
 }
 
+
+/* ───────────────────────── touch ─────────────────────────
+   v2: ô < 80px nhận chuột (để có tooltip). Không được chặn: chạm/bấm vào ô trong hàng-nút (bề mặt 3) vẫn chọn/bỏ chọn hàng;
+   chạm kéo bắt đầu trên ô (bề mặt 3, 5) vẫn cuộn trang trên điện thoại; ô không vào thứ tự Tab, không giữ focus;
+   nút Chốt/Bỏ lưu cạnh ô (bề mặt 5) vẫn trúng chuột. */
+async function caseTouch() {
+  const logs = [];
+  const anchor = mapped('a_hong', 'Neo Hong', [O + '/404-anchor.png']);
+  const others = [ven('o_hong', 'Hang Hong', 'photography', [O + '/404-o1.png']), ven('o_khong', 'Hang Khong', 'photography', []), ven('o_tot', 'Hang Tot', 'photography', [O + '/good-o3.png'])];
+  tmp('__adv068u.jsx', PROVIDERS + `
+import { ScreenVendorShortlist } from '/src/screens/Vendors.jsx';
+const anchor = ${JSON.stringify(anchor)};
+createRoot(document.getElementById('root')).render(<VendorProvider coupleId="adv068"><ChatActionsCtx.Provider value={{ pushUser: () => {}, pushAI: () => {} }}>
+  <div style={{ width: 390 }}>
+    <div id="s3"><VPickerMultiChatCard catId="photography" anchor={anchor} /></div>
+    <div id="s5"><ScreenVendorShortlist onMenuOpen={() => {}} onOpenVendorChat={() => {}} /></div>
+    <div style={{ height: 1500 }} />
+  </div></ChatActionsCtx.Provider></VendorProvider>);
+`); tmp('__adv068u.html', HTML('__adv068u.jsx'));
+  const S = [mapped('s_hong', 'Luu Hong', [O + '/404-s1.png']), mapped('s_khong', 'Luu Khong', [])];
+  const seed = JSON.stringify({ photography: { shortlisted: S, confirmed: null } });
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+  await ctx.addInitScript(([s]) => { if (!localStorage.getItem('th_vendors_adv068')) localStorage.setItem('th_vendors_adv068', s); }, [seed]);
+  await ctx.addInitScript({ content: PAGE_LIB });
+  const pg = await ctx.newPage();
+  pg.on('pageerror', e => logs.push('pageerror ' + String(e.message).slice(0, 200)));
+  await pg.route(/marry\.vn/, r => r.abort());
+  await pg.route('http://localhost:8787/**', async r => {
+    const m = r.request().method(), u = new URL(r.request().url());
+    if (m === 'OPTIONS') return r.fulfill({ status: 204, headers: CORS });
+    if (u.pathname.startsWith('/api/vendors/match')) return r.fulfill({ headers: CORS, contentType: 'application/json', body: JSON.stringify({ vendors: others, total: others.length }) });
+    if (m === 'POST' && u.pathname === '/api/vendors/status') return r.fulfill({ headers: CORS, contentType: 'application/json', body: '{"vendors":{}}' });
+    return r.fulfill({ status: 404, headers: CORS, contentType: 'application/json', body: '{"error":"vendor not found"}' });
+  });
+  await pg.goto(`http://127.0.0.1:${port}/__adv068u.html`, { waitUntil: 'domcontentloaded' });
+  await pg.waitForFunction(() => document.body.innerText.includes('Hang Khong') && document.body.innerText.includes('Luu Khong'), null, { timeout: 15000 });
+  await wait(2500);
+  const rowTile = (sel, name) => pg.evaluate(([sel, name]) => { const L = window.__L; const root = document.querySelector(sel);
+    const t = L.tiles(root).find(x => { let p = x; for (let i = 0; i < 6 && p; i++, p = p.parentElement) if ((p.innerText || '').includes(name) && !(p.innerText || '').includes(name === 'Hang Hong' ? 'Hang Khong' : name === 'Luu Hong' ? 'Luu Khong' : '@@')) return true; return false; });
+    if (!t) return null; window.scrollTo(0, 0); const btn = t.closest('button'); const R = L.rect(t); const hit = document.elementFromPoint(R.l + R.w / 2, R.t + R.h / 2);
+    return { x: R.l + R.w / 2, y: R.t + R.h / 2, pe: getComputedStyle(t).pointerEvents, ta: getComputedStyle(t).touchAction, inBtn: !!btn, hitInBtn: !!(btn && hit && btn.contains(hit)), tab: t.tabIndex, btnBg: btn ? getComputedStyle(btn).backgroundColor : null }; }, [sel, name]);
+  const btnBg = (name) => pg.evaluate((name) => { const b = [...document.querySelectorAll('#s3 button')].find(x => (x.innerText || '').includes(name)); return b ? getComputedStyle(b).backgroundColor : null; }, name);
+  // S3: chạm vào ô minh hoạ trong hàng-nút -> chọn, chạm lần nữa -> bỏ chọn
+  let t = await rowTile('#s3', 'Hang Hong');
+  check('S3 Hang Hong có ô minh hoạ nằm trong hàng-nút', t && t.inBtn, t);
+  if (t) {
+    console.log(`  .. S3 ô: pointer-events ${t.pe}, touch-action ${t.ta}, tabIndex ${t.tab}`);
+    check('S3: tâm ô minh hoạ trúng chính hàng-nút (phần tử trong nút)', t.hitInBtn, t);
+    const bg0 = await btnBg('Hang Hong');
+    await pg.touchscreen.tap(t.x, t.y); await wait(500);
+    const bg1 = await btnBg('Hang Hong');
+    check('S3: chạm vào ô minh hoạ chọn được hàng (nền hàng đổi)', bg1 !== bg0, [bg0, bg1]);
+    const act = await pg.evaluate(() => { const a = document.activeElement; return { tag: a && a.tagName, role: a && a.getAttribute('role') }; });
+    check('S3: sau khi chạm, focus không nằm trên lớp ô minh hoạ', act.role !== 'img', act);
+    await pg.mouse.click(t.x, t.y); await wait(500);
+    const bg2 = await btnBg('Hang Hong');
+    check('S3: bấm chuột vào ô minh hoạ bỏ chọn được hàng (nền về như cũ)', bg2 === bg0, [bg0, bg2]);
+  }
+  // không vào thứ tự Tab
+  const tabs = await pg.evaluate(() => window.__L.tiles(document).filter(x => x.tabIndex >= 0 || x.querySelector('[tabindex]:not([tabindex="-1"]),a,button,input')).length);
+  check('mọi ô minh hoạ không vào thứ tự Tab (không tabindex, không chứa phần tử focus được)', tabs === 0, tabs);
+  // Tab qua bề mặt 3: focus đi lần lượt các hàng-nút, không dừng ở ô
+  const seen = []; await pg.evaluate(() => { document.activeElement && document.activeElement.blur(); window.scrollTo(0, 0); });
+  for (let i = 0; i < 8; i++) { await pg.keyboard.press('Tab'); seen.push(await pg.evaluate(() => { const a = document.activeElement; return a ? (a.getAttribute('role') || a.tagName) : null; })); }
+  check('Tab 8 lần không dừng ở ô role=img', !seen.includes('img'), seen);
+  // cuộn bằng chạm kéo bắt đầu trên ô (S3 40px và S5 32px), có ca đối chứng bắt đầu ngoài ô
+  const cdp = await ctx.newCDPSession(pg);
+  const drag = async (x, y) => { await pg.evaluate(() => window.scrollTo(0, 0)); await wait(200); const y0 = await pg.evaluate(() => scrollY);
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+    for (let k = 1; k <= 10; k++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y - k * 25 }] }); await wait(16); }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await wait(700);
+    return (await pg.evaluate(() => scrollY)) - y0; };
+  const ctl = await drag(380, 600);
+  check(`đối chứng: chạm kéo ngoài ô cuộn được trang (${ctl}px)`, ctl > 50, ctl);
+  for (const [sel, name] of [['#s3', 'Hang Khong'], ['#s5', 'Luu Hong']]) {
+    await pg.evaluate((sel) => { document.querySelector(sel).scrollIntoView({ block: 'start' }); }, sel);
+    const tt = await pg.evaluate(([sel, name]) => { const L = window.__L; const t = L.tiles(document.querySelector(sel)).find(x => { let p = x; for (let i = 0; i < 8 && p; i++, p = p.parentElement) if ((p.innerText || '').split('\n').some(l => l.trim() === name)) return true; return false; }); if (!t) return null;
+      const top = t.getBoundingClientRect().top + scrollY; window.scrollTo(0, Math.max(0, top - 600)); const R = L.rect(t); return { x: R.l + R.w / 2, y: R.t + R.h / 2, sy: scrollY }; }, [sel, name]);
+    if (!tt) { check(`${sel} ${name}: có ô minh hoạ`, false); continue; }
+    const y0 = tt.sy;
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: tt.x, y: tt.y }] });
+    for (let k = 1; k <= 10; k++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: tt.x, y: tt.y - k * 25 }] }); await wait(16); }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await wait(700);
+    const d = (await pg.evaluate(() => scrollY)) - y0;
+    check(`${sel} ${name}: chạm kéo bắt đầu trên ô minh hoạ vẫn cuộn trang (${d}px)`, d > 50, d);
+  }
+  // S5: nút Chốt và Bỏ lưu cạnh ô vẫn trúng chuột và bấm được
+  const s5 = await pg.evaluate(() => { const L = window.__L; const t = L.tiles(document.querySelector('#s5'))[0]; let row = t; while (row && !row.querySelector('button')) row = row.parentElement; row.scrollIntoView({ block: 'center' });
+    const bs = [...row.querySelectorAll('button')].map(b => { const R = L.rect(b); const h = document.elementFromPoint(R.l + R.w / 2, R.t + R.h / 2); return { name: b.getAttribute('aria-label') || b.innerText.trim(), ok: !!h && b.contains(h), x: R.l + R.w / 2, y: R.t + R.h / 2 }; }); return bs; });
+  check('S5: các nút trong hàng có ô minh hoạ đều trúng chuột ở tâm', s5.length >= 2 && s5.every(b => b.ok), s5);
+  const chot = s5.find(b => /Chốt/.test(b.name));
+  if (chot) { const before = await pg.evaluate(() => document.querySelector('#s5').innerText); await pg.touchscreen.tap(chot.x, chot.y); await wait(600); const after = await pg.evaluate(() => document.querySelector('#s5').innerText);
+    check('S5: chạm "Chốt" ở hàng có ô minh hoạ có tác dụng (nội dung màn đổi)', before !== after); }
+  check('không lỗi trang', !logs.length, logs);
+  await ctx.close();
+}
+
 (async () => {
-  const CASES = { tooltip: caseTooltip, generic: caseGeneric, multi: caseMulti, switch: caseSwitch, many: caseMany };
+  const CASES = { tooltip: caseTooltip, generic: caseGeneric, multi: caseMulti, switch: caseSwitch, many: caseMany, touch: caseTouch };
   if (!CASES[CASE]) { console.log('FAIL --case phải là một trong ' + Object.keys(CASES).join(', ')); process.exit(1); }
   await new Promise(r => img.listen(0, '127.0.0.1', r));
   O = 'http://127.0.0.1:' + img.address().port;
