@@ -1,0 +1,125 @@
+{
+  "task": "T-065",
+  "at": "2026-11-05T09:05",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/vendor/images",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_1_khoi_phuc.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 9110,
+      "out": "FAIL có ảnh thành công thì mirror phải thoát 0, thấy 2; stderr: Tham số lạ: --fallback",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_2_khong_ban_luu.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 8764,
+      "out": "FAIL có ảnh lỗi (không cứu được) vẫn thoát 0, thấy 2; stderr Tham số lạ: --fallback",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_3_toc_do.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 8733,
+      "out": "FAIL mã thoát 2; stderr Tham số lạ: --fallback",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_4_manifest.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 8676,
+      "out": "FAIL entry ok thiếu file, khôi phục lỗi, nguồn gốc lỗi: MISSING, mã 3 như T-051 (Wayback không dùng để khôi phục entry ok), thấy 2; stderr Tham số lạ: --fallback",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_5_dung_som_bat_bien.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 8592,
+      "out": "FAIL nguồn gốc chết nhưng Wayback có ảnh: phải chạy tiếp và thoát 0, thấy 2; stdout cuối:",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_6_workflow_readme.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 8666,
+      "out": "FAIL workflow thiếu ô nhập 'wayback'",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-065/check_7_npm_test.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 12481,
+      "out": "FAIL npm test xanh nhưng chỉ có 0 ca kiểm thử nêu 'wayback' trong tên (cần >= 3, dùng server HTTP cục bộ, không gọi archive.org)",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 3424,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 184,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 29,
+      "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 43,
+      "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1036,
+      "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1987,
+      "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 6433,
+      "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
