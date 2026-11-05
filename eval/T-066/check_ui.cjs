@@ -20,6 +20,7 @@ const img = http.createServer((q, r) => {
   hits.push(q.url);
   if (q.url.startsWith('/good')) { r.writeHead(200, { 'Content-Type': 'image/png' }); r.end(PNG); }
   else if (q.url.startsWith('/slow')) { setTimeout(() => { r.writeHead(200, { 'Content-Type': 'image/png' }); r.end(PNG); }, 3500); }
+  else if (q.url.startsWith('/hang')) { /* không bao giờ trả lời */ }
   else if (q.url.startsWith('/html')) { r.writeHead(200, { 'Content-Type': 'text/html' }); r.end('<html>denied</html>'); }
   else { r.writeHead(404); r.end('no'); }
 });
@@ -57,6 +58,12 @@ createRoot(document.getElementById('root')).render(
       : <ScreenVendorShortlist onMenuOpen={() => {}} onOpenVendorChat={() => {}} />}</div>
   </ConnectProvider></VendorProvider>);
 `;
+const JSX_C = `
+import '/src/index.css';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+createRoot(document.getElementById('root')).render(<div id="stage" />);
+`;
 const HTML = (f) => `<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0}</style><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/${f}"></script></body></html>`;
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' };
 
@@ -71,32 +78,57 @@ window.__L = (() => {
   const rect = e => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
   const inter = (a, b) => a.l < b.r - 0.5 && b.l < a.r - 0.5 && a.t < b.b - 0.5 && b.t < a.b - 0.5;
   const tiles = (root) => [...root.querySelectorAll('[role="img"]')].filter(e => (e.getAttribute('aria-label') || '').startsWith(LAB));
-  const paints = (svg) => { const out = []; for (const e of [svg, ...svg.querySelectorAll('*')]) { const cs = getComputedStyle(e); for (const k of ['fill', 'stroke']) { const c = parse(cs[k]); if (c && c.a > 0.05) out.push(cs[k]); } } return [...new Set(out)]; };
-  const bestContrast = (list) => { const cs = list.map(parse).filter(Boolean); let m = 0; for (const a of cs) for (const b of cs) m = Math.max(m, cr(over(a, 255), over(b, 255))); return m; };
+  const paperRgb = () => { const d = document.createElement('div'); d.style.color = 'var(--paper)'; document.body.appendChild(d); const c = parse(getComputedStyle(d).color); d.remove(); return c || { r: 255, g: 255, b: 255, a: 1 }; };
+  /* Cặp nét/nền đặt cạnh nhau của một svg: nền = màu tô của hình có bbox lớn nhất (huy hiệu/khung; không có thì nền giấy --paper), nét = màu (tô hoặc nét) xuất hiện ở nhiều phần tử nhất trong các màu còn lại. */
+  const inkPair = (svg) => {
+    const shapes = [...svg.querySelectorAll('*')].filter(e => !/^(defs|title|desc|style|clippath|mask|lineargradient|radialgradient|stop|g)$/i.test(e.tagName));
+    let bg = null, bgA = -1; const rows = [];
+    for (const e of shapes) { const cs = getComputedStyle(e); let A = 0; try { const bb = e.getBBox(); A = bb.width * bb.height; } catch (x) {}
+      const f = parse(cs.fill), st = parse(cs.stroke), sw = parseFloat(cs.strokeWidth) || 0;
+      const fv = f && f.a > 0.05 ? cs.fill : null, sv = st && st.a > 0.05 && sw > 0 ? cs.stroke : null; rows.push({ fv, sv });
+      if (fv && A > bgA) { bgA = A; bg = fv; } }
+    const bgC = bg ? parse(bg) : paperRgb(); const cnt = {};
+    for (const r of rows) for (const v of [r.fv, r.sv]) if (v && v !== bg) cnt[v] = (cnt[v] || 0) + 1;
+    const best = Object.entries(cnt).sort((x, y) => y[1] - x[1])[0];
+    if (!best) return { bg: bg || 'paper', ink: null, c: 0, all: Object.keys(cnt) };
+    return { bg: bg || 'paper', ink: best[0], c: cr(over(parse(best[0]), 255), over(bgC, 255)), all: [bg, ...Object.keys(cnt)] };
+  };
   const invert = () => { const props = new Set(); for (const ss of document.styleSheets) { let rules; try { rules = ss.cssRules; } catch (e) { continue; } for (const r of rules) if (r.selectorText === ':root') for (const p of r.style) if (p.startsWith('--') && /^#[0-9a-f]{6}$/i.test(r.style.getPropertyValue(p).trim())) props.add(p); }
     const rs = getComputedStyle(document.documentElement); let css = ':root{'; for (const p of props) { const h = rs.getPropertyValue(p).trim(); if (!/^#[0-9a-f]{6}$/i.test(h)) continue; const n = [1, 3, 5].map(i => 255 - parseInt(h.slice(i, i + 2), 16)); css += p + ':rgb(' + n.join(',') + ');'; } css += '}'; const st = document.createElement('style'); st.id = '__inv'; st.textContent = css; document.head.appendChild(st); return props.size; };
   const uninvert = () => document.getElementById('__inv')?.remove();
   /* Mô tả một ô: rect, nhãn, title, svg, chip, đo tương phản */
+  const visible = (e) => { const r = e.getBoundingClientRect(); if (r.width <= 0 || r.height <= 0) return false; for (let x = e; x && x.nodeType === 1; x = x.parentElement) { const cs = getComputedStyle(x); if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.05) return false; } return true; };
+  const ownText = (e) => [...e.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
+  /* Mô tả một ô: rect, nhãn, title, svg, chip (tìm trong CẢ tài liệu theo chữ nhìn thấy, không phụ thuộc cách dựng DOM), chồng lấn với mọi phần tử nhìn thấy */
   const describe = (tile) => {
     const R = rect(tile), svg = tile.querySelector('svg');
-    const own = [...tile.querySelectorAll('*')].filter(e => !svg || !svg.contains(e));
-    const chip = own.find(e => e.children.length === 0 && (e.textContent || '').trim() === LAB) || null;
+    const chip = [...document.body.querySelectorAll('*')].filter(e => ownText(e) === LAB && visible(e) && (() => { const c = rect(e); const cx = (c.l + c.r) / 2, cy = (c.t + c.b) / 2; return cx >= R.l && cx <= R.r && cy >= R.t && cy <= R.b; })())[0] || null;
     const d = { label: tile.getAttribute('aria-label'), title: tile.getAttribute('title'), w: R.w, h: R.h, hasSvg: !!svg, imgs: tile.querySelectorAll('img').length, bgUrl: /url\\(/.test(getComputedStyle(tile).backgroundImage) };
-    if (svg) { const html = svg.outerHTML.replace(/xmlns(:\\w+)?="[^"]*"/g, ''); d.svgLen = svg.outerHTML.length; d.svgHtml = svg.outerHTML; d.literalColor = /#[0-9a-fA-F]{3,8}\\b|rgba?\\(|hsla?\\(/.test(html); d.netRef = /https?:|<image|@import|url\\((?!#)/.test(html); d.paintsLight = paints(svg); }
+    if (svg) { const html = svg.outerHTML.replace(/xmlns(:\\w+)?="[^"]*"/g, '').replace(/url\\(#[^)]*\\)/g, '').replace(/\\s(id|class|href|xlink:href|data-[\\w-]+|aria-[\\w-]+)="[^"]*"/g, ''); d.svgLen = svg.outerHTML.length; d.svgHtml = svg.outerHTML; d.literalColor = /#[0-9a-fA-F]{3,8}\\b|rgba?\\(|hsla?\\(/.test(html); d.netRef = /https?:|<image|@import|url\\((?!#)/.test(html); d.pairLight = inkPair(svg); }
     if (chip) { const C = rect(chip), cs = getComputedStyle(chip); const bg = parse(cs.backgroundColor) || { r: 0, g: 0, b: 0, a: 0 }; const fg = parse(cs.color);
-      const others = own.filter(e => e !== chip && !chip.contains(e) && !e.contains(chip) && ((e.children.length === 0 && (e.textContent || '').trim()) || e.tagName === 'BUTTON')).map(rect);
+      const others = [...document.body.querySelectorAll('*')].filter(e => e !== chip && !chip.contains(e) && !e.contains(chip) && !tile.contains(e) && !e.contains(tile) && visible(e) && (ownText(e) || e.tagName === 'BUTTON')).map(rect);
+      const inTile = [...tile.querySelectorAll('*')].filter(e => e !== chip && !chip.contains(e) && !e.contains(chip) && !(svg && (svg === e || svg.contains(e))) && visible(e) && (ownText(e) || e.tagName === 'BUTTON')).map(rect);
       d.chip = { inside: C.l >= R.l - 0.5 && C.r <= R.r + 0.5 && C.t >= R.t - 0.5 && C.b <= R.b + 0.5, lowerHalf: (C.t + C.b) / 2 > R.t + R.h / 2, fs: parseFloat(cs.fontSize), area: (C.w * C.h) / (R.w * R.h),
-        overlaps: others.some(o => inter(C, o)), contrast: fg ? Math.min(cr(fg, over(bg, 255)), cr(fg, over(bg, 0))) : 0 }; }
+        overlaps: [...others, ...inTile].some(o => inter(C, o)), contrast: fg ? Math.min(cr(fg, over(bg, 255)), cr(fg, over(bg, 0))) : 0 }; }
     return d;
   };
-  const darkPaints = (tile) => { const svg = tile.querySelector('svg'); if (!svg) return null; invert(); const p = paints(svg); uninvert(); return p; };
+  const darkPair = (tile) => { const svg = tile.querySelector('svg'); if (!svg) return null; invert(); const p = inkPair(svg); uninvert(); return p; };
+  /* svg "lớn" nhìn thấy trong một vùng (ngoài nút): dùng để bắt minh hoạ vẽ lúc đang kiểm, có nhãn hay không */
+  const bigSvgIn = (root) => [...root.querySelectorAll('svg')].filter(e => !e.closest('button') && visible(e) && (rect(e).w >= 28 || rect(e).h >= 28)).length;
   const scrollW = () => ({ doc: document.documentElement.scrollWidth, body: document.body.scrollWidth, vw: window.innerWidth });
-  return { LAB, tiles, describe, darkPaints, bestContrast, scrollW, rect };
+  return { LAB, tiles, describe, darkPair, bigSvgIn, scrollW, rect, visible };
 })();
 `;
 
 let b, vite, port, O;
-const cleanup = () => { try { b && b.close(); } catch (e) {} try { vite && vite.kill(); } catch (e) {} for (const f of ['__t066a.jsx', '__t066a.html', '__t066b.jsx', '__t066b.html']) { try { fs.unlinkSync(path.join(REPO, f)); } catch (e) {} } try { img.close(); } catch (e) {} };
+const TMPF = ['__t066a.jsx', '__t066a.html', '__t066b.jsx', '__t066b.html', '__t066c.jsx', '__t066c.html'];
+const cleanup = async () => {
+  try { b && await b.close(); } catch (e) {}                       // chờ trình duyệt đóng hẳn (không để /tmp/.org.chromium.*)
+  try { if (vite && vite.pid) { try { process.kill(-vite.pid, 'SIGTERM'); } catch (e) { vite.kill(); } await new Promise(r => { vite.once('exit', r); setTimeout(r, 3000); }); } } catch (e) {}
+  for (const f of TMPF) { try { fs.unlinkSync(path.join(REPO, f)); } catch (e) {} }
+  try { for (const f of fs.readdirSync(REPO)) if (/^vite\.config\.[a-z]+\.timestamp-/.test(f)) fs.unlinkSync(path.join(REPO, f)); } catch (e) {}
+  try { img.closeAllConnections && img.closeAllConnections(); img.close(); } catch (e) {}
+};
 
 async function newPage(url, external, extraRoutes) {
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
@@ -105,7 +137,7 @@ async function newPage(url, external, extraRoutes) {
   pg.on('pageerror', e => (globalThis.__logs = globalThis.__logs || []).push('pageerror ' + String(e.message).slice(0, 160)));
   await pg.route(/marry\.vn/, r => r.abort());
   await extraRoutes(pg);
-  await pg.goto(url);
+  await pg.goto(url, { waitUntil: 'domcontentloaded' });
   await pg.addScriptTag({ content: PAGE_LIB });
   return pg;
 }
@@ -126,7 +158,7 @@ async function rowInfo(pg, scope, names, n) {
     const L = window.__L, tiles = L.tiles(row).map(t => L.describe(t));
     const urlBg = [...row.querySelectorAll('*')].map(x => getComputedStyle(x).backgroundImage).filter(s => /url\(/.test(s) && !/\.svg/.test(s));
     const urlImg = [...row.querySelectorAll('img')].filter(i => i.complete && i.naturalWidth > 0).length;
-    return { tiles, urlBg, urlImg, hasLabelText: (row.innerText || '').includes(L.LAB), size: L.rect(row).w };
+    return { tiles, bigSvg: L.bigSvgIn(row), urlBg, urlImg, hasLabelText: (row.innerText || '').includes(L.LAB), size: L.rect(row).w };
   }, [scope, names, n, ROWFN.toString().trim() === '' ? '' : ROWFN]);
 }
 
@@ -134,25 +166,27 @@ async function rowInfo(pg, scope, names, n) {
   await new Promise(r => img.listen(0, '127.0.0.1', r));
   O = 'http://127.0.0.1:' + img.address().port;
   const ven = (id, name, cat, urls) => ({ id, name, category: cat, priceMin: 10, priceMax: 20, rating: 4.5, reviewCount: 3, city: 'HCMC', tags: ['modern'], photos: urls.map(url => ({ url })), match: { totalScore: 80, scoreBreakdown: {}, reasons: [] } });
-  const NAMES = ['Tot Studio', 'Hong Studio', 'Khong Studio', 'Cham Studio'];
-  const vendorsFor = (cat) => [ven('t_' + cat, NAMES[0], cat, [O + '/good1.png']), ven('h_' + cat, NAMES[1], cat, [O + '/404-a.png']), ven('k_' + cat, NAMES[2], cat, []), ven('c_' + cat, NAMES[3], cat, [O + '/slow-1.png'])];
+  const NAMES = ['Tot Studio', 'Hong Studio', 'Khong Studio', 'Cham Studio', 'Treo Studio'];
+  // Hong (ảnh hỏng) ở HẠNG 1 để ô có dải "PHÙ HỢP NHẤT"; Treo (ảnh không bao giờ trả lời) chỉ có ở photography
+  const vendorsFor = (cat) => [ven('h_' + cat, NAMES[1], cat, [O + '/404-a.png']), ven('t_' + cat, NAMES[0], cat, [O + '/good1.png']), ven('k_' + cat, NAMES[2], cat, []), ven('c_' + cat, NAMES[3], cat, [O + '/slow-1.png']), ...(cat === 'photography' ? [ven('x_' + cat, NAMES[4], cat, [O + '/hang-1.png'])] : [])];
   fs.writeFileSync(path.join(REPO, '__t066a.jsx'), JSX_A); fs.writeFileSync(path.join(REPO, '__t066a.html'), HTML('__t066a.jsx'));
+  fs.writeFileSync(path.join(REPO, '__t066c.jsx'), JSX_C); fs.writeFileSync(path.join(REPO, '__t066c.html'), HTML('__t066c.jsx'));
   fs.writeFileSync(path.join(REPO, '__t066b.jsx'), JSX_B); fs.writeFileSync(path.join(REPO, '__t066b.html'), HTML('__t066b.jsx'));
   port = 5200 + Math.floor(Math.random() * 500);
-  vite = cp.spawn('npx', ['vite', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { cwd: REPO, stdio: 'ignore' });
+  vite = cp.spawn('npx', ['vite', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { cwd: REPO, stdio: 'ignore', detached: true });
   try {
     for (let i = 0; i < 60; i++) { try { await new Promise((res, rej) => http.get(`http://127.0.0.1:${port}/__t066a.html`, r => { r.resume(); r.statusCode === 200 ? res() : rej(); }).on('error', rej)); break; } catch (e) { await new Promise(r => setTimeout(r, 500)); if (i === 59) throw new Error('vite không lên'); } }
     b = await chromium.launch();
     const external = [];
     const shot = async (pg, sel, name) => { if (!SHOTS) return; fs.mkdirSync(SHOTS, { recursive: true }); try { await (sel ? pg.locator(sel).first() : pg).screenshot({ path: path.join(SHOTS, `${name}-390-${TAG}.png`) }); } catch (e) {} };
-    const svgByCat = {}, sizeByCat = {}, lightDark = {};
+    const svgByCat = {}, svgKhong = {}, lightDark = {}; const wait = (t) => new Promise(r => setTimeout(r, Math.max(0, t)));
 
     /* Kiểm một ô minh hoạ ở một bề mặt: mọi tiêu chí đo trên ô đó. */
     const checkTile = (surf, cat, t, want) => {
       const exp = cat ? CATS[cat] : null;
       if (!t.label || !t.label.startsWith('Ảnh minh hoạ')) bad(2, `${surf}: tên truy cập phải bắt đầu bằng "Ảnh minh hoạ"`);
       if (exp && !(t.label || '').toLowerCase().includes(exp.toLowerCase())) bad(1, `${surf}: ô minh hoạ phải ghi đúng hạng mục "${exp}" trong tên truy cập, thấy "${t.label}"`);
-      if (Math.abs(t.w - want.w) > 1.5 || Math.abs(t.h - want.h) > 1.5) bad(1, `${surf}: ô minh hoạ phải đúng khung ảnh cũ ${want.w}x${want.h}, thấy ${Math.round(t.w)}x${Math.round(t.h)}`);
+      if (Math.abs(t.w - want.w) > 1.5 || (want.minH ? t.h < want.minH - 1.5 : Math.abs(t.h - want.h) > 1.5)) bad(1, `${surf}: ô minh hoạ phải đúng khung ảnh cũ ${want.w}x${want.minH ? '>=' + want.minH : want.h}, thấy ${Math.round(t.w)}x${Math.round(t.h)}`);
       if (!t.hasSvg) bad(3, `${surf}: ô minh hoạ phải chứa <svg> nằm trong trang`);
       if (t.imgs > 0 || t.bgUrl) bad(3, `${surf}: minh hoạ không được là <img> hay nền url()`);
       const small = Math.min(t.w, t.h) < 80;
@@ -181,30 +215,36 @@ async function rowInfo(pg, scope, names, n) {
       const pg = await newPage(`http://127.0.0.1:${port}/__t066a.html?cat=${cat}`, external, apiRoutes(vs));
       try {
         await pg.waitForFunction(() => document.body.innerText.includes('Tot Studio'), null, { timeout: 15000 });
+        const tVis = Date.now();
         await pg.waitForTimeout(250);
         const early = await rowInfo(pg, '[data-card="0"]', NAMES, 'Cham Studio');
-        if (!early.err && (early.tiles.length || early.hasLabelText)) bad(4, `S1 ${cat}: lúc đang kiểm ảnh (ảnh chưa tải xong) vẫn phải giữ cách hiện cũ, không hiện minh hoạ/nhãn "Ảnh minh hoạ"`);
+        if (!early.err && (early.tiles.length || early.hasLabelText || early.bigSvg)) bad(4, `S1 ${cat}: lúc đang kiểm ảnh (ảnh chưa tải xong) vẫn phải giữ cách hiện cũ: không vẽ BẤT KỲ minh hoạ nào (svg lớn trong hàng: ${early.bigSvg}), có nhãn hay không`);
         await pg.waitForFunction(() => window.__L.tiles(document.querySelector('[data-card="0"]')).length >= 2, null, { timeout: 4500 }).catch(() => {});
         const hong = await rowInfo(pg, '[data-card="0"]', NAMES, 'Hong Studio'), khong = await rowInfo(pg, '[data-card="0"]', NAMES, 'Khong Studio'), tot = await rowInfo(pg, '[data-card="0"]', NAMES, 'Tot Studio');
         for (const [nm, r] of [['Hong', hong], ['Khong', khong]]) {
           if (r.err) { miss(`S1 ${cat}: ${r.err}`); continue; }
           if (r.tiles.length !== 1) { miss(`S1 ${cat}: ${nm} Studio (ảnh ${nm === 'Hong' ? 'hỏng' : 'thiếu'}) phải có đúng 1 ô minh hoạ, thấy ${r.tiles.length}`); continue; }
-          checkTile(`S1 ${cat} ${nm}`, cat, r.tiles[0], { w: 100, h: 100 });
-          if (nm === 'Hong') { svgByCat[cat] = r.tiles[0].svgHtml; sizeByCat[cat] = r.tiles[0].svgLen; }
-          if (nm === 'Khong' && svgByCat[cat] && r.tiles[0].svgHtml !== svgByCat[cat]) bad(3, `S1 ${cat}: ảnh hỏng và ảnh thiếu của cùng hạng mục phải ra cùng một minh hoạ`);
+          checkTile(`S1 ${cat} ${nm}`, cat, r.tiles[0], { w: 100, minH: 100 });
+          if (nm === 'Hong') svgByCat[cat] = r.tiles[0].svgHtml;
+          if (nm === 'Khong') svgKhong[cat] = r.tiles[0].svgHtml;
         }
         if (!tot.err && tot.tiles.length) bad(4, `S1 ${cat}: vendor có ảnh tốt không được hiện minh hoạ`);
         if (!tot.err && !(tot.urlBg.length || tot.urlImg)) bad(4, `S1 ${cat}: vendor có ảnh tốt phải hiện ảnh thật`);
         // sáng/tối: đảo toàn bộ token màu, ô vẫn phải có cặp nét/nền tương phản >= 3:1 và màu phải đổi theo token
         if (!lightDark[cat]) {
-          const ld = await pg.evaluate(() => { const t = window.__L.tiles(document.querySelector('[data-card="0"]'))[0]; if (!t) return null; const light = window.__L.describe(t).paintsLight, dark = window.__L.darkPaints(t); return { light, dark, cl: window.__L.bestContrast(light), cd: window.__L.bestContrast(dark || []) }; });
+          const ld = await pg.evaluate(() => { const t = window.__L.tiles(document.querySelector('[data-card="0"]'))[0]; if (!t) return null; return { l: window.__L.describe(t).pairLight, d: window.__L.darkPair(t) }; });
           lightDark[cat] = ld;
-          if (!ld) bad(3, `S1 ${cat}: không có ô để đo sáng/tối`);
+          if (!ld || !ld.l || !ld.d) bad(3, `S1 ${cat}: không có ô để đo sáng/tối`);
           else {
-            if (ld.cl < 3) bad(3, `S1 ${cat}: nền sáng, cặp màu nét/nền tương phản tối đa ${ld.cl.toFixed(1)}:1 < 3:1`);
-            if (ld.cd < 3) bad(3, `S1 ${cat}: bảng token đảo sang tối, cặp màu nét/nền tương phản tối đa ${ld.cd.toFixed(1)}:1 < 3:1`);
-            if (JSON.stringify(ld.light) === JSON.stringify(ld.dark)) bad(3, `S1 ${cat}: màu minh hoạ không đổi khi đổi token (không dùng token màu của app)`);
+            if (!ld.l.ink || ld.l.c < 3) bad(3, `S1 ${cat}: cặp nét/nền đặt cạnh nhau (nền = hình tô lớn nhất, nét = màu phổ biến nhất còn lại) tương phản ${ld.l.c.toFixed(1)}:1 < 3:1`);
+            if (!ld.d.ink || ld.d.c < 3) bad(3, `S1 ${cat}: bảng token đảo sang tối, cặp nét/nền tương phản ${ld.d.c.toFixed(1)}:1 < 3:1`);
+            if (ld.l.ink === ld.d.ink && ld.l.bg === ld.d.bg) bad(3, `S1 ${cat}: màu minh hoạ không đổi khi đổi token (không dùng token màu của app)`);
           }
+        }
+        if (cat === 'photography') { // ảnh treo: dưới 8s vẫn là "đang kiểm"
+          await wait(tVis + 5500 - Date.now());
+          const tr = await rowInfo(pg, '[data-card="0"]', NAMES, 'Treo Studio');
+          if (tr.err) bad(4, 'S1: không thấy hàng Treo Studio (ảnh treo)'); else if (tr.tiles.length || tr.hasLabelText || tr.bigSvg) bad(4, 'S1 ảnh treo: trước 8 giây vẫn là "đang kiểm", không được vẽ minh hoạ/nhãn');
         }
         const sw = await pg.evaluate(() => window.__L.scrollW()); if (sw.doc > sw.vw || sw.body > sw.vw) bad(5, `S1 ${cat}: cuộn ngang (doc ${sw.doc}, body ${sw.body}, vw ${sw.vw})`);
         if (cat === 'photography') await shot(pg, '[data-card="0"]', 's1-danh-sach');
@@ -258,13 +298,59 @@ async function rowInfo(pg, scope, names, n) {
          if (cols.Tot && !cols.Tot.urlBg.length) bad(4, `S4 ${cat}: cột có ảnh tốt phải hiện ảnh thật`);
         if (cat === 'photography') await shot(pg, '[data-card="3"]', 's4-bang-so-sanh');
         const sw4 = await pg.evaluate(() => window.__L.scrollW()); if (sw4.doc > sw4.vw || sw4.body > sw4.vw) bad(5, `S4 ${cat}: cuộn ngang (doc ${sw4.doc})`);
+        if (cat === 'photography') { // ảnh treo quá 8 giây = hỏng -> minh hoạ có nhãn
+          await wait(tVis + 10500 - Date.now());
+          const tr = await rowInfo(pg, '[data-card="0"]', NAMES, 'Treo Studio');
+          if (tr.err || tr.tiles.length !== 1) miss('S1 ảnh treo: sau 8 giây (đo ở giây 10,5) phải hiện đúng 1 ô minh hoạ có nhãn, thấy ' + (tr.err || tr.tiles.length));
+          else checkTile('S1 ảnh treo', cat, tr.tiles[0], { w: 100, minH: 100 });
+        }
       } catch (e) { for (const n of [1, 2, 3, 4, 5]) bad(n, `chuỗi thẻ chat (${cat}) lỗi chạy: ${String(e.message).split('\n')[0]} ${(globalThis.__logs || []).slice(0, 2).join(' ; ')}`); }
       await pg.context().close();
     }
-    // mỗi hạng mục một minh hoạ riêng
+    /* ── Tiêu chí 3: mỗi hạng mục một hình khác nhau, đo bằng ĐIỂM ẢNH ─────────────────────────
+       Mỗi minh hoạ được render riêng, cùng kích thước 96x96 trên nền giấy (--paper), chụp ảnh, ngưỡng hoá: điểm "mực" = điểm ảnh
+       cách xa mọi màu nền (hai màu chiếm nhiều nhất, thường là giấy và huy hiệu) hơn 48 đơn vị RGB. Khoảng cách giữa hai hình =
+       1 - |mực chung| / |mực của một trong hai|. Hai hạng mục khác nhau phải cách nhau >= 0.35 (hai hình vẽ khác nhau hiếm khi
+       chung quá 65% nét; cùng một hình chỉ đổi class, data, id hay màu nét thì cách ~0). Vendor ảnh hỏng và ảnh thiếu của cùng hạng mục cách <= 0.10. */
+    const DIST_MIN = 0.35, INK_MIN = 0.015;
+    const pxPg = await newPage(`http://127.0.0.1:${port}/__t066c.html`, external, async () => {});
+    const renderMasks = async (items) => {
+      await pxPg.evaluate((items) => { const st = document.getElementById('stage'); const sty = document.createElement('style'); sty.textContent = '#stage svg{width:100%;height:100%;display:block}'; document.head.appendChild(sty);
+        st.innerHTML = items.map((svg, i) => `<div id="p${i}" style="width:96px;height:96px;background:var(--paper);margin:8px;display:inline-block;position:relative">${svg}</div>`).join(''); }, items);
+      const pngs = []; for (let i = 0; i < items.length; i++) pngs.push((await pxPg.locator('#p' + i).screenshot()).toString('base64'));
+      return pxPg.evaluate(async (pngs) => { const out = [];
+        for (const b64 of pngs) { const bm = await createImageBitmap(await (await fetch('data:image/png;base64,' + b64)).blob()); const c = new OffscreenCanvas(bm.width, bm.height), x = c.getContext('2d'); x.drawImage(bm, 0, 0); const d = x.getImageData(0, 0, bm.width, bm.height).data, N = bm.width * bm.height;
+          const h = new Map(); for (let i = 0; i < N; i++) { const k = ((d[4 * i] >> 4) << 8) | ((d[4 * i + 1] >> 4) << 4) | (d[4 * i + 2] >> 4); const e = h.get(k); if (e) e.n++; else h.set(k, { n: 1, i }); }
+          const top = [...h.values()].sort((a, b) => b.n - a.n), gr = [top[0]]; if (top[1] && top[1].n >= 0.08 * N) gr.push(top[1]);
+          const gc = gr.map(g => [d[4 * g.i], d[4 * g.i + 1], d[4 * g.i + 2]]); let m = '';
+          for (let i = 0; i < N; i++) { let far = true; for (const g of gc) if (Math.hypot(d[4 * i] - g[0], d[4 * i + 1] - g[1], d[4 * i + 2] - g[2]) <= 48) far = false; m += far ? '1' : '0'; }
+          out.push(m); }
+        return out; }, pngs);
+    };
+    const dist = (a, b) => { let i = 0, u = 0; for (let k = 0; k < a.length; k++) { const x = a[k] === '1', y = b[k] === '1'; if (x && y) i++; if (x || y) u++; } return u ? 1 - i / u : 0; };
+    const inkOf = (m) => m.split('1').length - 1;
+    // tự kiểm thước đo (luôn chạy, kể cả khi app chưa có minh hoạ): hình chung chỉ khác class, data, id hay màu nét phải bị bắt; hai hình khác nhau phải qua
+    const bg0 = '<circle cx="50" cy="50" r="42" style="fill:var(--paper)"/>';
+    const SA = `<svg viewBox="0 0 100 100">${bg0}<rect x="24" y="34" width="52" height="32" style="fill:none;stroke:var(--ink-700);stroke-width:5"/><circle cx="50" cy="50" r="9" style="fill:var(--ink-700)"/></svg>`;
+    const SA2 = `<svg viewBox="0 0 100 100" class="cat-b" data-cat="b" id="zz">${bg0}<rect x="24" y="34" width="52" height="32" style="fill:none;stroke:var(--son-600);stroke-width:5"/><circle cx="50" cy="50" r="9" style="fill:var(--son-600)"/></svg>`;
+    const SB = `<svg viewBox="0 0 100 100">${bg0}<circle cx="50" cy="58" r="18" style="fill:none;stroke:var(--ink-700);stroke-width:6"/><path d="M38 30 L50 16 L62 30" style="fill:none;stroke:var(--ink-700);stroke-width:5"/></svg>`;
+    const st = await renderMasks([SA, SA2, SB]);
+    if (dist(st[0], st[1]) >= DIST_MIN) bad(3, `eval hỏng: hình chung chỉ khác class, data, id hay màu nét phải bị bắt (cách ${dist(st[0], st[1]).toFixed(2)} >= ${DIST_MIN})`);
+    if (dist(st[0], st[2]) < DIST_MIN) bad(3, `eval hỏng: hai hình khác nhau phải qua (cách ${dist(st[0], st[2]).toFixed(2)} < ${DIST_MIN})`);
     const ids = Object.keys(svgByCat);
     if (ids.length < 10) bad(3, `chỉ lấy được minh hoạ của ${ids.length}/10 hạng mục: ${Object.keys(CATS).filter(c => !svgByCat[c]).join(', ')}`);
-    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) if (svgByCat[ids[i]] === svgByCat[ids[j]]) bad(3, `hạng mục ${ids[i]} và ${ids[j]} dùng cùng một minh hoạ (mỗi hạng mục phải có hình riêng)`);
+    if (ids.length >= 2) {
+      const ms = await renderMasks(ids.map(c => svgByCat[c]));
+      ids.forEach((c, i) => { if (inkOf(ms[i]) < INK_MIN * ms[i].length) bad(3, `hạng mục ${c}: minh hoạ gần như trống khi render 96px trên nền giấy`); });
+      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) { const dd = dist(ms[i], ms[j]); if (dd < DIST_MIN) bad(3, `hạng mục ${ids[i]} và ${ids[j]} trông giống nhau (render 96px, khác ${(dd * 100).toFixed(0)}% < ${DIST_MIN * 100}% điểm mực): mỗi hạng mục phải có hình vẽ riêng`); }
+      const both = ids.filter(c => svgKhong[c]);
+      if (both.length) { const mk = await renderMasks(both.map(c => svgKhong[c])); const mh = await renderMasks(both.map(c => svgByCat[c])); both.forEach((c, i) => { if (dist(mk[i], mh[i]) > 0.10) bad(3, `hạng mục ${c}: vendor ảnh hỏng và vendor không ảnh phải ra cùng một minh hoạ`); }); }
+      if (SHOTS && TAG === 'sau') { // contact sheet: 10 minh hoạ kèm tên hạng mục (người duyệt nhìn, đưa vào PR)
+        await pxPg.evaluate((items) => { document.getElementById('stage').innerHTML = '<div id="sheet" style="display:grid;grid-template-columns:repeat(5,120px);gap:12px;padding:16px;background:var(--paper);width:min-content;font-family:var(--font-ui)">' + items.map(([n, svg]) => `<figure style="margin:0;text-align:center"><div style="width:96px;height:96px;margin:0 auto;background:var(--paper);outline:1px solid var(--line-200)">${svg}</div><figcaption style="font-size:12px;color:var(--ink-700);margin-top:4px">${n}</figcaption></figure>`).join('') + '</div>'; }, Object.keys(CATS).filter(c => svgByCat[c]).map(c => [CATS[c], svgByCat[c]]));
+        fs.mkdirSync(SHOTS, { recursive: true }); await pxPg.locator('#sheet').screenshot({ path: path.join(SHOTS, 'contact-sheet.png') });
+      }
+    }
+    await pxPg.context().close();
 
     /* ── Bề mặt 5 và 6: Vendor đã lưu / Ngân sách ── */
     const MARRY = 'https://www.marry.vn/images/detailed/1/';
@@ -298,7 +384,7 @@ async function rowInfo(pg, scope, names, n) {
         if (m === 'POST' && u.pathname === '/api/vendors/status') return r.fulfill({ headers: CORS, contentType: 'application/json', body: '{"vendors":{}}' });
         return r.fulfill({ status: 404, headers: CORS, contentType: 'application/json', body: '{}' });
       });
-      await pg.goto(`http://127.0.0.1:${port}/__t066b.html?v=${v}`);
+      await pg.goto(`http://127.0.0.1:${port}/__t066b.html?v=${v}`, { waitUntil: 'domcontentloaded' });
       await pg.addScriptTag({ content: PAGE_LIB });
       return { pg, ctx, stored };
     };
@@ -308,7 +394,7 @@ async function rowInfo(pg, scope, names, n) {
       await pg.waitForFunction(() => document.body.innerText.includes('Luu Pool Tot'), null, { timeout: 15000 });
       await pg.waitForTimeout(300);
       const early = await rowInfo(pg, 'body', SN, 'Luu Cham');
-      if (!early.err && (early.tiles.length || early.hasLabelText)) bad(4, 'S5: lúc đang tra ảnh trong pool (chưa xác định) vẫn phải giữ cách hiện cũ, không hiện minh hoạ/nhãn');
+      if (!early.err && (early.tiles.length || early.hasLabelText || early.bigSvg)) bad(4, 'S5: lúc đang tra ảnh trong pool (chưa xác định) vẫn phải giữ cách hiện cũ, không hiện minh hoạ/nhãn');
       if (stored.length) bad(4, 'S5: có request tới URL ảnh đã lưu (marry.vn) lúc đang tra pool: ' + stored[0]);
       await pg.waitForTimeout(3000);
       const rows = {}; for (const n of SN) rows[n] = await rowInfo(pg, 'body', SN, n);
@@ -322,19 +408,26 @@ async function rowInfo(pg, scope, names, n) {
       await ctx.close();
     } catch (e) { for (const n of [1, 2, 3, 4, 5]) bad(n, 'S5 (Vendor đã lưu) lỗi chạy: ' + String(e.message).split('\n')[0]); }
     // S6
-    for (const [n, kind] of [['Luu Pool Hong', 'minh hoạ'], ['Luu Pool Rong', 'minh hoạ'], ['Luu Pool Tot', 'ảnh']]) {
+    for (const [n, kind] of [['Luu Pool Hong', 'minh hoạ'], ['Luu Pool Rong', 'minh hoạ'], ['Luu Pool Tot', 'ảnh'], ['Luu Cham', 'chậm']]) {
       try {
         const { pg, ctx, stored } = await openB('budget', seedBudget);
         await pg.waitForFunction((x) => document.body.innerText.includes(x), n, { timeout: 15000 });
         await pg.waitForTimeout(1200);
         await pg.locator('button', { hasText: n }).first().click({ timeout: 5000 });
-        await pg.waitForTimeout(2800);
-        const r = await pg.evaluate((n) => {
+        await pg.waitForTimeout(kind === 'chậm' ? 400 : 2800);
+        const measure = () => pg.evaluate((n) => {
           const L = window.__L; const tiles = [...document.querySelectorAll('div')].filter(d => { const R = d.getBoundingClientRect(); return Math.abs(R.width - 56) < 1.5 && Math.abs(R.height - 56) < 1.5 && d.parentElement && (d.parentElement.innerText || '').includes(n); });
           if (!tiles.length) return null; const t = tiles[0];
-          return { ill: L.tiles(t.parentElement).map(x => L.describe(x)), box: L.rect(t).w, urlBg: [t, ...t.querySelectorAll('*')].map(x => getComputedStyle(x).backgroundImage).filter(s => /url\(/.test(s) && !/\.svg/.test(s)), sc: L.scrollW() };
+          return { ill: L.tiles(t.parentElement).map(x => L.describe(x)), box: L.rect(t).w, urlBg: [t, ...t.querySelectorAll('*')].map(x => getComputedStyle(x).backgroundImage).filter(s => /url\(/.test(s) && !/\.svg/.test(s)), sc: L.scrollW(), big: L.bigSvgIn(t.parentElement) };
         }, n);
+        let r = await measure();
+        if (kind === 'chậm') { // đang tra pool: giữ cách hiện cũ (không vẽ minh hoạ nào), rồi ảnh tốt hiện ra
+          if (r && (r.ill.length || r.big)) bad(4, 'S6: lúc đang tra pool vẫn phải giữ cách hiện cũ (nền sage/sand + biểu tượng cửa hàng), không vẽ minh hoạ nào');
+          await pg.waitForTimeout(4200); r = await measure();
+          if (r && (r.ill.length || !r.urlBg.length)) bad(4, 'S6: tra xong ảnh tốt phải hiện ảnh thật, không minh hoạ/nhãn');
+        } else
         if (!r) { miss(`S6 ${n}: không thấy tiêu đề Chi tiết vendor 56px`); }
+        if (!r || kind === 'chậm') {}
         else if (kind === 'minh hoạ') {
           if (r.ill.length !== 1) miss( `S6 ${n}: tiêu đề Chi tiết vendor phải có đúng 1 ô minh hoạ, thấy ${r.ill.length}`);
           else checkTile(`S6 ${n}`, 'photography', r.ill[0], { w: 56, h: 56 });
@@ -351,7 +444,7 @@ async function rowInfo(pg, scope, names, n) {
     // mạng ngoài (tiêu chí 3)
     if (external.length) bad(3, 'front gọi ra ngoài hoặc tải file svg: ' + [...new Set(external)].slice(0, 3).join(', '));
   } catch (e) { for (const n of [1, 2, 3, 4, 5]) bad(n, 'lỗi chạy eval: ' + String(e.message).split('\n')[0] + ' | ' + (globalThis.__logs || []).slice(0, 4).join(' ; ')); }
-  cleanup();
+  await cleanup();
   const T = { 1: 'ảnh hỏng/thiếu ra minh hoạ đúng hạng mục ở 6 bề mặt', 2: 'nhãn "Ảnh minh hoạ" (chữ trên ảnh >= 80px; tên truy cập + title ở mọi ô)', 3: 'minh hoạ svg nội bộ, token màu, nhẹ, sáng/tối, riêng từng hạng mục, không mạng ngoài', 4: 'ảnh tốt vẫn là ảnh thật; đang kiểm ảnh giữ cách hiện cũ', 5: 'khung 390 không cuộn ngang' };
   let rc = 0;
   for (const n of ONLY) { if (F[n].length) { rc = 1; console.log(`C${n} FAIL ${F[n].slice(0, +(process.env.MAXF || 4)).join(' || ')}${F[n].length > 4 ? ` (+${F[n].length - 4} lỗi nữa)` : ''}`); } else console.log(`C${n} PASS ${T[n]}`); }
