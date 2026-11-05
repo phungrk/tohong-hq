@@ -10,7 +10,11 @@ import os, subprocess, sys, shlex
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "T-058", "lib"))
 from t058 import Env, write_manifest, kv, fail, ok, parse_args  # noqa: E402
 
-back = parse_args().get("back") or fail("thiếu --back")
+# Gate gọi file .py không tham số (classify: python3 -I <file>): khi thiếu --back thì lấy TOHONG_BACK_REPO, rồi repo cạnh tohong-hq.
+_HQ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+back = (parse_args().get("back") or os.environ.get("TOHONG_BACK_REPO")
+        or (os.path.join(os.path.dirname(_HQ), "tohong-back") if os.path.isdir(os.path.join(os.path.dirname(_HQ), "tohong-back")) else None)
+        or fail("thiếu --back (hoặc TOHONG_BACK_REPO)"))
 N_ORPHAN = 3000
 
 
