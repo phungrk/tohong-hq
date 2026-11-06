@@ -13,10 +13,10 @@ with tempfile.TemporaryDirectory() as tmp:
     L.chk(r.returncode == 0, f"summary thoát {r.returncode}")
     L.chk("Board hỏng:" in r.stdout, "stdout thiếu dòng 'Board hỏng:'")
     line = [l for l in r.stdout.splitlines() if "T-901" in l and "board/T-901.md" in l and "title" in l and "issue" in l]
-    L.chk(len(line) == 1 and line[0].lstrip().startswith("- "), "phải có đúng một dòng '- T-901 (board/T-901.md): title, issue'; thấy " + str(line))
+    L.chk(len(line) == 1 and line[0].lstrip().startswith("- ") and "nhẹ" in line[0], "phải có đúng một dòng '- T-901 (board/T-901.md) [nhẹ]: title, issue'; thấy " + str(line))
     L.chk(not any("T-902" in l and "board/" in l for l in r.stdout.splitlines()), "việc lành T-902 bị báo hỏng")
     j = jl(L.run(fake, T, "summary", "--json"))
-    L.chk(j.get("board_hong") == [{"task": "T-901", "file": "board/T-901.md", "fields": ["title", "issue"]}], "json board_hong sai: " + str(j.get("board_hong")))
+    L.chk(j.get("board_hong") == [{"task": "T-901", "file": "board/T-901.md", "fields": ["title", "issue"], "severity": "nhe"}], "json board_hong sai: " + str(j.get("board_hong")))
     L.chk(sum(j.get("counts", {}).values()) == 2, "việc hỏng vẫn phải được đếm trong counts")
 with tempfile.TemporaryDirectory() as tmp:
     fake = L.mk(tmp, {"T-903": {}})
