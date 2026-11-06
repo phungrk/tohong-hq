@@ -1,0 +1,181 @@
+{
+  "task": "T-081",
+  "at": "2026-11-06T15:13",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/dashboard",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-081/check_1_export_link_issue.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 202,
+      "out": ".com/phungrk/tohong-hq/tree/main/inbox/capu', 'pr_state': ''}]\nFAIL T-904 diff-b không DR: [Issue #14, PR] (issue đứng trước PR); thấy [{'label': 'PR tohong-front#70', 'url': 'https://github.com/phungrk/tohong-front/pull/70', 'pr_state': 'open'}]\nFAIL T-905 DR + issue + PR theo thứ tự DR, Issue, PR; thấy [{'label': 'Decision Request', 'url': 'https://github.com/phungrk/tohong-hq/blob/main/inbox/capu/T-905-dr.md', 'pr_state': ''}, {'label': 'PR tohong-back#71', 'url': 'https://github.com/phungrk/tohong-back/pull/71', 'pr_state': 'open'}]\nFAIL T-906 blocked chờ Capu: [thư mục, Issue #16]; thấy [{'label': 'Decision Request', 'url': 'https://github.com/phungrk/tohong-hq/tree/main/inbox/capu', 'pr_state': ''}]\nFAIL T-912 diff-b không có PR (luật 48 giờ): vẫn vào, links chỉ có Issue #22; thấy []",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-081/check_2_modal_link_issue_va_goi_y.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 5221,
+      "out": "hỉ nhận việc escalated)\nPASS iphone390: T-74 không có gợi ý /ok (không phải escalated có issue; /ok chỉ nhận việc escalated)\nPASS iphone390: T-75 không có gợi ý /ok (không phải escalated có issue; /ok chỉ nhận việc escalated)\nPASS iphone390: T-76 không có gợi ý /ok (không phải escalated có issue; /ok chỉ nhận việc escalated)\nPASS iphone390: T-77 không có gợi ý /ok (không phải escalated có issue; /ok chỉ nhận việc escalated)\nPASS iphone390: T-78 không có gợi ý /ok (không phải escalated có issue; /ok chỉ nhận việc escalated)\nPASS iphone390: dòng chỉ có Issue/PR không ghi \"chưa có link\"\nPASS iphone390: không cuộn ngang trang (390/390)\nPASS iphone390: link issue cao >= 32px: 32,32,32,32\nFAIL iphone390: gợi ý nằm trọn trong chiều ngang màn hình\nPASS iphone390: không lỗi trang\nFAIL 3 ý không đạt",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-081/check_3_ca_that.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 2997,
+      "out": "[Decision Request, Issue #16], thấy [\"https://github.com/phungrk/tohong-hq/blob/main/inbox/capu/T-072-r8-khoa-eval.md\"]\nFAIL T-074: links = [Decision Request, Issue #21], thấy [\"https://github.com/phungrk/tohong-hq/blob/main/inbox/capu/T-074-dinh-nghia-phu-hop-va-cach-do.md\"]\nPASS T-016: không issue, chỉ link Decision Request\nPASS T-070: không issue, chỉ link Decision Request\nFAIL T-072: trên trang có link Issue #16 (tab mới, noopener) và đúng một gợi ý /ok\nFAIL T-074: trên trang có link Issue #21 (tab mới, noopener) và đúng một gợi ý /ok\nPASS T-016: không link issue, không gợi ý /ok\nPASS T-070: không link issue, không gợi ý /ok\nPASS sổ cái thật: link issue khi và chỉ khi board có issue số nguyên dương, số khớp: ổn\nPASS sổ cái thật --public: tasks[] không có trường issue\nFAIL 4 ý không đạt",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-081/check_4_bat_bien_hq_dashboard.sh",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 49625,
+      "out": "FAIL INV-009 (export) chưa chấp nhận https://github.com/phungrk/tohong-hq/issues/16\nFAIL INV-009 (export) chưa chấp nhận https://github.com/phungrk/tohong-hq/issues/1234\nFAIL INV-009 (trang) chưa chấp nhận https://github.com/phungrk/tohong-hq/issues/16\nFAIL INV-009 (trang) chưa chấp nhận https://github.com/phungrk/tohong-hq/issues/1234",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_3_export_pr.py && node eval/T-076/check_6_ca_that.cjs && node eval/T-076/check_1_mo_modal_so_khop.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 3332,
+      "out": "-nghia-phu-hop-va-cach-do.md)\nPASS hạn quyết đọc từ decide-by: T-070 2026-11-10, T-016 2026-10-31\nPASS không PR nào hiện (mọi PR đã có sự kiện merged)\nPASS trang 390px: số trên khối Capu = 4 (không phải 7), thấy 4\nPASS modal: T-072,T-074,T-016,T-070 (leo thang trước; quyết xếp theo hạn: T-016 hạn 2026-10-31 trước T-070 hạn 2026-11-10); thấy T-072,T-074,T-016,T-070\nFAIL mỗi dòng link Decision Request đứng đầu; T-072, T-074 thêm một link Issue (T-081), các dòng khác chỉ một link\nPASS đối chứng không có sự kiện merged: T-052,T-055,T-057,T-067,T-068 quay lại danh sách; thấy [T-016,T-044,T-046,T-052,T-055,T-057,T-067,T-068,T-070,T-072,T-074]\nPASS sổ cái thật: capu_queue đúng hình dạng, mọi mã việc có trên board\nPASS sổ cái thật: mọi việc đang escalated đều có trong capu_queue\nFAIL 3 ý không đạt",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 31,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 139,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1076,
+      "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-002-workflow-context-hop-le.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 65,
+      "out": "PASS 7 workflow: không secrets/env sai chỗ trong if, inputs đều khai, không in env khi có secret cấp job",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-001-tat-ca-luon-du.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 11565,
+      "out": "PASS all-complete",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-002-cay-bat-bien-khop-tong.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 17896,
+      "out": "PASS kr-sum",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-003-doi-bo-loc-khong-doi-hinh.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 6379,
+      "out": "PASS shape-stable",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-004-san-pham-do-so-cai-xuat.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 262,
+      "out": "PASS product do sổ cái xuất, khớp normalize_area",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-005-export-khong-sap-vi-area-sua-tay.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 121,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-006-so-capu-bang-so-dong-modal.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 14234,
+      "out": "dal\nPASS không capu_queue @1280: số trên khối (2) = số dòng modal (2)\nPASS không capu_queue @1280: mỗi mã việc tối đa một dòng: T-1,T-3\nPASS không capu_queue @1280: không lỗi trang \nPASS không capu_queue @390: bấm số trên khối Capu mở #capu-modal\nPASS không capu_queue @390: số trên khối (2) = số dòng modal (2)\nPASS không capu_queue @390: mỗi mã việc tối đa một dòng: T-1,T-3\nPASS không capu_queue @390: không lỗi trang \nPASS rỗng @1280: bấm số trên khối Capu mở #capu-modal\nPASS rỗng @1280: số trên khối (0) = số dòng modal (0)\nPASS rỗng @1280: mỗi mã việc tối đa một dòng: \nPASS rỗng @1280: không lỗi trang \nPASS rỗng @390: bấm số trên khối Capu mở #capu-modal\nPASS rỗng @390: số trên khối (0) = số dòng modal (0)\nPASS rỗng @390: mỗi mã việc tối đa một dòng: \nPASS rỗng @390: không lỗi trang \nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-007-loc-san-pham-toan-man-hinh.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 26215,
+      "out": "PASS không capu_queue: lọc P giống hệt màn hình chỉ có việc của P (gồm số, chữ phụ, đèn khối Capu)\nPASS có capu_queue: lọc P giống hệt màn hình chỉ có việc của P (gồm số, chữ phụ, đèn khối Capu)\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-008-capu-queue-khong-chua-viec-da-xu-ly.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 271,
+      "out": "PASS sổ cái thật: mỗi mã việc tối đa một phần tử (0 phần tử)\nPASS sổ cái thật: mọi việc escalated trên board có trong capu_queue: thiếu []\nPASS sổ cái giả: mỗi mã việc tối đa một phần tử (2 phần tử)\nPASS sổ cái giả: T-954 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái giả: T-954 loại diff-b chỉ cho việc B/C đã done (tier B, state done)\nPASS sổ cái giả: T-957 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái giả: mọi việc escalated trên board có trong capu_queue: thiếu []\nPASS sổ cái giả: capu_queue đúng {T-954: diff-b (PR #95 còn mở), T-957: escalated}, thấy {'T-954': 'diff-b', 'T-957': 'escalated'}\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-009-link-capu-an-toan-cong-khai-khong-ro.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 8945,
+      "out": "PASS (a) bản công khai: 0 phần tử capu_queue, 653 sự kiện\nPASS all: số trên khối 0 = số dòng 0\nPASS all: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS all: không lỗi trang \nPASS planner: số trên khối 0 = số dòng 0\nPASS planner: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS planner: không lỗi trang \nPASS hq: số trên khối 0 = số dòng 0\nPASS hq: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS hq: không lỗi trang \nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-010-capu-queue-khong-doc-thu-muc-con-inbox.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 316,
+      "out": "PASS capu_queue không đổi khi thêm DR vào thư mục con inbox/capu (0 phần tử)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-011-viec-moi-pr-da-merged-khong-cho-capu.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 248,
+      "out": "PASS việc B/C mà mọi PR đã biết đã merged/closed không còn chờ Capu, bất kể tuổi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-012-dr-da-quyet-khong-con-dong.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 233,
+      "out": "PASS DR đã quyết (sau lần hỏi cuối) không còn dòng decision/blocked; hỏi lại thì vào lại",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
