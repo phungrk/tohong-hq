@@ -1,0 +1,125 @@
+{
+  "task": "T-076",
+  "at": "2026-11-06T04:17",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/dashboard",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_1_mo_modal_so_khop.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 7019,
+      "out": "thì modal hiện\nFAIL desktop: số dòng = số trên khối (0)\nFAIL desktop: thứ tự leo thang trước, rồi bậc C, rồi bậc B, trong nhóm theo số việc tăng dần; thấy \nFAIL desktop: #capu-modal có role=dialog và aria-modal=true\nPASS desktop: không lỗi trang \nPASS iphone390: chưa bấm thì modal không hiện\nFAIL iphone390: số trên khối Capu = 4 (2 leo thang + 1 bậc B + 1 bậc C; T-62 bậc A và T-63 không có PR mở không đếm), thấy 5\nFAIL iphone390: bấm số trên khối Capu thì modal hiện\nFAIL iphone390: số dòng = số trên khối (0)\nFAIL iphone390: thứ tự leo thang trước, rồi bậc C, rồi bậc B, trong nhóm theo số việc tăng dần; thấy \nFAIL iphone390: #capu-modal có role=dialog và aria-modal=true\nPASS iphone390: không lỗi trang \nFAIL thiếu capu_queue: số dòng = số trên khối = 2 (luật cũ), thấy 0/2\nFAIL 11 ý không đạt",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_2_dong_va_link.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 2585,
+      "out": "FAIL desktop: 7 dòng, thấy \nFAIL desktop: dòng leo thang có mã, tên, loại \"Leo thang\"\nFAIL desktop: leo thang trỏ file Decision Request trên GitHub blob/main/inbox/capu\nFAIL desktop: leo thang chưa có file thì trỏ thư mục inbox/capu (không mất dòng, không link rỗng)\nFAIL desktop: dòng bậc B: loại \"Đọc diff hành vi\", bậc B, link PR\nFAIL ngoại lệ Cannot read properties of undefined (reading 'kind')",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_3_export_pr.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 107,
+      "out": "FAIL exporter không chạy: export_dashboard.py: error: unrecognized arguments: --pr-state-file /tmp/tmphm4ejhxp/pr_state.json",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_4_dong_ban_phim_390.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 2550,
+      "out": "FAIL desktop: khối Capu nhận focus bàn phím\nFAIL desktop: khối Capu có role=button và aria-label mô tả\nFAIL desktop: Enter mở modal\nFAIL ngoại lệ page.evaluate: TypeError: Cannot read properties of null (reading 'contains')\n    at eval (eval at evaluate (:311:30), <anonymous>:1:46)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_5_rong.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 5035,
+      "out": "FAIL số trên khối = 0 dù có việc bậc B/C vừa xong (PR đã merge), thấy 2\nFAIL khối ở 0 vẫn mở được modal\nPASS không có dòng việc nào\nFAIL có đúng dòng \"Không có việc nào chờ anh\" (data-capu-empty), thấy null\nPASS Esc đóng modal rỗng\nPASS có việc chờ thì không có dòng \"Không có việc nào chờ anh\"\nFAIL 3 ý không đạt",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_6_ca_that.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 464,
+      "out": "FAIL ngoại lệ exporter lỗi: export_dashboard.py: error: unrecognized arguments: --pr-state-file /tmp/t076-HONeDl/merged-state.json",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_7_cong_khai.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 95,
+      "out": "FAIL exporter không chạy: export_dashboard.py: error: unrecognized arguments: --pr-state-file /tmp/tmpi0lj3keo/pr_state.json",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 30,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 129,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-001-tat-ca-luon-du.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 305,
+      "out": "FAIL thiếu d3.min.js cục bộ: đặt D3=/đường/dẫn/d3.min.js",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-002-cay-bat-bien-khop-tong.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 322,
+      "out": "FAIL thiếu d3.min.js cục bộ: đặt D3=/đường/dẫn/d3.min.js",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-003-doi-bo-loc-khong-doi-hinh.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 247,
+      "out": "FAIL thiếu d3.min.js cục bộ: đặt D3=/đường/dẫn/d3.min.js",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-004-san-pham-do-so-cai-xuat.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 230,
+      "out": "PASS product do sổ cái xuất, khớp normalize_area",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-005-export-khong-sap-vi-area-sua-tay.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 138,
+      "out": "PASS",
+      "tier": 2
+    }
+  ],
+  "hint": "spec"
+}
