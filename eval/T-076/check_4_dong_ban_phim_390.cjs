@@ -7,23 +7,23 @@ const data = dash([T('T-72', { state: 'escalated', owner: 'product' }), ...many]
   for (const [name, vp, touch] of [['desktop', { width: 1280, height: 900 }, false], ['iphone390', { width: 390, height: 844 }, true]]) {
     const o = await L.open(data, vp, { touch }), p = o.page;
     // bàn phím: Tab tới khối Capu, Enter mở; Space cũng mở
-    await p.focus('#nd_capu'); R.ok(await p.evaluate(() => document.activeElement.id) === 'nd_capu', name + ': khối Capu nhận focus bàn phím');
+    await p.focus('#nd_capu', { timeout: 2000 }).catch(() => {}); R.ok(await p.evaluate(() => document.activeElement.id) === 'nd_capu', name + ': khối Capu nhận focus bàn phím');
     R.ok((await p.$eval('#nd_capu', e => e.getAttribute('role'))) === 'button' && /Capu|chờ/i.test(await p.$eval('#nd_capu', e => e.getAttribute('aria-label') || '')), name + ': khối Capu có role=button và aria-label mô tả');
     await p.keyboard.press('Enter'); await p.waitForTimeout(300); R.ok(await L.modalOpen(o), name + ': Enter mở modal');
-    R.ok(await p.evaluate(() => !!document.querySelector('#capu-modal').contains(document.activeElement)), name + ': mở xong focus nằm trong modal');
+    R.ok(await p.evaluate(() => !!(document.querySelector('#capu-modal') && document.querySelector('#capu-modal').contains(document.activeElement))), name + ': mở xong focus nằm trong modal');
     // bẫy focus: Tab nhiều lần không ra khỏi modal
-    let out = false; for (let i = 0; i < 40; i++) { await p.keyboard.press('Tab'); if (!await p.evaluate(() => document.querySelector('#capu-modal').contains(document.activeElement))) out = true; }
+    let out = false; for (let i = 0; i < 40; i++) { await p.keyboard.press('Tab'); if (!await p.evaluate(() => !!(document.querySelector('#capu-modal') && document.querySelector('#capu-modal').contains(document.activeElement)))) out = true; }
     R.ok(!out, name + ': Tab 40 lần không ra khỏi modal'); 
     await p.keyboard.press('Escape'); await p.waitForTimeout(250); R.ok(!(await L.modalOpen(o)), name + ': Esc đóng');
     R.ok(await p.evaluate(() => document.activeElement.id) === 'nd_capu', name + ': đóng xong focus về khối Capu');
     await p.keyboard.press('Space'); await p.waitForTimeout(300); R.ok(await L.modalOpen(o), name + ': Space mở modal');
-    await p.click('#capu-modal-close'); await p.waitForTimeout(250); R.ok(!(await L.modalOpen(o)), name + ': nút X (#capu-modal-close) đóng');
+    await p.click('#capu-modal-close', { timeout: 2000 }).catch(() => {}); await p.waitForTimeout(250); R.ok(!(await L.modalOpen(o)), name + ': nút X (#capu-modal-close) đóng');
     await L.clickNode(o); R.ok(await L.modalOpen(o), name + ': chạm khối Capu mở lại');
     await p.mouse.click(2, 2); await p.waitForTimeout(250); R.ok(!(await L.modalOpen(o)), name + ': chạm ngoài (góc màn hình) đóng');
     await L.clickNode(o);
-    const b = await p.locator('#capu-modal [data-capu-panel]').boundingBox(); await p.mouse.click(b.x + b.width / 2, b.y + 10); await p.waitForTimeout(250);
+    const b = await p.locator('#capu-modal [data-capu-panel]').boundingBox({ timeout: 2000 }).catch(() => null); if (b) await p.mouse.click(b.x + b.width / 2, b.y + 10); await p.waitForTimeout(250);
     R.ok(await L.modalOpen(o), name + ': chạm trong khung modal không đóng');
-    const g = await p.evaluate(() => { const q = document.querySelector('#capu-modal [data-capu-panel]').getBoundingClientRect(), c = document.querySelector('#capu-modal-close').getBoundingClientRect();
+    const g = await p.evaluate(() => { if (!document.querySelector('#capu-modal [data-capu-panel]')) return { sw: 0, iw: 1, l: -1, r: 9e9, t: -1, bt: 9e9, ih: 0, cw: 0, ch: 0, over: '', sh: 9e9, chh: 0 }; const q = document.querySelector('#capu-modal [data-capu-panel]').getBoundingClientRect(), c = document.querySelector('#capu-modal-close').getBoundingClientRect();
       return { sw: document.documentElement.scrollWidth, iw: innerWidth, l: q.left, r: q.right, t: q.top, bt: q.bottom, ih: innerHeight, cw: c.width, ch: c.height, over: getComputedStyle(document.querySelector('#capu-modal [data-capu-panel]')).overflowY, sh: document.querySelector('#capu-modal [data-capu-panel]').scrollHeight, chh: document.querySelector('#capu-modal [data-capu-panel]').clientHeight }; });
     R.ok(g.sw <= g.iw && g.l >= 0 && g.r <= g.iw, name + ': không cuộn ngang, khung modal nằm trong chiều rộng ' + g.iw);
     R.ok(g.t >= 0 && g.bt <= g.ih, name + ': khung modal nằm trong chiều cao màn hình với 13 dòng');
