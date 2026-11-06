@@ -45,7 +45,7 @@ ASK_BLOCK_RE = re.compile(r"^\s*Chờ Capu\b", re.I)
 KIND_ORDER = ["escalated", "decision", "blocked", "merge-c", "diff-b"]
 
 
-def build_capu_queue(tasks, lines):
+def build_capu_queue(tasks, lines, issues=None):
     """Danh sách việc chờ Capu (spec T-076 D1-D5): chỉ đọc sổ cái, không token, không mạng."""
     evs = []
     for l in lines:
@@ -82,6 +82,7 @@ def build_capu_queue(tasks, lines):
             m = re.match(r"(T-\d+)-", f.name)
             if m:
                 inbox.setdefault(m.group(1), []).append(f)
+    issues = issues or {}
     t_now = task.now()
     queue = []
     for t in tasks:
@@ -109,6 +110,7 @@ def build_capu_queue(tasks, lines):
             else:
                 links.append({"label": "Decision Request", "url": f"{GH}tohong-hq/tree/main/inbox/capu", "pr_state": ""})
         tier = str(t.get("tier") or "")
+        pr_links = []
         if t.get("owner") == "engineering" and st == "done" and tier in ("B", "C"):
             allpr = prs.get(tid, [])
             open_pr = [u for u in allpr if u not in processed]
@@ -120,9 +122,16 @@ def build_capu_queue(tasks, lines):
                     kinds.add("diff-b" if tier == "B" else "merge-c")
             for u in open_pr:
                 m = PR_RE.fullmatch(u)
-                links.append({"label": f"PR {m.group(1)}#{m.group(2)}", "url": u, "pr_state": "open"})
+                pr_links.append({"label": f"PR {m.group(1)}#{m.group(2)}", "url": u, "pr_state": "open"})
         if not kinds:
             continue
+        # T-081 D-I1: link Issue (sau Decision Request, trước PR) khi board có issue là số nguyên dương
+        iss = str(issues.get(tid, "")).strip()
+        if len(iss) >= 2 and iss[0] == '"' and iss[-1] == '"':   # chỉ bỏ nháy kép khi có cặp bao ngoài
+            iss = iss[1:-1].strip()
+        if re.fullmatch(r"[1-9][0-9]*", iss):
+            links.append({"label": f"Issue #{iss}", "url": f"{GH}tohong-hq/issues/{iss}", "pr_state": ""})
+        links.extend(pr_links)
         decide_by = ""
         if files and kinds & {"escalated", "decision", "blocked"}:
             m = re.search(r"(?m)^decide-by:\s*(\d{4}-\d{2}-\d{2})", files[-1].read_text(encoding="utf-8", errors="replace"))
@@ -187,7 +196,8 @@ def export(out: Path, public: bool = False):
     if reg_dir.is_dir():
         regression_evals = sum(1 for p in reg_dir.iterdir() if not p.name.startswith(".") and p.name != "README.md")
 
-    capu_queue = build_capu_queue(tasks, lines)
+    issue_map = {t["id"]: t.get("issue", "") for t in task.all_tasks()}   # chỉ để dựng link trong capu_queue, không vào tasks[]
+    capu_queue = build_capu_queue(tasks, lines, issue_map)
 
     if public:
         # Bản công khai: bỏ nội dung chi tiết (defect, ghi chú, đường dẫn file)
