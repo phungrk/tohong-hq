@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { CATEGORIES, sha, cardSha, buildCandidates } from './candidates.mjs';
+import { CATEGORIES, sha, cardSha, buildCandidates, TOP_CANDIDATES } from './candidates.mjs';
 import { SCHEMA } from './metric.mjs';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const raw = fs.readFileSync(path.join(HERE, '..', 'profiles.json'), 'utf8');
@@ -14,7 +14,7 @@ const pool = mod.VENDOR_POOL, byId = Object.fromEntries(pool.map((v) => [v.id, v
 const graders = ['SAMPLE-1', 'SAMPLE-2', 'SAMPLE-3'];
 const labels = [];
 for (const p of profiles) for (const c of CATEGORIES) {
-  const top = mod.computeMatches(p, { category: c, limit: 5 }).vendors.map((v) => v.id);
+  const top = mod.computeMatches(p, { category: c, limit: TOP_CANDIDATES }).vendors.map((v) => v.id);
   for (const cand of buildCandidates(p, c, top, pool)) for (const g of graders)
     labels.push({ profile: p.id, category: c, vendor: cand.vendor, grader: g,
       fit: parseInt(sha(`${g}|${p.id}|${cand.vendor}`, 2), 16) % 2 === 0, role: cand.role, card: cardSha(byId[cand.vendor]) });

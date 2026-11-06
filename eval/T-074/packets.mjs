@@ -54,7 +54,7 @@ Cách xét:
 Ví dụ minh hoạ (vendor và cặp đôi giả, không có trong dữ liệu):
 - Cặp đôi thích phong cách truyền thống, ngân sách chụp ảnh 20 triệu. Thẻ: "Studio chuyên phóng sự cưới truyền thống, áo dài, lễ gia tiên", giá 12–25 triệu, 4,8 sao. Trả lời: co (hợp phong cách, có gói trong ngân sách).
 - Cùng cặp đôi. Thẻ: "Chuyên chụp concept Hàn Quốc ngoại cảnh, nền studio màu pastel", giá 10–18 triệu. Trả lời: khong (giá vừa nhưng phong cách lệch hẳn).
-- Cặp đôi thích sang trọng, ngân sách makeup 15 triệu. Thẻ: mô tả sơ sài, không ảnh, chưa có đánh giá, nhưng giá phù hợp. Trả lời: khong nếu không có gì cho thấy hợp; co nếu mô tả hoặc ảnh cho thấy rõ hợp.
+- Cặp đôi thích sang trọng, ngân sách makeup 15 triệu. Thẻ: mô tả một câu sơ sài, không ảnh, chưa có đánh giá, không có gì cho thấy hợp phong cách. Trả lời: khong (chưa đủ cơ sở để khuyên).
 `;
 
 async function loadMatcher() {
