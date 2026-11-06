@@ -1,6 +1,6 @@
 {
   "task": "T-073",
-  "at": "2026-11-06T01:51",
+  "at": "2026-11-06T02:04",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,15 +12,15 @@
       "eval": "python3 -I eval/T-073/check_1.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 41,
-      "out": "FAIL description='không gian tinh tế' -> ['minimalist'] (không được có minimalist); description='Không Gian Tinh Tế' -> ['minimalist'] (không được có minimalist); description='KHÔNG GIAN TINH TẾ' -> ['minimalist'] (không được có minimalist); description='tinh te' -> ['minimalist'] (không được có minimalist); description='tinh  tế' -> ['minimalist'] (không được có minimalist); description='Dịch vụ tinh tế, chu đáo' -> ['minimalist'] (không được có minimalist); name -> ['minimalist'] (không được có minimalist); merchant_description -> ['minimalist'] (không được có minimalist); review -> ['minimalist'] (không được có minimalist); style_tags thô -> ['minimalist'] (không được có minimalist); 'không gian tinh tế' đứng một mình phải ra danh sách rỗng, nhận ['minimalist']",
+      "ms": 31,
+      "out": "an Tinh Tế' -> ['minimalist'] (không được có minimalist); description='KHÔNG GIAN TINH TẾ' -> ['minimalist'] (không được có minimalist); description='tinh te' -> ['minimalist'] (không được có minimalist); description='tinh  tế' -> ['minimalist'] (không được có minimalist); description='Dịch vụ tinh tế, chu đáo' -> ['minimalist'] (không được có minimalist); name -> ['minimalist'] (không được có minimalist); merchant_description -> ['minimalist'] (không được có minimalist); review -> ['minimalist'] (không được có minimalist); style_tags thô -> ['minimalist'] (không được có minimalist); style_tags thô + text -> ['minimalist'] (không được có minimalist); 'không gian tinh tế' đứng một mình phải ra danh sách rỗng, nhận ['minimalist']; tag chuẩn minimalist không tự củng cố -> ['minimalist'], mong",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-073/check_2.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 128,
+      "ms": 133,
       "out": "FAIL 118 lỗi: marry_0fff143d81d1: styles=['luxury', 'modern', 'minimalist'], mong ['luxury', 'modern']; marry_946e3434221d: styles=['luxury', 'traditional', 'modern', 'minimalist', 'simple'], mong ['luxury', 'traditional', 'modern', 'simple']; marry_3122d81d9853: styles=['minimalist'], mong []; marry_722be314c3b2: styles=['traditional', 'minimalist'], mong ['traditional']; marry_2bd430732483: styles=['minimalist', 'simple'], mong ['simple']; marry_3c8fd3e91ccf: styles=['minimalist'], mong []",
       "tier": 1
     },
@@ -28,15 +28,23 @@
       "eval": "python3 -I eval/T-073/check_3.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 133,
-      "out": "FAIL bỏ minimalist cũ, giữ luxury: style_tags=['minimalist', 'luxury'], mong ['luxury']; bỏ minimalist cũ, giữ luxury: style_tags_removed=None, mong ['minimalist']; không text -> rỗng: style_tags=['minimalist', 'korean'], mong []; không text -> rỗng: style_tags_removed=None, mong ['minimalist', 'korean']; thêm mới, bỏ cũ: style_tags=['rustic', 'modern'], mong ['modern']; thêm mới, bỏ cũ: style_tags_removed=None, mong ['rustic']; lần 1: style_tags=['minimalist', 'simple', 'luxury', 'modern'], mong ['luxury', 'modern']; thứ tự không theo extractor",
+      "ms": 130,
+      "out": "FAIL bỏ minimalist cũ, giữ luxury: style_tags=['minimalist', 'luxury'], mong ['luxury']; bỏ minimalist cũ, giữ luxury: style_tags_removed=None, mong ['minimalist']; không text -> rỗng: style_tags=['minimalist', 'korean'], mong []; không text -> rỗng: style_tags_removed=None, mong ['minimalist', 'korean']; thêm mới, bỏ cũ: style_tags=['rustic', 'modern'], mong ['modern']; thêm mới, bỏ cũ: style_tags_removed=None, mong ['rustic']; lần 1: style_tags=['simple', 'minimalist', 'luxury', 'modern'], mong ['luxury', 'modern']; style_tags ['simple', 'minimalist', 'luxury', 'modern'] không bằng kết quả extractor trên văn bản nguồn (thứ tự hoặc nội dung); tên gói thô -> luxury: style_tags=['Gói dịch vụ chủ đề LUXURY PARTY', 'luxury'], mong ['luxury']",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-073/check_4.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 31,
+      "out": "FAIL chưa có tools/regen-pool-styles.sh trong repo tohong (lệnh tạo lại pool theo spec)",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 81,
+      "ms": 26,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -44,8 +52,32 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 148,
+      "ms": 127,
       "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/pool/inv-001-pool-khop-van-ban-nguon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 479,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/pool/inv-002-tag-chuan-khong-tu-cung-co.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 40,
+      "out": "PASS chưa áp dụng (pool vẫn là bản @6a9a9c7, T-073 chưa ship)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/pool/inv-003-tinh-te-khong-phai-toi-gian.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 31,
+      "out": "PASS chưa áp dụng (pool vẫn là bản @6a9a9c7, T-073 chưa ship)",
       "tier": 2
     }
   ],

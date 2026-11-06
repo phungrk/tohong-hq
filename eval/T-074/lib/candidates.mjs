@@ -25,14 +25,14 @@ export function cardOf(v) {
     price: `${v.priceMin}–${v.priceMax} triệu`,
     rating: v.rating > 0 ? v.rating : null,
     reviewCount: v.reviewCount || 0,
-    capacity: v.capacity ? `${v.capacity.min}–${v.capacity.max} khách` : null,
     photos: (v.photos || []).slice(0, 3).map((p) => p.url),
   };
 }
 export const cardSha = (v) => sha(JSON.stringify(cardOf(v)));
 
 export function profileText(p) {
-  const st = p.preferredStyles.join(' + ');
+  const VI = { traditional: 'truyền thống', luxury: 'sang trọng', modern: 'hiện đại', korean: 'kiểu Hàn Quốc', natural: 'tự nhiên', rustic: 'mộc mạc đồng quê' };
+  const st = p.preferredStyles.map((x) => VI[x] || x).join(' + ');
   const b = p.budgetByCategory;
   return `Cặp đôi cưới tại TP.HCM, tháng ${Number(p.weddingDate.slice(5, 7))}/${p.weddingDate.slice(0, 4)}, khoảng ${p.guestCount} khách, thích phong cách ${st}. ` +
     `Ngân sách (triệu đồng, cùng đơn vị với giá trên thẻ): chụp ảnh ${b.photography}, makeup ${b.makeup}, trang phục ${b.attire}, tiệc/địa điểm ${b.venue}.`;

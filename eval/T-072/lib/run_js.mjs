@@ -43,27 +43,24 @@ if (mode === "cases") {
         const A = { ...b, id: "twin_a", styles: ["editorial"], tags: ["editorial"] };
         const B = { ...b, id: "twin_b", styles: [], tags: [] };
         const M = { ...b, id: "twin_m", styles: [couple[0]], tags: [couple[0]] };
-        const r = run(couple, [A, B, M], { category: cat, limit: 10 });
+        // Cả danh sách của hạng mục (pool thật + 3 anh em), không cắt trang: đo thứ tự thật mà thẻ vendor trả về.
+        const r = run(couple, [...VENDOR_POOL.filter((v) => v.category === cat), A, B, M], { category: cat, limit: 100000 });
         const get = (id) => r.vendors.find((x) => x.id === id);
         if (!get("twin_a") || !get("twin_b") || !get("twin_m")) { res.push({ error: "pool_opt_unsupported_or_vendor_dropped", cat }); continue; }
         res.push({ cat, base: b.id, style: couple[0], lech: get("twin_a").match.totalScore, khong_tag: get("twin_b").match.totalScore, khop: get("twin_m").match.totalScore,
-          order: r.vendors.map((x) => x.id) });
+          order: r.vendors.map((x) => x.id).filter((id) => id.startsWith("twin_")) });
       }
     }
   }
   out(res);
 } else if (mode === "pool") {
+  // Mỗi tổ hợp hồ sơ x style x hạng mục: số vendor khớp (theo R2, eval tự tính từ tag) trong top 10 của danh sách trả về.
   const res = [];
+  const byId = new Map(VENDOR_POOL.map((v) => [v.id, v]));
   for (const p of C.pool_profiles) for (const st of C.pool_styles) for (const cat of C.pool_categories) {
-    const eligible = VENDOR_POOL.filter((v) => v.category === cat && v.isVerified && v.city === "HCMC" && (!(v.rating > 0) || v.rating >= 3.5));
-    const byId = new Map(VENDOR_POOL.map((v) => [v.id, v]));
-    const M = eligible.filter((v) => isMatched([st], v.styles)).length;
     const top = computeMatches({ ...p, city: "HCMC", preferredStyles: [st] }, { category: cat, limit: 10 });
     const got = top.vendors.filter((v) => isMatched([st], byId.get(v.id)?.styles)).length;
-    const all = computeMatches({ ...p, city: "HCMC", preferredStyles: [st] }, { category: cat, limit: 5000 });
-    let seenUnmatched = false, violated = false;
-    for (const v of all.vendors) { const m = isMatched([st], byId.get(v.id)?.styles); if (!m) seenUnmatched = true; else if (seenUnmatched) { violated = true; break; } }
-    res.push({ profile: JSON.stringify(p), style: st, cat, eligible_matched: M, expected: Math.min(10, M), got, tier_violated: violated });
+    res.push({ profile: JSON.stringify(p), style: st, cat, got });
   }
   out(res);
 } else if (mode === "text") {

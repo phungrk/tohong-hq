@@ -42,9 +42,22 @@ elif mode == "twins":
             res.append({"style": st, "lech": a, "khong_tag": n, "khop": m})
     print(json.dumps(res))
 elif mode == "rank":
-    # 25 vendor lệch/không tag chất lượng cao + 3 vendor khớp chất lượng thấp; top_n=20 phải chứa cả 3 khớp.
-    vs = [vendor(f"u{i}", ["editorial"] if i % 2 else [], reviews=[{"source": "marry", "rating": 5.0, "count": 300, "last_updated": datetime.utcnow().isoformat()}]) for i in range(25)]
-    vs += [vendor(f"m{i}", ["soft"], reviews=[{"source": "marry", "rating": 3.6, "count": 5, "last_updated": datetime.utcnow().isoformat()}],
-                  price_range={"min_vnd": 60_000_000, "max_vnd": 90_000_000, "unit": "package"}) for i in range(3)]
-    top = score_and_rank(vs, prof(["korean"]), top_n=20)
-    print(json.dumps({"ids": [v["id"] for v, _ in top]}))
+    # Thứ tự gu (cách B, ADR-026): các vendor giống hệt nhau, chỉ khác tag. Couple chọn korean.
+    # stage2: M (tag soft, khớp) phải đứng trên A (tag lệch) và B (không tag), dù chất lượng bằng nhau.
+    now = datetime.utcnow().isoformat()
+    s2 = score_and_rank([vendor("A", ["editorial"]), vendor("B", []), vendor("M", ["soft"])], prof(["korean"]), top_n=20)
+    # đường chat đầy đủ (stage 1-3, gồm MMR). Hai ca, mỗi ca trả [id, điểm sau boost] theo thứ tự cuối của WeddingMatcher.match:
+    # (a) "sinh đôi": 4 vendor khớp CÙNG tag (MMR phạt trùng tag) + 4 vendor không khớp, mọi thứ khác bằng nhau; pool 8 > top_k 6 (MMR chỉ chạy khi pool lớn hơn top_k).
+    # (b) "nguoc" (ca của Spec critic ở D2, chỉnh số để tách điểm rõ): 6 vendor khớp rating 3,6, 10 đánh giá, giá 30-90tr (trần giá gấp 3 lần ngân sách 30tr)
+    #     + 6 vendor không khớp rating 4,9, 300 đánh giá, giá 18-21tr (đúng ngân sách), top_k 5. Vendor khớp có điểm sau boost thấp hơn rõ
+    #     (khoảng 55,9 so với 61,3-62,2) nên phải đứng dưới vendor không khớp.
+    from matcher import WeddingMatcher
+    def chat(pool, k):
+        res = WeddingMatcher(pool).match(prof(["korean"]), top_k=k, enable_relaxation=False)
+        return [[m.vendor["id"], m.score] for m in res.matches]
+    twins = [vendor(f"m{i}", ["korean"]) for i in range(4)] + [vendor("u0", ["editorial"]), vendor("u1", []), vendor("u2", ["luxury"]), vendor("u3", ["rustic"])]
+    rv = lambda r, c: {"reviews": [{"source": "marry", "rating": r, "count": c, "last_updated": now}]}
+    u_price = [18, 19, 19.5, 20, 20.5, 21]; u_tags = [["editorial"], [], ["luxury"], ["rustic"], ["natural"], ["simple"]]
+    nguoc = [vendor(f"m{i}", ["korean"], price_range={"min_vnd": 30_000_000, "max_vnd": 90_000_000, "unit": "package"}, **rv(3.6, 10)) for i in range(6)] + \
+            [vendor(f"u{i}", u_tags[i], price_range={"min_vnd": int(u_price[i] * 1e6), "max_vnd": int(u_price[i] * 1e6), "unit": "package"}, **rv(4.9, 300)) for i in range(6)]
+    print(json.dumps({"stage2": [v["id"] for v, _ in s2], "pipeline": chat(twins, 6), "nguoc": chat(nguoc, 5)}))
