@@ -1,0 +1,165 @@
+{
+  "task": "T-078",
+  "at": "2026-11-06T05:48",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/dashboard",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_1_mo_modal_so_khop.cjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 7480,
+      "out": "iệc có cả Decision Request và PR mở chỉ một dòng\nPASS desktop: #capu-modal có role=dialog và aria-modal=true\nPASS desktop: không lỗi trang \nPASS iphone390: chưa bấm thì modal không hiện\nPASS iphone390: số trên khối Capu = 8 (T-62 bậc A và T-63 không có PR mở không đếm; T-64 có DR và PR mở chỉ một dòng), thấy 8\nPASS iphone390: bấm số trên khối Capu thì modal hiện\nPASS iphone390: số dòng = số trên khối (8)\nPASS iphone390: thứ tự T-72,T-74,T-16,T-70,T-64,T-17,T-61,T-60 (loại, rồi decide_by tăng dần, rồi số việc); thấy T-72,T-74,T-16,T-70,T-64,T-17,T-61,T-60\nPASS iphone390: một việc có cả Decision Request và PR mở chỉ một dòng\nPASS iphone390: #capu-modal có role=dialog và aria-modal=true\nPASS iphone390: không lỗi trang \nPASS thiếu capu_queue: số dòng = số trên khối = 2 (luật cũ), thấy 2/2\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_2_dong_va_link.cjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 4957,
+      "out": "hone390: việc đã xong có Decision Request chưa quyết: loại \"Quyết định chờ anh\", link file, hạn\nPASS iphone390: việc vừa bị chặn chờ Capu vừa có DR chưa quyết: loại \"Quyết định chờ anh\", link file, hạn\nPASS iphone390: việc bị chặn chờ Capu không có DR: loại \"Bị chặn - chờ anh làm\", link thư mục\nPASS iphone390: dòng bậc B: \"Đọc diff hành vi\", bậc B, link PR, không có hạn\nPASS iphone390: dòng bậc C: \"Duyệt và tự merge\", bậc C, link PR\nPASS iphone390: việc có hai PR mở: một dòng, hai link theo thứ tự dữ liệu\nPASS iphone390: việc có Decision Request và PR mở: một dòng, link DR trước rồi PR\nPASS iphone390: việc chưa có link PR vẫn hiện, ghi \"chưa có link\", không có thẻ a rỗng\nPASS iphone390: mọi link là https github.com/phungrk/…, mở tab mới, rel có noopener\nPASS iphone390: không lỗi trang\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_3_export_pr.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 182,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_4_dong_ban_phim_390.cjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 12827,
+      "out": "hông ra khỏi modal\nPASS iphone390: Esc đóng\nPASS iphone390: đóng xong focus về khối Capu\nPASS iphone390: Space mở modal\nPASS iphone390: nút X (#capu-modal-close) đóng\nPASS iphone390: chạm khối Capu mở lại\nPASS iphone390: chạm ngoài (góc màn hình) đóng\nPASS iphone390: chạm trong khung modal không đóng\nPASS iphone390: không cuộn ngang, khung modal nằm trong chiều rộng 390\nPASS iphone390: khung modal nằm trong chiều cao màn hình với 13 dòng\nPASS iphone390: 13 dòng không vừa thì khung tự cuộn dọc\nPASS iphone390: nút X vùng bấm >= 44x44px (44x44)\nPASS iphone390: mọi link cao >= 32px để chạm được\nPASS iphone390: khối Capu mở được modal cả khi bảng đang phóng to\nPASS iphone390: Esc lần một chỉ đóng modal, phóng to còn\nPASS iphone390: Esc lần hai đóng phóng to\nPASS iphone390: không lỗi trang \nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_5_rong.cjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 5101,
+      "out": "PASS số trên khối = 0 dù có việc bậc B/C vừa xong (PR đã merge), thấy 0\nPASS khối ở 0 vẫn mở được modal\nPASS không có dòng việc nào\nPASS có đúng dòng \"Không có việc nào chờ anh\" (data-capu-empty), thấy \"Không có việc nào chờ anh\"\nPASS Esc đóng modal rỗng\nPASS có việc chờ thì không có dòng \"Không có việc nào chờ anh\"\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_6_ca_that.cjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 3072,
+      "out": "st có thật (https://github.com/phungrk/tohong-hq/blob/main/inbox/capu/T-074-dinh-nghia-phu-hop-va-cach-do.md)\nPASS hạn quyết đọc từ decide-by: T-070 2026-11-10, T-016 2026-10-31\nPASS không PR nào hiện (mọi PR đã có sự kiện merged)\nPASS trang 390px: số trên khối Capu = 4 (không phải 7), thấy 4\nPASS modal: T-072,T-074,T-016,T-070 (leo thang trước; quyết xếp theo hạn: T-016 hạn 2026-10-31 trước T-070 hạn 2026-11-10); thấy T-072,T-074,T-016,T-070\nPASS mỗi dòng đúng một link tới Decision Request\nPASS đối chứng không có sự kiện merged: T-052,T-055,T-057,T-067,T-068 quay lại danh sách; thấy [T-016,T-044,T-046,T-052,T-055,T-057,T-067,T-068,T-070,T-072,T-074]\nPASS sổ cái thật: capu_queue đúng hình dạng, mọi mã việc có trên board\nPASS sổ cái thật: mọi việc đang escalated đều có trong capu_queue\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_7_cong_khai.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 123,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_8_lenh_merged.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 843,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_9_backfill.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 28,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && node eval/T-076/check_10_dashboard_bo_qua_merged.cjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 4818,
+      "out": "PASS merged trong lịch sử: số trên khối Capu vẫn 1, thấy 1\nPASS merged live: không dot nào chạy, thấy tối đa 0\nPASS merged live: số trên khối Capu vẫn 1, thấy 1\nPASS modal vẫn 1 dòng\nPASS không lỗi trang \nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 24,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 136,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1061,
+      "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-001-tat-ca-luon-du.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 11295,
+      "out": "PASS all-complete",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-002-cay-bat-bien-khop-tong.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 17639,
+      "out": "PASS kr-sum",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-003-doi-bo-loc-khong-doi-hinh.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 6240,
+      "out": "PASS shape-stable",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-004-san-pham-do-so-cai-xuat.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 220,
+      "out": "PASS product do sổ cái xuất, khớp normalize_area",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-005-export-khong-sap-vi-area-sua-tay.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 106,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-006-so-capu-bang-so-dong-modal.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 13843,
+      "out": "dal\nPASS không capu_queue @1280: số trên khối (2) = số dòng modal (2)\nPASS không capu_queue @1280: mỗi mã việc tối đa một dòng: T-1,T-3\nPASS không capu_queue @1280: không lỗi trang \nPASS không capu_queue @390: bấm số trên khối Capu mở #capu-modal\nPASS không capu_queue @390: số trên khối (2) = số dòng modal (2)\nPASS không capu_queue @390: mỗi mã việc tối đa một dòng: T-1,T-3\nPASS không capu_queue @390: không lỗi trang \nPASS rỗng @1280: bấm số trên khối Capu mở #capu-modal\nPASS rỗng @1280: số trên khối (0) = số dòng modal (0)\nPASS rỗng @1280: mỗi mã việc tối đa một dòng: \nPASS rỗng @1280: không lỗi trang \nPASS rỗng @390: bấm số trên khối Capu mở #capu-modal\nPASS rỗng @390: số trên khối (0) = số dòng modal (0)\nPASS rỗng @390: mỗi mã việc tối đa một dòng: \nPASS rỗng @390: không lỗi trang \nPASS",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
