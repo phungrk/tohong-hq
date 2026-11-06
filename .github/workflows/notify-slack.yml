@@ -10,7 +10,7 @@ on:
     branches: [main]
     paths: ["ledger/**", "reports/**"]
   workflow_run:
-    workflows: ["Đồng bộ sổ cái vào main"]
+    workflows: ["Đồng bộ sổ cái vào main", "Quyết trên issue bằng /ok"]
     types: [completed]
   workflow_dispatch:
     inputs:

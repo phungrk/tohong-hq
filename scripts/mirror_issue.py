@@ -7,8 +7,11 @@ Việc nào có trường `issue` trong board/T-xxx.md thì issue đó nhận đ
   ③ Qua Code Gate sự kiện accepted của adversary
   ④ Xong          state done (sau ③, hoặc sau ② với việc chỉ có spec) → comment rồi đóng issue
 Ngoài ra: escalated, hoặc done bậc C chưa merge → gán Capu, comment "cần anh". Không có gì khác.
+Khi escalated, comment gồm câu hỏi, THÂN Decision Request nguyên văn (bỏ frontmatter và comment HTML; quá 2500 ký tự thì
+cắt ở ranh giới dòng + dòng "còn tiếp"), link DR trên main và hướng dẫn trả lời bằng `/ok <quyết định>` (T-079, ADR-027).
 
-Issue KHÔNG BAO GIỜ đổi trạng thái việc. Script chỉ đọc ledger/events.jsonl + board/, không ghi sổ cái.
+Issue KHÔNG đổi trạng thái việc, TRỪ đúng một lệnh: bình luận `/ok` của Capu, do ok_issue.py xử lý ở workflow
+ok-tren-issue.yml (không phải script này). Script này chỉ đọc ledger/events.jsonl + board/, không ghi sổ cái.
 Chạy trong GitHub Actions (mirror-issue.yml) sau mỗi lần sổ cái vào main; trạng thái "đã phản chiếu
 tới sự kiện nào" lưu ở thư mục --state (nhánh mirror-state), như notify_slack.py.
 
@@ -22,6 +25,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -71,6 +75,53 @@ def gate_line(tid):
         return ""
 
 
+DR_LIMIT = 2500
+DR_CONT = "… (còn tiếp) — xem đầy đủ: "
+
+
+def dr_path(e):
+    """File Decision Request của sự kiện leo thang: `link` của sự kiện, không có thì inbox/capu/<T-xxx>-*.md đứng cuối theo chữ cái."""
+    link = (e.get("link") or "").strip()
+    if link and (ROOT / link).is_file():
+        return link
+    found = sorted((ROOT / "inbox" / "capu").glob(f"{e['task']}-*.md"))
+    return found[-1].relative_to(ROOT).as_posix() if found else ""
+
+
+def dr_body(path):
+    """Thân DR nguyên văn: bỏ frontmatter ở đầu file và mọi comment HTML; cắt khoảng trắng đầu cuối."""
+    t = (ROOT / path).read_text(encoding="utf-8").replace("\r\n", "\n")
+    t = re.sub(r"\A\ufeff?---\n.*?\n---[ \t]*(\n|\Z)", "", t, count=1, flags=re.S)
+    return re.sub(r"<!--.*?-->", "", t, flags=re.S).strip()
+
+
+def dr_cut(body):
+    """-> (phần giữ lại, có cắt không): nhiều dòng nguyên nhất mà các dòng nối bằng \\n không quá DR_LIMIT ký tự."""
+    if len(body) <= DR_LIMIT:
+        return body, False
+    keep = []
+    for line in body.split("\n"):
+        if len("\n".join(keep + [line])) > DR_LIMIT:
+            break
+        keep.append(line)
+    return "\n".join(keep).rstrip(), True
+
+
+def escalation_comment(e):
+    tid = e["task"]
+    parts = [f"⚠️ **Leo thang** · `{tid}` cần anh quyết\n\n{e.get('detail', '')}"]
+    path = dr_path(e)
+    if path:
+        body, cut = dr_cut(dr_body(path))
+        if body:
+            parts.append(body)
+        if cut:
+            parts.append(DR_CONT + blob(path))
+        parts.append(f"Decision Request: {blob(path)}")
+    parts.append(f"@{CAPU} trả lời bằng bình luận `/ok <quyết định>` ngay dưới issue này; quyết định được ghi vào sổ cái.")
+    return "\n\n".join(parts)
+
+
 def milestone(e, meta):
     """Trả về (key, comment, hành động) cho một sự kiện, hoặc None."""
     tid, ev, frm = e["task"], e.get("event"), e.get("from", "")
@@ -92,7 +143,7 @@ def milestone(e, meta):
             return (f"{tid}-3", txt + f"\n\n@{CAPU} bậc C: cần anh đọc diff hành vi và tự merge.", "assign-capu")
         return (f"{tid}-3", txt, "close")
     if ev == "escalated":
-        return (f"{tid}-esc-{e['id']}", f"⚠️ **Leo thang** · {e.get('detail', '')[:300]}\n\n@{CAPU} có Decision Request trong `inbox/capu/`.", "assign-capu")
+        return (f"{tid}-esc-{e['id']}", escalation_comment(e), "assign-capu")
     return None
 
 
