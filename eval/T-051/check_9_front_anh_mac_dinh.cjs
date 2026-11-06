@@ -35,6 +35,9 @@ const HARNESS_HTML = '<!doctype html><html><head><meta charset="utf-8"><meta nam
 let b, dev;
 // Chờ theo điều kiện thật (có hạn); hết hạn thì KHÔNG ném lỗi: phép đo phía sau tự báo FAIL đúng chỗ.
 const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeout: ms }).catch(() => null);
+// Sau khi trạng thái tốt xuất hiện, giữ cửa sổ quan sát VI PHẠM có hạn: chờ tới khi điều kiện tốt bị phá (trạng thái hỏng trễ); hết hạn mà vẫn tốt thì đo.
+const hold = (pg, fn, arg, ms = 2500) => pg.waitForFunction(([src, a]) => !(new Function('return (' + src + ')'))()(a), [fn.toString(), arg], { timeout: ms, polling: 100 }).catch(() => null);
+const settleHold = async (pg, fn, arg, ms = 12000) => { await settle(pg, fn, arg, ms); await hold(pg, fn, arg); };
 (async () => {
   await new Promise(r => img.listen(0, '127.0.0.1', r));
   const O = 'http://127.0.0.1:' + img.address().port;
@@ -62,7 +65,7 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
     await pg.goto(`http://127.0.0.1:${port}/__t051.html`);
     try { await pg.waitForFunction(() => document.body.innerText.includes('Vendor Tot'), null, { timeout: 15000 }); } catch (e) { globalThis.__logs.push('BODY=' + (await pg.evaluate(() => document.body.innerText)).slice(0, 200).replace(/\n/g, ' / ')); throw e; }
     // chờ ảnh tải xong/lỗi: ảnh tốt đã hiện, không còn nền URL hỏng nào trong thẻ danh sách
-    await settle(pg, () => { const bg = [...document.querySelectorAll('[data-card="0"] *')].map(x => getComputedStyle(x).backgroundImage).join('|') + [...document.querySelectorAll('[data-card="0"] img')].map(i => i.currentSrc).join('|'); return bg.includes('good1') && bg.includes('good2') && !/404-|html-a/.test(bg); });
+    await settleHold(pg, () => { const bg = [...document.querySelectorAll('[data-card="0"] *')].map(x => getComputedStyle(x).backgroundImage).join('|') + [...document.querySelectorAll('[data-card="0"] img')].map(i => i.currentSrc).join('|'); return bg.includes('good1') && bg.includes('good2') && !/404-|html-a/.test(bg); });
     // thu mọi phần tử có background gắn với từng vendor trong thẻ danh sách: lấy phần tử nền nhỏ nằm cùng hàng với tên vendor
     const info = await pg.evaluate(() => {
       const out = {};
@@ -104,7 +107,7 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
     try {
       await sel('Vendor Lan Lon');
       await pg.waitForSelector('[data-card="1"]', { timeout: 5000 });
-      await settle(pg, () => { const bg = [...document.querySelectorAll('[data-card="1"] *')].map(x => getComputedStyle(x).backgroundImage).join('|'); return bg.includes('good2') && !bg.includes('404-b'); });
+      await settleHold(pg, () => { const bg = [...document.querySelectorAll('[data-card="1"] *')].map(x => getComputedStyle(x).backgroundImage).join('|'); return bg.includes('good2') && !bg.includes('404-b'); });
       const dots = await pg.evaluate(() => ([...document.querySelectorAll('[data-card="1"] button')].filter(b => getComputedStyle(b).height === '6px')).length);
       const det2 = await pg.evaluate(() => [...document.querySelectorAll('[data-card="1"] *')].map(x => getComputedStyle(x).backgroundImage).filter(s => s && s !== 'none'));
       if (det2.some(s => s.includes('404-b'))) fail('chi tiết: ảnh hỏng không được hiện trong gallery');
@@ -117,7 +120,7 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
       await pg.locator('[data-card="1"]').getByText('So sánh', { exact: true }).first().click({ timeout: 5000 });
       await pg.waitForSelector('[data-card="2"]', { timeout: 5000 });
       await pg.waitForFunction(() => document.querySelector('[data-card="2"]').innerText.includes('Vendor Anh Hong'), null, { timeout: 8000 });
-      await settle(pg, () => { const bg = [...document.querySelectorAll('[data-card="2"] *')].map(x => getComputedStyle(x).backgroundImage).join('|'); return bg.includes('good1') && bg.includes('good2') && !/404-|html-a/.test(bg); });
+      await settleHold(pg, () => { const bg = [...document.querySelectorAll('[data-card="2"] *')].map(x => getComputedStyle(x).backgroundImage).join('|'); return bg.includes('good1') && bg.includes('good2') && !/404-|html-a/.test(bg); });
       const pk = await bgsIn(2);
       if (pk.some(s => /404-|html-a/.test(s))) fail('thẻ chọn so sánh: còn hiện ảnh hỏng (anchor hoặc hàng)');
       if (!pk.some(s => s.includes('good2'))) fail('thẻ chọn so sánh: anchor phải hiện ảnh tốt còn lại (good2)');
@@ -126,7 +129,7 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
       await pg.locator('[data-card="2"]').getByText('Vendor Tot', { exact: false }).first().click({ timeout: 5000 });
       await pg.locator('[data-card="2"]').getByText(/So sánh \d+ vendor/).first().click({ timeout: 5000 });
       await pg.waitForSelector('[data-card="3"]', { timeout: 5000 });
-      await settle(pg, () => { const bg = [...document.querySelectorAll('[data-card="3"] *')].map(x => getComputedStyle(x).backgroundImage).join('|'); return bg.includes('good1') && bg.includes('good2') && bg.includes('linear-gradient') && !/404-|html-a/.test(bg); });
+      await settleHold(pg, () => { const bg = [...document.querySelectorAll('[data-card="3"] *')].map(x => getComputedStyle(x).backgroundImage).join('|'); return bg.includes('good1') && bg.includes('good2') && bg.includes('linear-gradient') && !/404-|html-a/.test(bg); });
       const cmp = await bgsIn(3);
       if (cmp.some(s => /404-|html-a/.test(s))) fail('bảng so sánh: còn hiện ảnh hỏng');
       if (!cmp.some(s => s.includes('good1')) || !cmp.some(s => s.includes('good2'))) fail('bảng so sánh: cột có ảnh tốt phải hiện ảnh');

@@ -100,6 +100,12 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
       let el = leaf; while (el.parentElement && cnt(el.parentElement) === 1 && el.parentElement.tagName !== 'BODY') el = el.parentElement;
       return [el, ...el.querySelectorAll('*')].map(x => getComputedStyle(x).backgroundImage).filter(s => s && s !== 'none');
     }, name);
+    // Cửa sổ quan sát vi phạm có hạn: poll tới khi thấy tra trùng id / kèm coupleId (dừng ngay) hoặc hết hạn ms.
+    const watchLookups = async (ls, ms) => {
+      const bad = () => ls.some(l => l.couple) || new Set(ls.map(l => l.id)).size < ls.length;
+      const t0 = Date.now();
+      while (!bad() && Date.now() - t0 < ms) await new Promise(r => setTimeout(r, 100));
+    };
     const checkLookups = (where, ls) => {
       const withCouple = ls.filter(l => l.couple);
       if (withCouple.length) fail(`${where}: tra ảnh mang coupleId=${withCouple[0].couple} (endpoint sẽ tính ghép và gọi LLM trả phí; phải gọi không kèm coupleId)`);
@@ -124,6 +130,7 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
         if (bgs.some(s => s.includes('url(') && /404-|marry/.test(s))) fail(`danh sách đã lưu: ${n} còn hiện ảnh hỏng/marry.vn`);
       }
       if (marry.length) fail('danh sách đã lưu: có request tới marry.vn: ' + marry[0]);
+      await watchLookups(lookups, 3000);
       checkLookups('danh sách đã lưu', lookups);
       await lsChanged(pg);
       const after = await pg.evaluate(() => localStorage.getItem('th_vendors_t051'));
@@ -143,6 +150,7 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
         if (mode !== 'url' && (bg.includes('url(') || bg.includes('rgb(122, 154, 181)') || bg.includes('rgb(212, 160, 160)'))) fail(`Ngân sách: ${n} không có ảnh tốt phải giữ nền sage/sand hiện có của màn này (không ảnh, không gradient danh mục), thấy ${bg.slice(0, 100)}`);
         if (/url\(.*(404-|marry)/.test(bg)) fail(`Ngân sách: ${n} còn hiện ảnh hỏng`);
         if (marry.length) fail(`Ngân sách ${n}: có request tới marry.vn: ` + marry[0]);
+        await watchLookups(lookups, 3000);
         checkLookups('Ngân sách ' + n, lookups);
         await lsChanged(pg);
         const after = await pg.evaluate(() => localStorage.getItem('th_vendors_t051'));
