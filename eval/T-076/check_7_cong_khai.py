@@ -15,6 +15,10 @@ with tempfile.TemporaryDirectory() as tmp:
     ev = [X.handoff_event(1, "T-921", GH + "tohong-front/pull/1"), X.handoff_event(2, "T-922", GH + "tohong-back/pull/2"), X.ev(3, "T-922", "merged", "merged: BI-MAT-MERGE", GH + "tohong-back/pull/2")]
     ev[0]["detail"] = "BI-MAT-CHI-TIET-921"; ev[1]["detail"] = "BI-MAT-CHI-TIET-922"
     fake = X.build(tmp, tasks, ev, {"T-923-bi-mat.md": "2026-11-10"}, {"T-921-v1.md": "NOI-DUNG-BAN-GIAO-BI-MAT " + GH + "tohong-front/pull/1\n"})
+    import os, shutil
+    if os.environ.get("T076_DUMP_DIR"):
+        dd = Path(os.environ["T076_DUMP_DIR"]); shutil.copytree(fake, dd / "check_7_ledger")
+        (dd / "check_7.json").write_text(json.dumps({"now": X.NOW, "ledger": "check_7_ledger", "expect": {"queue": ["T-921", "T-923"], "kinds": {"T-921": "diff-b", "T-923": "escalated"}}}), encoding="utf-8"); sys.exit(0)
     d, err = X.export(fake, tmp / "out", public=True)
     if d is None: print("FAIL exporter không chạy: " + str(err)); sys.exit(1)
     raw = (tmp / "out" / "dashboard.json").read_text(encoding="utf-8")
