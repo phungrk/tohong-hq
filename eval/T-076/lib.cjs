@@ -39,8 +39,9 @@ async function open(data, vp, extra = {}) {
 }
 const nodeCount = o => o.page.$eval('#nd_capu .n', e => e.textContent.trim());
 const modalOpen = o => o.page.locator('#capu-modal').isVisible().catch(() => false);
+// Như người dùng thật: cuộn khối Capu vào khung nhìn rồi mới bấm (trên trang thật khối nằm dưới mép màn hình)
 // Mở modal bằng cách bấm vào chữ số của khối Capu (không phải nhân vật)
-const clickNode = async o => { const b = await o.page.locator('#nd_capu .n').boundingBox(); await o.page.mouse.click(b.x + b.width / 2, b.y + b.height / 2); await o.page.waitForTimeout(300); };
+const clickNode = async o => { const loc = o.page.locator('#nd_capu .n'); await loc.scrollIntoViewIfNeeded(); const b = await loc.boundingBox(); await o.page.mouse.click(b.x + b.width / 2, b.y + b.height / 2); await o.page.waitForTimeout(300); };
 const rows = o => o.page.$$eval('#capu-modal [data-capu-row]', rs => rs.map(r => ({ task: r.getAttribute('data-task'), kind: r.getAttribute('data-kind'), text: r.textContent.replace(/\s+/g, ' ').trim(),
   decide: r.getAttribute('data-decide-by') || '', links: [...r.querySelectorAll('a[data-capu-link]')].map(a => ({ href: a.getAttribute('href'), text: a.textContent.trim(), target: a.getAttribute('target'), rel: a.getAttribute('rel') || '', pr: a.getAttribute('data-pr-state') || '' })) })));
 const reporter = () => { let fails = 0; return { ok: (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; }, done: () => { console.log(fails ? 'FAIL ' + fails + ' ý không đạt' : 'PASS'); return fails ? 1 : 0; } }; };

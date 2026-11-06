@@ -22,7 +22,7 @@ L.dumpCases('check_4', [{ name: '13 dòng', tasks: data.tasks, queue: data.capu_
     await L.clickNode(o); R.ok(await L.modalOpen(o), name + ': chạm khối Capu mở lại');
     await p.mouse.click(2, 2); await p.waitForTimeout(250); R.ok(!(await L.modalOpen(o)), name + ': chạm ngoài (góc màn hình) đóng');
     await L.clickNode(o);
-    const b = await p.locator('#capu-modal [data-capu-panel]').boundingBox({ timeout: 2000 }).catch(() => null); if (b) await p.mouse.click(b.x + b.width / 2, b.y + 10); await p.waitForTimeout(250);
+    await p.locator('#capu-modal [data-capu-panel]').scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => {}); const b = await p.locator('#capu-modal [data-capu-panel]').boundingBox({ timeout: 2000 }).catch(() => null); if (b) await p.mouse.click(b.x + b.width / 2, b.y + 10); await p.waitForTimeout(250);
     R.ok(await L.modalOpen(o), name + ': chạm trong khung modal không đóng');
     const g = await p.evaluate(() => { if (!document.querySelector('#capu-modal [data-capu-panel]')) return { sw: 0, iw: 1, l: -1, r: 9e9, t: -1, bt: 9e9, ih: 0, cw: 0, ch: 0, over: '', sh: 9e9, chh: 0 }; const q = document.querySelector('#capu-modal [data-capu-panel]').getBoundingClientRect(), c = document.querySelector('#capu-modal-close').getBoundingClientRect();
       return { sw: document.documentElement.scrollWidth, iw: innerWidth, l: q.left, r: q.right, t: q.top, bt: q.bottom, ih: innerHeight, cw: c.width, ch: c.height, over: getComputedStyle(document.querySelector('#capu-modal [data-capu-panel]')).overflowY, sh: document.querySelector('#capu-modal [data-capu-panel]').scrollHeight, chh: document.querySelector('#capu-modal [data-capu-panel]').clientHeight }; });
