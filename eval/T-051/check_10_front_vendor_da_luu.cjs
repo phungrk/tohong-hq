@@ -151,5 +151,5 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
     }
     if (!bad) console.log('PASS vendor đã lưu: ảnh theo pool hiện tại, không gọi marry.vn, localStorage nguyên vẹn, ảnh hỏng ra mặc định ở danh sách đã lưu và Ngân sách');
   } catch (e) { fail('lỗi chạy eval: ' + String(e.message).split('\n')[0]); }
-  finally { await cleanup(); setTimeout(() => process.exit(bad), 300); }
+  finally { await cleanup(); process.stdout.write("", () => process.exit(bad)); }
 })();

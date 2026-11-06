@@ -136,5 +136,5 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
     if (!process.exitCode) console.log('PASS ảnh lỗi -> ảnh mặc định ở thẻ danh sách và gallery chi tiết; ảnh hỏng bị bỏ khỏi gallery');
     await b.close();
   } catch (e) { fail('lỗi chạy eval: ' + String(e.message).split('\n')[0] + ' | ' + (globalThis.__logs || []).slice(0, 6).join(' ; ')); }
-  finally { await cleanup(); setTimeout(() => process.exit(process.exitCode || 0), 300); }
+  finally { await cleanup(); process.stdout.write("", () => process.exit(process.exitCode || 0)); }
 })();
