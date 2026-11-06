@@ -18,7 +18,7 @@ export function machineCheck(v, profile, category) {
 }
 export const machinePass = (v, p, c) => { const m = machineCheck(v, p, c); return m.a && m.b; };
 
-// Địa điểm tiệc: giá là triệu đồng MỖI BÀN (GIẢ ĐỊNH chưa xác minh, xem spec); hạng mục khác: triệu đồng.
+// Địa điểm tiệc: giá là triệu đồng MỖI BÀN (bằng chứng ~85% trong spec); hạng mục khác: triệu đồng.
 export function priceLabel(v) {
   const unit = v.category === 'venue' ? ' triệu/bàn' : ' triệu';
   return (v.priceMin === v.priceMax ? `${v.priceMin}` : `${v.priceMin}–${v.priceMax}`) + unit;
@@ -56,7 +56,7 @@ export function shuffled(arr, seed) {
 }
 
 // Ứng viên chấm cho một ô (hồ sơ × hạng mục): top 15 của matcher hiện tại (topIds, đã lấy limit 15) giữ lại những vendor qua luật máy
-// + RANDOM_PER_CELL vendor ngẫu nhiên cùng qua luật máy nhưng ngoài top 15, trộn thứ tự theo seed. Vendor trượt luật máy không cần người chấm.
+// + TỐI ĐA RANDOM_PER_CELL vendor ngẫu nhiên (ít hơn nếu ngoài top 15 không đủ vendor qua A+B: lấy hết) cùng qua luật máy nhưng ngoài top 15, trộn thứ tự theo seed. Vendor trượt luật máy không cần người chấm.
 export function buildCandidates(profile, category, topIds, pool) {
   const topSet = new Set(topIds.slice(0, TOP_CANDIDATES));
   const eligible = pool.filter((v) => machinePass(v, profile, category)).sort((x, y) => (x.id < y.id ? -1 : 1));

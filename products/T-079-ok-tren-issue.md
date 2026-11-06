@@ -1,0 +1,74 @@
+# Spec T-079: Capu quyết việc chờ quyết bằng bình luận `/ok <nội dung>` trên issue
+
+## Ý định
+Capu (2026-11-06): quyết việc chờ quyết "trực tiếp trên task, không qua chat"; lệnh là `/ok <...>` (đổi từ `/quyet`). Chốt ở `decisions/2026-11-06-adr-027-ok-tren-issue.md` (ADR-027, sửa ADR-012 mục 2: issue vẫn là mặt kính, trừ đúng một lệnh). Việc `board/T-079.md`, bậc C, vùng `hq/ledger`.
+
+## Bằng chứng
+- `scripts/task.py cmd_decide` chỉ chạy khi việc ở `escalated`; đã có `--link`, ghi sự kiện `decided` (from `capu`, to chủ việc, việc về `doing`). Không cần đổi `task.py`.
+- `scripts/mirror_issue.py` hiện đã bình luận "Leo thang" (câu hỏi cắt 300 ký tự + "có Decision Request trong inbox/capu/") và gán Capu; chưa có phương án, link DR, hướng dẫn trả lời.
+- `.github/workflows/sync-ledger.yml` chỉ chạy trên push `claude/**`; `mirror-issue.yml`, `notify-slack.yml`, `publish-dashboard-data.yml` chạy lại nhờ `workflow_run` của "Đồng bộ sổ cái vào main" vì push bằng `GITHUB_TOKEN` không kích hoạt workflow `push`.
+- `inbox/capu/T-076-modal-cho-capu-leo-thang.md`: Decision Request thật có dòng `Cần quyết`, `Phương án A/B`, `Khuyến nghị`, `Nếu không quyết` (mẫu `templates/decision-request.md`).
+- Lưu ý: các eval `eval/T-063/*` hiện báo "Lần đầu: ghi nhận N sự kiện cũ, không phản chiếu" vì `mirror_issue.py` bỏ qua lịch sử khi chưa có `mirrored.txt` (sau T-063); eval T-079 tự mồi trạng thái nên không phụ thuộc chuyện này. Ngoài phạm vi T-079, báo Chief of Staff.
+- Ngoài ra là giả định: Capu chỉ có một tài khoản (`phungrk`), dùng điện thoại; tự tin ~80% rằng "việc chờ quyết" trong ý Capu = việc `escalated` (xem Câu hỏi mở).
+
+## Giả thuyết
+Nếu Capu quyết được ngay dưới issue thì thời gian từ lúc việc chờ quyết tới lúc `decided` ngắn lại (không phải mở chat) và mọi quyết định có dấu vết (link bình luận) trong sổ cái. Chỉ số bảo vệ: không có sự kiện `decided` nào do người khác tạo (bất biến đề xuất), sổ cái vẫn chỉ ghi qua `task.py`, `main` không bị viết lại lịch sử.
+
+## Hành vi (người dùng thấy gì)
+
+### A. Việc nào, ai, cú pháp
+A1. **Việc được nhận** = việc trên board có trường `issue` bằng số issue của bình luận **và** `state: escalated`. (Chỉ `escalated` vì đó là trạng thái duy nhất `task.py decide` chấp nhận; việc `blocked` "Chờ Capu" hay `done` có Decision Request chưa quyết, loại (i)/(iii)/(iv) của T-076, **không** quyết được bằng `/ok`: trả lời từ chối `not_escalated`, Capu quyết qua chat.) Nhiều việc cùng số issue: chỉ tính các việc `escalated`; đúng một việc thì chọn việc đó; hơn một thì từ chối `ambiguous`, không đoán.
+A2. **Tác giả.** Chỉ nhận khi **cả ba** điều đúng, đọc từ trường của sự kiện GitHub (không từ nội dung bình luận): `comment.user.login` = `phungrk` (so không phân biệt hoa thường, khớp toàn chuỗi; `phungrk2`, `phungr` không khớp), `comment.user.type` = `User` (bot không qua), và `sender.login` = `phungrk` (người vừa tạo/sửa bình luận cũng phải là Capu, để người có quyền ghi không sửa hộ bình luận của Capu thành lệnh). Sự kiện của bình luận trên pull request (`issue.pull_request` có mặt) và mọi `action` khác `created`/`edited` bị bỏ qua.
+A3. **Cú pháp.** Chuẩn hoá `\r\n` → `\n`. Lệnh là phần đầu của **dòng đầu tiên** của bình luận: bỏ khoảng trắng/tab đầu dòng, rồi `/ok` (không phân biệt hoa thường: `/OK`, `/Ok` đều được) theo sau bởi khoảng trắng/tab/xuống dòng hoặc hết chuỗi. `/okay`, `/ok2`, `//ok`, `ok`, `/quyet`, lệnh nằm giữa câu, ở dòng thứ hai trở đi, hay sau dấu trích dẫn `>` **không** phải lệnh. **Nội dung** = mọi thứ sau `/ok` (hết dòng đầu và các dòng sau), mọi dãy khoảng trắng/xuống dòng gộp thành một dấu cách, cắt đầu cuối. Nội dung được ghi nguyên văn như chữ (một nội dung như `--close` là chữ, **không** phải cờ; việc không bị đóng). Nội dung rỗng: từ chối `empty`. Dài hơn 2000 ký tự sau chuẩn hoá: từ chối `too_long`.
+
+### B. Ghi sổ cái (chỉ khi A1-A3 đạt)
+B1. Hiệu ứng trên sổ cái **đúng bằng** `python3 scripts/task.py decide <T-xxx> --note "<nội dung>" --link <URL bình luận>`: một sự kiện `decided` (`from` capu, `detail` = nội dung, `link` = `comment.html_url`), việc về `doing` giữ bởi chủ việc, `rounds` về 0. Cùng tập khoá sự kiện với đường chat. Không lệnh nào khác, không đổi trạng thái nào khác ngoài `decide` (không `--close`).
+B2. **Một bình luận quyết tối đa một lần.** Nếu sổ cái đã có sự kiện `decided` với `link` bằng URL bình luận này (chạy lại, hoặc Capu sửa bình luận sau khi đã quyết) thì không ghi gì thêm, kết quả `duplicate` và câu trả lời nêu nội dung **đã ghi**, không phải bản sửa. Bình luận không phải lệnh được sửa thành `/ok …` thì tính như bình luận mới (quyết một lần). Bình luận khác (id khác) sau khi việc leo thang lại thì quyết được.
+B3. **Ghi lên `main`.** Phần ghi sổ cái chạy trên bản `main` mới nhất của kho, tạo **một commit** `[T-xxx] <việc gì>` chỉ chứa `board/T-xxx.md` và `ledger/events.jsonl`, đẩy thẳng lên `main` bằng push thường (không force, không viết lại lịch sử, không merge commit). Nếu `main` bị người khác đẩy chen vào (workflow đồng bộ sổ cái, phiên Chief of Staff) làm push bị từ chối thì làm lại từ đầu trên `main` mới (lấy `main`, kiểm lại B2 và A1, ghi lại, đẩy), tối đa 5 lần; không bao giờ dùng rebase/merge giải xung đột trên `events.jsonl`. Hết 5 lần: workflow đỏ, không đăng xác nhận, sổ cái không đổi (Capu gửi lại bình luận mới).
+B4. Sau khi `main` đổi, các workflow hạ nguồn (báo Slack, phản chiếu issue, xuất dữ liệu dashboard) chạy lại như sau mỗi lần đồng bộ sổ cái: tên workflow này nằm trong `workflow_run.workflows` của chúng.
+
+### C. Issue thấy gì
+C1. **Khi việc có issue chuyển sang `escalated`**, bình luận "Leo thang" do `mirror_issue.py` đăng (marker `tohong-mirror:<T-xxx>-esc-<id>`, một lần cho mỗi sự kiện, không trùng khi chạy lại) gồm: câu hỏi cần quyết (`detail`, đầy đủ), các dòng `Phương án …`, `Khuyến nghị`, `Nếu không quyết` lấy từ file Decision Request (đường dẫn `link` của sự kiện `escalated`; không có `link` thì file `inbox/capu/<T-xxx>-*.md` đứng cuối theo chữ cái; không có file thì chỉ câu hỏi), link `https://github.com/<repo>/blob/main/<DR>`, và dòng hướng dẫn "trả lời bằng bình luận `/ok <quyết định>`". Tối đa 2500 ký tự. Vẫn gán Capu. Việc không có issue không bình luận gì. Không đăng lại cho sự kiện cũ (không backfill).
+C2. **Xác nhận** (bình luận của bot dưới issue khi `decided`): bắt đầu bằng marker `<!-- tohong-ok:<id bình luận>:decided -->`, nêu "Đã ghi", mã việc, nội dung đã ghi và việc đang về ai. Mọi `@` trong nội dung được vô hiệu hoá trong câu trả lời (không gửi thông báo cho người lạ); sổ cái giữ nguyên nội dung.
+C3. **Từ chối** (chỉ khi Capu thật gõ `/ok` đúng cú pháp mà không ghi được): bình luận bắt đầu bằng marker `<!-- tohong-ok:<id>:rejected-<mã> -->`, có cụm "Chưa ghi gì vào sổ cái" và lý do tiếng Việt. Mã: `empty`, `too_long`, `no_task` (issue không gắn việc nào), `not_escalated` (nêu trạng thái hiện tại; hướng dẫn quyết qua chat), `ambiguous`. Với mọi trường hợp còn lại (tác giả không phải Capu, bot, người sửa khác, PR, không phải lệnh) **im lặng hoàn toàn**: không bình luận, không ghi gì.
+C4. Mỗi marker chỉ đăng một lần (workflow kiểm các bình luận của bot trước khi đăng); sửa bình luận từ lệnh lỗi sang lệnh đúng cho marker khác nên vẫn nhận xác nhận. Đăng bình luận lỗi (mạng, hạn mức) sau khi sổ cái đã ghi: workflow đỏ nhưng chạy lại thì chỉ đăng phần còn thiếu, không ghi sổ cái lần hai (B2).
+C5. Việc không có issue vẫn quyết qua chat bằng `task.py decide` như cũ, không đổi.
+
+### D. Bảo mật
+D1. Workflow `.github/workflows/ok-tren-issue.yml`, `name: Quyết trên issue bằng /ok`, trigger duy nhất `issue_comment` loại `created`, `edited`. Quyền cấp workflow đúng `contents: write` và `issues: write`, không gì khác. Không secret nào ngoài `GITHUB_TOKEN`; không thêm secret hay biến mới. Checkout `ref: main`, không bao giờ checkout code từ PR/fork. Chỉ dùng action `actions/*`.
+D2. Nội dung bình luận không bao giờ đi vào dòng lệnh shell, biểu thức `${{ … }}` trong `run:`, tên file, hay thành đối số được diễn giải: workflow đưa cả sự kiện cho script qua file payload (`$GITHUB_EVENT_PATH`); script đọc JSON, gọi `task.py decide` bằng hàm/danh sách đối số (không `shell=True`, không `eval/exec`); nội dung chỉ là dữ liệu. Script không tự gọi mạng: việc đăng bình luận là bước riêng của workflow bằng `GITHUB_TOKEN`.
+D3. Lọc sớm theo tài khoản ở cấp job để khỏi chạy với bình luận người lạ; script tự kiểm lại A2 (không tin bộ lọc job).
+
+### E. Dashboard (tiêu chí 5 của Capu)
+E1. **Tách thành việc sau T-079** (đề nghị Chief of Staff mở việc bậc B, vùng `hq/dashboard`, phụ thuộc T-078 đã merge): modal việc chờ Capu (T-076) thêm link "Issue #N" khi việc có `issue`. Lý do không làm trong T-079: sửa `capu_queue.links` (T-076 D2/D3 và `eval/T-076/check_3`, `check_6` đòi `links` chỉ gồm link DR và PR chưa xử lý) nên cần spec T-076 sửa và Spec Gate riêng; làm gộp buộc sửa eval của việc khác. T-079 hoàn tất không phụ thuộc E1.
+
+## Ràng buộc (vòi)
+- Repo: `phungrk/tohong-hq` · Nhánh: `t-079-ok-tren-issue` · Vùng: `hq/ledger`.
+- Việc Engineering: (1) `scripts/ok_issue.py` (hợp đồng với eval: `python3 scripts/ok_issue.py --event <payload.json> [--git]`; stdout có dòng cuối là JSON `{"verdict": "decided|rejected|duplicate|ignored", "task": "", "reason": "", "reply": ""}`; mã thoát 0 cho cả bốn verdict; `--git` bật B3 trong thư mục kho với remote `origin`, nhánh `main`; mã lý do và marker như C2/C3; tài khoản Capu lấy từ `OK_LOGIN`, mặc định `phungrk`; sổ cái từ `TOHONG_ROOT`); (2) `.github/workflows/ok-tren-issue.yml` (checkout, chạy script, đăng `reply` nếu chưa có bình luận bot cùng marker); (3) `mirror_issue.py` phần C1, cập nhật chú thích đầu file và `mirror-issue.yml` ("không có chiều ngược" → trừ `/ok`); (4) thêm tên workflow vào `workflow_run` của `notify-slack.yml`, `mirror-issue.yml`, `publish-dashboard-data.yml`. Không đổi `task.py`.
+- Bất biến đã đọc: `_shared/` (INV-001 không secret: spec không dùng secret), `hq/inv-001` (lệnh `merged` không đổi trạng thái: không chạm), `hq/ledger/inv-001` (trường `issue` là số nguyên dương: A1 so khớp chuỗi số). Không vi phạm bất biến nào. ADR-012 mục 2 bị sửa bởi ADR-027 (đã chốt, Capu).
+- Chạm ranh giới: workflow ghi vào sổ cái và quyền ghi `main` → bậc C, Capu đọc diff và tự merge; file ngoài sổ cái nên PR do workflow sync mở.
+- Không chạm: payment, auth, schema DB, dữ liệu người dùng, secret. Không liên hệ vendor/khách thật.
+- Bậc đề xuất: **C** (đã đặt).
+
+## Tiêu chí chấp nhận và eval
+| # | Tiêu chí (có/không) | Eval |
+| --- | --- | --- |
+| 1 | Việc có issue chuyển sang chờ quyết: issue có đúng 1 bình luận gồm câu hỏi, phương án A/B, khuyến nghị, link DR trên `main`, hướng dẫn `/ok`; không trùng khi chạy lại; việc không issue không bình luận (C1) | `cd /home/user/tohong-hq && python3 eval/T-079/check_1_binh_luan_phuong_an.py` |
+| 2 | `/ok <nội dung>` hợp lệ từ phungrk ghi đúng 1 sự kiện `decided` (from capu, detail = nội dung chuẩn hoá, link = URL bình luận), việc về `doing`, có câu xác nhận; nội dung không bị chạy như lệnh; `@` bị vô hiệu trong trả lời (A2-A3, B1, C2, D2) | `cd /home/user/tohong-hq && python3 eval/T-079/check_2_ok_ghi_so_cai.py` |
+| 3 | Tài khoản khác/bot/người sửa khác/PR/không phải lệnh: sổ cái và board không đổi, im lặng; việc không `escalated`, issue lạ, nhiều việc, nội dung rỗng/quá dài: không đổi, từ chối có lý do (A1-A3, C3) | `cd /home/user/tohong-hq && python3 eval/T-079/check_3_tu_choi.py` |
+| 4 | Việc không có issue vẫn quyết qua chat như cũ; `/ok` không chạm chúng; sự kiện `/ok` cùng khoá với sự kiện chat (C5, B1) | `cd /home/user/tohong-hq && python3 eval/T-079/check_4_viec_khong_issue.py` |
+| 5 | Modal dashboard có link issue | **Tách ra việc sau (E1), chưa có eval ở đây**; xem Câu hỏi mở |
+| 6 | Mỗi bình luận quyết tối đa một lần: chạy lại/sửa không đổi sổ cái, xác nhận nêu nội dung đã ghi; bình luận mới sau khi leo thang lại quyết được (B2, C4) | `cd /home/user/tohong-hq && python3 eval/T-079/check_6_idempotent_va_sua.py` |
+| 7 | Bảo mật cấu hình: quyền tối thiểu, không secret mới, không nội suy nội dung vào shell, checkout `main`, không force-push, script không shell/mạng (D1-D3). Kiểm tĩnh vì Actions không chạy offline được | `cd /home/user/tohong-hq && python3 eval/T-079/check_7_bao_mat.py` |
+| 8 | Ghi lên `main` bằng git thật (remote cục bộ): 1 commit `[T-xxx]` đúng 2 file, tuyến tính; bị chen ngang thì thử lại không xung đột, không mất sự kiện, decided đúng 1 lần; trùng/từ chối không đổi `main`; workflow hạ nguồn bám vào workflow này (B3-B4) | `cd /home/user/tohong-hq && python3 eval/T-079/check_8_ghi_len_main.py` |
+
+Mô phỏng sự kiện: `act` không có, nên eval gọi thẳng `scripts/ok_issue.py` với JSON đúng dạng `issue_comment` và sổ cái tạm qua `TOHONG_ROOT`. Phần mà offline không kiểm được (bộ lọc job `if`, đăng bình luận qua `GITHUB_TOKEN`, chống đăng trùng bằng marker) chỉ kiểm tĩnh ở eval 7 và qua hợp đồng `reply` + marker; nên có một lần thử thật có giám sát của Capu sau merge (không phải eval).
+
+## Bất biến đề xuất (tầng 2)
+`hq/ledger`: **chỉ `phungrk` (type User, và là người gửi sự kiện) mới tạo được sự kiện `decided` qua issue**, và mọi `decided` có link `…/issues/<n>#issuecomment-<id>` phải có `from: capu`, `detail` không rỗng, `<n>` bằng trường `issue` của việc. Bản nháp chạy được: `eval/T-079/inv-draft-001-chi-phungrk-quyet-qua-issue.py` (ma trận tác giả × loại × người gửi × action × PR, và quét sổ cái thật). Spec critic rút vào `eval/invariants/hq/ledger/` khi spec qua cổng.
+
+## Không làm
+Lệnh khác ngoài `/ok` (kể cả `--close`, `/quyet`, huỷ, giao việc); đổi trạng thái khác ngoài `decide`; quyết việc `blocked`/`done` bằng `/ok`; đặt secret/biến mới; mở PR; viết lại lịch sử; trả lời người lạ; sửa hay xoá bình luận của Capu; backfill bình luận cho sự kiện leo thang cũ; link issue trên modal (E1).
+
+## Câu hỏi mở
+Tiêu chí 5 (link issue trên modal T-078) tách thành việc bậc B riêng sau T-079 vì phải sửa spec T-076 (D2/D3) và eval của nó; Capu đồng ý tách không, hay muốn gộp vào T-079 (khi đó T-079 phải qua Spec Gate lại cùng sửa spec T-076)?

@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { CATEGORIES, sha, cardOf, cardSha, profileText, buildCandidates, TOP_CANDIDATES } from './lib/candidates.mjs';
+import { CATEGORIES, sha, cardOf, cardSha, profileText, buildCandidates, TOP_CANDIDATES, RANDOM_PER_CELL } from './lib/candidates.mjs';
 import { MIN_GRADERS, MAX_GRADERS, SCHEMA } from './lib/metric.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -54,7 +54,7 @@ Cách xét:
 Ví dụ minh hoạ (vendor và cặp đôi giả, không có trong dữ liệu):
 - Cặp đôi thích phong cách truyền thống, ngân sách chụp ảnh 20 triệu. Thẻ: "Studio chuyên phóng sự cưới truyền thống, áo dài, lễ gia tiên", giá 12–25 triệu, 4,8 sao. Trả lời: co (hợp phong cách, có gói trong ngân sách).
 - Cùng cặp đôi. Thẻ: "Chuyên chụp concept Hàn Quốc ngoại cảnh, nền studio màu pastel", giá 10–18 triệu. Trả lời: khong (giá vừa nhưng phong cách lệch hẳn).
-- Cặp đôi thích sang trọng, ngân sách makeup 15 triệu. Thẻ: mô tả một câu sơ sài, không ảnh, chưa có đánh giá, không có gì cho thấy hợp phong cách. Trả lời: khong (chưa đủ cơ sở để khuyên).
+- Cặp đôi thích hiện đại, ngân sách makeup 8 triệu. Thẻ: "Makeup cô dâu phong cách hiện đại, tối giản, lớp nền mỏng", giá 3–8 triệu, ảnh khách cưới. Trả lời: co.
 `;
 
 async function loadMatcher() {
@@ -89,7 +89,8 @@ if (cmd === 'make') {
   fs.writeFileSync(path.join(out, '_private', 'declarations.template.json'), JSON.stringify(
     Object.fromEntries(Array.from({ length: n }, (_, i) => [`G${i + 1}`, { is_external: null, saw_system_scores: null, touched_matching_weights: null }])), null, 1));
   fs.writeFileSync(path.join(out, 'HUONG_DAN.md'), GUIDE);
-  console.log(`PASS ghi ${n} gói chấm + _private/ vào ${out} (${cell} ô, mỗi ô 3 người)`);
+  const short = key.cells.filter((c) => c.candidates.filter((x) => x.role === 'filler').length < RANDOM_PER_CELL).length;
+  console.log(`PASS ghi ${n} gói chấm + _private/ vào ${out} (${cell} ô, mỗi ô 3 người; ô thiếu vendor ngẫu nhiên (ít hơn ${RANDOM_PER_CELL} vendor qua A+B ngoài top ${TOP_CANDIDATES}): ${short})`);
 } else if (cmd === 'import') {
   const dir = opt('--dir'), out = opt('--out');
   if (!dir || !out) die('thiếu --dir hoặc --out');
