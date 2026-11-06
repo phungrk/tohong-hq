@@ -3,7 +3,7 @@
 import subprocess, sys
 import _lib as L
 fails = []
-for area in ("_shared", "hq/ledger", "hq/dashboard"):
+for area in ("_shared", "hq", "hq/ledger", "hq/dashboard"):
     d = L.ROOT / "eval" / "invariants" / area
     for f in sorted(d.glob("inv-*")):
         if f.suffix not in (".py", ".sh"): continue

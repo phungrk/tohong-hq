@@ -27,10 +27,15 @@ def env(fake): return dict(os.environ, TOHONG_ROOT=str(fake), TOHONG_NOW="2026-1
 def run(fake, *argv):
     return subprocess.run([sys.executable, *map(str, argv)], capture_output=True, text=True, env=env(fake), cwd=str(ROOT))
 def read(fake, tid):
-    """Đọc việc qua read_task của task.py trong sổ cái tạm; trả (meta, stderr)."""
-    code = ("import sys,json; sys.path.insert(0,%r); import task; m,_=task.read_task(%r); print(json.dumps(m,ensure_ascii=False))"
+    """Đọc việc qua read_task của task.py trong sổ cái tạm; trả (meta|None, stderr, tên lớp lỗi|"")."""
+    code = ("import sys,json; sys.path.insert(0,%r); import task\ntry:\n m,_=task.read_task(%r); print(json.dumps(m,ensure_ascii=False))\n"
+            "except task.LedgerError as e:\n print('LedgerError: '+str(e),file=sys.stderr); sys.exit(3)"
             % (str(ROOT / "scripts"), tid))
     r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, env=env(fake))
-    return (json.loads(r.stdout) if r.returncode == 0 else None), r.stderr
-# nháy hỏng: bắt đầu và kết thúc bằng " nhưng không phải JSON hợp lệ
-CORRUPT = {"issue": '""12""', "title": '"Xin "chao" ban"', "budget": '"\\q"'}
+    return (json.loads(r.stdout) if r.returncode == 0 else None), r.stderr, ("" if r.returncode == 0 else ("LedgerError" if r.returncode == 3 else "crash"))
+# Hỏng NHẸ: bắt đầu+kết thúc bằng " nhưng không phải JSON chặt -> bỏ mọi " và khoảng trắng hai đầu. {trường: (thô, đọc ra)}
+LIGHT = {"issue": ('""12""', "12"), "title": ('"Xin "chao" ban"', 'Xin "chao" ban'), "budget": ('"\\q"', "\\q"),
+         "state": ('""review""', "review"), "area": ('""hq/ledger""', "hq/ledger"), "id": ('""T-901""', "T-901")}
+CORRUPT = {k: v[0] for k, v in LIGHT.items()}
+# Hỏng NẶNG: còn sai sau bước bỏ nháy. {việc: (trường, thô)}
+HEAVY = {"T-911": ("state", '""xyz""'), "T-912": ("area", '"nope/xx"'), "T-913": ("id", '""T-999""'), "T-914": ("tier", '""Z""')}

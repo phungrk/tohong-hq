@@ -8,7 +8,7 @@ exp = {"title": 'Có: hai chấm # và "nháy" trong', "budget": "", "issue": "1
        "eval": ["python3 x.py", 'echo "hi"'], "area": " hq/ledger"}
 with tempfile.TemporaryDirectory() as tmp:
     fake = L.mk(tmp, {"T-903": good})
-    m, err = L.read(fake, "T-903")
+    m, err, _x = L.read(fake, "T-903")
     L.chk(m is not None, "read_task ném lỗi: " + err[-200:])
     if m:
         for k, v in exp.items(): L.chk(m.get(k) == v, f"{k}: phải {v!r}, thấy {m.get(k)!r}")
