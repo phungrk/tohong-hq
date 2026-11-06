@@ -1,6 +1,6 @@
 {
   "task": "T-075",
-  "at": "2026-11-06T02:14",
+  "at": "2026-11-06T02:17",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 -I eval/T-073/check_1.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 31,
+      "ms": 26,
       "out": "PASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 -I eval/T-073/check_2.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 111,
+      "ms": 93,
       "out": "PASS (minimalist: 118 vendor mất, 6 vendor giữ vì nguồn ghi tối giản/minimal)",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 -I eval/T-073/check_3.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 149,
+      "ms": 112,
       "out": "PASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "python3 -I eval/T-073/check_4.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 2575,
+      "ms": 2305,
       "out": "PASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "eval/T-075/adv-01-pool-trung-gian-khong-vao-git.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 37,
+      "ms": 26,
       "out": "PASS",
       "tier": 1
     },
@@ -52,7 +52,15 @@
       "eval": "eval/T-075/adv-02-regen-khong-de-lai-thay-doi.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1400,
+      "ms": 1276,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-075/adv-06-back-rong-khong-ghi-cho-khac.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 197,
       "out": "PASS",
       "tier": 1
     },
@@ -60,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 20,
+      "ms": 23,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -68,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 118,
+      "ms": 116,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -76,7 +84,7 @@
       "eval": "eval/invariants/planner/vendor/pool/inv-001-pool-khop-van-ban-nguon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 577,
+      "ms": 466,
       "out": "PASS",
       "tier": 2
     },
@@ -84,7 +92,7 @@
       "eval": "eval/invariants/planner/vendor/pool/inv-002-tag-chuan-khong-tu-cung-co.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1289,
+      "ms": 1252,
       "out": "PASS",
       "tier": 2
     },
@@ -92,7 +100,7 @@
       "eval": "eval/invariants/planner/vendor/pool/inv-003-tinh-te-khong-phai-toi-gian.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 35,
+      "ms": 37,
       "out": "PASS",
       "tier": 2
     },
@@ -108,7 +116,7 @@
       "eval": "eval/T-075/adv-03-scrape-chi-doi-style-tags.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 279,
+      "ms": 257,
       "out": "PASS (134 bản ghi đổi style_tags, không trường nào khác đổi)",
       "tier": 3
     },
@@ -116,7 +124,7 @@
       "eval": "eval/T-075/adv-04-chuoi-tho-va-phan-tu-la.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 132,
+      "ms": 137,
       "out": "PASS",
       "tier": 3
     },
@@ -124,8 +132,16 @@
       "eval": "eval/T-075/adv-05-vendor-vang-nguon-neu-id.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1558,
+      "ms": 1599,
       "out": "PASS",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-075/adv-07-gitignore-chi-chan-pool-trung-gian.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 67,
+      "out": "PASS (15 vendors.json nguồn vẫn được theo dõi)",
       "tier": 3
     }
   ],
