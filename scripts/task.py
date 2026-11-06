@@ -556,6 +556,13 @@ def cmd_decide(a):
     if not a.note:
         raise LedgerError("Ghi quyết định phải có --note.")
     meta, _ = read_task(a.task)
+    if meta["state"] in ("done", "blocked"):
+        # T-083 M3: chỉ ghi sự kiện, không chạm file board (kể cả updated)
+        if a.close:
+            raise LedgerError(f"{a.task} đang ở '{STATE_VI[meta['state']]}': không có gì để đóng bằng --close.")
+        log_event(meta, "decided", "capu", "capu", a.note, link=a.link or "", with_state=False)
+        print(f"{a.task}: ghi quyết định của Capu (trạng thái việc không đổi)")
+        return
     if a.close:
         transition(a.task, ["escalated"], "done", "decided", "capu", "done", holder="-",
                    detail=a.note, link=a.link or "")

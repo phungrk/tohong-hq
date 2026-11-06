@@ -56,6 +56,12 @@ def build_capu_queue(tasks, lines):
     nfc = lambda x: unicodedata.normalize("NFC", x or "")
     asks, answers, blocks, processed = {}, {}, {}, set()
     prs = task.collect_prs(evs)
+    # M1 (T-083): link sự kiện merged của chính việc cũng là PR của việc
+    for e in evs:
+        if e.get("event") == "merged" and e.get("task") and task.PR_URL_RE.fullmatch(e.get("link") or ""):
+            lst = prs.setdefault(e["task"], [])
+            if e["link"] not in lst:
+                lst.append(e["link"])
     for i, e in enumerate(evs):
         t, kind = e.get("task", ""), e.get("event", "")
         if kind == "merged":
@@ -82,13 +88,14 @@ def build_capu_queue(tasks, lines):
         tid, st = t["id"], t["state"]
         last_block = blocks.get(tid)
         block_asks = st == "blocked" and last_block is not None and bool(ASK_BLOCK_RE.search(last_block))
+        if tid in asks:
+            answered = any(i > asks[tid] for i, _ in answers.get(tid, []))
+        else:
+            answered = any(k == "decided" for _, k in answers.get(tid, []))
+        block_asks = block_asks and not answered   # M4: đã trả lời thì không còn loại blocked
         kinds = set()
         files = inbox.get(tid, [])
         if files and not (st == "blocked" and not block_asks):
-            if tid in asks:
-                answered = any(i > asks[tid] for i, _ in answers.get(tid, []))
-            else:
-                answered = any(k == "decided" for _, k in answers.get(tid, []))
             if not answered:
                 kinds.add("decision")
         if st == "escalated":
@@ -107,7 +114,7 @@ def build_capu_queue(tasks, lines):
             open_pr = [u for u in allpr if u not in processed]
             if open_pr:
                 kinds.add("diff-b" if tier == "B" else "merge-c")
-            elif not allpr:
+            elif not allpr:   # M2: luật 48 giờ chỉ khi tập PR rỗng
                 hrs = (t_now - task.parse_stamp(t["updated"])).total_seconds() / 3600
                 if hrs < 48:
                     kinds.add("diff-b" if tier == "B" else "merge-c")
