@@ -1,7 +1,7 @@
 {
   "task": "T-074",
-  "at": "2026-11-06T01:58",
-  "verdict": "GREEN",
+  "at": "2026-11-06T07:03",
+  "verdict": "RED",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/vendor/matching",
@@ -20,7 +20,7 @@
       "eval": "python3 eval/T-074/check_2_nhan.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 528,
+      "ms": 544,
       "out": "PASS validator nhận nhãn mẫu và từ chối 11 biến thể hỏng",
       "tier": 1
     },
@@ -28,15 +28,15 @@
       "eval": "python3 eval/T-074/check_3_nguong.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 57,
-      "out": "PASS ngưỡng 80% (hơn đối chứng 20 điểm) có lý do trong spec và khớp lệnh eval",
+      "ms": 50,
+      "out": "PASS luật không tụt quá 10 điểm so với baseline (phủ nhãn >= 80%) có lý do trong spec và khớp lệnh eval",
       "tier": 1
     },
     {
       "eval": "python3 eval/T-074/check_4_ho_so.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 21,
+      "ms": 23,
       "out": "PASS 30 hồ sơ: 6 style x 5, mức L/M/H = 10/10/10, đủ ngân sách 4 hạng mục, đều ở TP.HCM",
       "tier": 1
     },
@@ -44,31 +44,31 @@
       "eval": "python3 eval/T-074/check_5_cham_mu.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1210,
-      "out": "PASS gói chấm 3/4/5 người: không lộ điểm/hạng/style/tag/vai trò, 120 ô x đúng 3 người, tải đều, trộn thứ tự, import chặn khi thiếu khai báo",
+      "ms": 1598,
+      "out": "PASS gói chấm 3/4/5 người: không lộ điểm/hạng/style/tag/vai trò, 120 ô x đúng 3 người, mỗi ô <=15 top + 5 ngẫu nhiên, có hướng dẫn chấm (câu hỏi, luật giá, đơn vị, ví dụ), tải đều, trộn thứ tự, import chặn khi thiếu khai báo",
       "tier": 1
     },
     {
       "eval": "bash eval/T-074/check_6_thieu_nhan.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 187,
+      "ms": 208,
       "out": "PASS thiếu nhãn thật thì FAIL rõ: FAIL chưa có nhãn thật: eval/T-074/labels.json không tồn tại; cần 3-5 người chấm ngoài do Capu mời (quy trình: products/T-074-bo-eval-top5.md)",
       "tier": 1
     },
     {
       "eval": "node eval/T-074/check_7_cach_tinh.mjs",
       "kind": "cmd",
-      "status": "PASS",
-      "ms": 36,
-      "out": "PASS cách tính: đa số tuyệt đối, hoà là không, luật máy loại giá/xác minh/rating/thành phố/hạng mục, thiếu nhãn và thẻ đổi = chưa chấm, ngưỡng biên 80%, đối chứng chặn người chấm khen cả",
+      "status": "FAIL",
+      "ms": 23,
+      "out": "node:internal/modules/cjs/loader:1386\n  throw err;\n  ^\n\nError: Cannot find module '/home/user/tohong-hq/eval/T-074/check_7_cach_tinh.mjs'\n    at Function._resolveFilename (node:internal/modules/cjs/loader:1383:15)\n    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)\n    at Function._load (node:internal/modules/cjs/loader:1192:37)\n    at TracingChannel.traceSync (node:diagnostics_channel:328:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: []\n}\n\nNode.js v22.22.0",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 19,
+      "ms": 21,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,10 +76,26 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 108,
+      "ms": 131,
       "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 421,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/matching/inv-001-gu-khong-day-vendor-vuot-ngan-sach-o-chat.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 73,
+      "out": "PASS boost không phụ thuộc gu (6 style) và top 5 chat không có vendor khớp gu vượt ngân sách",
       "tier": 2
     }
   ],
-  "hint": ""
+  "hint": "code"
 }
