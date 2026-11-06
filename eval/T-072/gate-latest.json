@@ -1,6 +1,6 @@
 {
   "task": "T-072",
-  "at": "2026-11-06T01:55",
+  "at": "2026-11-06T02:01",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 -I eval/T-072/check_1_ca_chung.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 39,
+      "ms": 27,
       "out": "FAIL repo chưa có test/fixtures/style-cases.json (bản chép nguyên văn của file ca)",
       "tier": 1
     },
@@ -20,23 +20,23 @@
       "eval": "python3 -I eval/T-072/check_2_khong_phat_thieu_tag.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 596,
-      "out": "FAIL 1 ca sai; đầu tiên: JS pool_opt_unsupported_or_vendor_dropped",
+      "ms": 566,
+      "out": "FAIL 3 ca sai; đầu tiên: JS pool_opt_unsupported_or_vendor_dropped | PY stage 2: thứ tự ['A', 'B', 'M'], vendor khớp M không đứng đầu | PY đường chat: top 6 chỉ có 2/4 vendor khớp (['m0', 'u0', 'u1', 'u2', 'u3', 'm1'])",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-072/check_3_top10_pool_that.py",
       "kind": "cmd",
-      "status": "FAIL",
-      "ms": 367,
-      "out": "FAIL 77 lỗi trên 96 tổ hợp; đầu tiên: korean/photography/{\"budgetTotal\":300,\"weddingDate\":\"2027-03-15\",\"guestCount\":200}: top10 có 5 khớp, cần 10 | korean/makeup/{\"budgetTotal\":300,\"weddingDate\":\"2027-03-15\",\"guestCount\":200}: top10 có 3 khớp, cần 10 | korean/attire/{\"budgetTotal\":300,\"weddingDate\":\"2027-03-15\",\"guestCount\":200}: top10 có 3 khớp, cần 10",
+      "status": "PASS",
+      "ms": 231,
+      "out": "PASS tổng vendor khớp trong top 10: 561 -> 561 trên 96 tổ hợp (thông tin: 0 tổ hợp tụt riêng lẻ)",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-072/check_4_giai_thich_va_coverage.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 197,
+      "ms": 187,
       "out": "FAIL 398 lỗi trên 330 vendor, 6 khối formatter; đầu tiên: photography/['korean']/Bonjour Studio: styleCoverage=None cần total=1 | photography/['korean']/Phượt Studio: styleCoverage=None cần total=1 | photography/['korean']/Ktiu studio: styleCoverage=None cần total=1",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 21,
+      "ms": 32,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -52,7 +52,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 114,
+      "ms": 104,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     }
