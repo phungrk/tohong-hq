@@ -106,6 +106,16 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
       const t0 = Date.now();
       while (!bad() && Date.now() - t0 < ms) await new Promise(r => setTimeout(r, 100));
     };
+    // Cửa sổ quan sát vi phạm có hạn cho phép đo NỘI DUNG: sau khi trạng thái tốt xuất hiện, poll tới khi thấy nền hỏng (badFn trong trang) hoặc có request marry.vn
+    // (dừng ngay, phép đo phía sau báo FAIL đúng chỗ); hết hạn ms mà vẫn sạch thì đo. Thời điểm đo >= bản cũ (chờ cố định 3s / 2,5s sau nhấn).
+    const holdClean = async (pg, marry, badFn, arg, ms = 3000) => {
+      const t0 = Date.now();
+      while (Date.now() - t0 < ms) {
+        if (marry.length) return;
+        if (await pg.evaluate(badFn, arg).catch(() => false)) return;
+        await new Promise(r => setTimeout(r, 100));
+      }
+    };
     const checkLookups = (where, ls) => {
       const withCouple = ls.filter(l => l.couple);
       if (withCouple.length) fail(`${where}: tra ảnh mang coupleId=${withCouple[0].couple} (endpoint sẽ tính ghép và gọi LLM trả phí; phải gọi không kèm coupleId)`);
@@ -120,6 +130,7 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
       // chờ danh sách ổn định: ảnh theo pool đã hiện, không còn nền URL marry/404 nào, và đã tra pool đủ 6 id
       await settle(pg, () => { const bg = [...document.querySelectorAll('*')].map(x => getComputedStyle(x).backgroundImage).filter(s => s && s !== 'none'); return ['good1', 'good3', 'good5'].every(w => bg.some(s => s.includes(w))) && !bg.some(s => s.includes('url(') && /404-|marry/.test(s)); });
       await whenLookups(6);
+      await holdClean(pg, marry, () => [...document.querySelectorAll('*')].some(x => { const s = getComputedStyle(x).backgroundImage; return s && s.includes('url(') && /404-|marry/.test(s); }));
       const g = n => bgsOf(pg, n);
       const T = { 'Luu Pool Tot': ['good1', null], 'Luu Pool Hong': [null, '404-pool2'], 'Luu Mat Pool Tot': ['good3', null], 'Luu Mat Pool Hong': [null, '404-s4'], 'Luu Loi May Chu': ['good5', null], 'Luu Pool Rong': [null, 'marry'] };
       for (const [n, [want, ban]] of Object.entries(T)) {
@@ -144,6 +155,7 @@ const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeou
         try { await pg.waitForFunction((x) => document.body.innerText.includes(x), n, { timeout: 15000 }); } catch (e) { throw new Error('màn Ngân sách không hiện ' + n + ': ' + logs.join(' ; ')); }
         await pg.locator('button', { hasText: n }).first().click({ timeout: 5000 });
         await settle(pg, ([w, m]) => { const e = [...document.querySelectorAll('div')].find(d => d.style.width === '56px' && d.style.height === '56px'); if (!e) return false; const x = getComputedStyle(e).backgroundImage; return m === 'url' ? x.includes(w) : !x.includes('url('); }, [want, mode]);
+        await holdClean(pg, marry, ([w, m]) => { const e = [...document.querySelectorAll('div')].find(d => d.style.width === '56px' && d.style.height === '56px'); if (!e) return false; const x = getComputedStyle(e).backgroundImage; return m === 'url' ? /url\(.*(404-|marry)/.test(x) || !x.includes(w) : (x.includes('url(') || x.includes('rgb(122, 154, 181)') || x.includes('rgb(212, 160, 160)')); }, [want, mode]);
         const bg = await pg.evaluate(() => { const e = [...document.querySelectorAll('div')].find(d => d.style.width === '56px' && d.style.height === '56px'); return e ? getComputedStyle(e).backgroundImage : null; });
         if (bg === null) { fail(`Ngân sách: không thấy tiêu đề Chi tiết vendor của ${n}`); continue; }
         if (want && !bg.includes(want)) fail(`Ngân sách: ${n} phải hiện ảnh ${want}, thấy ${bg.slice(0, 100)}`);
