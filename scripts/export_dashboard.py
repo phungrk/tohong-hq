@@ -126,7 +126,9 @@ def build_capu_queue(tasks, lines, issues=None):
         if not kinds:
             continue
         # T-081 D-I1: link Issue (sau Decision Request, trước PR) khi board có issue là số nguyên dương
-        iss = re.sub(r'^\s*"?\s*|\s*"?\s*$', "", str(issues.get(tid, "")))
+        iss = str(issues.get(tid, "")).strip()
+        if len(iss) >= 2 and iss[0] == '"' and iss[-1] == '"':   # chỉ bỏ nháy kép khi có cặp bao ngoài
+            iss = iss[1:-1].strip()
         if re.fullmatch(r"[1-9][0-9]*", iss):
             links.append({"label": f"Issue #{iss}", "url": f"{GH}tohong-hq/issues/{iss}", "pr_state": ""})
         links.extend(pr_links)
