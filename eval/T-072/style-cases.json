@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "_ghi_chu": "Nguồn sự thật duy nhất của hợp đồng style (T-072). Engineering chép NGUYÊN VĂN file này vào tohong-back/test/fixtures/style-cases.json; test Node và test Python của repo đó đọc chung file ấy. check_1 kiểm hai bản giống hệt nhau từng byte.",
+  "expansion": {
+    "korean": ["korean", "soft"],
+    "modern": ["modern", "minimalist"]
+  },
+  "labels_vi": {
+    "korean": "Hàn Quốc",
+    "luxury": "sang trọng",
+    "rustic": "mộc mạc",
+    "natural": "tự nhiên",
+    "modern": "hiện đại",
+    "traditional": "truyền thống",
+    "minimalist": "tối giản",
+    "soft": "nhẹ nhàng",
+    "simple": "giản dị",
+    "editorial": "tạp chí"
+  },
+  "all_tags": ["luxury", "modern", "minimalist", "traditional", "simple", "rustic", "soft", "natural", "korean", "editorial"],
+  "cases": [
+    {"id": "c01-khop-thang",            "couple": ["luxury"],             "vendor": ["luxury", "modern"], "style": 1.0, "matched": 1, "total": 1},
+    {"id": "c02-lech-tag",              "couple": ["luxury"],             "vendor": ["rustic"],           "style": 0.5, "matched": 0, "total": 1},
+    {"id": "c03-khong-tag",             "couple": ["luxury"],             "vendor": [],                   "style": 0.5, "matched": 0, "total": 1},
+    {"id": "c04-couple-khong-chon",     "couple": [],                     "vendor": ["luxury"],           "style": 0.5, "matched": 0, "total": 0},
+    {"id": "c05-ca-hai-rong",           "couple": [],                     "vendor": [],                   "style": 0.5, "matched": 0, "total": 0},
+    {"id": "c06-korean-nhan-soft",      "couple": ["korean"],             "vendor": ["soft"],             "style": 1.0, "matched": 1, "total": 1},
+    {"id": "c07-korean-nhan-korean",    "couple": ["korean"],             "vendor": ["korean"],           "style": 1.0, "matched": 1, "total": 1},
+    {"id": "c08-modern-nhan-minimalist","couple": ["modern"],             "vendor": ["minimalist"],       "style": 1.0, "matched": 1, "total": 1},
+    {"id": "c09-minimalist-khong-nhan-modern", "couple": ["minimalist"],  "vendor": ["modern"],           "style": 0.5, "matched": 0, "total": 1},
+    {"id": "c10-soft-khong-nhan-korean","couple": ["soft"],               "vendor": ["korean"],           "style": 0.5, "matched": 0, "total": 1},
+    {"id": "c11-hai-style-khop-mot",    "couple": ["luxury", "korean"],   "vendor": ["soft"],             "style": 1.0, "matched": 1, "total": 2},
+    {"id": "c12-hai-style-khop-ca-hai", "couple": ["korean", "soft"],     "vendor": ["soft"],             "style": 1.0, "matched": 2, "total": 2},
+    {"id": "c13-hai-style-khong-khop",  "couple": ["korean", "modern"],   "vendor": ["rustic", "natural"],"style": 0.5, "matched": 0, "total": 2},
+    {"id": "c14-modern-korean-nhan-minimalist", "couple": ["korean", "modern"], "vendor": ["minimalist"], "style": 1.0, "matched": 1, "total": 2},
+    {"id": "c15-hoa-thuong-va-khoang-trang", "couple": ["Korean "],       "vendor": ["KOREAN"],           "style": 1.0, "matched": 1, "total": 1},
+    {"id": "c16-couple-trung-lap",      "couple": ["korean", "korean"],   "vendor": ["soft"],             "style": 1.0, "matched": 1, "total": 1},
+    {"id": "c17-style-la-khop-nguyen-van", "couple": ["gothic"],          "vendor": ["gothic"],           "style": 1.0, "matched": 1, "total": 1},
+    {"id": "c18-style-la-lech",         "couple": ["gothic"],             "vendor": ["luxury"],           "style": 0.5, "matched": 0, "total": 1}
+  ],
+  "pool_styles": ["korean", "luxury", "rustic", "natural", "modern", "traditional"],
+  "pool_categories": ["photography", "makeup", "attire", "venue"],
+  "pool_profiles": [
+    {"budgetTotal": 300,  "weddingDate": "2027-03-15", "guestCount": 200},
+    {"budgetTotal": 80,   "weddingDate": "2027-11-20", "guestCount": 500},
+    {"budgetTotal": 1000, "weddingDate": "2027-06-01", "guestCount": 100},
+    {}
+  ]
+}
