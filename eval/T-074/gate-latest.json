@@ -1,6 +1,6 @@
 {
   "task": "T-074",
-  "at": "2026-11-06T07:13",
+  "at": "2026-11-06T07:14",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "bash eval/T-074/check_1_mot_lenh.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 175,
+      "ms": 166,
       "out": "PASS một lệnh in tỉ lệ 4 hạng mục, dòng cuối: FAIL nhãn mẫu (is_sample=true): chỉ để kiểm cách chạy, không có giá trị đạt/không đạt; cần nhãn thật",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 eval/T-074/check_2_nhan.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 599,
+      "ms": 584,
       "out": "PASS validator nhận nhãn mẫu và từ chối 11 biến thể hỏng",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 eval/T-074/check_3_nguong.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 64,
+      "ms": 66,
       "out": "PASS luật không tụt quá 10 điểm so với baseline (phủ nhãn >= 80%) có lý do trong spec và khớp lệnh eval",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "python3 eval/T-074/check_4_ho_so.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 27,
+      "ms": 18,
       "out": "PASS 30 hồ sơ: 6 style x 5, mức L/M/H = 10/10/10, đủ ngân sách 4 hạng mục, đều ở TP.HCM",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "python3 eval/T-074/check_5_cham_mu.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1902,
+      "ms": 1891,
       "out": "PASS gói chấm 3/4/5 người: không lộ điểm/hạng/style/tag/vai trò, 120 ô x đúng 3 người, mỗi ô <=15 top + 5 ngẫu nhiên, có hướng dẫn chấm (câu hỏi, luật giá, đơn vị, ví dụ), tải đều, trộn thứ tự, ô thiếu vendor ngẫu nhiên lấy hết và báo số ô (dữ liệu cố định), import chặn khi thiếu khai báo",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "bash eval/T-074/check_6_thieu_nhan.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 190,
+      "ms": 172,
       "out": "PASS thiếu nhãn thật thì FAIL rõ: FAIL chưa có nhãn thật: eval/T-074/labels.json không tồn tại; cần 3-5 người chấm ngoài do Capu mời (quy trình: products/T-074-bo-eval-top5.md)",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "python3 eval/T-074/check_7_cach_tinh.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1897,
+      "ms": 1831,
       "out": "PASS cách tính qua lệnh: đa số 2/3, luật máy loại vendor vượt giá, chưa chấm ra khỏi mẫu số và báo phủ nhãn, lần đầu chỉ đo, tụt đúng 10 điểm đạt/10,7 FAIL, tốt lên đạt, không ghi đè baseline, nhãn đổi vô hiệu baseline và in tỉ lệ cũ cạnh mới",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 27,
+      "ms": 25,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 143,
+      "ms": 112,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 425,
+      "ms": 432,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-001-gu-khong-day-vendor-vuot-ngan-sach-o-chat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 74,
+      "ms": 73,
       "out": "PASS boost không phụ thuộc gu (6 style) và top 5 chat không có vendor khớp gu vượt ngân sách",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-002-thieu-tag-khong-bi-phat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 302,
+      "ms": 340,
       "out": "PASS tag lệch = không tag (JS mọi hạng mục, Python), vendor khớp cao hơn",
       "tier": 2
     },
@@ -108,8 +108,16 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-003-thu-tu-gu-theo-diem-r8.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 904,
+      "ms": 849,
       "out": "PASS R8: JS + Python stage 2 + chat (sinh đôi, ngược), fuzz 400 pool (tới 30 vendor, tag hoa/thường/khoảng trắng/không khoá, λ 0/0.3/0.9), bằng điểm ở mép top_k, chuẩn hoá R1",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/matching/inv-004-nhan-cham-mu-toan-ven.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 23,
+      "out": "PASS chưa có nhãn (eval/T-074/labels.json không tồn tại)",
       "tier": 2
     }
   ],
