@@ -38,4 +38,4 @@ LIGHT = {"issue": ('""12""', "12"), "title": ('"Xin "chao" ban"', 'Xin "chao" ba
          "state": ('""review""', "review"), "area": ('""hq/ledger""', "hq/ledger"), "id": ('""T-901""', "T-901")}
 CORRUPT = {k: v[0] for k, v in LIGHT.items()}
 # Hỏng NẶNG: còn sai sau bước bỏ nháy. {việc: (trường, thô)}
-HEAVY = {"T-911": ("state", '""xyz""'), "T-912": ("area", '"nope/xx"'), "T-913": ("id", '""T-999""'), "T-914": ("tier", '""Z""')}
+HEAVY = {"T-911": ("state", '""xyz""'), "T-913": ("id", '""T-999""'), "T-914": ("tier", '""Z""')}

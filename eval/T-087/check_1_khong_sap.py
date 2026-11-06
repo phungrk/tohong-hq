@@ -6,7 +6,7 @@ import json, tempfile
 from pathlib import Path
 import _lib as L
 with tempfile.TemporaryDirectory() as tmp:
-    fake = L.mk(tmp, {"T-901": dict(L.CORRUPT, escalation="tu-lam"), "T-902": {"title": '"" khoảng trắng ""'}, "T-903": {}})
+    fake = L.mk(tmp, {"T-901": dict(L.CORRUPT, escalation="tu-lam", eval="[]"), "T-902": {"title": '"" khoảng trắng ""'}, "T-903": {}})
     out = Path(tmp) / "pub"; T = L.ROOT / "scripts/task.py"
     runs = {"list": L.run(fake, T, "list"), "summary": L.run(fake, T, "summary"), "summary --json": L.run(fake, T, "summary", "--json"),
             "export": L.run(fake, L.ROOT / "scripts/export_dashboard.py", "--out", out), "gate": L.run(fake, L.ROOT / "scripts/gate.py", "T-901")}

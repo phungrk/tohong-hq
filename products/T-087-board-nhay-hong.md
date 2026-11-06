@@ -15,9 +15,10 @@ Quy trình đọc một file board, theo đúng thứ tự:
 
 **Bước 1, trường hỏng nhẹ.** Với mỗi dòng frontmatter `khoá: giá trị`: nếu giá trị (sau `strip()`) dài từ 2 ký tự, bắt đầu và kết thúc bằng `"`, mà **không** phải một chuỗi JSON hợp lệ theo JSON chặt (`strict=True`: ký tự điều khiển như tab thô nằm trong nháy là hỏng), thì đó là trường hỏng nhẹ. Giá trị dùng là phần còn lại sau khi bỏ **mọi** dấu `"` và khoảng trắng ở hai đầu. Vd `""review""` -> `review`, `""12""` -> `12`, `"Xin "chao" ban"` -> `Xin "chao" ban`, `"\q"` -> `\q`, `"" abc ""` -> `abc`. Mỗi (file, trường) có **một dòng stderr** mỗi tiến trình: `Cảnh báo: board/T-xxx.md · trường <tên>: nháy kép hỏng, đã bỏ nháy ngoài`. Stdout không bị chen gì (JSON của `--json` và exporter còn hợp lệ). Giá trị một ký tự `"` hay nháy một đầu (`"12`, `12"`) không phải trường hỏng: đọc như cũ. Giá trị là chuỗi JSON hợp lệ (kể cả `""`, có `\"`, `:`, `#`), danh sách `eval`, giá trị không nháy: đọc như cũ từng byte, không cảnh báo.
 Hệ quả: `issue: ""12""` đọc ra `12`, là số nguyên dương nên **có link issue 12** (khớp INV-001, vì giá trị đọc ra là 12).
+*Ghi chú:* bước 1 bỏ **mọi** dấu nháy ngoài, không chỉ một cặp. Docstring hq/dashboard INV-014 nói "MỘT cặp nháy kép bao ngoài"; phần chạy được của INV-014 không có case `""12""` nên không mâu thuẫn. Đề nghị Chief of Staff sửa docstring đó qua `decisions/` sau khi spec qua cổng (spec không tự sửa bất biến).
 
-**Bước 2, board hỏng nặng.** Sau bước 1, board là *hỏng nặng* nếu một trong: `id` khác tên file (không kể `.md`); `state` không thuộc STATES; `area` không rỗng và không qua `normalize_area` (vùng cũ trong LEGACY_AREAS vẫn hợp lệ); `tier` không rỗng và không thuộc A/B/C. (Áp dụng cả khi trường không hề có nháy hỏng, vd `state: xyz`.) Với board hỏng nặng:
-- `read_task` ném `LedgerError` nêu file + trường (không lỗi loại khác). Mọi nơi quét board (`all_tasks`, task.py list/summary, export_dashboard.py, gate.py, mirror_*.py, ok_issue.py, cost.py) **bỏ qua** board đó, không Traceback, và in một dòng stderr `Cảnh báo: board/T-xxx.md · trường <tên>: giá trị không hợp lệ (<giá trị đọc ra>), board bị bỏ qua`. Việc đó không có trong `counts`, `list`, `tasks.json`.
+**Bước 2, board hỏng nặng.** Sau bước 1, board là *hỏng nặng* nếu một trong ba: `id` khác tên file (không kể `.md`); `state` không thuộc STATES; `tier` không rỗng và không thuộc A/B/C. (Áp dụng cả khi trường không hề có nháy hỏng, vd `state: xyz`.) **`area` không bao giờ làm board hỏng nặng** (kể cả vùng lạ `hqx/dashboard`, dạng danh sách `["hq/dashboard"]`, `[]`, hay vùng cũ như `admin/members` của T-043): giữ nguyên hành vi hiện có theo hq/dashboard INV-005, việc vẫn có trong list, counts, `tasks.json` với product `""` hoặc suy ra như cũ. Riêng `gate.py` trên việc có `area` không chuẩn hoá được (chuỗi lạ, hoặc danh sách không rỗng) thoát khác 0 kèm `Lỗi:` nêu lý do, không Traceback; `area: []` coi như không có vùng và gate chạy như thường. Với board hỏng nặng:
+- `read_task` ném `LedgerError` mà thông báo nêu `board/T-xxx.md` + `trường <tên>`, và **chính `read_task` (một chỗ chung)** in một dòng stderr `Cảnh báo: board/T-xxx.md · trường <tên>: giá trị không hợp lệ (<giá trị>), board bị bỏ qua`. Các nơi quét board bỏ qua board đó, không Traceback. Việc đó không có trong `counts`, `list`, `tasks.json`. Spec chỉ hứa điều eval đo được ở task.py (list, summary, các lệnh), export_dashboard.py và gate.py; mirror_*.py, ok_issue.py, cost.py đã bắt `LedgerError` và nhận cảnh báo này miễn phí từ `read_task`, không có eval riêng.
 - `gate.py T-xxx` trên chính việc đó: thoát khác 0 kèm `Lỗi:` nêu file + trường, không Traceback.
 - Mọi lệnh đổi trạng thái (`start`, `handoff`, `accept`, `reject`, `respec`, `cost`, …) trên việc đó **từ chối**: thoát khác 0, stderr nêu `board/T-xxx.md` + `trường <tên>`, không ghi board, không ghi sổ cái.
 - `task.py new` không sập: số mới = 1 + số lớn nhất trong **tên file** `board/T-nnn.md` (kể cả file hỏng nặng), nên không bao giờ trùng một file có sẵn.
@@ -28,7 +29,7 @@ Hệ quả: `issue: ""12""` đọc ra `12`, là số nguyên dương nên **có 
 
 ## Ràng buộc
 - Repo: `tohong-hq` · Vùng: `hq/ledger` · được sửa `read_task`, `all_tasks`, `next_id`, `build_summary` và các nơi gọi cần thiết (task.py, gate.py, export_dashboard.py, mirror_*.py, ok_issue.py, cost.py). Không sửa tay board thật.
-- Bất biến đã đọc: `eval/invariants/_shared/`, `hq/` (INV-001, 002), `hq/ledger/` INV-001..005, `hq/dashboard/` INV-001..013. Không vi phạm. INV-001 giữ: issue chỉ có link khi giá trị đọc ra là số nguyên dương (`""12""` đọc ra 12 nên có link).
+- Bất biến đã đọc: `eval/invariants/_shared/`, `hq/` (INV-001, 002), `hq/ledger/` INV-001..005, `hq/dashboard/` INV-001..014 (đặc biệt INV-005: area lạ/danh sách không loại việc khỏi tasks.json). Không vi phạm; đã chạy toàn bộ trên bản cài tham chiếu (handoffs/T-087-v3.md). INV-001 giữ: issue chỉ có link khi giá trị đọc ra là số nguyên dương (`""12""` đọc ra 12 nên có link).
 - Không chạm: payment, auth, DB, dữ liệu người dùng. Bậc **A**: eval tự động phủ hết, chỉ sổ cái nội bộ.
 
 ## Tiêu chí chấp nhận và eval
@@ -39,12 +40,13 @@ Hệ quả: `issue: ""12""` đọc ra `12`, là số nguyên dương nên **có 
 | 3 | summary (text + json) báo board hỏng nhẹ kèm mức; board lành thì không | `python3 eval/T-087/check_3_summary_bao_hong.py` |
 | 4 | Bất biến `_shared`, `hq`, `hq/ledger`, `hq/dashboard` xanh (bỏ qua file shell thiếu D3 trong môi trường; Code Gate tầng 2 chạy đủ) | `python3 eval/T-087/check_4_bat_bien.py` |
 | 5 | Lệnh đổi trạng thái chạy trên việc hỏng nhẹ; sau lệnh giá trị đã chuẩn hoá, cảnh báo biến mất | `python3 eval/T-087/check_5_lenh_doi_trang_thai.py` |
-| 6 | Bước 2: state/area/id/tier hỏng nặng bị bỏ qua ở list/summary/export/gate, summary liệt kê mức nặng, lệnh đổi trạng thái từ chối không ghi gì, `new` cấp số đúng, read_task ném LedgerError | `python3 eval/T-087/check_6_hong_nang.py` |
+| 6 | Bước 2: state/id/tier hỏng nặng bị bỏ qua ở list/summary/export/gate, summary liệt kê mức nặng, lệnh đổi trạng thái từ chối không ghi gì, `new` cấp số đúng, read_task ném LedgerError | `python3 eval/T-087/check_6_hong_nang.py` |
+| 7 | area lạ/danh sách không phải hỏng: còn trong list/tasks.json, không trong board_hong; gate trên việc đó thoát != 0 kèm `Lỗi:` | `python3 eval/T-087/check_7_area_la_khong_hong.py` |
 
-Mọi eval chạy trên sổ cái tạm (`TOHONG_ROOT`). Capu nêu 4 tiêu chí; 5 và 6 do Spec Writer thêm theo phân xử của Chief of Staff. mirror_*.py/ok_issue.py/cost.py không có eval riêng (cần mạng/hook): chúng dựa vào hợp đồng `read_task` ném `LedgerError` ở tiêu chí 6 và phải bắt nó khi lặp qua board.
+Mọi eval chạy trên sổ cái tạm (`TOHONG_ROOT`). Capu nêu 4 tiêu chí; 5, 6, 7 do Spec Writer thêm theo phân xử của Chief of Staff. 
 
 ## Bất biến đề xuất (tầng 2, hq/ledger)
-INV mới. Phát biểu: sổ cái thật có `summary --json` thoát 0 và `board_hong` rỗng; sổ cái tạm có board hỏng nhẹ và nặng thì list/summary/export thoát 0, không Traceback. Bản nháp: `eval/T-087/proposed-inv-board-doc-duoc.py`.
+INV mới. Phát biểu: `summary --json` trên sổ cái thật thoát 0, không Traceback, không có board hỏng NẶNG (T-043 với `area: admin/members` không hỏng); sổ cái tạm có board hỏng nhẹ và nặng thì list/summary/export thoát 0, không Traceback. Bản nháp: `eval/T-087/proposed-inv-board-doc-duoc.py`.
 
 ## Không làm
 - Không sửa tay hay "chữa" file board thật (việc bỏ nháy chỉ xảy ra khi đọc và khi lệnh ghi lại).
