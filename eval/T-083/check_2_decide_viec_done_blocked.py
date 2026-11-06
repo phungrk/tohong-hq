@@ -11,10 +11,11 @@ with tempfile.TemporaryDirectory() as tmp:
              "T-922": dict(state="blocked", owner="engineering", tier="B", updated="2026-11-06T10:00"),    # blocked chờ Capu, DR
              "T-923": dict(state="escalated", owner="engineering", tier="B", updated="2026-11-06T10:00"),  # escalated, DR (hồi quy)
              "T-924": dict(state="doing", owner="engineering", tier="B", updated="2026-11-06T10:00"),
-             "T-925": dict(state="done", owner="engineering", tier="C", updated="2026-11-06T10:00")}       # done, DR, PR còn mở
+             "T-925": dict(state="done", owner="engineering", tier="C", updated="2026-11-06T10:00"),
+             "T-926": dict(state="done", owner="engineering", tier="B", updated="2026-11-04T10:00")}   # done, không PR, cũ 50 giờ, có DR       # done, DR, PR còn mở
     evs = [ev(1, "T-922", "blocked", "Chờ Capu: chưa có dữ liệu thật", frm="product"), ev(2, "T-923", "escalated", "câu hỏi", frm="product"),
            handoff_event(3, "T-925", PR_B), ev(4, "T-921", "merged", "merged", PR_A)]
-    fake = build(tmp, tasks, evs, inbox={"T-921-dr.md": "2026-11-10", "T-922-dr.md": "2026-11-10", "T-923-dr.md": "2026-11-10", "T-925-dr.md": "2026-11-10"})
+    fake = build(tmp, tasks, evs, inbox={"T-921-dr.md": "2026-11-10", "T-922-dr.md": "2026-11-10", "T-923-dr.md": "2026-11-10", "T-925-dr.md": "2026-11-10", "T-926-dr.md": "2026-11-10"})
     q0, err = export(fake, out)
     c.chk(q0 is not None, f"export lỗi: {err}")
     k0 = {t: e["kind"] for t, e in by_task(q0["capu_queue"]).items()} if q0 else {}
@@ -27,6 +28,13 @@ with tempfile.TemporaryDirectory() as tmp:
     d = [e for e in events(fake) if e["event"] == "decided" and e["task"] == "T-921"]
     c.chk(len(d) == 1 and d[0]["from"] == "capu" and d[0]["detail"] == "Chọn phương án A", f"đúng một sự kiện decided, from=capu, detail=note; thấy {d}")
     c.chk(front(fake, "T-921") == before, f"việc done không đổi state/holder/owner/tier/rounds/version/prev_state: {before} -> {front(fake, 'T-921')}")
+    # board giống hệt từng byte (kể cả updated, lịch sử) và việc 50 giờ không vào lại hàng
+    c.chk(k0.get("T-926") == "decision", f"trước khi quyết T-926 là 'decision'; thấy {k0.get('T-926')}")
+    raw = (fake / "board" / "T-926.md").read_bytes(); raw21 = (fake / "board" / "T-921.md").read_bytes()
+    r = task_cmd(fake, "decide", "T-926", "--note", "ok")
+    c.chk(r.returncode == 0, "decide T-926 (done, không PR, 50 giờ) phải thoát 0")
+    c.chk((fake / "board" / "T-926.md").read_bytes() == raw, "board/T-926.md không đổi từng byte (updated và lịch sử giữ nguyên)")
+    c.chk(raw21 == (fake / "board" / "T-921.md").read_bytes(), "board/T-921.md không đổi từng byte sau decide")
     # blocked
     before = front(fake, "T-922")
     r = task_cmd(fake, "decide", "T-922", "--note", "Chờ thêm dữ liệu, chưa mở")
@@ -49,6 +57,7 @@ with tempfile.TemporaryDirectory() as tmp:
     q1, err = export(fake, out)
     c.chk(q1 is not None, f"export lỗi sau quyết: {err}")
     b = by_task(q1["capu_queue"]) if q1 else {}
+    c.chk("T-926" not in b, f"T-926 sau decide không vào capu_queue (không bật luật 48 giờ); thấy {b.get('T-926')}")
     c.chk("T-921" not in b, f"T-921 (done, DR đã quyết, PR đã merged) phải ra khỏi capu_queue; thấy {b.get('T-921')}")
     c.chk("T-922" not in b, f"T-922 (blocked chờ Capu, đã quyết): cả 'decision' lẫn 'blocked' đều hết; thấy {b.get('T-922')}")
     c.chk("T-923" not in b, "T-923 đã quyết, về doing: ra")
