@@ -40,9 +40,6 @@ for n in (3, 4, 5):
         if need not in g: fail(f"HUONG_DAN.md thiếu '{need}'")
     if g.count("Trả lời: co") < 1 or g.count("Trả lời: khong") < 1: fail("HUONG_DAN.md cần ví dụ có và ví dụ không")
     if re.search(r"priceMax|priceMin|tag|trọng số|điểm của hệ thống", g): fail("HUONG_DAN.md lộ thuật ngữ nội bộ")
-    for i in range(n):
-        txt = open(os.path.join(o, f"G{i+1}.csv"), encoding="utf-8").read()
-        if "bàn" not in txt and "venue" in txt.lower(): pass
     rows_v = [r for r in csv.reader(open(os.path.join(o, "G1.csv"), encoding="utf-8")) if r and r[0].endswith("-venue")]
     if rows_v and not all("triệu/bàn" in r[5] for r in rows_v): fail("thẻ địa điểm tiệc không ghi đơn vị triệu/bàn")
     if rows_v and "mỗi bàn" not in rows_v[0][1] and "mỗi bàn" not in rows_v[0][1].lower(): fail("mô tả cặp đôi không nói tiệc tính mỗi bàn")
