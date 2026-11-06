@@ -1,7 +1,7 @@
 {
   "task": "T-082",
-  "at": "2026-11-06T08:31",
-  "verdict": "GREEN",
+  "at": "2026-11-06T08:39",
+  "verdict": "RED",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng hq/ledger",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_1_binh_luan_phuong_an.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 2825,
+      "ms": 2824,
       "out": "PASS bình luận chờ quyết = thân DR nguyên văn (4 loại DR, cắt đúng ranh giới + 'còn tiếp'), có link DR và /ok, không trùng",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_2_ok_ghi_so_cai.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4823,
+      "ms": 5134,
       "out": "PASS 16 ca /ok hợp lệ ghi đúng 1 sự kiện decided (from capu), việc về doing, có xác nhận, không chạy nội dung",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_3_tu_choi.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 7222,
+      "ms": 7087,
       "out": "PASS 29 ca bị từ chối/bỏ qua: sổ cái không đổi; im lặng với người lạ, từ chối có lý do với phungrk",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_4_viec_khong_issue.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1509,
+      "ms": 1545,
       "out": "PASS việc không issue quyết qua chat như cũ; /ok không chạm chúng; sự kiện /ok cùng hình với sự kiện chat",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_6_idempotent_va_sua.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1083,
+      "ms": 1250,
       "out": "PASS mỗi bình luận quyết tối đa một lần; chạy lại/sửa không đổi sổ cái; bình luận mới quyết được",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_7_bao_mat.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 23,
+      "ms": 34,
       "out": "PASS workflow quyền tối thiểu, không secret mới, không nội suy nội dung vào shell; script không shell/mạng",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_8_ghi_len_main.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1476,
+      "ms": 1379,
       "out": "PASS commit tuyến tính 1 sự kiện trên main, thử lại khi bị chen, không đổi main khi trùng/từ chối, hạ nguồn được kích hoạt",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/T-082/adv-01-tac-gia-gia-mao-unicode.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1661,
+      "ms": 1686,
       "out": "PASS login/sender giả dạng phungrk (unicode, khoảng trắng, kiểu lạ) đều bị bỏ qua, sổ cái không đổi",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "eval/T-082/adv-02-dr-link-ngoai-kho.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1604,
+      "ms": 1541,
       "out": "PASS link DR ngoài kho (tuyệt đối, ../, .git/config, /proc) không bị đăng lên issue",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "eval/T-082/adv-03-concurrency-khong-nuot-lenh.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 48,
+      "ms": 23,
       "out": "PASS workflow /ok không có nhóm concurrency nuốt lệnh, không nội suy sự kiện vào run/script",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "eval/T-082/adv-05-payload-thieu-truong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 3476,
+      "ms": 3418,
       "out": "PASS 15 payload hỏng không ghi gì vào sổ cái",
       "tier": 1
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 25,
+      "ms": 26,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 131,
+      "ms": 124,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 991,
+      "ms": 1011,
       "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/hq/ledger/inv-001-issue-la-so-nguyen-duong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 67,
+      "ms": 72,
       "out": "PASS mọi trường issue rỗng hoặc là số nguyên dương",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/hq/ledger/inv-002-decided-qua-issue-hop-le.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 71,
+      "ms": 70,
       "out": "PASS mọi decided qua issue: link đúng kho, from capu, detail không rỗng, đúng issue của việc",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/T-082/adv-04-noi-dung-doc-hai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 3637,
+      "ms": 3666,
       "out": "PASS 11 nội dung độc hại chỉ là dữ liệu",
       "tier": 3
     },
@@ -148,10 +148,42 @@
       "eval": "eval/T-082/adv-06-dua-push-git.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2988,
+      "ms": 2991,
       "out": "PASS đua push: hết lượt thì đỏ không ghi, chen bằng chat thì từ chối, song song thì cả hai ghi tuyến tính",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-082/adv-07-dr-path-bien.py",
+      "kind": "py",
+      "status": "FAIL",
+      "ms": 4274,
+      "out": "FAIL link='lnk/config': nội dung .git/ngoài kho bị đăng lên issue",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-082/adv-08-login-ascii-hop-le.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 3395,
+      "out": "PASS login ASCII hợp lệ (chữ số, gạch ngang, hoa/thường) được nhận; login gần giống bị bỏ qua",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-082/adv-09-dua-khong-concurrency.py",
+      "kind": "py",
+      "status": "FAIL",
+      "ms": 2041,
+      "out": "FAIL (i) 3 lượt song song cùng bình luận đều có reply marker '<!-- tohong-ok:9001:decided -->' mà workflow không xếp hàng theo comment.id -> bước đăng (liệt kê rồi tạo) đăng trùng marker, phá C4",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-082/adv-10-git-khong-xoa-viec-dang-lam.py",
+      "kind": "py",
+      "status": "FAIL",
+      "ms": 1293,
+      "out": "FAIL (nhanh-phien) sửa chưa commit ở products/x.md bị xoá | (nhanh-phien) HEAD/nhánh bị đổi (commit của phiên rơi khỏi nhánh) | (main-ban) sửa chưa commit ở products/x.md bị xoá | (main-ban) HEAD/nhánh bị đổi (commit của phiên rơi khỏi nhánh)",
       "tier": 3
     }
   ],
-  "hint": ""
+  "hint": "code"
 }
