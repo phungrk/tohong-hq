@@ -1,6 +1,6 @@
 {
   "task": "T-083",
-  "at": "2026-11-06T13:32",
+  "at": "2026-11-06T13:35",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 eval/T-083/check_1_viec_da_merged_khong_cho_capu.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 858,
+      "ms": 840,
       "out": "FAIL bậc B, PR không có trong handoff nhưng có sự kiện merged, cập nhật < 48h: phải ra khỏi capu_queue; thấy {'task': 'T-901', 'kind': 'diff-b', 'decide_by': '', 'links': []}\nFAIL bậc C, PR không có trong handoff nhưng có sự kiện merged, cập nhật < 48h: phải ra khỏi capu_queue; thấy {'task': 'T-901', 'kind': 'merge-c', 'decide_by': '', 'links': []}\nFAIL không có handoff, có merged: phải ra\nFAIL sự kiện merged với detail 'closed' cũng xử lý PR: phải ra\nFAIL merged của T-911 không che T-910; thấy ['T-910', 'T-911']",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 eval/T-083/check_2_decide_viec_done_blocked.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 914,
+      "ms": 937,
       "out": "b/main/inbox/capu/T-921-dr.md', 'pr_state': ''}]}\nFAIL T-922 (blocked chờ Capu, đã quyết): cả 'decision' lẫn 'blocked' đều hết; thấy {'task': 'T-922', 'kind': 'decision', 'decide_by': '2026-11-10', 'links': [{'label': 'Decision Request', 'url': 'https://github.com/phungrk/tohong-hq/blob/main/inbox/capu/T-922-dr.md', 'pr_state': ''}]}\nFAIL T-925 đã quyết DR nhưng PR còn mở (bậc C): còn là 'merge-c', không còn 'decision'; thấy {'task': 'T-925', 'kind': 'decision', 'decide_by': '2026-11-10', 'links': [{'label': 'Decision Request', 'url': 'https://github.com/phungrk/tohong-hq/blob/main/inbox/capu/T-925-dr.md', 'pr_state': ''}, {'label': 'PR tohong-front#5', 'url': 'https://github.com/phungrk/tohong-front/pull/5', 'pr_state': 'open'}]}\nFAIL T-925 chỉ còn link PR, không còn link Decision Request",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 eval/T-083/check_3_da_quyet_khong_quet.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 188,
+      "ms": 184,
       "out": "FAIL inbox/capu/da-quyet/ không còn trong sổ cái thật (file đã trả về inbox/capu/)\nFAIL DR của T-070 nằm ở inbox/capu/T-070-*.md",
       "tier": 1
     },
@@ -36,15 +36,15 @@
       "eval": "python3 eval/T-083/check_4_ca_that.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 151,
-      "out": "FAIL sổ cái có đúng một decided của capu cho T-070 (backfill); thấy 0\nFAIL T-082 (đã có merged) không vào capu_queue",
+      "ms": 149,
+      "out": "FAIL sổ cái có đúng một decided của capu cho T-070 với note nguyên văn; thấy []\nFAIL T-082 (đã có merged) không vào capu_queue",
       "tier": 1
     },
     {
       "eval": "python3 eval/T-083/check_5_bat_bien_xanh.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 64294,
+      "ms": 63961,
       "out": "PASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 28,
+      "ms": 26,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 160,
+      "ms": 122,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1130,
+      "ms": 1087,
       "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/hq/ledger/inv-001-issue-la-so-nguyen-duong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 93,
+      "ms": 71,
       "out": "PASS mọi trường issue rỗng hoặc là số nguyên dương",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/hq/ledger/inv-002-decided-qua-issue-hop-le.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 71,
+      "ms": 75,
       "out": "PASS mọi decided qua issue: link đúng kho, from capu, detail không rỗng, đúng issue của việc",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/hq/ledger/inv-003-chi-phungrk-quyet-qua-issue.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 9223,
+      "ms": 9311,
       "out": "PASS chỉ phungrk (User, chính người gửi, created|edited, không PR, khớp toàn chuỗi) tạo được decided qua issue",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/hq/ledger/inv-004-phan-chieu-khong-dang-file-ngoai-kho.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 5379,
+      "ms": 5475,
       "out": "PASS phản chiếu không đăng file ngoài kho/.git (kể cả kho con, symlink); link hợp lệ trong kho vẫn đăng",
       "tier": 2
     }
