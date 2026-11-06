@@ -8,7 +8,10 @@ c = Checker()
 evs = events(ROOT)
 c.chk(any(e["event"] == "merged" and e["task"] == "T-082" and e["link"] == PR_A for e in evs), "sổ cái có merged T-082 tohong-hq#26")
 d70 = [e for e in evs if e["event"] == "decided" and e["task"] == "T-070"]
-c.chk(len(d70) == 1 and d70[0]["from"] == "capu" and d70[0]["detail"].strip(), f"sổ cái có đúng một decided của capu cho T-070 (backfill); thấy {len(d70)}")
+import unicodedata
+NOTE = "Capu chọn A: chạy mirror với wayback trước, đọc SUMMARY rồi quyết tiếp"
+c.chk(len(d70) == 1 and d70[0]["from"] == "capu" and unicodedata.normalize("NFC", d70[0]["detail"]).strip() == unicodedata.normalize("NFC", NOTE),
+      f"sổ cái có đúng một decided của capu cho T-070 với note nguyên văn; thấy {[(e['from'], e['detail']) for e in d70]}")
 with tempfile.TemporaryDirectory() as tmp:
     env = dict(os.environ); env.pop("TOHONG_ROOT", None); env.pop("TOHONG_NOW", None)
     r = subprocess.run([sys.executable, str(ROOT / "scripts" / "export_dashboard.py"), "--public", "--out", tmp], capture_output=True, text=True, env=env)
