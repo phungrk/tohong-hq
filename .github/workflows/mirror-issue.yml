@@ -2,7 +2,8 @@ name: Phản chiếu sổ cái lên Issue
 
 # ADR-012: issue là mặt kính, sổ cái là sự thật. Mỗi khi sổ cái trên main đổi, việc nào có
 # trường `issue` thì issue đó nhận bốn mốc (nhận · qua Spec Gate · qua Code Gate · xong) và
-# được đóng khi việc done. Chiều ngược lại không tồn tại: không gì trên issue đổi được sổ cái.
+# được đóng khi việc done. Chiều ngược lại chỉ có đúng một lệnh (ADR-027): bình luận `/ok <quyết định>` của Capu,
+# do workflow "Quyết trên issue bằng /ok" xử lý; không gì khác trên issue đổi được sổ cái.
 # Trạng thái "đã phản chiếu tới đâu" lưu trên nhánh mirror-state (giống notify-slack).
 
 on:
@@ -10,7 +11,7 @@ on:
     branches: [main]
     paths: ["ledger/**", "board/**"]
   workflow_run:
-    workflows: ["Đồng bộ sổ cái vào main"]
+    workflows: ["Đồng bộ sổ cái vào main", "Quyết trên issue bằng /ok"]
     types: [completed]
   workflow_dispatch:
     inputs:
