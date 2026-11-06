@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """T-076 tiêu chí 3: bước xuất (scripts/export_dashboard.py) đưa vào `capu_queue` đúng tập "cái gì anh phải làm" (spec D2): Decision Request chưa quyết, việc escalated, việc blocked chờ Capu,
+Ghi chú T-081: kỳ vọng "links chỉ gồm Decision Request và PR chưa xử lý" được nới có chủ ý: việc có trường `issue` hợp lệ thêm link `Issue #<n>` (xem products/T-081-*.md, D-I1). Mọi việc giả ở đây không có `issue` nên eval này không đổi.
 việc engineering bậc B/C đã done còn PR chưa merged/closed (nguồn: sự kiện sổ cái `merged`); gộp trùng theo mã việc. Không token, không mạng.
 Chạy: cd /home/user/tohong-hq && python3 eval/T-076/check_3_export_pr.py     (PASS / FAIL <lý do>, mã thoát 0/1)
 """
