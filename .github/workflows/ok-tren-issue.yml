@@ -14,7 +14,11 @@ permissions:
   contents: write
   issues: write
 
-# Không đặt concurrency: nhóm dùng chung chỉ giữ 1 lượt chờ và huỷ lượt cũ (nuốt lệnh /ok); đua push do ok_issue.py thử lại.
+# Xếp hàng theo từng bình luận (created+edited cùng bình luận không chạy song song, bước đăng không nguyên tử);
+# không nhóm hằng số (sẽ huỷ lượt chờ cũ, nuốt /ok). Đua push giữa các bình luận do ok_issue.py thử lại.
+concurrency:
+  group: ok-tren-issue-${{ github.event.comment.id }}
+  cancel-in-progress: false
 
 jobs:
   ok:

@@ -13,7 +13,7 @@ Dòng cuối của stdout là JSON: {"verdict": "decided|rejected|duplicate|igno
 Mã thoát 0 cho cả bốn verdict. Biến môi trường: TOHONG_ROOT (sổ cái), OK_LOGIN (mặc định phungrk).
 
 --git: chạy trong kho (thư mục TOHONG_ROOT, remote origin, nhánh main): lấy origin/main mới nhất (reset cứng về đó, nên
-chỉ dùng trên bản checkout của workflow), kiểm lại, ghi sổ cái, tạo MỘT commit `[T-xxx] ...` chỉ gồm board/T-xxx.md và
+chỉ chạy khi đang ở nhánh main và cây sạch, ngược lại từ chối và thoát khác 0), kiểm lại, ghi sổ cái, tạo MỘT commit `[T-xxx] ...` chỉ gồm board/T-xxx.md và
 ledger/events.jsonl, đẩy bằng push thường. Bị chen ngang thì làm lại từ đầu trên main mới, tối đa 5 lần; hết lượt thì
 thoát khác 0 (workflow đỏ, sổ cái không đổi). Không force, không rebase, không merge.
 """
@@ -138,8 +138,19 @@ def git(*args, check=True):
     return r
 
 
+def guard_checkout():
+    """--git reset cứng, nên chỉ chạy trên checkout sạch của main; không bao giờ xoá việc đang làm của người gọi."""
+    br = git("rev-parse", "--abbrev-ref", "HEAD", check=False).stdout.strip()
+    if br != "main":
+        raise SystemExit(f"--git chỉ chạy trên nhánh main (đang ở '{br}'); không đụng cây làm việc")
+    st = git("status", "--porcelain", "--untracked-files=no", "--", ".", ":(exclude)*.pyc", check=False).stdout.strip()
+    if st:
+        raise SystemExit("--git từ chối: cây làm việc có thay đổi chưa commit; không đụng cây làm việc")
+
+
 def run_git(ev, content):
     last = ""
+    guard_checkout()
     for _ in range(MAX_TRIES):
         git("fetch", "-q", "origin", "main")
         git("reset", "-q", "--hard", "origin/main")

@@ -87,7 +87,7 @@ def dr_path(e):
             root = ROOT.resolve()
             real = (root / link).resolve()
             rel = real.relative_to(root)
-            if real.is_file() and rel.parts and rel.parts[0] != ".git" and ".git" not in (root / link).parts:
+            if real.is_file() and rel.parts and ".git" not in rel.parts and ".git" not in (root / link).parts:
                 return rel.as_posix()
         except (ValueError, OSError):
             pass                                         # ngoài kho / lỗi: quay về inbox/capu
