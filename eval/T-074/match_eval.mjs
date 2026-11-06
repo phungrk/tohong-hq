@@ -36,7 +36,7 @@ const poolSha = sha(JSON.stringify(pool.map((v) => [v.id, v.category, v.priceMin
 const topFn = (p, cat) => mod.computeMatches(p, { category: cat, limit: 5 }).vendors.map((v) => v.id);
 const baselinePath = path.resolve(opt('--baseline') || path.join(HERE, 'baseline.json'));
 
-const head = `T-074 · pool=${pool.length} vendor (sha ${poolSha}) · hồ sơ=${allProfiles.length} · không tụt quá ${MAX_DROP_PT} điểm so với baseline, phủ nhãn top 5 >= ${COVERAGE_PCT}% · giá địa điểm tiệc: triệu/bàn (giả định, chưa xác minh)`;
+const head = `T-074 · pool=${pool.length} vendor (sha ${poolSha}) · hồ sơ=${allProfiles.length} · không tụt quá ${MAX_DROP_PT} điểm so với baseline, phủ nhãn top 5 >= ${COVERAGE_PCT}% · giá địa điểm tiệc: triệu/bàn (~85% theo bằng chứng, xem spec)`;
 console.log(head);
 
 if (!fs.existsSync(labelsPath)) {
@@ -74,7 +74,10 @@ if (r.unlabeled.length) {
 }
 if (doc.is_sample) finish('FAIL nhãn mẫu (is_sample=true): chỉ để kiểm cách chạy, không có giá trị đạt/không đạt; cần nhãn thật', 1);
 if (!r.pass) finish(`FAIL ${CATEGORIES.filter((c) => !r.categories[c].pass).map((c) => `${c}: ${r.categories[c].reasons.join('; ')}`).join(' | ')}`, 1);
-if (base && !cmp) finish('FAIL nhãn hoặc hồ sơ đã đổi so với lúc ghi baseline: baseline vô hiệu; đặt baseline mới là quyết định của Capu (ghi decisions/)', 1);
+if (base && !cmp) {
+  for (const c of CATEGORIES) console.log(`baseline cũ ${c}: ${base.rates[c].toFixed(1)}% -> tỉ lệ mới (nhãn khác) ${r.categories[c].ratePct.toFixed(1)}% (${(r.categories[c].ratePct - base.rates[c] >= 0 ? '+' : '') + (r.categories[c].ratePct - base.rates[c]).toFixed(1)})`);
+  finish('FAIL nhãn hoặc hồ sơ đã đổi so với lúc ghi baseline: baseline vô hiệu; chấm thêm nghĩa là đặt lại baseline (xoá baseline.json rồi --save-baseline) là quyết định của Capu, xem tỉ lệ cũ cạnh tỉ lệ mới ở trên (ghi decisions/)', 1);
+}
 if (base && args.includes('--save-baseline')) finish('FAIL baseline đã có: không ghi đè; đặt baseline mới là quyết định của Capu (ghi decisions/)', 1);
 const rates = CATEGORIES.map((c) => `${c} ${r.categories[c].ratePct.toFixed(1)}%`).join(', ');
 if (cmp) {

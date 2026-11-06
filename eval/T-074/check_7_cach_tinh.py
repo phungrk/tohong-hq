@@ -97,4 +97,5 @@ if not m or int(m.group(2)) >= 150: fail("vị trí chưa chấm vẫn nằm tro
 doc["labels"][0]["fit"] = not doc["labels"][0]["fit"]; json.dump(doc, open(labels, "w"))
 code, out = ev("asc")
 if code == 0 or "baseline vô hiệu" not in last(out): fail("nhãn đổi sau baseline phải FAIL baseline vô hiệu: " + last(out))
-print("PASS cách tính qua lệnh: đa số 2/3, luật máy loại vendor vượt giá, chưa chấm ra khỏi mẫu số và báo phủ nhãn, lần đầu chỉ đo, tụt đúng 10 điểm đạt/10,7 FAIL, tốt lên đạt, không ghi đè baseline, nhãn đổi vô hiệu baseline")
+if not re.search(r"baseline cũ makeup: 100\.0% -> tỉ lệ mới", out): fail("khi baseline vô hiệu phải in tỉ lệ baseline cũ cạnh tỉ lệ mới: " + out[-400:])
+print("PASS cách tính qua lệnh: đa số 2/3, luật máy loại vendor vượt giá, chưa chấm ra khỏi mẫu số và báo phủ nhãn, lần đầu chỉ đo, tụt đúng 10 điểm đạt/10,7 FAIL, tốt lên đạt, không ghi đè baseline, nhãn đổi vô hiệu baseline và in tỉ lệ cũ cạnh mới")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """T-074 tiêu chí 5: gói chấm mù. Người chấm không thấy điểm, hạng, style, tag, vai trò; mỗi ô có đúng 3 người; thứ tự đã trộn;
-mỗi ô gồm tối đa 15 vendor top của máy + đúng 5 ngẫu nhiên; gói có HUONG_DAN.md với câu hỏi nguyên văn, luật giá, đơn vị giá địa điểm, ví dụ co/khong."""
+mỗi ô gồm tối đa 15 vendor top của máy + tối đa 5 ngẫu nhiên (đúng min(5, số vendor qua A+B còn lại ngoài top 15), kiểm trên dữ liệu cố định); gói có HUONG_DAN.md với câu hỏi nguyên văn, luật giá, đơn vị giá địa điểm, ví dụ co/khong."""
 import csv, json, os, re, subprocess, sys, tempfile
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 def fail(m): print("FAIL " + m); sys.exit(1)
@@ -31,9 +31,11 @@ for n in (3, 4, 5):
     for c in key["cells"]:
         roles = [x["role"] for x in c["candidates"]]
         if roles.count("system") + roles.count("filler") != len(roles): fail("vai trò lạ trong key")
-        if roles.count("filler") != 5: fail(f"ô {c['cell']} không có đúng 5 vendor ngẫu nhiên")
+        if roles.count("filler") > 5: fail(f"ô {c['cell']} có {roles.count('filler')} vendor ngẫu nhiên, tối đa 5")
         if roles.count("system") > 15: fail(f"ô {c['cell']} có {roles.count('system')} vendor top của máy, tối đa 15")
         if roles[-5:] == ["filler"] * 5 and roles.count("system") > 0: n_early += 1
+    n_short = sum(1 for c in key["cells"] if [x["role"] for x in c["candidates"]].count("filler") < 5)
+    if f"ô thiếu vendor ngẫu nhiên" not in r.stdout or not re.search(rf"ô thiếu vendor ngẫu nhiên[^:]*: {n_short}\)", r.stdout): fail(f"make phải in số ô thiếu vendor ngẫu nhiên ({n_short}): {r.stdout[-300:]}")
     if n_early > 3: fail(f"{n_early}/120 ô để 5 vendor ngẫu nhiên dồn cuối (trộn không đủ)")
     g = open(os.path.join(o, "HUONG_DAN.md"), encoding="utf-8").read() if os.path.exists(os.path.join(o, "HUONG_DAN.md")) else fail("thiếu HUONG_DAN.md trong gói chấm")
     for need in ("Với cặp đôi này, anh/chị có khuyên họ liên hệ vendor này không?", "giá thấp nhất", "mỗi bàn", "co", "khong", "Ví dụ"):
@@ -46,8 +48,27 @@ for n in (3, 4, 5):
     if not os.path.exists(os.path.join(o, "_private", "declarations.template.json")): fail("thiếu declarations.template.json")
     t = json.load(open(os.path.join(o, "_private", "declarations.template.json")))
     if any(v.get("is_external") is not None or v["saw_system_scores"] is not None or v["touched_matching_weights"] is not None for v in t.values()) or any("is_external" not in v for v in t.values()): fail("mẫu khai báo phải để null cho người thật điền")
+# Dữ liệu cố định (matcher giả, không phụ thuộc pool thật): luật "tối đa 5 ngẫu nhiên, thiếu thì lấy hết, báo số ô thiếu"
+# photography/makeup/attire: 40 vendor qua A+B -> top 15 + đúng 5 ngẫu nhiên. venue: 17 vendor qua A+B -> top 15 + đúng 2 ngẫu nhiên (ô thiếu).
+fb = os.path.join(tempfile.mkdtemp(), "tohong-back"); os.makedirs(os.path.join(fb, "lib"))
+open(os.path.join(fb, "package.json"), "w").write('{"type":"module"}')
+open(os.path.join(fb, "lib", "vendorMatcher.js"), "w").write("""
+export const VENDOR_POOL = [];
+for (const c of ['photography','makeup','attire','venue']) for (let i = 0; i < (c === 'venue' ? 17 : 40); i++)
+  VENDOR_POOL.push({ id: `f-${c}-${String(i).padStart(2,'0')}`, name: `V ${c} ${i}`, category: c, city: 'HCMC', isVerified: true, rating: 4.5, reviewCount: 1, priceMin: 1, priceMax: 2, description: 'd', photos: [] });
+export function computeMatches(p, { category, limit }) { return { vendors: VENDOR_POOL.filter((v) => v.category === category).slice(0, limit).map((v) => ({ id: v.id })) }; }
+""")
+fo = os.path.join(tempfile.mkdtemp(), "pk")
+r = subprocess.run(["node", "eval/T-074/packets.mjs", "make", "--graders", "3", "--out", fo], cwd=ROOT, capture_output=True, text=True, env=dict(os.environ, TOHONG_BACK=fb))
+if r.returncode != 0: fail("make trên dữ liệu cố định lỗi: " + (r.stdout + r.stderr)[-300:])
+fk = json.load(open(os.path.join(fo, "_private", "key.json"), encoding="utf-8"))
+for c in fk["cells"]:
+    roles = [x["role"] for x in c["candidates"]]
+    want = 2 if c["category"] == "venue" else 5
+    if roles.count("filler") != want or roles.count("system") != 15: fail(f"dữ liệu cố định: ô {c['cell']} có {roles.count('system')} top + {roles.count('filler')} ngẫu nhiên, cần 15 + {want}")
+if not re.search(r"ô thiếu vendor ngẫu nhiên[^:]*: 30\)", r.stdout): fail("dữ liệu cố định: phải báo 30 ô thiếu (30 hồ sơ x venue): " + r.stdout[-300:])
 # import phải từ chối khi chưa khai báo và khi còn ô trống
 o = f"{out}3"
 r = subprocess.run(["node", "eval/T-074/packets.mjs", "import", "--dir", o, "--out", os.path.join(o, "l.json")], cwd=ROOT, capture_output=True, text=True)
 if r.returncode == 0: fail("import nhận khi chưa có declarations.json")
-print("PASS gói chấm 3/4/5 người: không lộ điểm/hạng/style/tag/vai trò, 120 ô x đúng 3 người, mỗi ô <=15 top + 5 ngẫu nhiên, có hướng dẫn chấm (câu hỏi, luật giá, đơn vị, ví dụ), tải đều, trộn thứ tự, import chặn khi thiếu khai báo")
+print("PASS gói chấm 3/4/5 người: không lộ điểm/hạng/style/tag/vai trò, 120 ô x đúng 3 người, mỗi ô <=15 top + 5 ngẫu nhiên, có hướng dẫn chấm (câu hỏi, luật giá, đơn vị, ví dụ), tải đều, trộn thứ tự, ô thiếu vendor ngẫu nhiên lấy hết và báo số ô (dữ liệu cố định), import chặn khi thiếu khai báo")
