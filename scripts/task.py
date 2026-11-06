@@ -159,7 +159,7 @@ def read_task(tid):
                 try:
                     v = json.loads(v, strict=True)
                 except json.JSONDecodeError:
-                    v = v.strip('"').strip().strip('"').strip()
+                    v = v.strip('" \t\r\n\f\v')
                     flags.append((k, "nhe", "nháy kép hỏng, đã bỏ nháy ngoài"))
             elif v.startswith("["):
                 try:
@@ -171,11 +171,12 @@ def read_task(tid):
            ("tier", str(meta.get("tier") or "") not in ("", "A", "B", "C")))
     for k, b in bad:
         if b:
-            flags.append((k, "nang", f"giá trị không hợp lệ ({meta.get(k)!r}), board bị bỏ qua"))
+            flags.append((k, "nang", f"giá trị không hợp lệ ({meta.get(k)}), board bị bỏ qua"))
     _FLAGS[tid] = flags
     if flags and tid not in _WARNED:
         _WARNED.add(tid)
-        print(f"Cảnh báo: board/{tid}.md · " + "; ".join(f"trường {k}: {why}" for k, _s, why in flags), file=sys.stderr)
+        for k, _s, why in flags:
+            print(f"Cảnh báo: board/{tid}.md · trường {k}: {why}", file=sys.stderr)
     heavy = [f for f in flags if f[1] == "nang"]
     if heavy:
         raise LedgerError(f"board/{tid}.md · trường {heavy[0][0]}: {heavy[0][2]}")
