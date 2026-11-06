@@ -1,0 +1,125 @@
+{
+  "task": "T-087",
+  "at": "2026-11-06T21:57",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/ledger",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "python3 eval/T-087/check_1_khong_sap.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 641,
+      "out": "FAIL list: sập có Traceback | list: thoát 1, phải 0 | summary: sập có Traceback | summary: thoát 1, phải 0 | summary --json: sập có Traceback | summary --json: thoát 1, phải 0 | export: sập có Traceback | export: thoát 1, phải 0 | gate: sập có Traceback | list: title hỏng phải hiện nguyên chuỗi thô, nháy giữ nguyên | read_task ném lỗi: ~~~~~~~~~~~~~~~^^^\n  File \"/usr/lib/python3.13/json/decoder.py\", line 348, in decode\n    raise JSONDecodeError(\"Extra data\", s, end)\njson.decoder.JSONDecodeError: Extra data: line 1 column 7 (char 6)\n | export không ra tasks.json | export: stderr phải có cảnh báo nêu board/T-901.md | gate: stderr phải có cảnh báo nêu board/T-901.md",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-087/check_2_hop_le_nhu_cu.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 277,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-087/check_3_summary_bao_hong.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 477,
+      "out": "FAIL summary thoát 1 | stdout thiếu dòng 'Board hỏng:' | phải có đúng một dòng '- T-901 (board/T-901.md): title, issue'; thấy [] | json board_hong sai: None | việc hỏng vẫn phải được đếm trong counts | board lành: board_hong phải là []; thấy None",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-087/check_4_bat_bien.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 25125,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-087/check_5_lenh_doi_trang_thai.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 406,
+      "out": "FAIL đọc trước lệnh thất bại | handoff trên việc có trường hỏng: thoát 1: ~~~~~~~~~~~~~~~^^^\n  File \"/usr/lib/python3.13/json/decoder.py\", line 348, in decode\n    raise JSONDecodeError(\"Extra data\", s, end)\njson.decoder.JSONDecodeError: Extra data: line 1 column 7 (char 6)\n | đọc sau lệnh thất bại: ~~~~~~~~~~~~~~~^^^\n  File \"/usr/lib/python3.13/json/decoder.py\", line 348, in decode\n    raise JSONDecodeError(\"Extra data\", s, end)\njson.decoder.JSONDecodeError: Extra data: line 1 column 7 (char 6)\n | cost trên việc có trường hỏng: sập",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 31,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 147,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1359,
+      "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-002-workflow-context-hop-le.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 81,
+      "out": "PASS 7 workflow: không secrets/env sai chỗ trong if, inputs đều khai, không in env khi có secret cấp job",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-001-issue-la-so-nguyen-duong.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 98,
+      "out": "PASS mọi trường issue rỗng hoặc là số nguyên dương",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-002-decided-qua-issue-hop-le.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 95,
+      "out": "PASS mọi decided qua issue: link đúng kho, from capu, detail không rỗng, đúng issue của việc",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-003-chi-phungrk-quyet-qua-issue.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 11783,
+      "out": "PASS chỉ phungrk (User, chính người gửi, created|edited, không PR, khớp toàn chuỗi) tạo được decided qua issue",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-004-phan-chieu-khong-dang-file-ngoai-kho.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 8907,
+      "out": "PASS phản chiếu không đăng file ngoài kho/.git (kể cả kho con, symlink); link hợp lệ trong kho vẫn đăng",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-005-decide-viec-done-blocked-khong-cham-board.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2765,
+      "out": "PASS decide trên việc done/blocked không chạm board; chỉ ghi decided của capu với đúng note; thiếu note/--close thì không ghi",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
