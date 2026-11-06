@@ -77,9 +77,12 @@ def author_ok(ev):
     c = ev.get("comment") or {}
     u = c.get("user") or {}
     s = ev.get("sender") or {}
-    want = LOGIN.lower()
-    return (isinstance(u.get("login"), str) and u["login"].lower() == want and u.get("type") == "User"
-            and isinstance(s.get("login"), str) and s["login"].lower() == want)
+    want = LOGIN
+    if not (want.isascii() and isinstance(u.get("login"), str) and isinstance(s.get("login"), str)):
+        return False
+    # chỉ ASCII thuần mới đem so (str.lower() đổi KELVIN SIGN U+212A thành 'k'); so không phân biệt hoa/thường ASCII
+    return (u["login"].isascii() and s["login"].isascii() and u.get("type") == "User"
+            and u["login"].lower() == want.lower() and s["login"].lower() == want.lower())
 
 
 def confirm(cid, tid, detail, holder, again=False):
@@ -96,6 +99,8 @@ def decide_once(ev, content):
     """Kiểm B2 + A1 trên sổ cái hiện tại; ghi nếu hợp lệ. Ném Out cho mọi kết quả không phải 'đã ghi mới'."""
     c = ev["comment"]
     cid, url, number = c.get("id"), c.get("html_url", ""), (ev.get("issue") or {}).get("number")
+    if not isinstance(url, str) or not url.strip():      # B1: link = URL bình luận, thiếu thì không ghi
+        raise refuse(cid, "no_url", "Payload thiếu đường dẫn bình luận (`html_url`), không ghi được link vào sổ cái.")
     for e in ledger.read_events():                       # B2: một bình luận quyết tối đa một lần
         if e.get("event") == "decided" and e.get("link") == url and url:
             raise Out("duplicate", e.get("task", ""), "duplicate",
@@ -135,6 +140,8 @@ def git(*args, check=True):
 
 def run_git(ev, content):
     last = ""
+    if git("status", "--porcelain", check=False).stdout.strip():
+        raise SystemExit("Cây làm việc không sạch: --git reset cứng về origin/main, từ chối để khỏi mất thay đổi.")
     for _ in range(MAX_TRIES):
         git("fetch", "-q", "origin", "main")
         git("reset", "-q", "--hard", "origin/main")

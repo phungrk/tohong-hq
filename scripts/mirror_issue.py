@@ -82,8 +82,15 @@ DR_CONT = "… (còn tiếp) — xem đầy đủ: "
 def dr_path(e):
     """File Decision Request của sự kiện leo thang: `link` của sự kiện, không có thì inbox/capu/<T-xxx>-*.md đứng cuối theo chữ cái."""
     link = (e.get("link") or "").strip()
-    if link and (ROOT / link).is_file():
-        return link
+    if link:
+        try:
+            root = ROOT.resolve()
+            real = (root / link).resolve()
+            rel = real.relative_to(root)
+            if real.is_file() and rel.parts and rel.parts[0] != ".git" and ".git" not in (root / link).parts:
+                return rel.as_posix()
+        except (ValueError, OSError):
+            pass                                         # ngoài kho / lỗi: quay về inbox/capu
     found = sorted((ROOT / "inbox" / "capu").glob(f"{e['task']}-*.md"))
     return found[-1].relative_to(ROOT).as_posix() if found else ""
 

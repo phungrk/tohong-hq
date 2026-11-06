@@ -14,9 +14,7 @@ permissions:
   contents: write
   issues: write
 
-concurrency:
-  group: ok-tren-issue
-  cancel-in-progress: false
+# Không đặt concurrency: nhóm dùng chung chỉ giữ 1 lượt chờ và huỷ lượt cũ (nuốt lệnh /ok); đua push do ok_issue.py thử lại.
 
 jobs:
   ok:
