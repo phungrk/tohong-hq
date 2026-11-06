@@ -39,8 +39,8 @@ D1. Workflow `.github/workflows/ok-tren-issue.yml`, `name: Quyết trên issue b
 D2. Nội dung bình luận không bao giờ đi vào dòng lệnh shell, biểu thức `${{ … }}` trong `run:`, tên file, hay thành đối số được diễn giải: workflow đưa cả sự kiện cho script qua file payload (`$GITHUB_EVENT_PATH`); script đọc JSON, gọi `task.py decide` bằng hàm/danh sách đối số (không `shell=True`, không `eval/exec`); nội dung chỉ là dữ liệu. Script không tự gọi mạng: việc đăng bình luận là bước riêng của workflow bằng `GITHUB_TOKEN`.
 D3. Lọc sớm theo tài khoản ở cấp job để khỏi chạy với bình luận người lạ; script tự kiểm lại A2 (không tin bộ lọc job).
 
-### E. Dashboard (tiêu chí 5 của Capu)
-E1. **(CHỜ CAPU quyết tách hay gộp; tạm viết theo hướng TÁCH, khuyến nghị của Chief of Staff)** **Tách thành việc sau T-079** (đề nghị Chief of Staff mở việc bậc B, vùng `hq/dashboard`, phụ thuộc T-078 đã merge): modal việc chờ Capu (T-076) thêm link "Issue #N" khi việc có `issue`. Lý do không làm trong T-079: sửa `capu_queue.links` (T-076 D2/D3 và `eval/T-076/check_3`, `check_6` đòi `links` chỉ gồm link DR và PR chưa xử lý) nên cần spec T-076 sửa và Spec Gate riêng; làm gộp buộc sửa eval của việc khác. T-079 hoàn tất không phụ thuộc E1.
+### E. Dashboard (tiêu chí 5 của brief, đã tách sang T-081)
+E1. **Capu chọn tách 2026-11-06 → T-081** (việc bậc B, vùng `hq/dashboard`). **Tách thành việc riêng, sau T-079** (đề nghị Chief of Staff mở việc bậc B, vùng `hq/dashboard`, phụ thuộc T-078 đã merge): modal việc chờ Capu (T-076) thêm link "Issue #N" khi việc có `issue`. Lý do không làm trong T-079: sửa `capu_queue.links` (T-076 D2/D3 và `eval/T-076/check_3`, `check_6` đòi `links` chỉ gồm link DR và PR chưa xử lý) nên cần spec T-076 sửa và Spec Gate riêng; làm gộp buộc sửa eval của việc khác. T-079 hoàn tất không phụ thuộc E1.
 
 ## Ràng buộc (vòi)
 - Repo: `phungrk/tohong-hq` · Nhánh: `t-079-ok-tren-issue` · Vùng: `hq/ledger`.
@@ -57,7 +57,6 @@ E1. **(CHỜ CAPU quyết tách hay gộp; tạm viết theo hướng TÁCH, khu
 | 2 | `/ok <nội dung>` hợp lệ từ phungrk ghi đúng 1 sự kiện `decided` (from capu, detail = nội dung chuẩn hoá, link = URL bình luận), việc về `doing`, có câu xác nhận; nội dung không bị chạy như lệnh; không có `@<tên>` trần trong trả lời; dòng trống đầu và NBSP được nhận (A2-A3, B1, C2, D2) | `cd /home/user/tohong-hq && python3 eval/T-079/check_2_ok_ghi_so_cai.py` |
 | 3 | Tài khoản khác/bot/người sửa khác/PR/không phải lệnh: sổ cái và board không đổi, im lặng; việc không `escalated`, issue lạ, nhiều việc, nội dung rỗng/quá dài: không đổi, từ chối có lý do (A1-A3, C3) | `cd /home/user/tohong-hq && python3 eval/T-079/check_3_tu_choi.py` |
 | 4 | Việc không có issue vẫn quyết qua chat như cũ; `/ok` không chạm chúng; sự kiện `/ok` cùng khoá với sự kiện chat (C5, B1) | `cd /home/user/tohong-hq && python3 eval/T-079/check_4_viec_khong_issue.py` |
-| 5 | Modal dashboard có link issue | **Chờ Capu** (tạm theo hướng tách, E1): chưa có eval ở đây; nếu Capu chọn gộp thì thêm eval + sửa spec T-076 |
 | 6 | Mỗi bình luận quyết tối đa một lần: chạy lại/sửa không đổi sổ cái, xác nhận nêu nội dung đã ghi; bình luận mới sau khi leo thang lại quyết được (B2, C4) | `cd /home/user/tohong-hq && python3 eval/T-079/check_6_idempotent_va_sua.py` |
 | 7 | Bảo mật cấu hình: quyền tối thiểu, không secret mới, không nội suy nội dung vào shell, checkout `main`, không force-push, script không shell/mạng (D1-D3). Kiểm tĩnh vì Actions không chạy offline được | `cd /home/user/tohong-hq && python3 eval/T-079/check_7_bao_mat.py` |
 | 8 | Ghi lên `main` bằng git thật (remote cục bộ): 1 commit `[T-xxx]` đúng 2 file, tuyến tính; bị chen ngang thì thử lại không xung đột, không mất sự kiện, decided đúng 1 lần; trùng/từ chối không đổi `main`; workflow hạ nguồn bám vào workflow này (B3-B4) | `cd /home/user/tohong-hq && python3 eval/T-079/check_8_ghi_len_main.py` |
@@ -77,4 +76,8 @@ Mô phỏng sự kiện: `act` không có, nên eval gọi thẳng `scripts/ok_i
 Lệnh khác ngoài `/ok` (kể cả `--close`, `/quyet`, huỷ, giao việc); đổi trạng thái khác ngoài `decide`; quyết việc `blocked`/`done` bằng `/ok`; đặt secret/biến mới; mở PR; viết lại lịch sử; trả lời người lạ; sửa hay xoá bình luận của Capu; backfill bình luận cho sự kiện leo thang cũ; link issue trên modal (E1).
 
 ## Câu hỏi mở
-Tiêu chí 5 (link issue trên modal T-078) tách thành việc bậc B riêng sau T-079 vì phải sửa spec T-076 (D2/D3) và eval của nó; Capu đồng ý tách không, hay muốn gộp vào T-079 (Chief of Staff đang hỏi Capu; Product không respec cho tới khi có kết quả) (khi đó T-079 phải qua Spec Gate lại cùng sửa spec T-076)?
+Không. (Tiêu chí 5 đã được Capu chọn tách sang T-081, 2026-11-06.)
+
+## Lịch sử sửa
+- v2: sửa C1/C2/A3/A1 theo `handoffs/T-079-D1.md`, thêm mục rủi ro sync_branch.
+- v2 (respec): Capu chọn tách tiêu chí 5 → T-081; bỏ dòng 5 khỏi bảng; bảng còn tiêu chí 1-4 và 6-8 (số giữ nguyên để khớp tên eval).
