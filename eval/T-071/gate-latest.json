@@ -1,6 +1,6 @@
 {
   "task": "T-071",
-  "at": "2026-11-06T03:15",
+  "at": "2026-11-06T03:41",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_1_khong_fail_gia.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 319481,
+      "ms": 319424,
       "out": "PASS 10/10 lần chạy (5 x C9, C10) PASS khi vite lạ chiếm dải cổng",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_2_khong_mo_coi.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 74696,
+      "ms": 75200,
       "out": "PASS không còn tiến trình/file do eval tạo sau chạy xong và sau SIGTERM, SIGINT, SIGHUP (C9, C10)",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_3_ket_qua_khong_doi.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 266438,
+      "ms": 266132,
       "out": "PASS C9, C10: PASS trên code hiện tại, FAIL trên cả ba đột biến (ảnh hỏng, marry.vn, localStorage)",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_4_cho_theo_dieu_kien.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 112,
+      "ms": 114,
       "out": "PASS sáu file tiêu thụ dùng helper, không npx/Math.random/waitForTimeout; helper đủ tính chất tĩnh",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_5_bat_bien_vendor_images.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 175126,
+      "ms": 174133,
       "out": "PASS hai bất biến vendor-images: PASS trên main, FAIL trên bản bị phá, không để lại vite",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_6_helper_nonce.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 63947,
+      "ms": 63906,
       "out": "PASS helper từ chối vite lạ (nonce thật), phục vụ vite thật, dọn sạch tiến trình và file",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "eval/T-071/adv-04-helper-bien.cjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1222,
+      "ms": 919,
       "out": "PASS helper: song song hai cổng riêng, stop lặp không lỗi, lỗi ghi file reject Error và dọn sạch ngay",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/T-071/adv-05-c10-tra-tre.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 68236,
+      "ms": 68108,
       "out": "PASS C10 bắt được tra trùng id và tra kèm coupleId xảy ra 1s sau lần tra đầu (M4, M5)",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "eval/T-071/adv-06-c9-anh-hong-tre.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 8673,
+      "ms": 8407,
       "out": "PASS C9 bắt được ảnh hỏng hiện ra 1.2s sau khi bề mặt mount (M6)",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "eval/T-071/adv-07-c10-hong-tre.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 92791,
+      "ms": 92042,
       "out": "PASS C10 bắt được marry.vn gọi trễ 2s (M7) và ảnh hỏng hiện ra 1.2s sau khi bề mặt mount (M8)",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 25,
+      "ms": 22,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 109,
+      "ms": 143,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 32,
+      "ms": 34,
       "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 526,
+      "ms": 624,
       "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1799,
+      "ms": 1788,
       "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 6309,
+      "ms": 6301,
       "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-006-wayback-chi-khi-bat-co-va-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 6714,
+      "ms": 6683,
       "out": "PASS Wayback chỉ khi bật cờ; 4 yêu cầu, giãn cách nhỏ nhất 2.00 giây, tối đa 1 cùng lúc",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-007-khong-goi-wayback-available.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 673,
+      "ms": 717,
       "out": "PASS 6 yêu cầu tới Wayback, không có /wayback/available",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-008-san-toc-do-wayback.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 583,
+      "ms": 563,
       "out": "PASS 6 cách hạ tốc độ / dùng --wayback-* sai đều bị từ chối mã 2, không yêu cầu, không ghi manifest",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-009-wayback-429-khong-go-cua-mai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 16287,
+      "ms": 16285,
       "out": "PASS 429 mọi yêu cầu: 20 yêu cầu tổng, tối đa 4 liên tiếp cùng đường dẫn, lần gửi lại sớm nhất sau 1.00 giây, 1 cùng lúc",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-010-eval-khong-kill-theo-ten.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 216,
+      "ms": 166,
       "out": "PASS không eval nào kill tiến trình theo tên",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-011-file-thu-eval-khong-vao-git-front.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 38,
+      "ms": 29,
       "out": "PASS repo front không chứa file tạm của eval (__t0NN*, __nonce-*)",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/T-071/adv-01-chay-dong-thoi.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 66185,
+      "ms": 66014,
       "out": "PASS hai phiên C9 và hai phiên C10 chạy song song đều PASS, dọn sạch",
       "tier": 3
     },
@@ -204,7 +204,7 @@
       "eval": "eval/T-071/adv-02-tin-hieu-luc-trinh-duyet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 9871,
+      "ms": 10090,
       "out": "PASS tín hiệu lúc chromium đang chạy: harness thoát mã != 0 < 15s, không còn tiến trình/file do eval tạo",
       "tier": 3
     },
@@ -212,7 +212,7 @@
       "eval": "eval/T-071/adv-03-m3-on-dinh.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 324341,
+      "ms": 323827,
       "out": "PASS M3: C10 FAIL đúng lý do localStorage 8/8 lần (4 không tải, 4 tải CPU)",
       "tier": 3
     }
