@@ -1,0 +1,117 @@
+{
+  "task": "T-084",
+  "at": "2026-11-06T13:41",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/ledger",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "python3 eval/T-083/check_1_viec_da_merged_khong_cho_capu.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 891,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-083/check_2_decide_viec_done_blocked.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 992,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-083/check_3_da_quyet_khong_quet.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 227,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-083/check_4_ca_that.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 148,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-083/check_5_bat_bien_xanh.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 64734,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 28,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 137,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1105,
+      "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-001-issue-la-so-nguyen-duong.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 66,
+      "out": "PASS mọi trường issue rỗng hoặc là số nguyên dương",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-002-decided-qua-issue-hop-le.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 84,
+      "out": "PASS mọi decided qua issue: link đúng kho, from capu, detail không rỗng, đúng issue của việc",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-003-chi-phungrk-quyet-qua-issue.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 9659,
+      "out": "PASS chỉ phungrk (User, chính người gửi, created|edited, không PR, khớp toàn chuỗi) tạo được decided qua issue",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-004-phan-chieu-khong-dang-file-ngoai-kho.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 5571,
+      "out": "PASS phản chiếu không đăng file ngoài kho/.git (kể cả kho con, symlink); link hợp lệ trong kho vẫn đăng",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-005-decide-viec-done-blocked-khong-cham-board.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1608,
+      "out": "PASS decide trên việc done/blocked không chạm board; chỉ ghi decided của capu với đúng note; thiếu note/--close thì không ghi",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
