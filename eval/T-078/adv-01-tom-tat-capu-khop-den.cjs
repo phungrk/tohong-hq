@@ -62,7 +62,8 @@ async function sumOfCapu(o) {
       const n = await o.page.$eval('#nd_capu .n', e => e.textContent.trim()), lit = await litOf(o), s = await sumOfCapu(o);
       const line = s && s.lines[0];
       ok(!(lit && line === 'Đang rảnh'), `${name}: khối Capu số ${n}, sáng=${lit}, tóm tắt nhân vật "${line}" (INV-023: sáng thì không "Đang rảnh")`);
-      if (filter) ok(n === '0', `${name}: số trên khối Capu khi lọc ${filter} = ${n} (quyết định T-041 mục 1 đòi lọc; spec T-076 Ràng buộc nói không lọc)`);
+      if (filter) { ok(n === '0', `${name}: số trên khối Capu khi lọc ${filter} = ${n} (quyết định T-041 mục 1: lọc theo sản phẩm; spec T-076 v5 U1a)`);
+        ok(lit === false && line === 'Đang rảnh', `${name}: khối tắt và tóm tắt "Đang rảnh" (spec v5 U1a/U11), thấy sáng=${lit}, "${line}"`); }
       ok(!o.errors.length, `${name}: không lỗi trang ${o.errors.join(' | ')}`);
     } finally { await o.ctx.close(); }
   }
