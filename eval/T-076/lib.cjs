@@ -44,4 +44,6 @@ const clickNode = async o => { const b = await o.page.locator('#nd_capu .n').bou
 const rows = o => o.page.$$eval('#capu-modal [data-capu-row]', rs => rs.map(r => ({ task: r.getAttribute('data-task'), kind: r.getAttribute('data-kind'), text: r.textContent.replace(/\s+/g, ' ').trim(),
   decide: r.getAttribute('data-decide-by') || '', links: [...r.querySelectorAll('a[data-capu-link]')].map(a => ({ href: a.getAttribute('href'), text: a.textContent.trim(), target: a.getAttribute('target'), rel: a.getAttribute('rel') || '', pr: a.getAttribute('data-pr-state') || '' })) })));
 const reporter = () => { let fails = 0; return { ok: (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; }, done: () => { console.log(fails ? 'FAIL ' + fails + ' ý không đạt' : 'PASS'); return fails ? 1 : 0; } }; };
-module.exports = { REPO, INDEX, GH, DR, DR_DIR, pr, stamp, T, Q, link, dash, start, open, nodeCount, modalOpen, clickNode, rows, reporter, close: () => browser && browser.close() };
+// Bản cài đặt tham chiếu (ngoài repo) đối chiếu kỳ vọng: T076_DUMP_DIR=<thư mục> node check_x.cjs ghi cases (tasks, queue, expect) rồi thoát 0, không mở trình duyệt.
+const dumpCases = (name, cases) => { const d = process.env.T076_DUMP_DIR; if (!d) return; fs.writeFileSync(path.join(d, name + '.json'), JSON.stringify(cases)); process.exit(0); };
+module.exports = { dumpCases, REPO, INDEX, GH, DR, DR_DIR, pr, stamp, T, Q, link, dash, start, open, nodeCount, modalOpen, clickNode, rows, reporter, close: () => browser && browser.close() };
