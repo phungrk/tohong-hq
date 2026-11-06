@@ -1,6 +1,6 @@
 {
   "task": "T-076",
-  "at": "2026-11-06T04:29",
+  "at": "2026-11-06T04:31",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-076/check_1_mo_modal_so_khop.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 7105,
+      "ms": 7188,
       "out": "al có role=dialog và aria-modal=true\nPASS desktop: không lỗi trang \nPASS iphone390: chưa bấm thì modal không hiện\nPASS iphone390: số trên khối Capu = 7 (2 leo thang, 3 quyết/chặn, 1 bậc C, 1 bậc B; T-62 bậc A và T-63 không có PR mở không đếm; T-64 có DR và PR mở chỉ một dòng), thấy 7\nFAIL iphone390: bấm số trên khối Capu thì modal hiện\nFAIL iphone390: số dòng = số trên khối (0)\nFAIL iphone390: thứ tự escalated, quyết, bị chặn, bậc C, bậc B; trong nhóm theo số việc: T-64 và T-70 cùng nhóm \"decision\" theo số tăng dần phải là T-64,T-70; thấy \nFAIL iphone390: một việc có cả Decision Request và PR mở chỉ một dòng\nFAIL iphone390: #capu-modal có role=dialog và aria-modal=true\nPASS iphone390: không lỗi trang \nFAIL thiếu capu_queue: số dòng = số trên khối = 2 (luật cũ), thấy 0/2\nFAIL 11 ý không đạt",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-076/check_2_dong_va_link.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 4814,
+      "ms": 4799,
       "out": "capu và ghi hạn quyết 2026-11-10\nFAIL iphone390: leo thang chưa có file thì trỏ thư mục inbox/capu\nFAIL iphone390: việc đã xong có Decision Request chưa quyết: loại \"Quyết định chờ anh\", link file, hạn\nFAIL iphone390: việc bị chặn chờ Capu: loại \"Bị chặn - chờ anh làm\", link file\nFAIL iphone390: dòng bậc B: \"Đọc diff hành vi\", bậc B, link PR, không có hạn\nFAIL iphone390: dòng bậc C: \"Duyệt và tự merge\", bậc C, link PR\nFAIL iphone390: việc có hai PR mở: một dòng, hai link theo thứ tự dữ liệu\nFAIL iphone390: việc có Decision Request và PR mở: một dòng, link DR trước rồi PR\nFAIL iphone390: việc chưa có link PR vẫn hiện, ghi \"chưa có link\", không có thẻ a rỗng\nFAIL iphone390: mọi link là https github.com/phungrk/…, mở tab mới, rel có noopener\nPASS iphone390: không lỗi trang\nFAIL 24 ý không đạt",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_3_export_pr.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 123,
+      "ms": 135,
       "out": "FAIL dashboard.json thiếu mảng capu_queue",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-076/check_4_dong_ban_phim_390.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 20465,
+      "ms": 20360,
       "out": "i modal\nPASS iphone390: Esc đóng\nFAIL iphone390: đóng xong focus về khối Capu\nFAIL iphone390: Space mở modal\nPASS iphone390: nút X (#capu-modal-close) đóng\nFAIL iphone390: chạm khối Capu mở lại\nPASS iphone390: chạm ngoài (góc màn hình) đóng\nFAIL iphone390: chạm trong khung modal không đóng\nFAIL iphone390: không cuộn ngang, khung modal nằm trong chiều rộng 1\nFAIL iphone390: khung modal nằm trong chiều cao màn hình với 13 dòng\nFAIL iphone390: 13 dòng không vừa thì khung tự cuộn dọc\nFAIL iphone390: nút X vùng bấm >= 44x44px (0x0)\nPASS iphone390: mọi link cao >= 32px để chạm được\nFAIL iphone390: khối Capu mở được modal cả khi bảng đang phóng to\nFAIL iphone390: Esc lần một chỉ đóng modal, phóng to còn\nPASS iphone390: Esc lần hai đóng phóng to\nPASS iphone390: không lỗi trang \nFAIL 30 ý không đạt",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-076/check_5_rong.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 5096,
+      "ms": 5136,
       "out": "FAIL số trên khối = 0 dù có việc bậc B/C vừa xong (PR đã merge), thấy 2\nFAIL khối ở 0 vẫn mở được modal\nPASS không có dòng việc nào\nFAIL có đúng dòng \"Không có việc nào chờ anh\" (data-capu-empty), thấy null\nPASS Esc đóng modal rỗng\nPASS có việc chờ thì không có dòng \"Không có việc nào chờ anh\"\nFAIL 3 ý không đạt",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-076/check_6_ca_that.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 2875,
+      "ms": 2976,
       "out": "FAIL dashboard.json từ ảnh chụp có mảng capu_queue\nFAIL capu_queue = T-016,T-070,T-072,T-074, thấy []\nFAIL loại: T-072/T-074 escalated, T-070 decision, T-016 blocked; thấy {}\nFAIL hạn quyết đọc từ decide-by: T-070 2026-11-10, T-016 2026-10-31\nPASS không PR nào hiện (mọi PR đã có sự kiện merged)\nFAIL trang 390px: số trên khối Capu = 4 (không phải 7), thấy 6\nFAIL modal: T-072,T-074 (leo thang), T-070 (quyết), T-016 (chặn); thấy \nPASS mỗi dòng đúng một link tới Decision Request\nFAIL đối chứng không có sự kiện merged: T-052,T-055,T-057,T-067,T-068 quay lại danh sách; thấy []\nFAIL sổ cái thật: capu_queue đúng hình dạng, mọi mã việc có trên board\nFAIL ngoại lệ Cannot read properties of undefined (reading 'some')",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_7_cong_khai.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 100,
+      "ms": 134,
       "out": "FAIL thiếu capu_queue",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_8_lenh_merged.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 733,
+      "ms": 850,
       "out": "FAIL merged hợp lệ phải thoát 0: task.py: error: argument cmd: invalid choice: 'merged' (choose from 'new', 'request', 'start', 'handoff', 'accept', 'block', 'unblock', 'escalate', 'reject', 'evals', 'area', 'evalplus', 'respec', 'decide', 'cost', 'summary', 'list')\nFAIL sự kiện merged: task, link=URL, detail bắt đầu 'merged', from=by; thấy []\nFAIL ghi lại cùng PR: thoát 0 và không thêm sự kiện thứ hai (idempotent)\nFAIL --closed: sự kiện merged có detail bắt đầu 'closed'; thấy []\nFAIL trước khi ghi merged: T-931 (B, done, PR chưa merged) có trong capu_queue",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-076/check_9_backfill.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 47,
+      "ms": 33,
       "out": "FAIL T-052: thiếu sự kiện merged cho https://github.com/phungrk/tohong-back/pull/34, https://github.com/phungrk/tohong/pull/60, https://github.com/phungrk/tohong-front/pull/58\nFAIL T-055: thiếu sự kiện merged cho https://github.com/phungrk/tohong-front/pull/59\nFAIL T-057: thiếu sự kiện merged cho https://github.com/phungrk/tohong-front/pull/60\nFAIL T-067: thiếu sự kiện merged cho https://github.com/phungrk/tohong-back/pull/36\nFAIL T-068: thiếu sự kiện merged cho https://github.com/phungrk/tohong-front/pull/63\nFAIL T-070: thiếu sự kiện merged cho https://github.com/phungrk/tohong-back/pull/37",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-076/check_10_dashboard_bo_qua_merged.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 4897,
+      "ms": 4844,
       "out": "FAIL merged trong lịch sử: số trên khối Capu vẫn 1, thấy 2\nPASS merged live: không dot nào chạy, thấy tối đa 0\nFAIL merged live: số trên khối Capu vẫn 1, thấy 2\nFAIL modal vẫn 1 dòng\nPASS không lỗi trang \nFAIL 3 ý không đạt",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 284,
+      "ms": 26,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 162,
+      "ms": 136,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-001-tat-ca-luon-du.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 11388,
+      "ms": 11289,
       "out": "PASS all-complete",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-002-cay-bat-bien-khop-tong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 17714,
+      "ms": 17875,
       "out": "PASS kr-sum",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-003-doi-bo-loc-khong-doi-hinh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 6469,
+      "ms": 6234,
       "out": "PASS shape-stable",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-004-san-pham-do-so-cai-xuat.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 228,
+      "ms": 253,
       "out": "PASS product do sổ cái xuất, khớp normalize_area",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-005-export-khong-sap-vi-area-sua-tay.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 115,
+      "ms": 125,
       "out": "PASS",
       "tier": 2
     }
