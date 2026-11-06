@@ -93,6 +93,13 @@ if not os.path.exists(os.path.join(tmp, "t074-unlabeled.json")): fail("thiếu t
 m = re.search(r"^venue +\d+ +(\d+)/(\d+) ", out, re.M)
 if not m or int(m.group(2)) >= 150: fail("vị trí chưa chấm vẫn nằm trong mẫu số: " + (m.group(0) if m else out[-200:]))
 
+# 6b. Không để rác trong repo: không --out và không T074_OUT thì file ghi vào thư mục tạm, không vào cwd (gốc repo)
+junk = os.path.join(ROOT, "t074-unlabeled.json")
+if os.path.exists(junk): fail("đã có t074-unlabeled.json ở gốc repo (rác): xoá trước khi chạy eval")
+e2 = {k2: v for k2, v in env.items() if k2 != "T074_OUT"}; e2["FAKE_ORDER"] = "desc"
+r2 = subprocess.run(["node", "eval/T-074/match_eval.mjs", "--labels", labels, "--baseline", bl], cwd=ROOT, capture_output=True, text=True, env=e2)
+if os.path.exists(junk): os.remove(junk); fail("match_eval ghi t074-unlabeled.json vào cwd khi không có --out")
+if "t074-unlabeled.json" not in r2.stdout: fail("match_eval phải in đường dẫn t074-unlabeled.json")
 # 7. Baseline vô hiệu khi nhãn đổi
 doc["labels"][0]["fit"] = not doc["labels"][0]["fit"]; json.dump(doc, open(labels, "w"))
 code, out = ev("asc")

@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // T-074 · MỘT LỆNH: in tỉ lệ trùng top 5 theo hạng mục giữa matcher thật (pool thật) và nhãn người chấm mù.
-//   node eval/T-074/match_eval.mjs [--labels <file>] [--baseline <file>] [--save-baseline] [--validate <file>] [--print-threshold]
+//   node eval/T-074/match_eval.mjs [--labels <file>] [--baseline <file>] [--save-baseline] [--out <thư mục ghi t074-unlabeled.json, mặc định thư mục tạm>] [--validate <file>] [--print-threshold]
 // Dòng cuối luôn là "PASS ..." hoặc "FAIL <lý do>"; mã thoát 0 chỉ khi PASS. Không sửa matcher, không sửa nhãn.
 // Chưa có baseline: chỉ đo (PASS ghi rõ "baseline lần đầu"). Có baseline: tụt quá 10 điểm ở hạng mục nào là FAIL.
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { CATEGORIES, sha } from './lib/candidates.mjs';
@@ -69,7 +70,7 @@ for (const c of CATEGORIES) {
     `${x.pass ? '' : '  | ' + x.reasons.join('; ')}`);
 }
 if (r.unlabeled.length) {
-  const f = path.join(process.env.T074_OUT || process.cwd(), 't074-unlabeled.json');
+  const f = path.join(path.resolve(opt('--out') || process.env.T074_OUT || os.tmpdir()), 't074-unlabeled.json');
   try { fs.writeFileSync(f, JSON.stringify(r.unlabeled, null, 1)); console.log(`cần chấm thêm ${r.unlabeled.length} cặp (hồ sơ, vendor): ${f}`); } catch { /* chỉ gợi ý */ }
 }
 if (doc.is_sample) finish('FAIL nhãn mẫu (is_sample=true): chỉ để kiểm cách chạy, không có giá trị đạt/không đạt; cần nhãn thật', 1);
