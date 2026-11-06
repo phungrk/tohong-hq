@@ -3,7 +3,7 @@
 # Bất biến (hq/dashboard):
 #   (a) bản --public của scripts/export_dashboard.py xuất từ sổ cái thật: sự kiện không có detail/link; không chứa đường dẫn máy
 #       (/home/, /root/, /tmp/, đường dẫn repo) hay "handoffs/"; mọi URL trong capu_queue là https://github.com/phungrk/<repo>/pull/<n>
-#       hoặc link Decision Request (blob/main/inbox/capu/<file>, tree/main/inbox/capu); mỗi link đúng ba khoá label, url, pr_state;
+#       hoặc link Decision Request (blob/main/inbox/capu/<file>, tree/main/inbox/capu), hoặc issue của repo sổ cái tohong-hq/issues/<n> (ADR-029); mỗi link đúng ba khoá label, url, pr_state;
 #   (b) nạp đúng dashboard.json đó vào trang: ở Tất cả, planner, hq, mọi thẻ a trong modal Capu là a[data-capu-link] tới github.com/phungrk,
 #       target=_blank, rel có noopener; số trên khối = số dòng.
 # Áp dụng từ khi exporter xuất capu_queue và trang có #capu-modal (T-076/T-078 vào); trước đó PASS "chưa áp dụng".
@@ -25,7 +25,7 @@ for s in ("/home/", "/root/", "/tmp/", root, "handoffs/"):
     if s in raw: bad.append(f"bản công khai chứa {s!r}")
 ev = [e for e in d.get("events", []) if "detail" in e or "link" in e]
 if ev: bad.append(f"{len(ev)} sự kiện công khai còn detail/link")
-OK = re.compile(r"^https://github\.com/phungrk/[\w.-]+/(pull/\d+|blob/main/inbox/capu/[^/?#]+|tree/main/inbox/capu)$")
+OK = re.compile(r"^https://github\.com/phungrk/(?:[\w.-]+/(?:pull/\d+|blob/main/inbox/capu/[^/?#]+|tree/main/inbox/capu)|tohong-hq/issues/[1-9][0-9]*)$")  # ADR-029: thêm issue của repo sổ cái
 for e in d["capu_queue"]:
     for l in e.get("links", []):
         if set(l) != {"label", "url", "pr_state"}: bad.append(f"{e.get('task')}: link khoá lạ {sorted(l)}")
