@@ -13,11 +13,14 @@ async function attempt(repo, files, deadlineMs) {
   const nonce = crypto.randomBytes(8).toString('hex'), nf = '__nonce-' + nonce + '.txt';
   const h = { repo, written: [], child: null }; live.add(h);
   const all = Object.assign({}, files, { [nf]: nonce });
-  for (const [f, c] of Object.entries(all)) { fs.writeFileSync(path.join(repo, f), c); h.written.push(f); }
+  const wipe = () => { for (const f of h.written) { try { fs.unlinkSync(path.join(repo, f)); } catch (e) {} } };
+  try { for (const [f, c] of Object.entries(all)) { h.written.push(f); fs.writeFileSync(path.join(repo, f), c); } }
+  catch (e) { wipe(); live.delete(h); throw new Error('không ghi được file thử "' + h.written[h.written.length - 1] + '": ' + e.message); }
   const port = await freePort();
-  let exited = false;
+  let exited = false, spawnErr = null;
   h.child = cp.spawn(path.join(repo, 'node_modules', '.bin', 'vite'), ['--port', String(port), '--strictPort', '--host', '127.0.0.1'], { cwd: repo, detached: true, stdio: 'ignore', env: process.env });
   h.child.on('exit', () => { exited = true; });
+  h.child.on('error', (e) => { spawnErr = e; exited = true; });
   const stop = async () => {
     if (!live.has(h)) return;
     killGroup(h.child);
@@ -27,6 +30,7 @@ async function attempt(repo, files, deadlineMs) {
   };
   const t0 = Date.now();
   while (Date.now() - t0 < deadlineMs) {
+    if (spawnErr) { killGroup(h.child); wipe(); live.delete(h); const e = new Error('không chạy được vite (' + spawnErr.code + '): ' + spawnErr.message + '; cần cài node_modules trong ' + repo); e.fatal = true; throw e; }
     if (exited) { await stop(); throw new Error('vite thoát sớm (cổng ' + port + ')'); }
     const r = await get(`http://127.0.0.1:${port}/${nf}`);
     if (r && r.status === 200 && r.body === nonce && !exited) return { port, url: 'http://127.0.0.1:' + port, stop };
@@ -37,7 +41,7 @@ async function attempt(repo, files, deadlineMs) {
 async function startViteDev({ repo, files = {} }) {
   const total = Date.now() + 60000; let last;
   for (let i = 0; i < 3 && Date.now() < total; i++) {
-    try { return await attempt(repo, files, Math.min(18000, total - Date.now())); } catch (e) { last = e; }
+    try { return await attempt(repo, files, Math.min(18000, total - Date.now())); } catch (e) { if (e.fatal) throw e; last = e; }
   }
   throw new Error('startViteDev thất bại sau 3 lần: ' + (last && last.message));
 }
