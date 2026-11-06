@@ -1,6 +1,6 @@
 {
   "task": "T-079",
-  "at": "2026-11-06T07:11",
+  "at": "2026-11-06T08:18",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,47 +12,47 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_1_binh_luan_phuong_an.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 768,
-      "out": "FAIL bình luận #7 thiếu tóm tắt phương án A ('Phương án A') | bình luận #7 thiếu tóm tắt phương án B ('Phương án B') | bình luận #7 thiếu khuyến nghị ('Khuyến nghị') | bình luận #7 thiếu link Decision Request (blob trên main) ('https://github.com/o/r/blob/main/inbox/capu/T-002-thu.md') | bình luận #7 thiếu hướng dẫn trả lời bằng /ok ('/ok') | bình luận #7 thiếu marker tohong-mirror:T-002-esc-<id> (chống ghi trùng) | việc có issue nhưng không có file DR: vẫn phải có 1 bình luận gồm câu hỏi + hướng dẫn /ok",
+      "ms": 2937,
+      "out": "FAIL [đúng mẫu] thân DR không có nguyên văn trong bình luận (phần giữ lại 156 ký tự) | [đúng mẫu] thiếu link DR trên main | [đúng mẫu] thiếu hướng dẫn /ok | [thật T-074] thân DR không có nguyên văn trong bình luận (phần giữ lại 2135 ký tự) | [thật T-074] thiếu link DR trên main | [thật T-074] thiếu hướng dẫn /ok | [thật T-074] mất '**1.' | [thật T-074] mất '**2.' | [thật T-074] mất '**3.' | [thật T-074] mất '**4.' | [thật T-074] mất 'priceMin' | [thật T-074] mất khuyến nghị: 0/4 | [thật T-072] thân DR không có nguyên văn trong bình luận (phần giữ lại 1025 ký tự) | [thật T-072] thiếu link DR trên main",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_2_ok_ghi_so_cai.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 214,
-      "out": "FAIL ok_issue.py thoát 2: /usr/bin/python3: can't open file '/tmp/tmpr48pcz0q/scripts/ok_issue.py': [Errno 2] No such file or directory",
+      "ms": 199,
+      "out": "FAIL ok_issue.py thoát 2: /usr/bin/python3: can't open file '/tmp/tmpa_6xyqza/scripts/ok_issue.py': [Errno 2] No such file or directory",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_3_tu_choi.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 235,
-      "out": "FAIL ok_issue.py thoát 2: /usr/bin/python3: can't open file '/tmp/tmpy3twqww0/scripts/ok_issue.py': [Errno 2] No such file or directory",
+      "ms": 204,
+      "out": "FAIL ok_issue.py thoát 2: /usr/bin/python3: can't open file '/tmp/tmpnkqh9dpk/scripts/ok_issue.py': [Errno 2] No such file or directory",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_4_viec_khong_issue.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 811,
-      "out": "FAIL ok_issue.py thoát 2: /usr/bin/python3: can't open file '/tmp/tmpbrfbx0sm/scripts/ok_issue.py': [Errno 2] No such file or directory",
+      "ms": 809,
+      "out": "FAIL ok_issue.py thoát 2: /usr/bin/python3: can't open file '/tmp/tmpmywx7179/scripts/ok_issue.py': [Errno 2] No such file or directory",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_6_idempotent_va_sua.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 248,
-      "out": "FAIL ok_issue.py thoát 2: /usr/bin/python3: can't open file '/tmp/tmpvard_rxj/scripts/ok_issue.py': [Errno 2] No such file or directory",
+      "ms": 198,
+      "out": "FAIL ok_issue.py thoát 2: /usr/bin/python3: can't open file '/tmp/tmpglv01mhb/scripts/ok_issue.py': [Errno 2] No such file or directory",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_7_bao_mat.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 23,
+      "ms": 25,
       "out": "FAIL thiếu .github/workflows/ok-tren-issue.yml",
       "tier": 1
     },
@@ -60,15 +60,15 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-079/check_8_ghi_len_main.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 515,
-      "out": "FAIL ok_issue.py thoát 2: /usr/bin/python3: can't open file '/tmp/tmp7s03fue8/scripts/ok_issue.py': [Errno 2] No such file or directory",
+      "ms": 494,
+      "out": "FAIL ok_issue.py thoát 2: /usr/bin/python3: can't open file '/tmp/tmpzw8pmv4p/scripts/ok_issue.py': [Errno 2] No such file or directory",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 24,
+      "ms": 25,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 119,
+      "ms": 115,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1070,
+      "ms": 951,
       "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
       "tier": 2
     },
@@ -92,8 +92,16 @@
       "eval": "eval/invariants/hq/ledger/inv-001-issue-la-so-nguyen-duong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 70,
+      "ms": 56,
       "out": "PASS mọi trường issue rỗng hoặc là số nguyên dương",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-002-decided-qua-issue-hop-le.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 75,
+      "out": "PASS mọi decided qua issue: link đúng kho, from capu, detail không rỗng, đúng issue của việc",
       "tier": 2
     }
   ],
