@@ -1,0 +1,165 @@
+{
+  "task": "T-071",
+  "at": "2026-11-05T23:56",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/vendor/images",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_1_khong_fail_gia.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 30180,
+      "out": "PASS 10/10 lần chạy (5 x C9, C10) PASS khi vite lạ chiếm dải cổng",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_2_khong_mo_coi.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 17196,
+      "out": "PASS không còn tiến trình/file do eval tạo sau chạy xong và sau SIGTERM, SIGINT, SIGHUP (C9, C10)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_3_ket_qua_khong_doi.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 103862,
+      "out": "FAIL C10 trên bản front đột biến M3 ghi đè localStorage đáng ra FAIL, thấy: PASS vendor đã lưu: ảnh theo pool hiện tại, không gọi marry.vn, localStorage nguyên vẹn, ảnh hỏng ra",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_4_cho_theo_dieu_kien.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 104,
+      "out": "PASS sáu file tiêu thụ dùng helper, không npx/Math.random/waitForTimeout; helper đủ tính chất tĩnh",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_5_bat_bien_vendor_images.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 174563,
+      "out": "PASS hai bất biến vendor-images: PASS trên main, FAIL trên bản bị phá, không để lại vite",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 eval/T-053/check_6_helper_nonce.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 63880,
+      "out": "PASS helper từ chối vite lạ (nonce thật), phục vụ vite thật, dọn sạch tiến trình và file",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 22,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 121,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 20,
+      "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 33,
+      "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 550,
+      "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1795,
+      "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 6268,
+      "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-006-wayback-chi-khi-bat-co-va-cham.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 6684,
+      "out": "PASS Wayback chỉ khi bật cờ; 4 yêu cầu, giãn cách nhỏ nhất 2.00 giây, tối đa 1 cùng lúc",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-007-khong-goi-wayback-available.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 668,
+      "out": "PASS 6 yêu cầu tới Wayback, không có /wayback/available",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-008-san-toc-do-wayback.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 558,
+      "out": "PASS 6 cách hạ tốc độ / dùng --wayback-* sai đều bị từ chối mã 2, không yêu cầu, không ghi manifest",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-009-wayback-429-khong-go-cua-mai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 16273,
+      "out": "PASS 429 mọi yêu cầu: 20 yêu cầu tổng, tối đa 4 liên tiếp cùng đường dẫn, lần gửi lại sớm nhất sau 1.00 giây, 1 cùng lúc",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-010-eval-khong-kill-theo-ten.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 182,
+      "out": "PASS không eval nào kill tiến trình theo tên",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-011-file-thu-eval-khong-vao-git-front.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 29,
+      "out": "PASS repo front không chứa file tạm của eval (__t0NN*, __nonce-*)",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
