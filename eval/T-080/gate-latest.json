@@ -1,6 +1,6 @@
 {
   "task": "T-080",
-  "at": "2026-11-06T07:12",
+  "at": "2026-11-06T07:13",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 -I eval/T-072/check_1_ca_chung.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 202,
+      "ms": 162,
       "out": "PASS 18 ca, JS = PY = kỳ vọng",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 -I eval/T-072/check_2_khong_phat_thieu_tag.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 341,
+      "ms": 397,
       "out": "PASS JS 360 cặp (điểm + thứ tự), PY 24 cặp, PY stage 2 + đường chat (ca sinh đôi + ca ngược)",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 -I eval/T-072/check_3_top10_pool_that.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 429,
+      "ms": 457,
       "out": "PASS tổng vendor khớp trong top 10: 559 -> 610 trên 96 tổ hợp (baseline = code ref 4ac7e7a547 trên pool hiện tại; thông tin: 13 tổ hợp tụt riêng lẻ)",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "python3 -I eval/T-072/check_4_giai_thich_va_coverage.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 212,
+      "ms": 253,
       "out": "PASS 323 vendor, 33 danh sách, 6 khối formatter",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 22,
+      "ms": 27,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -52,7 +52,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 131,
+      "ms": 129,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 335,
+      "ms": 395,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -68,15 +68,31 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-001-gu-khong-day-vendor-vuot-ngan-sach-o-chat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 59,
+      "ms": 65,
       "out": "PASS boost không phụ thuộc gu (6 style) và top 5 chat không có vendor khớp gu vượt ngân sách",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/matching/inv-002-thieu-tag-khong-bi-phat.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 319,
+      "out": "PASS tag lệch = không tag (JS mọi hạng mục, Python), vendor khớp cao hơn",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/matching/inv-003-thu-tu-gu-theo-diem-r8.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1017,
+      "out": "PASS R8: JS + Python stage 2 + chat (sinh đôi, ngược), fuzz 400 pool (tới 30 vendor, tag hoa/thường/khoảng trắng/không khoá, λ 0/0.3/0.9), bằng điểm ở mép top_k, chuẩn hoá R1",
       "tier": 2
     },
     {
       "eval": "eval/T-080/adv-01-r8-chat-fuzz-va-bang-diem.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 559,
+      "ms": 611,
       "out": "PASS R8 chat: fuzz 400 pool (tới 30 vendor, tag hoa/thường/khoảng trắng/không khoá, λ 0/0.3/0.9), bằng điểm ở mép top_k, chuẩn hoá R1",
       "tier": 3
     },
@@ -84,7 +100,7 @@
       "eval": "eval/T-080/adv-02-js-chuan-hoa-va-style-la.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 129,
+      "ms": 126,
       "out": "PASS JS: chuẩn hoá hoa/thường/khoảng trắng/trùng, style lạ không in, một chiều, formatMatchBlock nhãn + style_tags null",
       "tier": 3
     },
@@ -92,7 +108,7 @@
       "eval": "eval/T-080/adv-03-matcher-service-dong-goi.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 123,
+      "ms": 73,
       "out": "PASS image matcher-service (chỉ file git theo dõi) import được engine + style_contract và chạy match: 3",
       "tier": 3
     }
