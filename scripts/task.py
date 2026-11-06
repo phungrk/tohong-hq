@@ -123,6 +123,23 @@ def task_path(tid):
     return BOARD / f"{tid}.md"
 
 
+_FLAGS, _WARNED = {}, set()
+
+
+def board_problems():
+    out = []
+    for p in sorted(BOARD.glob("T-*.md")) if BOARD.exists() else []:
+        try:
+            read_task(p.stem)
+        except LedgerError:
+            pass
+        fl = _FLAGS.get(p.stem) or []
+        if fl:
+            out.append({"task": p.stem, "file": f"board/{p.stem}.md", "fields": [f[0] for f in fl],
+                        "severity": "nang" if any(f[1] == "nang" for f in fl) else "nhe"})
+    return out
+
+
 def read_task(tid):
     p = task_path(tid)
     if not p.exists():
@@ -132,18 +149,36 @@ def read_task(tid):
     if not m:
         raise LedgerError(f"{p} thiếu phần đầu (frontmatter)")
     meta = {}
+    flags = []   # (trường, "nhe"|"nang", lý do)
     for line in m.group(1).splitlines():
         if ":" in line:
             k, v = line.split(":", 1)
+            k = k.strip()
             v = v.strip()
             if len(v) >= 2 and v[0] == v[-1] == '"':
-                v = json.loads(v)
+                try:
+                    v = json.loads(v, strict=True)
+                except json.JSONDecodeError:
+                    v = v.strip('"').strip().strip('"').strip()
+                    flags.append((k, "nhe", "nháy kép hỏng, đã bỏ nháy ngoài"))
             elif v.startswith("["):
                 try:
                     v = json.loads(v)
                 except json.JSONDecodeError:
                     pass
-            meta[k.strip()] = v
+            meta[k] = v
+    bad = (("id", meta.get("id") != tid), ("state", meta.get("state") not in STATES),
+           ("tier", str(meta.get("tier") or "") not in ("", "A", "B", "C")))
+    for k, b in bad:
+        if b:
+            flags.append((k, "nang", f"giá trị không hợp lệ ({meta.get(k)!r}), board bị bỏ qua"))
+    _FLAGS[tid] = flags
+    if flags and tid not in _WARNED:
+        _WARNED.add(tid)
+        print(f"Cảnh báo: board/{tid}.md · " + "; ".join(f"trường {k}: {why}" for k, _s, why in flags), file=sys.stderr)
+    heavy = [f for f in flags if f[1] == "nang"]
+    if heavy:
+        raise LedgerError(f"board/{tid}.md · trường {heavy[0][0]}: {heavy[0][2]}")
     for k in ("rounds", "version", "spec_returns", "evals_added"):
         meta[k] = int(meta.get(k) or 0)
     meta["cost"] = float(meta.get("cost") or 0)
@@ -181,7 +216,7 @@ def all_tasks():
 
 
 def next_id():
-    nums = [int(t["id"][2:]) for t in all_tasks()]
+    nums = [int(p.stem[2:]) for p in BOARD.glob("T-*.md") if re.fullmatch(r"T-\d{3,}", p.stem)] if BOARD.exists() else []
     return f"T-{(max(nums) + 1 if nums else 1):03d}"
 
 
@@ -679,6 +714,7 @@ def build_summary():
         "open": [{"task": t["id"], "title": t["title"], "state": t["state"], "holder": t["holder"],
                   "rounds": t["rounds"], "hours_since_update": hours(t)} for t in open_tasks],
         "alerts": alerts,
+        "board_hong": board_problems(),
         "first_pass_yield": round(len(first_pass) / len(done), 2) if done else None,
         "spec_returns": spec_returns,
         "evals_added": evals_added,
@@ -710,6 +746,10 @@ def cmd_summary(a):
             print(f"  - {al['task']} {al['title']}: {al['kind']} ({al['hours']} giờ)")
     else:
         print("Cảnh báo: không có")
+    if s["board_hong"]:
+        print("Board hỏng:")
+        for b in s["board_hong"]:
+            print(f"  - {b['task']} ({b['file']}) [{'nặng' if b['severity'] == 'nang' else 'nhẹ'}]: " + ", ".join(b["fields"]))
     if s["pr_pending"]:
         print("PR chưa có sự kiện merged (kiểm bằng gh api, rồi `task.py merged`):")
         for p_ in s["pr_pending"]:

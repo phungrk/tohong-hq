@@ -75,6 +75,8 @@ def invariant_dirs(area):
     """Cây bất biến cho một vùng (ADR-011): _shared/ → <sản phẩm>/ → … → <vùng đầy đủ>/.
 
     Vùng cũ chưa có tiền tố sản phẩm được ánh xạ theo LEGACY_AREAS để việc cũ chạy lại được."""
+    if not isinstance(area, str):
+        raise ledger.LedgerError(f"Vùng {area!r} không phải một chuỗi")
     area = ledger.normalize_area(area)
     dirs = ["_shared"]
     if area:
@@ -114,7 +116,11 @@ def main(argv=None):
     except ledger.LedgerError as e:
         print(f"Lỗi: {e}", file=sys.stderr)
         return 2
-    tiers = collect(meta)
+    try:
+        tiers = collect(meta)
+    except ledger.LedgerError as e:
+        print(f"Lỗi: {e}", file=sys.stderr)
+        return 2
     if not tiers:
         print(f"Lỗi: {a.task} không có eval nào. Việc chưa qua Spec Gate thì chưa được code.", file=sys.stderr)
         return 2
