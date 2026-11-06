@@ -6,7 +6,8 @@
 //  - localStorage không bị đổi (so sánh chuỗi trước/sau).
 // Chạy: NODE_PATH=$(npm root -g) node eval/T-051/check_10_front_vendor_da_luu.cjs <thư-mục-tohong-front>. In PASS hoặc FAIL <lý do>; mã thoát 0/1.
 // Dựng trang thử tạm __t051b.html/.jsx trong thư mục front (xoá khi xong); chặn API; ảnh phục vụ bằng server giả.
-const fs = require('fs'), path = require('path'), http = require('http'), cp = require('child_process');
+const fs = require('fs'), path = require('path'), http = require('http');
+const { startViteDev } = require('../_lib/vite_dev.cjs');
 const { chromium } = require('playwright');
 const REPO = path.resolve(process.argv[2] || '');
 let bad = 0; const fail = m => { console.log('FAIL ' + m); bad = 1; };
@@ -29,7 +30,9 @@ createRoot(document.getElementById('root')).render(
   </ConnectProvider></VendorProvider>);
 `;
 const HTML = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/__t051b.jsx"></script></body></html>';
-let b;
+let b, dev;
+// Chờ theo điều kiện thật (có hạn); hết hạn thì KHÔNG ném lỗi: phép đo phía sau tự báo FAIL đúng chỗ.
+const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeout: ms }).catch(() => null);
 (async () => {
   await new Promise(r => img.listen(0, '127.0.0.1', r));
   const O = 'http://127.0.0.1:' + img.address().port, MARRY = 'https://www.marry.vn/images/detailed/1/';
@@ -46,20 +49,27 @@ let b;
   const pool = { v_s1: [O + '/good1.png'], v_s2: [O + '/404-pool2.png'], v_s6: [] };
   const seeds = { list: JSON.stringify({ photography: { shortlisted: S, confirmed: null } }), budget: JSON.stringify({ photography: { shortlisted: S, confirmed: S[5] } }) };
   let seed = '';
-  const jsx = path.join(REPO, '__t051b.jsx'), html = path.join(REPO, '__t051b.html');
-  fs.writeFileSync(jsx, JSX); fs.writeFileSync(html, HTML);
-  const port = 5600 + Math.floor(Math.random() * 300);
-  const vite = cp.spawn('npx', ['vite', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { cwd: REPO, stdio: 'ignore' });
-  const cleanup = () => { try { b && b.close(); } catch (e) {} try { vite.kill(); } catch (e) {} try { fs.unlinkSync(jsx); fs.unlinkSync(html); } catch (e) {} img.close(); };
+  const cleanup = async () => { try { b && await b.close(); } catch (e) {} try { dev && await dev.stop(); } catch (e) {} img.close(); };
   const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' };
   try {
-    for (let i = 0; i < 60; i++) { try { await new Promise((res, rej) => http.get(`http://127.0.0.1:${port}/__t051b.html`, r => { r.resume(); r.statusCode === 200 ? res() : rej(); }).on('error', rej)); break; } catch (e) { await new Promise(r => setTimeout(r, 500)); if (i === 59) throw new Error('vite không lên'); } }
+    dev = await startViteDev({ repo: REPO, files: { '__t051b.jsx': JSX, '__t051b.html': HTML } });
+    const port = dev.port;
     b = await chromium.launch();
+    // Đo "không có gì xảy ra": chờ tới khi localStorage KHÁC bản gieo (điều kiện vi phạm; có hạn 2s thì coi như nguyên vẹn). Có vi phạm là dừng ngay.
+    const lsChanged = (pg) => pg.waitForFunction((s) => localStorage.getItem('th_vendors_t051') !== s, seed, { timeout: 2000, polling: 100 }).catch(() => null);
+    let lookupWaiters = [], curLookups = null;
+    // chờ (theo sự kiện, có hạn 8s) tới khi đã tra đủ n id khác nhau; hết hạn thì đo tiếp như thường
+    const whenLookups = (n) => new Promise(res => {
+      const ok = () => new Set(curLookups.map(l => l.id)).size >= n;
+      if (ok()) return res();
+      const t = setTimeout(res, 8000); lookupWaiters.push(() => { if (ok()) { clearTimeout(t); res(); } });
+    });
     const open = async (v) => {
       seed = seeds[v];
       const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
       await ctx.addInitScript(([s]) => { if (!localStorage.getItem('th_vendors_t051')) localStorage.setItem('th_vendors_t051', s); window.__seed = s; }, [seed]);
       const pg = await ctx.newPage(); const marry = [], logs = [], lookups = [];
+      lookupWaiters = [];
       pg.on('request', q => { if (/marry\.vn/.test(q.url())) marry.push(q.url()); });
       pg.on('pageerror', e => logs.push(String(e.message).slice(0, 150)));
       await pg.route(/marry\.vn/, r => r.abort());
@@ -68,7 +78,7 @@ let b;
         if (m === 'OPTIONS') return r.fulfill({ status: 204, headers: CORS });
         const mm = u.pathname.match(/^\/api\/vendors\/([^/]+)$/);
         if (mm && m === 'GET' && !['match', 'categories', 'status'].includes(mm[1])) {
-          const id = mm[1]; lookups.push({ id, couple: u.searchParams.get('coupleId') });
+          const id = mm[1]; lookups.push({ id, couple: u.searchParams.get('coupleId') }); lookupWaiters.forEach(f => f());
           if (id === 'v_s5') return r.fulfill({ status: 500, headers: CORS, body: 'err' });
           if (pool[id]) return r.fulfill({ headers: CORS, contentType: 'application/json', body: JSON.stringify({ vendor: { id, name: id, category: 'photography', photos: pool[id].map(url => ({ url })) }, match: null }) });
           return r.fulfill({ status: 404, headers: CORS, contentType: 'application/json', body: '{"error":"vendor not found"}' });
@@ -78,6 +88,7 @@ let b;
         return r.fulfill({ status: 404, headers: CORS, contentType: 'application/json', body: '{}' });
       });
       await pg.goto(`http://127.0.0.1:${port}/__t051b.html?v=${v}`);
+      curLookups = lookups;
       return { pg, marry, logs, ctx, lookups };
     };
     const bgsOf = (pg, name) => pg.evaluate((n) => {
@@ -100,7 +111,9 @@ let b;
     {
       const { pg, marry, logs, lookups } = await open('list');
       try { await pg.waitForFunction(() => document.body.innerText.includes('Luu Pool Tot'), null, { timeout: 15000 }); } catch (e) { throw new Error('danh sách đã lưu không hiện vendor: ' + logs.join(' ; ')); }
-      await pg.waitForTimeout(3000);
+      // chờ danh sách ổn định: ảnh theo pool đã hiện, không còn nền URL marry/404 nào, và đã tra pool đủ 6 id
+      await settle(pg, () => { const bg = [...document.querySelectorAll('*')].map(x => getComputedStyle(x).backgroundImage).filter(s => s && s !== 'none'); return ['good1', 'good3', 'good5'].every(w => bg.some(s => s.includes(w))) && !bg.some(s => s.includes('url(') && /404-|marry/.test(s)); });
+      await whenLookups(6);
       const g = n => bgsOf(pg, n);
       const T = { 'Luu Pool Tot': ['good1', null], 'Luu Pool Hong': [null, '404-pool2'], 'Luu Mat Pool Tot': ['good3', null], 'Luu Mat Pool Hong': [null, '404-s4'], 'Luu Loi May Chu': ['good5', null], 'Luu Pool Rong': [null, 'marry'] };
       for (const [n, [want, ban]] of Object.entries(T)) {
@@ -112,6 +125,7 @@ let b;
       }
       if (marry.length) fail('danh sách đã lưu: có request tới marry.vn: ' + marry[0]);
       checkLookups('danh sách đã lưu', lookups);
+      await lsChanged(pg);
       const after = await pg.evaluate(() => localStorage.getItem('th_vendors_t051'));
       if (after !== seed) fail('danh sách đã lưu: localStorage th_vendors_* bị đổi');
     }
@@ -121,9 +135,8 @@ let b;
       const { pg, marry, logs, lookups } = await open('budget');
       try {
         try { await pg.waitForFunction((x) => document.body.innerText.includes(x), n, { timeout: 15000 }); } catch (e) { throw new Error('màn Ngân sách không hiện ' + n + ': ' + logs.join(' ; ')); }
-        await pg.waitForTimeout(1500);
         await pg.locator('button', { hasText: n }).first().click({ timeout: 5000 });
-        await pg.waitForTimeout(2500);
+        await settle(pg, ([w, m]) => { const e = [...document.querySelectorAll('div')].find(d => d.style.width === '56px' && d.style.height === '56px'); if (!e) return false; const x = getComputedStyle(e).backgroundImage; return m === 'url' ? x.includes(w) : !x.includes('url('); }, [want, mode]);
         const bg = await pg.evaluate(() => { const e = [...document.querySelectorAll('div')].find(d => d.style.width === '56px' && d.style.height === '56px'); return e ? getComputedStyle(e).backgroundImage : null; });
         if (bg === null) { fail(`Ngân sách: không thấy tiêu đề Chi tiết vendor của ${n}`); continue; }
         if (want && !bg.includes(want)) fail(`Ngân sách: ${n} phải hiện ảnh ${want}, thấy ${bg.slice(0, 100)}`);
@@ -131,11 +144,12 @@ let b;
         if (/url\(.*(404-|marry)/.test(bg)) fail(`Ngân sách: ${n} còn hiện ảnh hỏng`);
         if (marry.length) fail(`Ngân sách ${n}: có request tới marry.vn: ` + marry[0]);
         checkLookups('Ngân sách ' + n, lookups);
+        await lsChanged(pg);
         const after = await pg.evaluate(() => localStorage.getItem('th_vendors_t051'));
         if (after !== seed) fail(`Ngân sách ${n}: localStorage th_vendors_* bị đổi`);
       } catch (e) { fail('Ngân sách ' + n + ': ' + String(e.message).split('\n')[0]); }
     }
     if (!bad) console.log('PASS vendor đã lưu: ảnh theo pool hiện tại, không gọi marry.vn, localStorage nguyên vẹn, ảnh hỏng ra mặc định ở danh sách đã lưu và Ngân sách');
   } catch (e) { fail('lỗi chạy eval: ' + String(e.message).split('\n')[0]); }
-  finally { cleanup(); setTimeout(() => process.exit(bad), 300); }
+  finally { await cleanup(); setTimeout(() => process.exit(bad), 300); }
 })();

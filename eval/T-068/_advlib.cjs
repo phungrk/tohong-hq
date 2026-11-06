@@ -21,6 +21,7 @@
  */
 const fs = require('fs'), path = require('path'), http = require('http'), cp = require('child_process');
 const { chromium } = require('playwright');
+const { startViteDev } = require('../_lib/vite_dev.cjs');
 const A = process.argv.slice(2), arg = (k, d) => (A.includes(k) ? A[A.indexOf(k) + 1] : d);
 const REPO = path.resolve(arg('--repo', ''));
 const CASE = arg('--case', '');
@@ -60,12 +61,12 @@ window.__L = (() => {
 /* hàng thẻ danh sách theo tên vendor: thẻ <a> chứa đúng tên */
 const ROW = (name) => `[...document.querySelectorAll('a')].find(a => (a.innerText || '').split('\\n').some(l => l.trim() === ${JSON.stringify(name)}))`;
 
-let b, vite, port, O;
+let b, dev, port, O;
 const TMPF = [];
 const tmp = (name, content) => { fs.writeFileSync(path.join(REPO, name), content); TMPF.push(name); };
 const cleanup = async () => {
   try { b && await b.close(); } catch (e) {}
-  try { if (vite && vite.pid) { try { process.kill(-vite.pid, 'SIGTERM'); } catch (e) { vite.kill(); } await new Promise(r => { vite.once('exit', r); setTimeout(r, 3000); }); } } catch (e) {}
+  try { dev && await dev.stop(); } catch (e) {}
   for (const f of TMPF) { try { fs.unlinkSync(path.join(REPO, f)); } catch (e) {} }
   try { for (const f of fs.readdirSync(REPO)) if (/^vite\.config\.[a-z]+\.timestamp-/.test(f)) fs.unlinkSync(path.join(REPO, f)); } catch (e) {}
   try { img.closeAllConnections && img.closeAllConnections(); img.close(); } catch (e) {}
@@ -445,11 +446,9 @@ createRoot(document.getElementById('root')).render(<VendorProvider coupleId="adv
   if (!CASES[CASE]) { console.log('FAIL --case phải là một trong ' + Object.keys(CASES).join(', ')); process.exit(1); }
   await new Promise(r => img.listen(0, '127.0.0.1', r));
   O = 'http://127.0.0.1:' + img.address().port;
-  port = 5800 + Math.floor(Math.random() * 400);
   try {
     tmp('__adv068x.html', HTML('__adv068x.jsx')); tmp('__adv068x.jsx', "import '/src/index.css';");
-    vite = cp.spawn('npx', ['vite', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { cwd: REPO, stdio: 'ignore', detached: true });
-    for (let i = 0; i < 60; i++) { try { await new Promise((res, rej) => http.get(`http://127.0.0.1:${port}/__adv068x.html`, r => { r.resume(); r.statusCode === 200 ? res() : rej(); }).on('error', rej)); break; } catch (e) { await wait(500); if (i === 59) throw new Error('vite không lên'); } }
+    dev = await startViteDev({ repo: REPO, files: {} }); port = dev.port;
     b = await chromium.launch();
     await CASES[CASE]();
   } catch (e) { check('lỗi chạy eval', false, String(e && e.message || e).split('\n')[0]); }

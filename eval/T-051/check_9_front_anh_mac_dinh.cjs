@@ -3,7 +3,8 @@
 // Chạy: NODE_PATH=$(npm root -g) node eval/T-051/check_9_front_anh_mac_dinh.cjs <thư-mục-tohong-front>
 // Dựng một trang thử tạm (__t051.html/.jsx) trong thư mục front, mount VMatchChatCard + VDetailChatCard thật, chặn /api/*, phục vụ ảnh bằng server giả; xoá trang thử khi xong.
 // In PASS hoặc FAIL <lý do>; mã thoát 0/1.
-const fs = require('fs'), path = require('path'), http = require('http'), cp = require('child_process');
+const fs = require('fs'), path = require('path'), http = require('http');
+const { startViteDev } = require('../_lib/vite_dev.cjs');
 const { chromium } = require('playwright');
 const REPO = path.resolve(process.argv[2] || '');
 const fail = m => { console.log('FAIL ' + m); process.exitCode = 1; };
@@ -31,7 +32,9 @@ function App() {
 createRoot(document.getElementById('root')).render(<App />);
 `;
 const HARNESS_HTML = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/__t051.jsx"></script></body></html>';
-let b;
+let b, dev;
+// Chờ theo điều kiện thật (có hạn); hết hạn thì KHÔNG ném lỗi: phép đo phía sau tự báo FAIL đúng chỗ.
+const settle = (pg, fn, arg, ms = 12000) => pg.waitForFunction(fn, arg, { timeout: ms }).catch(() => null);
 (async () => {
   await new Promise(r => img.listen(0, '127.0.0.1', r));
   const O = 'http://127.0.0.1:' + img.address().port;
@@ -44,13 +47,10 @@ let b;
     ven('v_mixed', 'Vendor Lan Lon', [O + '/404-b.png', O + '/good2.png']),
     ven('v_none', 'Vendor Khong Anh', []),
   ];
-  const jsx = path.join(REPO, '__t051.jsx'), html = path.join(REPO, '__t051.html');
-  fs.writeFileSync(jsx, HARNESS_JSX); fs.writeFileSync(html, HARNESS_HTML);
-  const port = 5100 + Math.floor(Math.random() * 500);
-  const vite = cp.spawn('npx', ['vite', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { cwd: REPO, stdio: 'ignore' });
-  const cleanup = () => { try { b && b.close(); } catch (e) {} try { vite.kill(); } catch (e) {} try { fs.unlinkSync(jsx); fs.unlinkSync(html); } catch (e) {} img.close(); };
+  const cleanup = async () => { try { b && await b.close(); } catch (e) {} try { dev && await dev.stop(); } catch (e) {} img.close(); };
   try {
-    for (let i = 0; i < 60; i++) { try { await new Promise((res, rej) => http.get(`http://127.0.0.1:${port}/__t051.html`, r => { r.resume(); r.statusCode === 200 ? res() : rej(); }).on('error', rej)); break; } catch (e) { await new Promise(r => setTimeout(r, 500)); if (i === 59) throw new Error('vite không lên'); } }
+    dev = await startViteDev({ repo: REPO, files: { '__t051.jsx': HARNESS_JSX, '__t051.html': HARNESS_HTML } });
+    const port = dev.port;
     b = await chromium.launch();
     const pg = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
     const external = [];
@@ -61,7 +61,8 @@ let b;
     const logs = []; globalThis.__logs = logs; pg.on('console', m => { if (m.type() === 'error') logs.push(m.text().slice(0, 150)); }); pg.on('pageerror', e => logs.push('pageerror ' + String(e.message).slice(0, 200)));
     await pg.goto(`http://127.0.0.1:${port}/__t051.html`);
     try { await pg.waitForFunction(() => document.body.innerText.includes('Vendor Tot'), null, { timeout: 15000 }); } catch (e) { globalThis.__logs.push('BODY=' + (await pg.evaluate(() => document.body.innerText)).slice(0, 200).replace(/\n/g, ' / ')); throw e; }
-    await pg.waitForTimeout(2500); // chờ ảnh tải xong/lỗi
+    // chờ ảnh tải xong/lỗi: ảnh tốt đã hiện, không còn nền URL hỏng nào trong thẻ danh sách
+    await settle(pg, () => { const bg = [...document.querySelectorAll('[data-card="0"] *')].map(x => getComputedStyle(x).backgroundImage).join('|') + [...document.querySelectorAll('[data-card="0"] img')].map(i => i.currentSrc).join('|'); return bg.includes('good1') && bg.includes('good2') && !/404-|html-a/.test(bg); });
     // thu mọi phần tử có background gắn với từng vendor trong thẻ danh sách: lấy phần tử nền nhỏ nằm cùng hàng với tên vendor
     const info = await pg.evaluate(() => {
       const out = {};
@@ -101,10 +102,10 @@ let b;
       await btn.click({ timeout: 5000 });
     };
     try {
-      await sel('Vendor Lan Lon'); await pg.waitForTimeout(500);
+      await sel('Vendor Lan Lon');
+      await pg.waitForSelector('[data-card="1"]', { timeout: 5000 });
+      await settle(pg, () => { const bg = [...document.querySelectorAll('[data-card="1"] *')].map(x => getComputedStyle(x).backgroundImage).join('|'); return bg.includes('good2') && !bg.includes('404-b'); });
       const dots = await pg.evaluate(() => ([...document.querySelectorAll('[data-card="1"] button')].filter(b => getComputedStyle(b).height === '6px')).length);
-      const det = await pg.evaluate(() => [...document.querySelectorAll('[data-card="1"] *')].map(x => getComputedStyle(x).backgroundImage).filter(s => s && s !== 'none'));
-      await pg.waitForTimeout(2000);
       const det2 = await pg.evaluate(() => [...document.querySelectorAll('[data-card="1"] *')].map(x => getComputedStyle(x).backgroundImage).filter(s => s && s !== 'none'));
       if (det2.some(s => s.includes('404-b'))) fail('chi tiết: ảnh hỏng không được hiện trong gallery');
       if (!det2.some(s => s.includes('good2'))) fail('chi tiết: gallery phải hiện ảnh tốt');
@@ -116,7 +117,7 @@ let b;
       await pg.locator('[data-card="1"]').getByText('So sánh', { exact: true }).first().click({ timeout: 5000 });
       await pg.waitForSelector('[data-card="2"]', { timeout: 5000 });
       await pg.waitForFunction(() => document.querySelector('[data-card="2"]').innerText.includes('Vendor Anh Hong'), null, { timeout: 8000 });
-      await pg.waitForTimeout(2500);
+      await settle(pg, () => { const bg = [...document.querySelectorAll('[data-card="2"] *')].map(x => getComputedStyle(x).backgroundImage).join('|'); return bg.includes('good1') && bg.includes('good2') && !/404-|html-a/.test(bg); });
       const pk = await bgsIn(2);
       if (pk.some(s => /404-|html-a/.test(s))) fail('thẻ chọn so sánh: còn hiện ảnh hỏng (anchor hoặc hàng)');
       if (!pk.some(s => s.includes('good2'))) fail('thẻ chọn so sánh: anchor phải hiện ảnh tốt còn lại (good2)');
@@ -125,7 +126,7 @@ let b;
       await pg.locator('[data-card="2"]').getByText('Vendor Tot', { exact: false }).first().click({ timeout: 5000 });
       await pg.locator('[data-card="2"]').getByText(/So sánh \d+ vendor/).first().click({ timeout: 5000 });
       await pg.waitForSelector('[data-card="3"]', { timeout: 5000 });
-      await pg.waitForTimeout(2500);
+      await settle(pg, () => { const bg = [...document.querySelectorAll('[data-card="3"] *')].map(x => getComputedStyle(x).backgroundImage).join('|'); return bg.includes('good1') && bg.includes('good2') && bg.includes('linear-gradient') && !/404-|html-a/.test(bg); });
       const cmp = await bgsIn(3);
       if (cmp.some(s => /404-|html-a/.test(s))) fail('bảng so sánh: còn hiện ảnh hỏng');
       if (!cmp.some(s => s.includes('good1')) || !cmp.some(s => s.includes('good2'))) fail('bảng so sánh: cột có ảnh tốt phải hiện ảnh');
@@ -135,5 +136,5 @@ let b;
     if (!process.exitCode) console.log('PASS ảnh lỗi -> ảnh mặc định ở thẻ danh sách và gallery chi tiết; ảnh hỏng bị bỏ khỏi gallery');
     await b.close();
   } catch (e) { fail('lỗi chạy eval: ' + String(e.message).split('\n')[0] + ' | ' + (globalThis.__logs || []).slice(0, 6).join(' ; ')); }
-  finally { cleanup(); setTimeout(() => process.exit(process.exitCode || 0), 300); }
+  finally { await cleanup(); setTimeout(() => process.exit(process.exitCode || 0), 300); }
 })();

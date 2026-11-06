@@ -9,6 +9,7 @@
 // Mỗi tiêu chí in một dòng "C<n> PASS ..." hoặc "C<n> FAIL <lý do>"; dòng cuối PASS/FAIL; mã thoát 0/1. Một lần chạy đo cả năm tiêu chí; --only chỉ chọn dòng in ra và mã thoát.
 const fs = require('fs'), path = require('path'), http = require('http'), cp = require('child_process');
 const { chromium } = require('playwright');
+const { startViteDev } = require('../../../../../_lib/vite_dev.cjs');
 const A = process.argv.slice(2), arg = (k, d) => (A.includes(k) ? A[A.indexOf(k) + 1] : d);
 const REPO = path.resolve(arg('--repo', ''));
 const ONLY = (arg('--only', '1,2,3,4,5')).split(',').map(Number);
@@ -123,11 +124,11 @@ window.__L = (() => {
 })();
 `;
 
-let b, vite, port, O;
+let b, dev, port, O;
 const TMPF = ['__vimga.jsx', '__vimga.html', '__vimgb.jsx', '__vimgb.html', '__vimgc.jsx', '__vimgc.html'];
 const cleanup = async () => {
   try { b && await b.close(); } catch (e) {}                       // chờ trình duyệt đóng hẳn (không để /tmp/.org.chromium.*)
-  try { if (vite && vite.pid) { try { process.kill(-vite.pid, 'SIGTERM'); } catch (e) { vite.kill(); } await new Promise(r => { vite.once('exit', r); setTimeout(r, 3000); }); } } catch (e) {}
+  try { dev && await dev.stop(); } catch (e) {}
   for (const f of TMPF) { try { fs.unlinkSync(path.join(REPO, f)); } catch (e) {} }
   try { for (const f of fs.readdirSync(REPO)) if (/^vite\.config\.[a-z]+\.timestamp-/.test(f)) fs.unlinkSync(path.join(REPO, f)); } catch (e) {}
   try { img.closeAllConnections && img.closeAllConnections(); img.close(); } catch (e) {}
@@ -175,10 +176,8 @@ async function rowInfo(pg, scope, names, n) {
   fs.writeFileSync(path.join(REPO, '__vimga.jsx'), JSX_A); fs.writeFileSync(path.join(REPO, '__vimga.html'), HTML('__vimga.jsx'));
   fs.writeFileSync(path.join(REPO, '__vimgc.jsx'), JSX_C); fs.writeFileSync(path.join(REPO, '__vimgc.html'), HTML('__vimgc.jsx'));
   fs.writeFileSync(path.join(REPO, '__vimgb.jsx'), JSX_B); fs.writeFileSync(path.join(REPO, '__vimgb.html'), HTML('__vimgb.jsx'));
-  port = 5200 + Math.floor(Math.random() * 500);
-  vite = cp.spawn('npx', ['vite', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { cwd: REPO, stdio: 'ignore', detached: true });
+  dev = await startViteDev({ repo: REPO, files: {} }); port = dev.port;
   try {
-    for (let i = 0; i < 60; i++) { try { await new Promise((res, rej) => http.get(`http://127.0.0.1:${port}/__vimga.html`, r => { r.resume(); r.statusCode === 200 ? res() : rej(); }).on('error', rej)); break; } catch (e) { await new Promise(r => setTimeout(r, 500)); if (i === 59) throw new Error('vite không lên'); } }
     b = await chromium.launch();
     const external = [];
     const shot = async (pg, sel, name) => { if (!SHOTS) return; fs.mkdirSync(SHOTS, { recursive: true }); try { await (sel ? pg.locator(sel).first() : pg).screenshot({ path: path.join(SHOTS, `${name}-390-${TAG}.png`) }); } catch (e) {} };
