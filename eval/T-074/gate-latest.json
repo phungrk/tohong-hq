@@ -1,0 +1,85 @@
+{
+  "task": "T-074",
+  "at": "2026-11-06T01:56",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/vendor/matching",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "bash eval/T-074/check_1_mot_lenh.sh",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 166,
+      "out": "PASS một lệnh in tỉ lệ 4 hạng mục, dòng cuối: FAIL nhãn mẫu (is_sample=true): chỉ để kiểm cách chạy, không có giá trị đạt/không đạt; cần nhãn thật",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-074/check_2_nhan.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 630,
+      "out": "PASS validator nhận nhãn mẫu và từ chối 11 biến thể hỏng",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-074/check_3_nguong.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 79,
+      "out": "PASS ngưỡng 80% (hơn đối chứng 20 điểm) có lý do trong spec và khớp lệnh eval",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-074/check_4_ho_so.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 24,
+      "out": "PASS 30 hồ sơ: 6 style x 5, mức L/M/H = 10/10/10, đủ ngân sách 4 hạng mục, đều ở TP.HCM",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-074/check_5_cham_mu.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 1338,
+      "out": "PASS gói chấm 3/4/5 người: không lộ điểm/hạng/style/tag/vai trò, 120 ô x đúng 3 người, tải đều, trộn thứ tự, import chặn khi thiếu khai báo",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-074/check_6_thieu_nhan.sh",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 226,
+      "out": "PASS thiếu nhãn thật thì FAIL rõ: FAIL chưa có nhãn thật: eval/T-074/labels.json không tồn tại; cần 3-5 người chấm ngoài do Capu mời (quy trình: products/T-074-bo-eval-top5.md)",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-074/check_7_cach_tinh.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 43,
+      "out": "PASS cách tính: đa số tuyệt đối, hoà là không, luật máy loại giá/xác minh/rating/thành phố/hạng mục, thiếu nhãn và thẻ đổi = chưa chấm, ngưỡng biên 80%, đối chứng chặn người chấm khen cả",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 25,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 143,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
