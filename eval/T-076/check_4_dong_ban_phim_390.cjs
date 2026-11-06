@@ -2,6 +2,7 @@
 const L = require('./lib.cjs'); const { T, Q, link, dash, pr, DR } = L; const R = L.reporter();
 const many = Array.from({ length: 12 }, (_, i) => T('T-' + (100 + i), { tier: 'B', title: 'Một tên việc khá dài để thử xuống dòng trên màn hình hẹp số ' + i }));
 const data = dash([T('T-72', { state: 'escalated', owner: 'product' }), ...many], [Q('T-72', 'escalated', [link('Decision Request', DR('T-72-r8-khoa-eval.md'))]), ...many.map(t => Q(t.id, 'diff-b', [link('PR tohong-front#' + t.id.slice(2), pr('tohong-front', Number(t.id.slice(2))), 'open')]))]);
+L.dumpCases('check_4', [{ name: '13 dòng', tasks: data.tasks, queue: data.capu_queue, expect: { count: 13, order: 'T-72,' + many.map(t => t.id).join() } }]);
 (async () => {
   await L.start();
   for (const [name, vp, touch] of [['desktop', { width: 1280, height: 900 }, false], ['iphone390', { width: 390, height: 844 }, true]]) {
