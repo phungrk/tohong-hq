@@ -17,6 +17,3 @@ Khuyến nghị: A ngay hôm nay, sau đó B cho những vendor Wayback không c
 Nếu không quyết: app tiếp tục hiện ảnh minh hoạ tự tạo cho mọi vendor có ảnh hỏng; không có lỗi hiển thị, chỉ thiếu ảnh thật.
 
 Khi chạy A: workflow "Mirror vendor images" ở tohong-back, tick ô wayback, deploy=false trước. Gửi em SUMMARY.
-
----
-**Capu quyết (chat 2026-11-06): A** — chạy mirror với wayback trước, đọc SUMMARY rồi quyết tiếp. Ghi ở đây vì `task.py decide` chưa nhận việc đã `done` (sửa ở T-083).
