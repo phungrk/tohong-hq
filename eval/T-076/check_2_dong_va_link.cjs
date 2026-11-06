@@ -9,7 +9,7 @@ const queue = [Q('T-72', 'escalated', [link('Decision Request', DR('T-72-r8-khoa
   Q('T-60', 'diff-b', [link('PR tohong-front#59', pr('tohong-front', 59), 'open')]), Q('T-61', 'merge-c', [link('PR tohong-back#37', pr('tohong-back', 37), 'open')]),
   Q('T-64', 'diff-b', [link('PR tohong-front#70', pr('tohong-front', 70), 'open'), link('PR tohong-back#41', pr('tohong-back', 41), 'open')]), Q('T-66', 'diff-b', []),
   Q('T-81', 'decision', [link('Decision Request', DR('T-81-x.md')), link('PR tohong-back#50', pr('tohong-back', 50), 'open')], '2026-11-12')];
-L.dumpCases('check_2', [{ name: 'chính', tasks, queue, expect: { count: 10, order: 'T-72,T-80,T-16,T-70,T-81,T-17,T-61,T-60,T-64,T-66' } }]);
+L.dumpCases('check_2', [{ name: 'chính', tasks, queue, expect: { count: 10, order: 'T-72,T-80,T-16,T-70,T-81,T-17,T-61,T-60,T-64,T-66', kinds: { 'T-72': 'escalated', 'T-80': 'escalated', 'T-16': 'decision', 'T-70': 'decision', 'T-81': 'decision', 'T-17': 'blocked', 'T-61': 'merge-c', 'T-60': 'diff-b', 'T-64': 'diff-b', 'T-66': 'diff-b' } }}]);
 (async () => {
   await L.start();
   for (const [name, vp, touch] of [['desktop', { width: 1280, height: 900 }, false], ['iphone390', { width: 390, height: 844 }, true]]) {
