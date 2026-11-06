@@ -1,6 +1,6 @@
 {
   "task": "T-072",
-  "at": "2026-11-06T02:11",
+  "at": "2026-11-06T07:00",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 -I eval/T-072/check_1_ca_chung.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 30,
+      "ms": 28,
       "out": "FAIL repo chưa có test/fixtures/style-cases.json (bản chép nguyên văn của file ca)",
       "tier": 1
     },
@@ -20,23 +20,23 @@
       "eval": "python3 -I eval/T-072/check_2_khong_phat_thieu_tag.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 674,
-      "out": "FAIL 7 ca sai; đầu tiên: JS pool_opt_unsupported_or_vendor_dropped | PY stage 2: thứ tự ['A', 'B', 'M'], vendor khớp M không đứng đầu | PY đường chat (sinh đôi): top 6 chỉ có 2/4 vendor khớp (['m0', 'u0', 'u1', 'u2', 'u3', 'm1'])",
+      "ms": 512,
+      "out": "FAIL 15 ca sai; đầu tiên: JS pool_opt_unsupported_or_vendor_dropped | PY stage 2: thứ tự ['A', 'B', 'M'], vendor khớp M không đứng đầu | PY đường chat (sinh đôi): top 6 chỉ có 2/4 vendor khớp (['m0', 'u0', 'u1', 'u2', 'u3', 'm1'])",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-072/check_3_top10_pool_that.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 494,
-      "out": "PASS tổng vendor khớp trong top 10: 559 -> 559 trên 96 tổ hợp (baseline = code ref 3634598d29 trên pool hiện tại; thông tin: 0 tổ hợp tụt riêng lẻ)",
+      "ms": 468,
+      "out": "PASS tổng vendor khớp trong top 10: 561 -> 561 trên 96 tổ hợp (baseline = code ref 3634598d29 trên pool hiện tại; thông tin: 0 tổ hợp tụt riêng lẻ)",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-072/check_4_giai_thich_va_coverage.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 198,
+      "ms": 177,
       "out": "FAIL 398 lỗi trên 330 vendor, 6 khối formatter; đầu tiên: photography/['korean']/Bonjour Studio: styleCoverage=None cần total=1 | photography/['korean']/Phượt Studio: styleCoverage=None cần total=1 | photography/['korean']/Ktiu studio: styleCoverage=None cần total=1",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 22,
+      "ms": 27,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -52,8 +52,16 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 115,
+      "ms": 157,
       "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 426,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     }
   ],
