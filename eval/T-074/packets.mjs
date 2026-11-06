@@ -2,12 +2,12 @@
 // T-074 · gói chấm mù.
 //   node eval/T-074/packets.mjs make   --graders N(3-5) --out <thư mục NGOÀI repo>
 //   node eval/T-074/packets.mjs import --dir <thư mục> --out <labels.json> [--sample]
-// make: mỗi người một file G<k>.csv (hạng mục × hồ sơ × ứng viên đã trộn); KHÔNG có điểm, hạng, style, tag, vai trò.
+// make: mỗi người một file G<k>.csv (hạng mục × hồ sơ × ứng viên đã trộn: top 15 của máy qua luật A+B và 5 vendor ngẫu nhiên) cùng HUONG_DAN.md; KHÔNG có điểm, hạng, style, tag, vai trò.
 // Bí mật (không gửi người chấm) nằm ở <dir>/_private/key.json. import: đọc cột "phu_hop" (co/khong) thành labels.json.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { CATEGORIES, sha, cardOf, cardSha, profileText, buildCandidates } from './lib/candidates.mjs';
+import { CATEGORIES, sha, cardOf, cardSha, profileText, buildCandidates, TOP_CANDIDATES } from './lib/candidates.mjs';
 import { MIN_GRADERS, MAX_GRADERS, SCHEMA } from './lib/metric.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -33,6 +33,30 @@ function parseCsv(t) {
   return rows;
 }
 
+
+// Hướng dẫn chấm: gửi kèm mọi gói. Không nhắc tên cột máy, điểm, hạng, trọng số.
+export const QUESTION = 'Với cặp đôi này, anh/chị có khuyên họ liên hệ vendor này không?';
+const GUIDE = `# Hướng dẫn chấm
+
+Mỗi dòng trong file CSV của anh/chị là một vendor cưới (nhà cung cấp dịch vụ) và mô tả một cặp đôi ở cột mo_ta_cap_doi.
+Với mỗi dòng, trả lời câu hỏi sau bằng cách điền cột phu_hop (viết co hoặc khong, không để trống):
+
+**${QUESTION}**
+
+Cách xét:
+- Đặt mình vào vị trí người tư vấn cho đúng cặp đôi ở cột mo_ta_cap_doi: phong cách họ thích, số khách, ngân sách.
+- Dựa vào tên, mô tả, ảnh, giá, đánh giá trên thẻ. Anh/chị không cần và không nên tra thêm thông tin ngoài.
+- Về giá: mọi vendor anh/chị thấy đều có ít nhất một gói trong ngân sách của hạng mục đó (giá thấp nhất không vượt ngân sách). Đừng trừ điểm chỉ vì giá cao nhất của khoảng giá vượt ngân sách.
+- Địa điểm tiệc: giá và ngân sách đều tính triệu đồng mỗi bàn.
+- Khuyên liên hệ vì thấy hợp với cặp đôi này, không phải vì thẻ đầy đủ hay đẹp. Mỗi dòng chấm độc lập, không so với dòng khác.
+- Không trao đổi với người chấm khác. Không tìm hiểu cách hệ thống xếp hạng.
+
+Ví dụ minh hoạ (vendor và cặp đôi giả, không có trong dữ liệu):
+- Cặp đôi thích phong cách truyền thống, ngân sách chụp ảnh 20 triệu. Thẻ: "Studio chuyên phóng sự cưới truyền thống, áo dài, lễ gia tiên", giá 12–25 triệu, 4,8 sao. Trả lời: co (hợp phong cách, có gói trong ngân sách).
+- Cùng cặp đôi. Thẻ: "Chuyên chụp concept Hàn Quốc ngoại cảnh, nền studio màu pastel", giá 10–18 triệu. Trả lời: khong (giá vừa nhưng phong cách lệch hẳn).
+- Cặp đôi thích sang trọng, ngân sách makeup 15 triệu. Thẻ: mô tả sơ sài, không ảnh, chưa có đánh giá, nhưng giá phù hợp. Trả lời: khong nếu không có gì cho thấy hợp; co nếu mô tả hoặc ảnh cho thấy rõ hợp.
+`;
+
 async function loadMatcher() {
   const back = path.resolve(process.env.TOHONG_BACK || path.join(HERE, '..', '..', '..', 'tohong-back'));
   return import(pathToFileURL(path.join(back, 'lib', 'vendorMatcher.js')).href);
@@ -48,7 +72,7 @@ if (cmd === 'make') {
   const key = { schema: 't074-key/v1', profiles_sha: profilesSha, graders: n, cells: [] };
   let cell = 0;
   for (const p of profiles) for (const cat of CATEGORIES) {
-    const top = mod.computeMatches(p, { category: cat, limit: 5 }).vendors.map((v) => v.id);
+    const top = mod.computeMatches(p, { category: cat, limit: TOP_CANDIDATES }).vendors.map((v) => v.id);
     const cands = buildCandidates(p, cat, top, pool);
     const cellId = `${p.id}-${cat}`;
     const assigned = [0, 1, 2].map((d) => (cell + d) % n);   // đúng 3 người mỗi ô, xoay vòng
@@ -63,7 +87,8 @@ if (cmd === 'make') {
   perGrader.forEach((rows, i) => fs.writeFileSync(path.join(out, `G${i + 1}.csv`), [COLS, ...rows].map((r) => r.map(q).join(',')).join('\n') + '\n'));
   fs.writeFileSync(path.join(out, '_private', 'key.json'), JSON.stringify(key, null, 1));
   fs.writeFileSync(path.join(out, '_private', 'declarations.template.json'), JSON.stringify(
-    Object.fromEntries(Array.from({ length: n }, (_, i) => [`G${i + 1}`, { saw_system_scores: null, touched_matching_weights: null }])), null, 1));
+    Object.fromEntries(Array.from({ length: n }, (_, i) => [`G${i + 1}`, { is_external: null, saw_system_scores: null, touched_matching_weights: null }])), null, 1));
+  fs.writeFileSync(path.join(out, 'HUONG_DAN.md'), GUIDE);
   console.log(`PASS ghi ${n} gói chấm + _private/ vào ${out} (${cell} ô, mỗi ô 3 người)`);
 } else if (cmd === 'import') {
   const dir = opt('--dir'), out = opt('--out');
@@ -75,7 +100,7 @@ if (cmd === 'make') {
   const labels = [], graders = [];
   for (let i = 1; i <= key.graders; i++) {
     const g = `G${i}`, d = decl[g] || {};
-    graders.push({ id: g, relationship: 'external', declaration: { saw_system_scores: d.saw_system_scores, touched_matching_weights: d.touched_matching_weights } });
+    graders.push({ id: g, relationship: d.is_external === true ? 'external' : d.is_external === false ? 'internal' : null, declaration: { saw_system_scores: d.saw_system_scores, touched_matching_weights: d.touched_matching_weights } });
     const rows = parseCsv(fs.readFileSync(path.join(dir, `${g}.csv`), 'utf8')).slice(1);
     for (const r of rows) {
       const c = cellMap[r[0]]; if (!c) die(`${g}: ô lạ ${r[0]}`);

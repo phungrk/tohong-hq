@@ -1,8 +1,8 @@
 // T-074 · cách tính tỉ lệ trùng top 5 và kiểm nhãn. Hàm thuần, không đọc file, không gọi matcher.
 import { CATEGORIES, machineCheck, cardSha } from './candidates.mjs';
 
-export const THRESHOLD_PCT = 80; // NGUONG_TI_LE_TOP5 trong spec
-export const LIFT_PCT = 20;      // NGUONG_LIFT trong spec
+export const MAX_DROP_PT = 10;    // NGUONG_TUT_TOI_DA trong spec: so với baseline, tụt quá số điểm này là FAIL (Capu chốt)
+export const COVERAGE_PCT = 80;   // NGUONG_PHU_NHAN trong spec: tối thiểu % vị trí top 5 đã có nhãn (Spec Writer đề xuất)
 export const MIN_GRADERS = 3, MAX_GRADERS = 5;
 export const SCHEMA = 't074-labels/v1';
 
@@ -69,28 +69,33 @@ function votesFor(idx, key, currentCard) {
   return [...g.values()].filter((r) => r.card === currentCard).map((r) => r.fit);
 }
 
-export function evaluate({ profiles, rows, poolById, topFn, thresholdPct = THRESHOLD_PCT, liftPct = LIFT_PCT }) {
+// Vị trí top 5: ô thiếu (hệ thống trả < 5) và vendor trượt luật máy A/B tính là KHÔNG phù hợp, vẫn nằm trong mẫu số.
+// Vendor chưa có đủ 3 nhãn (hoặc thẻ đã đổi) là CHƯA CHẤM: ra khỏi mẫu số và tử số, được báo riêng (phủ nhãn), để vendor mới vào top 5
+// không làm tỉ lệ tụt giả.
+export function evaluate({ profiles, rows, poolById, topFn, coveragePct = COVERAGE_PCT }) {
   const idx = index(rows);
   const out = { categories: {}, unlabeled: [] };
   for (const cat of CATEGORIES) {
-    let fit = 0, slots = 0, machineFail = 0, short = 0;
+    let fit = 0, slots = 0, covered = 0, machineFail = 0, short = 0;
     const perProfile = [], unl = [];
     for (const p of profiles) {
       const top = topFn(p, cat).slice(0, 5);
-      let pf = 0;
+      let pf = 0, pc = 0;
       for (let i = 0; i < 5; i++) {
         slots++;
         const id = top[i];
-        if (!id) { short++; continue; }
+        if (!id) { short++; covered++; pc++; continue; }
         const v = poolById[id];
-        if (!machineCheck(v, p, cat).a || !machineCheck(v, p, cat).b) { machineFail++; continue; }
+        const mc = machineCheck(v, p, cat);
+        if (!mc.a || !mc.b) { machineFail++; covered++; pc++; continue; }
         const m = majority(votesFor(idx, `${p.id}|${cat}|${id}`, cardSha(v)));
         if (m === null) { unl.push({ profile: p.id, category: cat, vendor: id }); continue; }
+        covered++; pc++;
         if (m) { fit++; pf++; }
       }
-      perProfile.push(pf / 5);
+      if (pc) perProfile.push(pf / pc);
     }
-    // đối chứng: filler qua luật máy, đủ nhãn, theo đa số
+    // đối chứng ngẫu nhiên: chỉ để tham khảo, không có ngưỡng
     let fN = 0, fFit = 0;
     const inScope = new Set(profiles.map((p) => p.id));
     const pById = Object.fromEntries(profiles.map((p) => [p.id, p]));
@@ -109,21 +114,28 @@ export function evaluate({ profiles, rows, poolById, topFn, thresholdPct = THRES
     }
     const n = perProfile.length, mean = perProfile.reduce((a, b) => a + b, 0) / (n || 1);
     const sd = Math.sqrt(perProfile.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, n - 1));
-    const ratePct = slots ? (fit * 100) / slots : 0;
+    const ratePct = covered ? (fit * 100) / covered : 0;
+    const coverPct = slots ? (covered * 100) / slots : 0;
     const fillerPct = fN ? (fFit * 100) / fN : null;
-    const lift = fillerPct === null ? null : ratePct - fillerPct;
     const reasons = [];
-    if (unl.length) reasons.push(`${unl.length} vendor trong top 5 chưa đủ ${MIN_GRADERS} nhãn`);
-    if (fit * 100 < thresholdPct * slots) reasons.push(`tỉ lệ ${ratePct.toFixed(1)}% < ${thresholdPct}%`);
-    if (lift === null) reasons.push('không có vendor đối chứng đã chấm');
-    else if (lift < liftPct) reasons.push(`hơn đối chứng chỉ ${lift.toFixed(1)} điểm < ${liftPct}`);
+    if (coverPct < coveragePct) reasons.push(`phủ nhãn ${coverPct.toFixed(1)}% < ${coveragePct}% (${unl.length} vị trí top 5 chưa đủ ${MIN_GRADERS} nhãn, cần chấm thêm)`);
     out.categories[cat] = {
-      cells: n, slots, fit, machineFail, short, unlabeled: unl.length, ratePct,
-      ci95Pct: n > 1 ? 196 * sd / Math.sqrt(n) : null, fillerPct, fillerN: fN, lift,
+      cells: profiles.length, slots, covered, fit, machineFail, short, unlabeled: unl.length, coveragePct: coverPct, ratePct,
+      ci95Pct: n > 1 ? 196 * sd / Math.sqrt(n) : null, fillerPct, fillerN: fN, lift: fillerPct === null ? null : ratePct - fillerPct,
       pass: reasons.length === 0, reasons,
     };
     out.unlabeled.push(...unl);
   }
   out.pass = CATEGORIES.every((c) => out.categories[c].pass);
   return out;
+}
+
+// So với baseline: rates = {category: ratePct}. Tụt NHIỀU HƠN MAX_DROP_PT điểm là FAIL; đúng bằng thì đạt.
+export function compareBaseline(cur, baseRates, maxDrop = MAX_DROP_PT) {
+  const res = {};
+  for (const c of CATEGORIES) {
+    const delta = cur.categories[c].ratePct - baseRates[c];
+    res[c] = { delta, pass: delta >= -maxDrop - 1e-9 };
+  }
+  return res;
 }

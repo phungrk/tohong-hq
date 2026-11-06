@@ -52,9 +52,18 @@ elif mode == "rank":
     #     + 6 vendor không khớp rating 4,9, 300 đánh giá, giá 18-21tr (đúng ngân sách), top_k 5. Vendor khớp có điểm sau boost thấp hơn rõ
     #     (khoảng 55,9 so với 61,3-62,2) nên phải đứng dưới vendor không khớp.
     from matcher import WeddingMatcher
+    from stage1_filters import apply_hard_filters
+    from stage3_boosts import apply_boosts
+    def candidates(pool):
+        # Danh sách ỨNG VIÊN SAU BOOST (R8): lặp lại stage 1 -> 2 (top 20) -> 3a bằng hàm công khai, KHÔNG phụ thuộc cách WeddingMatcher.match chọn top_k.
+        # Điểm của vendor bị loại khỏi top_k lấy từ đây, nên cách cài nào bỏ vendor điểm cao ra ngoài đều bị thấy.
+        p = prof(["korean"])
+        passed, _ = apply_hard_filters(pool, p, collect_rejections=False)
+        out = [(v["id"], apply_boosts(v, sb, p).final_score) for v, sb in score_and_rank(passed, p, top_n=20)]
+        return sorted(out, key=lambda t: -t[1])
     def chat(pool, k):
         res = WeddingMatcher(pool).match(prof(["korean"]), top_k=k, enable_relaxation=False)
-        return [[m.vendor["id"], m.score] for m in res.matches]
+        return {"top": [[m.vendor["id"], m.score] for m in res.matches], "ung_vien": [[i, s] for i, s in candidates(pool)]}
     twins = [vendor(f"m{i}", ["korean"]) for i in range(4)] + [vendor("u0", ["editorial"]), vendor("u1", []), vendor("u2", ["luxury"]), vendor("u3", ["rustic"])]
     rv = lambda r, c: {"reviews": [{"source": "marry", "rating": r, "count": c, "last_updated": now}]}
     u_price = [18, 19, 19.5, 20, 20.5, 21]; u_tags = [["editorial"], [], ["luxury"], ["rustic"], ["natural"], ["simple"]]

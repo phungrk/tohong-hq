@@ -3,7 +3,8 @@
 import { createHash } from 'node:crypto';
 
 export const CATEGORIES = ['photography', 'makeup', 'attire', 'venue'];
-export const FILLERS_PER_CELL = 3;
+export const TOP_CANDIDATES = 15;   // top 15 của matcher hiện tại (chỉ giữ vendor qua luật máy A và B)
+export const RANDOM_PER_CELL = 5;   // 5 vendor ngẫu nhiên (seed cố định) cùng qua luật máy, ngoài top 15: đối chứng
 export const sha = (s, n = 12) => createHash('sha256').update(s).digest('hex').slice(0, n);
 
 // (A) qua tầng lọc cứng với dữ liệu thật  +  (B) giá thấp nhất vendor công bố <= ngân sách hạng mục.
@@ -17,12 +18,18 @@ export function machineCheck(v, profile, category) {
 }
 export const machinePass = (v, p, c) => { const m = machineCheck(v, p, c); return m.a && m.b; };
 
+// Địa điểm tiệc: giá là triệu đồng MỖI BÀN (GIẢ ĐỊNH chưa xác minh, xem spec); hạng mục khác: triệu đồng.
+export function priceLabel(v) {
+  const unit = v.category === 'venue' ? ' triệu/bàn' : ' triệu';
+  return (v.priceMin === v.priceMax ? `${v.priceMin}` : `${v.priceMin}–${v.priceMax}`) + unit;
+}
+
 // Thẻ = đúng những gì người chấm được thấy. Không có styles, tags, điểm, hạng.
 export function cardOf(v) {
   return {
     name: v.name,
     description: String(v.description || '').replace(/\s+/g, ' ').slice(0, 400),
-    price: `${v.priceMin}–${v.priceMax} triệu`,
+    price: priceLabel(v),
     rating: v.rating > 0 ? v.rating : null,
     reviewCount: v.reviewCount || 0,
     photos: (v.photos || []).slice(0, 3).map((p) => p.url),
@@ -35,7 +42,7 @@ export function profileText(p) {
   const st = p.preferredStyles.map((x) => VI[x] || x).join(' + ');
   const b = p.budgetByCategory;
   return `Cặp đôi cưới tại TP.HCM, tháng ${Number(p.weddingDate.slice(5, 7))}/${p.weddingDate.slice(0, 4)}, khoảng ${p.guestCount} khách, thích phong cách ${st}. ` +
-    `Ngân sách (triệu đồng, cùng đơn vị với giá trên thẻ): chụp ảnh ${b.photography}, makeup ${b.makeup}, trang phục ${b.attire}, tiệc/địa điểm ${b.venue}.`;
+    `Ngân sách tối đa mỗi hạng mục (triệu đồng): chụp ảnh ${b.photography}, makeup ${b.makeup}, trang phục ${b.attire}, tiệc/địa điểm ${b.venue} (tiệc tính mỗi bàn).`;
 }
 
 function rng(seedStr) {
@@ -48,13 +55,13 @@ export function shuffled(arr, seed) {
   return a;
 }
 
-// Ứng viên chấm cho một ô (hồ sơ × hạng mục): top 5 hiện tại qua luật máy + FILLERS_PER_CELL vendor ngẫu nhiên
-// cùng qua luật máy (đối chứng), trộn thứ tự theo seed. Vendor trượt luật máy không cần người chấm.
+// Ứng viên chấm cho một ô (hồ sơ × hạng mục): top 15 của matcher hiện tại (topIds, đã lấy limit 15) giữ lại những vendor qua luật máy
+// + RANDOM_PER_CELL vendor ngẫu nhiên cùng qua luật máy nhưng ngoài top 15, trộn thứ tự theo seed. Vendor trượt luật máy không cần người chấm.
 export function buildCandidates(profile, category, topIds, pool) {
-  const topSet = new Set(topIds);
+  const topSet = new Set(topIds.slice(0, TOP_CANDIDATES));
   const eligible = pool.filter((v) => machinePass(v, profile, category)).sort((x, y) => (x.id < y.id ? -1 : 1));
   const sys = eligible.filter((v) => topSet.has(v.id)).map((v) => ({ vendor: v.id, role: 'system' }));
   const fill = shuffled(eligible.filter((v) => !topSet.has(v.id)), `fill|${profile.id}|${category}`)
-    .slice(0, FILLERS_PER_CELL).map((v) => ({ vendor: v.id, role: 'filler' }));
+    .slice(0, RANDOM_PER_CELL).map((v) => ({ vendor: v.id, role: 'filler' }));
   return shuffled([...sys, ...fill], `order|${profile.id}|${category}`);
 }

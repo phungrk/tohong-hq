@@ -2,10 +2,11 @@
 """T-072 tiêu chí 2 + 3a (ADR-026): hai vendor giống hệt nhau, một có tag lệch, một không tag -> cùng tổng điểm (JS trên vendor thật của pool, Python).
 3a: vendor khớp có tổng điểm > cả hai VÀ đứng trên cả hai trong danh sách trả về (đo thứ tự, không chỉ điểm):
   JS = danh sách đầy đủ của hạng mục (pool thật + 3 anh em); Python = stage 2 (score_and_rank) và đường chat đầy đủ qua MMR (stage 3).
-Luật R8 cho đường chat (một luật, đo trên hai ca): giữa một vendor khớp và một vendor không khớp, vendor có điểm sau boost cao hơn đứng trên (bằng điểm thì vendor khớp đứng trên).
+Luật R8 cho đường chat (một luật, đo trên hai ca): giữa một vendor khớp và một vendor không khớp, vendor có điểm sau boost cao hơn đứng trên (bằng điểm thì vendor khớp đứng trên), KỂ CẢ vendor bị loại khỏi top_k:
+  eval lấy danh sách ứng viên sau boost (run_py.py rank, "ung_vien"), coi mọi ứng viên không vào kết quả là đứng dưới toàn bộ kết quả rồi so cặp trên danh sách nối (kết quả + ứng viên bị loại).
   Ca sinh đôi: 4 vendor khớp cùng tag + 4 không khớp, điểm khớp cao hơn -> mọi vendor khớp phải đứng trước (loại MMR gốc).
   Ca ngược (Spec critic, D2): 6 vendor khớp điểm thấp (vượt ngân sách, rating 3,6) + 6 không khớp điểm cao (đúng ngân sách, rating 4,9), top 5 -> vendor không khớp phải đứng trên
-  (loại cách chia nhóm "khớp lên trước"). Mã thoát 0 = PASS."""
+  (loại cách chia nhóm "khớp lên trước": top 5 toàn vendor khớp thì không có cặp chéo trong kết quả, nhưng 6 vendor không khớp điểm cao bị loại ra ngoài và bị tính). Mã thoát 0 = PASS."""
 import json, os, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 cands = [os.environ.get("TOHONG_BACK_REPO"), os.getcwd(), os.path.join(os.getcwd(), "..", "tohong-back"), os.path.join(HERE, "..", "..", "..", "tohong-back")]
@@ -38,11 +39,18 @@ def cross_violations(name, lst):
             if x[0] == y[0]: continue
             if sx < sy or (sx == sy and x.startswith("u")): out.append(f"{name}: {x}({sx}) đứng trên {y}({sy}) trái thứ tự điểm")
     return out
-pl = rk["pipeline"]
+def full_order(name, ca):
+    # kết quả cuối + ứng viên sau boost bị loại khỏi top_k (xếp dưới, theo điểm giảm dần): R8 áp lên cả hai.
+    top = ca["top"]; ids = {x for x, _ in top}
+    score = {x: sc for x, sc in ca["ung_vien"]}
+    top = [[x, score.get(x, sc)] for x, sc in top]  # điểm lấy từ danh sách ứng viên: một nguồn duy nhất cho cả vendor được chọn và bị loại
+    dropped = [[x, sc] for x, sc in ca["ung_vien"] if x not in ids]
+    return top, dropped
+pl, pl_drop = full_order("sinh đôi", rk["pipeline"])
 if sum(1 for x, _ in pl if x.startswith("m")) != 4: bad.append(f"PY đường chat (sinh đôi): top 6 chỉ có {sum(1 for x, _ in pl if x.startswith('m'))}/4 vendor khớp ({[x for x, _ in pl]})")
-bad += cross_violations("PY đường chat (sinh đôi)", pl)
-ng = rk["nguoc"]
+bad += cross_violations("PY đường chat (sinh đôi)", pl + pl_drop)
+ng, ng_drop = full_order("ngược", rk["nguoc"])
 if len(ng) != 5: bad.append(f"PY đường chat (ngược): trả {len(ng)} vendor, cần 5")
-bad += cross_violations("PY đường chat (ngược)", ng)
+bad += cross_violations("PY đường chat (ngược)", ng + ng_drop)
 if bad: print(f"FAIL {len(bad)} ca sai; đầu tiên: " + " | ".join(bad[:3])); sys.exit(1)
 print(f"PASS JS {len(js)} cặp (điểm + thứ tự), PY {len(py)} cặp, PY stage 2 + đường chat (ca sinh đôi + ca ngược)")
