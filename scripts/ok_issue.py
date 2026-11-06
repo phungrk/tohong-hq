@@ -140,8 +140,6 @@ def git(*args, check=True):
 
 def run_git(ev, content):
     last = ""
-    if git("status", "--porcelain", check=False).stdout.strip():
-        raise SystemExit("Cây làm việc không sạch: --git reset cứng về origin/main, từ chối để khỏi mất thay đổi.")
     for _ in range(MAX_TRIES):
         git("fetch", "-q", "origin", "main")
         git("reset", "-q", "--hard", "origin/main")
