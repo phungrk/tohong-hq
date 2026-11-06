@@ -2,8 +2,8 @@
 const L = require('./lib.cjs'); const { T, Q, link, dash, pr, DR } = L; const R = L.reporter();
 const tasks = [T('T-72', { state: 'escalated', owner: 'product', tier: 'B' }), T('T-74', { state: 'escalated', owner: 'product', tier: 'A' }),
   T('T-60', { tier: 'B' }), T('T-61', { tier: 'C' }), T('T-62', { tier: 'A' }), T('T-63', { tier: 'B' }),
-  T('T-70', { tier: 'C' }), T('T-16', { state: 'blocked', owner: 'engineering', tier: 'B' }), T('T-17', { state: 'blocked', owner: 'engineering', tier: 'B' }), T('T-64', { tier: 'B' })];
-const queue = [Q('T-72', 'escalated', [link('Decision Request', DR('T-72-x.md'))], '2026-11-10'), Q('T-74', 'escalated', [link('Decision Request', DR('T-74-x.md'))], '2026-11-10'),
+  T('T-70', { tier: 'C' }), T('T-16', { state: 'blocked', owner: 'engineering', tier: 'B' }), T('T-17', { state: 'blocked', owner: 'engineering', tier: 'B' }), T('T-64', { tier: 'B' }), T('T-90', { state: 'doing', owner: 'product' })];   // T-90: phần tử escalated cũ trong capu_queue, nhưng dữ liệu live cho thấy đã rời escalated -> không có dòng
+const queue = [Q('T-90', 'escalated', [link('Decision Request', DR('T-90-x.md'))], '2026-11-09'), Q('T-72', 'escalated', [link('Decision Request', DR('T-72-x.md'))], '2026-11-10'), Q('T-74', 'escalated', [link('Decision Request', DR('T-74-x.md'))], '2026-11-10'),
   Q('T-70', 'decision', [link('Decision Request', DR('T-70-x.md'))], '2026-11-10'), Q('T-16', 'decision', [link('Decision Request', DR('T-16-x.md'))], '2026-10-31'),
   Q('T-17', 'blocked', [link('Decision Request', L.DR_DIR)]),
   Q('T-60', 'diff-b', [link('PR tohong-front#59', pr('tohong-front', 59), 'open')]), Q('T-61', 'merge-c', [link('PR tohong-back#37', pr('tohong-back', 37), 'open')]),
