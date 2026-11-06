@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""BẤT BIẾN ĐỀ XUẤT hq/ledger (T-087; chỉ spec-critic được rút vào eval/invariants/hq/ledger/).
+"""Bất biến hq/ledger (chờ merge, ADR-028) · nguồn: T-087 (Spec Gate v3 2026-11-07, spec-critic rút từ eval/T-087/proposed-inv-board-doc-duoc.py).
+Đích: eval/invariants/hq/ledger/inv-007-so-cai-chiu-board-hong.py sau khi PR T-087 merge và file này xanh trên main.
 (a) Sổ cái thật: `task.py summary --json` thoát 0, không Traceback, và không có board hỏng NẶNG (board_hong là danh sách, không phần tử nào severity = nang).
 (b) Sổ cái tạm có board hỏng nhẹ và hỏng nặng: list/summary/export không Traceback, thoát 0.
-Chạy: python3 eval/T-087/proposed-inv-board-doc-duoc.py"""
+Chạy: python3 eval/T-087/bat-bien-cho-merge/inv-007-so-cai-chiu-board-hong.py"""
 import json, subprocess, sys, tempfile
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # _lib.py của eval/T-087
 import _lib as L
 r = subprocess.run([sys.executable, str(L.ROOT / "scripts/task.py"), "summary", "--json"], capture_output=True, text=True, cwd=str(L.ROOT))
 try: j = json.loads(r.stdout)
