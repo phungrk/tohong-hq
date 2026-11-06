@@ -31,6 +31,9 @@ concurrency:
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    env:
+      # `secrets` không dùng được trong `if`; đưa vào env cấp job rồi kiểm env ở bước Project.
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,9 +65,8 @@ jobs:
           fi
 
       - name: Đồng bộ Project board (chỉ khi có PROJECTS_TOKEN)
-        if: ${{ secrets.PROJECTS_TOKEN != '' }}
+        if: ${{ env.PROJECTS_TOKEN != '' }}
         env:
-          PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
           PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
         run: python3 scripts/mirror_project.py
 
