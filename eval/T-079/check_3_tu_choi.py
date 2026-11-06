@@ -21,6 +21,8 @@ SILENT = [
     ("không phải lệnh: '//ok'", payload("//ok chọn A"), ),
     ("không phải lệnh: lệnh cũ /quyet", payload("/quyet chọn A"), ),
     ("lệnh không ở dòng đầu", payload("chào\n/ok chọn A"), ),
+    ("dòng trống rồi chữ khác rồi lệnh", payload("\n\nchào\n/ok chọn A"), ),
+    ("/ok dính chữ sau NBSP+chữ", payload("/ok2\u00a0chọn A"), ),
     ("trích dẫn", payload("> /ok chọn A"), ),
     ("giữa câu", payload("anh nghĩ /ok chọn A"), ),
     ("thân rỗng", payload(""), ),
@@ -40,7 +42,7 @@ for name, p in SILENT:
     try:
         before = B.snapshot(); r = B.ok(p)
         if B.snapshot() != before: fails.append(f"{name}: sổ cái/board đổi")
-        if r["verdict"] not in ("ignored", "rejected") or r["reply"] != "":
+        if r["verdict"] != "ignored" or r["reply"] != "":
             fails.append(f"{name}: phải im lặng (verdict ignored, reply rỗng), nhận verdict={r['verdict']} reply={r['reply'][:60]!r}")
     finally: B.close()
 for name, p, reason in REFUSE:

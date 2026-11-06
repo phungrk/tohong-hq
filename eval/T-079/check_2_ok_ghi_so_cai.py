@@ -14,6 +14,10 @@ CASES = [
     ("/ok\nchọn A\nvà làm ngay", "chọn A và làm ngay"),
     ("/ok chọn A\r\ndòng hai", "chọn A dòng hai"),
     ("/ok\tchọn A", "chọn A"),
+    ("\n\n/ok chọn A", "chọn A"),                            # dòng trống đầu bình luận bị bỏ qua
+    (" \u00a0\n/ok chọn A", "chọn A"),                       # dòng chỉ có khoảng trắng (kể cả NBSP) cũng bỏ qua
+    ("/ok\u00a0chọn A", "chọn A"),                           # NBSP sau /ok là khoảng trắng
+    ("\u00a0/ok chọn A", "chọn A"),
     ("/ok --close", "--close"),                               # chữ, không phải cờ: việc KHÔNG được đóng
     ("/ok $(touch PWNED) `id` ; rm -rf x", "$(touch PWNED) `id` ; rm -rf x"),
     ("/ok làm theo phương án B, bỏ phần phụ — vì giá", "làm theo phương án B, bỏ phần phụ — vì giá"),
@@ -54,8 +58,11 @@ try:
     r = B.ok(payload("/ok nhờ @mallory xem và @org/team"))
     if r["verdict"] != "decided":
         fails.append(f"ca @: verdict={r['verdict']}")
-    elif re.search(r"(?<![\w`\\])@(mallory|org)", r["reply"].replace("@​", "")) or "@mallory" in r["reply"] or "@org/team" in r["reply"]:
-        fails.append("câu xác nhận chứa @mallory/@org/team nguyên dạng -> gửi thông báo cho người lạ")
+    else:
+        # "không có @<tên> trần tạo mention": bỏ phần trong `…` / ```…```; mọi dạng vô hiệu hoá (chèn zero-width, backtick, ＠) đều được nhận
+        shown = re.sub(r"```.*?```|`[^`\n]*`", "", r["reply"], flags=re.S)
+        if re.search(r"@[A-Za-z0-9_-]+", shown):
+            fails.append("câu xác nhận còn @<tên> trần -> sẽ gửi thông báo cho người lạ: " + re.search(r"@[A-Za-z0-9_-]+", shown).group(0))
     if B.events()[-1]["detail"] != "nhờ @mallory xem và @org/team":
         fails.append("sổ cái phải giữ nguyên nội dung (kể cả @), chỉ câu trả lời được vô hiệu @")
 finally:
