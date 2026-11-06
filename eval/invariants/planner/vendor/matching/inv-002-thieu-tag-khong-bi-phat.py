@@ -15,7 +15,7 @@ if not repo: print("PASS chưa áp dụng (không tìm thấy tohong-back)"); sy
 cases = os.path.join(T072, "style-cases.json")
 def run(cmd):
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-    if p.returncode != 0: print("FAIL chạy lỗi " + os.path.basename(cmd[-3]) + ": " + (p.stderr or p.stdout)[-300:]); sys.exit(1)
+    if p.returncode != 0: print("FAIL chạy lỗi " + os.path.basename(cmd[1]) + ": " + (p.stderr or p.stdout)[-300:]); sys.exit(1)
     return json.loads(p.stdout)
 bad = []
 for r in run(["node", os.path.join(T072, "lib", "run_js.mjs"), repo, cases, "twins"]):
