@@ -1,7 +1,7 @@
 {
   "task": "T-075",
-  "at": "2026-11-06T02:11",
-  "verdict": "RED",
+  "at": "2026-11-06T02:13",
+  "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/vendor/pool",
@@ -12,7 +12,7 @@
       "eval": "python3 -I eval/T-073/check_1.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 29,
+      "ms": 32,
       "out": "PASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 -I eval/T-073/check_2.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 112,
+      "ms": 110,
       "out": "PASS (minimalist: 118 vendor mất, 6 vendor giữ vì nguồn ghi tối giản/minimal)",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 -I eval/T-073/check_3.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 145,
+      "ms": 126,
       "out": "PASS",
       "tier": 1
     },
@@ -36,7 +36,23 @@
       "eval": "python3 -I eval/T-073/check_4.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 2371,
+      "ms": 2193,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-075/adv-01-pool-trung-gian-khong-vao-git.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 35,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-075/adv-02-regen-khong-de-lai-thay-doi.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1482,
       "out": "PASS",
       "tier": 1
     },
@@ -44,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 23,
+      "ms": 22,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -52,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 128,
+      "ms": 137,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -60,7 +76,7 @@
       "eval": "eval/invariants/planner/vendor/pool/inv-001-pool-khop-van-ban-nguon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 544,
+      "ms": 466,
       "out": "PASS",
       "tier": 2
     },
@@ -68,7 +84,7 @@
       "eval": "eval/invariants/planner/vendor/pool/inv-002-tag-chuan-khong-tu-cung-co.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1208,
+      "ms": 1181,
       "out": "PASS",
       "tier": 2
     },
@@ -76,39 +92,23 @@
       "eval": "eval/invariants/planner/vendor/pool/inv-003-tinh-te-khong-phai-toi-gian.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 39,
+      "ms": 34,
       "out": "PASS",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/vendor/pool/inv-004-pool-trung-gian-khong-vao-git.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 28,
-      "out": "FAIL tools/scraper/output/pool-vendors.json đang được git theo dõi trong /home/claude/tohong (file trung gian; xem docstring)",
+      "status": "PASS",
+      "ms": 23,
+      "out": "PASS",
       "tier": 2
-    },
-    {
-      "eval": "eval/T-075/adv-01-pool-trung-gian-khong-vao-git.py",
-      "kind": "py",
-      "status": "FAIL",
-      "ms": 21,
-      "out": "FAIL tools/scraper/output/pool-vendors.json đang được git theo dõi trong /home/claude/tohong (file trung gian, spec T-073: không commit)",
-      "tier": 3
-    },
-    {
-      "eval": "eval/T-075/adv-02-regen-khong-de-lai-thay-doi.py",
-      "kind": "py",
-      "status": "FAIL",
-      "ms": 1389,
-      "out": "FAIL sau lệnh, file git theo dõi trong tohong đổi: M tools/scraper/output/pool-vendors.json",
-      "tier": 3
     },
     {
       "eval": "eval/T-075/adv-03-scrape-chi-doi-style-tags.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 323,
+      "ms": 261,
       "out": "PASS (134 bản ghi đổi style_tags, không trường nào khác đổi)",
       "tier": 3
     },
@@ -116,7 +116,7 @@
       "eval": "eval/T-075/adv-04-chuoi-tho-va-phan-tu-la.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 150,
+      "ms": 126,
       "out": "PASS",
       "tier": 3
     },
@@ -124,10 +124,10 @@
       "eval": "eval/T-075/adv-05-vendor-vang-nguon-neu-id.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1669,
+      "ms": 1744,
       "out": "PASS",
       "tier": 3
     }
   ],
-  "hint": "spec"
+  "hint": ""
 }
