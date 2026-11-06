@@ -12,7 +12,7 @@ const D3 = [process.env.D3, '/opt/npm-tools/node_modules/d3/dist/d3.min.js'].fin
 if (!D3) { console.log('FAIL thiếu d3.min.js cục bộ: đặt D3=/đường/dẫn/d3.min.js'); process.exit(1); }
 const { chromium } = require('playwright');
 const data = JSON.parse(fs.readFileSync(DATA, 'utf8'));
-const OK = /^https:\/\/github\.com\/phungrk\/[\w.-]+\/(pull\/\d+|blob\/main\/inbox\/capu\/[^/?#]+|tree\/main\/inbox\/capu)$/;
+const OK = /^https:\/\/github\.com\/phungrk\/(?:[\w.-]+\/(?:pull\/\d+|blob\/main\/inbox\/capu\/[^/?#]+|tree\/main\/inbox\/capu)|tohong-hq\/issues\/[1-9][0-9]*)$/; // ADR-029
 (async () => {
   const browser = await chromium.launch(); let fails = 0;
   const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; };
