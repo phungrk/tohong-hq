@@ -61,7 +61,7 @@ EVENT_VI = {
     "assigned": "Giao việc", "started": "Bắt đầu", "handoff": "Bàn giao", "rejected": "Trả về",
     "accepted": "Chấp nhận", "blocked": "Báo bị chặn", "unblocked": "Gỡ chặn",
     "escalated": "Leo thang", "decided": "Capu quyết định", "cost": "Ghi chi phí", "requested": "Capu yêu cầu",
-    "respec": "Sửa spec xong", "evalplus": "Thêm eval, chạy lại", "evals": "Đăng ký eval", "area": "Đổi vùng",
+    "respec": "Sửa spec xong", "merged": "PR đã xử lý", "evalplus": "Thêm eval, chạy lại", "evals": "Đăng ký eval", "area": "Đổi vùng",
 }
 SPEC_OWNER = "product"  # bộ phận giữ spec + eval (Spec Writer)
 GATE_OF = {"product": "spec-critic", "engineering": "adversary"}   # ai gác cổng cho việc của bộ phận nào
@@ -570,6 +570,48 @@ def cmd_decide(a):
     print(f"{a.task}: Capu đã quyết → {meta['owner']} làm tiếp")
 
 
+PR_URL_RE = re.compile(r"https://github\.com/phungrk/[\w.-]+/pull/\d+")
+
+
+def cmd_merged(a):
+    """Ghi PR của việc đã merge (hoặc đóng với --closed) vào sổ cái. KHÔNG đổi trạng thái việc; idempotent theo URL PR."""
+    if not a.pr or not PR_URL_RE.fullmatch(a.pr):
+        raise LedgerError("--pr phải là URL dạng https://github.com/phungrk/<repo>/pull/<số>")
+    meta, _ = read_task(a.task)   # việc không tồn tại -> LedgerError
+    if any(e.get("event") == "merged" and e.get("link") == a.pr for e in read_events()):
+        print(f"{a.task}: {a.pr} đã có sự kiện merged, không ghi lại")
+        return
+    word = "closed" if a.closed else "merged"
+    detail = word + (f": {a.note}" if a.note else "")
+    log_event(meta, "merged", a.by, a.by, detail, link=a.pr, with_state=False)
+    print(f"{a.task}: ghi {word} cho {a.pr} (trạng thái việc không đổi)")
+
+
+def collect_prs(events):
+    """PR của từng việc (spec T-076 D3): URL trong link/detail của handoff từ engineering (theo thứ tự dòng), rồi handoffs/<task>-v*.md theo số bản. -> {task: [url]}"""
+    prs = {}
+
+    def add(t, text):
+        for u in PR_URL_RE.findall(text or ""):
+            lst = prs.setdefault(t, [])
+            if u not in lst:
+                lst.append(u)
+    for e in events:
+        if e.get("event") == "handoff" and e.get("from") == "engineering" and e.get("task"):
+            add(e["task"], (e.get("link") or "") + " " + (e.get("detail") or ""))
+    files = {}
+    hd = ROOT / "handoffs"
+    if hd.is_dir():
+        for f in hd.glob("T-*-v*.md"):
+            m = re.fullmatch(r"(T-\d+)-v(\d+)\.md", f.name)
+            if m:
+                files.setdefault(m.group(1), []).append((int(m.group(2)), f))
+    for t, fl in files.items():
+        for _, f in sorted(fl):
+            add(t, f.read_text(encoding="utf-8", errors="replace"))
+    return prs
+
+
 def cmd_cost(a):
     if not a.note:
         raise LedgerError("Ghi chi phí phải có --note: số liệu lấy từ đâu (transcript, hóa đơn, điều chỉnh...).")
@@ -614,8 +656,18 @@ def build_summary():
     evals_added = sum(t.get("evals_added", 0) for t in tasks)
     since = t_now - timedelta(hours=24)
     last24 = [e for e in events if parse_stamp(e["t"]) >= since]
+    handled = {e.get("link") for e in events if e.get("event") == "merged"}
+    all_prs = collect_prs(events)
+    pr_pending = []
+    for t in done:
+        if t["owner"] != "engineering" or str(t.get("tier") or "") not in ("B", "C"):
+            continue
+        left = [u for u in all_prs.get(t["id"], []) if u not in handled]
+        if left:
+            pr_pending.append({"task": t["id"], "title": t["title"], "tier": str(t["tier"]), "prs": left})
     return {
         "as_of": stamp(t_now),
+        "pr_pending": pr_pending,
         "counts": counts,
         "open": [{"task": t["id"], "title": t["title"], "state": t["state"], "holder": t["holder"],
                   "rounds": t["rounds"], "hours_since_update": hours(t)} for t in open_tasks],
@@ -651,6 +703,10 @@ def cmd_summary(a):
             print(f"  - {al['task']} {al['title']}: {al['kind']} ({al['hours']} giờ)")
     else:
         print("Cảnh báo: không có")
+    if s["pr_pending"]:
+        print("PR chưa có sự kiện merged (kiểm bằng gh api, rồi `task.py merged`):")
+        for p_ in s["pr_pending"]:
+            print(f"  - {p_['task']} (bậc {p_['tier']}) {p_['title']}: " + ", ".join(p_["prs"]))
     if s["open"]:
         print("Đang mở:")
         for t in s["open"]:
@@ -708,7 +764,7 @@ def main(argv=None):
     sp.set_defaults(fn=cmd_request)
 
     for name, fn, hlp in [("start", cmd_start, "Bắt đầu làm"), ("handoff", cmd_handoff, "Bàn giao cho reviewer"),
-                          ("accept", cmd_accept, "Reviewer chấp nhận"), ("block", cmd_block, "Báo bị chặn"),
+                          ("accept", cmd_accept, "Reviewer chấp nhận"), ("block", cmd_block, "Báo bị chặn (cần Capu làm gì thì mở --note bằng \"Chờ Capu: ...\" để hiện trong modal dashboard)"),
                           ("unblock", cmd_unblock, "Gỡ chặn"), ("escalate", cmd_escalate, "Leo thang lên Capu")]:
         sp = sub.add_parser(name, help=hlp)
         common(sp)
@@ -749,6 +805,12 @@ def main(argv=None):
     common(sp, by_default="capu")
     sp.add_argument("--close", action="store_true", help="Đóng việc thay vì làm tiếp")
     sp.set_defaults(fn=cmd_decide)
+
+    sp = sub.add_parser("merged", help="Ghi PR của việc đã merge hoặc đã đóng (không đổi trạng thái việc)")
+    sp.add_argument("task"); sp.add_argument("--pr", default="", help="URL PR, vd https://github.com/phungrk/tohong-front/pull/59")
+    sp.add_argument("--by", required=True); sp.add_argument("--note", default="")
+    sp.add_argument("--closed", action="store_true", help="PR bị đóng, không merge")
+    sp.set_defaults(fn=cmd_merged)
 
     sp = sub.add_parser("cost", help="Ghi chi phí đã tiêu, không đổi trạng thái việc")
     sp.add_argument("task", nargs="?", default="", help="T-xxx; bỏ trống hoặc '-' nếu không gắn việc nào")

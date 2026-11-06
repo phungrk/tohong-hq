@@ -14,7 +14,9 @@ Script chỉ đọc sổ cái, không ghi gì vào repo.
 """
 import argparse
 import json
+import re
 import sys
+import unicodedata
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -37,6 +39,92 @@ def product_of(area: str) -> str:
         return ""
 
 
+GH = "https://github.com/phungrk/"
+PR_RE = re.compile(r"https://github\.com/phungrk/([\w.-]+)/pull/(\d+)")
+ASK_BLOCK_RE = re.compile(r"^\s*Chờ Capu\b", re.I)
+KIND_ORDER = ["escalated", "decision", "blocked", "merge-c", "diff-b"]
+
+
+def build_capu_queue(tasks, lines):
+    """Danh sách việc chờ Capu (spec T-076 D1-D5): chỉ đọc sổ cái, không token, không mạng."""
+    evs = []
+    for l in lines:
+        try:
+            evs.append(json.loads(l))
+        except json.JSONDecodeError:
+            pass
+    nfc = lambda x: unicodedata.normalize("NFC", x or "")
+    asks, answers, blocks, processed = {}, {}, {}, set()
+    prs = task.collect_prs(evs)
+    for i, e in enumerate(evs):
+        t, kind = e.get("task", ""), e.get("event", "")
+        if kind == "merged":
+            processed.add(e.get("link", ""))
+        if not t:
+            continue
+        det = nfc(e.get("detail"))
+        if kind == "blocked":
+            blocks[t] = det
+        if kind == "escalated" or (kind == "blocked" and ASK_BLOCK_RE.search(det)):
+            asks[t] = i
+        if kind in ("decided", "unblocked"):
+            answers.setdefault(t, []).append((i, kind))
+    inbox = {}
+    idir = ROOT / "inbox" / "capu"
+    if idir.is_dir():
+        for f in sorted(idir.glob("T-*.md"), key=lambda f: f.name):
+            m = re.match(r"(T-\d+)-", f.name)
+            if m:
+                inbox.setdefault(m.group(1), []).append(f)
+    t_now = task.now()
+    queue = []
+    for t in tasks:
+        tid, st = t["id"], t["state"]
+        last_block = blocks.get(tid)
+        block_asks = st == "blocked" and last_block is not None and bool(ASK_BLOCK_RE.search(last_block))
+        kinds = set()
+        files = inbox.get(tid, [])
+        if files and not (st == "blocked" and not block_asks):
+            if tid in asks:
+                answered = any(i > asks[tid] for i, _ in answers.get(tid, []))
+            else:
+                answered = any(k == "decided" for _, k in answers.get(tid, []))
+            if not answered:
+                kinds.add("decision")
+        if st == "escalated":
+            kinds.add("escalated")
+        if block_asks:
+            kinds.add("blocked")
+        links = []
+        if kinds:
+            if files:
+                links.append({"label": "Decision Request", "url": f"{GH}tohong-hq/blob/main/inbox/capu/{files[-1].name}", "pr_state": ""})
+            else:
+                links.append({"label": "Decision Request", "url": f"{GH}tohong-hq/tree/main/inbox/capu", "pr_state": ""})
+        tier = str(t.get("tier") or "")
+        if t.get("owner") == "engineering" and st == "done" and tier in ("B", "C"):
+            allpr = prs.get(tid, [])
+            open_pr = [u for u in allpr if u not in processed]
+            if open_pr:
+                kinds.add("diff-b" if tier == "B" else "merge-c")
+            elif not allpr:
+                hrs = (t_now - task.parse_stamp(t["updated"])).total_seconds() / 3600
+                if hrs < 48:
+                    kinds.add("diff-b" if tier == "B" else "merge-c")
+            for u in open_pr:
+                m = PR_RE.fullmatch(u)
+                links.append({"label": f"PR {m.group(1)}#{m.group(2)}", "url": u, "pr_state": "open"})
+        if not kinds:
+            continue
+        decide_by = ""
+        if files and kinds & {"escalated", "decision", "blocked"}:
+            m = re.search(r"(?m)^decide-by:\s*(\d{4}-\d{2}-\d{2})", files[-1].read_text(encoding="utf-8", errors="replace"))
+            decide_by = m.group(1) if m else ""
+        kind = next(k for k in KIND_ORDER if k in kinds)
+        queue.append({"task": tid, "kind": kind, "decide_by": decide_by, "links": links})
+    return sorted(queue, key=lambda q: q["task"])
+
+
 def export(out: Path, public: bool = False):
     out.mkdir(parents=True, exist_ok=True)
     as_of = task.now()
@@ -56,6 +144,7 @@ def export(out: Path, public: bool = False):
         })
 
     events = []
+    lines = []
     if task.LEDGER.exists():
         # bỏ dòng trùng y hệt (có thể sinh ra khi rebase nhánh có nhật ký gộp hai phía)
         lines = list(dict.fromkeys(l for l in task.LEDGER.read_text(encoding="utf-8").splitlines() if l.strip()))
@@ -91,6 +180,8 @@ def export(out: Path, public: bool = False):
     if reg_dir.is_dir():
         regression_evals = sum(1 for p in reg_dir.iterdir() if not p.name.startswith(".") and p.name != "README.md")
 
+    capu_queue = build_capu_queue(tasks, lines)
+
     if public:
         # Bản công khai: bỏ nội dung chi tiết (defect, ghi chú, đường dẫn file)
         for e in events:
@@ -100,7 +191,8 @@ def export(out: Path, public: bool = False):
     for name, rows in (("tasks", tasks), ("events", events), ("roster", roster)):
         (out / f"{name}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
     bundle = {"generated_at": stamp, "timezone": "Asia/Ho_Chi_Minh", "public": public,
-              "regression_evals": regression_evals, "tasks": tasks, "events": events, "roster": roster}
+              "regression_evals": regression_evals, "tasks": tasks, "events": events, "roster": roster,
+              "capu_queue": capu_queue}
     (out / "dashboard.json").write_text(json.dumps(bundle, ensure_ascii=False), encoding="utf-8")
     print(f"Đã xuất lúc {stamp}{' (bản công khai)' if public else ''}: {len(tasks)} việc, {len(events)} sự kiện, "
           f"{sum(r['status'] == 'Hired' for r in roster)}/{len(roster)} vị trí đã có người → {out}")

@@ -1,0 +1,63 @@
+name: Quyết trên issue bằng /ok
+
+# T-079 · ADR-027: Capu (tài khoản phungrk) trả lời `/ok <quyết định>` dưới issue của một việc đang chờ quyết
+# -> scripts/ok_issue.py ghi `task.py decide` vào sổ cái trên main, rồi workflow đăng câu xác nhận/từ chối.
+# Bảo mật: nội dung bình luận chỉ đi qua file payload ($GITHUB_EVENT_PATH), không vào dòng lệnh shell;
+# chỉ checkout main (không bao giờ code từ PR/fork); chỉ action actions/*; không secret nào ngoài GITHUB_TOKEN.
+# Script tự kiểm lại tác giả; bộ lọc `if` ở job chỉ để khỏi chạy với bình luận người lạ.
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: write
+  issues: write
+
+# Xếp hàng theo từng bình luận (created+edited cùng bình luận không chạy song song, bước đăng không nguyên tử);
+# không nhóm hằng số (sẽ huỷ lượt chờ cũ, nuốt /ok). Đua push giữa các bình luận do ok_issue.py thử lại.
+concurrency:
+  group: ok-tren-issue-${{ github.event.comment.id }}
+  cancel-in-progress: false
+
+jobs:
+  ok:
+    if: ${{ github.event.comment.user.login == 'phungrk' && github.event.sender.login == 'phungrk' && !github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Ghi sổ cái (nếu là lệnh /ok hợp lệ)
+        id: ok
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          python3 scripts/ok_issue.py --event "$GITHUB_EVENT_PATH" --git > "$RUNNER_TEMP/ok.out"
+          tail -n 1 "$RUNNER_TEMP/ok.out" > "$RUNNER_TEMP/result.json"
+
+      - name: Đăng câu trả lời (một lần cho mỗi marker)
+        uses: actions/github-script@v7
+        env:
+          RESULT_FILE: ${{ runner.temp }}/result.json
+        with:
+          script: |
+            const fs = require('fs');
+            const res = JSON.parse(fs.readFileSync(process.env.RESULT_FILE, 'utf8'));
+            if (!res.reply) { core.info('verdict=' + res.verdict + ': im lặng'); return; }
+            const marker = res.reply.split('\n', 1)[0];
+            const number = context.payload.issue.number;
+            const existing = await github.paginate(github.rest.issues.listComments,
+              { owner: context.repo.owner, repo: context.repo.repo, issue_number: number, per_page: 100 });
+            if (existing.some(c => c.user && c.user.type === 'Bot' && (c.body || '').startsWith(marker))) {
+              core.info('Đã có bình luận với marker ' + marker); return;
+            }
+            await github.rest.issues.createComment(
+              { owner: context.repo.owner, repo: context.repo.repo, issue_number: number, body: res.reply });
