@@ -1,0 +1,85 @@
+{
+  "task": "T-080",
+  "at": "2026-11-06T07:06",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/vendor/matching",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "python3 -I eval/T-072/check_1_ca_chung.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 154,
+      "out": "PASS 18 ca, JS = PY = kỳ vọng",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-072/check_2_khong_phat_thieu_tag.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 361,
+      "out": "PASS JS 360 cặp (điểm + thứ tự), PY 24 cặp, PY stage 2 + đường chat (ca sinh đôi + ca ngược)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-072/check_3_top10_pool_that.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 510,
+      "out": "PASS tổng vendor khớp trong top 10: 559 -> 610 trên 96 tổ hợp (baseline = code ref 4ac7e7a547 trên pool hiện tại; thông tin: 13 tổ hợp tụt riêng lẻ)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-072/check_4_giai_thich_va_coverage.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 226,
+      "out": "PASS 323 vendor, 33 danh sách, 6 khối formatter",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 30,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 134,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 441,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/matching/inv-001-gu-khong-day-vendor-vuot-ngan-sach-o-chat.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 67,
+      "out": "PASS boost không phụ thuộc gu (6 style) và top 5 chat không có vendor khớp gu vượt ngân sách",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/matching/inv-002-nhan-cham-mu-toan-ven.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 29,
+      "out": "PASS chưa có nhãn (eval/T-074/labels.json không tồn tại)",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}

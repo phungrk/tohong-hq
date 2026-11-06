@@ -1,7 +1,7 @@
 {
   "task": "T-074",
-  "at": "2026-11-06T07:03",
-  "verdict": "GREEN",
+  "at": "2026-11-06T07:06",
+  "verdict": "RED",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/vendor/matching",
@@ -12,7 +12,7 @@
       "eval": "bash eval/T-074/check_1_mot_lenh.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 127,
+      "ms": 163,
       "out": "PASS một lệnh in tỉ lệ 4 hạng mục, dòng cuối: FAIL nhãn mẫu (is_sample=true): chỉ để kiểm cách chạy, không có giá trị đạt/không đạt; cần nhãn thật",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 eval/T-074/check_2_nhan.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 576,
+      "ms": 570,
       "out": "PASS validator nhận nhãn mẫu và từ chối 11 biến thể hỏng",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 eval/T-074/check_3_nguong.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 66,
+      "ms": 64,
       "out": "PASS luật không tụt quá 10 điểm so với baseline (phủ nhãn >= 80%) có lý do trong spec và khớp lệnh eval",
       "tier": 1
     },
@@ -36,16 +36,16 @@
       "eval": "python3 eval/T-074/check_4_ho_so.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 27,
+      "ms": 23,
       "out": "PASS 30 hồ sơ: 6 style x 5, mức L/M/H = 10/10/10, đủ ngân sách 4 hạng mục, đều ở TP.HCM",
       "tier": 1
     },
     {
       "eval": "python3 eval/T-074/check_5_cham_mu.py",
       "kind": "cmd",
-      "status": "PASS",
-      "ms": 1464,
-      "out": "PASS gói chấm 3/4/5 người: không lộ điểm/hạng/style/tag/vai trò, 120 ô x đúng 3 người, mỗi ô <=15 top + 5 ngẫu nhiên, có hướng dẫn chấm (câu hỏi, luật giá, đơn vị, ví dụ), tải đều, trộn thứ tự, import chặn khi thiếu khai báo",
+      "status": "FAIL",
+      "ms": 535,
+      "out": "FAIL ô P11-photography không có đúng 5 vendor ngẫu nhiên",
       "tier": 1
     },
     {
@@ -60,7 +60,7 @@
       "eval": "python3 eval/T-074/check_7_cach_tinh.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1580,
+      "ms": 1556,
       "out": "PASS cách tính qua lệnh: đa số 2/3, luật máy loại vendor vượt giá, chưa chấm ra khỏi mẫu số và báo phủ nhãn, lần đầu chỉ đo, tụt đúng 10 điểm đạt/10,7 FAIL, tốt lên đạt, không ghi đè baseline, nhãn đổi vô hiệu baseline",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 25,
+      "ms": 28,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 120,
+      "ms": 126,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 449,
+      "ms": 374,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -92,10 +92,18 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-001-gu-khong-day-vendor-vuot-ngan-sach-o-chat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 71,
+      "ms": 81,
       "out": "PASS boost không phụ thuộc gu (6 style) và top 5 chat không có vendor khớp gu vượt ngân sách",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/matching/inv-002-nhan-cham-mu-toan-ven.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 34,
+      "out": "PASS chưa có nhãn (eval/T-074/labels.json không tồn tại)",
       "tier": 2
     }
   ],
-  "hint": ""
+  "hint": "code"
 }
