@@ -22,8 +22,8 @@ def build(tmp, tasks, events=(), inbox=(), handoffs=None):
     for tid, kv in tasks.items():
         (fake / "board" / f"{tid}.md").write_text(board_text(src, tid, **kv), encoding="utf-8")
     (fake / "ledger" / "events.jsonl").write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events) + ("\n" if events else ""), encoding="utf-8")
-    for n in inbox:
-        (fake / "inbox" / "capu" / n).write_text("---\ntype: decision-request\n---\nx\n", encoding="utf-8")
+    for n, by in (inbox.items() if isinstance(inbox, dict) else [(n, "") for n in inbox]):
+        (fake / "inbox" / "capu" / n).write_text(f"---\ntype: decision-request\ntask: {n[:5]}\ndecide-by: {by}\n---\nx\n", encoding="utf-8")
     for n, c in (handoffs or {}).items():
         (fake / "handoffs" / n).write_text(c, encoding="utf-8")
     return fake
@@ -33,14 +33,16 @@ def handoff_event(i, tid, link, t="2026-11-05T10:00"):
     return {"id": f"E-{i:04d}", "t": t, "task": tid, "title": "x", "event": "handoff", "from": "engineering", "to": "adversary", "round": 0, "severity": "", "detail": "d", "link": link, "cost": 0.0, "state": "review", "holder": "adversary"}
 
 
+def ev(i, tid, event, detail="", link="", t="2026-11-05T10:00", frm="chief-of-staff", to="chief-of-staff", state=""):
+    return {"id": f"E-{i:04d}", "t": t, "task": tid, "title": "x", "event": event, "from": frm, "to": to, "round": 0, "severity": "", "detail": detail, "link": link, "cost": 0.0, "state": state, "holder": ""}
+
+
 def export(root, out, pr_state=None, public=True, extra_env=None):
     env = dict(os.environ, TOHONG_ROOT=str(root), TOHONG_NOW=NOW)
     env.pop("PR_READ_TOKEN", None)
     env.update(extra_env or {})
     cmd = [sys.executable, str(ROOT / "scripts" / "export_dashboard.py"), "--out", str(out)]
     if public: cmd.append("--public")
-    if pr_state is not None:
-        f = Path(out).parent / "pr_state.json"; f.write_text(json.dumps(pr_state), encoding="utf-8"); cmd += ["--pr-state-file", str(f)]
     r = subprocess.run(cmd, capture_output=True, text=True, env=env)
     if r.returncode != 0:
         return None, r.stderr.strip().splitlines()[-1] if r.stderr.strip() else "thoát " + str(r.returncode)

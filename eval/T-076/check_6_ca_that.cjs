@@ -1,43 +1,45 @@
-// T-076 ca thật: xuất dữ liệu từ sổ cái THẬT của tohong-hq (giả định mọi PR đã merge), nạp vào dashboard thật. Việc xong bậc B/C không được đếm; khối Capu = đúng số việc đang escalated trong board/;
-// mỗi việc escalated có link tới file inbox/capu/ có thật (nếu có file T-xxx-*.md), hoặc thư mục. Thêm phép thử "mọi PR mở" để thấy việc B/C quay lại và có link PR.
+// T-076 ca thật: ảnh chụp sổ cái 2026-11-06 cố định (eval/T-076/fixtures/ledger-2026-11-06, kèm sự kiện `merged` mô phỏng sau backfill), TOHONG_NOW=2026-11-06T12:00, không token, không mạng.
+// Kỳ vọng hôm đó: đúng bốn việc T-016 (bị chặn chờ Capu), T-070 (Decision Request, việc đã done), T-072, T-074 (leo thang); T-015 (đã decided), T-021 (Capu huỷ), T-052/055/057/067/068 (PR đã merged) không có.
+// Cộng kiểm nhẹ trên sổ cái thật: chỉ về hình dạng, không ngoại lệ, không phụ thuộc thời điểm.
 // Chạy: cd /home/user/tohong-hq && node eval/T-076/check_6_ca_that.cjs
 const fs = require('fs'), path = require('path'), os = require('os'), cp = require('child_process');
 const L = require('./lib.cjs'); const R = L.reporter();
-const ROOT = path.resolve(__dirname, '..', '..');
+const ROOT = path.resolve(__dirname, '..', '..'), FIX = path.join(__dirname, 'fixtures', 'ledger-2026-11-06');
 const tmp = fs.mkdtempSync(path.join(process.env.TMPDIR || os.tmpdir(), 't076-'));
-const exportWith = (name, stateOf) => {
-  // lấy mọi URL PR có trong sự kiện handoff + handoffs/*.md của sổ cái thật
-  const text = fs.readFileSync(path.join(ROOT, 'ledger/events.jsonl'), 'utf8') + fs.readdirSync(path.join(ROOT, 'handoffs')).map(f => fs.readFileSync(path.join(ROOT, 'handoffs', f), 'utf8')).join('\n');
-  const st = {}; for (const m of text.matchAll(/https:\/\/github\.com\/phungrk\/([\w.-]+)\/pull\/(\d+)/g)) st[`phungrk/${m[1]}#${m[2]}`] = stateOf;
-  const f = path.join(tmp, name + '-state.json'); fs.writeFileSync(f, JSON.stringify(st)); const out = path.join(tmp, name);
-  const r = cp.spawnSync('python3', ['scripts/export_dashboard.py', '--public', '--out', out, '--pr-state-file', f], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, PR_READ_TOKEN: '' } });
+const exp = (root, name, now) => {
+  const out = path.join(tmp, name);
+  const env = { ...process.env, TOHONG_ROOT: root }; delete env.PR_READ_TOKEN; if (now) env.TOHONG_NOW = now;
+  const r = cp.spawnSync('python3', [path.join(ROOT, 'scripts/export_dashboard.py'), '--public', '--out', out], { encoding: 'utf8', env });
   if (r.status !== 0) throw new Error('exporter lỗi: ' + (r.stderr || '').split('\n').filter(Boolean).pop());
-  return { data: JSON.parse(fs.readFileSync(path.join(out, 'dashboard.json'), 'utf8')), nPR: Object.keys(st).length };
+  return JSON.parse(fs.readFileSync(path.join(out, 'dashboard.json'), 'utf8'));
 };
-const escalatedOnBoard = () => fs.readdirSync(path.join(ROOT, 'board')).filter(f => /^T-\d+\.md$/.test(f)).filter(f => /^state:\s*escalated\s*$/m.test(fs.readFileSync(path.join(ROOT, 'board', f), 'utf8'))).map(f => f.replace('.md', ''));
 (async () => {
   await L.start();
-  const esc = escalatedOnBoard();
-  const merged = exportWith('merged', 'merged');
-  R.ok(Array.isArray(merged.data.capu_queue), 'dashboard.json thật có mảng capu_queue');
-  const q = merged.data.capu_queue || [];
-  R.ok(q.every(e => e.kind === 'escalated'), 'mọi PR merged: không việc bậc B/C nào trong capu_queue (thấy ' + q.filter(e => e.kind !== 'escalated').map(e => e.task) + ')');
-  R.ok(q.map(e => e.task).sort().join() === esc.sort().join(), 'capu_queue = đúng các việc escalated trên board: [' + esc + '], thấy [' + q.map(e => e.task) + ']');
-  for (const e of q) { const files = fs.readdirSync(path.join(ROOT, 'inbox/capu')).filter(f => f.startsWith(e.task + '-') && f.endsWith('.md'));
-    const u = e.links[0] && e.links[0].url, want = files.map(f => `https://github.com/phungrk/tohong-hq/blob/main/inbox/capu/${f}`);
-    R.ok(files.length ? want.includes(u) : u === 'https://github.com/phungrk/tohong-hq/tree/main/inbox/capu', e.task + ': link Decision Request trỏ file có thật trong inbox/capu (' + u + ')'); }
-  const o = await L.open(merged.data, { width: 390, height: 844 }, { touch: true });
-  R.ok(await L.nodeCount(o) === String(esc.length), 'trang thật 390px: số trên khối Capu = ' + esc.length + ', thấy ' + await L.nodeCount(o));
+  const d = exp(FIX, 'fix', '2026-11-06T12:00');
+  const q = d.capu_queue || [], by = Object.fromEntries(q.map(e => [e.task, e]));
+  R.ok(Array.isArray(d.capu_queue), 'dashboard.json từ ảnh chụp có mảng capu_queue');
+  R.ok(q.map(e => e.task).sort().join() === 'T-016,T-070,T-072,T-074', 'capu_queue = T-016,T-070,T-072,T-074, thấy [' + q.map(e => e.task) + ']');
+  const kinds = Object.fromEntries(q.map(e => [e.task, e.kind]));
+  R.ok(kinds['T-072'] === 'escalated' && kinds['T-074'] === 'escalated' && kinds['T-070'] === 'decision' && kinds['T-016'] === 'blocked', 'loại: T-072/T-074 escalated, T-070 decision, T-016 blocked; thấy ' + JSON.stringify(kinds));
+  for (const e of q) { const f = fs.readdirSync(path.join(FIX, 'inbox/capu')).filter(x => x.startsWith(e.task + '-') && x.endsWith('.md'));
+    R.ok(e.links.length === 1 && f.map(x => 'https://github.com/phungrk/tohong-hq/blob/main/inbox/capu/' + x).includes(e.links[0].url), e.task + ': một link tới file Decision Request có thật (' + (e.links[0] && e.links[0].url) + ')'); }
+  R.ok(by['T-070'] && by['T-070'].decide_by === '2026-11-10' && by['T-016'] && by['T-016'].decide_by === '2026-10-31', 'hạn quyết đọc từ decide-by: T-070 2026-11-10, T-016 2026-10-31');
+  R.ok(!q.some(e => e.links.some(l => /\/pull\//.test(l.url))), 'không PR nào hiện (mọi PR đã có sự kiện merged)');
+  const o = await L.open(d, { width: 390, height: 844 }, { touch: true });
+  R.ok(await L.nodeCount(o) === '4', 'trang 390px: số trên khối Capu = 4 (không phải 7), thấy ' + await L.nodeCount(o));
   await L.clickNode(o); const rs = await L.rows(o);
-  R.ok(rs.length === esc.length && rs.map(r => r.task).sort().join() === esc.sort().join(), 'modal liệt kê đúng ' + esc.length + ' việc leo thang');
-  R.ok(rs.every(r => r.links.length === 1 && r.links[0].href.startsWith('https://github.com/phungrk/tohong-hq/')), 'mỗi dòng có đúng một link tới tohong-hq');
-  if (!esc.length) R.ok(await o.page.locator('#capu-modal [data-capu-empty]').count() === 1, 'không có việc escalated: modal ghi "Không có việc nào chờ anh"');
+  R.ok(rs.map(r => r.task).join() === 'T-072,T-074,T-070,T-016', 'modal: T-072,T-074 (leo thang), T-070 (quyết), T-016 (chặn); thấy ' + rs.map(r => r.task));
+  R.ok(rs.every(r => r.links.length === 1 && r.links[0].href.startsWith('https://github.com/phungrk/tohong-hq/blob/main/inbox/capu/')), 'mỗi dòng đúng một link tới Decision Request');
   await o.ctx.close();
-  // đối chứng: mọi PR mở -> việc B/C xong gần đây phải quay lại, có link PR
-  const open = exportWith('open', 'open');
-  const bc = (open.data.capu_queue || []).filter(e => e.kind !== 'escalated');
-  const want = open.data.tasks.filter(t => t.owner === 'engineering' && t.state === 'done' && ['B', 'C'].includes(t.tier) && t.hours_since_update < 24 * 30);
-  R.ok(open.nPR > 0 && bc.every(e => e.links.length && e.links.every(l => l.pr_state === 'open' && /\/pull\/\d+$/.test(l.url))), 'đối chứng mọi PR mở: các dòng B/C có link PR mở (' + bc.length + ' dòng, ' + open.nPR + ' PR trong sổ cái)');
-  R.ok(bc.length > 0 && bc.length <= want.length, 'đối chứng: việc B/C với PR mở xuất hiện (' + bc.length + '), không vượt số việc B/C xong trong 30 ngày (' + want.length + ')');
+  // đối chứng: bỏ sự kiện merged -> các việc B/C quay lại (chứng tỏ sự kiện merged là thứ làm chúng biến mất)
+  const bare = path.join(tmp, 'bare'); fs.cpSync(FIX, bare, { recursive: true });
+  const lf = path.join(bare, 'ledger/events.jsonl'); fs.writeFileSync(lf, fs.readFileSync(lf, 'utf8').split('\n').filter(l => l && JSON.parse(l).event !== 'merged').join('\n') + '\n');
+  const d2 = exp(bare, 'bare', '2026-11-06T12:00'), t2 = (d2.capu_queue || []).map(e => e.task);
+  R.ok(['T-052', 'T-055', 'T-057', 'T-067', 'T-068'].every(t => t2.includes(t)), 'đối chứng không có sự kiện merged: T-052,T-055,T-057,T-067,T-068 quay lại danh sách; thấy [' + t2 + ']');
+  // kiểm nhẹ trên sổ cái thật: chạy được, hình dạng đúng, mọi việc trong queue có thật trên board
+  const real = exp(ROOT, 'real');
+  const ids = new Set(real.tasks.map(t => t.id));
+  R.ok(Array.isArray(real.capu_queue) && real.capu_queue.every(e => ids.has(e.task) && ['escalated', 'decision', 'blocked', 'diff-b', 'merge-c'].includes(e.kind) && Array.isArray(e.links) && e.links.every(l => /^https:\/\/github\.com\/phungrk\//.test(l.url))), 'sổ cái thật: capu_queue đúng hình dạng, mọi mã việc có trên board');
+  R.ok(real.tasks.filter(t => t.state === 'escalated').every(t => real.capu_queue.some(e => e.task === t.id)), 'sổ cái thật: mọi việc đang escalated đều có trong capu_queue');
   await L.close(); fs.rmSync(tmp, { recursive: true, force: true }); process.exit(R.done());
 })().catch(e => { console.log('FAIL ngoại lệ ' + e.message); process.exit(1); });

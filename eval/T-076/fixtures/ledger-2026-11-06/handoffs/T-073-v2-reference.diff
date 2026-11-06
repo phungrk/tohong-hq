@@ -1,0 +1,106 @@
+diff -ruN '--exclude=output' '--exclude=__pycache__' /home/claude/tohong/tools/generate-vendor-pool.js tohong/tools/generate-vendor-pool.js
+--- /home/claude/tohong/tools/generate-vendor-pool.js	2026-11-04 14:01:50.049477432 +0000
++++ tohong/tools/generate-vendor-pool.js	2026-11-06 01:56:56.072711237 +0000
+@@ -65,9 +65,31 @@
+ const IN_FILE = argOf('--in', join(ROOT, 'tools/scraper/output/pool-vendors.json'));
+ const OUT_FILE = argOf('--out', join(ROOT, 'edge/lib/vendorPool.generated.js'));
+ 
++const STYLES_ONLY = process.argv.includes('--styles-only');
++const BASE_FILE = argOf('--base', OUT_FILE);
++
+ const raw = JSON.parse(readFileSync(IN_FILE, 'utf8'));
+ const pool = Array.isArray(raw) ? raw : (raw.vendors || Object.values(raw)[0]);
+ 
++// --styles-only: giữ nguyên pool nền (--base, mặc định = --out), chỉ thay styles/tags theo style_tags của
++// pool-vendors.json. Mọi trường khác (giá, ảnh, rating, thứ tự) không đụng (ADR-025).
++if (STYLES_ONLY) {
++  const src = readFileSync(BASE_FILE, 'utf8');
++  const i = src.indexOf('= [') + 2;
++  const j = src.lastIndexOf(']') + 1;
++  const base = JSON.parse(src.slice(i, j));
++  const tagsById = new Map(pool.map((v) => [v.id, v.style_tags || []]));
++  const missing = base.filter((v) => !tagsById.has(v.id)).map((v) => v.id);
++  if (missing.length) {
++    console.error(`✗ ${missing.length} vendor trong pool nền không có trong ${IN_FILE}, vd ${missing.slice(0, 3).join(', ')}`);
++    process.exit(1);
++  }
++  const next = base.map((v) => ({ ...v, styles: tagsById.get(v.id), tags: tagsById.get(v.id) }));
++  writeFileSync(OUT_FILE, src.slice(0, i) + JSON.stringify(next) + src.slice(j));
++  console.log(`✓ --styles-only: cập nhật styles/tags cho ${next.length} vendor, trường khác giữ nguyên`);
++  process.exit(0);
++}
++
+ const seen = new Set();
+ const vendors = [];
+ 
+diff -ruN '--exclude=output' '--exclude=__pycache__' /home/claude/tohong/tools/regen-pool-styles.sh tohong/tools/regen-pool-styles.sh
+--- /home/claude/tohong/tools/regen-pool-styles.sh	1970-01-01 00:00:00.000000000 +0000
++++ tohong/tools/regen-pool-styles.sh	2026-11-06 01:56:51.837479793 +0000
+@@ -0,0 +1,15 @@
++#!/usr/bin/env bash
++# Tạo lại styles/tags của vendor pool từ văn bản nguồn; MỌI trường khác của pool giữ nguyên (ADR-025).
++# Chạy từ gốc repo tohong:  bash tools/regen-pool-styles.sh [--back <thư mục tohong-back>]
++# Mặc định --back = edge (submodule). Ghi <back>/lib/vendorPool.generated.js.
++set -euo pipefail
++ROOT="$(cd "$(dirname "$0")/.." && pwd)"
++BACK="$ROOT/edge"
++[ "${1:-}" = "--back" ] && BACK="$(cd "$2" && pwd)"
++POOL="$BACK/lib/vendorPool.generated.js"
++[ -f "$POOL" ] || { echo "✗ không thấy $POOL" >&2; exit 1; }
++cd "$ROOT/tools/scraper"
++python3 clean_style_tags.py                         # 1. tính lại style_tags từ văn bản nguồn
++python3 build_pool.py --out output/pool-vendors.json # 2. gộp theo id
++cd "$ROOT"
++node tools/generate-vendor-pool.js --styles-only --base "$POOL" --out "$POOL"  # 3. chỉ thay styles/tags
+diff -ruN '--exclude=output' '--exclude=__pycache__' /home/claude/tohong/tools/scraper/enrichment/pipeline.py tohong/tools/scraper/enrichment/pipeline.py
+--- /home/claude/tohong/tools/scraper/enrichment/pipeline.py	2026-11-04 14:01:50.051866241 +0000
++++ tohong/tools/scraper/enrichment/pipeline.py	2026-11-06 01:56:51.829006250 +0000
+@@ -259,14 +259,16 @@
+                     vendor["capacity_min"] = cap_min
+                 log_entry["changes"]["capacity_from_editorial"] = cap_max
+ 
+-        # Style tags — re-extract sau khi merchant_description được cập nhật
+-        detected_styles = self.style_extractor.extract(vendor)
+-        if detected_styles:
+-            existing = set(vendor.get("style_tags", []))
+-            new_tags = [t for t in detected_styles if t not in existing]
+-            if new_tags:
+-                vendor["style_tags"] = list(existing) + new_tags
+-                log_entry["changes"]["style_tags_added"] = new_tags
++        # Style tags — TÍNH LẠI TỪ ĐẦU từ văn bản nguồn (thay thế, không cộng thêm).
++        before_styles = list(vendor.get("style_tags") or [])
++        after_styles = self.style_extractor.extract(vendor)
++        vendor["style_tags"] = after_styles
++        added = [t for t in after_styles if t not in before_styles]
++        removed = [t for t in before_styles if t not in after_styles]
++        if added:
++            log_entry["changes"]["style_tags_added"] = added
++        if removed:
++            log_entry["changes"]["style_tags_removed"] = removed
+ 
+         # Record provenance
+         vendor.setdefault("enrichment_log", []).append(log_entry)
+diff -ruN '--exclude=output' '--exclude=__pycache__' /home/claude/tohong/tools/scraper/extractors/style_tags.py tohong/tools/scraper/extractors/style_tags.py
+--- /home/claude/tohong/tools/scraper/extractors/style_tags.py	2026-11-04 14:01:50.056706442 +0000
++++ tohong/tools/scraper/extractors/style_tags.py	2026-11-06 01:56:41.172584590 +0000
+@@ -80,7 +80,7 @@
+         r"t[ốo]i\s*gi[ảa]n",
+         r"minimali[sz]t",
+         r"\bminimal\b",
+-        r"tinh\s*t[ếe]",
++        # "tinh tế" cố ý bị loại (T-073): sáo ngữ marketing, không phải phong cách tối giản.
+     ],
+     "simple": [
+         r"[đd][ơo]n\s*gi[ảa]n",
+@@ -121,8 +121,10 @@
+         ]
+         # Raw tags từ source (vd tên gói "Gói dịch vụ chủ đề LUXURY PARTY")
+         # cũng là tín hiệu style — chạy keyword matching để cứu "luxury".
++        # Chỉ chuỗi thô: tag chuẩn (ALLOWED_TAGS) là KẾT QUẢ của lần extract trước,
++        # đọc lại sẽ tự củng cố (T-073).
+         for t in vendor.get("style_tags", []):
+-            if isinstance(t, str) and t:
++            if isinstance(t, str) and t and t not in ALLOWED_TAGS:
+                 parts.append(t)
+         for review in vendor.get("top_reviews", []):
+             text = review.get("text", "") if isinstance(review, dict) else ""
