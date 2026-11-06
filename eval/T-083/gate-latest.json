@@ -1,0 +1,69 @@
+{
+  "task": "T-083",
+  "at": "2026-11-06T13:29",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/ledger",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 25,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 118,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1132,
+      "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-001-issue-la-so-nguyen-duong.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 70,
+      "out": "PASS mọi trường issue rỗng hoặc là số nguyên dương",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-002-decided-qua-issue-hop-le.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 81,
+      "out": "PASS mọi decided qua issue: link đúng kho, from capu, detail không rỗng, đúng issue của việc",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-003-chi-phungrk-quyet-qua-issue.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 9316,
+      "out": "PASS chỉ phungrk (User, chính người gửi, created|edited, không PR, khớp toàn chuỗi) tạo được decided qua issue",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/ledger/inv-004-phan-chieu-khong-dang-file-ngoai-kho.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 5237,
+      "out": "PASS phản chiếu không đăng file ngoài kho/.git (kể cả kho con, symlink); link hợp lệ trong kho vẫn đăng",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
