@@ -1,0 +1,29 @@
+{
+  "task": "T-072",
+  "at": "2026-11-06T01:52",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/vendor/matching",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 23,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 130,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
