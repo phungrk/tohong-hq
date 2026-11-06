@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""T-087 tiêu chí 6 (hỏng NẶNG): state/area/id/tier còn sai sau khi bỏ nháy -> board bị bỏ qua ở list/summary/export/gate (không Traceback,
+"""T-087 tiêu chí 6 (hỏng NẶNG): state/id/tier còn sai (area KHÔNG thuộc nhóm này, xem check_7) sau khi bỏ nháy -> board bị bỏ qua ở list/summary/export/gate (không Traceback,
 cảnh báo stderr), summary liệt kê (nặng), lệnh đổi trạng thái từ chối (mã != 0, board + sổ cái không đổi một byte), `new` vẫn cấp
 số đúng (không va file T-9xx nào), read_task ném LedgerError chứ không lỗi khác. Chạy: python3 eval/T-087/check_6_hong_nang.py"""
 import json, tempfile
