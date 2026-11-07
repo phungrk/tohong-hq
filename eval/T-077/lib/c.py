@@ -75,3 +75,18 @@ def burn(n):
 
 def front_copy(tmp, name="front-x", mutate=lambda d: None):
     dst = os.path.join(tmp, name); h.front_copy(dst, mutate); return dst
+
+
+def vite_caches(tmpdir):
+    """Tên các mục cấp 1 trong TMPDIR chứa một cache vite (có deps/_metadata.json trong <= 3 cấp). Phân biệt với hồ sơ chromium, bản sao front..."""
+    out = []
+    try: names = os.listdir(tmpdir)
+    except OSError: return out
+    for n in names:
+        p = os.path.join(tmpdir, n)
+        if not os.path.isdir(p) or os.path.islink(p): continue
+        base = p.count(os.sep)
+        for dp, dn, fn in os.walk(p):
+            if dp.count(os.sep) - base > 3: dn[:] = []; continue
+            if os.path.basename(dp) == "deps" and "_metadata.json" in fn: out.append(n); break
+    return sorted(out)
