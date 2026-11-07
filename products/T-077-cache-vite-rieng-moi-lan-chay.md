@@ -16,10 +16,10 @@ Nếu mỗi lần chạy helper dùng cache riêng thì đỏ giả khi chạy c
 
 ## Hành vi (người dùng thấy gì)
 "Người dùng" ở đây là agent/người chạy eval front.
-1. Mỗi lần gọi `startViteDev` (eval/_lib/vite_dev.cjs) dựng máy chủ vite dùng một thư mục cache riêng của lần đó. Thư mục này nằm trong thư mục tạm của hệ thống (`os.tmpdir()`, theo `TMPDIR`) và không nằm trong `node_modules/.vite` của repo front (kể cả khi `node_modules` là symlink, như `h.front_copy`).
+1. Mỗi lần gọi `startViteDev` (eval/_lib/vite_dev.cjs) dựng máy chủ vite dùng một thư mục cache riêng của lần đó. Mỗi lần chạy tạo ĐÚNG MỘT mục riêng ngay dưới `os.tmpdir()` (theo `TMPDIR`; vd `tohong-vite-<run>`), không có thư mục cha chung của nhiều lần chạy, và nó chứa cache vite thật (`deps/_metadata.json`). Nó không nằm trong `node_modules/.vite` của repo front (kể cả khi `node_modules` là symlink, như `h.front_copy`).
 2. Lúc chạy, vite không thêm, bớt hay sửa file nào trong cache chung `node_modules/.vite` của front gốc.
-3. Hai lần chạy cùng lúc (bất kể front gốc hay bản sao) có hai thư mục cache khác nhau.
-4. Khi `stop()` được gọi, khi tiến trình eval thoát bình thường, khi eval FAIL, và khi tiến trình node nhận SIGINT/SIGTERM/SIGHUP, thư mục cache riêng bị xoá. Không để lại thư mục nào của lần chạy trong thư mục tạm. (SIGKILL không bắt được, ngoài phạm vi.)
+3. Hai lần chạy cùng lúc (bất kể front gốc hay bản sao) có hai mục cache khác tên, cả hai là mục cấp 1 của `os.tmpdir()` (không gom dưới một thư mục cha chung).
+4. Khi `stop()` được gọi, khi tiến trình eval thoát bình thường, khi eval FAIL, và khi tiến trình node nhận SIGINT/SIGTERM/SIGHUP, mục cache riêng đó bị xoá. Sau `stop()` không còn mục nào của lần chạy dưới `os.tmpdir()` (không để thư mục cha rỗng). Eval đo cả SIGINT, SIGHUP và SIGTERM. (SIGKILL không bắt được, ngoài phạm vi.)
 5. Kết quả PASS/FAIL của các eval front đang có trên code hiện tại không đổi. Cache riêng không được làm một lần chạy FAIL chỉ vì cache bắt đầu "lạnh": nếu cần, nạp sẵn cache riêng từ cache chung (chỉ đọc) hoặc chờ vite sẵn sàng; chọn cách nào là việc của Engineering.
 
 ## Ràng buộc (vòi)
@@ -32,16 +32,17 @@ Nếu mỗi lần chạy helper dùng cache riêng thì đỏ giả khi chạy c
 ## Tiêu chí chấp nhận và eval
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Chạy chồng C10 trên bản sao và small_tile_tooltip trên front gốc 20 lần dưới tải 8 CPU: 0 đỏ giả (cả hai phép đo chạy một mình đều PASS trước đó) | `python3 eval/T-077/check_1_chay_chong.py` (~4-6 phút) |
-| 2 | Mỗi lần chạy helper có cache vite riêng trong TMPDIR (hai lần chạy chồng -> >= 2 cache khác tên), cache chung `node_modules/.vite` không đổi | `python3 eval/T-077/check_2_cache_rieng.py` |
+| 1 | Kiểm khói: chạy chồng C10 (bản sao, lặp) và small_tile_tooltip (front gốc, tối đa 6 lần hoặc 80s) dưới tải vừa 2 CPU: 0 đỏ giả (small_tile_tooltip chạy một mình PASS trước đó). Thống kê, KHÔNG phân biệt chắc đúng/sai | `python3 eval/T-077/check_1_chay_chong.py` (~1-1,5 phút) |
+| 2 | **Eval phân biệt chính, tất định.** Mỗi lần chạy helper có cache vite riêng là mục cấp 1 của TMPDIR (hai lần chạy chồng -> >= 2 mục khác tên), cache chung `node_modules/.vite` không đổi | `python3 eval/T-077/check_2_cache_rieng.py` |
 | 3 | PASS/FAIL trên code hiện tại không đổi: small_tile_tooltip PASS, C10 PASS; đột biến M1 (ảnh hỏng) -> C10 FAIL, M2 (mất title) -> small_tile_tooltip FAIL đúng lý do | `python3 eval/T-077/check_3_ket_qua_khong_doi.py` |
-| 4 | Dọn cache tạm: sau chạy PASS, chạy FAIL, và SIGTERM giữa chừng, TMPDIR không còn gì (trừ node-compile-cache của node); front không dư file `__*` sau chạy PASS/FAIL | `python3 eval/T-077/check_4_don_cache_tam.py` |
+| 4 | Dọn cache tạm: sau chạy PASS, chạy FAIL, và SIGTERM / SIGINT / SIGHUP giữa chừng, TMPDIR không còn mục nào (trừ node-compile-cache của node); front không dư file `__*` sau chạy PASS/FAIL | `python3 eval/T-077/check_4_don_cache_tam.py` |
 
 Mọi check nhận `--evalroot DIR` (mặc định `eval/`): chạy cùng phép đo trên một bản sao của `eval/` đã thay helper, để chứng minh xanh trên bản tham chiếu mà không đụng sổ cái. Eval đo hành vi quan sát được ngoài (thư mục tạm, cache chung, PASS/FAIL), không đọc mã helper.
-Trạng thái đo 2026-11-07: hiện trạng đỏ (1: 3 đỏ giả/20; 2: đỏ tất định; 3: xanh; 4: đỏ vì không có cache riêng để dọn); bản tham chiếu xanh cả bốn. Tiêu chí 3 xanh trước và sau là chủ ý (chốt "không đổi").
+Trạng thái đo 2026-11-07: hiện trạng đỏ ở tiêu chí 2 và 4 (tất định); tiêu chí 3 xanh (chủ ý, chốt "không đổi"); tiêu chí 1 KHÔNG đỏ chắc chắn trên hiện trạng (bản gốc 20 lần/tải 8: đỏ 3/20 một lần, Spec Gate đo hai lần đều xanh) nên chỉ là kiểm khói, đã hạ nhẹ (tải 2 CPU, <= 80s) vì không phân biệt được đúng/sai trên máy này; giữ lại để bắt hồi quy rõ. Bản tham chiếu xanh cả bốn.
+**Luật đỏ giả:** check_2 (vế "cache chung không đổi") và bất biến đề xuất có thể đỏ giả khi agent khác đang chạy eval front dùng helper cũ cùng lúc (ADR-035). Gặp đỏ chỉ khi chạy chồng thì chạy lại riêng trước khi phân loại (ADR-035 mục 4).
 
 ## Bất biến đề xuất (tầng 2)
-Đề xuất cho `eval/invariants/planner/`: "Helper vite dev của eval không bao giờ ghi vào cache chung `node_modules/.vite` của repo, và không để cache tạm sau chạy" — dạng check_2 + check_4 rút gọn (một lần chạy `startViteDev` với TMPDIR riêng: có cache riêng lúc chạy, cache chung không đổi, TMPDIR sạch sau `stop()`), chạy được không cần chromium. Spec critic rút vào bể khi spec qua cổng.
+Đề xuất cho `eval/invariants/planner/` (cùng luật đỏ giả ở trên): "Helper vite dev của eval không bao giờ ghi vào cache chung `node_modules/.vite` của repo, và không để cache tạm sau chạy" — dạng check_2 + check_4 rút gọn (một lần chạy `startViteDev` với TMPDIR riêng: có cache riêng lúc chạy, cache chung không đổi, TMPDIR sạch sau `stop()`), chạy được không cần chromium. Spec critic rút vào bể khi spec qua cổng.
 
 ## Không làm
 - Không đổi chờ cố định 15s hay timeout trong lib vendor-images (đó là triệu chứng; đổi sẽ đổi ngưỡng đo, ngoài phạm vi).
