@@ -51,6 +51,10 @@ CODE = [
  'f = lambda path, mode="r", enc="utf-8": open(path, mode, encoding=enc)',
  'command -v node >/dev/null 2>&1 || { echo "thiếu node"; exit 1; }',
  'đọc tại /Users/capu/work/tohong-hq/eval/x.py rồi so sánh với bản cũ ở máy khác',
+ 'sys.path.insert(0, os.path.join(repo, "matcher"))  # profile.py che stdlib `profile`: chủ ý, giống thật',
+ 'env.pop("TOHONG_LIVE_URL", None)   # sổ cái giả không đẩy lên dashboard thật, chỉ chạy cục bộ',
+ 'subprocess.run(["bash", "build.sh"], check=True)  # dựng bản thật trước khi so sánh tên',
+ 'await page.goto(url, { waitUntil: "load" }); // chờ trang tải xong rồi mới đo vị trí',
  'xem nhật ký ở /var/log/tohong/export.log để biết lần chạy trước đã xong chưa',
  'cài ở /opt/tohong/bin/export_dashboard rồi chạy thử bản xuất công khai đó',
 ]
@@ -63,6 +67,8 @@ KEEP = [
  'case khác xảy ra khi bể trống: khối vẫn hiện 0 và không báo lỗi gì cả',
  'Không eval nào dừng tiến trình theo TÊN (' + 'p' + 'kill, `p' + 'grep x | xargs ' + 'kill`) vì giết nhầm',   # ghép lúc chạy để INV-010 planner/vendor/images không quét trúng
  'số lượng (a = 1, b = 2) phải khớp tổng trong khối, kể cả khi có mô tả dài thêm',
+ 'ngôn ngữ C# và mục #3 phải hiện đúng trong tên, không bị cắt ở dấu thăng',   # T-099: # không có khoảng trắng hai bên thì không tách
+ 'hàm f(x) # ghi chú dài thêm cho đủ dòng mô tả của bất biến này, phần trước không là code',   # T-099: tách ra nhưng phần trước không thỏa mục A -> giữ nguyên cả dòng
 ]
 for _i, _c in enumerate(KEEP):
     FIX[f"inv-{160 + _i}-doi-chung-van-xuoi-{_i}.sh"] = ("#!/usr/bin/env bash\n# Bất biến: %s\nexit 0\n" % _c, _c)

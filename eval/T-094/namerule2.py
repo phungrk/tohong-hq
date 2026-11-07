@@ -28,9 +28,28 @@ _INFIX = ("$(", "${", " && ", " || ", " == ", " != ", " => ", " === ", " !== ", 
 _JSON = re.compile(r'^"[\w.-]+"\s*:|^[a-z_]+:\s*[\["{]|^\S+\)\s*,?$|\)\s*;\s*\S')   # "khoá": …  |  khoá: [ …  |  …)  |  …); lệnh tiếp
 
 
+def strip_trailing_comment(t):
+    """Sửa đổi T-099: cắt chú thích cuối dòng. Quét từ trái sang phải; ngoài chuỗi nháy (\" hoặc '; nháy lẻ chưa đóng = coi như còn trong chuỗi, không cắt),
+    chỗ đầu tiên là ' # ' hoặc ' // ' (khoảng trắng hai bên) đứng sau ít nhất một ký tự không trắng thì trả phần trước nó (đã bỏ khoảng trắng cuối). Không có thì trả t."""
+    q = None
+    for i, ch in enumerate(t):
+        if q:
+            if ch == q: q = None
+        elif ch in "\"'": q = ch
+        elif ch == " " and (t.startswith("# ", i + 1) or t.startswith("// ", i + 1)) and t[:i].strip():
+            return t[:i].rstrip()
+    return t
+
+
 def looks_like_code(s):
     t = s.strip()
     if not t: return False
+    if _core(t): return True
+    h = strip_trailing_comment(t)
+    return h != t and _core(h)
+
+
+def _core(t):
     if any(p in t for p in _PATH): return True
     if t.startswith(_SYMS): return True
     if t.endswith("{"): return True

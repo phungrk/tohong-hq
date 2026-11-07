@@ -33,6 +33,23 @@ Sau khi làm sạch dòng (T-092: bỏ khoảng trắng, `#`/`//`/ba dấu nháy
 
 Cài đặt tham chiếu độc lập: `looks_like_code` trong `eval/T-094/namerule2.py`. Quy tắc chọn **chặt** có chủ ý: thà bỏ nhầm một dòng mô tả lạ (rơi xuống bước kế, tên vẫn đọc được) còn hơn để lọt dòng code. Đã kiểm: 119 mô tả thật của bể đều không bị loại (tên không đổi); quét mọi dòng >= 50 ký tự trong 12 dòng đầu của mọi file `inv-*` thì không còn dòng ASCII nào trông như code mà không bị loại (chỉ còn gạch đầu dòng văn xuôi `- …`).
 
+### A'. Sửa đổi (T-099): chú thích cuối dòng
+Bổ sung mục A; mọi điều 1-9 giữ nguyên chữ. Lý do: Code Gate T-097 (`eval/T-097/adv-01-code-kem-chu-thich-tieng-viet.py`) tìm được dòng gọi hàm kèm chú thích tiếng Việt (vd `sys.path.insert(0, …)  # …`, `env.pop("X", None)  # …`, `subprocess.run([…])  # …`; thật trong `eval/T-072/lib/run_py.py`, `eval/T-063/eval-mirror.py`) không thỏa điều 7 (không còn toàn ASCII, ngoặc không cân) và thành `name`.
+
+Trước khi xét một chuỗi `s` theo điều 1-9, **tách chú thích cuối dòng**: quét `s` từ trái sang phải, giữ trạng thái "trong chuỗi nháy" (bật/tắt bởi ký tự `"` hoặc `'`; nháy chưa đóng thì cho tới hết chuỗi vẫn là "trong chuỗi"). Điểm tách là **vị trí khoảng trắng đầu tiên** thỏa cả bốn: ngoài chuỗi nháy; ngay sau nó là `# ` hoặc `// ` (dấu rồi một khoảng trắng); phần đứng trước nó có ít nhất một ký tự không trắng; (đây là điểm tách đầu tiên, các điểm sau bỏ qua). `head` = phần trước điểm tách, bỏ khoảng trắng cuối. Không có điểm tách thì không có `head`.
+- Nếu `s` thỏa điều 1-9 (như cũ), `s` không dùng được làm tên.
+- Nếu không, và có `head` mà `head` thỏa điều 1-9, thì **cả dòng `s` là code**, không dùng được làm tên (rơi bước kế như mọi ứng viên bị loại ở mục B).
+- Chỉ `head` được xét lại; điều kiện 1-9 không đổi và không xét lại lần nữa trên phần chú thích.
+
+Ca biên (đo được):
+- Dòng chỉ là chú thích (`# mô tả …`, `// mô tả …`): dấu ở đầu đã bị bước làm sạch của T-092 bỏ; không có ký tự không trắng đứng trước nên không tách; xử lý như cũ.
+- Dấu dính chữ, thiếu khoảng trắng ở một trong hai phía (`C#`, `#3`, `a#b`, `https://x`, `x //y`) không phải điểm tách. `a // b` và `a # b` (khoảng trắng cả hai phía) LÀ điểm tách.
+- `head` không thỏa mục A (vd `hàm f(x) # ghi chú`, `ngôn ngữ C # và …`) thì cả dòng không bị loại bởi điều khoản này.
+- Dấu trong chuỗi nháy (`print("a # b")` hay `x = "a // b"`) không phải điểm tách; nháy lẻ trong văn xuôi (`don't … # …`) làm không tách: hệ quả chọn có chủ ý, chỉ làm quy tắc nhẹ tay hơn (dòng giữ nguyên như điều 1-9 cũ).
+- Chỉ tách chú thích ĐẦU TIÊN; phần sau nó không xét.
+
+Cài đặt tham chiếu: `strip_trailing_comment` và `looks_like_code` trong `eval/T-094/namerule2.py`. Fixture thêm vào bảng B (`eval/T-094/check.py`, tên mong đợi viết tay): inv-147..150 (bốn dòng code kèm chú thích tiếng Việt: `sys.path.insert`, `env.pop`, `subprocess.run`, `await page.goto(…); //`) -> dòng mô tả sạch kế tiếp; inv-165 (`C#`, `#3`) và inv-166 (`hàm f(x) # ghi chú …`) -> nguyên văn đuôi.
+
 ### B. Quy tắc tên mới (thay "Một quy tắc duy nhất, thử lần lượt" của T-092)
 Giữ nguyên làm sạch, bước 1, 2, 3 và phần "Sau khi có `name`" của T-092, **thêm hai điều**:
 - Mỗi **ứng viên** (đuôi ở 1a; dòng ≥ 50 ký tự ở 1b; chữ sau `·` ở bước 2) phải **không** rơi vào mục A, kiểm trên ứng viên **trước** khi cắt ở ". " và trước khi cắt 140 ký tự.
@@ -43,7 +60,7 @@ Giữ nguyên làm sạch, bước 1, 2, 3 và phần "Sau khi có `name`" của
 
 Hệ quả: `name` không bao giờ chứa `/home/`, `/root/`, `/tmp/`, `handoffs/`, `C:\`, và không bao giờ là một dòng thỏa mục A. `source` giữ nguyên.
 
-**Bảng fixture** (`eval/T-094/check.py --criterion 1` dựng đúng các file này, tổng 37 file trong sổ cái tạm; tên mong đợi viết tay):
+**Bảng fixture** (`eval/T-094/check.py --criterion 1` dựng đúng các file này, tổng 43 file trong sổ cái tạm (37 + 6 của T-099); tên mong đợi viết tay):
 
 | File | Nội dung chính | `name` mong đợi | Vì sao |
 | --- | --- | --- | --- |
@@ -101,3 +118,6 @@ Không. INV-017 (`eval/invariants/hq/dashboard/inv-017-so-be-khop-file-that.py`)
 
 ## Đã sửa ở rework 1 (T-094-D1)
 Mục A điều 5-9 viết lại: thêm `exec`, `command` + các lệnh cat/sed/awk/jq/mkdir/rm/printf/npx/test/local/case/then/do/pass/lambda…; gán nhiều biến và gán có kiểu; gọi hàm nhiều dòng; pipe; `/Users/ /var/ /opt/`; điều 6 ghi "bắt đầu khớp". Lý do: định nghĩa đóng 7 điều cũ để lọt `exec node "$HERE/…"` (dạng chuẩn của 80 file bể) và 3 dạng khác, ba cách cài đặt cho ba tên khác nhau. Fixture tăng từ 12 lên 37.
+
+## Đã sửa ở T-099
+Bổ sung mục A' (chú thích cuối dòng) sau lỗi hổng Code Gate T-097 tìm thấy; điều 1-9 và mọi chữ khác không đổi. Câu cũ cho hai cách hiểu: điều 7 và 9 xét cả dòng kể cả phần chú thích, nên dòng code + chú thích tiếng Việt vừa không-ASCII vừa lệch ngoặc không bị bắt. Bảng fixture B tăng thêm 6 file; số 37 ở bảng thành 43.
