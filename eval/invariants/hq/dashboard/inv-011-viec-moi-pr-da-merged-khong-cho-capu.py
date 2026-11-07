@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Bất biến nháp hq/dashboard · nguồn: T-083 (Spec Gate v2 2026-11-06, spec-critic; spec M1-M2, INV-P7 của Product). Gác theo ADR-028:
 chỉ xanh khi PR T-083 đã merge; đưa vào eval/invariants/hq/dashboard/ (đánh số tiếp) sau khi merge.
-Việc B/C `done` mà mọi PR đã biết (URL PR trong handoff từ engineering, trong handoffs/<T>-v*.md, và `link` của sự kiện `merged`
+Việc B/C `done` mà mọi PR đã biết (URL PR trong handoff từ engineering, trong file bàn giao của việc, và `link` của sự kiện `merged`
 của chính việc) đều đã có sự kiện `merged` (merged hoặc closed) thì không có dòng `diff-b`/`merge-c`, bất kể tuổi.
 Đo trên sổ cái thật (xuất --public vào thư mục tạm) và một sổ cái giả có ca "PR ngoài handoff, cập nhật 2 giờ trước".
 Chạy: python3 eval/T-083/bat-bien-cho-merge/inv-draft-p7-viec-moi-pr-da-merged-khong-cho-capu.py"""

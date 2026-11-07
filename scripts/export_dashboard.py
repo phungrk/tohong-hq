@@ -140,6 +140,114 @@ def build_capu_queue(tasks, lines, issues=None):
         queue.append({"task": tid, "kind": kind, "decide_by": decide_by, "links": links})
     return sorted(queue, key=lambda q: q["task"])
 
+# --- Khối `model` (spec T-092 mục A): số liệu bể tri thức cho Knowledge Reservoir ---
+_KR_PRE = re.compile(r'^(?:#+|//+|"""|\'\'\')+')
+_KR_POST = re.compile(r'(?:"""|\'\'\')\s*$')
+KR_URL = "https://github.com/phungrk/tohong-hq/blob/main/eval/invariants/"
+
+
+def _kr_clean(line):
+    s = _KR_PRE.sub("", line.strip()).strip()
+    return _KR_POST.sub("", s).strip()
+
+
+def _kr_colon(s):
+    """Dấu ':' đầu tiên nằm ngoài mọi cặp ngoặc tròn; -1 nếu không có."""
+    depth = 0
+    for i, c in enumerate(s):
+        if c == "(":
+            depth += 1
+        elif c == ")":
+            depth = max(0, depth - 1)
+        elif c == ":" and depth == 0:
+            return i
+    return -1
+
+
+def _kr_finish(t, slug):
+    t = t.strip()
+    k = t.find(". ")
+    if k >= 0:
+        t = t[:k]
+    t = t.strip().rstrip(":").strip()
+    if len(t) > 140:
+        t = t[:140].rstrip() + "…"
+    return t or slug.replace("-", " ")
+
+
+def kr_name(text, slug):
+    ls = [_kr_clean(l) for l in text.split("\n")[:12]]
+    for i, l in enumerate(ls):
+        if not l.lower().startswith("bất biến"):
+            continue
+        k = _kr_colon(l)
+        head, tail = (l[:k], l[k + 1:].strip()) if k >= 0 else (l, "")
+        if tail and not tail.lower().startswith("nguồn") and not head.rstrip().lower().endswith("nguồn"):
+            return _kr_finish(tail, slug)
+        j = i + 1
+        if not l.rstrip().endswith((".", ":")):
+            while j < len(ls) and ls[j] and not ls[j].rstrip().endswith((".", ":")):
+                j += 1
+            j += 1
+        for m in ls[j:]:
+            if len(m) >= 50 and not m.lower().startswith("chỉ xanh"):
+                return _kr_finish(m, slug)
+        break
+    for l in ls:
+        m = re.match(r"^INV-\d+\s*(?:\([^)]*\))?\s*·\s*(.+)$", l, re.I)
+        if m:
+            return _kr_finish(m.group(1), slug)
+    return _kr_finish("", slug)
+
+
+def kr_source(text):
+    t = "\n".join(text.split("\n")[:12])
+    i = t.lower().find("nguồn")
+    if i < 0:
+        return ""
+    m = re.search(r"T-\d+", t[i:])
+    return m.group(0) if m else ""
+
+
+def build_model(public: bool) -> dict:
+    inv_root = ROOT / "eval" / "invariants"
+    items = []
+    if inv_root.is_dir():
+        for f in inv_root.rglob("*"):
+            if not (f.name.startswith("inv-") and f.is_file()):
+                continue
+            area = f.parent.relative_to(inv_root).as_posix()
+            m = re.match(r"inv-(\d+)", f.name)
+            num = m.group(1) if m else None
+            slug = re.sub(r"^inv-(?:\d+-?)?", "", f.name)
+            slug = slug.rsplit(".", 1)[0] if "." in slug else slug
+            text = f.read_text(encoding="utf-8", errors="replace")
+            it = {"area": area, "id": "INV-" + (num if num else "?"), "slug": slug,
+                  "name": kr_name(text, slug), "source": kr_source(text), "url": KR_URL + area + "/" + f.name}
+            if not public:
+                it["path"] = "eval/invariants/" + area + "/" + f.name
+            items.append(((area != "_shared", area, int(num) if num else 10 ** 9, f.name), it))
+    items.sort(key=lambda x: x[0])
+    lst = [x[1] for x in items]
+    inv = {}
+    for x in lst:
+        inv[x["area"]] = inv.get(x["area"], 0) + 1
+    adv = 0
+    ev = ROOT / "eval"
+    if ev.is_dir():
+        for d in ev.iterdir():
+            if d.is_dir() and re.fullmatch(r"T-\d+", d.name):
+                adv += sum(1 for c in d.iterdir() if c.is_file() and c.name.startswith("adv-"))
+    reg = ev / "regression"
+    regn = sum(1 for p in reg.iterdir() if not p.name.startswith(".") and p.name != "README.md") if reg.is_dir() else 0
+    pdir = ROOT / "products"
+    specs = sum(1 for p in pdir.glob("T-*.md") if p.is_file()) if pdir.is_dir() else 0
+    idir = ROOT / "insights"
+    ins = sorted(p.name for p in idir.glob("*-weekly.md") if p.is_file()) if idir.is_dir() else []
+    return {"invariants": inv, "invariants_total": len(lst), "invariant_list": lst, "adversarial_evals": adv,
+            "regression_evals": regn, "specs": specs, "insight_reports": len(ins),
+            "last_insight": ins[-1] if ins else ""}
+
 
 def export(out: Path, public: bool = False):
     out.mkdir(parents=True, exist_ok=True)
@@ -209,7 +317,7 @@ def export(out: Path, public: bool = False):
         (out / f"{name}.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
     bundle = {"generated_at": stamp, "timezone": "Asia/Ho_Chi_Minh", "public": public,
               "regression_evals": regression_evals, "tasks": tasks, "events": events, "roster": roster,
-              "capu_queue": capu_queue}
+              "capu_queue": capu_queue, "model": build_model(public)}
     (out / "dashboard.json").write_text(json.dumps(bundle, ensure_ascii=False), encoding="utf-8")
     print(f"Đã xuất lúc {stamp}{' (bản công khai)' if public else ''}: {len(tasks)} việc, {len(events)} sự kiện, "
           f"{sum(r['status'] == 'Hired' for r in roster)}/{len(roster)} vị trí đã có người → {out}")
