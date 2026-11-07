@@ -194,11 +194,36 @@ _CODE_SYMS = ("$", "{", "}", "|", "&", "!", "<", ">", "@", ";", "\\", "^", "~", 
 _CODE_INFIX = ("$(", "${", " && ", " || ", " == ", " != ", " => ", " === ", " !== ", "=>", "->", ">&", "2>")
 
 
+def strip_trailing_comment(t):
+    """T-094 muc A': cat chu thich cuoi dong. Chuoi nhay chi dong boi dung loai nhay da mo, khong xet '\\';
+    chua dong thi khong cat. Khoang trang chi la [ \\t]. Chi diem tach dau tien (khoang trang ngoai chuoi,
+    sau do '#' hoac '//' roi mot [ \\t], phia truoc co ky tu ngoai [ \\t])."""
+    q = None
+    for i, ch in enumerate(t):
+        if q:
+            if ch == q:
+                q = None
+        elif ch in "\"'":
+            q = ch
+        elif ch in " \t":
+            r = t[i + 1:]
+            if ((r[:1] == "#" and r[1:2] in (" ", "\t")) or (r[:2] == "//" and r[2:3] in (" ", "\t"))) and t[:i].strip(" \t"):
+                return t[:i].rstrip(" \t")
+    return t
+
+
 def looks_like_code(s):
-    """T-094 muc A: dong code hoac duong dan may thi khong dung lam ten."""
+    """T-094 muc A + A': dong code hoac duong dan may thi khong dung lam ten; xet ca dong, roi phan head truoc chu thich cuoi dong."""
     t = s.strip()
     if not t:
         return False
+    if _code_core(t):
+        return True
+    h = strip_trailing_comment(t)
+    return h != t and _code_core(h)
+
+
+def _code_core(t):
     if any(p in t for p in _MACH_PATHS) or t.startswith(_CODE_SYMS) or t.endswith("{"):
         return True
     if any(x in t for x in _CODE_INFIX):
@@ -259,18 +284,17 @@ def build_model(public: bool) -> dict:
         for f in inv_root.rglob("*"):
             if not (f.name.startswith("inv-") and f.is_file()):
                 continue
-            area = f.parent.relative_to(inv_root).as_posix()
-            if area == ".":
-                area = "_root"
+            at_root = f.parent == inv_root
+            area = "_root" if at_root else f.parent.relative_to(inv_root).as_posix()
             m = re.match(r"inv-(\d+)", f.name)
             num = m.group(1) if m else None
             slug = re.sub(r"^inv-(?:\d+-?)?", "", f.name)
             slug = slug.rsplit(".", 1)[0] if "." in slug else slug
             text = f.read_text(encoding="utf-8", errors="replace")
             it = {"area": area, "id": "INV-" + (num if num else "?"), "slug": slug,
-                  "name": kr_name(text, slug, f.name), "source": kr_source(text), "url": KR_URL + (area + "/" if area != "_root" else "") + f.name}
+                  "name": kr_name(text, slug, f.name), "source": kr_source(text), "url": KR_URL + ("" if at_root else area + "/") + f.name}
             if not public:
-                it["path"] = "eval/invariants/" + (area + "/" if area != "_root" else "") + f.name
+                it["path"] = "eval/invariants/" + ("" if at_root else area + "/") + f.name
             items.append(((area != "_shared", area, int(num) if num else 10 ** 9, f.name), it))
     items.sort(key=lambda x: x[0])
     lst = [x[1] for x in items]
