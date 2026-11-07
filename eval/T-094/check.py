@@ -32,7 +32,42 @@ FIX = {
  "inv-111.sh": ('#!/usr/bin/env bash\n# Bất biến: cd /root/work && python3 run.py\nexit 0\n', "inv-111.sh"),
  "inv-112-doi-chung-mo-ta-co-slash.sh": ('#!/usr/bin/env bash\n# Bất biến: scripts/export_dashboard.py không sập khi area sửa tay\nexit 0\n', "scripts/export_dashboard.py không sập khi area sửa tay"),
 }
-BASE = "inv-4"
+# Dạng dòng code bể thật hay có (D1 của spec-critic): mỗi dòng đặt giữa dòng nguồn và một dòng mô tả sạch; tên mong đợi = dòng mô tả sạch.
+CODE = [
+ 'exec node "$HERE/lib/loc_inv.cjs" --repo "$REPO" --check kr-sum',
+ 'back, front = os.path.abspath(a.back), os.path.abspath(a.front)',
+ 'T, G, X = (load("a"), load("b"), load("c"), load("d"), load("e"))',
+ 'count: int = len([x for x in range(100) if x % 3 == 0 and x > 10])',
+ 'L.task("new", "--title", "x", "--to", "engineering", "--tier", "B",',
+ 'result = run_checks(first_argument, second_argument, third_argument,',
+ 'cat "$ROOT/board/T-001.md" | sed -n 1,12p | grep -c area',
+ 'sed -n 1,12p "$ROOT/board/T-001.md" | awk \'{print $1}\' | jq -r .x',
+ 'mkdir -p "$TMP/ledger/board" && printf "%s\\n" "$X" > "$TMP/x"',
+ 'rm -rf "$TMP/ledger" "$TMP/out" "$TMP/err" "$TMP/more-files-here"',
+ 'npx playwright test --project=chromium --reporter=line eval/T-094',
+ 'local out; out=$(run_one_check "$1" 2>&1) || return 1; echo "$out"',
+ 'test -f "$ROOT/scripts/export_dashboard.py" || { echo skip; exit 0; }',
+ 'case "$1" in --public) MODE=public;; *) MODE=normal;; esac; shift',
+ 'f = lambda path, mode="r", enc="utf-8": open(path, mode, encoding=enc)',
+ 'command -v node >/dev/null 2>&1 || { echo "thiếu node"; exit 1; }',
+ 'đọc tại /Users/capu/work/tohong-hq/eval/x.py rồi so sánh với bản cũ ở máy khác',
+ 'xem nhật ký ở /var/log/tohong/export.log để biết lần chạy trước đã xong chưa',
+ 'cài ở /opt/tohong/bin/export_dashboard rồi chạy thử bản xuất công khai đó',
+]
+for _i, _c in enumerate(CODE):
+    FIX[f"inv-{130 + _i}-dong-code-{_i}.sh"] = ("#!/usr/bin/env bash\n# Bất biến hq/x · nguồn: T-00%d.\n# %s\n# Mô tả sạch số %d của bất biến này, đủ dài hơn năm mươi ký tự để chọn\n" % (_i, _c, _i), "Mô tả sạch số %d của bất biến này, đủ dài hơn năm mươi ký tự để chọn" % _i)
+# Đối chứng (không được bị loại): văn xuôi tiếng Việt mở đầu bằng từ trùng từ khoá, trích pipe/mũi tên trong ngoặc
+KEEP = [
+ 'do lỗi mạng nên trang không tải được, bản xuất vẫn phải đủ số liệu của bể',
+ 'test thử khi chọn sản phẩm thì mọi con số trên màn hình đổi theo bộ chọn',
+ 'case khác xảy ra khi bể trống: khối vẫn hiện 0 và không báo lỗi gì cả',
+ 'Không eval nào dừng tiến trình theo TÊN (pkill, `pgrep x | xargs kill`) vì giết nhầm',
+ 'số lượng (a = 1, b = 2) phải khớp tổng trong khối, kể cả khi có mô tả dài thêm',
+]
+for _i, _c in enumerate(KEEP):
+    FIX[f"inv-{160 + _i}-doi-chung-van-xuoi-{_i}.sh"] = ("#!/usr/bin/env bash\n# Bất biến: %s\nexit 0\n" % _c, _c)
+# Hệ quả đã biết của điều 4: văn xuôi có mũi tên ASCII "->" bị loại, tên rơi xuống slug
+FIX["inv-170-mui-ten-trong-van-xuoi.sh"] = ("#!/usr/bin/env bash\n# Bất biến: đỏ -> rework, xanh -> merge theo bậc của việc\nexit 0\n", "mui ten trong van xuoi")
 
 
 def export(f, out, pub):
@@ -64,7 +99,7 @@ def c1():
             for fn, (_, want) in FIX.items():
                 if got.get(fn) != want: bad.append(f"[{k}] {fn}: name {got.get(fn)!r}, mong {want!r}")
             for fn, n in got.items():
-                if n != FIX[fn][1] and fn not in FIX: continue
+                if fn not in FIX: continue
                 if any(p in n for p in ("/home/", "/root/", "/tmp/", "handoffs/")): bad.append(f"[{k}] {fn}: name chứa đường dẫn máy/handoffs/: {n!r}")
     return bad
 
