@@ -6,7 +6,7 @@
 Chạy: python3 eval/T-087/bat-bien-cho-merge/inv-007-so-cai-chiu-board-hong.py"""
 import json, subprocess, sys, tempfile
 import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # _lib.py của eval/T-087
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "T-087"))  # _lib.py của eval/T-087 (vào bể theo ADR-028 sau merge tohong-hq#29)
 import _lib as L
 r = subprocess.run([sys.executable, str(L.ROOT / "scripts/task.py"), "summary", "--json"], capture_output=True, text=True, cwd=str(L.ROOT))
 try: j = json.loads(r.stdout)
