@@ -8,7 +8,7 @@ cache đó là đúng một mục cấp 1 của TMPDIR; sau stop() không để 
 Đo (không cần chromium): một lần startViteDev trên front với TMPDIR riêng, gọi vài URL để vite tối ưu deps; trong lúc chạy PHẢI thấy một cache vite (deps/_metadata.json, sâu <= 4 cấp) trong TMPDIR;
 sau stop() + node thoát: TMPDIR rỗng, cache chung không đổi (bỏ qua node_modules/.vite/vitest: vitest của front có quyền ghi ở đó).
 Repo front: TOHONG_FRONT_REPO, FRONT, cwd nếu là repo front, rồi ../tohong-front cạnh tohong-hq; không thấy (hoặc chưa cài node_modules) -> "PASS chưa áp dụng".
-Chạy: python3 eval/T-077/bat-bien-cho-merge/inv-002-vite-dev-cache-rieng-don-sach.py (sau merge: eval/invariants/planner/inv-002-...) (gate.py: python3 -I). ~10-40s. Mã thoát 0 = đạt."""
+Chạy: python3 eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py (gate.py: python3 -I). ~10-40s. Mã thoát 0 = đạt."""
 import json, os, shutil, signal, subprocess, sys, tempfile, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
