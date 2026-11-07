@@ -12,6 +12,9 @@
 // hit-other-block (adv-05): ở 320, 360, 375, 390 (thường) và 360, 390 (phóng to): vùng bấm của nhân vật (g.mch, T-037) không nằm trên hình chính hay chữ
 //   của KHỐI KHÁC (g.node, g.gate, g.res có id): bấm vào khối phía trên/dưới không được mở tóm tắt của nhân vật khối khác. Đo bằng elementFromPoint ở
 //   tâm và hai đầu mỗi chữ khối, và ở mép trên/dưới (3%, 97%) của hình chính mỗi khối. Bấm tâm thân mỗi nhân vật vẫn mở tóm tắt của chính nó.
+// first-load (adv-06, ADR-034): tải trang một lần ở khung hẹp, KHÔNG phát sự kiện resize nhân tạo (điện thoại thật không đổi cỡ sau khi tải):
+//   320, 340, 355 (< 360) và 360, 375: tâm số đếm khối không nằm dưới vùng bấm nhân vật của khối mình, vùng bấm không lấn khối khác, bấm tâm số
+//   Capu mở #capu-modal; vùng bấm rộng ≥ 44px, cao ≥ 44px (≥ 360) hoặc ≥ 36px (< 360). Chạy cả font nạp ngay và font nạp muộn 2,5s.
 // Dữ liệu dashboard.json, kênh live, d3, font đều cục bộ. Mã thoát 0 = đạt.
 const fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
@@ -20,7 +23,7 @@ const REPO = path.resolve(arg('--repo') || '.'), INDEX = path.join(REPO, 'index.
 const FONT = path.join(__dirname, '..', '..', 'invariants', 'hq', 'dashboard', 'model', 'lib', 'BeVietnamPro-Regular.ttf');
 const D3 = [process.env.D3, '/opt/npm-tools/node_modules/d3/dist/d3.min.js',
   '/tmp/claude-0/-home-user/86243faa-8dbf-5631-b32b-051ad4d92b1e/scratchpad/d3.min.js'].find(p => p && fs.existsSync(p));
-if (!['tap-count', 'capu-caption', 'labels', 'routes', 'hit-other-block'].includes(CHECK)) { console.log('FAIL --check sai'); process.exit(1); }
+if (!['tap-count', 'capu-caption', 'labels', 'routes', 'hit-other-block', 'first-load'].includes(CHECK)) { console.log('FAIL --check sai'); process.exit(1); }
 if (!fs.existsSync(INDEX)) { console.log('FAIL không thấy index.html trong ' + REPO); process.exit(1); }
 if (!D3) { console.log('FAIL thiếu d3.min.js cục bộ: đặt D3'); process.exit(1); }
 if (!fs.existsSync(FONT)) { console.log('FAIL thiếu font ' + FONT); process.exit(1); }
@@ -40,18 +43,18 @@ function data(a, d, b) {
 const CSS = ['400', '500', '600'].map(w => `@font-face{font-family:'Be Vietnam Pro';font-weight:${w};src:url(https://fonts.gstatic.com/bvp.ttf) format('truetype')}`).join('');
 const UFN = () => { window.__U = e => { const svg = document.querySelector('#model svg'), sr = svg.getBoundingClientRect(), k = sr.width / 1000, r = e.getBoundingClientRect();
   return { l: (r.left - sr.left) / k, t: (r.top - sr.top) / k, r: (r.right - sr.left) / k, b: (r.bottom - sr.top) / k }; }; };
-async function open(browser, vp, zoom, d) {
+async function open(browser, vp, zoom, d, opt = {}) {
   const ctx = await browser.newContext({ viewport: vp, deviceScaleFactor: 1, reducedMotion: 'reduce' }); const page = await ctx.newPage(); const errs = [];
   page.on('pageerror', e => errs.push('lỗi JS ' + String(e).slice(0, 80))); await page.addInitScript(UFN);
   await page.route('**/cdnjs.cloudflare.com/**', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(D3) }));
   await page.route('**/fonts.googleapis.com/**', r => r.fulfill({ contentType: 'text/css', body: CSS }));
-  await page.route('**/fonts.gstatic.com/**', r => r.fulfill({ contentType: 'font/ttf', body: fs.readFileSync(FONT) }));
+  await page.route('**/fonts.gstatic.com/**', async r => { if (opt.late) await new Promise(z => setTimeout(z, 2500)); r.fulfill({ contentType: 'font/ttf', body: fs.readFileSync(FONT) }); });
   await page.route('**/raw.githubusercontent.com/**', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(d) }));
   await page.routeWebSocket(/\/ws$/, ws => { ws.send(JSON.stringify({ type: 'snapshot', server_time: Date.now(), events: [], activity: [] })); });
   await page.goto('file://' + INDEX); await page.waitForSelector('#model svg');
-  await page.evaluate(() => document.fonts.ready); await page.waitForTimeout(1200);
+  if (opt.late) await page.waitForTimeout(1500); await page.evaluate(() => document.fonts.ready); await page.waitForTimeout(1200);
   if (zoom) { await page.click('button#model-zoom'); await page.waitForTimeout(600); }
-  await page.evaluate(() => window.dispatchEvent(new Event('resize'))); await page.waitForTimeout(300);
+  if (!opt.noResize) await page.evaluate(() => window.dispatchEvent(new Event('resize'))); await page.waitForTimeout(300);
   return { ctx, page, errs };
 }
 const V = { '360': [{ width: 360, height: 800 }, 0], '375': [{ width: 375, height: 667 }, 0], '390': [{ width: 390, height: 844 }, 0], '844': [{ width: 844, height: 900 }, 0],
@@ -140,6 +143,17 @@ const ROUTES = () => { const svg = document.querySelector('#model svg'), bad = [
         if (!st.open) bad.push('bấm tâm số khối Capu không mở #capu-modal'); else if (String(st.rows) !== st.n) bad.push(`modal ${st.rows} dòng ≠ số khối ${st.n}`);
         await ctx.close(); say(bad.concat(errs), `${tag} ${D.join('/')}`);
       }
+    } else if (CHECK === 'first-load') {
+      const W = { '320': 320, '340': 340, '355': 355, '360': 360, '375': 375 };
+      for (const late of [0, 1]) for (const tag of Object.keys(W)) { const vp = { width: W[tag], height: 760 };
+        const { ctx, page, errs } = await open(browser, vp, 0, data(12, 34, 56), { noResize: 1, late }); const bad = [];
+        for (const c of await page.evaluate(COUNT_PTS, null)) for (const p of c.pts) if (p.by) bad.push(`${c.id}: ${p.nm} số đếm nằm dưới vùng bấm nhân vật ${p.by}`);
+        bad.push(...await page.evaluate(OTHER));
+        for (const [id, w, h] of await page.evaluate(() => [...document.querySelectorAll('#chars g.mch .hit')].map(h => { const r = h.getBoundingClientRect(); return [h.parentNode.getAttribute('data-block'), r.width, r.height]; })))
+          if (w < 44 - 0.01 || h < (W[tag] < 360 ? 36 : 44) - 0.01) bad.push(`vùng bấm ${id} ${w.toFixed(1)}x${h.toFixed(1)}px`);
+        const cp = (await page.evaluate(COUNT_PTS, 'nd_capu'))[0].pts[1]; await page.mouse.click(cp.x, cp.y); await page.waitForTimeout(350);
+        if (!await page.evaluate(() => { const m = document.getElementById('capu-modal'); return !!m && !m.hidden && getComputedStyle(m).display !== 'none'; })) bad.push('bấm tâm số khối Capu không mở #capu-modal');
+        await ctx.close(); say(bad.concat(errs), `${tag}${late ? ' font-muộn' : ''}`); }
     } else if (CHECK === 'hit-other-block') {
       V['320'] = [{ width: 320, height: 700 }, 0]; V['360-phong-to'] = [{ width: 360, height: 800 }, 1];
       for (const tag of ['320', '360', '375', '390', '360-phong-to', '390-phong-to']) { const [vp, zoom] = V[tag]; const { ctx, page, errs } = await open(browser, vp, zoom, data(3, 2, 4));
