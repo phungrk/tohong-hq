@@ -175,7 +175,71 @@ def _kr_finish(t, slug):
     return t or slug.replace("-", " ")
 
 
-def kr_name(text, slug):
+_KW_CODE = ("import from def class return if elif else for while with try except finally raise assert print exit const let var function "
+            "await async set export source cd echo python python3 node bash npm git grep curl fi done exec mkdir rm cp mv cat sed awk jq "
+            "printf npx readonly declare local esac yield lambda trap touch chmod eval unset shift ls").split()
+_KW_AMB = "test case then do pass find sort head tail true false diff command".split()
+_KW_END = r"(?=$|[\s(\[{:;=.-])"
+_KW_RE = re.compile(r"^(" + "|".join(_KW_CODE) + r")" + _KW_END)
+_AMB_RE = re.compile(r"^(" + "|".join(_KW_AMB) + r")(?:$|\s*;|\s+(?=[-\"$/.\[('])|\s+(?=(?:" + "|".join(_KW_CODE) + r")" + _KW_END + "))")
+_PIPE_RE = re.compile(r" \| *(?:" + "|".join(sorted(set(_KW_CODE) | set(_KW_AMB) | set("wc tr cut xargs tee uniq sh".split()))) + r")" + _KW_END)
+_ASSIGN_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.\[\]'\"]*\s*(?:[-+*/|&%]|\*\*|//)?=(?!=)\s*\S")
+_MULTI_RE = re.compile(r"^[A-Za-z_][\w.]*(?:\s*,\s*[A-Za-z_][\w.]*)+\s*=(?!=)")
+_TYPED_RE = re.compile(r"^[A-Za-z_]\w*\s*:\s*[A-Za-z_][\w\[\], .]*=(?!=)")
+_CALL_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*\(.*\)\s*;?$")
+_OPEN_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*\(")
+_DATA_RE = re.compile(r'^"[\w.-]+"\s*:|^[a-z_]+:\s*[\["{]|^\S+\)\s*,?$|\)\s*;\s*\S')
+_MACH_PATHS = ("/home/", "/root/", "/tmp/", "handoffs/", "C:\\", "/Users/", "/var/", "/opt/")
+_CODE_SYMS = ("$", "{", "}", "|", "&", "!", "<", ">", "@", ";", "\\", "^", "~", "/", "%", "*", "+")
+_CODE_INFIX = ("$(", "${", " && ", " || ", " == ", " != ", " => ", " === ", " !== ", "=>", "->", ">&", "2>")
+
+
+def strip_trailing_comment(t):
+    """T-094 muc A': cat chu thich cuoi dong. Chuoi nhay chi dong boi dung loai nhay da mo, khong xet '\\';
+    chua dong thi khong cat. Khoang trang chi la [ \\t]. Chi diem tach dau tien (khoang trang ngoai chuoi,
+    sau do '#' hoac '//' roi mot [ \\t], phia truoc co ky tu ngoai [ \\t])."""
+    q = None
+    for i, ch in enumerate(t):
+        if q:
+            if ch == q:
+                q = None
+        elif ch in "\"'":
+            q = ch
+        elif ch in " \t":
+            r = t[i + 1:]
+            if ((r[:1] == "#" and r[1:2] in (" ", "\t")) or (r[:2] == "//" and r[2:3] in (" ", "\t"))) and t[:i].strip(" \t"):
+                return t[:i].rstrip(" \t")
+    return t
+
+
+def looks_like_code(s):
+    """T-094 muc A + A': dong code hoac duong dan may thi khong dung lam ten; xet ca dong, roi phan head truoc chu thich cuoi dong."""
+    t = s.strip()
+    if not t:
+        return False
+    if _code_core(t):
+        return True
+    h = strip_trailing_comment(t)
+    return h != t and _code_core(h)
+
+
+def _code_core(t):
+    if any(p in t for p in _MACH_PATHS) or t.startswith(_CODE_SYMS) or t.endswith("{"):
+        return True
+    if any(x in t for x in _CODE_INFIX):
+        return True
+    if _PIPE_RE.search(t) and (t.isascii() or _KW_RE.match(t) or _AMB_RE.match(t)):
+        return True
+    if not t.split()[0].isupper() and (_KW_RE.match(t) or _AMB_RE.match(t)):
+        return True
+    if t.isascii() and (_DATA_RE.search(t) or t.startswith(('"', "(")) or t.count(")") > t.count("(")):
+        return True
+    if _ASSIGN_RE.match(t) or _MULTI_RE.match(t) or _TYPED_RE.match(t) or _CALL_RE.match(t):
+        return True
+    return bool(_OPEN_RE.match(t) and (t.isascii() or t.count("(") > t.count(")") or t.endswith("(")))
+
+
+def kr_name(text, slug, fname=""):
     ls = [_kr_clean(l) for l in text.split("\n")[:12]]
     for i, l in enumerate(ls):
         if not l.lower().startswith("bất biến"):
@@ -183,21 +247,25 @@ def kr_name(text, slug):
         k = _kr_colon(l)
         head, tail = (l[:k], l[k + 1:].strip()) if k >= 0 else (l, "")
         if tail and not tail.lower().startswith("nguồn") and not head.rstrip().lower().endswith("nguồn"):
-            return _kr_finish(tail, slug)
+            if not looks_like_code(tail):
+                return _kr_finish(tail, slug)
+            break
         j = i + 1
         if not l.rstrip().endswith((".", ":")):
             while j < len(ls) and ls[j] and not ls[j].rstrip().endswith((".", ":")):
                 j += 1
             j += 1
         for m in ls[j:]:
-            if len(m) >= 50 and not m.lower().startswith("chỉ xanh"):
+            if len(m) >= 50 and not m.lower().startswith("chỉ xanh") and not looks_like_code(m):
                 return _kr_finish(m, slug)
         break
     for l in ls:
         m = re.match(r"^INV-\d+\s*(?:\([^)]*\))?\s*·\s*(.+)$", l, re.I)
         if m:
+            if looks_like_code(m.group(1)):
+                break
             return _kr_finish(m.group(1), slug)
-    return _kr_finish("", slug)
+    return _kr_finish("", slug) or fname
 
 
 def kr_source(text):
@@ -216,16 +284,17 @@ def build_model(public: bool) -> dict:
         for f in inv_root.rglob("*"):
             if not (f.name.startswith("inv-") and f.is_file()):
                 continue
-            area = f.parent.relative_to(inv_root).as_posix()
+            at_root = f.parent == inv_root
+            area = "_root" if at_root else f.parent.relative_to(inv_root).as_posix()
             m = re.match(r"inv-(\d+)", f.name)
             num = m.group(1) if m else None
             slug = re.sub(r"^inv-(?:\d+-?)?", "", f.name)
             slug = slug.rsplit(".", 1)[0] if "." in slug else slug
             text = f.read_text(encoding="utf-8", errors="replace")
             it = {"area": area, "id": "INV-" + (num if num else "?"), "slug": slug,
-                  "name": kr_name(text, slug) or f.name, "source": kr_source(text), "url": KR_URL + area + "/" + f.name}
+                  "name": kr_name(text, slug, f.name), "source": kr_source(text), "url": KR_URL + ("" if at_root else area + "/") + f.name}
             if not public:
-                it["path"] = "eval/invariants/" + area + "/" + f.name
+                it["path"] = "eval/invariants/" + ("" if at_root else area + "/") + f.name
             items.append(((area != "_shared", area, int(num) if num else 10 ** 9, f.name), it))
     items.sort(key=lambda x: x[0])
     lst = [x[1] for x in items]
