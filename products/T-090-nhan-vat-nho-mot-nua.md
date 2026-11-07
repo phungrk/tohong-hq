@@ -22,7 +22,7 @@ Nếu nhân vật nhỏ còn một nửa và khối thấp đi đúng phần nh�
 ### 0. Quy ước đo (dùng cho cả spec)
 - **u** = px hiển thị chia `svg.getBoundingClientRect().width / svg.viewBox.baseVal.width`; chiều rộng `viewBox` **giữ 1000**.
 - **Thân** = hộp bao `g.mch [data-part=body]`. **Nhân vật đầy đủ** = hộp bao của mọi `path` trong `g.mch` đang hiển thị lúc nghỉ (không `display:none`, độ mờ tích lũy > 0,05; mồ hôi, giấy, vệt lao, dấu hỏi ẩn lúc nghỉ nên không tính). **Lúc nghỉ** = `data-state="idle"`. **"Mốc trước"** = số đo ở mục Bằng chứng, đóng cứng trong eval.
-- **Viewport đo:** 1280×900, 844×900, 390×844 (bản thường) và 1280×900, 390×844 khi phóng to (`button#model-zoom`). "Mọi viewport" trong ý định nghĩa là năm tình huống này. Vì nhân vật và khối cùng nằm trong một `viewBox` rộng 1000 nên tỉ lệ đo bằng u đúng ở mọi viewport; eval vẫn đo ở cả năm để bắt trường hợp CSS đổi theo cỡ màn hình.
+- **Viewport đo:** 1280×900, 1440×900, 1920×1000, 844×900, 390×844 (bản thường) và 1280×900, 1440×900, 390×844 khi phóng to (`button#model-zoom`). "Mọi viewport" trong ý định nghĩa là tám tình huống này (v2 thêm 1440, 1920 vì `.page` rộng tới 1400px). Vì nhân vật và khối cùng nằm trong một `viewBox` rộng 1000 nên tỉ lệ đo bằng u đúng ở mọi viewport; eval vẫn đo ở cả tám để bắt trường hợp CSS đổi theo cỡ màn hình.
 - **Cách hiểu đã chọn cho "kích thước nhân vật":** hộp bao ở **toạ độ màn hình** (`getBoundingClientRect`) chia cho hệ số svg, **không** đọc thuộc tính `viewBox` hay `transform` (đo hành vi thấy được, không đo mã). Có hai số đo: thân và nhân vật đầy đủ; **cả hai** phải bằng 1/2 mốc trước của chính nó, **cả rộng lẫn cao**.
 
 ### 1. Cỡ nhân vật (tiêu chí 1)
@@ -49,6 +49,23 @@ Dot, khối sáng, số đếm, nhân vật 5 trạng thái, bong bóng, tóm t�
 ### 4. Ảnh trước/sau (tiêu chí 4)
 Bốn ảnh `docs/screenshots/T-090/{truoc,sau}-{1280,390}.png` của vùng `#model` đã commit ở HEAD của repo dashboard: đủ bốn, khác nhau, ≥ 5KB, rộng đúng 1280/390px, và mỗi ảnh "sau" **thấp hơn** ảnh "trước" cùng cỡ. Ảnh "trước" mẫu đã chụp sẵn ở `eval/T-090/screenshots/truoc-{1280,390}.png` (chụp từ main, cùng fixture); Engineering dùng lại hay chụp lại bằng `bash eval/T-090/run.sh <repo> --shots <thư-mục> --label truoc|sau`.
 
+### 5. Bề ngang trang tăng lên 1400px (tiêu chí 5, v2)
+Ý định (Capu, nguyên văn ở Câu hỏi mở): bề ngang trang trên PC tăng từ `max-width: 1200px` lên `1400px` (`index.html` dòng 26, `.page{max-width:1200px;margin:0 auto;padding:24px 16px 48px;…}`).
+- **5.1** `getComputedStyle(.page).maxWidth` = `1400px`. `.page` rộng `min(viewport, 1400)px` (±1px): 1440 và 1920 → 1400px; 1280 → 1280px; 844 → 844px; 390 → 390px. Padding, margin, khoảng cách dọc giữ nguyên.
+- **5.2** Ở 390, 844, 1280, 1440, 1920: trang không cuộn ngang; mọi phần tử con trực tiếp của `.page` (KPI, Đội ngũ, Bản đồ luồng, Mô hình, Cảnh báo, Kanban, Dòng thời gian…) nằm trong `.page`.
+- **5.3** `#model svg` rộng ≥ 90% `.page` ở viewport > 480px (co giãn theo bề ngang trang: ~1334px ở 1440 và 1920, ~1214px ở 1280) và không tràn `.page`; ở 390 vẫn 300–390px (T-028 P2).
+- **5.4** Bản đồ luồng (d3 dựng theo `clientWidth`) vẫn vừa khung chứa.
+- **5.5** Phóng to ở 1280, 1440, 1920: svg ≥ 94% khung nhìn, không cuộn ngang trong `#model`, trang không cuộn ngang (T-035 mục 2 giữ nguyên).
+- **Không đổi hành vi ở 844 và 390** (`.page` đã kín khung nhìn; 0 thay đổi px). **Ở 1280 hành vi giữ nhưng kích thước px đổi:** trước đây `.page` bị chặn ở 1200px nên 1280 trông như 1232; nay `.page` = 1280px nên svg 1134 → 1214px (+7%), thân nhân vật px × 1,07. Đây là hệ quả của yêu cầu, không phải lỗi.
+
+## Hệ quả của max-width 1400 (đã kiểm, Product 2026-11-07)
+Đo bằng Playwright trên bản vá thô trong scratchpad (chỉ đổi 1200 → 1400): svg `#model` rộng 1134px ở 1280/1440/1920 (trước) → 1214px ở 1280 và 1334px ở 1440/1920 (sau); hệ số 1,134 → 1,214 / 1,334; thân nhân vật cao 74,8px → 80,1 / 88,0px (với CH_S cũ); chữ `.t` 13,0px → 14,0 / 15,3px; không cuộn ngang ở cả bốn cỡ.
+- **Đo theo u:** không đổi (u = px chia hệ số svg; `viewBox` giữ 1000). Tiêu chí 1 và 2 đo theo u nên bất kể 1200 hay 1400. Đã thêm 1440 và 1920 vào danh sách viewport của tiêu chí 1-2.
+- **Đo theo px:** chỉ có sàn (thân ≥ 33px ở 1280, ≥ 9px ở 390 ở tiêu chí 1.3): rộng ra chỉ làm px lớn hơn nên không đỏ. Hệ quả cho "1/2": ở 1440+ thân nhân vật cao ~44px (33u × 1,334) so với ~88px trước (66u × 1,334); tỉ lệ 1/2 vẫn đúng theo u. Cỡ chữ `.t`/`.cap`/`.n` ở 1440+ lớn hơn 1280 vì svg co giãn (T-035 1.4 chỉ có sàn nên không vi phạm).
+- **Quét bể `eval/invariants/hq/dashboard/` (model 32 + gốc 16, và mọi `lib/*.cjs`)**: không file nào chứa hằng 1200 hay chuỗi `max-width`; viewport rộng nhất mọi bất biến dùng là 1280 (mọi `lib` dùng 1280×900 và 390×844; inv-032 thêm 360, 375, 844; `adv_model.cjs` ADV-01 đổi bề ngang tới 1920 để đo đường kính dot 7–16px). Không bất biến nào phụ thuộc `max-width:1200`. Cái duy nhất đổi hành vi số là px ở 1280 (svg 1134 → 1214px). Đã chạy lại toàn bộ bất biến `hq/dashboard` (model 32 + gốc 16) trên bản vá thô chỉ đổi 1200 → 1400: mọi bất biến cho kết quả **y hệt main**: 46 xanh; hai đỏ có sẵn trên main (cũng đỏ khi không vá, không do 1400): `hq/dashboard/inv-015` và `inv-016` (cột Xong, ADR-031, T-089 đang sửa). Eval tiêu chí 5 xanh 23/23 trên bản vá, đỏ 6/23 trên main (đúng chỗ `max-width` còn 1200).
+- **Kanban, drawer, modal ở 1440+:** `#capu-modal` và `#model[data-zoom=on]` là `position:fixed; inset:0` theo khung nhìn, không phụ thuộc `.page`; modal panel `width:min(560px,100%)`. Kanban và Dòng thời gian là `section.card` trong `.page`, chỉ rộng ra theo `.page` (tiêu chí 5.2 kiểm không tràn). Không có drawer trong `index.html` origin/main. T-089 (Kanban) sẽ sửa phần Kanban: tiêu chí 5.2 áp cho cả Kanban mới của T-089 (chỉ kiểm nằm trong `.page`, không kiểm cột).
+- Bất biến nào đỏ có chủ ý do 1400: **không thêm**; vẫn chỉ inv-019.
+
 ## Bất biến sẽ đỏ có chủ ý và đề xuất lời mới (Chief of Staff phân xử qua `decisions/`; Product không tự sửa)
 Đã đọc mã cả 32 bất biến của `hq/dashboard/model` (không chỉ đọc tên) và chạy trên main (xem bản bàn giao). Chỉ **một** bất biến mâu thuẫn trực tiếp với ý định:
 - **inv-019 "nhân vật đủ to"** (`lib/t035_inv.cjs`, `BODY_MIN_U = 62`, `BODY_MIN_PX = {1280: 68, 390: 19}`): thân 33u sẽ đỏ ở cả hai cỡ. Ngưỡng này sinh ra từ ý định T-035 ("gấp đôi 30u"); T-090 đảo ý định đó. **Đề nghị lời mới:** `BODY_MIN_U = 29.7`, `BODY_MIN_PX = {1280: 33, 390: 9}` (một nửa ngưỡng cũ, làm tròn xuống; vẫn đủ 11 nhân vật), sửa chú thích dòng "thân cao ≥ 62u" tương ứng, ghi ADR dẫn T-090. Eval T-090 tiêu chí 1.3 đã dùng chính các số này. Eval T-090 chạy inv-019 theo danh sách miễn (`T090_EXEMPT`, mặc định `inv-019`); khi Chief of Staff sửa inv-019, chỉ cần đặt `T090_EXEMPT=` (rỗng) để chạy đủ.
@@ -56,6 +73,7 @@ Bốn ảnh `docs/screenshots/T-090/{truoc,sau}-{1280,390}.png` của vùng `#mo
 - Eval cũ của việc đã đóng ghi cỡ/toạ độ cũ (`eval/T-031/model-characters.cjs` S7 68–114px, C8 P2/P5 sàn 19px; `eval/T-035/…` 1.1/1.2; `eval/T-047/mui-ten-to.cjs` `ORACLE` toạ độ tuyến): là eval của việc đã đóng, không chạy lại, không sửa (cùng cách ADR-019 xử lý `eval/T-039`). Không phải bất biến.
 
 ## Ràng buộc (vòi)
+- Chỉ đổi `index.html` dòng 26 cho tiêu chí 5 (`max-width:1200px` → `1400px`); không đổi `padding`, `margin`, `gap`.
 - Repo: `phungrk/tohong-hq-dashboard` (một file `index.html`) · Nhánh: `t-090-nhan-vat-nho` từ `origin/main` · Vùng: `hq/dashboard/model`.
 - **Không đụng phần Kanban** (T-089 cũng sửa `index.html`): chỉ sửa trong `#model` (khối `nd_*`, `gt_*`, `src_*`, đường `p_*`, nhãn `.lbl`, `buildChars`, `CH_S`, `CH_TOP`, `bubLay`, chú thích `nd_capu`, `viewBox` của bảng Mô hình). Merge xung đột với T-089 do Chief of Staff xử lý theo thứ tự.
 - Bất biến đã đọc: `eval/invariants/_shared/` + `eval/invariants/hq/dashboard/model/` (32). Spec này không vi phạm INV nào, trừ inv-019 (đề nghị đổi, mục trên).
@@ -68,10 +86,11 @@ Lệnh chung: `cd /home/user/tohong-hq && export NODE_PATH=$(npm root -g) D3=/tm
 
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Ở 1280, 844, 390, phóng to 1280 và 390: thân và nhân vật đầy đủ của 11 nhân vật bằng 0,45–0,55 mốc trước (cả rộng lẫn cao), không dưới sàn 29,7u / 33px / 9px | `bash eval/T-090/run.sh <repo> --criterion 1` |
+| 1 | Ở 1280, 1440, 1920, 844, 390, phóng to 1280/1440/390: thân và nhân vật đầy đủ của 11 nhân vật bằng 0,45–0,55 mốc trước (cả rộng lẫn cao), không dưới sàn 29,7u / 33px / 9px | `bash eval/T-090/run.sh <repo> --criterion 1` |
 | 2 | Khối thấp đi 30–46u (cổng: đường kính), bề ngang ±10%, nhân vật vừa khối, mọi chữ trọn trong khối và `viewBox` (kể cả chú thích `nd_capu`), thân không đè chữ lúc nghỉ, khối không chồng nhau, `viewBox` ≤ 1040u, không cuộn ngang ở 390 (thường và phóng to) | `bash eval/T-090/run.sh <repo> --criterion 2` |
 | 3 | Mọi bất biến `hq/dashboard/model` (trừ inv-019 có chủ ý) xanh: đường nối, mũi tên, dot, bong bóng, tóm tắt, phóng to chạy | `bash eval/T-090/run.sh <repo> --criterion 3` (chạy 31 bất biến, 4 luồng, ~3 phút) |
 | 4 | Bốn ảnh trước/sau 1280 và 390 đã commit ở HEAD, ảnh sau thấp hơn ảnh trước | `bash eval/T-090/run.sh <repo> --criterion 4` |
+| 5 | `.page` max-width 1400px: rộng `min(viewport,1400)`, không cuộn ngang 390–1920, mọi khối trong `.page`, `#model svg` ≥ 90% `.page`, Bản đồ luồng vừa khung, phóng to ≥ 94% khung nhìn | `bash eval/T-090/run.sh <repo> --criterion 5` |
 
 Kiểm chứng eval (Spec Writer, 2026-11-07): trên main `--criterion 1` và `2` đỏ đúng chỗ (thân/nhân vật tỉ lệ 1,00; khối cao 176; viewBox 1100; chú thích `nd_capu` tràn); trên bản mô phỏng thô (`CH_S` 1,1, khối thấp 38u, hàng dịch lên, chú thích rút gọn) cả 20 kiểm tra tiêu chí 1 và 27 kiểm tra tiêu chí 2 xanh, nên tiêu chí đạt được. Tiêu chí 4 đỏ cho tới khi có ảnh trong repo dashboard.
 
@@ -79,9 +98,12 @@ Kiểm chứng eval (Spec Writer, 2026-11-07): trên main `--criterion 1` và `2
 Một, cho Spec critic rút vào bể khi spec qua cổng: **inv-019 viết lại** như mục trên (sàn cỡ nhân vật theo T-090: thân ≥ 29,7u, ≥ 33px ở 1280, ≥ 9px ở 390; vẫn đủ 11). Ngoài ra (tính chất mới, chạy được): **"chữ của khối không bao giờ chạy ra ngoài hình chính của khối hay ra ngoài `viewBox`"** (tiêu chí 2.4, đo bằng `MEASURE` trong `eval/T-090/nhan-vat-nho.cjs` mục D: lỗi `nd_capu` là bằng chứng nó đã vỡ một lần). Không đề xuất bất biến về tỉ lệ 1/2 (ý định của một lần, không phải tính chất phải đúng mãi).
 
 ## Không làm
-- Không đổi cỡ chữ, bề ngang khối, màu, hình vẽ nhân vật, số nhân vật, 5 trạng thái, tuyến đường (khối nào nối khối nào), dot, tóm tắt, phóng to.
+- Không đổi cỡ chữ, bề ngang khối (trong u), màu, hình vẽ nhân vật, số nhân vật, 5 trạng thái, tuyến đường (khối nào nối khối nào), dot, tóm tắt, phóng to.
 - Không đụng Kanban hay bảng khác của dashboard (T-089), Bản đồ luồng, chú giải.
 - Không sửa bất biến trong bể, không sửa eval của việc cũ.
 
 ## Câu hỏi mở
-Một câu cho Capu (không chặn việc, cách hiểu mặc định ghi sẵn): "Khối chỉ thấp đi (bề ngang giữ để chữ không bị thu nhỏ) đúng ý Capu chưa, hay Capu muốn khối cũng hẹp ngang lại, chấp nhận chữ nhỏ hơn hoặc xuống dòng?" Mặc định: chỉ thấp đi, tự tin ~75%.
+Không. Capu đã trả lời (2026-11-07, nguyên văn): "T-90: giữ kích thước khối đồng thời tăng bề ngang của page trên PC — hiện tại max-width 1200px thì tăng lên max-width 1400px". Hiểu: giữ cách hiểu mặc định (khối chỉ thấp đi, bề ngang khối giữ trong ±10%, tiêu chí 2.2) và thêm yêu cầu `.page{max-width}` 1200px → 1400px (tiêu chí 5).
+
+## Nhật ký sửa spec
+- v2 (2026-11-07, Capu trả lời câu hỏi mở): bỏ câu hỏi mở, thêm mục 5 và tiêu chí 5, thêm viewport 1440/1920 vào mục 0; thêm mục "Hệ quả của max-width 1400". Không đổi câu nào của tiêu chí 1-4.
