@@ -51,6 +51,11 @@ CODE = [
  'f = lambda path, mode="r", enc="utf-8": open(path, mode, encoding=enc)',
  'command -v node >/dev/null 2>&1 || { echo "thiếu node"; exit 1; }',
  'đọc tại /Users/capu/work/tohong-hq/eval/x.py rồi so sánh với bản cũ ở máy khác',
+ 'sys.path.insert(0, x)\t# chú thích tiếng Việt cho đủ dài, đứng sau một dấu tab chứ không phải dấu cách',   # T-099 D1: tab trước dấu
+ 'foo(a)  #\tghi chú tiếng Việt dài thêm, sau dấu thăng là một dấu tab chứ không phải dấu cách',   # T-099 D1: tab sau dấu
+ 'print("it\'s ok", file=sys.stderr)  # ghi chú tiếng Việt dài thêm, nháy đơn nằm trong chuỗi nháy kép',   # T-099 D1: nháy khác loại không đóng chuỗi
+ 'log("it\'s ok", x)  # ghi chú tiếng Việt dài thêm, hàm không là từ khoá nên chỉ tách chú thích mới nhận ra là code',   # T-099 D1: như trên nhưng không dựa vào từ khoá print
+ "print('say \"hi\" now', file=sys.stderr)  // ghi chú tiếng Việt dài thêm, nháy kép nằm trong chuỗi nháy đơn",   # T-099 D1: chiều ngược lại, dấu //
  'sys.path.insert(0, os.path.join(repo, "matcher"))  # profile.py che stdlib `profile`: chủ ý, giống thật',
  'env.pop("TOHONG_LIVE_URL", None)   # sổ cái giả không đẩy lên dashboard thật, chỉ chạy cục bộ',
  'subprocess.run(["bash", "build.sh"], check=True)  # dựng bản thật trước khi so sánh tên',
@@ -68,6 +73,7 @@ KEEP = [
  'Không eval nào dừng tiến trình theo TÊN (' + 'p' + 'kill, `p' + 'grep x | xargs ' + 'kill`) vì giết nhầm',   # ghép lúc chạy để INV-010 planner/vendor/images không quét trúng
  'số lượng (a = 1, b = 2) phải khớp tổng trong khối, kể cả khi có mô tả dài thêm',
  'ngôn ngữ C# và mục #3 phải hiện đúng trong tên, không bị cắt ở dấu thăng',   # T-099: # không có khoảng trắng hai bên thì không tách
+ 'gọi foo(a, b)\u00a0# ghi chú tiếng Việt dài thêm, trước dấu thăng là NBSP nên không phải điểm tách',   # T-099 D1: NBSP không tính, không tách, giữ nguyên
  'hàm f(x) # ghi chú dài thêm cho đủ dòng mô tả của bất biến này, phần trước không là code',   # T-099: tách ra nhưng phần trước không thỏa mục A -> giữ nguyên cả dòng
 ]
 for _i, _c in enumerate(KEEP):

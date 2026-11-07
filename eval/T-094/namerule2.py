@@ -29,15 +29,18 @@ _JSON = re.compile(r'^"[\w.-]+"\s*:|^[a-z_]+:\s*[\["{]|^\S+\)\s*,?$|\)\s*;\s*\S'
 
 
 def strip_trailing_comment(t):
-    """Sửa đổi T-099: cắt chú thích cuối dòng. Quét từ trái sang phải; ngoài chuỗi nháy (\" hoặc '; nháy lẻ chưa đóng = coi như còn trong chuỗi, không cắt),
-    chỗ đầu tiên là ' # ' hoặc ' // ' (khoảng trắng hai bên) đứng sau ít nhất một ký tự không trắng thì trả phần trước nó (đã bỏ khoảng trắng cuối). Không có thì trả t."""
+    """Sửa đổi T-099 (spec T-094 mục A'): cắt chú thích cuối dòng. Quét trái sang phải; chuỗi nháy mở bởi \" hoặc ' chỉ đóng bởi đúng loại đó, không xét dấu thoát \\;
+    chưa đóng = tới hết dòng vẫn trong chuỗi, không cắt. Khoảng trắng = chỉ [ \\t] (không NBSP). Điểm tách = [ \\t] đầu tiên ngoài chuỗi, ngay sau là '#' hoặc '//' rồi một [ \\t],
+    và phía trước có ký tự ngoài [ \\t]. Trả phần trước (bỏ [ \\t] cuối); không có điểm tách thì trả t."""
     q = None
     for i, ch in enumerate(t):
         if q:
             if ch == q: q = None
         elif ch in "\"'": q = ch
-        elif ch == " " and (t.startswith("# ", i + 1) or t.startswith("// ", i + 1)) and t[:i].strip():
-            return t[:i].rstrip()
+        elif ch in " \t":
+            r = t[i + 1:]
+            if ((r[:1] == "#" and r[1:2] in (" ", "\t")) or (r[:2] == "//" and r[2:3] in (" ", "\t"))) and t[:i].strip(" \t"):
+                return t[:i].rstrip(" \t")
     return t
 
 
