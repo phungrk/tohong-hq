@@ -1,6 +1,6 @@
 {
   "task": "T-091",
-  "at": "2026-11-07T02:35",
+  "at": "2026-11-07T02:45",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-089/run.sh 1",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 19062,
+      "ms": 19003,
       "out": "hấy 10\nPASS 390/biên/hq: hết việc ẩn thì không có nút, thấy []\nPASS 390/biên/planner: cột Xong hiện 10 thẻ [T-931 T-932 T-933 T-934 T-935 T-936 T-937 T-938 T-939 T-940], thấy [T-931 T-932 T-933 T-934 T-935 T-936 T-937 T-938 T-939 T-940]\nPASS 390/biên/planner: số đầu cột Xong là tổng 11, thấy 11\nPASS 390/biên/planner: đúng một nút \"Xem thêm · còn 1 việc\" trong cột Xong, thấy [\"Xem thêm · còn 1 việc\"]\nPASS 390/biên/all: cột Xong hiện 10 thẻ [T-931 T-901 T-932 T-902 T-933 T-903 T-934 T-904 T-935 T-905], thấy [T-931 T-901 T-932 T-902 T-933 T-903 T-934 T-904 T-935 T-905]\nPASS 390/biên/all: số đầu cột Xong là tổng 21, thấy 21\nPASS 390/biên/all: đúng một nút \"Xem thêm · còn 11 việc\" trong cột Xong, thấy [\"Xem thêm · còn 11 việc\"]\nPASS 390: không việc xong thì cột Xong trống, đếm 0, không nút\nPASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-089/run.sh 2",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 9662,
+      "ms": 9593,
       "out": "ấm → 40: số đầu cột Xong là tổng 40, thấy 40\nPASS 390/all/sau bấm → 40: hết việc ẩn thì không có nút, thấy []\nPASS 390/all: nút hết thì focus ở thẻ đầu tiên vừa hiện (T-525), thấy {\"id\":\"\",\"inDone\":true,\"text\":\"T-525\"}\nPASS 390/planner: nút bấm được ở giữa nút (không bị che)\nPASS 390/planner/sau bấm → 12: cột Xong hiện 12 thẻ [T-601 T-603 T-605 T-607 T-609 T-602 T-604 T-606 T-608 T-612 T-611 T-610], thấy [T-601 T-603 T-605 T-607 T-609 T-602 T-604 T-606 T-608 T-612 T-611 T-610]\nPASS 390/planner/sau bấm → 12: số đầu cột Xong là tổng 12, thấy 12\nPASS 390/planner/sau bấm → 12: hết việc ẩn thì không có nút, thấy []\nPASS 390/planner: nút hết thì focus ở thẻ đầu tiên vừa hiện (T-611), thấy {\"id\":\"\",\"inDone\":true,\"text\":\"T-611\"}\nPASS 390: đã bấm tới hết ở Tất cả (40 việc) và planner (12 việc)\nPASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-089/run.sh 3",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 9902,
+      "ms": 9870,
       "out": "r/10 thẻ: số cột Xong và KPI Đã xong đều là tổng 12, thấy 12/12\nPASS 390/planner/10 thẻ: không quá một nút Xem thêm trên cả trang\nPASS 390/planner/sau Xem thêm: cột Mới đủ 0 thẻ, thấy 0 (đếm 0)\nPASS 390/planner/sau Xem thêm: cột Đang làm đủ 5 thẻ, thấy 5 (đếm 5)\nPASS 390/planner/sau Xem thêm: cột Chờ review đủ 1 thẻ, thấy 1 (đếm 1)\nPASS 390/planner/sau Xem thêm: cột Rework đủ 0 thẻ, thấy 0 (đếm 0)\nPASS 390/planner/sau Xem thêm: cột Bị chặn đủ 0 thẻ, thấy 0 (đếm 0)\nPASS 390/planner/sau Xem thêm: cột Chờ Capu đủ 1 thẻ, thấy 1 (đếm 1)\nPASS 390/planner/sau Xem thêm: bảy cột đúng thứ tự\nPASS 390/planner/sau Xem thêm: số cột Xong và KPI Đã xong đều là tổng 12, thấy 12/12\nPASS 390/planner/sau Xem thêm: không quá một nút Xem thêm trên cả trang\nPASS dữ liệu thử có cột Đang làm với 12 thẻ (>10)\nPASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-089/run.sh 4",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 15515,
+      "ms": 15582,
       "out": "512 T-505 T-523 T-516 T-509 T-502 T-520 T-513 T-506 T-524 T-517 T-510 T-503 T-521 T-514 T-507 T-525 T-518], thấy [T-501 T-519 T-512 T-505 T-523 T-516 T-509 T-502 T-520 T-513 T-506 T-524 T-517 T-510 T-503 T-521 T-514 T-507 T-525 T-518]\nPASS 390/hq mở 20 lần nữa: số đầu cột Xong là tổng 25, thấy 25\nPASS 390/hq mở 20 lần nữa: đúng một nút \"Xem thêm · còn 5 việc\" trong cột Xong, thấy [\"Xem thêm · còn 5 việc\"]\nPASS 390/tải lại trang → 10: cột Xong hiện 10 thẻ [T-501 T-519 T-512 T-505 T-523 T-516 T-509 T-502 T-520 T-513], thấy [T-501 T-519 T-512 T-505 T-523 T-516 T-509 T-502 T-520 T-513]\nPASS 390/tải lại trang → 10: số đầu cột Xong là tổng 25, thấy 25\nPASS 390/tải lại trang → 10: đúng một nút \"Xem thêm · còn 15 việc\" trong cột Xong, thấy [\"Xem thêm · còn 15 việc\"]\nPASS 390: không lỗi trang \nPASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-089/run.sh 5",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 17089,
+      "ms": 17112,
       "out": "iện 10 thẻ [T-803 T-802 T-501 T-519 T-512 T-505 T-523 T-516 T-509 T-502], thấy [T-803 T-802 T-501 T-519 T-512 T-505 T-523 T-516 T-509 T-502]\nPASS 390/hq: live việc hq xong lên đầu: số đầu cột Xong là tổng 27, thấy 27\nPASS 390/hq: live việc hq xong lên đầu: đúng một nút \"Xem thêm · còn 17 việc\" trong cột Xong, thấy [\"Xem thêm · còn 17 việc\"]\nPASS 390/hq: T-803 lên đầu\nPASS 390/về Tất cả: 10 thẻ gồm việc live: cột Xong hiện 10 thẻ [T-803 T-808 T-802 T-601 T-501 T-603 T-519 T-605 T-512 T-607], thấy [T-803 T-808 T-802 T-601 T-501 T-603 T-519 T-605 T-512 T-607]\nPASS 390/về Tất cả: 10 thẻ gồm việc live: số đầu cột Xong là tổng 43, thấy 43\nPASS 390/về Tất cả: 10 thẻ gồm việc live: đúng một nút \"Xem thêm · còn 33 việc\" trong cột Xong, thấy [\"Xem thêm · còn 33 việc\"]\nPASS 390: không lỗi trang \nPASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-089/run.sh 6",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 10290,
+      "ms": 10315,
       "out": "ng thời gian · T-606\"\nPASS 390: Dòng thời gian có ít nhất một dòng sự kiện\nPASS 390/sau khi mở việc ẩn: cột Xong hiện 10 thẻ [T-601 T-501 T-603 T-519 T-605 T-512 T-607 T-505 T-609 T-523], thấy [T-601 T-501 T-603 T-519 T-605 T-512 T-607 T-505 T-609 T-523]\nPASS 390/sau khi mở việc ẩn: số đầu cột Xong là tổng 40, thấy 40\nPASS 390/sau khi mở việc ẩn: đúng một nút \"Xem thêm · còn 30 việc\" trong cột Xong, thấy [\"Xem thêm · còn 30 việc\"]\nPASS 390: không thẻ nào ở trạng thái đang chọn (việc ẩn không có thẻ)\nPASS 390: mở thêm làm thẻ T-606 hiện ra thì đang được chọn, thấy [T-606]\nPASS 390: Dòng thời gian vẫn là T-606\nPASS 390: bấm thẻ đang hiện chọn đúng T-603\nPASS 390: T-603 bị đẩy khỏi 10 thẻ do việc live, Dòng thời gian vẫn giữ T-603, thấy \"Dòng thời gian · T-603\"\nPASS 390: không lỗi trang \nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-089/run.sh 7",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 6823,
+      "ms": 7049,
       "out": "9 T-605 T-512 T-607 T-505 T-609 T-523 T-602 T-516 T-604 T-509 T-606 T-502 T-608 T-520 T-513 T-506]\nPASS 390/chạm/bấm một lần → 20: số đầu cột Xong là tổng 40, thấy 40\nPASS 390/chạm/bấm một lần → 20: đúng một nút \"Xem thêm · còn 20 việc\" trong cột Xong, thấy [\"Xem thêm · còn 20 việc\"]\nPASS 390/20 thẻ: có nút\nPASS 390/20 thẻ: là phần tử button\nPASS 390/20 thẻ: nút nằm trọn trong 0..390px (33..191)\nPASS 390/20 thẻ: nút cao >= 40 và rộng >= 120 (thấy 158x61)\nPASS 390/20 thẻ: chữ nút >= 14px (thấy 14)\nPASS 390/20 thẻ: chữ nút không bị cắt\nPASS 390/20 thẻ: sau khi cuộn tới, giữa nút không bị phần tử khác che\nPASS 390/20 thẻ: nút nằm dưới thẻ cuối của cột Xong\nPASS 390/20 thẻ: trang không cuộn ngang\nPASS 390: bấm tới hết: 40 thẻ, không còn nút\nPASS 390: hiện đủ 40 thẻ, trang không cuộn ngang\nPASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 27,
+      "ms": 28,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 130,
+      "ms": 135,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1010,
+      "ms": 1099,
       "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/hq/inv-002-workflow-context-hop-le.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 47,
+      "ms": 53,
       "out": "PASS 6 workflow: không secrets/env sai chỗ trong if, inputs đều khai, không in env khi có secret cấp job",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-001-tat-ca-luon-du.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 11178,
+      "ms": 11729,
       "out": "PASS all-complete",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-002-cay-bat-bien-khop-tong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 17669,
+      "ms": 17982,
       "out": "PASS kr-sum",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-003-doi-bo-loc-khong-doi-hinh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 6321,
+      "ms": 6406,
       "out": "PASS shape-stable",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-004-san-pham-do-so-cai-xuat.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 241,
+      "ms": 297,
       "out": "PASS product do sổ cái xuất, khớp normalize_area",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-005-export-khong-sap-vi-area-sua-tay.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 105,
+      "ms": 111,
       "out": "PASS",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-006-so-capu-bang-so-dong-modal.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 13775,
+      "ms": 14130,
       "out": "dal\nPASS không capu_queue @1280: số trên khối (2) = số dòng modal (2)\nPASS không capu_queue @1280: mỗi mã việc tối đa một dòng: T-1,T-3\nPASS không capu_queue @1280: không lỗi trang \nPASS không capu_queue @390: bấm số trên khối Capu mở #capu-modal\nPASS không capu_queue @390: số trên khối (2) = số dòng modal (2)\nPASS không capu_queue @390: mỗi mã việc tối đa một dòng: T-1,T-3\nPASS không capu_queue @390: không lỗi trang \nPASS rỗng @1280: bấm số trên khối Capu mở #capu-modal\nPASS rỗng @1280: số trên khối (0) = số dòng modal (0)\nPASS rỗng @1280: mỗi mã việc tối đa một dòng: \nPASS rỗng @1280: không lỗi trang \nPASS rỗng @390: bấm số trên khối Capu mở #capu-modal\nPASS rỗng @390: số trên khối (0) = số dòng modal (0)\nPASS rỗng @390: mỗi mã việc tối đa một dòng: \nPASS rỗng @390: không lỗi trang \nPASS",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-007-loc-san-pham-toan-man-hinh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 25610,
+      "ms": 26121,
       "out": "PASS không capu_queue: lọc P giống hệt màn hình chỉ có việc của P (gồm số, chữ phụ, đèn khối Capu)\nPASS có capu_queue: lọc P giống hệt màn hình chỉ có việc của P (gồm số, chữ phụ, đèn khối Capu)\nPASS",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-008-capu-queue-khong-chua-viec-da-xu-ly.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 228,
+      "ms": 231,
       "out": "PASS sổ cái thật: mỗi mã việc tối đa một phần tử (0 phần tử)\nPASS sổ cái thật: mọi việc escalated trên board có trong capu_queue: thiếu []\nPASS sổ cái giả: mỗi mã việc tối đa một phần tử (2 phần tử)\nPASS sổ cái giả: T-954 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái giả: T-954 loại diff-b chỉ cho việc B/C đã done (tier B, state done)\nPASS sổ cái giả: T-957 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái giả: mọi việc escalated trên board có trong capu_queue: thiếu []\nPASS sổ cái giả: capu_queue đúng {T-954: diff-b (PR #95 còn mở), T-957: escalated}, thấy {'T-954': 'diff-b', 'T-957': 'escalated'}\nPASS",
       "tier": 2
     },
@@ -164,15 +164,15 @@
       "eval": "eval/invariants/hq/dashboard/inv-009-link-capu-an-toan-cong-khai-khong-ro.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 8624,
-      "out": "PASS (a) bản công khai: 0 phần tử capu_queue, 702 sự kiện\nPASS all: số trên khối 0 = số dòng 0\nPASS all: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS all: không lỗi trang \nPASS planner: số trên khối 0 = số dòng 0\nPASS planner: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS planner: không lỗi trang \nPASS hq: số trên khối 0 = số dòng 0\nPASS hq: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS hq: không lỗi trang \nPASS",
+      "ms": 8765,
+      "out": "PASS (a) bản công khai: 0 phần tử capu_queue, 703 sự kiện\nPASS all: số trên khối 0 = số dòng 0\nPASS all: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS all: không lỗi trang \nPASS planner: số trên khối 0 = số dòng 0\nPASS planner: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS planner: không lỗi trang \nPASS hq: số trên khối 0 = số dòng 0\nPASS hq: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS hq: không lỗi trang \nPASS",
       "tier": 2
     },
     {
       "eval": "eval/invariants/hq/dashboard/inv-010-capu-queue-khong-doc-thu-muc-con-inbox.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 268,
+      "ms": 313,
       "out": "PASS capu_queue không đổi khi thêm DR vào thư mục con inbox/capu (0 phần tử)",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-011-viec-moi-pr-da-merged-khong-cho-capu.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 210,
+      "ms": 222,
       "out": "PASS việc B/C mà mọi PR đã biết đã merged/closed không còn chờ Capu, bất kể tuổi",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-012-dr-da-quyet-khong-con-dong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 207,
+      "ms": 275,
       "out": "PASS DR đã quyết (sau lần hỏi cuối) không còn dòng decision/blocked; hỏi lại thì vào lại",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-013-link-issue-dung-so-viec.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 200,
+      "ms": 224,
       "out": "PASS 0 phần tử capu_queue; (b) đang kiểm",
       "tier": 2
     },
@@ -204,9 +204,25 @@
       "eval": "eval/invariants/hq/dashboard/inv-014-issue-tu-do-khong-sinh-link-sai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 106,
+      "ms": 130,
       "out": "PASS 25 giá trị issue thử",
       "tier": 2
+    },
+    {
+      "eval": "eval/T-091/adv-01.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 142466,
+      "out": "8 T-309 T-310 T-311 T-312 T-313 T-314 T-315 T-316]\nPASS 390/Enter → 20: đếm 34, thấy 34\nPASS 390/Enter → 20: nút còn 14, thấy [\"Xem thêm · còn 14 việc\"]\nPASS 390/Space x2 → hết: cột Xong [T-1001 T-1000 T-100 T-99 T-301 T-302 T-303 T-304 T-305 T-306 T-307 T-308 T-309 T-310 T-311 T-312 T-313 T-314 T-315 T-316 T-317 T-318 T-319 T-320 T-321 T-322 T-323 T-324 T-325 T-326 T-327 T-328 T-329 T-330], thấy [T-1001 T-1000 T-100 T-99 T-301 T-302 T-303 T-304 T-305 T-306 T-307 T-308 T-309 T-310 T-311 T-312 T-313 T-314 T-315 T-316 T-317 T-318 T-319 T-320 T-321 T-322 T-323 T-324 T-325 T-326 T-327 T-328 T-329 T-330]\nPASS 390/Space x2 → hết: đếm 34, thấy 34\nPASS 390/Space x2 → hết: nút không có, thấy []\nPASS 390/bàn phím: nút mất thì focus ở thẻ đầu vừa hiện T-327, thấy T-327\nPASS 390: không lỗi trang \nPASS",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-091/adv-02.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 6074,
+      "out": "PASS 390: 10 thẻ, không cuộn ngang\nPASS 390: nút trọn trong khung nhìn (33..191)\nPASS 390: nút trọn trong khung nhìn (33..191)\nPASS 390: hiện hết 25 thẻ, thấy 25\nPASS 390: hiện hết thẻ (có tiêu đề dài không dấu cách) vẫn không cuộn ngang, scrollWidth 390\nPASS 390: không lỗi trang \nPASS 320: 10 thẻ, không cuộn ngang\nPASS 320: nút trọn trong khung nhìn (33..287)\nPASS 320: nút trọn trong khung nhìn (33..287)\nPASS 320: hiện hết 25 thẻ, thấy 25\nPASS 320: hiện hết thẻ (có tiêu đề dài không dấu cách) vẫn không cuộn ngang, scrollWidth 320\nPASS 320: không lỗi trang \nPASS",
+      "tier": 3
     }
   ],
   "hint": ""
