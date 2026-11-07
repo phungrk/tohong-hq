@@ -11,7 +11,7 @@ def is_front(d): return d and os.path.isfile(os.path.join(d, "package.json")) an
 repo = next((d for d in (os.environ.get("TOHONG_FRONT_REPO"), os.getcwd(), os.path.join(HQ, "..", "tohong-front"), "/home/user/tohong-front")
              if is_front(d) and os.path.basename(os.path.abspath(d)) != "tohong-hq"), None)
 if not repo: print("PASS chưa áp dụng (không thấy repo front)"); sys.exit(0)
-NAME = re.compile(r"(^|/)__(t0\d\d|nonce)[^/]*$")
+NAME = re.compile(r"(^|/)__(t0\d\d|nonce|vite-cfg-)[^/]*$")  # ADR-037: thêm file bọc config của helper (T-098)
 def git(*a): return subprocess.run(["git", "-C", repo, *a], capture_output=True, text=True, timeout=60).stdout.splitlines()
 bad = [f for f in git("ls-files") if NAME.search(f)]
 msg = []
