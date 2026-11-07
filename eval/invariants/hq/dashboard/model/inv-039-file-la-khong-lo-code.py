@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Bất biến hq/dashboard/model (chờ merge, ADR-028) · nguồn: T-094 (Spec Gate v2 2026-11-07, spec-critic rút từ tiêu chí 1-2).
+"""Bất biến hq/dashboard/model · nguồn: T-094 (Spec Gate v2 2026-11-07, spec-critic rút từ tiêu chí 1-2).
 File bất biến viết lạ (dòng code, đường dẫn máy, nằm ở gốc bể) vẫn cho tên là mô tả và vùng hợp lệ trong dashboard.json
 Đích: eval/invariants/hq/dashboard/model/inv-039-file-la-khong-lo-code.py sau khi PR T-094 merge và file này xanh trên main.
 Dựng sổ cái tạm với các file viết lạ (không có mô tả dài, chỉ có dòng code / lệnh / đường dẫn máy; một file ở gốc eval/invariants), chạy
 scripts/export_dashboard.py THẬT (có và không --public): mọi name không rỗng, không chứa đường dẫn máy hay handoffs/, không là dòng code
 (eval/T-094/namerule2.py looks_like_code; trừ khi name là slug hay tên file, bước 3-4); mọi area khớp ^(_shared|_root|[a-z0-9_-]+(/[a-z0-9_-]+)*)$; url không có "/./"; file ở gốc có area _root.
-Chạy: python3 eval/T-094/bat-bien-cho-merge/inv-039-file-la-khong-lo-code.py   Mã thoát 0 = đạt. In PASS hoặc FAIL <lý do>."""
+Chạy: python3 eval/invariants/hq/dashboard/model/inv-039-file-la-khong-lo-code.py   Mã thoát 0 = đạt. In PASS hoặc FAIL <lý do>."""
 import json, os, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 

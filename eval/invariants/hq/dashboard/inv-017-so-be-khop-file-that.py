@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Bất biến hq/dashboard (chờ merge, ADR-028) · nguồn: T-092 (Spec Gate v2 2026-11-07, spec-critic rút từ eval/T-092/inv-proposed-so-be-khop-file-that.py).
+"""Bất biến hq/dashboard · nguồn: T-092 (Spec Gate v2 2026-11-07, spec-critic rút từ eval/T-092/inv-proposed-so-be-khop-file-that.py).
 Số bất biến mà dashboard.json báo (khối Knowledge Reservoir) luôn bằng số file inv-* thật trong bể, ở cả bản thường và bản --public.
-Đích: eval/invariants/hq/dashboard/inv-017-so-be-khop-file-that.py sau khi PR T-092 merge và file này xanh trên main.
+File ở gốc eval/invariants/ thuộc vùng "_root" (T-094 mục C, ADR-039).
 Chạy scripts/export_dashboard.py THẬT (có và không --public) trên sổ cái hiện tại: model.invariants_total = số file thường tên `inv-*`
 dưới eval/invariants/ (đếm độc lập bằng os.walk) = tổng model.invariants = len(model.invariant_list) > 0; từng vùng khớp; mọi phần tử
 có name không rỗng và url; bản public: model không chứa /home/ hay /root/ và không có khoá path. Lỗi gốc: commit 641f502 bỏ khối model.
-Chạy: python3 eval/T-092/bat-bien-cho-merge/inv-017-so-be-khop-file-that.py   Mã thoát 0 = đạt. In PASS hoặc FAIL <lý do>."""
+Chạy: python3 eval/invariants/hq/dashboard/inv-017-so-be-khop-file-that.py   Mã thoát 0 = đạt. In PASS hoặc FAIL <lý do>."""
 import json, os, subprocess, sys, tempfile
 from pathlib import Path
 
@@ -18,6 +18,7 @@ for dp, _, fn in os.walk(inv_root):
     for n in fn:
         if n.startswith("inv-") and (Path(dp) / n).is_file():
             a = str(Path(dp).relative_to(inv_root)).replace(os.sep, "/")
+            if a == ".": a = "_root"  # ADR-039: T-094 mục C
             by[a] = by.get(a, 0) + 1
 total = sum(by.values())
 bad = []
