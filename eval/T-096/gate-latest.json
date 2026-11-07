@@ -1,6 +1,6 @@
 {
   "task": "T-096",
-  "at": "2026-11-07T13:35",
+  "at": "2026-11-07T13:57",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-096/export-be.py --criterion 1",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 262,
+      "ms": 199,
       "out": "FAIL [thường] model thiếu mảng adversarial_list; [public] model thiếu mảng adversarial_list",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-096/export-be.py --criterion 2",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 404,
+      "ms": 340,
       "out": "FAIL [thường] thiếu adversarial_list/regression_list; [public] thiếu adversarial_list/regression_list",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && D3=/tmp/claude-0/-home-user/86243faa-8dbf-5631-b32b-051ad4d92b1e/scratchpad/d3.min.js NODE_PATH=$(npm root -g) node eval/T-096/check.cjs --criterion 3",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 3181,
+      "ms": 2776,
       "out": "FAIL phải có phần tử role=tablist\nFAIL ba tab [data-kr-tab] theo thứ tự invariants, adversarial, regression; thấy []\nFAIL lỗi chạy eval: TypeError: Cannot read properties of undefined (reading 'sel')     at /home/user/tohong-hq/eval/T-096/check.cjs:98:20",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && D3=/tmp/claude-0/-home-user/86243faa-8dbf-5631-b32b-051ad4d92b1e/scratchpad/d3.min.js NODE_PATH=$(npm root -g) node eval/T-096/check.cjs --criterion 4",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 9793,
+      "ms": 9065,
       "out": "ression: thứ tự phải giữ, thêm đúng các mục kế tiếp\nFAIL tab regression: nút biến mất thì focus phải ở liên kết GitHub của mục mới đầu tiên (https://github.com/phungrk/tohong-hq/blob/main/eval/regression/reg-11.sh), thấy \"\"\nFAIL nhóm vùng của 10 dòng đầu phải [\"_shared\",\"hq/dashboard\"], thấy [\"_shared\",\"hq/dashboard\",\"hq/dashboard/model\",\"planner/front/layout\",\"planner/vendor/pool\"]\nFAIL sau một lần bấm có 20 dòng\nFAIL đổi tab rồi quay lại: về 10 dòng, thấy 25\nFAIL đóng rồi mở: về 10 dòng, thấy 25\nFAIL đổi bộ chọn sản phẩm khi drawer mở: về 10 dòng, thấy 12\nFAIL planner: nút phải \"Xem thêm · còn 2\", thấy []\nFAIL trước làm tươi: 20 dòng\nFAIL làm tươi dữ liệu không được đặt lại số dòng (20), thấy 25\nFAIL đúng 10 mục: đủ 10 dòng, không có nút (dòng 25, nút 0)\nFAIL một mục: một dòng, không nút",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && D3=/tmp/claude-0/-home-user/86243faa-8dbf-5631-b32b-051ad4d92b1e/scratchpad/d3.min.js NODE_PATH=$(npm root -g) node eval/T-096/check.cjs --criterion 5",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 3280,
+      "ms": 2906,
       "out": "FAIL phải có #kr-drawer-resize\nFAIL dừng",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && D3=/tmp/claude-0/-home-user/86243faa-8dbf-5631-b32b-051ad4d92b1e/scratchpad/d3.min.js NODE_PATH=$(npm root -g) node eval/T-096/check.cjs --criterion 6",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 3440,
+      "ms": 2731,
       "out": "FAIL lỗi chạy eval: TypeError: Cannot read properties of undefined (reading 'text')     at /home/user/tohong-hq/eval/T-096/check.cjs:265:43",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "cd /home/user/tohong-hq && D3=/tmp/claude-0/-home-user/86243faa-8dbf-5631-b32b-051ad4d92b1e/scratchpad/d3.min.js NODE_PATH=$(npm root -g) node eval/T-096/check.cjs --criterion 7",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 35333,
+      "ms": 35060,
       "out": "FAIL lỗi chạy eval: page.focus: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for locator('#kr-drawer-resize')\u001b[22m",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 37,
+      "ms": 32,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 175,
+      "ms": 148,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1127,
+      "ms": 1097,
       "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/hq/inv-002-workflow-context-hop-le.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 50,
+      "ms": 77,
       "out": "PASS 6 workflow: không secrets/env sai chỗ trong if, inputs đều khai, không in env khi có secret cấp job",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-001-tat-ca-luon-du.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 11945,
+      "ms": 11451,
       "out": "PASS all-complete",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-002-cay-bat-bien-khop-tong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 18400,
+      "ms": 17740,
       "out": "PASS kr-sum",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-003-doi-bo-loc-khong-doi-hinh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 6714,
+      "ms": 6281,
       "out": "PASS shape-stable",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-004-san-pham-do-so-cai-xuat.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 305,
+      "ms": 314,
       "out": "PASS product do sổ cái xuất, khớp normalize_area",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-005-export-khong-sap-vi-area-sua-tay.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 119,
+      "ms": 111,
       "out": "PASS",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-006-so-capu-bang-so-dong-modal.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 15282,
+      "ms": 14211,
       "out": "dal\nPASS không capu_queue @1280: số trên khối (2) = số dòng modal (2)\nPASS không capu_queue @1280: mỗi mã việc tối đa một dòng: T-1,T-3\nPASS không capu_queue @1280: không lỗi trang \nPASS không capu_queue @390: bấm số trên khối Capu mở #capu-modal\nPASS không capu_queue @390: số trên khối (2) = số dòng modal (2)\nPASS không capu_queue @390: mỗi mã việc tối đa một dòng: T-1,T-3\nPASS không capu_queue @390: không lỗi trang \nPASS rỗng @1280: bấm số trên khối Capu mở #capu-modal\nPASS rỗng @1280: số trên khối (0) = số dòng modal (0)\nPASS rỗng @1280: mỗi mã việc tối đa một dòng: \nPASS rỗng @1280: không lỗi trang \nPASS rỗng @390: bấm số trên khối Capu mở #capu-modal\nPASS rỗng @390: số trên khối (0) = số dòng modal (0)\nPASS rỗng @390: mỗi mã việc tối đa một dòng: \nPASS rỗng @390: không lỗi trang \nPASS",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-007-loc-san-pham-toan-man-hinh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 27751,
+      "ms": 26009,
       "out": "PASS không capu_queue: lọc P giống hệt màn hình chỉ có việc của P (gồm số, chữ phụ, đèn khối Capu)\nPASS có capu_queue: lọc P giống hệt màn hình chỉ có việc của P (gồm số, chữ phụ, đèn khối Capu)\nPASS",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-008-capu-queue-khong-chua-viec-da-xu-ly.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 501,
+      "ms": 250,
       "out": "PASS sổ cái thật: mỗi mã việc tối đa một phần tử (0 phần tử)\nPASS sổ cái thật: mọi việc escalated trên board có trong capu_queue: thiếu []\nPASS sổ cái giả: mỗi mã việc tối đa một phần tử (2 phần tử)\nPASS sổ cái giả: T-954 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái giả: T-954 loại diff-b chỉ cho việc B/C đã done (tier B, state done)\nPASS sổ cái giả: T-957 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái giả: mọi việc escalated trên board có trong capu_queue: thiếu []\nPASS sổ cái giả: capu_queue đúng {T-954: diff-b (PR #95 còn mở), T-957: escalated}, thấy {'T-954': 'diff-b', 'T-957': 'escalated'}\nPASS",
       "tier": 2
     },
@@ -164,15 +164,15 @@
       "eval": "eval/invariants/hq/dashboard/inv-009-link-capu-an-toan-cong-khai-khong-ro.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 10279,
-      "out": "PASS (a) bản công khai: 0 phần tử capu_queue, 750 sự kiện\nPASS all: số trên khối 0 = số dòng 0\nPASS all: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS all: không lỗi trang \nPASS planner: số trên khối 0 = số dòng 0\nPASS planner: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS planner: không lỗi trang \nPASS hq: số trên khối 0 = số dòng 0\nPASS hq: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS hq: không lỗi trang \nPASS",
+      "ms": 8807,
+      "out": "PASS (a) bản công khai: 0 phần tử capu_queue, 758 sự kiện\nPASS all: số trên khối 0 = số dòng 0\nPASS all: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS all: không lỗi trang \nPASS planner: số trên khối 0 = số dòng 0\nPASS planner: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS planner: không lỗi trang \nPASS hq: số trên khối 0 = số dòng 0\nPASS hq: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS hq: không lỗi trang \nPASS",
       "tier": 2
     },
     {
       "eval": "eval/invariants/hq/dashboard/inv-010-capu-queue-khong-doc-thu-muc-con-inbox.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 606,
+      "ms": 320,
       "out": "PASS capu_queue không đổi khi thêm DR vào thư mục con inbox/capu (0 phần tử)",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-011-viec-moi-pr-da-merged-khong-cho-capu.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 437,
+      "ms": 279,
       "out": "PASS việc B/C mà mọi PR đã biết đã merged/closed không còn chờ Capu, bất kể tuổi",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-012-dr-da-quyet-khong-con-dong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 278,
+      "ms": 264,
       "out": "PASS DR đã quyết (sau lần hỏi cuối) không còn dòng decision/blocked; hỏi lại thì vào lại",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-013-link-issue-dung-so-viec.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 633,
+      "ms": 302,
       "out": "PASS 0 phần tử capu_queue; (b) đang kiểm",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-014-issue-tu-do-khong-sinh-link-sai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 266,
+      "ms": 126,
       "out": "PASS 25 giá trị issue thử",
       "tier": 2
     },
@@ -212,7 +212,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-015-cot-xong-moi-nhat-so-dem-tong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 28097,
+      "ms": 25072,
       "out": "PASS done-cap",
       "tier": 2
     },
@@ -220,7 +220,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-016-tat-ca-du-khi-hon-10-viec-xong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 13060,
+      "ms": 11899,
       "out": "PASS all-complete-many",
       "tier": 2
     },
@@ -228,7 +228,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-017-so-be-khop-file-that.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 346,
+      "ms": 336,
       "out": "PASS",
       "tier": 2
     },
@@ -236,7 +236,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-001-khong-dot-gia.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9760,
+      "ms": 9290,
       "out": "PASS no-fake-dots",
       "tier": 2
     },
@@ -244,7 +244,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-002-tran-dot.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 18779,
+      "ms": 18449,
       "out": "PASS dot-cap",
       "tier": 2
     },
@@ -252,7 +252,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-003-dot-tren-duong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9412,
+      "ms": 8518,
       "out": "PASS dot-on-path",
       "tier": 2
     },
@@ -260,7 +260,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-004-khong-ket-sang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 17199,
+      "ms": 16876,
       "out": "PASS no-stuck-lit",
       "tier": 2
     },
@@ -268,7 +268,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-005-reduced-motion-khong-dot.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 5680,
+      "ms": 5356,
       "out": "PASS reduced-no-dots",
       "tier": 2
     },
@@ -276,7 +276,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-006-khong-cuon-ngang-390.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 2510,
+      "ms": 2650,
       "out": "PASS no-hscroll-390",
       "tier": 2
     },
@@ -284,7 +284,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-007-capu-sang-khi-escalated.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 14241,
+      "ms": 14335,
       "out": "PASS capu-escalated",
       "tier": 2
     },
@@ -292,7 +292,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-008-dot-co-khi-doi-be-ngang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 8288,
+      "ms": 8135,
       "out": "PASS rotate",
       "tier": 2
     },
@@ -300,7 +300,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-009-so-dem-thi-sang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 24308,
+      "ms": 23297,
       "out": "PASS count-lit",
       "tier": 2
     },
@@ -308,7 +308,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-010-nhan-vat-khop-khoi-sang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 25181,
+      "ms": 25053,
       "out": "PASS char-match-lit",
       "tier": 2
     },
@@ -316,7 +316,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-011-ranh-thi-mo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 8408,
+      "ms": 8352,
       "out": "PASS idle-dim",
       "tier": 2
     },
@@ -324,7 +324,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-012-reduced-motion-nhan-vat-dung-yen.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 7877,
+      "ms": 7984,
       "out": "PASS reduced-still",
       "tier": 2
     },
@@ -332,7 +332,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-013-bong-bong-co-tran.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 14729,
+      "ms": 14152,
       "out": "PASS bubble-cap",
       "tier": 2
     },
@@ -340,7 +340,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-014-khong-giao-nhan-gia.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 10074,
+      "ms": 9865,
       "out": "PASS no-fake-handover",
       "tier": 2
     },
@@ -348,7 +348,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-015-nhan-vat-giu-net-ve.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 12489,
+      "ms": 12474,
       "out": "PASS char-own-paint",
       "tier": 2
     },
@@ -356,7 +356,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-016-nhan-vat-khong-che-chu-khi-cu-dong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 64433,
+      "ms": 64264,
       "out": "PASS overlap",
       "tier": 2
     },
@@ -364,7 +364,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-017-dot-nhin-thay-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 28016,
+      "ms": 27826,
       "out": "PASS dot-visible",
       "tier": 2
     },
@@ -372,7 +372,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-018-nhan-vat-khong-che-chu-nao.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 36481,
+      "ms": 36502,
       "out": "PASS no-text-cover",
       "tier": 2
     },
@@ -380,7 +380,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-019-nhan-vat-du-to.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 6571,
+      "ms": 6262,
       "out": "PASS char-size",
       "tier": 2
     },
@@ -388,7 +388,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-020-bot-cong-tren-cung.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 36596,
+      "ms": 36639,
       "out": "PASS gate-on-top",
       "tier": 2
     },
@@ -396,7 +396,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-021-phong-to-an-toan.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 10075,
+      "ms": 10465,
       "out": "PASS zoom-safe",
       "tier": 2
     },
@@ -404,7 +404,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-022-bong-bong-dung-co-khi-doi-phong-to.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 10384,
+      "ms": 10616,
       "out": "PASS 390px bản thường, trước khi bấm nd_exec 12px\nPASS 390px vừa bấm Phóng to, bong bóng đang hiện nd_exec 12px\nPASS 390px vừa bấm Thu nhỏ, bong bóng đang hiện gt_code 12px, nd_spec 12px\nPASS 1280px bản thường, trước khi bấm nd_exec 12px\nPASS 1280px vừa bấm Phóng to, bong bóng đang hiện nd_exec 12px\nPASS 1280px vừa bấm Thu nhỏ, bong bóng đang hiện gt_code 12px, nd_spec 12px\nPASS",
       "tier": 2
     },
@@ -412,7 +412,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-023-tom-tat-khop-den.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 19609,
+      "ms": 19779,
       "out": "PASS lit-match",
       "tier": 2
     },
@@ -420,7 +420,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-024-tom-tat-khong-ro.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 5363,
+      "ms": 5348,
       "out": "PASS no-leak",
       "tier": 2
     },
@@ -428,7 +428,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-025-tom-tat-mot-lop.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 7190,
+      "ms": 7347,
       "out": "PASS one-layer",
       "tier": 2
     },
@@ -436,7 +436,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-026-tom-tat-khong-che-chu-khoi.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 15377,
+      "ms": 15582,
       "out": "PASS own-text",
       "tier": 2
     },
@@ -444,7 +444,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-027-esc-tung-lop.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 6956,
+      "ms": 7633,
       "out": "PASS esc-layers",
       "tier": 2
     },
@@ -452,7 +452,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-028-tom-tat-khong-de-bot-khi-cu-dong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 134354,
+      "ms": 135778,
       "out": "(thông tin) 1280 nd_spec: không thấy give/take trong 5 giây\n  (thông tin) 1280 gt_spec: không thấy give/take trong 5 giây\n  (thông tin) 1280 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 1280 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 1280 nd_capu: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_spec: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_exec: không thấy give/take trong 5 giây\n  (thông tin) 390 gt_code: không thấy give/take trong 5 giây\n  (thông tin) 390 nd_capu: không thấy give/take trong 5 giây\nPASS motion",
       "tier": 2
     },
@@ -460,7 +460,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-029-moi-duong-co-mui-cuoi.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 11441,
+      "ms": 11640,
       "out": "1280: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\n  390: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\n  390-phong-to: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\n  1280-toi: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\n  390-toi: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\nPASS end-arrow",
       "tier": 2
     },
@@ -468,7 +468,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-030-duong-dai-co-mui-giua.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 11623,
+      "ms": 11576,
       "out": "1280: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\n  390: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\n  390-phong-to: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\n  1280-toi: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\n  390-toi: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\nPASS mid-arrow",
       "tier": 2
     },
@@ -476,7 +476,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-031-khong-ky-thuat-de-vo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 2509,
+      "ms": 2414,
       "out": "1280: 24 đường, 24 mũi cuối, 6 mũi giữa, 6 đường dài\nPASS no-fragile",
       "tier": 2
     },
@@ -484,7 +484,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-032-font-nap-muon-mui-khong-che-chu.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 23311,
+      "ms": 23091,
       "out": "360: 24 mũi cuối, 6 mũi giữa (sau khi font nạp)\n  375: 24 mũi cuối, 6 mũi giữa (sau khi font nạp)\n  390: 24 mũi cuối, 6 mũi giữa (sau khi font nạp)\n  390-phong-to: 24 mũi cuối, 6 mũi giữa (sau khi font nạp)\n  844: 24 mũi cuối, 6 mũi giữa (sau khi font nạp)\n  1280: 24 mũi cuối, 6 mũi giữa (sau khi font nạp)\nPASS font-muon: font thật nạp muộn, mũi tên không che chữ, không đè bot",
       "tier": 2
     },
@@ -492,7 +492,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-033-co-chu-khoi-khong-duoi-san.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 18557,
+      "ms": 18780,
       "out": "ranh 1280: đạt\n  ranh 844: đạt\n  ranh 390: đạt\n  ranh 1280-phong-to: đạt\n  ranh 390-phong-to: đạt\n  ban 1280: đạt\n  ban 844: đạt\n  ban 390: đạt\n  ban 1280-phong-to: đạt\n  ban 390-phong-to: đạt\nPASS font-floor: 10/10 tình huống, cỡ chữ khối không dưới sàn",
       "tier": 2
     },
@@ -500,7 +500,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-034-chu-khoi-trong-khoi.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 18966,
+      "ms": 19025,
       "out": "ranh 1280: đạt\n  ranh 844: đạt\n  ranh 390: đạt\n  ranh 1280-phong-to: đạt\n  ranh 390-phong-to: đạt\n  ban 1280: đạt\n  ban 844: đạt\n  ban 390: đạt\n  ban 1280-phong-to: đạt\n  ban 390-phong-to: đạt\nPASS text-in-block: 10/10 tình huống, mọi chữ khối nằm trọn trong khối và viewBox",
       "tier": 2
     },
@@ -508,7 +508,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-035-bam-so-khong-bi-nhan-vat-chiem.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 29452,
+      "ms": 29208,
       "out": "360 0/0/0: đạt\n   360 12/34/56: đạt\n   375 0/0/0: đạt\n   375 12/34/56: đạt\n   390 0/0/0: đạt\n   390 12/34/56: đạt\n   390-phong-to 0/0/0: đạt\n   390-phong-to 12/34/56: đạt\n   844 0/0/0: đạt\n   844 12/34/56: đạt\n   1280 0/0/0: đạt\n   1280 12/34/56: đạt\nPASS",
       "tier": 2
     },
@@ -516,7 +516,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-036-vung-bam-khong-sang-khoi-khac.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 41830,
+      "ms": 41140,
       "out": "320: đạt\n   360: đạt\n   375: đạt\n   390: đạt\n   360-phong-to: đạt\n   390-phong-to: đạt\nPASS",
       "tier": 2
     },
@@ -524,7 +524,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-037-tai-lan-dau-man-hep.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 43844,
+      "ms": 42688,
       "out": "320: đạt\n   340: đạt\n   355: đạt\n   360: đạt\n   375: đạt\n   320 font-muộn: đạt\n   340 font-muộn: đạt\n   355 font-muộn: đạt\n   360 font-muộn: đạt\n   375 font-muộn: đạt\nPASS",
       "tier": 2
     },
@@ -532,7 +532,7 @@
       "eval": "eval/invariants/hq/dashboard/model/inv-038-ten-be-that-khong-la-code.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 417,
+      "ms": 389,
       "out": "PASS",
       "tier": 2
     }
