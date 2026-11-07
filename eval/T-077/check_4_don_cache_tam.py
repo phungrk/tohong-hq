@@ -39,4 +39,4 @@ try:
 finally:
     h.kill_pids(h.marked()); h.rm_probe_files(c.FRONT); shutil.rmtree(tmp, ignore_errors=True)
 if errs: print("FAIL " + " | ".join(errs)); sys.exit(1)
-print("PASS cả năm tình huống (PASS, FAIL, SIGTERM): có cache riêng lúc chạy, TMPDIR sạch sau chạy, front không dư file")
+print("PASS cả năm tình huống (PASS, FAIL, SIGTERM, SIGINT, SIGHUP): có cache riêng lúc chạy, TMPDIR sạch sau chạy, front không dư file")
