@@ -223,7 +223,7 @@ def build_model(public: bool) -> dict:
             slug = slug.rsplit(".", 1)[0] if "." in slug else slug
             text = f.read_text(encoding="utf-8", errors="replace")
             it = {"area": area, "id": "INV-" + (num if num else "?"), "slug": slug,
-                  "name": kr_name(text, slug), "source": kr_source(text), "url": KR_URL + area + "/" + f.name}
+                  "name": kr_name(text, slug) or f.name, "source": kr_source(text), "url": KR_URL + area + "/" + f.name}
             if not public:
                 it["path"] = "eval/invariants/" + area + "/" + f.name
             items.append(((area != "_shared", area, int(num) if num else 10 ** 9, f.name), it))
