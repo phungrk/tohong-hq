@@ -10,7 +10,7 @@ INV-003 · `rewrite --check` của công cụ ảnh vendor không bao giờ báo
 Không cần mạng: dựng pool và manifest giả trong thư mục tạm, chỉ gọi `rewrite`.
 Chạy không tham số (gate.py: python3 -I). Repo tohong-back: TOHONG_BACK_REPO, rồi cwd, rồi ../tohong-back.
 Chưa có scripts/vendor-images/vendor-images.mjs: PASS "chưa áp dụng". Mã thoát 0 = đạt."""
-import json, os, subprocess, sys, tempfile
+import atexit, json, os, shutil, subprocess, sys, tempfile
 
 cands = [os.environ.get("TOHONG_BACK_REPO"), os.getcwd(), os.path.join(os.getcwd(), "..", "tohong-back")]
 repo = next((os.path.abspath(c) for c in cands if c and os.path.isfile(os.path.join(c, "lib", "vendorPool.generated.js"))), None)
@@ -52,6 +52,7 @@ formats = {
     "escape \\/": json.dumps(vendors, ensure_ascii=False, separators=(",", ":")).replace("/", "\\/"),
 }
 tmp = tempfile.mkdtemp(prefix="inv003-")
+atexit.register(shutil.rmtree, tmp, True)  # ADR-038: dọn thư mục tạm
 man = os.path.join(tmp, "manifest.json")
 json.dump({"version": 1, "baseUrl": BASE, "entries": entries}, open(man, "w", encoding="utf-8"), ensure_ascii=False)
 def rw(pool, *extra):
