@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Eval tầng 1 của T-090. Spec: products/T-090-nhan-vat-nho-mot-nua.md.
-//   cd /home/user/tohong-hq && bash eval/T-090/run.sh <repo-dashboard> [--criterion N] [--no-inv]
+//   cd /home/user/tohong-hq && bash eval/T-090/run.sh <repo-dashboard> [--criterion N] [--no-inv]   (N = 1..5)
 //   cd /home/user/tohong-hq && bash eval/T-090/run.sh <repo> --shots <thư-mục> --label truoc|sau
-// Tiêu chí: 1 cỡ nhân vật = 1/2; 2 khối thu nhỏ tương ứng; 3 mọi bất biến model xanh (trừ inv-019 có chủ ý); 4 ảnh trước/sau 1280 và 390 đã commit.
+// Tiêu chí: 1 cỡ nhân vật = 1/2; 2 khối thu nhỏ tương ứng; 3 mọi bất biến model xanh (trừ inv-019 có chủ ý); 4 ảnh trước/sau 1280 và 390 đã commit; 5 .page max-width 1400px (v2, Capu 2026-11-07).
 // In từng dòng `PASS Cn ...` / `FAIL Cn.<mã> <lý do>`, rồi một dòng cuối PASS/FAIL; mã thoát 0/1. Dữ liệu dashboard.json và kênh live là giả, cục bộ.
 const fs = require('fs'), path = require('path'), cp = require('child_process');
 const PW = require('playwright');
@@ -36,6 +36,7 @@ const GAP = [2, 24];                        // u: từ đáy thân tới chữ n
 const TOP = [0, 24];                        // u: từ mép trên khối tới đỉnh thân (mốc trước 19u)
 const VB_H_MAX = 1040;                      // viewBox cao giảm ≥ 60u so với 1100 (3 hàng khối cùng co), viewBox rộng giữ 1000
 const BODY_MIN = { u: 29.7, px1280: 33, px390: 9 };   // sàn tuyệt đối đề xuất cho inv-019 mới (xem spec mục "Bất biến đề xuất")
+const PAGE_MAX = 1400;                      // px: .page max-width mới (cũ 1200)
 const SHOT_NAMES = ['truoc-1280', 'sau-1280', 'truoc-390', 'sau-390'];
 
 const T = (id, state, owner) => ({ id, title: 'Việc ' + id, state, holder: owner, owner, reviewer: 'adversary', rounds: 0, version: 1, deadline: '', budget: '', cost: 0,
@@ -57,7 +58,7 @@ async function open(vp, zoom) {
   if (zoom) { await page.click('button#model-zoom'); await page.waitForTimeout(500); }
   return o;
 }
-const VIEWS = [['1280', { width: 1280, height: 900 }, 0], ['844', { width: 844, height: 900 }, 0], ['390', { width: 390, height: 844 }, 0], ['1280-phong-to', { width: 1280, height: 900 }, 1], ['390-phong-to', { width: 390, height: 844 }, 1]];
+const VIEWS = [['1280', { width: 1280, height: 900 }, 0], ['1440', { width: 1440, height: 900 }, 0], ['1920', { width: 1920, height: 1000 }, 0], ['844', { width: 844, height: 900 }, 0], ['390', { width: 390, height: 844 }, 0], ['1280-phong-to', { width: 1280, height: 900 }, 1], ['1440-phong-to', { width: 1440, height: 900 }, 1], ['390-phong-to', { width: 390, height: 844 }, 1]];
 
 // ---------- đo trong trang (lúc nghỉ) ----------
 const MEASURE = () => {
@@ -151,6 +152,29 @@ async function crit3() {
   console.log(`ghi chú: miễn ${exempt.join(', ')} (cỡ tối thiểu cũ 62u mâu thuẫn trực tiếp với ý định; lời mới do Chief of Staff phân xử qua decisions/, xem spec mục "Bất biến đề xuất")`);
 }
 
+
+// ---------- tiêu chí 5 (v2): .page max-width 1400px; bố cục trang vẫn lành ở mọi cỡ ----------
+async function crit5() {
+  for (const w of [390, 844, 1280, 1440, 1920]) {
+    const o = await open({ width: w, height: w >= 1440 ? 1000 : 900 }, 0);
+    try {
+      const m = await o.page.evaluate(() => { const pg = document.querySelector('.page'), pr = pg.getBoundingClientRect(), svg = document.querySelector('#model svg'), sr = svg.getBoundingClientRect(), bf = document.querySelector('#ban-do-luong svg');
+        const outside = [...pg.children].filter(c => { const r = c.getBoundingClientRect(); return r.width && (r.left < pr.left - 1 || r.right > pr.right + 1); }).map(c => c.id || c.tagName.toLowerCase() + '.' + c.className);
+        return { maxW: getComputedStyle(pg).maxWidth, pageW: pr.width, svgW: sr.width, over: document.documentElement.scrollWidth - innerWidth, outside, flow: bf ? bf.getBoundingClientRect().width : -1, flowBox: bf ? bf.parentNode.getBoundingClientRect().width : -1, mdlRight: sr.right - pr.right }; });
+      const want = Math.min(w, PAGE_MAX);
+      rec(5, `${w} A .page rộng ${want}px (max-width ${PAGE_MAX}px: ≥ 1440 dừng ở 1400, nhỏ hơn thì kín khung nhìn, không còn chặn 1200)`, m.maxW !== PAGE_MAX + 'px' ? `max-width tính ra ${m.maxW}` : (Math.abs(m.pageW - want) > 1 ? `.page rộng ${m.pageW.toFixed(0)}px, cần ${want}` : null));
+      rec(5, `${w} B trang không cuộn ngang; mọi khối con của .page nằm trong .page`, m.over > 0 ? `tràn ${m.over}px` : (m.outside.length ? 'ra ngoài .page: ' + m.outside.join(', ') : null));
+      rec(5, `${w} C #model svg rộng ≥ 90% .page ở > 480px (≥ 300px ở 390, T-028) và không tràn .page`, (w > 480 && m.svgW < 0.9 * m.pageW) || (w <= 480 && m.svgW < 300) || m.mdlRight > 1 ? `svg ${m.svgW.toFixed(0)}px trong .page ${m.pageW.toFixed(0)}px (lệch phải ${m.mdlRight.toFixed(0)}px)` : null);
+      rec(5, `${w} D Bản đồ luồng vẫn vừa khung chứa`, m.flow < 0 ? 'mất Bản đồ luồng' : (m.flow > m.flowBox + 1 ? `svg ${m.flow.toFixed(0)}px > khung ${m.flowBox.toFixed(0)}px` : null));
+      if (w >= 1280) { // phóng to: T-035 "svg ≥ 94% khung nhìn" giữ nguyên ở cỡ rộng
+        await o.page.click('button#model-zoom'); await o.page.waitForTimeout(500);
+        const z = await o.page.evaluate(() => ({ svgW: document.querySelector('#model svg').getBoundingClientRect().width, vw: innerWidth, mw: document.querySelector('#model').scrollWidth - document.querySelector('#model').clientWidth, over: document.documentElement.scrollWidth - innerWidth }));
+        rec(5, `${w} E phóng to: svg ≥ 94% khung nhìn, không cuộn ngang trong #model và trang`, z.svgW < 0.94 * z.vw - 1 || z.mw > 1 || z.over > 0 ? `svg ${z.svgW.toFixed(0)}/${z.vw}px, cuộn ngang #model ${z.mw}px, trang ${z.over}px` : null); }
+      if (o.errors.length) rec(5, `${w} 0 lỗi trang`, o.errors[0]);
+    } finally { await o.ctx.close(); }
+  }
+}
+
 // ---------- tiêu chí 4: ảnh trước/sau đã commit ở HEAD của repo dashboard ----------
 function crit4() {
   const dir = 'docs/screenshots/T-090/'; let ls;
@@ -182,6 +206,7 @@ async function shots() {
     browser = await PW.chromium.launch();
     if (SHOTS) { await shots(); await browser.close(); process.exit(0); }
     if (want(1) || want(2)) await crit1and2();
+    if (want(5)) await crit5();
     await browser.close();
     if (want(3) && !NO_INV) await crit3();
     if (want(4)) crit4();
