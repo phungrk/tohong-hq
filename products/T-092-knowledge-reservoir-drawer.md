@@ -36,8 +36,14 @@ Phần tử của `invariant_list`: `{"area", "id", "slug", "name", "source", "u
 - `area`: như khoá của `invariants`.
 - `id`: `"INV-"` + số trong tên file, giữ nguyên chữ số (`inv-004-x.sh` -> `INV-004`). Tên file chỉ có `inv-` mà không có số: `id` = `"INV-?"`.
 - `slug`: tên file bỏ tiền tố `inv-<số>-` và đuôi sau dấu chấm cuối (`inv-004-pool-trung-gian.py` -> `pool-trung-gian`).
-- `name`: lấy từ **12 dòng đầu** của file (đọc UTF-8, lỗi giải mã thì thay ký tự), theo thứ tự ưu tiên: (1) dòng đầu tiên chứa `Bất biến` (có thể kèm `(…)` ngay sau) rồi dấu `:`: lấy phần sau dấu `:` đó; (2) nếu không có, dòng đầu tiên có dạng `INV-<số> · <chữ>`: lấy `<chữ>`; (3) nếu không có, `slug` thay `-` bằng dấu cách. Sau đó: bỏ khoảng trắng và dấu `"` thừa hai đầu, cắt tại dấu chấm đầu tiên có dấu cách theo sau (". "), rồi nếu dài hơn 140 ký tự thì giữ 140 ký tự đầu (bỏ khoảng trắng cuối) và thêm `…`. Một dòng, không xuống dòng.
-- `source`: trong 12 dòng đầu, dòng đầu tiên chứa `Nguồn:`; lấy mã `T-<số>` đầu tiên trong phần sau `Nguồn:` của dòng đó (vd `T-074`); không có thì `""`.
+- `name`: lấy từ **12 dòng đầu** của file (đọc UTF-8, lỗi giải mã thì thay ký tự). Trước hết làm sạch từng dòng: bỏ khoảng trắng hai đầu, bỏ ký tự chú thích ở đầu dòng (`#`, `//`, ba dấu nháy kép, ba dấu nháy đơn; lặp được) và ba dấu nháy ở cuối dòng, bỏ khoảng trắng lần nữa. Mọi so khớp chữ dưới đây **không phân biệt hoa thường**. Một quy tắc duy nhất, thử lần lượt:
+  1. Tìm **dòng đầu tiên bắt đầu bằng** `Bất biến` (dòng chỉ chứa chữ đó ở giữa, như `ADR-031: lời bất biến sửa`, không tính). Trong dòng đó tìm dấu `:` **đầu tiên nằm ngoài mọi cặp ngoặc tròn** (đếm độ sâu ngoặc; `:` trong ngoặc bị bỏ qua). Gọi phần trước dấu là `đầu`, phần sau là `đuôi` (bỏ khoảng trắng).
+     - (a) Nếu có `:` đó, `đuôi` không rỗng, `đuôi` không bắt đầu bằng `nguồn`, và `đầu` không kết thúc bằng `nguồn`: `name` = `đuôi`.
+     - (b) Ngược lại (không có `:` ngoài ngoặc, `đuôi` rỗng hoặc bắt đầu bằng `nguồn`, hoặc `đầu` kết thúc bằng `nguồn`, vd `Bất biến hq/ledger · nguồn: T-083 (...`): bỏ phần nối tiếp của đoạn nguồn, tức bỏ các dòng sau dòng đó cho tới hết dòng đầu tiên kết thúc bằng `.` hoặc `:` (nếu chính dòng đó đã kết thúc bằng `.` hoặc `:` thì không bỏ gì); rồi `name` = dòng đầu tiên sau đó có từ 50 ký tự trở lên và không bắt đầu bằng `chỉ xanh` (ghi chú gác theo ADR-028). Không tìm được thì chuyển sang bước 2.
+  2. Nếu bước 1 không cho tên: dòng đầu tiên có dạng `INV-<số>`, tuỳ chọn một cặp ngoặc, rồi `·`, rồi chữ; `name` = chữ sau `·`. Không có thì bước 3.
+  3. `name` = `slug` thay `-` bằng dấu cách.
+  Sau khi có `name` (từ bước 1 hoặc 2): cắt tại dấu chấm đầu tiên có dấu cách theo sau (". "), bỏ khoảng trắng và dấu `:` thừa ở cuối, rồi nếu dài hơn 140 ký tự thì giữ 140 ký tự đầu, bỏ khoảng trắng cuối, rồi thêm `…` (nên có thể ngắn hơn 141 ký tự). Một dòng, không xuống dòng. Kết quả không bao giờ rỗng (bước 3 bảo đảm).
+- `source`: ghép 12 dòng đầu bằng xuống dòng, tìm từ `nguồn` đầu tiên (không phân biệt hoa thường, kể cả `nguồn:` viết thường giữa dòng); `source` = mã `T-<số>` đầu tiên **sau** vị trí đó (có thể ở dòng sau); không có thì `""`.
 - `url`: `https://github.com/phungrk/tohong-hq/blob/main/eval/invariants/<area>/<tên file>`.
 - `path` (chỉ bản không `--public`): `eval/invariants/<area>/<tên file>`, tương đối so với gốc repo.
 Thứ tự: `_shared` đứng trước, các vùng còn lại sắp tăng dần theo chuỗi vùng; trong một vùng sắp theo số nguyên trong tên (`inv-2` trước `inv-10`), hòa thì theo tên file.
@@ -63,6 +69,7 @@ Bản `--public`: không có khoá `path`; không trường nào của `model` c
 
 ### D. Đóng và dùng được trên điện thoại
 - Đóng bằng: bấm `#kr-drawer-close`; phím `Esc` (bắt ở `window` giai đoạn bắt, `stopImmediatePropagation`, như modal Capu, nên không thoát luôn chế độ phóng to hay đóng tóm tắt nhân vật cùng lúc); bấm/chạm vào lớp nền ngoài khung drawer. Bấm vào trong khung drawer (kể cả chữ, khoảng trống) không đóng.
+- Nút Back của trình duyệt: drawer **không xử lý Back**, giống `#capu-modal` hiện nay (T-078 không có `popstate`/`pushState`; chỉ chế độ phóng to T-036 có). Mở/đóng drawer không thêm hay bớt bước lịch sử. Back khi drawer mở có tác dụng như hiện nay: đang phóng to thì thoát phóng to (drawer vẫn mở trên cùng), không thì rời trang. Không có eval cho Back.
 - Đóng xong: `#kr-drawer` có `hidden`, focus về `#nd_kr`. Phím `Tab`/`Shift+Tab` xoay vòng trong drawer (nút đóng và các liên kết), không ra ngoài.
 - Khung nhìn 390px: khung drawer rộng đúng bề rộng khung nhìn (không tràn: `scrollWidth <= clientWidth`, trang không phát sinh cuộn ngang), nút đóng nằm trọn trong khung nhìn, danh sách cuộn dọc trong drawer, mọi liên kết `a[data-kr-link]` cao >= 32px. Ở 1280px khung rộng tối đa 560px, sát mép phải.
 - Trong chế độ phóng to sơ đồ (T-036, nút `#model-zoom`): bấm `#nd_kr` vẫn mở drawer và drawer hiện trên cùng; `Esc` đóng drawer, sơ đồ vẫn phóng to; `Esc` lần nữa mới thoát phóng to.
@@ -79,13 +86,13 @@ Môi trường chung cho eval trình duyệt: `D3=/tmp/claude-0/-home-user/86243
 
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Hợp đồng dữ liệu A: trên sổ cái tạm có đủ biến thể (đủ ba dạng dòng mô tả, thiếu mô tả, tên dài, vùng cũ, thư mục `inv-…`, `adv-*` ở độ sâu 1 và sâu hơn, hồi quy, spec, insight) `model` có đúng các khoá, số, `id`, `slug`, `name`, `source`, `url`, `path`, thứ tự như định nghĩa | `cd /home/user/tohong-hq && python3 eval/T-092/export-be.py --criterion 1` |
+| 1 | Hợp đồng dữ liệu A: trên sổ cái tạm có đủ biến thể (đủ ba dạng dòng mô tả, thiếu mô tả, tên dài, vùng cũ, thư mục `inv-…`, `adv-*` ở độ sâu 1 và sâu hơn, hồi quy, spec, insight) `model` có đúng các khoá, số, `id`, `slug`, `name`, `source`, `url`, `path`, thứ tự như định nghĩa, gồm các dạng dòng mô tả của bể thật | `cd /home/user/tohong-hq && python3 eval/T-092/export-be.py --criterion 1` |
 | 2 | Khối `#nd_kr` hiện số đúng: Tất cả, hq, planner, với `#krTxt`, `[data-kr-scope]`, `#nd_kr .lbl` theo T-041 | `cd /home/user/tohong-hq && D3=… NODE_PATH=$(npm root -g) node eval/T-092/check.cjs --criterion 2` |
 | 3 | Bấm khối (chuột, và Enter/Space) mở `#kr-drawer` với đúng tiêu đề, `[data-kr-stat]`, nhóm vùng, dòng bất biến, liên kết GitHub, trạng thái rỗng; bấm nhân vật không mở | `… node eval/T-092/check.cjs --criterion 3` |
 | 4 | Đóng bằng X, Esc, chạm ngoài, không đóng khi bấm trong; focus vào/ra; Tab xoay vòng; 390px không tràn; trong chế độ phóng to Esc chỉ đóng drawer | `… node eval/T-092/check.cjs --criterion 4` |
 | 5 | Bộ lọc sản phẩm áp vào drawer: số dòng, nhóm, `[data-kr-filter]`, ẩn `specs`; đổi bộ chọn khi drawer mở thì cập nhật tại chỗ, không đóng | `… node eval/T-092/check.cjs --criterion 5` |
 | 6 | Bản `--public`: không có `path`, không chuỗi đường dẫn máy, không dòng thân eval (mốc `SECRET_BODY_SENTINEL_92`), số và `name` đúng, `url` đúng dạng; bản thường có `path` tương đối | `cd /home/user/tohong-hq && python3 eval/T-092/export-be.py --criterion 6` |
-| 7 | Trên sổ cái thật (cả hai chế độ): `invariants_total` = số file `inv-*` đếm độc lập bằng cách khác = tổng `invariants` = `len(invariant_list)`; từng vùng khớp; `adversarial_evals` khớp đếm độc lập; mọi `path` tồn tại; tổng > 0 | `cd /home/user/tohong-hq && python3 eval/T-092/export-be.py --criterion 7` |
+| 7 | Trên sổ cái thật (cả hai chế độ): mọi `name` và `source` của toàn bể khớp quy tắc viết lại độc lập (`eval/T-092/namerule.py`), `name` không rỗng, không bắt đầu bằng `nguồn`, không chỉ là mã hay đường dẫn, hai bất biến `_shared` có tên là phần mô tả; ghi được bảng tên->file; `invariants_total` = số file `inv-*` đếm độc lập bằng cách khác = tổng `invariants` = `len(invariant_list)`; từng vùng khớp; `adversarial_evals` khớp đếm độc lập; mọi `path` tồn tại; tổng > 0 | `cd /home/user/tohong-hq && python3 eval/T-092/export-be.py --criterion 7` |
 
 Ánh xạ với 5 tiêu chí trong `board/T-092.md`: (1) -> eval 1, 2, 7; (2) -> eval 3; (3) -> eval 4, 5; (4) -> eval 6; (5) -> eval 7 và bất biến đề xuất.
 
