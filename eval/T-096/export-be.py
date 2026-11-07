@@ -42,15 +42,24 @@ def make_fake(tmp):
     body = f"echo {SENT}\n"
     w(f, "eval/invariants/_shared/inv-001-x.sh", "#!/usr/bin/env bash\n# Bất biến: Không có secret.\n" + body)
     E = "eval/"
-    w(f, E + "T-901/adv-01-co-mo-ta.sh", "#!/usr/bin/env bash\n# Eval đối kháng T-901 (adversary). Chạy trong repo dashboard.\nset -u\n" + body)
-    w(f, E + "T-901/adv-02-docstring.py", '#!/usr/bin/env python3\n"""T-901 adv-02 (adversary, tầng 3). Spec T-899 mục 4 + INV-001.\nDòng hai."""\nprint("' + SENT + '")\n')
-    w(f, E + "T-901/adv-03.cjs", "#!/usr/bin/env node\n/*\n * Eval đối kháng (tầng 3) của T-901: input phá.\n */\nconsole.log('" + SENT + "')\n")
-    w(f, E + "T-901/adv-10-muoi.sh", "# Kiểm tra số thứ tự tự nhiên của tên file\n" + body)
+    C95 = "# Eval đối kháng T-901 (adversary, 2026-11-07), vùng hq/dashboard/model. Mô tả: dòng giống hệt nhau ở nhiều file.\n"
+    # T-901: ca giống T-095 (comment đầu giống nhau, slug khác nhau), docstring, khối /* */, nhãn trùng, adv-vv
+    for n in ("adv-01-nhan-khong-de-chu.sh", "adv-02-bam-so-khong-che.sh", "adv-03-vung-chung.sh"):
+        w(f, E + "T-901/" + n, "#!/usr/bin/env bash\n" + C95 + "set -u\n" + body)
+    w(f, E + "T-901/adv-04.py", '#!/usr/bin/env python3\n"""T-901 adv-04 (adversary, tầng 3). Spec T-899 mục 4 + INV-001.\nDòng hai."""\nprint("' + SENT + '")\n')
+    w(f, E + "T-901/adv-05.cjs", "#!/usr/bin/env node\n/*\n * Eval đối kháng (tầng 3) của T-901: input phá.\n */\nconsole.log('" + SENT + "')\n")
+    for n in ("adv-06.sh", "adv-07.sh"):
+        w(f, E + "T-901/" + n, "# Kiểm tra trùng nhãn comment trong cùng việc\n" + body)
+    w(f, E + "T-901/adv-10-muoi-hai.sh", "# Kiểm tra số thứ tự tự nhiên của tên file\n" + body)
+    w(f, E + "T-901/adv-vv.cjs", "// Chung cho các ca trình duyệt giả lập\n// " + SENT + "\n")
+    # T-902: slug 2 từ thắng comment; chỉ code -> tên file; dòng đầu có đường dẫn máy bị bỏ
     w(f, E + "T-902/adv-01-chi-code.sh", '#!/usr/bin/env bash\nset -u\nROOT="$(pwd)"\nexec node x.cjs\n' + body)
     w(f, E + "T-902/adv-02.sh", "#!/usr/bin/env bash\nset -u\n" + body)
-    w(f, E + "T-902/adv-03-duong-dan.sh", "# Chạy trong /home/user/tohong-hq/eval và đọc handoffs/T-1-v1.md rồi ghi lại\n# Kiểm tra số liệu hiển thị đúng sau khi đổi bộ chọn sản phẩm\n" + body)
-    w(f, E + "T-903/adv-01-ten-dai.sh", "# " + LONG + "\n" + body)
-    w(f, E + "T-903/adv-02-chi-the.sh", "# T-903 adv-02 (adversary)\n# Kiểm tra mục hai đủ dài ở dòng sau\n" + body)
+    w(f, E + "T-902/adv-03-duong.sh", "# Chạy trong /home/user/tohong-hq/eval và đọc handoffs/T-1-v1.md rồi ghi lại\n# Kiểm tra số liệu hiển thị đúng sau khi đổi bộ chọn sản phẩm\n" + body)
+    # T-903: slug thắng; tên dài cắt; dòng thẻ rồi dòng thật
+    w(f, E + "T-903/adv-01-ten-dai.sh", "# Dòng này bị bỏ qua vì slug đã đủ hai từ, không đọc comment\n" + body)
+    w(f, E + "T-903/adv-02-dai.sh", "# " + LONG + "\n" + body)
+    w(f, E + "T-903/adv-03.sh", "# T-903 adv-03 (adversary)\n# Kiểm tra mục hai đủ dài ở dòng sau\n" + body)
     w(f, E + "T-100/adv-01.py", '"""Tầng 3 T-100 · input: tên trùng khoá.\n"""\n' + f"print('{SENT}')\n")
     w(f, E + "T-99/adv-01.sh", "# Số T nhỏ hơn đứng sau\n" + body)
     # không tính:
@@ -61,31 +70,41 @@ def make_fake(tmp):
     w(f, E + "regression/reg-T-050-so-dem.sh", "# Hồi quy T-050: số đếm không lệch sau khi đổi bộ chọn\n" + body)
     w(f, E + "regression/T-060-kanban/run.sh", "# trong thư mục\n" + body)
     w(f, E + "regression/doi_chung.py", '"""Kiểm tra bản vá cũ không quay lại"""\n' + f"print('{SENT}')\n")
+    w(f, E + "regression/smoke.py", "# Hồi quy nhanh số đếm sau đổi bộ chọn\n" + f"print('{SENT}')\n")
+    w(f, E + "regression/solo.sh", "#!/usr/bin/env bash\nset -u\n" + body)
     return f
 
 
 def want_adv():
-    # (task, file, name, id) theo thứ tự: số T giảm dần, trong một T tên file theo số tự nhiên tăng dần
+    # (task, file, name, id); name None = kiểm riêng (tên dài). Số T giảm dần; trong một việc: cụm số trước cụm chữ, số so như số nguyên
     return [
-        ("T-903", "adv-01-ten-dai.sh", None, "adv-01-ten-dai"),
-        ("T-903", "adv-02-chi-the.sh", "Kiểm tra mục hai đủ dài ở dòng sau", "adv-02-chi-the"),
-        ("T-902", "adv-01-chi-code.sh", "chi code", "adv-01-chi-code"),
+        ("T-903", "adv-01-ten-dai.sh", "adv-01 · ten dai", "adv-01-ten-dai"),
+        ("T-903", "adv-02-dai.sh", None, "adv-02-dai"),
+        ("T-903", "adv-03.sh", "adv-03 · Kiểm tra mục hai đủ dài ở dòng sau", "adv-03"),
+        ("T-902", "adv-01-chi-code.sh", "adv-01 · chi code", "adv-01-chi-code"),
         ("T-902", "adv-02.sh", "adv-02.sh", "adv-02"),
-        ("T-902", "adv-03-duong-dan.sh", "Kiểm tra số liệu hiển thị đúng sau khi đổi bộ chọn sản phẩm", "adv-03-duong-dan"),
-        ("T-901", "adv-01-co-mo-ta.sh", "Chạy trong repo dashboard", "adv-01-co-mo-ta"),
-        ("T-901", "adv-02-docstring.py", "Spec T-899 mục 4 + INV-001", "adv-02-docstring"),
-        ("T-901", "adv-03.cjs", "của T-901: input phá", "adv-03"),
-        ("T-901", "adv-10-muoi.sh", "Kiểm tra số thứ tự tự nhiên của tên file", "adv-10-muoi"),
-        ("T-100", "adv-01.py", "input: tên trùng khoá", "adv-01"),
-        ("T-99", "adv-01.sh", "Số T nhỏ hơn đứng sau", "adv-01"),
+        ("T-902", "adv-03-duong.sh", "adv-03 · Kiểm tra số liệu hiển thị đúng sau khi đổi bộ chọn sản phẩm", "adv-03-duong"),
+        ("T-901", "adv-01-nhan-khong-de-chu.sh", "adv-01 · nhan khong de chu", "adv-01-nhan-khong-de-chu"),
+        ("T-901", "adv-02-bam-so-khong-che.sh", "adv-02 · bam so khong che", "adv-02-bam-so-khong-che"),
+        ("T-901", "adv-03-vung-chung.sh", "adv-03 · vung chung", "adv-03-vung-chung"),
+        ("T-901", "adv-04.py", "adv-04 · Spec T-899 mục 4 + INV-001", "adv-04"),
+        ("T-901", "adv-05.cjs", "adv-05.cjs", "adv-05"),
+        ("T-901", "adv-06.sh", "adv-06.sh", "adv-06"),
+        ("T-901", "adv-07.sh", "adv-07.sh", "adv-07"),
+        ("T-901", "adv-10-muoi-hai.sh", "adv-10 · muoi hai", "adv-10-muoi-hai"),
+        ("T-901", "adv-vv.cjs", "adv-vv · Chung cho các ca trình duyệt giả lập", "adv-vv"),
+        ("T-100", "adv-01.py", "adv-01 · input: tên trùng khoá", "adv-01"),
+        ("T-99", "adv-01.sh", "adv-01 · Số T nhỏ hơn đứng sau", "adv-01"),
     ]
 
 
 def want_reg():
     # (file, name, source, id, loại) theo tên (không phân biệt hoa thường), bỏ .gitkeep, README.md
     return [
-        ("doi_chung.py", "Kiểm tra bản vá cũ không quay lại", "", "doi_chung", "blob"),
-        ("reg-T-050-so-dem.sh", "Hồi quy T-050: số đếm không lệch sau khi đổi bộ chọn", "T-050", "reg-T-050-so-dem", "blob"),
+        ("doi_chung.py", "doi chung", "", "doi_chung", "blob"),
+        ("reg-T-050-so-dem.sh", "reg T 050 so dem", "T-050", "reg-T-050-so-dem", "blob"),
+        ("smoke.py", "Hồi quy nhanh số đếm sau đổi bộ chọn", "", "smoke", "blob"),
+        ("solo.sh", "solo.sh", "", "solo", "blob"),
         ("T-060-kanban", "T 060 kanban", "T-060", "T-060-kanban", "tree"),
     ]
 
@@ -96,10 +115,10 @@ def check_fake(m, public):
         if not isinstance(m.get(key), list):
             bad.append(f"[{k}] model thiếu mảng {key}"); return
     A, R = m["adversarial_list"], m["regression_list"]
-    if m.get("adversarial_evals") != 11 or len(A) != 11:
-        bad.append(f"[{k}] adversarial_evals/len(adversarial_list) phải 11/11, thấy {m.get('adversarial_evals')}/{len(A)}")
-    if m.get("regression_evals") != 3 or len(R) != 3:
-        bad.append(f"[{k}] regression_evals/len(regression_list) phải 3/3, thấy {m.get('regression_evals')}/{len(R)}")
+    if m.get("adversarial_evals") != 17 or len(A) != 17:
+        bad.append(f"[{k}] adversarial_evals/len(adversarial_list) phải 17/17, thấy {m.get('adversarial_evals')}/{len(A)}")
+    if m.get("regression_evals") != 5 or len(R) != 5:
+        bad.append(f"[{k}] regression_evals/len(regression_list) phải 5/5, thấy {m.get('regression_evals')}/{len(R)}")
     want_keys = {"id", "file", "name", "source", "url"} | (set() if public else {"path"})
     for it in A + R:
         if set(it) != want_keys:
@@ -112,7 +131,7 @@ def check_fake(m, public):
         if got.get("id") != id_: bad.append(f"{loc}: id phải {id_!r}, thấy {got.get('id')!r}")
         if name is None:
             n = got.get("name", "")
-            if not (n.startswith("Dòng mô tả rất dài") and n.endswith("…") and len(n) <= 141 and "\n" not in n):
+            if not (n.startswith("adv-02 · Dòng mô tả rất dài") and n.endswith("…") and len(n) - len("adv-02 · ") <= 141 and "\n" not in n):
                 bad.append(f"{loc}: tên dài phải cắt 140 ký tự + …, thấy {len(n)} ký tự {n[-10:]!r}")
         elif got.get("name") != name:
             bad.append(f"{loc}: name phải {name!r}, thấy {got.get('name')!r}")
@@ -168,6 +187,11 @@ def real():
                 for s in ("/home/", "/root/", "/tmp/", "handoffs/", str(ROOT)):
                     if s in raw: bad.append(f"[public] dashboard.json chứa {s!r}")
                 if any("path" in x for x in A + R): bad.append("[public] còn khoá path")
+            seen = {}
+            for x in A: seen.setdefault((x["source"], x["name"]), []).append(x["file"])
+            for key, fl in seen.items():
+                if len(fl) > 1: bad.append(f"[{k}] trong {key[0]} hai mục cùng name {key[1]!r}: {fl}")
+            if sum(1 for x in A if x["name"] == x["file"]) > len(A) * 0.2: bad.append(f"[{k}] quá 20% tên eval đối kháng là tên file (quy tắc nhãn kém)")
             # thứ tự adv: số T giảm dần
             tn = [int(x["source"][2:]) for x in A]
             if tn != sorted(tn, reverse=True): bad.append(f"[{k}] adversarial_list phải sắp theo số việc giảm dần")
