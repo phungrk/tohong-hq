@@ -9,6 +9,9 @@
 // labels (adv-03): mọi nhãn .lbl ngoài khối (gồm "eval tầng 3") không đè chữ khác, hình khối, thân nhân vật (>0,5u), trừ hai dòng của cùng một nhãn;
 //   ở 8 viewport T-090 với font thật.
 // routes (adv-04): mỗi đường p_* bắt đầu ở khối nguồn và kết thúc ở khối đích theo tên tuyến (|khoảng cách tới hình| ≤ 8u, hình học viewBox).
+// hit-other-block (adv-05): ở 320, 360, 375, 390 (thường) và 360, 390 (phóng to): vùng bấm của nhân vật (g.mch, T-037) không nằm trên hình chính hay chữ
+//   của KHỐI KHÁC (g.node, g.gate, g.res có id): bấm vào khối phía trên/dưới không được mở tóm tắt của nhân vật khối khác. Đo bằng elementFromPoint ở
+//   tâm và hai đầu mỗi chữ khối, và ở mép trên/dưới (3%, 97%) của hình chính mỗi khối. Bấm tâm thân mỗi nhân vật vẫn mở tóm tắt của chính nó.
 // Dữ liệu dashboard.json, kênh live, d3, font đều cục bộ. Mã thoát 0 = đạt.
 const fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
@@ -17,7 +20,7 @@ const REPO = path.resolve(arg('--repo') || '.'), INDEX = path.join(REPO, 'index.
 const FONT = path.join(__dirname, '..', '..', 'invariants', 'hq', 'dashboard', 'model', 'lib', 'BeVietnamPro-Regular.ttf');
 const D3 = [process.env.D3, '/opt/npm-tools/node_modules/d3/dist/d3.min.js',
   '/tmp/claude-0/-home-user/86243faa-8dbf-5631-b32b-051ad4d92b1e/scratchpad/d3.min.js'].find(p => p && fs.existsSync(p));
-if (!['tap-count', 'capu-caption', 'labels', 'routes'].includes(CHECK)) { console.log('FAIL --check sai'); process.exit(1); }
+if (!['tap-count', 'capu-caption', 'labels', 'routes', 'hit-other-block'].includes(CHECK)) { console.log('FAIL --check sai'); process.exit(1); }
 if (!fs.existsSync(INDEX)) { console.log('FAIL không thấy index.html trong ' + REPO); process.exit(1); }
 if (!D3) { console.log('FAIL thiếu d3.min.js cục bộ: đặt D3'); process.exit(1); }
 if (!fs.existsSync(FONT)) { console.log('FAIL thiếu font ' + FONT); process.exit(1); }
@@ -76,6 +79,16 @@ const CAPU = () => { const g = document.getElementById('nd_capu'), R = __U(g.que
     if (Math.min(q.r, b.r) - Math.max(q.l, b.l) > 2 && Math.min(q.b, b.b) - Math.max(q.t, b.t) > 2) bad.push('thân nhân vật đè "' + e.textContent.trim() + '"'); } }
   return { bad, txt: cap.textContent.replace(/\s+/g, ' ').trim() }; };
 
+const OTHER = () => { const svg = document.querySelector('#model svg'), bad = [];
+  const who = (x, y) => { const e = document.elementFromPoint(x, y), m = e && e.closest && e.closest('g.mch'); return m ? m.getAttribute('data-block') : null; };
+  for (const t of svg.querySelectorAll('g.node[id] text, g.gate[id] text, g.res[id] text')) { if (!t.textContent.trim() || t.closest('.mch')) continue;
+    const own = t.closest('g.node[id], g.gate[id], g.res[id]').id; t.scrollIntoView({ block: 'center' }); const q = t.getBoundingClientRect(); if (!q.width) continue;
+    for (const fx of [.15, .5, .85]) { const b = who(q.left + q.width * fx, q.top + q.height / 2); if (b && b !== own) { bad.push(`chữ "${t.textContent.trim().slice(0, 24)}" của ${own} nằm dưới vùng bấm nhân vật ${b}`); break; } } }
+  for (const s of svg.querySelectorAll('g.node[id]>rect, g.gate[id]>circle, g.res[id]>rect')) { const own = s.parentNode.id; s.scrollIntoView({ block: 'center' }); const q = s.getBoundingClientRect();
+    for (const [fx, fy] of [[.3, .03], [.5, .03], [.7, .03], [.3, .97], [.5, .97], [.7, .97]]) { const b = who(q.left + q.width * fx, q.top + q.height * fy);
+      if (b && b !== own) { bad.push(`khối ${own} (điểm ${fx},${fy}) nằm dưới vùng bấm nhân vật ${b}`); break; } } }
+  return bad; };
+
 const LBL = () => { const svg = document.querySelector('#model svg'), bad = [];
   const ov = (a, b) => Math.min(Math.min(a.r, b.r) - Math.max(a.l, b.l), Math.min(a.b, b.b) - Math.max(a.t, b.t));
   const texts = [...svg.querySelectorAll('text')].filter(t => !t.closest('.mch,#fx_b,#fx_s,#fx_f') && t.textContent.trim() && getComputedStyle(t).display !== 'none');
@@ -127,6 +140,16 @@ const ROUTES = () => { const svg = document.querySelector('#model svg'), bad = [
         if (!st.open) bad.push('bấm tâm số khối Capu không mở #capu-modal'); else if (String(st.rows) !== st.n) bad.push(`modal ${st.rows} dòng ≠ số khối ${st.n}`);
         await ctx.close(); say(bad.concat(errs), `${tag} ${D.join('/')}`);
       }
+    } else if (CHECK === 'hit-other-block') {
+      V['320'] = [{ width: 320, height: 700 }, 0]; V['360-phong-to'] = [{ width: 360, height: 800 }, 1];
+      for (const tag of ['320', '360', '375', '390', '360-phong-to', '390-phong-to']) { const [vp, zoom] = V[tag]; const { ctx, page, errs } = await open(browser, vp, zoom, data(3, 2, 4));
+        const bad = await page.evaluate(OTHER);
+        for (const id of await page.evaluate(() => [...document.querySelectorAll('#chars g.mch')].map(g => g.getAttribute('data-block')))) {
+          const pt = await page.evaluate(id => { const b = document.querySelector(`g.mch[data-block=${id}] [data-part=body]`); b.scrollIntoView({ block: 'center' }); const q = b.getBoundingClientRect(); return [q.left + q.width / 2, q.top + q.height / 2]; }, id);
+          await page.mouse.click(pt[0], pt[1]); await page.waitForTimeout(250);
+          if (!await page.evaluate(id => document.querySelector(`g.mch[data-block=${id}]`).getAttribute('aria-expanded') === 'true', id)) bad.push(`bấm thân ${id} không mở tóm tắt của nó`);
+          await page.keyboard.press('Escape'); await page.waitForTimeout(150); }
+        await ctx.close(); say(bad.concat(errs), tag); }
     } else if (CHECK === 'capu-caption') {
       for (const D of [[0, 0, 0], [12, 34, 56], [99, 99, 99]]) for (const tag of ['390', '844', '1280', '1440', '1920', '390-phong-to', '1280-phong-to', '1440-phong-to']) {
         const [vp, zoom] = V[tag]; const { ctx, page, errs } = await open(browser, vp, zoom, data(...D)); const r = await page.evaluate(CAPU); await ctx.close();
