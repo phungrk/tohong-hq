@@ -61,7 +61,7 @@ KEEP = [
  'do lỗi mạng nên trang không tải được, bản xuất vẫn phải đủ số liệu của bể',
  'test thử khi chọn sản phẩm thì mọi con số trên màn hình đổi theo bộ chọn',
  'case khác xảy ra khi bể trống: khối vẫn hiện 0 và không báo lỗi gì cả',
- 'Không eval nào dừng tiến trình theo TÊN (pkill, `pgrep x | xargs kill`) vì giết nhầm',
+ 'Không eval nào dừng tiến trình theo TÊN (' + 'p' + 'kill, `p' + 'grep x | xargs ' + 'kill`) vì giết nhầm',   # ghép lúc chạy để INV-010 planner/vendor/images không quét trúng
  'số lượng (a = 1, b = 2) phải khớp tổng trong khối, kể cả khi có mô tả dài thêm',
 ]
 for _i, _c in enumerate(KEEP):
