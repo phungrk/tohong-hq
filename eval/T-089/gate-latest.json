@@ -1,0 +1,157 @@
+{
+  "task": "T-089",
+  "at": "2026-11-07T01:51",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/dashboard",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 36,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 136,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 987,
+      "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-002-workflow-context-hop-le.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 52,
+      "out": "PASS 6 workflow: không secrets/env sai chỗ trong if, inputs đều khai, không in env khi có secret cấp job",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-001-tat-ca-luon-du.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 281,
+      "out": "FAIL thiếu d3.min.js cục bộ: đặt D3=/đường/dẫn/d3.min.js",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-002-cay-bat-bien-khop-tong.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 288,
+      "out": "FAIL thiếu d3.min.js cục bộ: đặt D3=/đường/dẫn/d3.min.js",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-003-doi-bo-loc-khong-doi-hinh.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 282,
+      "out": "FAIL thiếu d3.min.js cục bộ: đặt D3=/đường/dẫn/d3.min.js",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-004-san-pham-do-so-cai-xuat.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 248,
+      "out": "PASS product do sổ cái xuất, khớp normalize_area",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-005-export-khong-sap-vi-area-sua-tay.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 129,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-006-so-capu-bang-so-dong-modal.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 38,
+      "out": "FAIL thiếu d3.min.js cục bộ: đặt D3=/đường/dẫn/d3.min.js",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-007-loc-san-pham-toan-man-hinh.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 277,
+      "out": "FAIL thiếu d3.min.js cục bộ: đặt biến môi trường D3=/đường/dẫn/d3.min.js",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-008-capu-queue-khong-chua-viec-da-xu-ly.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 210,
+      "out": "PASS sổ cái thật: mỗi mã việc tối đa một phần tử (0 phần tử)\nPASS sổ cái thật: mọi việc escalated trên board có trong capu_queue: thiếu []\nPASS sổ cái giả: mỗi mã việc tối đa một phần tử (2 phần tử)\nPASS sổ cái giả: T-954 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái giả: T-954 loại diff-b chỉ cho việc B/C đã done (tier B, state done)\nPASS sổ cái giả: T-957 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái giả: mọi việc escalated trên board có trong capu_queue: thiếu []\nPASS sổ cái giả: capu_queue đúng {T-954: diff-b (PR #95 còn mở), T-957: escalated}, thấy {'T-954': 'diff-b', 'T-957': 'escalated'}\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-009-link-capu-an-toan-cong-khai-khong-ro.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 151,
+      "out": "PASS (a) bản công khai: 0 phần tử capu_queue, 687 sự kiện\nFAIL thiếu d3.min.js cục bộ: đặt D3=/đường/dẫn/d3.min.js",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-010-capu-queue-khong-doc-thu-muc-con-inbox.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 262,
+      "out": "PASS capu_queue không đổi khi thêm DR vào thư mục con inbox/capu (0 phần tử)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-011-viec-moi-pr-da-merged-khong-cho-capu.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 216,
+      "out": "PASS việc B/C mà mọi PR đã biết đã merged/closed không còn chờ Capu, bất kể tuổi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-012-dr-da-quyet-khong-con-dong.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 223,
+      "out": "PASS DR đã quyết (sau lần hỏi cuối) không còn dòng decision/blocked; hỏi lại thì vào lại",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-013-link-issue-dung-so-viec.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 230,
+      "out": "PASS 0 phần tử capu_queue; (b) đang kiểm",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/dashboard/inv-014-issue-tu-do-khong-sinh-link-sai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 108,
+      "out": "PASS 25 giá trị issue thử",
+      "tier": 2
+    }
+  ],
+  "hint": "spec"
+}
