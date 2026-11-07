@@ -19,7 +19,7 @@ IGNORE_TMP = {"node-compile-cache"}
 
 def find_front():
     for c in (os.environ.get("TOHONG_FRONT_REPO"), os.environ.get("FRONT"), os.getcwd(), os.path.join(HQ, "..", "tohong-front")):
-        if c and os.path.isfile(os.path.join(c, "package.json")) and os.path.exists(os.path.join(c, "node_modules", ".bin", "vite")):
+        if c and os.path.isfile(os.path.join(c, "package.json")) and os.path.isfile(os.path.join(c, "node_modules", "vite", "package.json")):
             return os.path.abspath(c)
     return None
 
