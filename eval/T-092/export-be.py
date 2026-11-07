@@ -48,6 +48,9 @@ def make_fake(tmp):
     w(f, I + "hq/dashboard/inv-003-khong-co-mo-ta.sh", "#!/usr/bin/env bash\n" + body)
     w(f, I + "hq/inv-001-ten-dai.sh", f"#!/usr/bin/env bash\n# Bất biến: {LONG}\n" + body)
     w(f, I + "dashboard/model/inv-001-vung-cu.sh", "#!/usr/bin/env bash\n# Bất biến: Vùng cũ chưa có tiền tố\n" + body)
+    w(f, I + "hq/ledger/inv-001-dang-nguon.py", '"""Bất biến hq/ledger · nguồn: T-083 (Spec Gate v2 2026-11-06; spec x).\nMô tả thật của bất biến này dài hơn năm mươi ký tự đủ để nhận. Phần sau\n"""\nprint("SECRET_BODY_SENTINEL_92")\n')
+    w(f, I + "hq/ledger/inv-002-cong-ty.sh", '#!/usr/bin/env bash\n# Bất biến công ty (ADR-011, nguồn: CLAUDE.md "Ranh giới cứng"): repo không chứa khóa API, token.\n' + body)
+    w(f, I + "hq/ledger/inv-003-nguon-thuong.py", '#!/usr/bin/env python3\n"""nguồn: T-063 eval đối kháng\nBất biến (hq/ledger): Số nguyên dương.\n"""\nprint("SECRET_BODY_SENTINEL_92")\n')
     # không tính:
     w(f, I + "planner/front/layout/lib/helper.cjs", "// not inv\n")
     w(f, I + "planner/front/layout/README.md", "# not inv\n")
@@ -70,14 +73,14 @@ def check_fake(m, public):
     if not want_keys <= set(m):
         bad.append(f"[{k}] model thiếu khoá {sorted(want_keys - set(m))}")
     inv = m.get("invariants")
-    want_inv = {"_shared": 1, "planner/front/layout": 2, "planner/vendor/matching": 1, "hq/dashboard": 1, "hq": 1, "dashboard/model": 1}
+    want_inv = {"_shared": 1, "planner/front/layout": 2, "planner/vendor/matching": 1, "hq/dashboard": 1, "hq": 1, "dashboard/model": 1, "hq/ledger": 3}
     if inv != want_inv: bad.append(f"[{k}] invariants phải {want_inv}, thấy {inv}")
-    if m.get("invariants_total") != 7: bad.append(f"[{k}] invariants_total phải 7, thấy {m.get('invariants_total')}")
+    if m.get("invariants_total") != 10: bad.append(f"[{k}] invariants_total phải 10, thấy {m.get('invariants_total')}")
     for key, v in (("adversarial_evals", 2), ("regression_evals", 2), ("specs", 2), ("insight_reports", 2), ("last_insight", "2026-11-01-weekly.md")):
         if m.get(key) != v: bad.append(f"[{k}] {key} phải {v!r}, thấy {m.get(key)!r}")
     lst = m.get("invariant_list") or []
     order = [(x.get("area"), x.get("id")) for x in lst]
-    want_order = [("_shared", "INV-001"), ("dashboard/model", "INV-001"), ("hq", "INV-001"), ("hq/dashboard", "INV-003"), ("planner/front/layout", "INV-002"),
+    want_order = [("_shared", "INV-001"), ("dashboard/model", "INV-001"), ("hq", "INV-001"), ("hq/dashboard", "INV-003"), ("hq/ledger", "INV-001"), ("hq/ledger", "INV-002"), ("hq/ledger", "INV-003"), ("planner/front/layout", "INV-002"),
                   ("planner/front/layout", "INV-010"), ("planner/vendor/matching", "INV-004")]
     if order != want_order: bad.append(f"[{k}] thứ tự/id invariant_list phải {want_order}, thấy {order}")
     by = {(x.get("area"), x.get("id")): x for x in lst}
@@ -87,6 +90,9 @@ def check_fake(m, public):
         ("planner/front/layout", "INV-010"): ("z-sau", "Khung rộng đúng", "T-025", "planner/front/layout/inv-010-z-sau.sh"),
         ("planner/vendor/matching", "INV-004"): ("nhan-cham-mu", "Nhãn chấm mù luôn toàn vẹn", "T-074", "planner/vendor/matching/inv-004-nhan-cham-mu.py"),
         ("hq/dashboard", "INV-003"): ("khong-co-mo-ta", "khong co mo ta", "", "hq/dashboard/inv-003-khong-co-mo-ta.sh"),
+        ("hq/ledger", "INV-001"): ("dang-nguon", "Mô tả thật của bất biến này dài hơn năm mươi ký tự đủ để nhận", "T-083", "hq/ledger/inv-001-dang-nguon.py"),
+        ("hq/ledger", "INV-002"): ("cong-ty", "repo không chứa khóa API, token.", "", "hq/ledger/inv-002-cong-ty.sh"),
+        ("hq/ledger", "INV-003"): ("nguon-thuong", "Số nguyên dương.", "T-063", "hq/ledger/inv-003-nguon-thuong.py"),
         ("dashboard/model", "INV-001"): ("vung-cu", "Vùng cũ chưa có tiền tố", "", "dashboard/model/inv-001-vung-cu.sh"),
     }
     for key, (slug, name, src, rel) in want.items():
@@ -101,8 +107,9 @@ def check_fake(m, public):
         elif x.get("path") != "eval/invariants/" + rel: bad.append(f"[{k}] {key} path phải eval/invariants/{rel}, thấy {x.get('path')!r}")
     long = by.get(("hq", "INV-001"), {})
     n = long.get("name", "")
-    if not (n.endswith("…") and len(n) == 141 and n.startswith("Rất dài")):
-        bad.append(f"[{k}] name dài phải cắt 140 ký tự + '…' (141), thấy độ dài {len(n)}")
+    want_long = LONG[:140].rstrip() + "…"   # quy tắc: giữ 140 ký tự đầu, bỏ khoảng trắng cuối, thêm …
+    if n != want_long:
+        bad.append(f"[{k}] name dài phải là 140 ký tự đầu bỏ khoảng trắng cuối + '…' ({len(want_long)} ký tự), thấy {len(n)} ký tự")
     for x in lst:
         for fld in ("area", "id", "slug", "name", "source", "url"):
             if not isinstance(x.get(fld), str): bad.append(f"[{k}] {x.get('id')} thiếu trường chuỗi {fld}")
@@ -164,6 +171,30 @@ def run_real():
                 rel = f"eval/invariants/{x.get('area')}/"
                 if not x.get("url", "").startswith(GH + rel): bad.append(f"[{k}] url sai {x.get('url')!r}"); break
                 if not public and not (ROOT / x.get("path", "?")).is_file(): bad.append(f"[{k}] path không tồn tại {x.get('path')!r}"); break
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            import namerule
+            for x in lst:
+                rel = x.get("url", "").split("/blob/main/")[-1]
+                fp = ROOT / rel
+                if not fp.is_file(): bad.append(f"[{k}] url không trỏ tới file có thật: {x.get('url')!r}"); continue
+                text = fp.read_text(encoding="utf-8", errors="replace")
+                want_n, want_s = namerule.name(text, x.get("slug", "")), namerule.source(text)
+                nm = x.get("name", "")
+                if nm != want_n: bad.append(f"[{k}] {rel}: name phải {want_n!r}, thấy {nm!r}")
+                if x.get("source") != want_s: bad.append(f"[{k}] {rel}: source phải {want_s!r}, thấy {x.get('source')!r}")
+                if (not nm.strip() or nm.lower().startswith("nguồn") or "\n" in nm or re.fullmatch(r"[\w./\\:*<>#-]+", nm) or re.match(r"^T-\d+\b", nm)):
+                    bad.append(f"[{k}] {rel}: name vô nghĩa (rỗng, nguồn, hoặc chỉ là mã/đường dẫn): {nm!r}")
+                if len(nm) > 141: bad.append(f"[{k}] {rel}: name dài {len(nm)} > 141")
+            sh = [x for x in lst if x.get("area") == "_shared"]
+            if len(sh) >= 2:
+                for x in sh[:2]:
+                    nm = x.get("name", "")
+                    if len(nm) < 15 or "Ranh giới" in nm or "CLAUDE.md" in nm or nm.startswith(("ADR", "T-")):
+                        bad.append(f"[{k}] _shared {x.get('id')}: name phải là phần mô tả thật, thấy {nm!r}")
+            if "--table" in sys.argv and not public:
+                tp = Path(sys.argv[sys.argv.index("--table") + 1])
+                tp.write_text("| vùng | mã | nguồn | tên | file |\n| --- | --- | --- | --- | --- |\n" + "\n".join(
+                    f"| {x['area']} | {x['id']} | {x['source'] or '-'} | {x['name'].replace('|', '/')} | {x.get('path','')} |" for x in lst) + "\n", encoding="utf-8")
             js = json.dumps(m, ensure_ascii=False)
             for s in ("/home/", "/root/"):
                 if s in js: bad.append(f"[{k}] model chứa đường dẫn máy {s!r}")
