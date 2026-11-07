@@ -1,0 +1,482 @@
+{
+ "_ghi_chu": "Ảnh chụp tên bất biến của bể thật 2026-11-07 (exporter hiện tại, 119 file) trước T-094. sha12 = sha1 của 12 dòng đầu. sua_co_chu_y: {đường dẫn tương đối: lý do} cho ca sửa có chủ ý; hiện rỗng (0 ca).",
+ "sua_co_chu_y": {},
+ "ten": {
+  "_shared/inv-001-khong-secret-trong-repo.sh": {
+   "sha12": "29b7c9c630ea260f696b018023543bd2785e3a9b",
+   "name": "repo không chứa khóa API, token hay khóa riêng."
+  },
+  "_shared/inv-002-so-cai-doc-duoc.sh": {
+   "sha12": "4c963ed7d434de4d4d7b438a18a59c34266ae388",
+   "name": "mọi file board/ đọc được bằng task.py"
+  },
+  "hq/inv-001-lenh-merged-khong-doi-trang-thai.py": {
+   "sha12": "d0b683a8a61cf7456656bb131cb197473afac4eb",
+   "name": "ghi trạng thái PR vào sổ cái không bao giờ đổi trạng thái việc, và cùng một PR không bao giờ có hai sự kiện `merged`."
+  },
+  "hq/inv-002-workflow-context-hop-le.py": {
+   "sha12": "1453a6ca4d7d63683c3ba374513be5f5216a2b54",
+   "name": "context hợp lệ trong mọi workflow (bảng context availability của GitHub)."
+  },
+  "hq/dashboard/inv-001-tat-ca-luon-du.sh": {
+   "sha12": "8bd6e098c46486e00192ba10ef297bc201cf965a",
+   "name": "bộ chọn sản phẩm ở \"Tất cả\" (mặc định, và khi localStorage[\"tohong.productFilter\"] thiếu, rỗng, lạ, sai hoa thường hay bị cấm) thì bảng việc…"
+  },
+  "hq/dashboard/inv-002-cay-bat-bien-khop-tong.sh": {
+   "sha12": "7b00a45c592deb750040b511f7bceb73d9a025b7",
+   "name": "trong khối Knowledge Reservoir, tổng số của các dòng [data-kr-scope] bằng model.invariants_total, mỗi nhánh đúng một dòng và luôn có dòng _s…"
+  },
+  "hq/dashboard/inv-003-doi-bo-loc-khong-doi-hinh.sh": {
+   "sha12": "cb5fb875c59db5294e1610bb5170a541d54ca5d2",
+   "name": "đổi bộ lọc sản phẩm không đổi toạ độ, kích thước của khối, đường, cổng, khung và vị trí chữ trong #model (tính từ góc svg), ở 1280 và 390px;…"
+  },
+  "hq/dashboard/inv-004-san-pham-do-so-cai-xuat.sh": {
+   "sha12": "293389266745bddfdc13db8cd021f63917b55e62",
+   "name": "scripts/export_dashboard.py xuất cho MỌI việc (dashboard.json và tasks.json, cùng giá trị) trường `product` thuộc task.PRODUCTS ∪ {\"\"}"
+  },
+  "hq/dashboard/inv-005-export-khong-sap-vi-area-sua-tay.py": {
+   "sha12": "971e2221c4d71364b2f9101d44314b6ec82deb03",
+   "name": "scripts/export_dashboard.py không sập vì giá trị `area` sửa tay trong file board, kể cả giá trị bộ đọc frontmatter biến thành list (`area: […"
+  },
+  "hq/dashboard/inv-006-so-capu-bang-so-dong-modal.sh": {
+   "sha12": "1f7c6e302f47a8d8d0bacc5f2cb0aa3c1f4c35bb",
+   "name": "số trên khối Capu (#nd_capu .n) luôn bằng số dòng [data-capu-row] trong modal #capu-modal mở bằng cách bấm số đó, kể cả 0 và dữ liệu cũ khôn…"
+  },
+  "hq/dashboard/inv-007-loc-san-pham-toan-man-hinh.sh": {
+   "sha12": "47c8d11d98bccebd720a9a756ffe319ad6c66929",
+   "name": "chọn sản phẩm P thì mọi con số, chữ phụ, đèn và danh sách việc trên màn hình (bảng việc, KPI, Cảnh báo, Dòng thời gian, Feed, khối mô hình K…"
+  },
+  "hq/dashboard/inv-008-capu-queue-khong-chua-viec-da-xu-ly.py": {
+   "sha12": "7d54c36dd702834c13597996f0c95eb87f124aab",
+   "name": "`capu_queue` trong dashboard.json chỉ chứa việc Capu còn phải làm."
+  },
+  "hq/dashboard/inv-009-link-capu-an-toan-cong-khai-khong-ro.sh": {
+   "sha12": "a60b0e1d2ee71c5901c7c021c23dac92eff9b69b",
+   "name": "(a) bản --public của scripts/export_dashboard.py xuất từ sổ cái thật: sự kiện không có detail/link; không chứa đường dẫn máy"
+  },
+  "hq/dashboard/inv-010-capu-queue-khong-doc-thu-muc-con-inbox.py": {
+   "sha12": "6ad364641e883ce0b15d1ae56a0fc29cbd330733",
+   "name": "`capu_queue` không phụ thuộc thư mục con của inbox/capu/: thêm file DR (kể cả trùng mã việc, có decide-by) vào bất kỳ"
+  },
+  "hq/dashboard/inv-011-viec-moi-pr-da-merged-khong-cho-capu.py": {
+   "sha12": "47df548695d405fdda96620d9092a2de2ef5e101",
+   "name": "Việc B/C `done` mà mọi PR đã biết (URL PR trong handoff từ engineering, trong file bàn giao của việc, và `link` của sự kiện `merged`"
+  },
+  "hq/dashboard/inv-012-dr-da-quyet-khong-con-dong.py": {
+   "sha12": "ee33183e85eba4531e464ebf7829f540999f5075",
+   "name": "Việc đã có sự kiện `decided`/`unblocked` đứng sau sự kiện hỏi Capu cuối cùng (`escalated`, hoặc `blocked` mở bằng \"Chờ Capu\"),"
+  },
+  "hq/dashboard/inv-013-link-issue-dung-so-viec.py": {
+   "sha12": "d920c098ad2df3d953cf330ec04fdd5a71221722",
+   "name": "trong `capu_queue` của bản --public xuất từ sổ cái thật,"
+  },
+  "hq/dashboard/inv-014-issue-tu-do-khong-sinh-link-sai.py": {
+   "sha12": "42ad89bdae096ab680afa81701a8b21af5f843fb",
+   "name": "với board mang giá trị `issue` tuỳ ý, `capu_queue` công khai chỉ có link Issue khi giá trị (sau khi bỏ khoảng trắng đầu/cuối"
+  },
+  "hq/dashboard/inv-015-cot-xong-moi-nhat-so-dem-tong.sh": {
+   "sha12": "6d1284b38e05607bd6ecb3d947b1e6d761a90f0d",
+   "name": "với mọi bộ dữ liệu và mọi bộ chọn sản phẩm, cột Xong của Kanban hiện min(tổng, giới hạn) việc xong mới nhất theo updated (hoà: id lớn trước;"
+  },
+  "hq/dashboard/inv-016-tat-ca-du-khi-hon-10-viec-xong.sh": {
+   "sha12": "50b00f4ec628c67bbd330f49acca2b1c1202a633",
+   "name": "bộ chọn \"Tất cả\" (mặc định, và localStorage trống/lạ/rỗng/sai hoa thường) với 29 việc xong"
+  },
+  "hq/dashboard/model/inv-001-khong-dot-gia.sh": {
+   "sha12": "b663bf9a6f3b3dd32a7c83cf04a8e663a2f82398",
+   "name": "mở bảng Mô hình với dữ liệu bất kỳ (kể cả sự kiện cũ trong dashboard.json và snapshot live) mà không có sự kiện mới thì không có circle nào…"
+  },
+  "hq/dashboard/model/inv-002-tran-dot.sh": {
+   "sha12": "2805e14e3589022641174f12b206aaf4a2333d48",
+   "name": "không bao giờ quá 12 circle trong #fx_f (dồn 40 sự kiện vẫn có dot), và #fx_f rỗng sau khi mọi dot xong."
+  },
+  "hq/dashboard/model/inv-003-dot-tren-duong.sh": {
+   "sha12": "3d931131fc1a3492dec821f00a1c4806bbeb6c74",
+   "name": "mọi dot nằm trên một đường p_* của #model svg và có fill thuộc 5 màu #14754d #2b7fb8 #d9931f #d33 #8a5cf6."
+  },
+  "hq/dashboard/model/inv-004-khong-ket-sang.sh": {
+   "sha12": "66573911b2d856de5b7a65ca77ee2088349cf24d",
+   "name": "khối có số đếm việc đang ở khối bằng 0 thì không sáng; khối giữ dot nhận dot mà sổ cái không có việc thì tắt trong 10 giây."
+  },
+  "hq/dashboard/model/inv-005-reduced-motion-khong-dot.sh": {
+   "sha12": "bc36fc17643a3ca959b7aa2683f37d0d28f858df",
+   "name": "prefers-reduced-motion: reduce thì không tạo circle nào trong #fx_f, kể cả khi có sự kiện."
+  },
+  "hq/dashboard/model/inv-006-khong-cuon-ngang-390.sh": {
+   "sha12": "19828baf155e0afc40e94d1c3c6aeb8883e6eb00",
+   "name": "trang dashboard không cuộn ngang ở bề ngang 390px."
+  },
+  "hq/dashboard/model/inv-007-capu-sang-khi-escalated.sh": {
+   "sha12": "a8a4595d24b2a2287c39509d22b48e0abf2d95aa",
+   "name": "có việc escalated (mọi chủ việc, kể cả chief-of-staff) thì khối Capu sáng viền màu #d33 và không tắt theo thời gian."
+  },
+  "hq/dashboard/model/inv-008-dot-co-khi-doi-be-ngang.sh": {
+   "sha12": "a9b2119784823fc19986cb4c76904be2ee901e43",
+   "name": "đổi bề ngang giữa lúc dot đang chạy (xoay điện thoại 390↔844, thu cửa sổ 1280→390) thì dot vẫn 7–16px; không dùng bán kính tính một lần lúc…"
+  },
+  "hq/dashboard/model/inv-009-so-dem-thi-sang.sh": {
+   "sha12": "2414ee73944eee99b2ed1b06f71dcf35d16a2190",
+   "name": "khối loại \"sáng khi > 0\" (Ý định, Spec Writer, Spec Gate, Spec rework, Agent code [số lớn + \"N chờ\"], Code rework, Code Gate, Capu) sáng khi…"
+  },
+  "hq/dashboard/model/inv-010-nhan-vat-khop-khoi-sang.sh": {
+   "sha12": "343710ea743a1427a6cab59341e8d14c7e4c97e2",
+   "name": "ngoài lúc give/take, nhân vật work hoặc wait thì khối của nó đang sáng, idle thì khối không sáng (lệch không quá 0,3 giây), bất kể khối sáng…"
+  },
+  "hq/dashboard/model/inv-011-ranh-thi-mo.sh": {
+   "sha12": "d01466ac96bbc52050569143ef128cbda5ee04b7",
+   "name": "nhân vật idle có opacity tính ra 0,30–0,50 và thân đứng yên; trạng thái làm việc/chờ có opacity >= 0,95."
+  },
+  "hq/dashboard/model/inv-012-reduced-motion-nhan-vat-dung-yen.sh": {
+   "sha12": "a7c36a8c58faa5795d65c98b4041d104ecbfa187",
+   "name": "prefers-reduced-motion: reduce thì không animation/transition nào trên g.mch và g.bub, data-anim=none, thân đứng yên ở mọi trạng thái; trạng…"
+  },
+  "hq/dashboard/model/inv-013-bong-bong-co-tran.sh": {
+   "sha12": "58713269651bd3ab3e5181bdf898d0b3d9959c61",
+   "name": "không quá 3 bong bóng cùng lúc, mỗi khối tối đa 1, mỗi bong bóng tối đa 3,5 giây, #fx_b rỗng sau khi hết sự kiện; #fx_f chỉ chứa circle dot."
+  },
+  "hq/dashboard/model/inv-014-khong-giao-nhan-gia.sh": {
+   "sha12": "a22bd4c0db22001f56e0fedf9617bb9dbdf499c3",
+   "name": "mở trang với sự kiện cũ (dashboard.json, snapshot live) không tạo give/take hay bong bóng giao-nhận."
+  },
+  "hq/dashboard/model/inv-015-nhan-vat-giu-net-ve.sh": {
+   "sha12": "4808f98049c7ebcbd1459067f408325ab8e2ae0c",
+   "name": "khối sáng hay nháy không tô viền/nền/transition lên nhân vật (stroke, stroke-width, fill của phần không phải lamp/phần phụ giữ nguyên); anim…"
+  },
+  "hq/dashboard/model/inv-016-nhan-vat-khong-che-chu-khi-cu-dong.sh": {
+   "sha12": "15ebbb8cd7247e5de8d24587ebb308e08860fd7c",
+   "name": "hộp bao [data-part=body] của nhân vật không chồng lên chữ của khối nó quá 2 đơn vị SVG theo mỗi chiều ở MỌI trạng thái"
+  },
+  "hq/dashboard/model/inv-017-dot-nhin-thay-duoc.sh": {
+   "sha12": "92cdcc995c9ffbcdb52ef32a2ec5c748bc865385",
+   "name": "khi có sự kiện có đường dot, dot hiện thật trên màn hình: #fx_f không display:none, có circle trong #fx_f với getBoundingClientRect().width…"
+  },
+  "hq/dashboard/model/inv-018-nhan-vat-khong-che-chu-nao.sh": {
+   "sha12": "65c132ea82994a24194f8c820fe0d7403f95afa8",
+   "name": "ở 1280 và 390px, lúc nghỉ và mọi trạng thái khi chạy sự kiện, hộp bao [data-part=body] của mọi nhân vật không chồng quá 2u (cả hai chiều) lê…"
+  },
+  "hq/dashboard/model/inv-019-nhan-vat-du-to.sh": {
+   "sha12": "b18662d82dc606c9007776f2d83094277f834f13",
+   "name": "đủ 11 nhân vật; thân [data-part=body] lúc nghỉ cao ≥ 62u, và ≥ 68px ở 1280, ≥ 19px ở 390px."
+  },
+  "hq/dashboard/model/inv-020-bot-cong-tren-cung.sh": {
+   "sha12": "47178d1ccf8f0a12c33f753ea5b4376e9a6f16bc",
+   "name": "ở gt_spec và gt_code (1280 và 390px): không phần tử vẽ nào ngoài g.mch của cổng, đứng sau nó trong DOM, giao hộp bao thân bot (trừ #fx_b .bu…"
+  },
+  "hq/dashboard/model/inv-021-phong-to-an-toan.sh": {
+   "sha12": "d1fe0df4d66fa3c7cb0299d9c4f5476abfa99f4f",
+   "name": "ở 1280 và 390px: nút #model-zoom vào phóng to; khi phóng to trang ngoài không cuộn ngang, chỉ một svg và không id trùng trong #model; Esc đó…"
+  },
+  "hq/dashboard/model/inv-022-bong-bong-dung-co-khi-doi-phong-to.sh": {
+   "sha12": "3f5e737924616f7cc04666210d6c3c82f0f216e8",
+   "name": "ở 390 và 1280px, bong bóng ĐANG HIỆN lúc bấm Phóng to / Thu nhỏ vẫn có chữ 9–16px trên màn hình và trọn trong svg"
+  },
+  "hq/dashboard/model/inv-023-tom-tat-khop-den.sh": {
+   "sha12": "90a39e0c5478a42c318c1656e75d1dc4fa201c2a",
+   "name": "tóm tắt khi bấm nhân vật và đèn của khối không nói hai điều khác nhau: khối sáng (bất kỳ quy tắc nào) thì tóm tắt không bao giờ là \"Đang rản…"
+  },
+  "hq/dashboard/model/inv-024-tom-tat-khong-ro.sh": {
+   "sha12": "4a02e758fecf1b264ba2bf425c92264902c482e4",
+   "name": "dù dữ liệu việc hay sự kiện live có detail, link, ghi chú, defect, không chữ nào trong #fx_s và #model-sum-live chứa chúng (dashboard là tra…"
+  },
+  "hq/dashboard/model/inv-025-tom-tat-mot-lop.sh": {
+   "sha12": "c0646db2ed9166e95f75f83b0e9d59b1e80c178a",
+   "name": "tối đa một tóm tắt trong toàn trang, ở lớp #fx_s là con cuối của svg và sau #fx_b; bong bóng sự kiện vẫn ≤ 3; không có bong bóng sự kiện cùn…"
+  },
+  "hq/dashboard/model/inv-026-tom-tat-khong-che-chu-khoi.sh": {
+   "sha12": "9011b16ad2c9e7011b62f10392016333c2d40d3e",
+   "name": "ở 390 và 1280px, bản thường và phóng to, với tên dài nhất: hộp tóm tắt trọn trong svg, không che chữ của chính khối được bấm (tên, số đếm, c…"
+  },
+  "hq/dashboard/model/inv-027-esc-tung-lop.sh": {
+   "sha12": "74e1d8df5532b657b1d14e48e5e0f49f61c7cdfb",
+   "name": "trong chế độ phóng to có tóm tắt đang mở: Esc lần một chỉ đóng tóm tắt (phóng to còn), Esc lần hai đóng phóng to (mở rộng inv-021)."
+  },
+  "hq/dashboard/model/inv-028-tom-tat-khong-de-bot-khi-cu-dong.sh": {
+   "sha12": "9ac9986e0e6aeb7d9f6d5e284824d9434059e6fb",
+   "name": "tóm tắt nhân vật đang mở thì ở MỌI khung (kể cả khi nhân vật đang give/take do dot tới), hộp sum-bg không chồng lên"
+  },
+  "hq/dashboard/model/inv-029-moi-duong-co-mui-cuoi.sh": {
+   "sha12": "7f6d27e60e745cd9e0d85cfb0611dde87df8da4b",
+   "name": "mọi path[id^=p_] trong #model svg có đúng một mũi cuối [data-part=ah][data-at=end][data-for=<id>]: nhìn thấy, fill đặc cùng màu đường, dài 6…"
+  },
+  "hq/dashboard/model/inv-030-duong-dai-co-mui-giua.sh": {
+   "sha12": "14fc9431f4a567c3918d71a4d4538bda79858fc5",
+   "name": "mọi p_* dài ≥ 220u có đúng một mũi giữa [data-at=mid], đường ngắn hơn không có; mũi giữa đạt cùng chuẩn (đặc, cùng màu, 6,89-8,41px × 5,60-6…"
+  },
+  "hq/dashboard/model/inv-031-khong-ky-thuat-de-vo.sh": {
+   "sha12": "c965c067326d99b13d01642629ad189f6c42c55e",
+   "name": "không phần tử nào có fill/stroke tính ra context-*, index.html không chứa chuỗi context-stroke/context-fill; p_* không dùng marker; mũi tên…"
+  },
+  "hq/dashboard/model/inv-032-font-nap-muon-mui-khong-che-chu.sh": {
+   "sha12": "a78f9e9cba2c795c5215459d4c60d58fb795a6ca",
+   "name": "font thật của trang (\"Be Vietnam Pro\", OFL, lib/BeVietnamPro-Regular.ttf) nạp muộn 2,5s, sau khi mũi tên và nhãn đã dựng bằng font dự phòng."
+  },
+  "hq/dashboard/model/inv-033-co-chu-khoi-khong-duoi-san.sh": {
+   "sha12": "3cb78f2c3a7ad84c1e99fa5e26194412b2dfe787",
+   "name": "ở 1280, 844, 390 (thường) và 1280, 390 (phóng to), dữ liệu rảnh và bận, cỡ chữ hiệu dụng của chữ khối g.node trong #model svg"
+  },
+  "hq/dashboard/model/inv-034-chu-khoi-trong-khoi.sh": {
+   "sha12": "cfc93e8ffa01ba7d9d019621108972c6ce64d98f",
+   "name": "ở 1280, 844, 390 (thường) và 1280, 390 (phóng to), dữ liệu rảnh và bận (số đếm cỡ thực tế), mọi chữ hiển thị của khối bảng Mô hình"
+  },
+  "hq/dashboard/model/inv-035-bam-so-khong-bi-nhan-vat-chiem.sh": {
+   "sha12": "ed9d5f385d3135adaa0ebee0ca0aa82a520009d9",
+   "name": "ở 360, 375, 390 (thường), 390 phóng to, 844, 1280, font thật, dữ liệu 0/0/0 và 12/34/56: tâm số đếm .n của mọi khối không nằm dưới vùng bấm…"
+  },
+  "hq/dashboard/model/inv-036-vung-bam-khong-sang-khoi-khac.sh": {
+   "sha12": "56e0e88e7d6b81c3d886842a060751ce7bd4c5f8",
+   "name": "ở 320, 360, 375, 390 (thường), 360 và 390 phóng to: vùng bấm nhân vật không nằm trên hình chính hay chữ của khối khác; bấm tâm thân mỗi nhân…"
+  },
+  "hq/dashboard/model/inv-037-tai-lan-dau-man-hep.sh": {
+   "sha12": "7b241042260fb294e6a5eba4c463b8a9b3607226",
+   "name": "tải trang lần đầu ở 320, 340, 355, 360, 375 không có resize nhân tạo, font nạp ngay và muộn: tâm số đếm không dưới vùng bấm khối mình, vùng…"
+  },
+  "hq/ledger/inv-001-issue-la-so-nguyen-duong.py": {
+   "sha12": "9edba6002722350e5b7b9ce2c613726d5be597d3",
+   "name": "Trường `issue` của mọi việc trong board/ là rỗng hoặc số nguyên dương (chữ số, không '#', không dấu cách, không URL)."
+  },
+  "hq/ledger/inv-002-decided-qua-issue-hop-le.py": {
+   "sha12": "e7fb828433fc4eb0156563c79d5bfcad80d3e329",
+   "name": "Mọi sự kiện `decided` trong ledger/events.jsonl có link tới một bình luận issue (`#issuecomment-`) phải"
+  },
+  "hq/ledger/inv-003-chi-phungrk-quyet-qua-issue.py": {
+   "sha12": "0374d646a4fca3d08e91c7b64bfcd87d671d2fc3",
+   "name": "Chỉ tài khoản phungrk (type User, chính người gửi sự kiện, action created|edited, không phải PR) tạo được `decided` qua issue"
+  },
+  "hq/ledger/inv-004-phan-chieu-khong-dang-file-ngoai-kho.py": {
+   "sha12": "1f8be7a35e6aa7e5922be0654ade263c238a341f",
+   "name": "Phản chiếu sổ cái lên issue (scripts/mirror_issue.py) KHÔNG BAO GIỜ đăng nội dung file nằm ngoài kho hoặc trong .git"
+  },
+  "hq/ledger/inv-005-decide-viec-done-blocked-khong-cham-board.py": {
+   "sha12": "656f31d8f5e8da33c3dd93772e4fc3052af6b603",
+   "name": "`task.py decide` trên việc `done` hoặc `blocked` không bao giờ chạm file board, và chỉ ghi quyết định của Capu"
+  },
+  "hq/ledger/inv-006-board-that-khong-hong-nang.py": {
+   "sha12": "093d489c72bec95adffa664479f9fbe1f996ae45",
+   "name": "(a) đọc được bằng read_task của scripts/task.py, không ném lỗi loại nào;"
+  },
+  "hq/ledger/inv-007-so-cai-chiu-board-hong.py": {
+   "sha12": "cbd9536cb9e50c99a02b1ebafeb6949c1b069726",
+   "name": "Đích: eval/invariants/hq/ledger/inv-007-so-cai-chiu-board-hong.py sau khi PR T-087 merge và file này xanh trên main."
+  },
+  "planner/inv-001-vite-dev-chi-qua-helper.py": {
+   "sha12": "e29f4ae6757187b8339f23323d9c755c6e979baa",
+   "name": "Mọi eval của sản phẩm planner dựng MÁY CHỦ vite (dev/preview) đều đi qua eval/_lib/vite_dev.cjs (startViteDev): nhóm tiến trình riêng,"
+  },
+  "planner/admin/members/inv-001-khong-dien-thoai-khong-ma.sh": {
+   "sha12": "4005091f4838c4e6ad4584c7a7f7d0c56e2e4e4d",
+   "name": "mọi route /api/admin/members-* trả cho admin không có số điện thoại, trường điện thoại, mã người dùng, mã cặp đôi, mã Clerk hay email cũ tro…"
+  },
+  "planner/admin/members/inv-002-khong-admin-403-truoc-du-lieu.sh": {
+   "sha12": "940ecb375cbdaeeeb8d8481735b267420dd924b4",
+   "name": "người không phải admin nhận 403 {\"error\":\"forbidden\"} ở mọi route /api/admin/members-*, mọi phương thức, trước khi đọc hay liệt kê R2 và trư…"
+  },
+  "planner/admin/members/inv-003-chi-doc.sh": {
+   "sha12": "d9fc0ddbfe784e981cf46748e6589e8735612153",
+   "name": "gọi mọi route /api/admin/members-* (kể cả refresh, Clerk lỗi) không put/delete R2 và R2 y nguyên."
+  },
+  "planner/admin/members/inv-004-no-store.sh": {
+   "sha12": "f1fbc926616d67191970190fcdd10eb56e80671f",
+   "name": "phản hồi 200 của mọi route /api/admin/members-* (và 405 của members-list) có Cache-Control: no-store, không public/max-age/s-maxage."
+  },
+  "planner/admin/members/inv-005-thu-tu-khong-phu-thuoc-clerk.sh": {
+   "sha12": "f89cc7eb7a1db864dbbd17afc9402975cd12fa9a",
+   "name": "cùng dữ liệu R2 thì thứ tự dòng của danh sách thành viên như nhau khi Clerk lên hay xuống, cache email trống, một phần hay đầy, danh sách dự…"
+  },
+  "planner/admin/members/inv-006-du-lieu-ca-nhan-khong-ra-khoi-man-admin.sh": {
+   "sha12": "168241c252e4059397b7b66e8d9864c7a1100c85",
+   "name": "màn Thành viên của admin không hiện số điện thoại hay mã, không đưa tên/email/từ khoá vào URL, console, storage, tiêu đề trang,"
+  },
+  "planner/front/budget/inv-001-mot-con-so-cho-khoan-vendor.sh": {
+   "sha12": "b65bef8e7955785d46fce3cc38bac9cfe7890ecf",
+   "name": "Khoản vendor đã chốt có MỘT con số trong Ngân sách: số lưu (amt) = số ở dòng khoản trong Mục con = số tiền chi ở dòng hạng mục; tổng \"Đã chố…"
+  },
+  "planner/front/budget/inv-002-khong-doan-so-khi-thieu-dau-vao.sh": {
+   "sha12": "a36ca43c78937f8dc6661e371cf2ec14c82a6394",
+   "name": "Vendor đã chốt mà thiếu một đầu vào (số khách 0, hoặc giá 0) thì không hiện số tiền chi suy diễn: số lưu 0 hoặc không có, dòng hạng mục khôn…"
+  },
+  "planner/front/budget/inv-003-mo-man-khong-dung-du-lieu-chung.sh": {
+   "sha12": "303f2b06bcd0affc217b663ada280ee0e3974580",
+   "name": "Mở màn Ngân sách mà không bấm gì thì không bao giờ thêm hay xoá khoản, không đổi trường nào ngoài amt của khoản vendor trùng id vendor đang…"
+  },
+  "planner/front/budget/inv-004-lop-cach-hoat-dong-la-hop-thoai.sh": {
+   "sha12": "6f53aab3b934f99175a4de96caadaeb9c52df8b3",
+   "name": "Lớp \"Cách hoạt động\" mở từ chi tiết hạng mục ngân sách là role=dialog tên \"Cách hoạt động\", không đổi địa chỉ; đóng được bằng Escape, Back (…"
+  },
+  "planner/front/layout/inv-001-khung-min-viewport-appmax.sh": {
+   "sha12": "d436bbebd55edf30b87931489310a83e5254556f",
+   "name": "khung app rộng đúng min(viewport, --app-max), căn giữa, không bao giờ vượt --app-max; --app-max là nơi duy nhất giữ 768px (đổi biến thì khun…"
+  },
+  "planner/front/layout/inv-002-khong-cuon-ngang.sh": {
+   "sha12": "a456e8b4a9c138ef1f3dd9c1bdc89800e7200540",
+   "name": "không có cuộn ngang (html, body, khung) ở mọi viewport 320-1440."
+  },
+  "planner/front/layout/inv-003-phu-nam-trong-khung.sh": {
+   "sha12": "78ab985f0f9c6965a4f45c66c34d6caaa49ac6ee",
+   "name": "mọi phần tử phủ (fixed, absolute z>=50, role=dialog: sheet, scrim, modal) và thanh tab nằm trong khung ở 390/768/1024/1280; phần tử phủ rộng…"
+  },
+  "planner/front/layout/inv-004-vien-bong-theo-khung.sh": {
+   "sha12": "bc65a1295a6744c771c6882843e0ce91719d2f75",
+   "name": "viền/bóng quanh khung chỉ hiện khi viewport rộng hơn khung; ngưỡng đi theo --app-max."
+  },
+  "planner/front/layout/inv-005-cham-ngoai-khung-dong-sheet.sh": {
+   "sha12": "764aa82123e753fd3f27eb9c0e819ee22568df78",
+   "name": "khi sheet/modal đang mở và viewport rộng hơn khung, chạm vùng ngoài khung thì sheet đóng (như chạm lớp tối)."
+  },
+  "planner/front/layout/inv-006-cham-ngoai-khung-chi-dong-lop-tren.sh": {
+   "sha12": "fd99f76b0004dca7d68f90142db0cc42106d7861",
+   "name": "sheet/modal chồng nhau, chạm vùng ngoài khung chỉ đóng lớp trên cùng; lớp dưới vẫn mở."
+  },
+  "planner/front/layout/inv-007-document-la-thu-cuon.sh": {
+   "sha12": "81327e1274b582bea97d0f7c656abe322f5dfa7c",
+   "name": "khi không có lớp mở, document là thứ cuộn (window.scrollY tăng khi lăn hay vuốt, tới được cuối và về đầu) ở bốn tab và trang con; không phần…"
+  },
+  "planner/front/layout/inv-008-header-va-thanh-tab-dinh.sh": {
+   "sha12": "43c0fc82a116a83fe08ef2f09d2c995c4148d89f",
+   "name": "header dính đầu và thanh tab dính đáy vùng nhìn thấy ở mọi vị trí cuộn (cả trang con với nút Quay lại); ở đầu trang header không che chữ, ở…"
+  },
+  "planner/front/layout/inv-009-lop-mo-khoa-cuon-nen.sh": {
+   "sha12": "682bfa149a337e86ce5a119974f54bdb4d77931d",
+   "name": "lớp mở (sheet Mời, ngăn kéo, chat AI, sheet Thêm việc, hộp thoại Cách hoạt động) thì nền không trôi và không nhảy, lớp nằm trong vùng nhìn t…"
+  },
+  "planner/front/layout/inv-010-thanh-tab-tron-trong-vung-nhin-thay.sh": {
+   "sha12": "169f5c6b96a1873eecab931d11159f01865b2931",
+   "name": "khi vùng nhìn thấy (visualViewport) thấp hơn cửa sổ bố cục (innerHeight) vì thanh công cụ trình duyệt, thanh tab nằm trọn trong vùng nhìn th…"
+  },
+  "planner/front/layout/inv-011-mep-tren-khong-nen-sam-khi-khong-lop.sh": {
+   "sha12": "b4ea769bd298465abf040af1c60413bb2270bd99",
+   "name": "khi không lớp nào mở, ở cả 4 tab, đầu và giữa trang, không phần tử fixed/sticky (hoặc nằm trong cây con của phần tử fixed/sticky)"
+  },
+  "planner/front/loading/inv-001-trang-thai-cho-khong-noi-doi.sh": {
+   "sha12": "8c8993cf906922db9ccf59bfd33d25f508c1da59",
+   "name": "ở 4 tab (Trang chủ, Kế hoạch, Ngân sách, Khách mời), khi /api/me và dữ liệu chính chưa trả lời, không có chữ trạng thái rỗng giả (\"0 người\",…"
+  },
+  "planner/front/loading/inv-002-vung-cho-co-nhan-khong-focus.sh": {
+   "sha12": "573dc654e709e2ee14aeaa19ab8d5a746e8cb5ce",
+   "name": "lúc chờ, mỗi vùng [aria-busy=\"true\"] nhìn thấy chứa role=status tên \"Đang tải\" và không chứa phần tử focus được (nên không phủ header, nút M…"
+  },
+  "planner/front/loading/inv-003-vung-cho-ton-trong-reduced-motion.sh": {
+   "sha12": "62cfb3f7efed746db678a7d4c3bf2a309a2ae54f",
+   "name": "khi bật prefers-reduced-motion: reduce, ở 4 tab, lúc chờ không animation nào đang chạy trong vùng [aria-busy=\"true\"], và vùng vẫn có khối tô…"
+  },
+  "planner/front/navigation/inv-001-thu-tu-back-mot-buoc.sh": {
+   "sha12": "097731fd611f7a63bc5be0dc56ef59c2d010fcbe",
+   "name": "mỗi lần đổi tab hoặc mở trang con là đúng một bước lịch sử; chạm lại tab đang chọn không thêm bước; Back/Forward nhiều bước đi đúng thứ tự n…"
+  },
+  "planner/front/navigation/inv-002-back-dong-lop-tren-truoc.sh": {
+   "sha12": "673d3d2f3e984332ba87d436f87021fe6d036e2a",
+   "name": "mọi lớp đang mở có đúng một bước lịch sử và không đổi địa chỉ; Back chỉ đóng lớp trên cùng, không đổi trang; đóng lớp bằng giao diện, Forwar…"
+  },
+  "planner/front/navigation/inv-003-khong-bay-goc.sh": {
+   "sha12": "a8ef3f0cd9ff6432aee4ab16eb6b83b2317be6b0",
+   "name": "mở app (ở / hay link sâu) không thêm bước nào; ở gốc Back rời app; không hộp thoại rời trang; không bắt popstate để giữ người dùng."
+  },
+  "planner/front/navigation/inv-004-hash-dung-man.sh": {
+   "sha12": "818c30c0361a4276eb946aad6332c8a94ac4e9e8",
+   "name": "mỗi tab/trang con có đúng một địa chỉ hash theo bảng; địa chỉ chỉ khớp mẫu cho phép (không dữ liệu cá nhân); tải lại và link sâu vào đúng mà…"
+  },
+  "planner/front/navigation/inv-005-manifest-cai-duoc.sh": {
+   "sha12": "1d089631855a072958be54c082dad18834e95802",
+   "name": "manifest có display standalone, icon PNG 192 và 512 (any và maskable riêng, đúng cỡ, nền đặc, logo trong vùng an toàn), apple-touch-icon PNG…"
+  },
+  "planner/front/navigation/inv-006-goi-y-cai-ton-trong-lua-chon.sh": {
+   "sha12": "ec019a088d15435643a42a9516265a74e75dea59",
+   "name": "gợi ý cài không bao giờ hiện khi đang standalone hay khi Onboarding mở; \"Không nhắc lại\" được nhớ qua tải lại chỉ trong localStorage, không…"
+  },
+  "planner/front/navigation/inv-007-khoi-phuc-vi-tri-cuon.sh": {
+   "sha12": "6b850a76adaee43685e2a78f9b39fa9ba2fddad2",
+   "name": "vị trí cuộn nhớ theo địa chỉ hash: chạm tab, Back, Forward, Quay lại đưa trang về đúng vị trí rời gần nhất ngay ở khung hình đầu (không nháy…"
+  },
+  "planner/front/vendor-images/inv-001-anh-khong-dung-duoc-co-minh-hoa-dung-hang-muc.sh": {
+   "sha12": "4727d21ca9bf36c117045d95202980a2b239850c",
+   "name": "ô ảnh vendor có ảnh không dùng được (ảnh hỏng, hoặc không có ảnh) ở cả 6 bề mặt luôn có đúng một ô role=\"img\" tên \"Ảnh minh hoạ: <tên hạng m…"
+  },
+  "planner/front/vendor-images/inv-002-minh-hoa-noi-bo-token-moi-hang-muc-mot-hinh.sh": {
+   "sha12": "23fbdb990807a61f021fb18900993081b34fd6c2",
+   "name": "minh hoạ là svg inline (không <img>, không url()/http/file svg, không yêu cầu mạng ngoài), chỉ dùng token màu, <= 4096 byte, cặp nét/nền >=…"
+  },
+  "planner/front/vendor-images/inv-003-anh-tot-va-dang-kiem-khong-minh-hoa.sh": {
+   "sha12": "dcff6b8dee2558a97bcdc29cd9fd63e1f25856c8",
+   "name": "ô có ảnh thật không bao giờ mang minh hoạ hay nhãn \"Ảnh minh hoạ\" (kể cả ảnh tải chậm); lúc đang kiểm (ảnh chưa tải xong, đang tra pool) ô g…"
+  },
+  "planner/front/vendor-images/inv-004-o-nho-co-tooltip-khi-re-chuot.sh": {
+   "sha12": "1e4ca2f28743e9361b5aacb50457cd9edaac8a99",
+   "name": "ô minh hoạ có cạnh ngắn < 80px (không có chữ nhãn) phải hiện tooltip = tên truy cập khi rê chuột: phần tử trúng chuột ở tâm ô, hoặc tổ tiên…"
+  },
+  "planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py": {
+   "sha12": "2f982320447dbe2238422f3b50a74385e9f26103",
+   "name": "Pool ảnh vendor nhất quán với manifest Pages"
+  },
+  "planner/vendor/images/inv-002-entry-ok-khong-mat.py": {
+   "sha12": "d904e914140065bc9e831949718687aeaa9438f8",
+   "name": "Entry `ok` của manifest ảnh vendor (= file đã deploy lên Pages, pool trên main có thể đang trỏ tới) không bao giờ mất,"
+  },
+  "planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py": {
+   "sha12": "a255156c477900c88c0d08e856fdb9cb273b36ba",
+   "name": "`rewrite --check` của công cụ ảnh vendor không bao giờ báo xanh giả, và `rewrite` thay đủ, với mọi pool là module ES hợp lệ"
+  },
+  "planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py": {
+   "sha12": "df7b9f97d736560590ac4ed058599a1c8a38a83b",
+   "name": "`mirror` của công cụ ảnh vendor thoát mã 4 (dừng sớm) thì không bao giờ đổi `--manifest`: file chưa có thì vẫn không có,"
+  },
+  "planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py": {
+   "sha12": "fc4cd908efde5eb477ce59afb077822a8ec3b9bb",
+   "name": "stdout đủ dòng dù người đọc ống chậm: `mirror` của công cụ ảnh vendor, ở mọi mã thoát có SUMMARY (0, 3, 4),"
+  },
+  "planner/vendor/images/inv-006-wayback-chi-khi-bat-co-va-cham.py": {
+   "sha12": "f9389ee65f64f3a89b2e737b15fea32ab3f2e981",
+   "name": "`mirror` của công cụ ảnh vendor chỉ gọi Wayback/archive.org khi được bật, và gọi chậm"
+  },
+  "planner/vendor/images/inv-007-khong-goi-wayback-available.py": {
+   "sha12": "c644fab2584444c7d7f62f92c0ec6e5078e87bf3",
+   "name": "`mirror` của công cụ ảnh vendor không bao giờ gọi API availability của Wayback (đường dẫn chứa /wayback/available, trên bất kỳ host)."
+  },
+  "planner/vendor/images/inv-008-san-toc-do-wayback.py": {
+   "sha12": "810bb73e82f45a6e244697fe65c4d742d093f952",
+   "name": "Không ai hạ được tốc độ gọi archive.org dưới 1 yêu cầu/giây: `mirror` của công cụ ảnh vendor THOÁT MÃ 2, không ghi manifest,"
+  },
+  "planner/vendor/images/inv-009-wayback-429-khong-go-cua-mai.py": {
+   "sha12": "35163213d998fe7f37a9fd890951be6de14a2795",
+   "name": "archive.org chặn (429) thì `mirror` của công cụ ảnh vendor lùi và thôi gõ cửa"
+  },
+  "planner/vendor/images/inv-010-eval-khong-kill-theo-ten.py": {
+   "sha12": "3a797c25fadde1b437e2f385b61d141cfa6a1f14",
+   "name": "Không eval nào trong eval/ dừng tiến trình theo TÊN (pkill, killall, `pgrep .."
+  },
+  "planner/vendor/images/inv-011-file-thu-eval-khong-vao-git-front.py": {
+   "sha12": "eb30063f769ff3e1107d105c1b1c5b3d3bb17ac3",
+   "name": "File tạm mà eval ghi vào repo front để vite phục vụ (file thử `__t0NN*`, file nonce `__nonce-*`, mọi tên bắt đầu `__t05`/`__nonce`)"
+  },
+  "planner/vendor/matching/inv-001-gu-khong-day-vendor-vuot-ngan-sach-o-chat.py": {
+   "sha12": "d42357a9d5ee6ca18599271a215312f76cff25e9",
+   "name": "Ở đường chat Python, gu là tín hiệu cộng điểm với trọng số cố định của bước chấm điểm, không hơn"
+  },
+  "planner/vendor/matching/inv-002-thieu-tag-khong-bi-phat.py": {
+   "sha12": "c47d95f632321f05c41f456d5c45e89205412ecf",
+   "name": "Thiếu tag không bị phạt: hai vendor giống hệt nhau chỉ khác tag style, một tag lệch, một không tag, luôn cùng tổng điểm"
+  },
+  "planner/vendor/matching/inv-003-thu-tu-gu-theo-diem-r8.py": {
+   "sha12": "cc41c438ad4a2db1ad99ef118fea1bc9f9984c61",
+   "name": "Thứ tự gu nhất quán theo điểm (R8), không phải khoá chia nhóm"
+  },
+  "planner/vendor/matching/inv-004-nhan-cham-mu-toan-ven.py": {
+   "sha12": "59680ccb7c2239bb2449ae2c0a033a3d8ca369da",
+   "name": "Nhãn chấm mù của bộ đo matching luôn toàn vẹn"
+  },
+  "planner/vendor/pool/inv-001-pool-khop-van-ban-nguon.py": {
+   "sha12": "e02501369cccf5fd02c7ea618154fcb27d885d27",
+   "name": "mọi tag phong cách cặp đôi thấy trên vendor đều có bằng chứng trong văn bản của chính vendor đó."
+  },
+  "planner/vendor/pool/inv-002-tag-chuan-khong-tu-cung-co.py": {
+   "sha12": "d4881536aeab1fcd3421a7efac0f671def6e28b4",
+   "name": "tag phong cách không tự củng cố"
+  },
+  "planner/vendor/pool/inv-003-tinh-te-khong-phai-toi-gian.py": {
+   "sha12": "84aef51bd339c96f7ee9a6cd5df793fd88716e6b",
+   "name": "\"tinh tế\" là sáo ngữ marketing, không phải bằng chứng phong cách tối giản."
+  },
+  "planner/vendor/pool/inv-004-pool-trung-gian-khong-vao-git.py": {
+   "sha12": "3cf094605a7004ed62dc7a392d899e92b058da8c",
+   "name": "tools/scraper/output/pool-vendors.json của repo tohong KHÔNG được git theo dõi"
+  }
+ }
+}
