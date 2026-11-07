@@ -5,15 +5,17 @@ js, mjs, ts, cjs, mts, cts). Bản v2 luôn truyền --config file bọc, nên f
 Input biên (repo tối giản, node_modules riêng symlink từng gói của front, không bao giờ chạm cache chung):
  (a) chỉ có vite.config.cts; (b) có cả vite.config.cjs và vite.config.mts (vite chọn .cjs);
  (c) có cả vite.config.js và vite.config.ts (vite chọn .js) — đối chứng, đã đúng.
-Mỗi config thêm plugin trả /__adv06-mark = tên file. Mong đợi: qua helper trả cùng tên file như vite chạy trần; cache riêng dưới TMPDIR; TMPDIR + repo sạch sau stop().
+Mỗi config thêm plugin: lúc dev trả /__adv06-mark = tên file, lúc build ghi adv06-mark.txt = tên file. Đáp án lấy bằng `vite build` (không dựng máy chủ ngoài helper, INV-001 planner); máy chủ chỉ dựng qua startViteDev.
+Mong đợi: qua helper trả cùng tên file như vite build chọn; cache riêng dưới TMPDIR; TMPDIR + repo sạch sau stop().
 Mã thoát 0 = đạt."""
-import json, os, shutil, signal, socket, subprocess, sys, tempfile, time, urllib.request
+import json, os, shutil, subprocess, sys, tempfile, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import advlib as a
 if not os.path.isfile(os.path.join(a.FRONT, "node_modules", "vite", "package.json")): print("PASS chưa áp dụng (không có front)"); sys.exit(0)
 
 def cfg(name, ts=False, cjs=False):
-    plug = ("{ name: 'adv06', configureServer(s) { s.middlewares.use((q, r, n) => q.url === '/__adv06-mark' ? r.end(%s) : n()); } }" % json.dumps(name))
+    plug = ("{ name: 'adv06', configureServer(s) { s.middlewares.use((q, r, n) => q.url === '/__adv06-mark' ? r.end(%s) : n()); }, "
+            "generateBundle() { this.emitFile({ type: 'asset', fileName: 'adv06-mark.txt', source: %s }); } }" % (json.dumps(name), json.dumps(name)))
     if cjs: return "module.exports = { plugins: [%s] };\n" % plug
     return "export default { plugins: [%s] };\n" % plug
 
@@ -26,26 +28,14 @@ def mini(d, cfgs):
     for fn, body in cfgs.items(): open(os.path.join(d, fn), "w").write(body)
     return d
 
-def fetch(url):
-    try: return urllib.request.urlopen(url, timeout=5).read().decode()
-    except Exception as e: return "ERR:" + type(e).__name__
-
-def bare(repo, tmp):
-    s = socket.socket(); s.bind(("127.0.0.1", 0)); port = s.getsockname()[1]; s.close()
+def oracle(repo, tmp, out):
+    # Đáp án "vite tự chọn file nào": vite build (không dựng máy chủ, INV-001 planner cho phép), plugin của file được chọn ghi adv06-mark.txt.
     env = dict(os.environ); env["TMPDIR"] = tmp
-    p = subprocess.Popen([os.path.join(repo, "node_modules", ".bin", "vite"), "--port", str(port), "--strictPort", "--host", "127.0.0.1"], cwd=repo, env=env,
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-    try:
-        t0 = time.time(); out = "ERR:timeout"
-        while time.time() - t0 < 20:
-            out = fetch(f"http://127.0.0.1:{port}/__adv06-mark")
-            if not out.startswith("ERR"): break
-            time.sleep(0.25)
-        return out
-    finally:
-        try: os.killpg(p.pid, signal.SIGKILL)
-        except OSError: pass
-        p.wait()
+    vbin = os.path.join(repo, "node_modules", ".bin", "vite")
+    subprocess.run([vbin, "build", "--outDir", out, "--emptyOutDir", "--logLevel", "silent"], cwd=repo, env=env,
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=90, start_new_session=True)
+    try: return open(os.path.join(out, "adv06-mark.txt")).read()
+    except OSError: return "ERR:build không ra adv06-mark.txt"
 
 DRV = r"""
 const http = require('http'); const { startViteDev } = require(process.argv[2]);
@@ -65,17 +55,17 @@ try:
     for i, (name, cfgs) in enumerate(CASES.items()):
         repo = mini(os.path.join(w, f"r{i}"), cfgs)
         tb = os.path.join(w, f"tb{i}"); os.mkdir(tb)
-        want = bare(repo, tb)
-        th = os.path.join(w, f"th{i}"); os.mkdir(th)
+        want = oracle(repo, tb, os.path.join(w, f"dist{i}"))
         before = set(os.listdir(repo))
+        th = os.path.join(w, f"th{i}"); os.mkdir(th)
         env = dict(os.environ); env["TMPDIR"] = th
         p = subprocess.run(["node", drv, a.HELPER, repo], env=env, capture_output=True, text=True, timeout=90)
         try: got = json.loads(p.stdout.strip().splitlines()[-1])
         except Exception: got = {"err": "driver: " + (p.stdout + p.stderr)[-200:]}
         time.sleep(0.5)
         e = []
-        if want.startswith("ERR"): e.append(f"vite trần không dựng được ({want}) — eval không áp dụng")
-        elif got.get("mark") != want: e.append(f"vite trần dùng {want!r}, qua helper được {got.get('mark') or got.get('err')!r}")
+        if want.startswith("ERR"): e.append(f"vite build không cho đáp án ({want})")
+        elif got.get("mark") != want: e.append(f"vite build dùng {want!r}, qua helper được {got.get('mark') or got.get('err')!r}")
         lt = sorted(n for n in os.listdir(th) if n not in a.IGNORE_TMP)
         lf = sorted(set(os.listdir(repo)) - before)
         if lt: e.append(f"TMPDIR còn {lt[:3]}")
