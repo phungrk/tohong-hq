@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """T-077 tiêu chí 2: mỗi lần chạy helper vite dùng cache riêng, không dùng cache chung node_modules/.vite. Quan sát được từ ngoài, không cần biết cách cài:
-hai lần chạy chồng (small_tile_tooltip trên front gốc, C10 trên bản sao) với TMPDIR riêng của eval. Phải thấy (a) trong lúc chạy, TMPDIR có >= 2 thư mục cache khác tên (mỗi lần chạy một),
+hai lần chạy chồng (small_tile_tooltip trên front gốc, C10 trên bản sao) với TMPDIR riêng của eval. Phải thấy (a) trong lúc chạy, ngay dưới TMPDIR (mục cấp 1, không qua thư mục cha chung) có >= 2 mục cache khác tên (mỗi lần chạy đúng một mục riêng),
 mỗi cái là một cache vite thật (có deps/_metadata.json, tức vite đã ghi vào đó); (b) cache chung của front gốc (realpath node_modules/.vite) không thêm/bớt/đổi file nào trước và sau.
-Hợp đồng quan sát: cache riêng nằm trong thư mục tạm của hệ thống (os.tmpdir(), theo TMPDIR). Chạy: python3 eval/T-077/check_2_cache_rieng.py [--evalroot DIR] [--front DIR]. In PASS/FAIL; thoát 0/1."""
+Hợp đồng quan sát: cache riêng nằm trong thư mục tạm của hệ thống (os.tmpdir(), theo TMPDIR). Chạy: python3 eval/T-077/check_2_cache_rieng.py [--evalroot DIR] [--front DIR]. In PASS/FAIL; thoát 0/1.
+Đỏ giả: nếu lúc đo có eval front khác (agent song song) còn dùng helper cũ ghi cache chung thì vế (b) đỏ; gặp đỏ chỉ khi chạy chồng thì chạy lại riêng trước khi phân loại (ADR-035 mục 4)."""
 import sys, os, shutil, threading, time
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib"))
 import c, h

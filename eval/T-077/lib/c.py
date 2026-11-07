@@ -69,8 +69,10 @@ def cache_state(front):
     return s
 
 
-def burn(n):
-    return [subprocess.Popen([sys.executable, "-c", "while True: pass"]) for _ in range(n)]
+def burn(n, secs=120):
+    """n tiến trình đốt CPU, tự thoát sau `secs` giây dù check bị giết (kể cả SIGKILL) -> không bao giờ chạy mãi."""
+    code = "import time\nt=time.time()\nwhile time.time()-t<%d: pass" % secs
+    return [subprocess.Popen([sys.executable, "-c", code], start_new_session=True) for _ in range(n)]
 
 
 def front_copy(tmp, name="front-x", mutate=lambda d: None):
