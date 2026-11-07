@@ -1,7 +1,7 @@
 {
   "task": "T-098",
-  "at": "2026-11-07T13:56",
-  "verdict": "GREEN",
+  "at": "2026-11-07T14:07",
+  "verdict": "RED",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/vendor/images",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-077/check_1_chay_chong.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 62138,
+      "ms": 60743,
       "out": "PASS 0 đỏ giả: 6 lần small_tile_tooltip (front gốc) + 1 lần C10 (bản sao) chạy chồng, tải 2 tiến trình CPU",
       "tier": 1
     },
@@ -20,15 +20,15 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-077/check_2_cache_rieng.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 54679,
-      "out": "PASS 2 cache riêng khác tên trong TMPDIR, cache chung không đổi (26 mục)",
+      "ms": 54027,
+      "out": "PASS 2 cache riêng khác tên trong TMPDIR, cache chung không đổi (24 mục)",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && python3 eval/T-077/check_3_ket_qua_khong_doi.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 131101,
+      "ms": 143304,
       "out": "PASS code hiện tại: small_tile_tooltip PASS, C10 PASS; đột biến M1 -> C10 FAIL, M2 -> small_tile_tooltip FAIL đúng lý do",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && python3 eval/T-077/check_4_don_cache_tam.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 30340,
+      "ms": 30334,
       "out": "PASS cả năm tình huống (PASS, FAIL, SIGTERM, SIGINT, SIGHUP): có cache riêng lúc chạy, TMPDIR sạch sau chạy, front không dư file",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 37,
+      "ms": 29,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -52,7 +52,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 149,
+      "ms": 175,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 547,
+      "ms": 562,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 32,
+      "ms": 33,
       "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 598,
+      "ms": 606,
       "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1788,
+      "ms": 1811,
       "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 6320,
+      "ms": 6333,
       "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-006-wayback-chi-khi-bat-co-va-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 7189,
+      "ms": 7178,
       "out": "PASS Wayback chỉ khi bật cờ; 4 yêu cầu, giãn cách nhỏ nhất 2.00 giây, tối đa 1 cùng lúc",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-007-khong-goi-wayback-available.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 704,
+      "ms": 682,
       "out": "PASS 6 yêu cầu tới Wayback, không có /wayback/available",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-008-san-toc-do-wayback.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 571,
+      "ms": 559,
       "out": "PASS 6 cách hạ tốc độ / dùng --wayback-* sai đều bị từ chối mã 2, không yêu cầu, không ghi manifest",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-009-wayback-429-khong-go-cua-mai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 16291,
+      "ms": 16274,
       "out": "PASS 429 mọi yêu cầu: 20 yêu cầu tổng, tối đa 4 liên tiếp cùng đường dẫn, lần gửi lại sớm nhất sau 1.00 giây, 1 cùng lúc",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-010-eval-khong-kill-theo-ten.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 351,
+      "ms": 305,
       "out": "PASS không eval nào kill tiến trình theo tên",
       "tier": 2
     },
@@ -148,10 +148,50 @@
       "eval": "eval/invariants/planner/vendor/images/inv-011-file-thu-eval-khong-vao-git-front.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 31,
+      "ms": 34,
       "out": "PASS repo front không chứa file tạm của eval (__t0NN*, __nonce-*)",
       "tier": 2
+    },
+    {
+      "eval": "eval/T-098/adv-01-khong-co-vite-config.py",
+      "kind": "py",
+      "status": "FAIL",
+      "ms": 2874,
+      "out": "FAIL repo không có vite.config: lúc chạy không có cache vite riêng (deps/_metadata.json) dưới TMPDIR | cache chung node_modules/.vite bị đổi (23 mục, vd ['deps/@clerk_clerk-react.js', 'deps/@clerk_clerk-react.js.map', 'deps/_metadata.json'])",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-098/adv-02-tmpdir-symlink-khoang-trang.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 6039,
+      "out": "PASS TMPDIR có khoảng trắng và TMPDIR symlink: trang + deps 200, cache riêng, cache chung không đổi, sạch sau stop()",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-098/adv-03-vite-config-ham-promise-ts.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 13794,
+      "out": "PASS 5 dạng vite.config (hàm, hàm async, Promise, .ts, base có cacheDir): trang + deps 200, cache riêng, cache chung không đổi, sạch",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-098/adv-04-startvitedev-nem-loi.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 3285,
+      "out": "PASS startViteDev ném lỗi (config hỏng, thiếu vite): TMPDIR và repo sạch ngay khi lỗi tới người gọi",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-098/adv-05-bon-lan-chay-song-song.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 5393,
+      "out": "PASS 4 lần chạy song song cùng TMPDIR: 4 cache cấp 1 khác tên, dừng lệch không xoá của nhau, sạch sau cùng, cache chung không đổi",
+      "tier": 3
     }
   ],
-  "hint": ""
+  "hint": "code"
 }
