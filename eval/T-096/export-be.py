@@ -32,6 +32,7 @@ def w(base, rel, text):
 
 
 LONG = "Dòng mô tả rất dài " + "lặp lại nhiều lần " * 12   # > 140 ký tự, không có ". "
+LONG140 = re.sub(r"\s+", " ", LONG.strip())[:140].rstrip() + "…"   # nhãn đúng: 140 ký tự đầu + …  (name = <mã> · nhãn nên tới 141 + len("adv-vv · ") = 150 ký tự)
 
 
 def make_fake(tmp):
@@ -60,6 +61,13 @@ def make_fake(tmp):
     w(f, E + "T-903/adv-01-ten-dai.sh", "# Dòng này bị bỏ qua vì slug đã đủ hai từ, không đọc comment\n" + body)
     w(f, E + "T-903/adv-02-dai.sh", "# " + LONG + "\n" + body)
     w(f, E + "T-903/adv-03.sh", "# T-903 adv-03 (adversary)\n# Kiểm tra mục hai đủ dài ở dòng sau\n" + body)
+    # T-904: hai file cùng mã + cùng slug, khác đuôi -> cả hai dùng tên file; thẻ của/cho trọn từ; cắt ". " rồi mới lọc; name 150 ký tự
+    for n in ("adv-01-a-b.sh", "adv-01-a-b.py"):
+        w(f, E + "T-904/" + n, "# Dòng mô tả khác nhau của " + n + " không được dùng\n" + body)
+    w(f, E + "T-904/adv-03.sh", "# chorus nhiều lớp kiểm tra thứ tự đóng\n" + body)
+    w(f, E + "T-904/adv-04.sh", "# cho kiểm tra thứ tự mở ngăn kéo\n" + body)
+    w(f, E + "T-904/adv-05.sh", "# Case 1 (xem adv-vv.cjs). cd /home/user/tohong-hq && bash adv-vv.cjs\n" + body)
+    w(f, E + "T-904/adv-vv.cjs", "// " + LONG + "\n// " + SENT + "\n")
     w(f, E + "T-100/adv-01.py", '"""Tầng 3 T-100 · input: tên trùng khoá.\n"""\n' + f"print('{SENT}')\n")
     w(f, E + "T-99/adv-01.sh", "# Số T nhỏ hơn đứng sau\n" + body)
     # không tính:
@@ -78,8 +86,14 @@ def make_fake(tmp):
 def want_adv():
     # (task, file, name, id); name None = kiểm riêng (tên dài). Số T giảm dần; trong một việc: cụm số trước cụm chữ, số so như số nguyên
     return [
+        ("T-904", "adv-01-a-b.py", "adv-01-a-b.py", "adv-01-a-b"),
+        ("T-904", "adv-01-a-b.sh", "adv-01-a-b.sh", "adv-01-a-b"),
+        ("T-904", "adv-03.sh", "adv-03 · chorus nhiều lớp kiểm tra thứ tự đóng", "adv-03"),
+        ("T-904", "adv-04.sh", "adv-04 · kiểm tra thứ tự mở ngăn kéo", "adv-04"),
+        ("T-904", "adv-05.sh", "adv-05 · Case 1 (xem adv-vv.cjs)", "adv-05"),
+        ("T-904", "adv-vv.cjs", "adv-vv · " + LONG140, "adv-vv"),
         ("T-903", "adv-01-ten-dai.sh", "adv-01 · ten dai", "adv-01-ten-dai"),
-        ("T-903", "adv-02-dai.sh", None, "adv-02-dai"),
+        ("T-903", "adv-02-dai.sh", "adv-02 · " + LONG140, "adv-02-dai"),
         ("T-903", "adv-03.sh", "adv-03 · Kiểm tra mục hai đủ dài ở dòng sau", "adv-03"),
         ("T-902", "adv-01-chi-code.sh", "adv-01 · chi code", "adv-01-chi-code"),
         ("T-902", "adv-02.sh", "adv-02.sh", "adv-02"),
@@ -115,8 +129,8 @@ def check_fake(m, public):
         if not isinstance(m.get(key), list):
             bad.append(f"[{k}] model thiếu mảng {key}"); return
     A, R = m["adversarial_list"], m["regression_list"]
-    if m.get("adversarial_evals") != 17 or len(A) != 17:
-        bad.append(f"[{k}] adversarial_evals/len(adversarial_list) phải 17/17, thấy {m.get('adversarial_evals')}/{len(A)}")
+    if m.get("adversarial_evals") != 23 or len(A) != 23:
+        bad.append(f"[{k}] adversarial_evals/len(adversarial_list) phải 23/23, thấy {m.get('adversarial_evals')}/{len(A)}")
     if m.get("regression_evals") != 5 or len(R) != 5:
         bad.append(f"[{k}] regression_evals/len(regression_list) phải 5/5, thấy {m.get('regression_evals')}/{len(R)}")
     want_keys = {"id", "file", "name", "source", "url"} | (set() if public else {"path"})
@@ -129,11 +143,7 @@ def check_fake(m, public):
         if got.get("file") != file or got.get("source") != task:
             bad.append(f"{loc}: thứ tự/nguồn sai, thấy file={got.get('file')} source={got.get('source')}"); continue
         if got.get("id") != id_: bad.append(f"{loc}: id phải {id_!r}, thấy {got.get('id')!r}")
-        if name is None:
-            n = got.get("name", "")
-            if not (n.startswith("adv-02 · Dòng mô tả rất dài") and n.endswith("…") and len(n) - len("adv-02 · ") <= 141 and "\n" not in n):
-                bad.append(f"{loc}: tên dài phải cắt 140 ký tự + …, thấy {len(n)} ký tự {n[-10:]!r}")
-        elif got.get("name") != name:
+        if got.get("name") != name:
             bad.append(f"{loc}: name phải {name!r}, thấy {got.get('name')!r}")
         if got.get("url") != f"{GH}blob/main/eval/{task}/{file}": bad.append(f"{loc}: url sai: {got.get('url')}")
         if not public and got.get("path") != f"eval/{task}/{file}": bad.append(f"{loc}: path phải eval/{task}/{file}, thấy {got.get('path')}")
@@ -179,7 +189,14 @@ def real():
             if sorted((x["source"], x["file"]) for x in A) != sorted((p.parent.name, p.name) for p in advs): bad.append(f"[{k}] tập (việc, file) của adversarial_list khác đếm độc lập")
             for x in A + R:
                 n = x.get("name", "")
-                if not n or "\n" in n or len(n) > 141: bad.append(f"[{k}] {x.get('file')}: name rỗng/nhiều dòng/quá dài"); continue
+                if not n or "\n" in n: bad.append(f"[{k}] {x.get('file')}: name rỗng/nhiều dòng"); continue
+                # Giới hạn 141 (140 + …) áp lên NHÃN, không áp lên cả name (name adv = <mã> · <nhãn>). Nhãn slug và tên file không bị cắt.
+                isadv = any(x is a for a in A)
+                lab = n.split(" · ", 1)[1] if (isadv and " · " in n) else n
+                stem = x["id"]
+                slug = stem.split("-", 2)[2] if (isadv and stem.count("-") >= 2) else stem
+                slug_lab = " ".join(t for t in re.split(r"[-_\s]+", slug) if t)
+                if n != x["file"] and lab != slug_lab and len(lab) > 141: bad.append(f"[{k}] {x.get('file')}: nhãn dài {len(lab)} > 141 (140 ký tự + …)"); continue
                 if nr.looks_like_code(n) or n.startswith("#!"): bad.append(f"[{k}] {x.get('file')}: name là dòng code/đường dẫn máy: {n[:60]!r}")
                 if not x.get("url", "").startswith(GH): bad.append(f"[{k}] {x.get('file')}: url sai")
                 if not public and not (ROOT / x.get("path", "?")).exists(): bad.append(f"[{k}] path không tồn tại: {x.get('path')}")
