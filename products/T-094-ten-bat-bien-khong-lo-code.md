@@ -17,15 +17,21 @@ Sửa **mục A của T-092** ở đúng chỗ dưới; mọi chữ khác của 
 
 ### A. "Dòng code" và "đường dẫn máy" (đo được)
 Sau khi làm sạch dòng (T-092: bỏ khoảng trắng, `#`/`//`/ba dấu nháy ở đầu và ba dấu nháy ở cuối), một chuỗi `s` (đã bỏ khoảng trắng hai đầu) là **không dùng được làm tên** khi thỏa **bất kỳ** điều nào sau (so khớp chữ thường/hoa đúng như viết, trừ khi ghi khác):
-1. **Đường dẫn máy:** chứa một trong `/home/`, `/root/`, `/tmp/`, `handoffs/`, `C:\`.
-2. **Bắt đầu bằng ký hiệu code:** ký tự đầu là một trong `$ { } | & ! < > @ ; \ ^ ~ / % *`. (Cố ý KHÔNG có dấu nháy ngược, `(`, `[`, `"`: mô tả hợp lệ của bể bắt đầu bằng chúng, vd `` `capu_queue` không… `` và `(a) bản --public…`.)
+1. **Đường dẫn máy** (ở bất kỳ vị trí): chứa một trong `/home/`, `/root/`, `/tmp/`, `/Users/`, `/var/`, `/opt/`, `handoffs/`, `C:\`.
+2. **Bắt đầu bằng ký hiệu code:** ký tự đầu là một trong `$ { } | & ! < > @ ; \ ^ ~ / % * +`. (Cố ý KHÔNG có dấu nháy ngược, `(`, `[`, `"` ở đây cho chuỗi có chữ có dấu: mô tả hợp lệ của bể bắt đầu bằng chúng, vd `` `capu_queue` không… `` và `(a) bản --public…`; xem điều 9.)
 3. **Kết thúc bằng `{`.**
-4. **Chứa toán tử/cấu trúc shell hay code** (ở bất kỳ vị trí): `$(`, `${`, ` && `, ` || `, ` == `, ` != `, `=>`, `->`, `>&`, `2>`.
-5. **Bắt đầu bằng từ khoá/lệnh code** viết **thường** đúng như sau, theo sau là hết chuỗi hoặc một trong ký tự khoảng trắng, `(`, `[`, `{`, `:`, `;`, `=`, `.`, `-`: `import from def class return if elif else for while with try except finally raise assert print exit const let var function await async set export source cd echo python python3 node bash npm git grep curl fi done`. Từ đầu toàn chữ HOA (vd `INV`) không tính.
-6. **Gán:** cả chuỗi khớp `^[A-Za-z_][A-Za-z0-9_.\[\]'"]*\s*(?:[-+*/|&%]|\*\*|//)?=(?!=)\s*\S` (tên ASCII rồi `=`, `+=`, `-=`, `//=`… rồi giá trị; vd `r = subprocess.run(…)`, `ROOT = Path(…)`).
-7. **Gọi hàm cả dòng:** cả chuỗi khớp `^[A-Za-z_][A-Za-z0-9_.]*\(.*\)\s*;?$` (vd `subprocess.run(x)`, `print(x)`).
+4. **Chứa toán tử/cấu trúc shell hay code** (ở bất kỳ vị trí): `$(`, `${`, ` && `, ` || `, ` == `, ` != `, ` === `, ` !== `, `=>`, `->`, `>&`, `2>`. **Hệ quả đã biết:** văn xuôi viết mũi tên ASCII (`đỏ -> rework`) bị loại và rơi bước kế; chấp nhận vì spec chọn chặt có chủ ý (fixture inv-170). 0 tên thật hôm nay dính.
+5. **Bắt đầu bằng từ khoá/lệnh code** viết **thường** đúng như sau, theo sau là hết chuỗi hoặc một trong khoảng trắng, `(`, `[`, `{`, `:`, `;`, `=`, `.`, `-`: `import from def class return if elif else for while with try except finally raise assert print exit const let var function await async set export source cd echo python python3 node bash npm git grep curl fi done exec mkdir rm cp mv cat sed awk jq printf npx readonly declare local esac yield lambda trap touch chmod eval unset shift ls`. Từ đầu toàn chữ HOA (vd `INV`) không tính.
+   **Từ dễ trùng văn xuôi** `test case then do pass find sort head tail true false diff command`: chỉ tính khi sau nó là hết chuỗi, hoặc `;`, hoặc (sau khoảng trắng) một ký tự `- " $ / . [ ( '`, hoặc một từ khoá của danh sách trên. Nên `test -f x`, `do echo hi`, `case "$1" in`, `command -v git`, `pass` bị loại, còn `do lỗi mạng nên…`, `test thử khi…`, `case khác xảy ra…` giữ nguyên.
+6. **Gán:** chuỗi **bắt đầu** khớp một trong (regex Python, `re.match`, không cần khớp tới cuối):
+   - `[A-Za-z_][A-Za-z0-9_.\[\]'"]*\s*(?:[-+*/|&%]|\*\*|//)?=(?!=)\s*\S` (vd `r = subprocess.run(…)`, `x += 1`);
+   - gán nhiều biến `[A-Za-z_][\w.]*(?:\s*,\s*[A-Za-z_][\w.]*)+\s*=(?!=)` (vd `back, front = …`, `T, G, X = (…)`);
+   - gán có kiểu `[A-Za-z_]\w*\s*:\s*[A-Za-z_][\w\[\], .]*=(?!=)` (vd `x: int = 5`).
+7. **Gọi hàm:** chuỗi khớp `^[A-Za-z_][A-Za-z0-9_.]*\(.*\)\s*;?$` (cả dòng, vd `print(x)`); **hoặc** bắt đầu bằng `[A-Za-z_][A-Za-z0-9_.]*\(` và (toàn ký tự ASCII, hoặc số `(` nhiều hơn số `)`, hoặc kết thúc bằng `(`): lệnh gọi viết nhiều dòng như `L.task("new", "--title", "x",`. KHÔNG dùng quy tắc "kết thúc bằng dấu phẩy" (loại nhầm 8 tên thật).
+8. **Pipe:** chứa ` | ` mà từ đầu tiên sau nó là một từ trong điều 5 (kể cả nhóm dễ trùng) hoặc `wc tr cut xargs tee uniq sh`, **và** (chuỗi toàn ASCII, hoặc bắt đầu bằng từ khoá điều 5). Vd `cat x | sed -n 1,12p | grep -c area` bị loại; câu tiếng Việt trích `` `pgrep x | xargs kill` `` (tên thật INV-010 planner/vendor/images) giữ nguyên.
+9. **Dạng dữ liệu/mã khác, chỉ cho chuỗi toàn ASCII:** khớp `^"[\w.-]+"\s*:` (khoá JSON), hoặc `^[a-z_]+:\s*[\["{]` (`sources: [...]`), hoặc `^\S+\)\s*,?$`, hoặc `\)\s*;\s*\S` (hai lệnh một dòng), hoặc bắt đầu bằng `"` hay `(`, hoặc số `)` nhiều hơn số `(`.
 
-Cài đặt tham chiếu độc lập: `looks_like_code` trong `eval/T-094/namerule2.py`. Quy tắc chọn **chặt** có chủ ý: thà bỏ nhầm một dòng mô tả lạ (rơi xuống bước kế, tên vẫn đọc được) còn hơn để lọt dòng code. Đã kiểm: 119 mô tả thật của bể đều không bị loại.
+Cài đặt tham chiếu độc lập: `looks_like_code` trong `eval/T-094/namerule2.py`. Quy tắc chọn **chặt** có chủ ý: thà bỏ nhầm một dòng mô tả lạ (rơi xuống bước kế, tên vẫn đọc được) còn hơn để lọt dòng code. Đã kiểm: 119 mô tả thật của bể đều không bị loại (tên không đổi); quét mọi dòng >= 50 ký tự trong 12 dòng đầu của mọi file `inv-*` thì không còn dòng ASCII nào trông như code mà không bị loại (chỉ còn gạch đầu dòng văn xuôi `- …`).
 
 ### B. Quy tắc tên mới (thay "Một quy tắc duy nhất, thử lần lượt" của T-092)
 Giữ nguyên làm sạch, bước 1, 2, 3 và phần "Sau khi có `name`" của T-092, **thêm hai điều**:
@@ -37,7 +43,7 @@ Giữ nguyên làm sạch, bước 1, 2, 3 và phần "Sau khi có `name`" của
 
 Hệ quả: `name` không bao giờ chứa `/home/`, `/root/`, `/tmp/`, `handoffs/`, `C:\`, và không bao giờ là một dòng thỏa mục A. `source` giữ nguyên.
 
-**Bảng fixture** (`eval/T-094/check.py --criterion 1` dựng đúng các file này trong sổ cái tạm; tên mong đợi viết tay):
+**Bảng fixture** (`eval/T-094/check.py --criterion 1` dựng đúng các file này, tổng 37 file trong sổ cái tạm; tên mong đợi viết tay):
 
 | File | Nội dung chính | `name` mong đợi | Vì sao |
 | --- | --- | --- | --- |
@@ -53,6 +59,9 @@ Hệ quả: `name` không bao giờ chứa `/home/`, `/root/`, `/tmp/`, `handoff
 | inv-110-dong-inv-la-code.sh | `INV-110 · x = f(y)` | `dong inv la code` | bước 2 bị loại -> slug |
 | inv-111.sh | `Bất biến: cd /root/work && python3 run.py` | `inv-111.sh` | bước 4 (tên file) |
 | inv-112-doi-chung-mo-ta-co-slash.sh | `Bất biến: scripts/export_dashboard.py không sập…` | nguyên văn đuôi | đối chứng: đường dẫn repo (không phải đường dẫn máy) được phép, như INV-004/005 hq/dashboard hôm nay |
+| inv-130..148 (19 file) | mỗi file một dòng code giữa dòng nguồn và một dòng mô tả sạch >= 50 ký tự: `exec node "$HERE/lib/loc_inv.cjs" --repo "$REPO" --check kr-sum` (dòng chuẩn của bể); `back, front = …`; `T, G, X = (…)`; `count: int = …`; `L.task("new", …,` và `result = run_checks(a, b,` (gọi nhiều dòng); `cat … \| sed … \| grep …`; `sed … \| awk … \| jq …`; `mkdir … && printf …`; `rm -rf …`; `npx playwright test …`; `local out; out=$(…)…`; `test -f … \|\| { … }`; `case "$1" in …`; `f = lambda …`; `command -v node …`; ba dòng văn xuôi có `/Users/`, `/var/`, `/opt/` | dòng mô tả sạch | điều 1, 4-9 |
+| inv-160..164 (5 file) | văn xuôi tiếng Việt: `do lỗi mạng…`, `test thử khi…`, `case khác xảy ra…`, câu trích `` `pgrep x \| xargs kill` ``, `số lượng (a = 1, b = 2)…` | nguyên văn đuôi | đối chứng: không bị loại |
+| inv-170-mui-ten-trong-van-xuoi.sh | `Bất biến: đỏ -> rework, xanh -> merge theo bậc của việc` | `mui ten trong van xuoi` | hệ quả đã biết của điều 4 |
 
 ### C. File bất biến ở gốc `eval/invariants/`
 File thường `inv-*` nằm ngay dưới `eval/invariants/` (không thư mục con):
@@ -77,7 +86,7 @@ Board ghi một tiêu chí gồm bốn ý 1)-4); mỗi ý một eval:
 | 1 | `name` của mọi fixture bảng B đúng từng ký tự, cả có và không `--public`; không tên nào chứa `/home/`, `/root/`, `/tmp/`, `handoffs/` | `cd /home/user/tohong-hq && python3 eval/T-094/check.py --criterion 1` |
 | 2 | File ở gốc `eval/invariants`: `area` = `_root`, `url`/`path` không có `/./`, đếm và thứ tự đúng, cả hai chế độ | `cd /home/user/tohong-hq && python3 eval/T-094/check.py --criterion 2` |
 | 3 | Tên 119 bất biến thật không đổi so với `ten-hien-tai.json` (trừ `sua_co_chu_y`); mọi tên không là code/đường dẫn máy và khớp `namerule2.py` | `cd /home/user/tohong-hq && python3 eval/T-094/check.py --criterion 3` |
-| 4 | INV-009 và INV-017 xanh | `cd /home/user/tohong-hq && D3=<đường dẫn d3.min.js> bash eval/T-094/check4.sh` |
+| 4 | INV-009 và INV-017 xanh | `cd /home/user/tohong-hq && D3=${D3:-/tmp/claude-0/-home-user/86243faa-8dbf-5631-b32b-051ad4d92b1e/scratchpad/d3.min.js} bash eval/T-094/check4.sh` (INV-009 cần `D3` và node; `check4.sh` còn tự tìm `d3.min.js` nếu `D3` thiếu) |
 
 Hiện: 1 đỏ, 2 đỏ (đúng kỳ vọng, chưa có code), 3 xanh (phải xanh trước và sau), 4 xanh.
 
@@ -88,4 +97,7 @@ INV-đề-xuất (hq/dashboard/model): "`name` trong `dashboard.json` (cả hai 
 Không đổi `source`, không đổi thứ tự/đếm của T-092 ngoài `_root`, không sửa file bất biến hiện có, không đổi trang `index.html` (drawer đọc `name` như cũ).
 
 ## Câu hỏi mở
-INV-017 (đang chờ merge) tính vùng bằng `relative_to` nên ghi gốc là `"."`; khi có file ở gốc nó sẽ đỏ với `_root`. Hôm nay bể không có file ở gốc nên xanh. Đề nghị Chief of Staff cho spec-critic cập nhật INV-017 (ánh xạ `"."` -> `"_root"`) khi rút vào bể, ghi `decisions/`. Không cần Capu.
+Không. INV-017 (`eval/invariants/hq/dashboard/inv-017-so-be-khop-file-that.py`) tính vùng bằng `relative_to`, nên file ở gốc mang vùng `"."` và sẽ đỏ với `_root`. Chief of Staff sửa INV-017 (ánh xạ `"."` thành `"_root"`, bỏ chữ "chờ merge" ở đầu file) qua `decisions/` cùng lúc merge code T-094; spec-critic và Engineering không tự sửa. Hôm nay bể không có file ở gốc nên INV-017 vẫn xanh.
+
+## Đã sửa ở rework 1 (T-094-D1)
+Mục A điều 5-9 viết lại: thêm `exec`, `command` + các lệnh cat/sed/awk/jq/mkdir/rm/printf/npx/test/local/case/then/do/pass/lambda…; gán nhiều biến và gán có kiểu; gọi hàm nhiều dòng; pipe; `/Users/ /var/ /opt/`; điều 6 ghi "bắt đầu khớp". Lý do: định nghĩa đóng 7 điều cũ để lọt `exec node "$HERE/…"` (dạng chuẩn của 80 file bể) và 3 dạng khác, ba cách cài đặt cho ba tên khác nhau. Fixture tăng từ 12 lên 37.
