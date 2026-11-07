@@ -20,7 +20,7 @@ if (!CHECKS.includes(CHECK)) { console.log('FAIL --check phải là một trong 
 const SHOT_DIR = ['T-035', 'T-036'].some(t => fs.existsSync(path.join(REPO, 'docs', 'screenshots', t)));
 
 const GATES = ['gt_spec', 'gt_code'];
-const BODY_MIN_U = 62, BODY_MIN_PX = { 1280: 68, 390: 19 };
+const BODY_MIN_U = 29.7, BODY_MIN_PX = { 1280: 33, 390: 9 };  // ADR-033 (2026-11-07): hạ ngưỡng cho nhân vật 1/2 (T-090); trước: 62u, 68px/19px
 const T = (id, state, owner) => ({ id, title: 'Việc ' + id, state, holder: owner, owner, reviewer: 'adversary', rounds: 0, version: 1, deadline: '', budget: '', cost: 0,
   created: '2026-10-30T09:00', updated: '2026-11-01T09:00', hours_since_update: 2, tier: 'A', area: 'dashboard/model', evals: 1, spec_returns: 0, evals_added: 0 });
 const roster = ['capu', 'chief-of-staff', 'insight', 'product', 'spec-critic', 'engineering', 'adversary'].map(id => ({ id, name: id, role: '', kind: id === 'capu' ? 'human' : 'agent', reports_to: '', mission: '', agent_file: '', status: 'Hired' }));
