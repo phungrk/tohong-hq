@@ -28,7 +28,9 @@ def enrich_all(cats="all", budget="30", basis=None, photos=2, extra=()):
 
 
 def net_usd(ts, ph, ts_used=0, ph_used=0, margin=MARGIN):
-    return round(TS_USD * max(0, ts - max(0, FREE - ts_used - margin)) + PH_USD * max(0, ph - max(0, FREE - ph_used - margin)), 6)
+    """Chi net CỦA ĐỢT tính TÍCH LUỸ (spec, "Công thức trần"): ts/ph = số request của lần chạy này; ts_used/ph_used = đã dùng trong tháng (baseline + mọi log).
+    net = 0,040 x max(0, TS_cum + margin - 1000) + 0,007 x max(0, PH_cum + margin - 1000)."""
+    return round(TS_USD * max(0, ts + ts_used + margin - FREE) + PH_USD * max(0, ph + ph_used + margin - FREE), 6)
 
 
 def gross_usd(ts, ph):
@@ -36,7 +38,8 @@ def gross_usd(ts, ph):
 
 
 def usage_logs(root, ts=0, details=0, media=0, baseline_photos=0, baseline_ts=0, name="T-106/20261108-040329-x.log"):
-    """Ghi run-logs của tháng: một log với dòng GOOGLE_USAGE và usage-baseline.json (ghi chú tay của Capu, vd 606 request ảnh)."""
+    """Ghi run-logs của tháng: một log với dòng GOOGLE_USAGE (kiểu T-106, không run id) và usage-baseline.json (ghi chú tay của Capu, vd 606 request ảnh).
+    Quy ước fixture: đã dùng 950 = hết hạn mức miễn phí hiệu dụng (1000 - biên 50), chi net bắt đầu từ 0."""
     d = os.path.join(root.path, "run-logs")
     os.makedirs(os.path.join(d, os.path.dirname(name)), exist_ok=True)
     open(os.path.join(d, name), "w").write("noise\nGOOGLE_USAGE text_search=%d photo_details=%d photo_media=%d\n" % (ts, details, media))
@@ -54,9 +57,9 @@ def kv(out, tag):
 
 
 def is_temp_closed(audit_row):
-    """Đọc trạng thái tạm đóng cửa đúng định nghĩa T-110 (Hành vi 6): dòng audit có hiệu lực mang status temporarily_closed hoặc manual_override temporarily_closed.
-    Nếu T-110 đổi tên trường, đổi MỘT chỗ này."""
-    return bool(audit_row) and (audit_row.get("status") == "temporarily_closed" or audit_row.get("manual_override") == "temporarily_closed")
+    """Trạng thái tạm đóng cửa đúng định nghĩa T-110 (Hành vi 6, ĐỊNH NGHĨA MỘT LẦN): dòng audit có hiệu lực có closed_state == "temporarily_closed" VÀ retry == true.
+    Nếu T-110 đổi dấu hiệu, đổi MỘT chỗ này."""
+    return bool(audit_row) and audit_row.get("closed_state") == "temporarily_closed" and audit_row.get("retry") is True
 
 
 def search_rules(spec):
@@ -72,10 +75,35 @@ def search_rules(spec):
     return out
 
 
-def fx(places, rules, deny=False):
+def fx(places, rules, deny=False, die_after=None):
     f = t.fixture(places, (), None, deny)
     f["search"] = search_rules(rules)
+    if die_after is not None:
+        f["die_after"] = die_after
     return f
+
+
+def save_log(root, name, out):
+    """Lưu stdout của một lần chạy thành log của đợt như workflow làm (tee vào run-logs/T-111/<name>), để lần chạy sau đọc tích luỹ."""
+    d = os.path.join(root.path, "run-logs", "T-111")
+    os.makedirs(d, exist_ok=True)
+    open(os.path.join(d, name), "w", encoding="utf-8").write(out)
+
+
+def jlines(out, tag):
+    """Mọi dòng `<tag> {json}` -> list dict."""
+    res = []
+    for l in out.splitlines():
+        if l.startswith(tag + " {"):
+            try:
+                res.append(json.loads(l[len(tag) + 1:]))
+            except ValueError:
+                pass
+    return res
+
+
+def n_requests(out, kind):
+    return sum(1 for d in kv(out, "GOOGLE_REQUEST") if d.get("kind") == kind)
 
 
 def queries(calls):
@@ -122,15 +150,20 @@ def scenario_basic(parent=None):
     C = V("s_temp", "Nhà hàng Charlie Temp", 3)
     D = V("s_low", "Nhà hàng Delta Khac", 4)
     E = V("s_short_ok", "Nhà hàng Tiệc Cưới Echo Pearl", 5)
+    H = V("s_tlow", "Nhà hàng Hotel Tlow", 8)
     F = V("s_gone", "Nhà hàng Foxtrot Moon (Quận 1)", 6, ("attire",))
     G = V("s_noshort", "Mai House", 7, ("attire",))
+    GF = V("s_golf", "Nhà hàng Tiệc Cưới Golf Royal Palace Garden", 9, ("attire",))
     Bb = dict(B)
     Bb["categories"] = ["attire"]
-    files = {"venue": [A, B, C, D, E], "wedding_attire": [Bb, F, G]}
+    files = {"venue": [A, B, C, D, E, H], "wedding_attire": [Bb, F, G, GF]}
     PL = {"PA": place(A["name"], GADDR % 1, nphotos=3), "PB": place(B["name"], GADDR % 2, status="CLOSED_PERMANENTLY"),
           "PC": place(C["name"], GADDR % 3, status="CLOSED_TEMPORARILY"), "PD": place("Hoàn Toàn Khác Biệt", "99 Trần Hưng Đạo, Cô Giang, Hồ Chí Minh"),
-          "PE": place(E["name"], GADDR % 5, nphotos=3)}
-    RULES = [("alpha garden", ["PA"]), ("bravo old", ["PB"]), ("charlie temp", ["PC"]), ("delta khac", ["PD"]), ("echo pearl", ["PE"], "tiec cuoi")]
+          "PE": place(E["name"], GADDR % 5, nphotos=3),
+          "PH": place("Quán Khác Hẳn Tên", "77 Hai Bà Trưng, Bến Nghé, Hồ Chí Minh", status="CLOSED_TEMPORARILY"),
+          "PG": place("Golf Royal", GADDR % 9, nphotos=3)}
+    RULES = [("alpha garden", ["PA"]), ("bravo old", ["PB"]), ("charlie temp", ["PC"]), ("delta khac", ["PD"]), ("echo pearl", ["PE"], "tiec cuoi"),
+             ("hotel tlow", ["PH"]), ("golf royal", ["PG"], "tiec cuoi")]
     r = t.Root(files, parent=parent)
     return r, fx(PL, RULES), PL, RULES
 

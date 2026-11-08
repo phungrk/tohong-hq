@@ -5,10 +5,11 @@ rồi chạy ĐÚNG lệnh `bash tools/regen-pool-styles.sh --back <tohong-back 
   P_match (category attire, có place_id + 2 ảnh Google)   -> ở lại pool, photos thay bằng đúng 2 ảnh Google (source=google, host lh*.googleusercontent.com, có attribution), giá giữ nguyên.
   P_venue (venue, có ảnh Google)                          -> như trên (venue vẫn được xử lý).
   P_plain (không đụng tới)                                -> ở lại, ảnh marry giữ nguyên, giá giữ nguyên.
-  P_temp (tạm đóng cửa, định nghĩa T-110: audit status/manual_override temporarily_closed, còn trong vendors.json) -> KHÔNG có trong pool.
+  P_temp (tạm đóng cửa, định nghĩa T-110 Hành vi 6: dòng audit có closed_state="temporarily_closed" VÀ retry=true, còn trong vendors.json) -> KHÔNG có trong pool.
+  P_tlow (ứng viên CLOSED_TEMPORARILY bị cổng từ chối: status low_confidence NHƯNG vẫn closed_state + retry) -> KHÔNG có trong pool (T-110 nguồn ii; B2 của T-111-D1).
   P_gone (đã remove: có trong removed_vendors.json, không còn trong vendors.json, còn trong pool nền) -> KHÔNG có trong pool; lệnh thoát 0 (lỗi T-109: trước đây thoát 1).
-  P_low (low_confidence, vendor ở lại)                    -> Ở LẠI pool (không remove).
-Sau đó: (a) P_temp được nhận khớp (audit enriched, có place_id + ảnh) rồi chạy lại -> P_temp QUAY LẠI pool; (b) gọi trực tiếp `node tools/generate-vendor-pool.js --styles-only` KHÔNG kèm --prune
+  P_low (low_confidence thường, không closed_state)       -> Ở LẠI pool (không remove).
+Sau đó: (a) P_temp được nhận khớp (audit enriched, có place_id + ảnh) rồi chạy lại -> P_temp QUAY LẠI pool; (b, kiểm hồi quy của `--prune` do T-110/T-112 làm; T-111 chỉ dùng lại, T-112 cũng phải đạt) gọi trực tiếp `node tools/generate-vendor-pool.js --styles-only` KHÔNG kèm --prune
 trên pool nền còn vendor đã mất khỏi nguồn -> vẫn thoát 1 (an toàn mặc định, không xoá pool âm thầm); (c) nguồn rỗng (0 vendor) với --prune -> từ chối (thoát khác 0), pool không đổi;
 (d) INV-012 và INV-013 xanh trên pool tạm. Spec: products/T-111-enrich-toan-bo-vendor.md, "Pool". In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import json, os, re, shutil, subprocess, sys
@@ -38,7 +39,8 @@ def poolv(i, name, cat, n):
             "photos": [{"url": "https://www.marry.vn/images/%s.jpg" % i, "source": "marry"}], "availability": list(range(1, 13)), "tags": [], "isVerified": True}
 
 
-mk = {"venue": [gv("P_venue", "Nhà hàng Pvenue", "venue", 1, True), gv("P_temp", "Nhà hàng Ptemp", "venue", 2), gv("P_low", "Nhà hàng Plow", "venue", 3)],
+mk = {"venue": [gv("P_venue", "Nhà hàng Pvenue", "venue", 1, True), gv("P_temp", "Nhà hàng Ptemp", "venue", 2), gv("P_low", "Nhà hàng Plow", "venue", 3),
+                gv("P_tlow", "Nhà hàng Ptlow", "venue", 7)],
       "wedding_attire": [gv("P_match", "Áo cưới Pmatch", "attire", 4, True), gv("P_plain", "Áo cưới Pplain", "attire", 5)]}
 r = t.Root(mk, parent="repo")
 os.makedirs(os.path.join(r.base, "tools"), exist_ok=True)
@@ -49,12 +51,14 @@ open(os.path.join(r.base, "tools", "scraper", "output", "vendors.json"), "w").wr
 gone = gv("P_gone", "Nhà hàng Pgone", "venue", 6)
 r.write("venue/removed_vendors.json", [{"removed_at": "2026-11-08T10:00:00Z", "reason": "no_match sau thử tên rút gọn", "vendor": gone}])
 r.write("venue/enrichment-audit.json", [
-    {"vendor_id": "P_temp", "status": "temporarily_closed", "retry": True, "matched_name": "Nhà hàng Ptemp", "confidence": 1.0, "candidate_place_id": "PT"},
+    {"vendor_id": "P_temp", "status": "temporarily_closed", "retry": True, "closed_state": "temporarily_closed", "matched_name": "Nhà hàng Ptemp", "confidence": 1.0, "candidate_place_id": "PT"},
+    {"vendor_id": "P_tlow", "status": "low_confidence", "reject_reason": "low_score", "retry": True, "closed_state": "temporarily_closed", "matched_name": "Khác", "confidence": 0.2, "candidate_place_id": "PTL"},
     {"vendor_id": "P_low", "status": "low_confidence", "reject_reason": "low_score", "matched_name": "Khác", "confidence": 0.2, "candidate_place_id": "PL"}])
 back = os.path.join(r.base, "back")
 os.makedirs(os.path.join(back, "lib"))
 base_pool = [poolv("P_venue", "Nhà hàng Pvenue", "venue", 1), poolv("P_temp", "Nhà hàng Ptemp", "venue", 2), poolv("P_low", "Nhà hàng Plow", "venue", 3),
-             poolv("P_match", "Áo cưới Pmatch", "attire", 4), poolv("P_plain", "Áo cưới Pplain", "attire", 5), poolv("P_gone", "Nhà hàng Pgone", "venue", 6)]
+             poolv("P_match", "Áo cưới Pmatch", "attire", 4), poolv("P_plain", "Áo cưới Pplain", "attire", 5), poolv("P_gone", "Nhà hàng Pgone", "venue", 6),
+             poolv("P_tlow", "Nhà hàng Ptlow", "venue", 7)]
 PF = os.path.join(back, "lib", "vendorPool.generated.js")
 
 
@@ -77,9 +81,9 @@ rc, o = regen()
 if rc != 0:
     t.fail("regen-pool-styles.sh --photos-for all thoát %d (lỗi T-109: pool nền còn vendor đã gỡ phải được gỡ, không thoát lỗi): %s" % (rc, o.strip().splitlines()[-1:] or ""))
 P = read_pool()
-for gone_id in ("P_gone", "P_temp"):
+for gone_id in ("P_gone", "P_temp", "P_tlow"):
     if gone_id in P:
-        bad.append("%s vẫn có trong pool (%s)" % (gone_id, "đã remove" if gone_id == "P_gone" else "tạm đóng cửa"))
+        bad.append("%s vẫn có trong pool (%s)" % (gone_id, "đã remove" if gone_id == "P_gone" else "tạm đóng cửa: closed_state + retry"))
 for keep in ("P_venue", "P_match", "P_plain", "P_low"):
     if keep not in P:
         bad.append("%s phải ở lại pool" % keep)
@@ -102,7 +106,7 @@ v = r.vendor("P_temp")
 v["google_photos"] = [{"uri": "https://lh3.googleusercontent.com/P_temp/0", "attributions": [{"name": "A"}], "fetched_at": "2026-11-09T00:00:00Z"}]
 v["enrichment_log"] = [{"source": "google_maps", "timestamp": "2026-11-09T04:03:36", "matched_name": "Nhà hàng Ptemp", "confidence": 1.0, "place_id": "PID_T", "formatted_address": x.GADDR % 2, "address_match": True, "changes": {}}]
 r.write("venue/vendors.json", {"vendors": r.vendors("venue")})
-ar = [a for a in r.read("venue/enrichment-audit.json") if a["vendor_id"] != "P_temp"] + [{"vendor_id": "P_temp", "status": "enriched", "place_id": "PID_T", "matched_name": "Nhà hàng Ptemp", "confidence": 1.0}]
+ar = [a for a in r.read("venue/enrichment-audit.json") if a["vendor_id"] != "P_temp"] + [{"vendor_id": "P_temp", "status": "enriched", "place_id": "PID_T", "reopened": True, "matched_name": "Nhà hàng Ptemp", "confidence": 1.0}]
 r.write("venue/enrichment-audit.json", ar)
 rc, o = regen()
 if rc != 0 or "P_temp" not in read_pool():

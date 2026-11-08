@@ -1,7 +1,7 @@
 """Google GIẢ cho eval T-111 (bản của T-110 + hai khoá luật search: "absent" = chỉ khớp khi chuỗi này KHÔNG có trong query; "status" = trả mã HTTP lỗi) (không bao giờ gọi mạng thật). Tự nạp khi PYTHONPATH trỏ tới thư mục này và FAKE_GOOGLE_FIXTURE được đặt.
 Vá requests.sessions.Session.request (mọi requests.get/post/head và Session.get/post đều đi qua đây), nên eval chạy ĐÚNG lệnh CLI như workflow
 mà không cần biết cài đặt dùng hàm nào. Mọi lượt gọi ghi một dòng JSON vào FAKE_GOOGLE_LOG: {"kind","method","url"}.
-kind: share (share.google, goo.gl, maps.app.goo.gl) | maps (google.com/maps/*) | search (places:searchText) | details (places/<id>) | media (/media) | other.
+kind: geocode (maps.googleapis.com/…/geocode) | share (share.google, goo.gl, maps.app.goo.gl) | maps (google.com/maps/*) | search (places:searchText) | details (places/<id>) | media (/media) | other.
 Mode deny (fixture {"deny": true}): MỌI lượt gọi đều bị ghi lại rồi ném lỗi (chạy offline thật sự). 'other' luôn ném lỗi.
 Fixture: {"places": {pid: {name,address,status,lat,lng,photos:[{name,authorAttributions}]}},
           "search": [{"match": "<chuỗi con của textQuery, không dấu, chữ thường>", "ids": [pid,...]}],
@@ -43,6 +43,8 @@ if _fx:
             kind = "share"
         elif host.endswith("google.com") and "/maps" in url:
             kind = "maps"
+        elif host == "maps.googleapis.com" and "/geocode" in url:
+            kind = "geocode"
         elif host == "places.googleapis.com" and url.endswith(":searchText"):
             kind = "search"
         elif host == "places.googleapis.com" and url.rstrip("/").endswith("/media"):
@@ -52,6 +54,14 @@ if _fx:
         else:
             kind = "other"
         _log(kind, method, url, (kwargs.get("json") or {}).get("textQuery", "") if kind == "search" else "")
+        da = fx.get("die_after")
+        if da is not None and kind == "search":
+            lg = os.environ.get("FAKE_GOOGLE_LOG")
+            n_search = sum(1 for l in open(lg, encoding="utf-8") if '"kind": "search"' in l) if lg and os.path.exists(lg) else 0
+            if n_search > int(da):   # lượt gửi thứ da+1 đã ghi log phía fake: chết ngay như bị SIGKILL (không flush gì thêm)
+                os._exit(137)
+        if kind == "geocode" and not fx.get("deny"):
+            return _resp(200, {"status": "ZERO_RESULTS", "results": []}, url)
         if fx.get("deny") or kind == "other":
             raise requests.ConnectionError("eval T-110: không cho phép gọi %s %s (kind=%s)" % (method, url, kind))
         if kind == "share":
