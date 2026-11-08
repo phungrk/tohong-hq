@@ -36,7 +36,7 @@ PL["PEN"] = t.place("Én Banquet & Event Space", "308C Điện Biên Phủ, Phư
 vs = t.scen_vendors(True)
 vs.append(t.vendor(TH, "Thiskyhall", "Lầu 5, Số 10 Mai Chí Thọ, Khu đô thị Sala, An Khánh, TPHCM, Quận 2, Thành phố Hồ Chí Minh"))
 vs.append(t.vendor(EN, "Én Banquet & Event Space", "Lầu 7 tòa nhà Robot Tower, 308C Điện Biên Phủ, Phường 4, Quận 3, Thành phố Hồ Chí Minh"))
-vs.append(t.vendor("t110_pg", "Nhà Hàng Pergola Test", "28A Trần Cao Vân, P.12, Quận Phú Nhuận, Thành phố Hồ Chí Minh"))
+vs.append(t.vendor("t110_pg", "Nhà Hàng Tiệc Cưới Ngoài Trời Pergola", "28A Trần Cao Vân, P.12, Quận Phú Nhuận, Thành phố Hồ Chí Minh"))
 r = t.Root({"venue": vs, "honeymoon": []}, parent="repo")
 r.write("venue/removed_vendors.json", t.scen_removed(False))
 r.write("venue/enrichment-audit.json", t.scen_audit_rows() + [
@@ -44,7 +44,7 @@ r.write("venue/enrichment-audit.json", t.scen_audit_rows() + [
 ENT = [t.accept_with_snapshot(TH, "PTH", PL["PTH"]), t.accept_with_snapshot(EN, "PEN", PL["PEN"]), t.entry("t110_X", "remove"),
        t.entry("t110_R", "reject_match", place_id="PR"), t.entry("t110_R2", "reject_match", place_id="PR2"), t.entry("t110_pg", "temporarily_closed")]
 r.set_overrides(ENT)
-FX = t.fixture(PL, RULES + [("Pergola Test", [])])
+FX = t.fixture(PL, RULES + [("Ngoài Trời Pergola", [])])
 r.run(t.ENRICH, FX)
 r.run(t.REFRESH[:-1] + ["100"], FX)
 r.run(t.ENRICH, FX)
