@@ -20,6 +20,7 @@ if abs(sum(e["cost"] for e in ev) - exp) > 1e-3: fails.append(f"tổng {sum(e['c
 if len(ev) - before != 2: fails.append(f"backfill phải thêm đúng 2 sự kiện (main, sa2), thêm {len(ev) - before}")
 b.run(["backfill", sid])
 if len(b.events()) != len(ev): fails.append("chạy backfill lần hai vẫn thêm sự kiện")
+b.age(main, *subs.values())          # phiên đã kết thúc từ lâu: --final được phép (xem check_12)
 r = b.run(["backfill", sid, "--final"])
 m = [e for e in b.events() if e["src"]["agent"] == "main"]
 if len(m) != 2 or m[-1]["src"]["msgs"] != 4: fails.append(f"--final phải thêm tin dở của phiên chính (msgs=4), có {[e['src']['msgs'] for e in m]}")
