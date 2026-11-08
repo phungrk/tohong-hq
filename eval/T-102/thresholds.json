@@ -1,0 +1,16 @@
+{
+  "_doc": "Ngưỡng quyết định của T-102, khoá TRƯỚC khi chạy lượt đo nào. Không sửa sau khi có run đầu tiên; đổi ngưỡng = làm lại thí nghiệm.",
+  "locked_at": "2026-11-08T08:00",
+  "model_pin": "claude-sonnet-5-5",
+  "tasks_min": 3,
+  "reps_min_per_cell": 2,
+  "primary_metric": "usd_per_run",
+  "aggregate": "mean over tasks of (median usd of arm B / median usd of arm A); reduction = 1 - that mean",
+  "adopt_reduction_min": 0.20,
+  "drop_reduction_max": 0.05,
+  "adopt_tasks_cheaper_fraction": 0.6667,
+  "gate_not_worse": "green_first_rate(B) >= green_first_rate(A) AND mean_returns(B) <= mean_returns(A), pooled over all runs",
+  "extra_rep_if_cell_spread_over": 0.30,
+  "inconclusive_rule": "one extra rep per cell, once; still INCONCLUSIVE => recommendation is not to adopt",
+  "pilot_stop_usd": 5.0
+}
