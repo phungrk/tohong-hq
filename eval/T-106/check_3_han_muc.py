@@ -2,7 +2,7 @@
 """T-106 tiêu chí 3: tổng request SKU Photos của tháng <= 1.000 và Text Search <= $5, đo bằng LOG của các lần chạy thật.
 Log: mỗi lần chạy thật của enrich.py / refresh_photos.py lưu stdout vào $T106_LOG_DIR (mặc định $TOHONG_REPO/tools/scraper/run-logs/T-106/)
 với tên bắt đầu YYYYMMDD (vd 20261108-enrich-venue.log). Dòng đọc được:
-  GOOGLE_USAGE text_search=<n> photo_details=<n> photo_media=<n>     (enrich.py và refresh_photos.py PHẢI in đúng một dòng cuối lần chạy thật)
+  GOOGLE_USAGE text_search=<n> photo_details=<n> photo_media=<n>     (enrich.py và refresh_photos.py PHẢI in đúng một dòng cuối lần chạy thật; >1 dòng => đỏ)
   RESULT ... requests=<n> (details=<a>, media=<b>)                  (dòng cũ của refresh_photos.py; dùng khi log không có GOOGLE_USAGE)
 Log của lần --dry-run (có "DRY RUN") tính 0. Log không có dòng nào ở trên và không phải dry-run => đỏ (không đo được).
 Tính: baseline (T106_PHOTOS_BASELINE, mặc định 606) + SUM(photo_details + photo_media) <= 1000 (đếm cả Place Details để chặn trên: 606 khớp 3 lần x 202 request gồm details);
@@ -29,6 +29,8 @@ for f in logs:
     if not name.startswith(prefix):
         continue
     u = re.findall(r"^GOOGLE_USAGE\s+(.*)$", text, re.M)
+    if len(u) > 1:
+        c.fail("%s có %d dòng GOOGLE_USAGE (phải đúng một dòng cuối lần chạy thật)" % (name, len(u)))
     if u:
         kv = dict(re.findall(r"(\w+)=(\d+)", u[-1]))
         searches += int(kv.get("text_search", 0)); photos += int(kv.get("photo_details", 0)) + int(kv.get("photo_media", 0)); used += 1
