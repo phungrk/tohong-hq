@@ -1,0 +1,13 @@
+{
+  "_doc": "Bốn việc front đã xong, chạy lại từ commit cha của PR đã merge. Ba việc đầu là lõi; T-068 dự phòng (thay khi một việc lõi không chạy lại được sạch ở arm A). Eval chỉ gồm lệnh nhanh (<= 70s mỗi lệnh), tầng 1, chạy với đối số là thư mục worktree.",
+  "tasks": [
+    {"task": "T-060", "spec": "products/T-059-safari-thanh-tren-xam.md", "base_sha": "218e623~1", "merge_sha": "218e623",
+     "evals": ["bash eval/T-059/run.sh <WT> --only 1", "bash eval/T-059/run.sh <WT> --only 2", "bash eval/T-059/run.sh <WT> --only 3", "bash eval/T-059/run.sh <WT> --only 4"]},
+    {"task": "T-050", "spec": "products/T-048-cach-hoat-dong-chi-tiet-hang-muc.md", "base_sha": "05552dd~1", "merge_sha": "05552dd",
+     "evals": ["bash eval/T-048/run.sh <WT> --only 1", "bash eval/T-048/run.sh <WT> --only 2", "bash eval/T-048/run.sh <WT> --only 3", "bash eval/T-048/run.sh <WT> --only 4", "bash eval/T-048/run.sh <WT> --only 6"]},
+    {"task": "T-046", "spec": "products/T-045-nha-hang-tinh-theo-ban.md", "base_sha": "60a779e~1", "merge_sha": "60a779e",
+     "evals": ["bash eval/T-045/run.sh <WT> --only 1", "bash eval/T-045/run.sh <WT> --only 2", "bash eval/T-045/run.sh <WT> --only 3", "bash eval/T-045/run.sh <WT> --only 4", "bash eval/T-045/run.sh <WT> --only 6", "bash eval/T-045/run.sh <WT> --only 10"]},
+    {"task": "T-068", "reserve": true, "spec": "products/T-066-anh-minh-hoa-tu-tao.md", "base_sha": "a7e5807~1", "merge_sha": "a7e5807",
+     "evals": ["bash eval/T-066/run.sh <WT> --only 1", "bash eval/T-066/run.sh <WT> --only 2", "bash eval/T-066/run.sh <WT> --only 3"]}
+  ]
+}
