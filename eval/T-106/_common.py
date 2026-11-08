@@ -113,10 +113,12 @@ def _fold(s):
 
 
 def _main(token):
-    """'309b' -> '309b'; '588/c2' -> '588'; '03' -> '3' (phần trước dấu '/' đầu tiên, bỏ số 0 đầu)."""
-    t = token.split("/")[0].strip()
-    m = re.match(r"^([a-z]?)(\d+)(.*)$", t)
-    return (m.group(1) + str(int(m.group(2))) + m.group(3)) if m else t
+    """Số nhà chuẩn hoá ĐỦ cả phần hẻm: '309b' -> '309b'; '03' -> '3'; '137/27A' -> '137/27a'; '137/027A' -> '137/27a' (bỏ số 0 đầu ở từng phần cách nhau bởi '/')."""
+    out = []
+    for part in token.strip().split("/"):
+        m = re.match(r"^([a-z]?)(\d+)(.*)$", part)
+        out.append((m.group(1) + str(int(m.group(2))) + m.group(3)) if m else part)
+    return "/".join(out)
 
 
 def _street_key(s):
@@ -126,14 +128,14 @@ def _street_key(s):
 
 
 def parse_address(addr):
-    """(tập số nhà chính, khoá tên đường) hoặc None. Luật (A1..A6):
+    """(tập số nhà chuẩn hoá, khoá tên đường) hoặc None. Luật (A1..A6):
     A1 chuẩn hoá: bỏ dấu (đ->d), chữ thường, '–'/'—' -> '-', bỏ nội dung trong ngoặc đơn, gộp khoảng trắng; tách theo dấu phẩy.
     A2 duyệt các đoạn từ trái sang, lấy đoạn ĐẦU TIÊN có dạng 'số nhà + tên đường' (cho phép tiền tố 'Số '), nghĩa là bắt đầu bằng số nhà
        (chữ+số, vd 309b, 588/c2, c17, 215e4; khoảng '45 - 47', '01-02-02a' = nhiều số) rồi tới chữ. Đoạn bắt đầu bằng 'Lầu/Tầng/Tòa nhà/tên toà nhà' không có dạng này nên bị bỏ qua.
     A3 nếu đoạn chỉ có số nhà (vd '137/27A') thì tên đường là đoạn kế tiếp, miễn đoạn đó không bắt đầu bằng chữ số.
-    A4 số nhà chính của một token = phần trước '/' đầu tiên, bỏ số 0 đầu ('03'->'3', '588/c2'->'588'); khoảng cho ra tập các số nhà chính.
+    A4 số nhà chuẩn hoá của một token = TOÀN BỘ token gồm cả phần hẻm sau '/', bỏ số 0 đầu ở từng phần ('03'->'3', '137/027A'->'137/27a'); '137/27A' KHÁC '137/5' và KHÁC '137'. Khoảng ('52-56') cho ra tập các số viết ra.
     A5 tên đường: bỏ MỘT tiền tố trong {duong, d., dai lo, pho}; cắt từ từ khoá hành chính {quan, huyen, phuong, thanh pho, tphcm, tp, q, p} trở đi; rồi bỏ mọi ký tự không phải chữ/số (nên 'quoc lo 1 k' = 'quoc lo 1k'; 'Đ. số 14' = 'Đường số 14').
-    A6 không tìm được đoạn nào theo A2/A3 hoặc tên đường < 4 ký tự -> None."""
+    A6 đoạn có dạng A2/A3 nhưng khoá tên đường (sau A5) ngắn hơn 4 ký tự (vd 'Đường D2') thì BỎ QUA đoạn đó và xét tiếp đoạn kế; hết đoạn mà không rút được -> None."""
     segs = [x.strip() for x in _fold(addr).split(",") if x.strip()]
     for i, seg in enumerate(segs):
         m = _NUM_FIRST.match(seg)
@@ -152,7 +154,7 @@ def parse_address(addr):
 
 
 def address_match(vendor_addr, google_addr):
-    """True khi cả hai địa chỉ parse được (parse_address), hai khoá tên đường BẰNG nhau, và hai tập số nhà chính GIAO nhau. Còn lại False."""
+    """True khi cả hai địa chỉ parse được (parse_address), hai khoá tên đường BẰNG nhau, và hai tập số nhà chuẩn hoá GIAO nhau. Còn lại False."""
     a, b = parse_address(vendor_addr), parse_address(google_addr)
     return bool(a and b and a[1] == b[1] and (a[0] & b[0]))
 
@@ -160,3 +162,15 @@ def address_match(vendor_addr, google_addr):
 def accept_match(confidence, addr_match):
     """Luật nhận khớp (Hành vi 2): confidence >= 0,6, hoặc confidence >= 0,4 VÀ address_match."""
     return (confidence or 0) >= 0.6 or ((confidence or 0) >= 0.4 and addr_match is True)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Sự thật gốc KHÔNG do code sinh: snapshot địa chỉ marry.vn của 99 vendor venue (commit 46b6bc4 của tohong, trước mọi lần enrich venue).
+# ---------------------------------------------------------------------------------------------------------------------
+def load_address_snapshot():
+    return json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "venue_address_snapshot.json"), encoding="utf-8"))["addresses"]
+
+
+def has_candidate(a):
+    """Dòng audit có ứng viên Google: có matched_name, hoặc confidence > 0."""
+    return bool((a.get("matched_name") or "").strip()) or (a.get("confidence") or 0) > 0

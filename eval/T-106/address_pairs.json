@@ -168,6 +168,46 @@
    "google_origin": "G*",
    "expected": true,
    "why": "vendor: đoạn 'Tầng 5 Tòa nhà…' bỏ, tiền tố 'số' bỏ"
+  },
+  {
+   "vendor": "137/27A Lê Văn Sỹ, P.14, Quận Phú Nhuận",
+   "google": "137/5, Đ. Lê Văn Sỹ, Phú Nhuận, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "cùng hẻm 137, khác nhà 27A vs 5: số nhà đủ cả phần hẻm (A4) phải bằng"
+  },
+  {
+   "vendor": "137/27A Lê Văn Sỹ, P.14, Quận Phú Nhuận",
+   "google": "137/027A, Đ. Lê Văn Sỹ, Phú Nhuận, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "bỏ số 0 đầu ở từng phần: 137/27a = 137/27a"
+  },
+  {
+   "vendor": "137/27A Lê Văn Sỹ, P.14, Quận Phú Nhuận",
+   "google": "137 Lê Văn Sỹ, Phú Nhuận, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "Google bỏ phần hẻm: 137 khác 137/27a (đi review, không đoán)"
+  },
+  {
+   "vendor": "12 Đường D2, 45 Lê Lợi, Phường Bến Thành, Quận 1",
+   "google": "45 Lê Lợi, Bến Thành, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "A6: đoạn '12 Đường D2' có khoá 'd2' < 4 ký tự nên bỏ qua, xét đoạn kế '45 Lê Lợi'"
+  },
+  {
+   "vendor": "45, 49, 65 đường Hòa Bình, P.Hiệp Tân, Quận Tân Phú",
+   "google": "45 Hòa Bình, Hiệp Tân, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "ca biên: A3 không nhận đoạn kế bắt đầu bằng chữ số nên vế vendor rút ra {65}, không phải {45}; Google ghi 45 thì đi review"
   }
  ]
 }
