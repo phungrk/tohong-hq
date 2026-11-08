@@ -13,6 +13,9 @@
   8. (B5) `concurrency.group == "google-places"` (so khoá YAML) ở enrich-vendors.yml VÀ ở MỌI workflow trong repo có dùng GOOGLE_MAPS_API_KEY (enrich-venue.yml, refresh-vendor-photos.yml,
      scrape-vendors.yml, resolve-overrides.yml nếu có, …); scrape-vendors.yml chỉ còn `workflow_dispatch` (không `schedule`);
   9. (M5) body PR có danh sách vendor bị gỡ vì no_match (từ dòng REMOVED_VENDOR) và lệnh `--restore`.
+  10. (D2 B1) sổ đăng ký lần chạy: một bước TRƯỚC enrich.py thật chạy `check_runs.py` với `gh run list` (các workflow Google) và `gh pr list`; `run-name` của mọi workflow Google bắt đầu bằng `REAL ` khi chạy thật;
+     log tee vào tên có `run-${{ github.run_id }}`; KHÔNG bước nào xoá log (`rm`), bước kiểm khoá chỉ che khoá (sed/redact); có upload-artifact `run-logs` (`if: always()`, retention >= 30 ngày);
+  11. (D2 M3) mọi workflow nhóm `google-places` có `cancel-in-progress: false` (một lần bấm mới không giết lần đang chạy).
 In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -90,6 +93,30 @@ for fn in sorted(os.listdir(wdir)):
         onx = dd.get(True, dd.get("on")) or {}
         if "schedule" in onx:
             bad.append("scrape-vendors.yml còn lịch (schedule): phải chỉ còn workflow_dispatch trong đợt này")
+steps_all = [st for j in (d.get("jobs") or {}).values() for st in j.get("steps", [])]
+ci = next((i for i, st in enumerate(steps_all) if "check_runs.py" in (st.get("run") or "")), None)
+ei2 = next((i for i, st in enumerate(steps_all) if "enrich.py" in (st.get("run") or "") and "--dry-run" not in (st.get("run") or "")), None)
+if ci is None or ei2 is None or ci > ei2 or "gh run list" not in txt or "gh pr list" not in txt or "exit" not in (steps_all[ci].get("run") or "") and "check_runs.py" not in (steps_all[ci].get("run") or ""):
+    bad.append("thiếu bước check_runs.py (gh run list + gh pr list) đứng TRƯỚC enrich.py thật")
+if not re.search(r"run-name:.*REAL", txt):
+    bad.append("run-name phải đánh dấu lần chạy thật bằng tiền tố 'REAL '")
+if "run-${{ github.run_id }}" not in txt:
+    bad.append("tên log phải chứa run-${{ github.run_id }}")
+if any(re.search(r"\brm\b[^\n]*run-logs", (st.get("run") or "")) for st in steps_all):
+    bad.append("có bước xoá run-logs (bước kiểm khoá chỉ được che khoá, không xoá log)")
+if not any("upload-artifact" in (st.get("uses") or "") and "run-logs" in str(st.get("with")) for st in steps_all):
+    bad.append("thiếu upload-artifact cho run-logs")
+for fn2 in sorted(os.listdir(os.path.join(repo, ".github", "workflows"))):
+    if not fn2.endswith((".yml", ".yaml")):
+        continue
+    raw2 = open(os.path.join(repo, ".github", "workflows", fn2), encoding="utf-8").read()
+    if "GOOGLE_MAPS_API_KEY" not in raw2 and fn2 != "enrich-vendors.yml":
+        continue
+    cg2 = yaml.safe_load(raw2).get("concurrency")
+    if not isinstance(cg2, dict) or cg2.get("cancel-in-progress") is not False:
+        bad.append("%s: concurrency.cancel-in-progress phải là false" % fn2)
+    if fn2 != "scrape-vendors.yml" and not re.search(r"run-name:", raw2):
+        bad.append("%s: thiếu run-name (đánh dấu REAL khi chạy thật)" % fn2)
 sv = os.path.join(repo, ".github", "workflows", "scrape-vendors.yml")
 if os.path.isfile(sv) and re.search(r"enrich\.py[^\n]*--budget-usd", open(sv, encoding="utf-8").read()):
     bad.append("scrape-vendors.yml bị sửa để chạy enrich mới")

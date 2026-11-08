@@ -12,6 +12,9 @@
   s_noshort    "Mai House" không có tên rút gọn, không trả gì         -> VẪN đúng 2 lượt: lượt 2 = tên gốc KHÔNG kèm địa danh ("Mai House"), khác lượt 1; rồi remove. Không vendor nào bị remove sau đúng một lượt (B3).
 Stdout có đúng một dòng `REMOVED_VENDOR {json}` cho mỗi vendor bị gỡ vì no_match (id, category, name, q1, q2) để Capu duyệt và `--restore` (M5).
 Rồi lần 1b (Google không trả gì ở lượt nào): vendor tạm đóng (s_temp, s_tlow) vẫn thử lại 2 lượt mỗi vendor, ở lại, vẫn closed_state + retry, KHÔNG remove (B2).
+M5 (D2): vendor tạm đóng do GOOGLE báo (nguồn ii, không có mục duyệt tay) được thử lại tối đa N = 3 lần (audit `closed_retries`: 0 lúc phát hiện, +1 mỗi lần thử lại). Sau lần thử lại thứ 3
+mà vẫn tạm đóng hoặc không trả gì: `retry=false`, `retry_exhausted=true`, GIỮ `closed_state` (vẫn ẩn, INV-021 f), vào review (`closed_retry_exhausted`), KHÔNG remove, lần sau 0 lượt.
+Trình tự: lần 1 (phát hiện, closed_retries=0) -> 1b (không trả gì, =1) -> 2 (s_temp mở lại, s_tlow vẫn đóng, =2) -> 3 (s_tlow không trả gì, =3: cạn) -> 4 (0 lượt cho s_tlow).
 Rồi lần 2 (Google báo s_temp mở lại): chỉ s_temp và s_tlow (còn retry) được tìm; s_temp được nhận khớp với ảnh, hết closed_state/retry; vendor khác 0 lượt (kể cả s_low, đã có audit).
 Spec: products/T-111-enrich-toan-bo-vendor.md, "Luật cho mỗi vendor". In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import os, sys
@@ -111,4 +114,18 @@ T2 = r.vendor("s_temp")
 a2 = r.audit().get("s_temp") or {}
 if not (t.has_pid(T2) and len(T2.get("google_photos") or []) == 2) or x.is_temp_closed(a2) or a2.get("retry") or a2.get("closed_state"):
     bad.append("lần 2: s_temp mở lại và qua sáu cổng phải được nhận (place_id + 2 ảnh), hết closed_state và hết retry")
+# Lần 3: s_tlow thử lại lần thứ 3, Google không trả gì -> cạn lượt thử lại
+rc3, out3, calls3 = x.run_basic(r, x.fx({}, []))
+if t.n_kind(calls3, "search") != 2 or x.count_for(calls3, "hotel tlow") != 2:
+    bad.append("lần 3: mong 2 Text Search (s_tlow, lần thử lại thứ 3, gồm lượt 2), thấy %r" % x.queries(calls3))
+a3 = r.audit().get("s_tlow") or {}
+if a3.get("retry") is not False or a3.get("retry_exhausted") is not True or a3.get("closed_state") != "temporarily_closed" or not r.vendor("s_tlow") or any(e["vendor"]["id"] == "s_tlow" for e in r.removed()):
+    bad.append("lần 3: s_tlow cạn 3 lần thử lại phải: retry=false, retry_exhausted=true, giữ closed_state, còn trong vendors.json, KHÔNG remove; thấy %r" % {k: a3.get(k) for k in ("retry", "retry_exhausted", "closed_state", "closed_retries")})
+if a3.get("closed_retries") != 3:
+    bad.append("lần 3: closed_retries mong 3, thấy %r" % a3.get("closed_retries"))
+if "s_tlow" not in r.review() or "closed_retry_exhausted" not in (r.review().get("s_tlow", {}).get("flags") or ""):
+    bad.append("lần 3: s_tlow cạn lượt thử lại phải có dòng review-needed.csv với cờ closed_retry_exhausted để Capu quyết")
+rc4, out4, calls4 = x.run_basic(r, x.fx({}, []))
+if t.n_kind(calls4, "search"):
+    bad.append("lần 4: vendor đã cạn lượt thử lại không được tìm nữa (thấy %r)" % x.queries(calls4))
 t.done(bad, "luật ADR-049 đúng: giữ+ảnh<=2, CLOSED_PERMANENTLY gỡ ở mọi file, tạm đóng (kể cả ứng viên bị cổng từ chối) ở lại, ẩn, không remove dù lần sau không trả gì, được nhận khi mở lại; low_confidence vào review không remove; lượt 2 chấm bằng tên gốc; no_match luôn qua 2 lượt khác nhau rồi remove, có REMOVED_VENDOR; 13 Text Search + 4 media")
