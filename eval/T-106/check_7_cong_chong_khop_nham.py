@@ -10,6 +10,7 @@ Mong đợi theo `expect` của từng ca:
   <mã lý do>: còn trong vendors.json NHƯNG không place_id, không google_photos; audit mới nhất status=low_confidence, reject_reason=<mã>, vẫn có matched_name,
               confidence, formatted_address; đúng MỘT dòng review-needed.csv với flags chứa low_confidence_place VÀ <mã>, có google_matched_name + google_confidence;
               contact.address_source còn nguyên.
+  (ứng viên CLOSED_PERMANENTLY bị cổng từ chối: xử lý như mọi ứng viên bị từ chối, vendor KHÔNG bị gỡ; `low_score` không có mã trong flags; audit có candidate_place_id)
   removed: gỡ khỏi vendors.json, có trong removed_vendors.json, audit closed_permanently (ADR-044).
 Cuối cùng: dòng cuối stdout là GOOGLE_USAGE với text_search = số vendor chạy. Cần TOHONG_REPO. In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import csv, json, os, sys
@@ -31,6 +32,8 @@ for name, vs, pre in groups:
     passing, ref = [], {}
     for v in vs:
         if v["expect"] == "removed":
+            if c.reject_reason(v["address"], v["place"]["address"], v["conf"], "HCMC", ()) is not None:
+                c.fail("hàm chuẩn lệch bảng: ca removed %s không qua G1-G3,G5 (ứng viên đóng cửa chỉ gỡ vendor khi qua cổng)" % v["id"])
             continue
         r = c.reject_reason(v["address"], v["place"]["address"], v["conf"], "HCMC", closed)
         ref[v["id"]] = r
@@ -114,13 +117,14 @@ for name, vs, pre in groups:
             if e: problems.append("còn place_id")
             if r.get("google_photos"): problems.append("còn google_photos")
             if a.get("status") != "low_confidence": problems.append("audit status=%r (mong low_confidence)" % a.get("status"))
+            if a.get("candidate_place_id") != v["place"]["id"]: problems.append("audit candidate_place_id=%r (mong %r: place_id của ứng viên bị từ chối)" % (a.get("candidate_place_id"), v["place"]["id"]))
             if a.get("reject_reason") != exp: problems.append("audit reject_reason=%r (mong %r)" % (a.get("reject_reason"), exp))
             if a.get("place_id"): problems.append("audit còn place_id")
             if not (a.get("matched_name") and a.get("confidence") and a.get("formatted_address")): problems.append("audit thiếu matched_name/confidence/formatted_address")
             if len(mine) != 1: problems.append("review-needed.csv có %d dòng (mong 1)" % len(mine))
             else:
                 fl = (mine[0].get("flags") or "").split("|")
-                if "low_confidence_place" not in fl or exp not in fl: problems.append("flags=%r thiếu low_confidence_place hoặc %s" % (mine[0].get("flags"), exp))
+                if "low_confidence_place" not in fl or (exp != "low_score" and exp not in fl): problems.append("flags=%r thiếu low_confidence_place hoặc %s" % (mine[0].get("flags"), exp))
                 if not (mine[0].get("google_matched_name") or "").strip() or not (mine[0].get("google_confidence") or "").strip(): problems.append("review thiếu google_matched_name/google_confidence")
             if (r.get("contact") or {}).get("address_source") != v["address"]: problems.append("contact.address_source không còn nguyên")
             if problems:

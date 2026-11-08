@@ -84,8 +84,17 @@ passing = []
 for i, a in last.items():
     if i in recs and c.has_candidate(a) and a.get("formatted_address") and i in snap and a.get("status") != "closed_permanently":
         if c.reject_reason(snap[i], a["formatted_address"], a.get("confidence"), "HCMC", CLOSED) is None:
-            passing.append((i, a.get("place_id") or (c.record_google_log(recs.get(i)) or {}).get("place_id") or "?" + i, snap[i]))
-G6 = c.shared_place_id_groups([x for x in passing if not x[1].startswith("?")])
+            pid = a.get("place_id") or a.get("candidate_place_id") or (c.record_google_log(recs.get(i)) or {}).get("place_id")
+            if pid:
+                passing.append((i, pid, snap[i]))
+            elif a.get("reject_reason") == "shared_place_id":
+                c.fail("%s: bị hạ vì shared_place_id nhưng audit thiếu candidate_place_id (không tính lại được G6)" % i)
+G6 = c.shared_place_id_groups(passing)
+for i, a in last.items():  # ứng viên đóng cửa: chỉ được gỡ khi qua G1-G3,G5 (G4 không áp dụng cho chính nó)
+    if a.get("status") == "closed_permanently" and i in snap and a.get("formatted_address"):
+        w = c.reject_reason(snap[i], a["formatted_address"], a.get("confidence"), "HCMC", ())
+        if w:
+            c.fail("%s bị gỡ vì CLOSED_PERMANENTLY nhưng ứng viên không qua cổng (%s): vendor đang hoạt động không được gỡ" % (i, w))
 low = 0
 for i, a in last.items():
     if i not in recs:
@@ -105,6 +114,8 @@ for i, a in last.items():
     why = c.reject_reason(snap[i], a.get("formatted_address"), a.get("confidence"), "HCMC", CLOSED) or ("shared_place_id" if i in G6 else None)
     accepted = why is None
     if not accepted:
+        if a.get("candidate_place_id") is None:
+            c.fail("%s: dòng audit bị từ chối thiếu candidate_place_id" % i)
         if a.get("reject_reason") != (why if why != "low_score" else a.get("reject_reason")) or (why != "low_score" and not a.get("reject_reason")):
             c.fail("%s: luật v4 từ chối vì %s nhưng audit reject_reason=%r" % (i, why, a.get("reject_reason")))
         low += 1
