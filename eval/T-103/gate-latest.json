@@ -1,6 +1,6 @@
 {
   "task": "T-103",
-  "at": "2026-11-08T04:17",
+  "at": "2026-11-08T04:19",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 eval/T-101/check_1_dang_ky_hook.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 343,
+      "ms": 341,
       "out": "PASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 eval/T-101/check_2_subagent_stop.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 102,
+      "ms": 109,
       "out": "PASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 eval/T-101/check_3_stop_quet_sot.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 224,
+      "ms": 248,
       "out": "PASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "python3 eval/T-101/check_4_khong_dem_trung.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 284,
+      "ms": 297,
       "out": "PASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "python3 eval/T-101/check_5_backfill.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 380,
+      "ms": 376,
       "out": "PASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "python3 eval/T-101/check_8_tin_rong_giua.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 660,
+      "ms": 591,
       "out": "PASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "python3 eval/T-101/check_9_nhieu_transcript.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 681,
+      "ms": 705,
       "out": "PASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "python3 eval/T-101/check_10_install_hook_an_toan.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 705,
+      "ms": 674,
       "out": "PASS",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "python3 eval/T-101/check_11_backfill_tuan_tu.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 14381,
+      "ms": 14397,
       "out": "PASS",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "python3 eval/T-101/check_12_chay_that_an_toan.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 540,
+      "ms": 539,
       "out": "PASS",
       "tier": 1
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 28,
+      "ms": 29,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 144,
+      "ms": 147,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 27,
+      "ms": 32,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1031,
+      "ms": 1034,
       "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/hq/inv-002-workflow-context-hop-le.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 55,
+      "ms": 49,
       "out": "PASS 6 workflow: không secrets/env sai chỗ trong if, inputs đều khai, không in env khi có secret cấp job",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/hq/ledger/inv-001-issue-la-so-nguyen-duong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 71,
+      "ms": 74,
       "out": "PASS mọi trường issue rỗng hoặc là số nguyên dương",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/hq/ledger/inv-002-decided-qua-issue-hop-le.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 78,
+      "ms": 79,
       "out": "PASS mọi decided qua issue: link đúng kho, from capu, detail không rỗng, đúng issue của việc",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/hq/ledger/inv-003-chi-phungrk-quyet-qua-issue.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 8993,
+      "ms": 9167,
       "out": "PASS chỉ phungrk (User, chính người gửi, created|edited, không PR, khớp toàn chuỗi) tạo được decided qua issue",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/hq/ledger/inv-004-phan-chieu-khong-dang-file-ngoai-kho.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 5198,
+      "ms": 5322,
       "out": "PASS phản chiếu không đăng file ngoài kho/.git (kể cả kho con, symlink); link hợp lệ trong kho vẫn đăng",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/hq/ledger/inv-005-decide-viec-done-blocked-khong-cham-board.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1419,
+      "ms": 1644,
       "out": "PASS decide trên việc done/blocked không chạm board; chỉ ghi decided của capu với đúng note; thiếu note/--close thì không ghi",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/hq/ledger/inv-006-board-that-khong-hong-nang.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 68,
+      "ms": 71,
       "out": "PASS",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/hq/ledger/inv-007-so-cai-chiu-board-hong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 459,
+      "ms": 405,
       "out": "PASS",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/hq/ledger/inv-008-hook-chi-phi-doc-lap-thu-muc-va-khong-ghi-trung.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 398,
+      "ms": 371,
       "out": "PASS",
       "tier": 2
     }
