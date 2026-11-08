@@ -276,6 +276,136 @@ def kr_source(text):
     m = re.search(r"T-\d+", t[i:])
     return m.group(0) if m else ""
 
+# --- Danh sách eval đối kháng và hồi quy (spec T-096 mục A) ---
+EV_URL = "https://github.com/phungrk/tohong-hq/"
+_EV_PRE = re.compile(r'^(?:#+|//+|"""|\'\'\'|/\*|\*)+')
+_EV_POST = re.compile(r'(?:"""|\'\'\'|\*/)\s*$')
+_EV_SEP = " \t·:,;.—–-"
+_EV_END = r"(?=$|[\s·:,;.—–-])"
+_EV_TAGS = [re.compile(x, re.I) for x in (
+    r"eval đối kháng", r"eval tầng 3", r"adversary", r"tầng 3", r"adv-\d+", r"T-\d+",
+    r"của" + _EV_END, r"cho" + _EV_END, r"lần \d+", r"v\d+", r"\d+:", r"\([^)]*\)")]
+_EV_UPPER_ASSIGN = re.compile(r"\b[A-Z][A-Z0-9_]*=")
+_EV_WORD_OUT = re.compile(r"^(?:và|chạy)(?![^\W_])", re.I)
+
+
+def _ev_clean(line):
+    s = _EV_PRE.sub("", line.strip()).strip()
+    return _EV_POST.sub("", s).strip()
+
+
+def _ev_strip_tags(s):
+    while True:
+        t = s.lstrip(_EV_SEP)
+        for rx in _EV_TAGS:
+            m = rx.match(t)
+            if m and m.end() > 0:
+                t = t[m.end():]
+                break
+        else:
+            return t
+        s = t
+
+
+def _ev_label_from_comment(path):
+    """Bước 2: dòng comment đầu; trả nhãn (đã cắt 140 + …) hoặc ''."""
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    for raw in text.split("\n")[:12]:
+        if raw.lstrip().startswith("#!"):
+            continue
+        t = _ev_strip_tags(_ev_clean(raw))
+        t = re.sub(r"\s+", " ", t).strip()
+        k = t.find(". ")
+        if k >= 0:
+            t = t[:k]
+        t = t.rstrip(":. ").strip()
+        if (len(t) < 12 or looks_like_code(t) or _EV_UPPER_ASSIGN.search(t) or ".md" in t or "lib/" in t
+                or _EV_WORD_OUT.match(t) or t.count("(") != t.count(")") or t.count('"') % 2):
+            continue
+        if len(t) > 140:
+            t = t[:140].rstrip() + "…"
+        return t
+    return ""
+
+
+def _ev_stem(fname):
+    return fname.rsplit(".", 1)[0] if "." in fname else fname
+
+
+def _ev_words(s):
+    return [w for w in re.split(r"[-_\s]+", s) if w]
+
+
+def _ev_natkey(name):
+    return [(0, int(x), "") if x.isdigit() else (1, 0, x.lower()) for x in re.split(r"(\d+)", name)]
+
+
+def _ev_adv_list(ev, public):
+    out = []
+    if not ev.is_dir():
+        return out
+    for d in ev.iterdir():
+        if not (d.is_dir() and re.fullmatch(r"T-\d+", d.name)):
+            continue
+        rows = []
+        for f in d.iterdir():
+            if not (f.is_file() and f.name.startswith("adv-")):
+                continue
+            stem = _ev_stem(f.name)
+            code = "adv-" + stem[4:].split("-", 1)[0]
+            words = _ev_words(stem[len(code):])
+            if len(words) >= 2:
+                label, step = " ".join(words), 1
+            else:
+                label, step = _ev_label_from_comment(f), 2
+            rows.append({"f": f, "stem": stem, "code": code, "label": label, "step": step})
+        # (a) nhãn bước 2 giống nguyên văn trong một việc -> tên file
+        cnt = {}
+        for r in rows:
+            if r["step"] == 2 and r["label"]:
+                cnt[r["label"]] = cnt.get(r["label"], 0) + 1
+        for r in rows:
+            r["name"] = (r["code"] + " · " + r["label"]) if r["label"] and not (r["step"] == 2 and cnt[r["label"]] > 1) else r["f"].name
+        # (b) mọi name trùng trong một việc -> tên file
+        cnt = {}
+        for r in rows:
+            cnt[r["name"]] = cnt.get(r["name"], 0) + 1
+        for r in rows:
+            if cnt[r["name"]] > 1:
+                r["name"] = r["f"].name
+        for r in sorted(rows, key=lambda r: _ev_natkey(r["f"].name)):
+            it = {"id": r["stem"], "file": r["f"].name, "name": r["name"], "source": d.name,
+                  "url": f"{EV_URL}blob/main/eval/{d.name}/{r['f'].name}"}
+            if not public:
+                it["path"] = f"eval/{d.name}/{r['f'].name}"
+            out.append((int(d.name[2:]), it))
+    out.sort(key=lambda x: -x[0])   # sort ổn định: giữ thứ tự trong việc
+    return [x[1] for x in out]
+
+
+def _ev_reg_list(reg, public):
+    out = []
+    if not reg.is_dir():
+        return out
+    for p in sorted((p for p in reg.iterdir() if not p.name.startswith(".") and p.name != "README.md"),
+                    key=lambda p: _ev_natkey(p.name)):
+        isdir = p.is_dir()
+        if isdir:
+            name = p.name.replace("-", " ").replace("_", " ")
+        else:
+            words = _ev_words(_ev_stem(p.name))
+            name = " ".join(words) if len(words) >= 2 else (_ev_label_from_comment(p) or p.name)
+        m = re.search(r"T-\d+", p.name)
+        it = {"id": p.name if isdir else _ev_stem(p.name), "file": p.name, "name": name, "source": m.group(0) if m else "",
+              "url": f"{EV_URL}{'tree' if isdir else 'blob'}/main/eval/regression/{p.name}"}
+        if not public:
+            it["path"] = f"eval/regression/{p.name}"
+        out.append(it)
+    return out
+
 
 def build_model(public: bool) -> dict:
     inv_root = ROOT / "eval" / "invariants"
@@ -314,6 +444,7 @@ def build_model(public: bool) -> dict:
     idir = ROOT / "insights"
     ins = sorted(p.name for p in idir.glob("*-weekly.md") if p.is_file()) if idir.is_dir() else []
     return {"invariants": inv, "invariants_total": len(lst), "invariant_list": lst, "adversarial_evals": adv,
+            "adversarial_list": _ev_adv_list(ev, public), "regression_list": _ev_reg_list(reg, public),
             "regression_evals": regn, "specs": specs, "insight_reports": len(ins),
             "last_insight": ins[-1] if ins else ""}
 
