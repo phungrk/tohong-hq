@@ -3,6 +3,7 @@
 `photos` (và `styles`/`tags` theo lệnh tools/regen-pool-styles.sh) của vendor category=venue. Mọi trường khác của mọi vendor giữ nguyên (đặc biệt priceMin/priceMax:
 ADR-025, 36 vendor lệch giá do tạo lại pool toàn phần), tập id không thêm; id mất chỉ khi nằm trong removed_vendors.json (place_id Google 404).
 Vendor venue có photos đổi thì mọi ảnh mới đều source=google. styles == tags. Và bất biến planner/vendor/pool/inv-001 (styles khớp văn bản nguồn) vẫn đạt.
+Tập "venue" (ADR-047) = vendor có category=venue trong pool HOẶC có id xuất hiện trong nguồn venue ($TOHONG_REPO/tools/scraper/output/HCMC/venue/vendors.json), kể cả khi id đó cũng nằm ở nguồn khác (vd honeymoon). Vendor ngoài tập này không được đổi gì.
 Mốc: T106_BASE_REF, mặc định merge-base(HEAD, origin/main) của tohong-back. Pool chưa đổi so với mốc => đỏ (chưa có ảnh Google venue). Cần: TOHONG_REPO, TOHONG_BACK_REPO."""
 import json, os, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -23,10 +24,17 @@ old = {p["id"]: p for p in c.parse_pool(s.stdout)}
 cur_list = c.load_pool(b)
 cur = {p["id"]: p for p in cur_list}
 gone = c.removed_ids(t)
+_vf = os.path.join(t, c.VENUE_DIR, "vendors.json")
+if not os.path.isfile(_vf):
+    c.fail("không đọc được nguồn venue %s" % _vf)
+_vd = json.load(open(_vf, encoding="utf-8"))
+venue_ids = {v.get("id") for v in (_vd.get("vendors", []) if isinstance(_vd, dict) else _vd)}
+def is_venue(p):
+    return p.get("category") == "venue" or p.get("id") in venue_ids
 added = [i for i in cur if i not in old]
 if added:
     c.fail("pool thêm %d id mới so với mốc, vd %s" % (len(added), added[0]))
-lost = [i for i in old if i not in cur and not (old[i].get("category") == "venue" and i in gone)]
+lost = [i for i in old if i not in cur and not (is_venue(old[i]) and i in gone)]
 if lost:
     c.fail("pool mất %d vendor không phải venue-place_id-404, vd %s" % (len(lost), lost[0]))
 changed = 0
@@ -37,8 +45,8 @@ for i, p in cur.items():
         c.fail("%s: styles != tags" % i)
     if not diff:
         continue
-    if p.get("category") != "venue":
-        c.fail("%s (category %s) đổi trường %s: chỉ venue được đổi" % (i, p.get("category"), sorted(diff)))
+    if not is_venue(p):
+        c.fail("%s (category %s, id không có trong nguồn venue) đổi trường %s: chỉ venue được đổi" % (i, p.get("category"), sorted(diff)))
     extra = diff - {"photos", "styles", "tags"}
     if extra:
         c.fail("%s (venue) đổi trường ngoài photos/styles/tags: %s" % (i, sorted(extra)))
