@@ -1,5 +1,5 @@
 {
-  "_doc": "Ngưỡng + trần của T-102, khoá TRƯỚC khi chạy lượt đo nào. Băm sha256 của file này nằm trong spec. Không sửa sau khi có hồ sơ lượt đầu tiên; đổi = làm lại thí nghiệm, ghi decisions/. Riêng trần $ chỉ nâng được bằng eval/T-102/budget-raises.json (có decision của Capu), không sửa file này.",
+  "_doc": "Ngưỡng + trần của T-102, khoá TRƯỚC khi chạy lượt đo nào. Băm sha256 của file này nằm trong spec. Không sửa sau khi có hồ sơ lượt đầu tiên; đổi = làm lại thí nghiệm, ghi decisions/. Riêng trần $ chỉ nâng được bằng eval/T-102/budget-raises.json (dữ liệu, không phải eval; có decision của Capu), không sửa file này.",
   "locked_at": "2026-11-08T12:00:00+07:00",
   "model_pin": "claude-sonnet-5-5",
   "tasks_core": [
@@ -14,6 +14,7 @@
   "inconclusive_extra_reps_per_cell": 1,
   "planned_runs": 12,
   "pilot_runs": 2,
+  "pilot_task": "T-060",
   "primary_metric": "usd_per_run",
   "aggregate": "mean over tasks of (median usd of arm B / median usd of arm A) over VALID runs; reduction = 1 - that mean",
   "adopt_reduction_min": 0.2,
@@ -29,13 +30,14 @@
   ],
   "excluded_max_per_cell": 2,
   "harness_fault_max_total": 2,
+  "board_budget_at_creation_usd": 5.0,
   "budget_cap_usd": 30.0,
-  "budget_cap_note": "Tạm $30 (Chief of Staff đang hỏi Capu). Capu đổi con số này TRƯỚC khi khoá: Spec Writer sửa file, băm lại, cập nhật spec và board. Sau khi khoá chỉ nâng bằng budget-raises.json.",
-  "budget_forecast": "F = (trung bình usd của pilot_runs lượt đầu) x budget_est_margin x planned_runs; F > trần hiệu lực => dừng, task.py escalate",
+  "budget_cap_note": "Tạm $30 (Chief of Staff đang hỏi Capu). Là THAM SỐ THIẾT KẾ, không phải bằng chứng đã duyệt. Trần hiệu lực = approved(t) = board_budget_at_creation_usd + các mục budget-raises.json có approved_at <= t (mỗi mục có decisions/ nhắc T-102 và đúng số tiền, và sự kiện trong ledger). $30 tạm = một mục +$25, chỉ hợp lệ khi Capu duyệt. Không đọc trường budget của board. Capu đổi con số này TRƯỚC khi khoá: Spec Writer sửa file, băm lại, cập nhật spec; sau khi khoá chỉ nâng bằng budget-raises.json.",
+  "budget_forecast": "F = (trung bình của usd lượt A HỢP LỆ đầu tiên và usd lượt B HỢP LỆ đầu tiên của việc pilot_task) x budget_est_margin x planned_runs; chưa có đủ cả hai lượt hợp lệ thì chưa có F và chỉ được chạy lượt của pilot_task; F > trần hiệu lực => dừng, task.py escalate",
   "budget_est_margin": 2.0,
   "per_run_cap_usd": 4.0,
   "per_run_overshoot": 1.25,
-  "budget_stop_rule": "trước mỗi lượt thứ k > pilot_runs: tổng usd mọi hồ sơ trước đó + per_run_cap_usd x per_run_overshoot <= trần hiệu lực lúc started_at của lượt k; không thì dừng, task.py escalate",
+  "budget_stop_rule": "trước mỗi lượt thứ k > pilot_runs: tổng usd mọi hồ sơ trước đó + per_run_cap_usd x per_run_overshoot <= approved(started_at) của lượt k; không thì dừng, task.py escalate",
   "agent_graphify_subcommands": [
     "query",
     "path",
