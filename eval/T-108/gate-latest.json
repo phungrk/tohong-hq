@@ -1,0 +1,237 @@
+{
+  "task": "T-108",
+  "at": "2026-11-08T01:39",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/vendor/images",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "python3 -I eval/T-106/check_1_place_id.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 84,
+      "out": "FAIL 0/96 vendor venue có place_id Google (cần >= 60)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-106/check_2_anh_google.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 49,
+      "out": "FAIL 0/96 vendor venue có >= 1 ảnh Google (cần >= 50)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-106/check_3_han_muc.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 31,
+      "out": "FAIL chưa có log chạy thật trong /home/claude/tohong/tools/scraper/run-logs/T-106 (lưu stdout mỗi lần chạy enrich/refresh vào đó, tên bắt đầu YYYYMMDD)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-106/check_4_khong_url_api.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 69,
+      "out": "PASS pool và vendors.json không chứa places.googleapis.com",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-106/check_5_khop_sai_vao_review.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 26,
+      "out": "FAIL chưa có tools/scraper/output/HCMC/venue/enrichment-audit.json: enrich venue chưa chạy",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-106/check_6_pool_chi_doi_photos.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 68,
+      "out": "FAIL pool chưa đổi so với mốc da37302a: chưa có vendor venue nào được thêm ảnh Google",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 37,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 147,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 39,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 319,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2415,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-9RHDMl/deps), cache chung không đổi (0 mục), TMPDIR sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1876,
+      "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 926,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-CtDn4Z/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 20,
+      "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 30,
+      "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 634,
+      "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1788,
+      "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 6297,
+      "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-006-wayback-chi-khi-bat-co-va-cham.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 7171,
+      "out": "PASS Wayback chỉ khi bật cờ; 4 yêu cầu, giãn cách nhỏ nhất 2.00 giây, tối đa 1 cùng lúc",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-007-khong-goi-wayback-available.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 671,
+      "out": "PASS 6 yêu cầu tới Wayback, không có /wayback/available",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-008-san-toc-do-wayback.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 558,
+      "out": "PASS 6 cách hạ tốc độ / dùng --wayback-* sai đều bị từ chối mã 2, không yêu cầu, không ghi manifest",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-009-wayback-429-khong-go-cua-mai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 16280,
+      "out": "PASS 429 mọi yêu cầu: 20 yêu cầu tổng, tối đa 4 liên tiếp cùng đường dẫn, lần gửi lại sớm nhất sau 1.00 giây, 1 cùng lúc",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-010-eval-khong-kill-theo-ten.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 252,
+      "out": "PASS không eval nào kill tiến trình theo tên",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-011-file-thu-eval-khong-vao-git-front.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 26,
+      "out": "PASS repo front không chứa file tạm của eval (__t0NN*, __nonce-*)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-012-pool-khong-url-places-api.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 83,
+      "out": "PASS 1 file pool (lib/vendorPool.generated.js) không chứa URL API Places/khoá Google",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-013-anh-google-co-ghi-cong.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 49,
+      "out": "PASS 132 ảnh Google trong pool đều có attribution không rỗng",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-014-anh-google-truy-ve-place-id.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 57,
+      "out": "PASS 68 vendor có ảnh Google đều có place_id nguồn",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/images/inv-015-nhan-khop-google-co-cong.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 47,
+      "out": "PASS nhận khớp có cổng (0 bản ghi place_id mới tính lại được address_match từ địa chỉ gốc)",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
