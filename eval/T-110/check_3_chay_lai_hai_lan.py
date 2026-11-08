@@ -4,7 +4,7 @@ Spec: products/T-110-duyet-tay-venue.md, "Chạy lại và thứ tự".
 Kịch bản: 5 mục accept_place có snapshot (A..E, bị các cổng từ chối nếu không duyệt tay), 1 mục accept_place chỉ có maps_link (L, cần bước resolve), 1 remove (X),
 1 temporarily_closed (P, đã có dòng audit low_confidence như Pergola thật), reject_match R/R2, cùng F, Z.
 Chuỗi lệnh của workflow: resolve_overrides -> enrich venue -> refresh_photos -> enrich venue (áp lại).
-  Lượt 1 áp mọi thứ. Lượt 2 chạy lại ĐÚNG chuỗi đó: MỌI file trong output/ (kể cả manual_overrides.json, audit, removed_vendors.json, review-needed.csv) giữ nguyên
+  Lượt 1 áp mọi thứ. Lượt 2 chạy lại ĐÚNG chuỗi đó (với điều kiện Google trả cùng kết quả như lượt 1): MỌI file trong output/ (kể cả manual_overrides.json, audit, removed_vendors.json, review-needed.csv) giữ nguyên
   byte (không đổi cả dấu thời gian), bước resolve và refresh gọi 0 lượt Google, enrich gọi Text Search đúng 1 lượt (chỉ P, vì tạm đóng cửa luôn được thử lại) và
   GOOGLE_USAGE của enrich là text_search=1 photo_details=0 photo_media=0.
 In PASS hoặc FAIL <lý do>; thoát 0/1."""
@@ -25,8 +25,8 @@ vs = t.scen_vendors(True)
 vs.append(t.vendor("t110_L", "Nhà hàng Lima", "40 Pasteur, Quận 1, Thành phố Hồ Chí Minh"))
 vs.append(t.vendor("t110_P", "Nhà Hàng Pergola Test", "28A Trần Cao Vân, P.12, Quận Phú Nhuận, Thành phố Hồ Chí Minh"))
 r = t.Root({"venue": vs, "honeymoon": []})
-r.write("venue/removed_vendors.json", [t.closed_record(t.CLOSED_Y)])
-r.write("venue/enrichment-audit.json", [t.scen_r2_audit(),
+r.write("venue/removed_vendors.json", t.scen_removed(False))
+r.write("venue/enrichment-audit.json", t.scen_audit_rows() + [
         {"vendor_id": "t110_L", "status": "no_match", "matched_name": "", "confidence": 0.0, "place_id": None, "formatted_address": "", "address_match": None},
         {"vendor_id": "t110_P", "status": "low_confidence", "matched_name": "Pergola Garden Restaurant", "confidence": 0.226, "place_id": None,
          "formatted_address": PL["PP"]["address"], "address_match": True, "reject_reason": "low_score", "candidate_place_id": ""}])

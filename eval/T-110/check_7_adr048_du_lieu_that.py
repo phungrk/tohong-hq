@@ -5,10 +5,11 @@ Spec: products/T-110-duyet-tay-venue.md, "Áp ADR-048 cho 4 venue". Cần TOHONG
     google_photos >= 1 ảnh (uri lh*.googleusercontent.com, có attributions), audit status enriched + manual_override=accept_place; pool tohong-back: >= 1 ảnh, MỌI ảnh source=google,
     host lh*.googleusercontent.com, mỗi ảnh có attribution.
   Tự Do (marry_e38f1e755f9c): không còn trong vendors.json của category nào; venue/removed_vendors.json có đúng 1 bản ghi (manual=true, reason bắt đầu 'manual_override: remove'); không có trong pool.
-  Pergola (marry_2ee808943c08): còn trong vendors.json (venue), không place_id, không google_photos, không trong removed_vendors.json; dòng audit mới nhất có retry=true và
-    manual_override=temporarily_closed; còn trong pool với >= 1 ảnh và không ảnh Google.
+  Pergola (marry_2ee808943c08): còn trong vendors.json (venue), không place_id, không google_photos, không trong removed_vendors.json; dòng audit mới nhất có retry=true,
+    closed_state='temporarily_closed' và manual_override=temporarily_closed; KHÔNG có trong pool tohong-back (ADR-049: tạm đóng cửa không hiển thị trên app).
+    Ngoại lệ: nếu audit có reopened=true và đã có place_id thì Pergola được nhận (Google mở lại + qua sáu cổng) và phải có trong pool với ảnh Google.
   Log chạy thật tools/scraper/run-logs/T-110/*.log: tổng GOOGLE_USAGE text_search <= 3 (resolve <= 2 + thử lại Pergola 1), photo_details <= 4, photo_media <= 4, tổng <= 9; không chứa khoá AIza….
-  Nếu đặt T110_BASE_REF (mốc git của tohong-back trước PR): pool chỉ khác ở Én, Thiskyhall (photos/styles/tags) và Tự Do (bị gỡ); không vendor khác đổi.
+  Nếu đặt T110_BASE_REF (mốc git của tohong-back trước PR): pool chỉ khác ở Én, Thiskyhall (photos/styles/tags), Tự Do và Pergola (bị gỡ khỏi pool); không vendor khác đổi.
 In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import glob, json, os, re, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -74,15 +75,18 @@ pv, pa = venue.get(PG), audit.get(PG) or {}
 if pv is None:
     bad.append("Pergola biến mất khỏi venue/vendors.json (tạm đóng cửa không được gỡ)")
 else:
-    if t.has_pid(pv) or pv.get("google_photos"):
-        bad.append("Pergola có place_id hoặc ảnh Google (ADR-048: không nhận lúc này)")
+    if (t.has_pid(pv) or pv.get("google_photos")) and (audit.get(PG) or {}).get("reopened") is not True:
+        bad.append("Pergola có place_id hoặc ảnh Google mà không phải do mở lại (ADR-048: không nhận lúc này)")
 if any((x.get("vendor") or {}).get("id") == PG for cat in cats for x in load(os.path.join(cat, "removed_vendors.json"), [])):
     bad.append("Pergola nằm trong removed_vendors.json")
-if pa.get("retry") is not True or pa.get("manual_override") != "temporarily_closed":
-    bad.append("Pergola: dòng audit mong retry=true + manual_override=temporarily_closed; thấy %r" % {k: pa.get(k) for k in ("status", "retry", "manual_override")})
-pp = pool.get(PG)
-if not pp or not pp.get("photos") or any(p.get("source") == "google" or LH.match(str(p.get("url", ""))) for p in pp["photos"]):
-    bad.append("Pergola trong pool: mong >= 1 ảnh minh hoạ và không ảnh Google")
+if not (t.has_pid(pv or {}) and pa.get("reopened") is True) and (pa.get("retry") is not True or pa.get("closed_state") != "temporarily_closed" or pa.get("manual_override") != "temporarily_closed"):
+    bad.append("Pergola: dòng audit mong retry=true + closed_state=temporarily_closed + manual_override=temporarily_closed; thấy %r" % {k: pa.get(k) for k in ("status", "retry", "closed_state", "manual_override")})
+if t.has_pid(pv or {}) and pa.get("reopened") is True:
+    pp = pool.get(PG)
+    if not pp or not any(p.get("source") == "google" for p in pp.get("photos") or []):
+        bad.append("Pergola đã mở lại và được nhận nhưng không có trong pool với ảnh Google")
+elif PG in pool:
+    bad.append("Pergola tạm đóng cửa mà còn trong pool tohong-back (phải vắng mặt, ADR-049)")
 
 logs = sorted(glob.glob(os.path.join(root, "run-logs", "T-110", "*.log")))
 if not logs:
@@ -112,9 +116,9 @@ if ref:
     if base is not None:
         b = {p["id"]: p for p in base}
         changed = {i for i in set(b) | set(pool) if b.get(i) != pool.get(i)}
-        if changed != {EN, TH, TD}:
-            bad.append("pool đổi ở %r (mong đúng Én, Thiskyhall, Tự Do)" % sorted(changed)[:5])
+        if changed != {EN, TH, TD, PG}:
+            bad.append("pool đổi ở %r (mong đúng Én, Thiskyhall, Tự Do, Pergola)" % sorted(changed)[:5])
         for i in (EN, TH):
             if i in b and i in pool and {k: v for k, v in b[i].items() if k not in ("photos", "styles", "tags")} != {k: v for k, v in pool[i].items() if k not in ("photos", "styles", "tags")}:
                 bad.append("%s: pool đổi trường ngoài photos/styles/tags" % i)
-t.done(bad, "ADR-048 đã áp: Én và Thiskyhall có place_id + ảnh Google (dữ liệu và pool), Tự Do gỡ khỏi pool và lưu removed_vendors.json, Pergola giữ ảnh minh hoạ và được đánh dấu thử lại; log trong hạn mức")
+t.done(bad, "ADR-048 đã áp: Én và Thiskyhall có place_id + ảnh Google (dữ liệu và pool), Tự Do gỡ khỏi pool và lưu removed_vendors.json, Pergola ẩn khỏi pool và được đánh dấu thử lại; log trong hạn mức")

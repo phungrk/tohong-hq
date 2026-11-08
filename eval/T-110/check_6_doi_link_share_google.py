@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """T-110 tiêu chí 6: đổi link `share.google` thành place_id bằng bước resolve (chạy trong workflow GitHub), tối đa 1 lượt Places mỗi link, lỗi thì ghi rõ, KHÔNG đoán.
 OFFLINE (Google giả, link giả). Spec: products/T-110-duyet-tay-venue.md, "Đổi link share.google thành place_id".
-Lệnh: `python3 resolve_overrides.py --state HCMC` (cwd tools/scraper). Quy trình mong đợi cho mỗi mục accept_place chưa có `resolved`:
+Lệnh: `python3 resolve_overrides.py --state HCMC [--probe | --suggest]` (cwd tools/scraper).
+  --probe: chỉ mở link (HTTP thường), in 'PROBE <vendor_id> <dạng> <URL đích>' (dạng: place_path | place_id_param | search_q | ftid_cid | unknown) hoặc 'PROBE_ERROR <id> link_unreachable';
+    0 request Places, không đổi file. Dạng đọc được: place_path (/maps/place/<tên>), place_id_param (query_place_id/placeid = ChIJ…), search_q (google.com/search?q=<tên>&kgmid=…).
+    ftid_cid (ftid=/cid=/!1s0x… không kèm tên) và unknown -> link_no_place_name. link_unreachable = không có phản hồi, HTTP >= 400, hoặc URL đích không thuộc host google.*.
+  --suggest: với mục accept_place còn lỗi/chưa có place_id: đúng 1 Text Search theo '<tên vendor> <địa chỉ marry.vn>', in 'SUGGEST <id> <place_id> | <tên> | <địa chỉ>' (hoặc SUGGEST_NONE),
+    ghi suggested_place_id/suggested_name/suggested_address + cờ place_id_needed vào review-needed.csv; KHÔNG ghi manual_overrides.json hay vendors.json (Capu điền place_id vào mục). Quy trình mong đợi cho mỗi mục accept_place chưa có `resolved`:
   maps_link -> mở link (HTTP thường, không phải Places API) -> URL Maps đích -> lấy tên địa điểm trong /maps/place/<tên>/ -> đúng 1 lượt Places (Text Search) ->
   ứng viên phải có tên (bỏ dấu, chữ thường, bỏ ký tự lạ) BẰNG tên trong URL, và nếu URL có @lat,lng thì cách ứng viên <= 300 m; còn lại là lỗi. URL có sẵn token ChIJ...
   (query_place_id hay placeid) -> đúng 1 lượt Place Details. Mục chỉ có place_id -> đúng 1 lượt Place Details.
@@ -19,7 +24,7 @@ import _t110 as t
 
 bad = []
 M = "https://www.google.com/maps/place/%s/@%s,%s,17z/data=!3m1!4b1"
-L = {k: "https://share.google/" + k for k in ("ok1", "ok2", "dead", "noname", "nores", "wrongname", "far", "cid")}
+L = {k: "https://share.google/" + k for k in ("ok1", "ok2", "dead", "noname", "nores", "wrongname", "far", "cid", "kg", "ftid", "badhost")}
 LINKS = {
     L["ok1"]: {"status": 200, "to": M % ("Trung+t%C3%A2m+h%E1%BB%99i+ngh%E1%BB%8B+Thiskyhall+Sala", "10.7950", "106.7400")},
     L["ok2"]: {"status": 200, "to": M % ("%C3%89n+Banquet+%26+Event+Space", "10.7800", "106.6800")},
@@ -28,6 +33,9 @@ LINKS = {
     L["nores"]: {"status": 200, "to": M % ("Nh%C3%A0+h%C3%A0ng+Kh%C3%B4ng+C%C3%B3", "10.7800", "106.6800")},
     L["wrongname"]: {"status": 200, "to": M % ("Nh%C3%A0+h%C3%A0ng+Sai+T%C3%AAn", "10.7800", "106.6800")},
     L["far"]: {"status": 200, "to": M % ("Nh%C3%A0+h%C3%A0ng+Xa", "10.7000", "106.6000")},
+    L["kg"]: {"status": 200, "to": "https://www.google.com/search?q=Nh%C3%A0+h%C3%A0ng+Kg+Th%E1%BB%AD&kgmid=/g/11abc"},
+    L["ftid"]: {"status": 200, "to": "https://www.google.com/maps?ftid=0x317529:0x123abc"},
+    L["badhost"]: {"status": 200, "to": "https://example.com/page"},
     L["cid"]: {"status": 200, "to": "https://www.google.com/maps/place/Nh%C3%A0+h%C3%A0ng+Cid/data=!4m2?query_place_id=ChIJ_cid_place"},
 }
 PL = {"ChIJ_thisky": t.place("Trung tâm hội nghị Thiskyhall Sala", "Tầng 5, Cổng D6/10 Mai Chí Thọ, An Khánh, Hồ Chí Minh", lat=10.7950, lng=106.7400),
@@ -35,10 +43,12 @@ PL = {"ChIJ_thisky": t.place("Trung tâm hội nghị Thiskyhall Sala", "Tầng 
       "ChIJ_sai": t.place("Một Nơi Khác Hẳn", "1 Lê Lợi, Hồ Chí Minh", lat=10.7800, lng=106.6800),
       "ChIJ_xa": t.place("Nhà hàng Xa", "1 Lê Lợi, Hồ Chí Minh", lat=10.9000, lng=106.9000),
       "ChIJ_cid_place": t.place("Nhà hàng Cid", "2 Lê Lợi, Hồ Chí Minh"),
+      "ChIJ_kg": t.place("Nhà hàng Kg Thử", "7 Lê Lợi, Hồ Chí Minh"),
+      "ChIJ_sug1": t.place("Nhà hàng Gợi Ý Một", "1 Lê Lợi, Bến Thành, Hồ Chí Minh"), "ChIJ_sug2": t.place("Nhà hàng Gợi Ý Hai", "1 Lê Lợi, Bến Thành, Hồ Chí Minh"),
       "ChIJ_byid": t.place("Nhà hàng Theo Id", "3 Lê Lợi, Hồ Chí Minh")}
-SEARCH = [("Thiskyhall Sala", ["ChIJ_thisky"]), ("Banquet", ["ChIJ_en"]), ("Sai Tên", ["ChIJ_sai"]), ("Nhà hàng Xa", ["ChIJ_xa"])]
+SEARCH = [("Thiskyhall Sala", ["ChIJ_thisky"]), ("Banquet", ["ChIJ_en"]), ("Sai Tên", ["ChIJ_sai"]), ("Nhà hàng Xa", ["ChIJ_xa"]), ("Kg Thử", ["ChIJ_kg"]), ("Nhà hàng noname", ["ChIJ_sug1"]), ("Nhà hàng ftid", ["ChIJ_sug2"])]
 FX = t.fixture(PL, SEARCH, LINKS)
-IDS = {"ok1": "t110_a1", "ok2": "t110_a2", "dead": "t110_e1", "noname": "t110_e2", "nores": "t110_e3", "wrongname": "t110_e4", "far": "t110_e5", "cid": "t110_a3"}
+IDS = {"ok1": "t110_a1", "ok2": "t110_a2", "dead": "t110_e1", "noname": "t110_e2", "nores": "t110_e3", "wrongname": "t110_e4", "far": "t110_e5", "cid": "t110_a3", "kg": "t110_a5", "ftid": "t110_e7", "badhost": "t110_e8"}
 vs = [t.vendor(i, "Nhà hàng " + k, "1 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh") for k, i in IDS.items()] + [t.vendor("t110_a4", "Nhà hàng Theo Id", "3 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh"),
       t.vendor("t110_e6", "Nhà hàng Mất Id", "4 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh"), t.vendor("t110_rm", "Nhà hàng Bị Loại", "5 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh")]
 ENT = [t.entry(i, "accept_place", maps_link=L[k]) for k, i in IDS.items()]
@@ -58,11 +68,29 @@ rc, out, calls = r.run(t.REFRESH, FX)
 if any(x["kind"] == "share" for x in calls):
     bad.append("refresh_photos mở link share.google")
 
+# ---- dò link (--probe): in URL đích + dạng, 0 request Places, không đổi file -----------------------------------------------------------------------
+snap0 = r.tree()
+rc, out, calls = r.run(t.RESOLVE + ["--probe"], FX)
+if t.n_kind(calls, "search", "details", "media"):
+    bad.append("--probe gọi Places (%d lượt); chỉ được mở link" % t.n_kind(calls, "search", "details", "media"))
+if r.tree() != snap0:
+    bad.append("--probe đổi file")
+probe = {}
+for l in out.splitlines():
+    p_ = l.split()
+    if len(p_) >= 4 and p_[0] == "PROBE":
+        probe[p_[1]] = (p_[2], p_[3])
+for vid, form in {"t110_a1": "place_path", "t110_a2": "place_path", "t110_a3": "place_id_param", "t110_a5": "search_q", "t110_e7": "ftid_cid", "t110_e2": "unknown"}.items():
+    if probe.get(vid, ("", ""))[0] != form or not probe[vid][1].startswith("http"):
+        bad.append("--probe %s: mong dạng %s kèm URL đích; thấy %r" % (vid, form, probe.get(vid)))
+if not any(l.startswith("PROBE_ERROR t110_e1 link_unreachable") for l in out.splitlines()) or not any(l.startswith("PROBE_ERROR t110_e8 link_unreachable") for l in out.splitlines()):
+    bad.append("--probe: link chết (404) và link tới host không phải Google phải ra 'PROBE_ERROR <id> link_unreachable'")
+
 # ---- resolve ----------------------------------------------------------------------------------------------------------------------------------------
 rc, out, calls = r.run(t.RESOLVE, FX)
 doc = r.overrides()
 by = {e["vendor_id"]: e for e in doc.get("overrides", [])}
-good = {"t110_a1": "ChIJ_thisky", "t110_a2": "ChIJ_en", "t110_a3": "ChIJ_cid_place", "t110_a4": "ChIJ_byid"}
+good = {"t110_a1": "ChIJ_thisky", "t110_a2": "ChIJ_en", "t110_a3": "ChIJ_cid_place", "t110_a4": "ChIJ_byid", "t110_a5": "ChIJ_kg"}
 for vid, pid in good.items():
     e = by.get(vid) or {}
     rs = e.get("resolved") or {}
@@ -75,7 +103,7 @@ for vid, pid in good.items():
     keep = {k: v for k, v in before[vid].items() if k not in ("place_id", "resolved")}
     if {k: v for k, v in e.items() if k not in ("place_id", "resolved")} != keep:
         bad.append("%s: resolve sửa trường ngoài place_id/resolved" % vid)
-for vid, code in {"t110_e1": "link_unreachable", "t110_e2": "link_no_place_name", "t110_e3": "search_no_result", "t110_e4": "name_mismatch", "t110_e5": "location_mismatch", "t110_e6": "place_not_found"}.items():
+for vid, code in {"t110_e1": "link_unreachable", "t110_e2": "link_no_place_name", "t110_e3": "search_no_result", "t110_e4": "name_mismatch", "t110_e5": "location_mismatch", "t110_e6": "place_not_found", "t110_e7": "link_no_place_name", "t110_e8": "link_unreachable"}.items():
     e = by.get(vid) or {}
     if not any(l.startswith("RESOLVE_ERROR %s %s" % (vid, code)) for l in out.splitlines()):
         bad.append("%s: mong 'RESOLVE_ERROR %s %s'" % (vid, vid, code))
@@ -94,6 +122,35 @@ if t.n_kind(calls, "media"):
 # mỗi mục tối đa 1 lượt Places: 8 mục link/place_id -> tối đa 8 lượt
 if n_search + n_det > len([e for e in ENT if e["action"] == "accept_place"]):
     bad.append("resolve dùng %d lượt Places cho %d mục (mong <= 1 mỗi mục)" % (n_search + n_det, len([e for e in ENT if e["action"] == "accept_place"])))
+
+# ---- lối ra (--suggest): link hỏng -> 1 Text Search theo tên + địa chỉ marry.vn, ghi ứng viên vào review-needed.csv, KHÔNG tự nhận ----------------------------
+snap_ov = open(r.p(t.OVERRIDES), "rb").read()
+vend_before = json.dumps(r.vendors(), sort_keys=True)
+rc, out, calls = r.run(t.RESOLVE + ["--suggest"], FX)
+sq = [x for x in calls if x["kind"] == "search"]
+if t.n_kind(calls, "share", "details", "media") or len(sq) > 8 or any("1 Lê Lợi" not in x["q"] for x in sq):
+    bad.append("--suggest: mong chỉ Text Search (<= 1 mỗi mục lỗi), truy vấn chứa tên + địa chỉ marry.vn; thấy %r" % [(x["kind"], x["q"][:40]) for x in calls][:3])
+if open(r.p(t.OVERRIDES), "rb").read() != snap_ov or json.dumps(r.vendors(), sort_keys=True) != vend_before:
+    bad.append("--suggest tự nhận/ghi vào file duyệt tay hoặc vendors.json (chỉ được ghi review-needed.csv)")
+rv = r.review()
+for vid, pid in {"t110_e2": "ChIJ_sug1", "t110_e7": "ChIJ_sug2"}.items():
+    row = rv.get(vid) or {}
+    if row.get("suggested_place_id") != pid or not row.get("suggested_name") or not row.get("suggested_address") or "place_id_needed" not in (row.get("flags") or ""):
+        bad.append("--suggest %s: review-needed.csv mong suggested_place_id=%s + tên + địa chỉ + cờ place_id_needed; thấy %r" % (vid, pid, {k: row.get(k) for k in ("suggested_place_id", "flags")}))
+    if not any(l.startswith("SUGGEST %s %s" % (vid, pid)) for l in out.splitlines()):
+        bad.append("--suggest %s: thiếu dòng 'SUGGEST %s %s | <tên> | <địa chỉ>'" % (vid, vid, pid))
+if not any(l.startswith("SUGGEST_NONE t110_e3") for l in out.splitlines()):
+    bad.append("--suggest: vendor không có ứng viên phải ra 'SUGGEST_NONE <id>'")
+# Capu điền place_id vào mục -> lần resolve kế điền resolved bằng 1 lượt Place Details
+doc2 = r.overrides()
+for e in doc2["overrides"]:
+    if e["vendor_id"] == "t110_e2":
+        e["place_id"] = "ChIJ_sug1"
+r.write(t.OVERRIDES, doc2)
+rc, out, calls = r.run(t.RESOLVE, FX)
+e2 = {e["vendor_id"]: e for e in r.overrides()["overrides"]}["t110_e2"]
+if (e2.get("resolved") or {}).get("place_id") != "ChIJ_sug1" or (e2.get("resolved") or {}).get("resolved_from") != "place_id" or t.n_kind(calls, "details") < 1:
+    bad.append("sau khi Capu điền place_id, resolve phải điền resolved bằng Place Details; thấy %r" % e2.get("resolved"))
 
 # ---- hai link thật của ADR-048: tổng <= 2 lượt Places; chạy lại 0 lượt ----------------------------------------------------------------------------
 r2 = t.Root({"venue": vs[:2], "honeymoon": []})
