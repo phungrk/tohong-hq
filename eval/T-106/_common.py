@@ -124,7 +124,8 @@ def _main(token):
 def _street_key(s):
     s = _ADMIN_CUT.sub("", " " + s.strip()).strip()
     s = _STREET_PREFIX.sub("", s)
-    return re.sub(r"[^a-z0-9]", "", s)
+    s = re.sub(r"[^a-z0-9]", "", s)
+    return re.sub(r"^ql(?=\d)", "quoclo", s)  # A5 (v4, T-108 rework): "QL13" = "Quốc lộ 13"
 
 
 def parse_address(addr):
@@ -134,7 +135,7 @@ def parse_address(addr):
        (chữ+số, vd 309b, 588/c2, c17, 215e4; khoảng '45 - 47', '01-02-02a' = nhiều số) rồi tới chữ. Đoạn bắt đầu bằng 'Lầu/Tầng/Tòa nhà/tên toà nhà' không có dạng này nên bị bỏ qua.
     A3 nếu đoạn chỉ có số nhà (vd '137/27A') thì tên đường là đoạn kế tiếp, miễn đoạn đó không bắt đầu bằng chữ số.
     A4 số nhà chuẩn hoá của một token = TOÀN BỘ token gồm cả phần hẻm sau '/', bỏ số 0 đầu ở từng phần ('03'->'3', '137/027A'->'137/27a'); '137/27A' KHÁC '137/5' và KHÁC '137'. Khoảng ('52-56') cho ra tập các số viết ra.
-    A5 tên đường: bỏ MỘT tiền tố trong {duong, d., dai lo, pho}; cắt từ từ khoá hành chính {quan, huyen, phuong, thanh pho, tphcm, tp, q, p} trở đi; rồi bỏ mọi ký tự không phải chữ/số (nên 'quoc lo 1 k' = 'quoc lo 1k'; 'Đ. số 14' = 'Đường số 14').
+    A5 tên đường: bỏ MỘT tiền tố trong {duong, d., dai lo, pho}; cắt từ từ khoá hành chính {quan, huyen, phuong, thanh pho, tphcm, tp, q, p} trở đi; rồi bỏ mọi ký tự không phải chữ/số (nên 'quoc lo 1 k' = 'quoc lo 1k'; 'Đ. số 14' = 'Đường số 14'); cuối cùng khoá bắt đầu bằng 'ql' + chữ số thì 'ql' thành 'quoclo' (v4: "QL13" = "Quốc lộ 13"; "ĐT743", "TL8" KHÔNG quy đổi).
     A6 đoạn có dạng A2/A3 nhưng khoá tên đường (sau A5) ngắn hơn 4 ký tự (vd 'Đường D2') thì BỎ QUA đoạn đó và xét tiếp đoạn kế; hết đoạn mà không rút được -> None."""
     segs = [x.strip() for x in _fold(addr).split(",") if x.strip()]
     for i, seg in enumerate(segs):
@@ -174,3 +175,81 @@ def load_address_snapshot():
 def has_candidate(a):
     """Dòng audit có ứng viên Google: có matched_name, hoặc confidence > 0."""
     return bool((a.get("matched_name") or "").strip()) or (a.get("confidence") or 0) > 0
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# T-108 spec rework (v4 của spec T-106, 2026-11-08): sáu cổng chống khớp nhầm địa điểm (Hành vi 2 mới). Định nghĩa chuẩn; code của
+# Engineering phải cho cùng kết quả trên eval/T-106/gate_cases.json (check_7 khoá điều đó). Chỉ đọc dữ liệu đã lưu, không gọi Google.
+# Thứ tự cổng = thứ tự mã lý do: G1 điểm số (cũ) -> G2 tỉnh/thành -> G3 mâu thuẫn tên đường -> G4 trùng địa chỉ nhà hàng đã gỡ
+# -> G5 địa chỉ không xác nhận được -> G6 một place_id, một địa chỉ gốc (xét theo nhóm). Vendor bị hạ ghi MÃ CỦA CỔNG ĐẦU TIÊN bị vi phạm.
+# ---------------------------------------------------------------------------------------------------------------------
+UNCONFIRMED_MIN_CONF = 0.95   # G5: không so được địa chỉ (một bên không rút được số nhà + đường) thì cần confidence >= ngưỡng này
+HCM_NAMES = {"hochiminh", "hochiminhcity", "hcm", "hcmc"}
+PROVINCES = {"HCMC": HCM_NAMES}   # tỉnh/thành mong đợi theo mã `city` của vendor
+REASON_ORDER = ["out_of_province", "address_conflict", "same_address_as_closed", "address_unconfirmed", "shared_place_id"]
+
+
+def province_key(addr):
+    """P1 tách theo dấu phẩy (sau A1), bỏ đoạn cuối nếu là 'Việt Nam'/'Vietnam'/'VN'; P2 lấy đoạn cuối còn lại, bỏ mọi chữ số (mã bưu chính
+    '70000'), bỏ MỘT tiền tố {thành phố, tp, tỉnh}, bỏ ký tự không phải chữ cái. Rỗng nếu không có đoạn nào."""
+    segs = [x.strip() for x in _fold(addr).split(",") if x.strip()]
+    if segs and re.sub(r"[^a-z]", "", segs[-1]) in ("vietnam", "vn"):
+        segs = segs[:-1]
+    if not segs:
+        return ""
+    s = re.sub(r"\d+", "", segs[-1]).strip()
+    s = re.sub(r"^(?:thanh pho\s+|tinh\s+|tp\.?\s*)", "", s)
+    return re.sub(r"[^a-z]", "", s)
+
+
+def in_province(google_addr, city="HCMC"):
+    """G2: đoạn cuối (tỉnh/thành) của địa chỉ Google thuộc tỉnh/thành của vendor. Địa chỉ rỗng hoặc không nhận ra tỉnh: False.
+    Giới hạn đã biết: từ 7/2025 Bình Dương và Bà Rịa-Vũng Tàu sáp nhập vào TP.HCM nên Google ghi 'Hồ Chí Minh' cho chúng; cổng này không
+    bắt được chúng (G3 bắt khi tên đường khác)."""
+    return province_key(google_addr) in PROVINCES.get(city, HCM_NAMES)
+
+
+def streets_compatible(k1, k2):
+    """S1: hai khoá tên đường bằng nhau, hoặc khoá ngắn là tiền tố của khoá dài, phần dư đúng MỘT chữ cái, và khoá ngắn không kết thúc bằng chữ số
+    ('tranhungdao' ~ 'tranhungdaob'; 'quoclo1' KHÔNG ~ 'quoclo1k')."""
+    if k1 == k2:
+        return True
+    a, b = sorted((k1, k2), key=len)
+    return b.startswith(a) and len(b) - len(a) == 1 and b[-1].isalpha() and not a[-1].isdigit()
+
+
+def street_conflict(vendor_addr, google_addr):
+    """G3: cả hai địa chỉ rút được (số nhà, đường) theo A1-A6 và hai khoá đường KHÔNG tương thích (S1). Số nhà khác nhau mà cùng đường: KHÔNG mâu thuẫn."""
+    a, b = parse_address(vendor_addr), parse_address(google_addr)
+    return bool(a and b and not streets_compatible(a[1], b[1]))
+
+
+def reject_reason(src, google_addr, confidence, city="HCMC", closed_addrs=()):
+    """Mã lý do của cổng ĐẦU TIÊN (G1..G5) từ chối ứng viên, hoặc None nếu nhận. G1 (điểm số) từ chối thì trả 'low_score'.
+    closed_addrs: các địa chỉ (địa chỉ gốc `address_source` và `formatted_address`) của vendor đã gỡ vì CLOSED_PERMANENTLY cùng thành phố."""
+    am = address_match(src, google_addr)
+    if not accept_match(confidence, am):
+        return "low_score"
+    if not in_province(google_addr, city):
+        return "out_of_province"
+    if street_conflict(src, google_addr):
+        return "address_conflict"
+    if not am and any(address_match(src, x) for x in closed_addrs):
+        return "same_address_as_closed"
+    if not am and not (parse_address(src) and parse_address(google_addr)) and (confidence or 0) < UNCONFIRMED_MIN_CONF:
+        return "address_unconfirmed"
+    return None
+
+
+def shared_place_id_groups(items):
+    """G6. items: danh sách (vendor_id, place_id, address_source) của các vendor ĐÃ QUA G1-G5 (cùng id ở nhiều category tính MỘT vendor).
+    Trả tập vendor_id bị hạ: mọi vendor của một place_id mà trong nhóm có hai vendor khác địa chỉ gốc (address_match = False VÀ chuỗi gốc sau A1 khác nhau)."""
+    by = {}
+    for vid, pid, src in items:
+        by.setdefault(pid, {})[vid] = src
+    out = set()
+    for pid, d in by.items():
+        ids = sorted(d)
+        if any(not address_match(d[x], d[y]) and _fold(d[x]) != _fold(d[y]) for i, x in enumerate(ids) for y in ids[i + 1:]):
+            out.update(ids)
+    return out

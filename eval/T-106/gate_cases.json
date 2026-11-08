@@ -1,0 +1,743 @@
+{
+ "_chu_thich": "Bảng ca cho check_7/check_8 (spec T-106 v4, Hành vi 2: sáu cổng). `real:true` = vendor/ứng viên thật từ enrichment-audit.json của PR phungrk/tohong#72 (4622da4): id, tên, địa chỉ gốc (venue_address_snapshot.json), tên + địa chỉ + confidence Google đã lưu; place_id thay bằng mã giả giữ cấu trúc chia sẻ. Còn lại viết tay (syn_*). `expect`: accepted | mã lý do (out_of_province, address_conflict, same_address_as_closed, address_unconfirmed, shared_place_id) | removed (CLOSED_PERMANENTLY, ADR-044). expect do người viết spec gắn tay, hàm chuẩn trong _common.py được kiểm chéo khi sinh bảng. `conf` là confidence mà pipeline tính từ tên vendor và tên ứng viên (check_7 đối chiếu ±0,002).",
+ "run_doc_lap": {
+  "name": "Mỗi vendor một place_id riêng",
+  "vendors": [
+   {
+    "id": "marry_8fa049d68064",
+    "name": "Fleur de Lys Hospitality",
+    "address": "Tầng 5 Tòa nhà Harbour View Tower, số 35 Nguyễn Huệ, Phường Bến Nghé, Quận 1, Quận 1, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_pBdbSb4M",
+     "name": "Fleur De Lys Hotel Quy Nhon",
+     "address": "16 Nguyễn Huệ, Quy Nhơn, Gia Lai"
+    },
+    "conf": 0.706,
+    "expect": "out_of_province",
+    "real": true
+   },
+   {
+    "id": "marry_6d9c8636de49",
+    "name": "NHÀ HÀNG HOÀNG TY",
+    "address": "447 - 449 - 451 Trần Văn Giàu, Phường Bình Trị Đông B, Quận Bình Tân - 451 Trần Văn Giàu, Phường Bình Trị Đông B, Quận Bình Tân, Quận Bình Tân, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_Pfw0PJ1E",
+     "name": "Nhà hàng Hoàng Ty",
+     "address": "70-72 Võ Văn Tần, Xuân Hòa, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "address_conflict",
+    "real": true
+   },
+   {
+    "id": "marry_a723b6948641",
+    "name": "Unique Wedding & Event",
+    "address": "91B2 Phạm Văn Hai, P.3, Quận Tân Bình, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_B8sAX3kc",
+     "name": "Unique Wedding & Event - 38 Đặng Văn Bi",
+     "address": "38 Đặng Văn Bi, Thủ Đức, Hồ Chí Minh 70000"
+    },
+    "conf": 0.737,
+    "expect": "address_conflict",
+    "real": true
+   },
+   {
+    "id": "marry_32bd364757c4",
+    "name": "Làng Nướng Nam Bộ",
+    "address": "285/C145 Cách Mạng Tháng 8, P.12, Quận 10, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_VgjmipAk",
+     "name": "Làng Nướng Nam Bộ",
+     "address": "302A Tô Hiến Thành, Cư xá Bắc Hải, Hòa Hưng, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "address_conflict",
+    "real": true
+   },
+   {
+    "id": "marry_42040e3fc73e",
+    "name": "TTC Hospitality",
+    "address": "62 Trần Huy Liệu, P.12, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_hnRd8Igo",
+     "name": "TTC Hospitality",
+     "address": "512 Đ. Lý Thường Kiệt, Tân Sơn Nhất, Hồ Chí Minh 700000"
+    },
+    "conf": 1.0,
+    "expect": "address_conflict",
+    "real": true
+   },
+   {
+    "id": "marry_4faee6c1f2ab",
+    "name": "Trung Tâm Hội Nghị Tiệc Cưới Kalina",
+    "address": "105 – 107 Bờ Bao Tân Thắng, P. Sơn Kỳ (Đối diện Aeon Mall Tân Phú), Quận Tân Phú, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_qVzS9qeU",
+     "name": "TRUNG TÂM HỘI NGHỊ - TIỆC CƯỚI CELINA GARDEN",
+     "address": "47 Bình Phú, Tam Bình, Hồ Chí Minh 70000"
+    },
+    "conf": 0.846,
+    "expect": "address_conflict",
+    "real": true
+   },
+   {
+    "id": "marry_533f94f2e3a6",
+    "name": "Trung Tâm Hội Nghị Tiệc Cưới Eden Plaza Quận 12",
+    "address": "608 Lê Văn Khương P. Thới An Quận 12, Quận 12, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_t70iDFik",
+     "name": "Trung Tâm Hội Nghị - Tiệc Cưới Eden Plaza",
+     "address": "333 Đ. 22 Tháng 12, Thuận Giao, Hồ Chí Minh"
+    },
+    "conf": 0.897,
+    "expect": "address_conflict",
+    "real": true
+   },
+   {
+    "id": "marry_755651c5033f",
+    "name": "Windsor Plaza Hotel",
+    "address": "18 An Dương Vương, Quận 5, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_RI3oO6gw",
+     "name": "Khách sạn Windsor Plaza",
+     "address": "1 Sư Vạn Hạnh, An Đông, Hồ Chí Minh 700000"
+    },
+    "conf": 0.619,
+    "expect": "address_conflict",
+    "real": true
+   },
+   {
+    "id": "marry_2650cc6ef8a1",
+    "name": "Silver Creek City Resort",
+    "address": "112 An Phú Đông 11, Quận 12, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_POicv75w",
+     "name": "Khách Sạn Silver Creek City Resort",
+     "address": "112 Đ. Võ Thị Liễu, An Phú Đông, Hồ Chí Minh"
+    },
+    "conf": 0.828,
+    "expect": "address_conflict",
+    "real": true
+   },
+   {
+    "id": "marry_1e7c855f8dfa",
+    "name": "THISKYHALL SALA",
+    "address": "Lầu 5, Số 10 Đường Mai Chí Thọ, Khu đô thị Sala, Thủ Thiêm, Thủ Đức, TPHCM, Ho Chi Minh City, Vietnam, Quận Thủ Đức, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_61oHIb1E",
+     "name": "Trung tâm hội nghị Thiskyhall Sala",
+     "address": "Tầng 5, Cổng D6/10 Mai Chí Thọ, P, An Khánh, Hồ Chí Minh 700000"
+    },
+    "conf": 0.612,
+    "expect": "address_unconfirmed",
+    "real": true
+   },
+   {
+    "id": "marry_b25635d69270",
+    "name": "Dich vụ  lá đỏ",
+    "address": "Tam đông. Hóc  mon, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_G9FDtPMU",
+     "name": "Dịch vụ nấu tiệc lá đỏ",
+     "address": "21B, Xuân Thới Sơn, Hồ Chí Minh"
+    },
+    "conf": 0.765,
+    "expect": "address_unconfirmed",
+    "real": true
+   },
+   {
+    "id": "marry_20c439a5ba07",
+    "name": "Nhà Hàng Trung Tâm Tiệc Cưới Đại Dương",
+    "address": "18A Phan Văn Trị, P7, Quận Gò Vấp, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_NP7Hk3Tw",
+     "name": "Nhà Hàng Tiệc Cưới Đại Dương",
+     "address": "2PPX+67X, Tân Hiệp, Hồ Chí Minh"
+    },
+    "conf": 0.844,
+    "expect": "address_unconfirmed",
+    "real": true
+   },
+   {
+    "id": "marry_a84d73bc78b2",
+    "name": "The ADORA",
+    "address": "198 Hoàng Văn Thụ, P.9, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid__NBVsuj4",
+     "name": "The Adora Nguyễn Kiệm",
+     "address": "Nguyễn Kiệm/371 Đ. Hạnh Thông, Phường, Hạnh Thông, Hồ Chí Minh 700000"
+    },
+    "conf": 0.6,
+    "expect": "address_unconfirmed",
+    "real": true
+   },
+   {
+    "id": "marry_597d56365622",
+    "name": "Nhà hàng tiệc cưới Tân Sơn Nhất",
+    "address": "200 Hoàng Văn Thụ, P. 9, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_YaH2JB-w",
+     "name": "Nhà hàng tiệc cưới Tân Sơn Nhất",
+     "address": "202 Đ. Hoàng Văn Thụ, Đức Nhuận, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "accepted",
+    "real": true
+   },
+   {
+    "id": "marry_6920b64d9fab",
+    "name": "Trung tâm hội nghị và tiệc cưới Khách sạn Đệ Nhất",
+    "address": "18 Hoàng Việt, Phường 4, Quận Tân Bình, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_W1k_KkQQ",
+     "name": "Trung Tâm Hội Nghị & Tiệc Cưới Khách Sạn Đệ Nhất",
+     "address": "21 Hoàng Việt, Tân Sơn Nhất, Hồ Chí Minh 700000"
+    },
+    "conf": 0.979,
+    "expect": "accepted",
+    "real": true
+   },
+   {
+    "id": "marry_34823351990f",
+    "name": "Trung tâm Hội nghị 108 Nguyễn Du",
+    "address": "106 Nguyễn Du, P. Bến Thành, Quận 1, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_ut0Bc-z4",
+     "name": "Nhà khách 108 Nguyễn Du",
+     "address": "108 Nguyễn Du, Bến Thành, Hồ Chí Minh"
+    },
+    "conf": 0.655,
+    "expect": "accepted",
+    "real": true
+   },
+   {
+    "id": "marry_fac1da067090",
+    "name": "Nhà hàng Ái Huê",
+    "address": "412 - 414 - 418 Trần Hưng Đạo B, P.1, Quận 5, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_q-A0a5bk",
+     "name": "Nhà Hàng Ái Huê",
+     "address": "412 - 418 Trần Hưng Đạo, Chợ Lớn, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "accepted",
+    "real": true
+   },
+   {
+    "id": "marry_8a598c176efc",
+    "name": "MerPerle Crystal Palace Hotel - Convention",
+    "address": "C17–1–2 Nguyễn Lương Bằng, Phú Mỹ Hưng, Quận 7, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_kDbAzMao",
+     "name": "MerPerle Crystal Palace",
+     "address": "13 Nguyễn Lương Bằng, Khu đô thị Phú Mỹ Hưng, Phú Mỹ, Hồ Chí Minh"
+    },
+    "conf": 0.719,
+    "expect": "accepted",
+    "real": true
+   },
+   {
+    "id": "marry_c6f3c54184ac",
+    "name": "Chloe Gallery",
+    "address": "06 Phan Văn Chương, Hồ Bán Nguyệt, Phú Mỹ Hưng, Quận 7, HCM, Quận 7, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_aMECttLA",
+     "name": "Chloe Gallery",
+     "address": "Hồ Bán Nguyệt/Phan Văn Chương/02 - 06 Phú Mỹ Hưng, Khu đô thị Phú Mỹ Hưng, Tân Mỹ, Hồ Chí Minh 70000"
+    },
+    "conf": 1.0,
+    "expect": "accepted",
+    "real": true
+   },
+   {
+    "id": "marry_7e0c49db5e78",
+    "name": "Khách san Mai House Saigon",
+    "address": "1 Ngô Thời Nhiệm, Phường 06, Quận 3, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_gNkg9xaI",
+     "name": "Khách sạn Mai House Saigon",
+     "address": "Lối vào sảnh: 01, Ngô Thời Nhiệm/157 Nam Kỳ Khởi Nghĩa, Xuân Hòa, Hồ Chí Minh 700000"
+    },
+    "conf": 1.0,
+    "expect": "accepted",
+    "real": true
+   },
+   {
+    "id": "marry_b92e8a86175d",
+    "name": "Khu du lịch Bình Quới 2",
+    "address": "Cuối đường Bình Quới, P.28, Quận Bình Thạnh, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_bHxBsaWo",
+     "name": "Khu Du Lịch Bình Quới 2",
+     "address": "2, Khu du lịch, Cuối đường Bình Quới, Hồ Chí Minh 70000"
+    },
+    "conf": 1.0,
+    "expect": "accepted",
+    "real": true
+   },
+   {
+    "id": "marry_dd2bb6a21eae",
+    "name": "Trung tâm hội nghị Asiana Plaza Tân Phú",
+    "address": "284 - 286 Vườn Lài, Phường Phú Thọ Hòa, Quận Tân Phú, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_MSqh2LRc",
+     "name": "Asiana Plaza (Tân Phú)",
+     "address": "56/1, 284-286, 30/4 Đ. Vườn Lài, Phú Thọ Hòa, Hồ Chí Minh 70000"
+    },
+    "conf": 0.678,
+    "expect": "accepted",
+    "real": true
+   },
+   {
+    "id": "marry_9fcd97672a4f",
+    "name": "Khu du lịch Văn Thánh",
+    "address": "48/10 Điện Biên Phủ, P.22, Quận Bình Thạnh, Thành phố Hồ Chí Minh",
+    "place": {
+     "id": "pid_xdSId_50",
+     "name": "Khu du lịch Văn Thánh",
+     "address": "48/10 Điện Biên Phủ, Thạnh Mỹ Tây, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "accepted",
+    "real": true
+   },
+   {
+    "id": "syn_ql13_ok",
+    "name": "Nha hang Alpha QL",
+    "address": "88 QL13, P.26, Quận Bình Thạnh",
+    "place": {
+     "id": "pid_syn_ql13_ok",
+     "name": "Nha hang Alpha QL",
+     "address": "88 Quốc lộ 13, Hiệp Bình Chánh, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "accepted"
+   },
+   {
+    "id": "syn_ql13_vs_ql1",
+    "name": "Nha hang Bravo QL",
+    "address": "88 QL13, P.26, Quận Bình Thạnh",
+    "place": {
+     "id": "pid_syn_ql13_vs_ql1",
+     "name": "Nha hang Bravo QL",
+     "address": "88 Quốc lộ 1, Hiệp Bình Chánh, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "address_conflict"
+   },
+   {
+    "id": "syn_ql1_vs_ql1k",
+    "name": "Nha hang Charlie QL",
+    "address": "50 Quốc lộ 1, P.Linh Trung, Quận Thủ Đức",
+    "place": {
+     "id": "pid_syn_ql1_vs_ql1k",
+     "name": "Nha hang Charlie QL",
+     "address": "50 Quốc lộ 1K, Linh Xuân, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "address_conflict"
+   },
+   {
+    "id": "syn_duong_b",
+    "name": "Nha hang Delta TH",
+    "address": "412 Trần Hưng Đạo B, P.1, Quận 5",
+    "place": {
+     "id": "pid_syn_duong_b",
+     "name": "Nha hang Delta TH",
+     "address": "412 Trần Hưng Đạo, Chợ Lớn, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "accepted"
+   },
+   {
+    "id": "syn_src_no_number_c1",
+    "name": "Nha hang Echo KDL",
+    "address": "Khu du lịch Echo, P.28, Quận Bình Thạnh",
+    "place": {
+     "id": "pid_syn_src_no_number_c1",
+     "name": "Nha hang Echo KDL",
+     "address": "55 Xô Viết Nghệ Tĩnh, Bến Nghé, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "accepted"
+   },
+   {
+    "id": "syn_g_no_number_c1",
+    "name": "Nha hang Foxtrot LL",
+    "address": "100 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_g_no_number_c1",
+     "name": "Nha hang Foxtrot LL",
+     "address": "Lê Lợi, Bến Nghé, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "accepted"
+   },
+   {
+    "id": "syn_g_no_number_955",
+    "name": "Nha hang Hoa Sen Vang",
+    "address": "100 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_g_no_number_955",
+     "name": "Nha hang Hoa Sen Vang 2",
+     "address": "Lê Lợi, Bến Nghé, Hồ Chí Minh"
+    },
+    "conf": 0.955,
+    "expect": "accepted"
+   },
+   {
+    "id": "syn_g_no_number_933",
+    "name": "Nha hang Hoa Mai Tim",
+    "address": "100 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_g_no_number_933",
+     "name": "Nha hang Hoa Mai Tim Q1",
+     "address": "Lê Lợi, Bến Nghé, Hồ Chí Minh"
+    },
+    "conf": 0.93,
+    "expect": "address_unconfirmed"
+   },
+   {
+    "id": "syn_src_no_number_955",
+    "name": "Nha hang Cuc Tim Den",
+    "address": "Khu du lịch Cúc, P.28, Quận Bình Thạnh",
+    "place": {
+     "id": "pid_syn_src_no_number_955",
+     "name": "Nha hang Cuc Tim Den 2",
+     "address": "55 Xô Viết Nghệ Tĩnh, Bến Nghé, Hồ Chí Minh"
+    },
+    "conf": 0.952,
+    "expect": "accepted"
+   },
+   {
+    "id": "syn_src_no_number_933",
+    "name": "Nha hang Lan Xanh Xam",
+    "address": "Khu du lịch Lan, P.28, Quận Bình Thạnh",
+    "place": {
+     "id": "pid_syn_src_no_number_933",
+     "name": "Nha hang Lan Xanh Xam Q1",
+     "address": "55 Xô Viết Nghệ Tĩnh, Bến Nghé, Hồ Chí Minh"
+    },
+    "conf": 0.933,
+    "expect": "address_unconfirmed"
+   },
+   {
+    "id": "syn_prov_quynhon",
+    "name": "Nha hang Golf QN",
+    "address": "12 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_prov_quynhon",
+     "name": "Nha hang Golf QN",
+     "address": "12 Lê Lợi, Quy Nhơn, Gia Lai"
+    },
+    "conf": 1.0,
+    "expect": "out_of_province"
+   },
+   {
+    "id": "syn_prov_binhduong",
+    "name": "Nha hang Hotel BD",
+    "address": "12 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_prov_binhduong",
+     "name": "Nha hang Hotel BD",
+     "address": "12 Lê Lợi, Thuận Giao, Bình Dương"
+    },
+    "conf": 1.0,
+    "expect": "out_of_province"
+   },
+   {
+    "id": "syn_prov_missing",
+    "name": "Nha hang India NP",
+    "address": "12 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_prov_missing",
+     "name": "Nha hang India NP",
+     "address": "12 Lê Lợi"
+    },
+    "conf": 1.0,
+    "expect": "out_of_province"
+   },
+   {
+    "id": "syn_prov_tphcm",
+    "name": "Nha hang Juliet TP",
+    "address": "12 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_prov_tphcm",
+     "name": "Nha hang Juliet TP",
+     "address": "12 Lê Lợi, Bến Nghé, TP.HCM"
+    },
+    "conf": 1.0,
+    "expect": "accepted"
+   },
+   {
+    "id": "syn_prov_vn_postal",
+    "name": "Nha hang Kilo VN",
+    "address": "12 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_prov_vn_postal",
+     "name": "Nha hang Kilo VN",
+     "address": "12 Lê Lợi, Bến Nghé, Hồ Chí Minh 700000, Việt Nam"
+    },
+    "conf": 1.0,
+    "expect": "accepted"
+   }
+  ]
+ },
+ "chung_place_id": [
+  {
+   "name": "Grand Palace và Luxury Palace cùng một place_id",
+   "vendors": [
+    {
+     "id": "marry_ae22b3a8f79b",
+     "name": "Trung Tâm Hội nghị - Tiệc Cưới Grand Palace",
+     "address": "142/18 Cộng Hòa, P.4, Quận Tân Bình, Thành phố Hồ Chí Minh(028) 3811 8181 Ext 101Điện thoạiSĐThttps://www.grandpalace.com.vnWebsiteWebsiteFacebookFacebook",
+     "place": {
+      "id": "pid_gala_royale",
+      "name": "Trung tâm Hội nghị Tiệc cưới Grand Palace",
+      "address": "63 Mạc Đĩnh Chi, Tân Định, Hồ Chí Minh 70000"
+     },
+     "conf": 0.988,
+     "expect": "address_conflict",
+     "real": true
+    },
+    {
+     "id": "marry_9c3f1ad337b2",
+     "name": "Trung Tâm Hội Nghị Tiệc Cưới Luxury Palace",
+     "address": "171 Nguyễn Thái Sơn, Phường 7, Quận Gò Vấp, Thành phố Hồ Chí Minh",
+     "place": {
+      "id": "pid_gala_royale",
+      "name": "Trung tâm Hội nghị Tiệc cưới Grand Palace",
+      "address": "63 Mạc Đĩnh Chi, Tân Định, Hồ Chí Minh 70000"
+     },
+     "conf": 0.892,
+     "expect": "address_conflict",
+     "real": true
+    }
+   ]
+  },
+  {
+   "name": "TDG CENTER dùng chung place_id với GALA",
+   "vendors": [
+    {
+     "id": "marry_f1281c3914e0",
+     "name": "Trung tâm hội nghị tiệc cưới TDG CENTER",
+     "address": "02 Đường D2, Phường Sơn Kỳ, Quận Tân Phú, Thành phố Hồ Chí Minh, Quận Tân Phú, Thành phố Hồ Chí Minh",
+     "place": {
+      "id": "pid_gala_415",
+      "name": "Trung tâm Hội nghị & Tiệc cưới Gala",
+      "address": "415 Đ. Hoàng Văn Thụ, Tân Sơn Hòa, Hồ Chí Minh 700000"
+     },
+     "conf": 0.822,
+     "expect": "address_unconfirmed",
+     "real": true
+    },
+    {
+     "id": "marry_6babc2dabab7",
+     "name": "Trung Tâm Hội Nghị & Tiệc Cưới GALA",
+     "address": "415 Hoàng Văn Thụ, P.2, Quận Tân Bình, Thành phố Hồ Chí Minh",
+     "place": {
+      "id": "pid_gala_415",
+      "name": "Trung tâm Hội nghị & Tiệc cưới Gala",
+      "address": "415 Đ. Hoàng Văn Thụ, Tân Sơn Hòa, Hồ Chí Minh 700000"
+     },
+     "conf": 1.0,
+     "expect": "accepted",
+     "real": true
+    }
+   ]
+  },
+  {
+   "name": "Hai vendor Pavillon cùng địa chỉ gốc (đối chứng)",
+   "vendors": [
+    {
+     "id": "marry_6a6dc5ec7c7e",
+     "name": "Trung Tâm Tân Sơn Nhất Pavillon",
+     "address": "202 Hoàng Văn Thụ, P. 9, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
+     "place": {
+      "id": "pid_pavillon",
+      "name": "Trung Tâm Hội Nghị & Tiệc Cưới Pavillon Tân Sơn Nhất",
+      "address": "202 Đ. Hoàng Văn Thụ, Đức Nhuận, Hồ Chí Minh"
+     },
+     "conf": 0.537,
+     "expect": "accepted",
+     "real": true
+    },
+    {
+     "id": "marry_ee9f9a427838",
+     "name": "Trung tâm Hội Nghị - Tiệc Cưới Tân Sơn Nhất Pavillon",
+     "address": "202 Hoàng Văn Thụ, Quận Tân Bình, Thành phố Hồ Chí Minh",
+     "place": {
+      "id": "pid_pavillon",
+      "name": "Trung Tâm Hội Nghị & Tiệc Cưới Pavillon Tân Sơn Nhất",
+      "address": "202 Đ. Hoàng Văn Thụ, Đức Nhuận, Hồ Chí Minh"
+     },
+     "conf": 0.824,
+     "expect": "accepted",
+     "real": true
+    }
+   ]
+  },
+  {
+   "name": "Hai chi nhánh cùng đường khác số nhà cùng một place_id",
+   "vendors": [
+    {
+     "id": "syn_br_a",
+     "name": "Nha hang Cuc Vang",
+     "address": "10 Lê Lợi, Quận 1",
+     "place": {
+      "id": "pid_cucvang",
+      "name": "Nha hang Cuc Vang",
+      "address": "10 Lê Lợi, Bến Nghé, Hồ Chí Minh"
+     },
+     "conf": 1.0,
+     "expect": "shared_place_id"
+    },
+    {
+     "id": "syn_br_b",
+     "name": "Nha hang Cuc Vang 2",
+     "address": "20 Lê Lợi, Quận 1",
+     "place": {
+      "id": "pid_cucvang",
+      "name": "Nha hang Cuc Vang",
+      "address": "10 Lê Lợi, Bến Nghé, Hồ Chí Minh"
+     },
+     "conf": 0.944,
+     "expect": "shared_place_id"
+    }
+   ]
+  },
+  {
+   "name": "Hai vendor cùng chuỗi địa chỉ gốc không rút được (đối chứng)",
+   "vendors": [
+    {
+     "id": "syn_same_a",
+     "name": "Nha hang Mai Trang",
+     "address": "Khu du lịch Mai, Củ Chi",
+     "place": {
+      "id": "pid_maitrang",
+      "name": "Nha hang Mai Trang",
+      "address": "Khu du lịch Mai, Củ Chi, Hồ Chí Minh"
+     },
+     "conf": 1.0,
+     "expect": "accepted"
+    },
+    {
+     "id": "syn_same_b",
+     "name": "Nha hang Mai Trang",
+     "address": "Khu du lịch Mai, Củ Chi",
+     "place": {
+      "id": "pid_maitrang",
+      "name": "Nha hang Mai Trang",
+      "address": "Khu du lịch Mai, Củ Chi, Hồ Chí Minh"
+     },
+     "conf": 1.0,
+     "expect": "accepted"
+    }
+   ]
+  }
+ ],
+ "nha_hang_dong_cua": [
+  {
+   "name": "ROSE PALACE cùng địa chỉ Rose Palace đã đóng cửa, khớp vào Rosa Palace",
+   "vendors": [
+    {
+     "id": "marry_5076cd75074e",
+     "name": "Nhà hàng tiệc cưới hội nghị Rose Palace",
+     "address": "746 Kha Vạn Cân, P.Linh Đông, Quận Thủ Đức, Thành phố Hồ Chí Minh",
+     "place": {
+      "id": "pid_rose_closed",
+      "name": "Nhà Hàng Tiệc Cưới Hội Nghị Rose Palace",
+      "address": "Nhà Hàng Tiệc Cưới Hội Nghị Rose Palace, 746 Kha Vạn Cân, Thủ Đức, Hồ Chí Minh",
+      "status": "CLOSED_PERMANENTLY"
+     },
+     "conf": 1.0,
+     "expect": "removed",
+     "real": true
+    },
+    {
+     "id": "marry_8909e36e73bf",
+     "name": "TRUNG TÂM HỘI NGHỊ TIỆC CƯỚI ROSE PALACE",
+     "address": "746 Kha Vạn Cân, Phường Linh Đông, Quận Thủ Đức, Quận Thủ Đức, Thành phố Hồ Chí Minh",
+     "place": {
+      "id": "pid_zMb-mnfg",
+      "name": "Trung Tâm Hội Nghị - Tiệc Cưới Rosa Palace",
+      "address": "12a, 2 ĐT743, An Phú, Hồ Chí Minh"
+     },
+     "conf": 0.963,
+     "expect": "address_conflict",
+     "real": true
+    }
+   ]
+  },
+  {
+   "name": "Vendor cùng địa chỉ nhà hàng đóng cửa, ứng viên không so được địa chỉ (conf 1,0)",
+   "vendors": [
+    {
+     "id": "syn_cl_x",
+     "name": "Nha hang Sen Tay",
+     "address": "12 Lê Lợi, Quận 1",
+     "place": {
+      "id": "pid_syn_cl_x",
+      "name": "Nha hang Sen Tay",
+      "address": "12 Lê Lợi, Bến Nghé, Hồ Chí Minh",
+      "status": "CLOSED_PERMANENTLY"
+     },
+     "conf": 1.0,
+     "expect": "removed"
+    },
+    {
+     "id": "syn_cl_y",
+     "name": "Nha hang Sen Tay Palace",
+     "address": "12 Lê Lợi, Quận 1",
+     "place": {
+      "id": "pid_syn_cl_y",
+      "name": "Nha hang Sen Tay Palace",
+      "address": "Tầng 3, Tòa nhà ABC, Bến Nghé, Hồ Chí Minh"
+     },
+     "conf": 1.0,
+     "expect": "same_address_as_closed"
+    },
+    {
+     "id": "syn_cl_z",
+     "name": "Nha hang Sen Tay Garden",
+     "address": "12 Lê Lợi, Quận 1",
+     "place": {
+      "id": "pid_syn_cl_z",
+      "name": "Nha hang Sen Tay Garden",
+      "address": "12 Lê Lợi, Bến Nghé, Hồ Chí Minh"
+     },
+     "conf": 1.0,
+     "expect": "accepted"
+    }
+   ]
+  }
+ ],
+ "da_go_tu_truoc": [
+  {
+   "name": "Nhà hàng đóng cửa đã gỡ từ trước (removed_vendors.json), vendor còn lại không so được địa chỉ",
+   "preremoved": [
+    {
+     "id": "syn_pre_x",
+     "name": "Nha hang Truc Xanh",
+     "address": "7 Hai Bà Trưng, Quận 1",
+     "formatted_address": "7 Hai Bà Trưng, Bến Nghé, Hồ Chí Minh"
+    }
+   ],
+   "vendors": [
+    {
+     "id": "syn_pre_y",
+     "name": "Nha hang Truc Xanh Palace",
+     "address": "7 Hai Bà Trưng, Quận 1",
+     "place": {
+      "id": "pid_syn_pre_y",
+      "name": "Nha hang Truc Xanh Palace",
+      "address": "Tầng 2, Tòa nhà XYZ, Bến Nghé, Hồ Chí Minh"
+     },
+     "conf": 1.0,
+     "expect": "same_address_as_closed"
+    }
+   ]
+  }
+ ]
+}
