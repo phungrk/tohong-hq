@@ -3,7 +3,7 @@
 file; cùng id ở nhiều category là MỘT vendor) ... mọi vendor trong nhóm đó bị từ chối"; "không phụ thuộc thứ tự"); rút từ eval đối kháng
 eval/T-108/adv-08-g6-xuyen-category.py (đỏ trên tohong 618ae09, xanh trên ddc82d0) gộp adv-10-g6-xuyen-category-hoi-tu.py (adversary, Code Gate v7-v8,
 2026-11-08), Chief of Staff đồng ý 2026-11-08.
-CHỜ MERGE (ADR-028): chạy code enrich.py/settle.py của PR tohong#72 (chưa merge); chuyển vào eval/invariants/planner/vendor/images/ khi #72 merge.
+Đã vào bể sau khi tohong#72 merge (ADR-028).
 INV-019 · G6 xét vendor của mọi category file cùng thành phố, và hội tụ không phụ thuộc thứ tự chạy category.
 Dựng output tạm (không đụng dữ liệu thật): venue V (gốc '100 Lê Lợi, Quận 1', Google '100 Lê Lợi, Bến Thành, Hồ Chí Minh', conf 0,9: qua G1-G5) và photography X
 (id khác, bản ghi mới có address_source 'Khu đô thị Sala, Thủ Đức' không rút được số nhà, conf 0,97 >= 0,95: qua G1-G5), CHUNG một place_id. Chạy đúng lệnh
