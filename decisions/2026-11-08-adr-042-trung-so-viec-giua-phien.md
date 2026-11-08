@@ -12,7 +12,7 @@ tasks: [T-105, T-106, T-107]
 - Lúc 08:07 phiên này lại tạo một việc khác ("Chạy thí nghiệm Graphify A/B") cũng mang số T-106, vì lúc chạy `task.py new` sổ cái chưa đồng bộ main. Khi gộp, `board/T-106.md` của phiên kia bị bản của phiên này đè trong vài phút. Đã khôi phục.
 
 **Quyết định:**
-1. `board/T-106.md` là việc enrich venue của phiên kia. File đã khôi phục từ main.
+1. `board/T-106.md` là việc enrich venue của phiên kia. Bản đè đã kịp đồng bộ lên main (5ce72d5). Đã khôi phục từ nhánh `claude/t-106-enrich-venue` (753a69d) bằng commit 4318fc8.
 2. Việc chạy thí nghiệm Graphify tạo lại thành **T-107**. Hai sự kiện E-0834 (requested) và E-0835 (assigned), cùng thời điểm 08:07 và ghi task T-106, thực ra thuộc T-107. Ledger chỉ ghi thêm nên không sửa hai dòng này.
 3. T-105 bị chặn (`block`) vì trùng T-106. T-106 có bối cảnh đủ hơn (96 venue, đã dùng 606/1.000 request) và đã giao product trước.
 4. Từ nay Chief of Staff chạy `git fetch origin main && git rebase/merge` **ngay trước** mỗi `task.py new` để lấy số việc mới nhất. Khi gộp mà gặp xung đột add/add trên `board/`, phải xem tay, không mặc định giữ bản của phiên mình.
