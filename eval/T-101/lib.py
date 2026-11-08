@@ -71,6 +71,22 @@ class Box:
         path.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
         return path
 
+    def write_stops(self, path, first_user, seq, attr=None):
+        """seq = [(message.id, stop_reason hoặc None)]: tự đặt tin rỗng ở bất kỳ vị trí nào."""
+        path = pathlib.Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+        rows = [{"type": "user", "uuid": "u0", "message": {"role": "user", "content": first_user}}]
+        if attr: rows[0]["attributionAgent"] = attr
+        for mid, stop in seq:
+            rows += self._asst(mid, stop)
+        path.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+        return path
+
+    def age(self, *paths, secs=3600):
+        """Đặt mtime lùi secs giây (phiên đã kết thúc từ lâu)."""
+        t = __import__("time").time() - secs
+        for p in paths:
+            os.utime(p, (t, t))
+
     def append(self, path, mids):
         with open(path, "a", encoding="utf-8") as f:
             for mid in mids:
@@ -95,6 +111,16 @@ class Box:
             p.update(agent_id=agent, agent_type=agent_type, agent_transcript_path=str(agent_path),
                      stop_hook_active=False)
         return p
+
+
+def ranges_ok(events):
+    """Mỗi (phiên, agent): src.msgs tăng chặt theo thứ tự ghi, tức khoảng tin không chồng nhau. Trả về danh sách lỗi."""
+    bad, last = [], {}
+    for e in events:
+        s = e["src"]; k = (s["session"], s["agent"])
+        if s["msgs"] <= last.get(k, 0): bad.append(f"{k} msgs {last.get(k, 0)}→{s['msgs']}")
+        last[k] = s["msgs"]
+    return bad
 
 
 def finish(fails):
