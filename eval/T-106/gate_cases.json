@@ -481,6 +481,69 @@
     },
     "conf": 1.0,
     "expect": "accepted"
+   },
+   {
+    "id": "syn_cl_prov",
+    "name": "Nha hang Hoa Sen Palace",
+    "address": "12 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_cl_prov",
+     "name": "Nha hang Hoa Sen Palace",
+     "address": "16 Nguyễn Huệ, Quy Nhơn, Gia Lai",
+     "status": "CLOSED_PERMANENTLY"
+    },
+    "conf": 1.0,
+    "expect": "out_of_province"
+   },
+   {
+    "id": "syn_cl_street",
+    "name": "Nha hang Kim Long",
+    "address": "30 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_cl_street",
+     "name": "Nha hang Kim Long",
+     "address": "88 Võ Văn Tần, Xuân Hòa, Bến Nghé, Hồ Chí Minh",
+     "status": "CLOSED_PERMANENTLY"
+    },
+    "conf": 1.0,
+    "expect": "address_conflict"
+   },
+   {
+    "id": "syn_cl_low",
+    "name": "Nha hang Binh Minh",
+    "address": "20 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_cl_low",
+     "name": "Quan an Tre Xanh",
+     "address": "99 Trần Hưng Đạo, Bến Nghé, Hồ Chí Minh",
+     "status": "CLOSED_PERMANENTLY"
+    },
+    "conf": 0.118,
+    "expect": "low_score"
+   },
+   {
+    "id": "syn_cl_innocent",
+    "name": "Nha hang Thanh Tam",
+    "address": "88 Võ Văn Tần, Quận 3",
+    "place": {
+     "id": "pid_syn_cl_innocent",
+     "name": "Nha hang Thanh Tam",
+     "address": "Tầng 2, Tòa nhà Kim, Xuân Hòa, Bến Nghé, Hồ Chí Minh"
+    },
+    "conf": 1.0,
+    "expect": "accepted"
+   },
+   {
+    "id": "syn_prov_tphcm_attached",
+    "name": "Nha hang Lima TP",
+    "address": "12 Lê Lợi, Quận 1",
+    "place": {
+     "id": "pid_syn_prov_tphcm_attached",
+     "name": "Nha hang Lima TP",
+     "address": "12 Lê Lợi, Bến Nghé, TPHCM"
+    },
+    "conf": 1.0,
+    "expect": "accepted"
    }
   ]
  },
