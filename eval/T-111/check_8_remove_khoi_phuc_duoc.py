@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """T-111 tiêu chí 2 (remove khôi phục được). OFFLINE (Google giả). Vendor R ở 2 category file bị luật no_match (2 lần) gỡ, rồi `enrich.py --state HCMC --restore R` (lệnh của T-110):
-- removed_vendors.json của MỖI file có đúng 1 bản ghi {removed_at, reason, vendor}; `vendor` giữ nguyên mọi trường gốc (name, id, categories, portfolio_urls, contact.address, …) và không có `manual`;
+- removed_vendors.json của MỖI file có đúng 1 bản ghi {removed_at, reason, vendor}; `vendor` giữ nguyên mọi trường gốc CỦA CHÍNH FILE ĐÓ (cùng id nhưng `categories` có thể khác giữa các file; --restore khôi phục đúng từng file) (name, id, categories, portfolio_urls, contact.address, …) và không có `manual`;
 - khôi phục: thoát 0, in `RESTORED R files=2`, vendor trở lại vendors.json của CẢ HAI file bằng đúng bản ghi `vendor` đã lưu, bản ghi khỏi removed_vendors.json;
 - chạy enrich lần sau: 0 lượt Text Search cho R (dòng audit cũ giữ nguyên, không bị gỡ lại hay tìm lại); R trở lại pool ở lần tạo pool kế tiếp (id có trong pool-vendors.json do build_pool.py);
 - vendor chưa từng bị gỡ: `--restore` báo `RESTORE_ERROR <id> not_removed`, thoát khác 0, không đổi file.
@@ -25,7 +25,7 @@ if any(len(v) != 1 for v in recs.values()):
 for c, (e,) in recs.items():
     if e.get("manual") or not e.get("removed_at") or not e.get("reason"):
         bad.append("%s: bản ghi removed thiếu removed_at/reason hoặc có manual" % c)
-    for k, v in orig.items():
+    for k, v in (orig if c == "venue" else dict(orig, categories=["attire"])).items():   # mỗi file lưu bản ghi nguyên vẹn của CHÍNH file đó (categories khác nhau)
         if k != "contact" and e["vendor"].get(k) != v:
             bad.append("%s: trường %s của vendor bị đổi trong bản ghi removed" % (c, k))
 saved = {c: json.loads(json.dumps(recs[c][0]["vendor"])) for c in recs}
