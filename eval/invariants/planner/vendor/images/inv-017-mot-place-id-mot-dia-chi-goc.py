@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Nguồn: T-108 / spec T-106 v4.1 (products/T-106-enrich-venue.md, Hành vi 2 cổng G6), qua Spec Gate 2026-11-08 (spec-critic); defect adversary adv-06
 (Grand Palace và Luxury Palace cùng place_id ở 63 Mạc Đĩnh Chi; TDG CENTER chung place_id với GALA). Bản nháp: eval/T-108/inv-proposed-mot-place-id-mot-dia-chi-goc.py.
-CHỜ MERGE: đỏ trên dữ liệu tohong#72 chưa áp lại luật v4; chuyển vào eval/invariants/planner/vendor/images/ khi PR tohong (áp lại) merge.
+Đã vào bể sau khi tohong#72 merge (ADR-028).
 INV-017 · Một place_id không cho hai địa chỉ gốc khác nhau (chỉ venue).
 Trong tools/scraper/output/HCMC/venue/vendors.json, các vendor có enrichment_log[google_maps] place_id GIỐNG NHAU phải có contact.address_source cùng một địa chỉ:
 address_match(nguồn A, nguồn B) = true, hoặc chuỗi gốc sau chuẩn hoá A1 bằng nhau (cùng một vendor ghi hai lần / hai tên cùng chỗ). Vi phạm = hai vendor mang ảnh của cùng một nơi

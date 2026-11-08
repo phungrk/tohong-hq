@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Nguồn: T-108 / spec T-106 v4.1 (products/T-106-enrich-venue.md, Hành vi 2 cổng G2), qua Spec Gate 2026-11-08 (spec-critic); defect adversary adv-06
 (Fleur de Lys Q1 khớp khách sạn ở Quy Nhơn, mang ảnh vào pool). Bản nháp: eval/T-108/inv-proposed-khong-ung-vien-ngoai-tinh.py.
-CHỜ MERGE: đỏ trên dữ liệu tohong#72 chưa áp lại luật v4; chuyển vào eval/invariants/planner/vendor/images/ khi PR tohong (áp lại) merge.
+Đã vào bể sau khi tohong#72 merge (ADR-028).
 INV-016 · Không ứng viên Google ngoài tỉnh/thành của vendor.
 Mọi bản ghi enrichment_log[google_maps] CÓ place_id và có formatted_address (cấp trên cùng của bản ghi log, như T-106 từ nay ghi), ở mọi tools/scraper/output/HCMC/*/vendors.json,
 phải có tỉnh/thành (đoạn cuối của formatted_address, sau khi bỏ 'Việt Nam' và mã bưu chính) thuộc tỉnh/thành của vendor (city HCMC -> Hồ Chí Minh; hàm chuẩn _common.in_province).
