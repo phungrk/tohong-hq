@@ -6,7 +6,7 @@
   DRY_RUN_VERDICT basis cap_usd expected_usd upper_usd within_cap=<true|false> stops_after=<category|none>
 Công thức (thực, không làm tròn giữa chừng): N = vendor trong phạm vi (eligible trong pool; +ngoài pool khi --include-non-pool); retry_only = dòng no_match cũ.
   expected: text_search = N x (1 + 0,15) + retry_only ; photo_requests = N x 0,60 x max_photos.   upper: text_search = N + ceil(N x 0,30) + retry_only ; photo_requests = N x max_photos.
-  net/gross theo giá 0,040 / 0,007 và hạn mức miễn phí (check_5). stops_after = category CUỐI CÙNG mà số tích luỹ expected <= trần ("none" nếu ngay category đầu đã vượt).
+  net/gross theo giá 0,040 / 0,007; net TÍCH LUỸ cùng công thức check_5 (đã dùng 950 trong fixture); gross của ĐỢT chỉ cộng log T-110/T-111 (fixture không có). stops_after = category CUỐI CÙNG mà số tích luỹ expected <= trần ("none" nếu ngay category đầu đã vượt).
 Mong đợi: số trong DRY_RUN_COST, DRY_RUN_PLAN, DRY_RUN_VERDICT khớp công thức (sai số 0,01 $, 1 lượt); trần 1,50 (hết hạn mức miễn phí) cho stops_after=venue; trần 30 cho none;
 `--include-non-pool` thêm đúng 5 vendor ngoài pool vào phạm vi. Spec: products/T-111-enrich-toan-bo-vendor.md, "Dry-run". In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import math, os, sys
@@ -23,7 +23,7 @@ def build():
     old = x.V("old1", "Nhà hàng Cũ Mèm Lắm", 90, ("venue",))
     r = t.Root({"venue": a + [old], "wedding_attire": b, "other": o})
     r.write("venue/enrichment-audit.json", [{"vendor_id": "old1", "status": "no_match", "matched_name": "", "confidence": 0.0, "place_id": None}])
-    x.usage_logs(r, ts=1000, baseline_photos=1000)
+    x.usage_logs(r, ts=950, baseline_photos=950)
     return r
 
 
@@ -49,7 +49,7 @@ def model(n_by_cat, retry_only, cap, basis, photos=2):
         first = False
         cum_ts += ts
         cum_ph += ph
-        usd = x.net_usd(cum_ts, cum_ph, 1000, 1000) if basis == "net" else x.gross_usd(cum_ts, cum_ph)
+        usd = x.net_usd(cum_ts, cum_ph, 950, 950) if basis == "net" else x.gross_usd(cum_ts, cum_ph)
         cum[c] = usd
         if usd <= cap + 1e-9:
             stops = c
@@ -67,8 +67,8 @@ chk = {"text_search": exp_ts, "photo_requests": exp_ph}
 for k, v in chk.items():
     if abs(float(cost.get(k, -99)) - v) > 1:
         bad.append("DRY_RUN_COST.%s = %s, công thức %s" % (k, cost.get(k), v))
-for k, v in (("expected_net_usd", x.net_usd(exp_ts, exp_ph, 1000, 1000)), ("expected_gross_usd", x.gross_usd(exp_ts, exp_ph)),
-             ("upper_net_usd", x.net_usd(up_ts, up_ph, 1000, 1000)), ("upper_gross_usd", x.gross_usd(up_ts, up_ph))):
+for k, v in (("expected_net_usd", x.net_usd(exp_ts, exp_ph, 950, 950)), ("expected_gross_usd", x.gross_usd(exp_ts, exp_ph)),
+             ("upper_net_usd", x.net_usd(up_ts, up_ph, 950, 950)), ("upper_gross_usd", x.gross_usd(up_ts, up_ph))):
     if abs(float(cost.get(k, -99)) - v) > 0.011:
         bad.append("DRY_RUN_COST.%s = %s, công thức %.3f" % (k, cost.get(k), v))
 plan = {d.get("category"): d for d in x.kv(out, "DRY_RUN_PLAN")}

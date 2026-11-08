@@ -33,7 +33,7 @@
  },
  {
   "name": "Dịch vụ trang điểm tại nhà - Rita Vu Make up",
-  "short": "trang điểm"
+  "short": "trang điểm tại nhà - Rita Vu Make up"
  },
  {
   "name": "Ruby Studio - Nhà Bè",
@@ -73,10 +73,34 @@
  },
  {
   "name": "Áo Dài Cưới Tài Lộc Gò Vấp",
-  "short": "Áo Dài Cưới"
+  "short": null
  },
  {
   "name": "Khách sạn Sofitel Saigon Plaza",
   "short": "Sofitel Saigon Plaza"
+ },
+ {
+  "name": "Trang Sức Bạc Cao Cấp Tài Như",
+  "short": null
+ },
+ {
+  "name": "Công ty TNHH Vận Tải Quốc Tế Thái Phát",
+  "short": "Vận Tải Quốc Tế Thái Phát"
+ },
+ {
+  "name": "Trung Tâm Hội Nghị & Tiệc Cưới GALA",
+  "short": "GALA"
+ },
+ {
+  "name": "Trung tâm tiệc cưới và hội nghị The White House Wedding",
+  "short": "The White House Wedding"
+ },
+ {
+  "name": "Cho thuê xe hoa cao cấp tại TPHCM",
+  "short": null
+ },
+ {
+  "name": "Én Banquet & Event Space",
+  "short": "Én Banquet"
  }
 ]

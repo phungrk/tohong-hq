@@ -5,9 +5,10 @@ và một dòng category=TOTAL (tổng các dòng trên). Định nghĩa (vendor
   processed = vendor có >= 1 lượt Text Search trong lần chạy này; kept = kết cục nhận khớp (có place_id); with_photos = kept có >= 1 ảnh Google; removed = bị gỡ lần này (CLOSED_PERMANENTLY hoặc no_match x2);
   temp_closed = kết cục tạm đóng cửa; review = low_confidence; error = lỗi HTTP; unprocessed = còn trong phạm vi nhưng chưa tìm vì dừng trần.
   Ràng buộc: processed = kept + removed + temp_closed + review + error; with_photos <= kept.
-Mong đợi cho kịch bản: venue processed=5 kept=2 with_photos=2 removed=1 (s_closed_perm) temp_closed=1 review=1; wedding_attire processed=2 (s_gone, s_noshort; s_closed_perm đã tính ở venue) kept=0 removed=2.
+Mong đợi cho kịch bản (10 vendor, xem check_2): venue processed=6 kept=2 with_photos=2 removed=1 (s_closed_perm) temp_closed=1 (s_temp) review=2 (s_low, s_tlow); wedding_attire processed=3 (s_gone, s_noshort, s_golf; s_closed_perm đã tính ở venue) kept=0 removed=2 review=1 (s_golf).
+Stdout còn liệt kê từng vendor bị gỡ vì no_match: `REMOVED_VENDOR {"id","category","name","q1","q2"}` (2 dòng), để Capu duyệt (M5).
 Các số cũng phải khớp dữ liệu sau chạy (đếm lại từ vendors.json / removed_vendors.json / audit). GOOGLE_USAGE dòng cuối khớp số lượt thật. Chạy lần 2 (không còn gì để làm trừ s_temp):
-báo cáo lần 2 chỉ còn s_temp processed=1. In PASS hoặc FAIL <lý do>; thoát 0/1."""
+báo cáo lần 2 chỉ còn s_temp và s_tlow (còn retry): TOTAL processed=2 temp_closed=1 review=1. In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _t111 as x
@@ -27,8 +28,8 @@ if not bad:
             bad.append("%s: thiếu trường (cần %s)" % (c, ", ".join(F)))
         elif v["processed"] != v["kept"] + v["removed"] + v["temp_closed"] + v["review"] + v["error"] or v["with_photos"] > v["kept"]:
             bad.append("%s: ràng buộc processed = kept + removed + temp_closed + review + error, with_photos <= kept bị vi phạm: %r" % (c, v))
-    exp = {"venue": dict(processed=5, kept=2, with_photos=2, removed=1, temp_closed=1, review=1, error=0, unprocessed=0),
-           "wedding_attire": dict(processed=2, kept=0, with_photos=0, removed=2, temp_closed=0, review=0, error=0, unprocessed=0)}
+    exp = {"venue": dict(processed=6, kept=2, with_photos=2, removed=1, temp_closed=1, review=2, error=0, unprocessed=0),
+           "wedding_attire": dict(processed=3, kept=0, with_photos=0, removed=2, temp_closed=0, review=1, error=0, unprocessed=0)}
     for c, e in exp.items():
         got = {k: int(rows[c][k]) for k in F}
         if got != e:
@@ -49,6 +50,8 @@ PL2 = dict(PL)
 PL2["PC"] = t.place("Nhà hàng Charlie Temp", x.GADDR % 3, status="CLOSED_TEMPORARILY")
 rc, out2, calls2 = x.run_basic(r, x.fx(PL2, RULES))
 tot2 = next((d for d in x.kv(out2, "CATEGORY_REPORT") if d.get("category") == "TOTAL"), {})
-if tot2.get("processed") != "1" or tot2.get("temp_closed") != "1":
-    bad.append("lần 2: mong TOTAL processed=1 temp_closed=1 (chỉ s_temp thử lại), thấy %r" % tot2)
-t.done(bad, "CATEGORY_REPORT đúng định nghĩa và khớp dữ liệu (venue 5/2/2/1/1/1, wedding_attire 2/0/0/2), TOTAL là tổng, GOOGLE_USAGE khớp, lần 2 chỉ vendor tạm đóng được thử lại")
+if tot2.get("processed") != "2" or tot2.get("temp_closed") != "1" or tot2.get("review") != "1":
+    bad.append("lần 2: mong TOTAL processed=2 temp_closed=1 review=1 (chỉ s_temp và s_tlow thử lại), thấy %r" % tot2)
+if {d.get("id") for d in x.jlines(out, "REMOVED_VENDOR")} != {"s_gone", "s_noshort"}:
+    bad.append("thiếu REMOVED_VENDOR cho s_gone và s_noshort")
+t.done(bad, "CATEGORY_REPORT đúng định nghĩa và khớp dữ liệu (venue 6/2/2/1/1/2, wedding_attire 3/0/0/2/0/1), TOTAL là tổng, GOOGLE_USAGE khớp, lần 2 chỉ vendor tạm đóng được thử lại")

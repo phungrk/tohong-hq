@@ -5,9 +5,10 @@ A. Duyệt tay thắng luật tự động (T-110, quyết định của Chief o
    - remove: 0 Text Search cho vendor đó.
 B. Tập G4 chỉ nhận vendor CLOSED_PERMANENTLY do Google báo: vendor X bị T-111 gỡ vì no_match KHÔNG làm vendor Y (cùng địa chỉ gốc, ứng viên Google không so được địa chỉ, độ tin 1,0)
    bị từ chối same_address_as_closed; còn vendor Y2 cùng địa chỉ với vendor đóng cửa thật (CLOSED_PERMANENTLY) vẫn bị từ chối (đối chứng: G4 còn nguyên).
-C. Luật audit: vendor có dòng audit enriched/low_confidence: 0 lượt. Dòng no_match cũ (từ T-106/T-108, không có `attempts`) = đã thử 1 lần: đúng 1 lượt, dùng tên rút gọn,
-   không trúng thì remove; dòng no_match cũ của vendor không có tên rút gọn: 0 lượt, remove.
+C. Luật audit: vendor có dòng audit enriched/low_confidence: 0 lượt. Dòng no_match cũ (từ T-106/T-108, không có `attempts`) = đã thử 1 lần: đúng 1 lượt (lượt 2): tên rút gọn nếu có
+   ("Nomad Star <địa danh>"), không thì tên gốc không kèm địa danh ("Mai House"); không trúng thì remove. Không dòng no_match cũ nào bị remove mà chưa qua lượt 2.
 D. Lỗi HTTP (500) không được tính là đã thử: vendor không bị remove, không có dòng audit enriched/low_confidence/no_match; lần chạy sau tìm lại và nhận khớp.
+E. Mọi chi phí Google nằm trong trần (B5): mặc định KHÔNG gọi Geocoding (0 lượt kind=geocode/other dù vendor không khớp và chưa có toạ độ); với `--geocode` thì mỗi lượt Geocoding vào dòng GOOGLE_REQUEST kind=geocode và vào GOOGLE_USAGE (geocode=<n>) bằng số lượt thật.
 Spec: products/T-111-enrich-toan-bo-vendor.md, "Tương tác". In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -62,10 +63,10 @@ r.write("venue/enrichment-audit.json", [
     {"vendor_id": "c_ns", "status": "no_match", "matched_name": "", "confidence": 0.0, "place_id": None}])
 rc, out, calls = r.run(x.enrich_all("venue"), x.fx({}, []))
 qs = [x.fold(q) for q in x.queries(calls)]
-if any(k in q for q in qs for k in ("enrich done", "low done", "mai house")):
-    bad.append("C: vendor có audit enriched/low_confidence, hoặc no_match không có tên rút gọn, bị tìm lại: %r" % qs)
-if len(qs) != 1 or not qs[0].startswith("nomad star") or "tiec cuoi" in qs[0]:
-    bad.append("C: dòng no_match cũ phải được thử đúng 1 lượt bằng tên rút gọn 'Nomad Star'; thấy %r" % qs)
+if any(k in q for q in qs for k in ("enrich done", "low done")):
+    bad.append("C: vendor có audit enriched/low_confidence bị tìm lại: %r" % qs)
+if len(qs) != 2 or not any(q.startswith("nomad star") and "tiec cuoi" not in q for q in qs) or "mai house" not in qs:
+    bad.append("C: dòng no_match cũ phải được thử đúng 1 lượt: 'Nomad Star <địa danh>' (tên rút gọn) và 'Mai House' (tên gốc, không địa danh); thấy %r" % qs)
 if not x.gone_everywhere(r, "c_nm") or not x.gone_everywhere(r, "c_ns"):
     bad.append("C: no_match cũ + lượt rút gọn không trúng (hoặc không có tên rút gọn) phải bị remove")
 if not r.vendor("c_enr") or not r.vendor("c_low"):
@@ -81,4 +82,26 @@ PLD = {"PERR": t.place("Nhà hàng Errol Park", x.GADDR % 41)}
 rc, out, calls = r.run(x.enrich_all("venue"), x.fx(PLD, [("errol park", ["PERR"])]))
 if x.count_for(calls, "errol park") != 1 or not t.has_pid(r.vendor("d_err")):
     bad.append("D: lần chạy sau phải tìm lại vendor lỗi (1 lượt) và nhận khớp")
-t.done(bad, "duyệt tay thắng luật gỡ no_match; tập G4 không nhận vendor T-111 gỡ (đối chứng G4 vẫn chạy); audit cũ không tìm lại, no_match cũ thử đúng 1 lượt rút gọn; lỗi HTTP không bị tính là đã thử")
+# M3: mọi lần gửi HTTP, kể cả lượt lỗi, được đếm
+r = t.Root({"venue": [V("d_err2", "Nhà hàng Errol Two", 42)]})
+rc, out, calls = r.run(x.enrich_all("venue"), x.fx({}, [("errol two", [], None, 500)]))
+u = t.usage(out) or {}
+if u.get("text_search") != t.n_kind(calls, "search") or x.n_requests(out, "search") != t.n_kind(calls, "search") or t.n_kind(calls, "search") < 1:
+    bad.append("D/M3: mọi lần gửi (kể cả lượt bị 500 và retry nếu có) phải vào GOOGLE_REQUEST và GOOGLE_USAGE: fake thấy %d, USAGE %r, REQUEST %d" % (t.n_kind(calls, "search"), u, x.n_requests(out, "search")))
+# ---- E ----
+g = V("e_geo", "Nhà hàng Geo Nowhere", 51)
+g["latitude"] = g["longitude"] = None
+r = t.Root({"venue": [g]})
+rc, out, calls = r.run(x.enrich_all("venue"), x.fx({}, []))
+if t.n_kind(calls, "geocode", "other"):
+    bad.append("E: mặc định không được gọi Geocoding/API khác (thấy %r)" % sorted({c["kind"] for c in calls}))
+u = t.usage(out) or {}
+if "geocode" in u and u["geocode"] != 0:
+    bad.append("E: GOOGLE_USAGE geocode phải là 0 hoặc vắng khi không bật --geocode")
+r = t.Root({"venue": [dict(g)]})
+rc, out, calls = r.run(x.enrich_all("venue", extra=["--geocode"]), x.fx({}, []))
+ng = t.n_kind(calls, "geocode")
+u = t.usage(out) or {}
+if ng < 1 or u.get("geocode") != ng or x.n_requests(out, "geocode") != ng:
+    bad.append("E: bật --geocode: mong >= 1 lượt Geocoding và GOOGLE_USAGE geocode=%d, GOOGLE_REQUEST kind=geocode %d dòng; thấy USAGE %r, REQUEST %d" % (ng, ng, u, x.n_requests(out, "geocode")))
+t.done(bad, "Geocoding mặc định tắt và, khi bật, được đếm; duyệt tay thắng luật gỡ no_match; tập G4 không nhận vendor T-111 gỡ (đối chứng G4 vẫn chạy); audit cũ không tìm lại, no_match cũ thử đúng 1 lượt rút gọn; lỗi HTTP không bị tính là đã thử")
