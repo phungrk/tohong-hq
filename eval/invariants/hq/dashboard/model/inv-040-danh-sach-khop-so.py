@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """INV-040 hq/dashboard/model · nguồn: T-096 (rút bởi spec-critic khi spec v3 qua Spec Gate, 2026-11-07).
-Gác ở eval/T-096/bat-bien-cho-merge/ theo ADR-028; Chief of Staff đưa vào eval/invariants/hq/dashboard/model/ khi PR T-096 merge và xanh trên main.
+Gác ở eval/invariants/hq/dashboard/model/ theo ADR-028; Chief of Staff đưa vào eval/invariants/hq/dashboard/model/ khi PR T-096 merge và xanh trên main.
 Bất biến: số eval đối kháng và hồi quy trên tab của drawer bằng số mục thật của danh sách, ở cả bản thường và --public.
 Chạy scripts/export_dashboard.py THẬT trên sổ cái hiện tại: model.adversarial_evals = len(adversarial_list) = số file adv-* trực tiếp trong eval/T-<số>/ (đếm độc lập);
 model.regression_evals = len(regression_list) = số mục cấp một của eval/regression/ (trừ tên bắt đầu '.' và README.md); mỗi mục có name không rỗng và url;
