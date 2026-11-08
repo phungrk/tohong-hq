@@ -16,6 +16,8 @@ E. Log ở nhiều thư mục (T-106 600, T-110 350 text_search; baseline ảnh 
 F. Lần chạy bị giết (fixture die_after=3, thoát 137 ở lượt Text Search thứ 4): stdout đã có đủ dòng GOOGLE_REQUEST (4 search đã ghi, kể cả lượt chết), và khi lưu làm log, lần chạy sau
    đếm chúng (baseline ts 946): với trần 0,30 chỉ làm 4 vendor tiếp (không phải 5 như khi log bị bỏ qua).
 G. Log hỏng (không có GOOGLE_REQUEST lẫn GOOGLE_USAGE) trong run-logs/T-111: chạy thật bị từ chối (thoát 2, USAGE_LOG_UNREADABLE, 0 lượt); dry-run vẫn in và cảnh báo.
+H. Đếm theo cặp (file, run_id), không theo file (D2 M2): một log có `GOOGLE_REQUEST`+`GOOGLE_USAGE` của run `ra1-enrich-x` (3 search) và một `GOOGLE_USAGE` của run `ra1-refresh-y` KHÔNG có
+   dòng REQUEST (2 Place Details + 4 media, kiểu refresh_photos.py trong cùng job): cả hai đều được đếm (ảnh 944 + 6 = 950) nên trần 0,30 dừng ở 5 vendor; nếu USAGE của refresh bị bỏ vì "file có REQUEST" thì sẽ làm 6.
 Spec: products/T-111-enrich-toan-bo-vendor.md, "Chi phí và trần". In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -121,4 +123,14 @@ if rc != 2 or calls or "USAGE_LOG_UNREADABLE" not in out:
 rc, out, calls = r.run(x.enrich_all(CATS, budget="0.30", basis="net", extra=["--dry-run"]), x.fx({}, [], deny=True), key=False)
 if rc != 0 or calls or "USAGE_LOG_UNREADABLE" not in out:
     bad.append("G: dry-run với log hỏng vẫn thoát 0, 0 lượt, nhưng phải in cảnh báo USAGE_LOG_UNREADABLE")
+# H
+r, FX, *_ = build()
+x.usage_logs(r, ts=0, baseline_ts=947, baseline_photos=944, name="T-106/20261108-040329-a.log")
+open(os.path.join(r.path, "run-logs", "T-111", "20261108-130000-run-5-enrich.log") if os.makedirs(os.path.join(r.path, "run-logs", "T-111"), exist_ok=True) is None else "", "w").write(
+    "GOOGLE_REQUEST run=ra1-enrich-x kind=search\nGOOGLE_REQUEST run=ra1-enrich-x kind=search\nGOOGLE_REQUEST run=ra1-enrich-x kind=search\n"
+    "GOOGLE_USAGE run=ra1-enrich-x text_search=3 photo_details=0 photo_media=0\n"
+    "GOOGLE_USAGE run=ra1-refresh-y text_search=0 photo_details=2 photo_media=4\n")
+rc, out, calls = r.run(x.enrich_all(CATS, budget="0.30", basis="net"), FX)
+if t.n_kind(calls, "search") != 5:
+    bad.append("H: đếm theo (file, run_id): USAGE của run refresh (6 ảnh) phải được cộng dù file có REQUEST của run khác: mong 5 Text Search, thấy %d" % t.n_kind(calls, "search"))
 t.done(bad, "trần $ tích luỹ cho cả đợt: tự dừng đúng chỗ (5 vendor, 0,27 <= 0,30), lần sau cùng trần không tiêu thêm, tăng trần làm tiếp phần còn lại không đếm đôi; log nhiều việc cộng, tháng khác không; lần chạy bị giết vẫn được đếm; log hỏng từ chối chạy thật; trần > 30 bị từ chối")
