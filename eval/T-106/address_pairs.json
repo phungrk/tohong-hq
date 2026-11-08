@@ -1,0 +1,213 @@
+{
+ "_chu_thich": "V = địa chỉ marry.vn thật (venue/vendors.json); V* = viết tay theo định dạng marry.vn (nguồn thật đã bị ghi đè). G = formattedAddress Google thật (enrichment_log); G* = viết tay theo định dạng Google hai cấp, vì venue chưa được enrich nên chưa có cặp thật của cùng một nhà hàng. expected do người viết spec gắn bằng tay, không do hàm tính.",
+ "pairs": [
+  {
+   "vendor": "309B – 311 Nguyễn Văn Trỗi, P.1, Quận Tân Bình, Thành phố Hồ Chí Minh(028) 3842 1111Điện thoại",
+   "google": "309B Nguyễn Văn Trỗi, Phú Nhuận, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "khoảng số: 309B có trong khoảng 309B-311; tên đường bằng nhau"
+  },
+  {
+   "vendor": "309B – 311 Nguyễn Văn Trỗi, P.1, Quận Tân Bình, Thành phố Hồ Chí Minh",
+   "google": "311 Nguyễn Văn Trỗi, Tân Sơn Hòa, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "đầu kia của khoảng cũng tính"
+  },
+  {
+   "vendor": "Lầu 5, Số 10 Mai Chí Thọ, Khu đô thị Sala, An Khánh, TPHCM, Quận 2, Thành phố Hồ Chí Minh",
+   "google": "Lầu 5, 10 Mai Chí Thọ, An Khánh, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "bỏ đoạn 'Lầu 5', bỏ tiền tố 'Số'"
+  },
+  {
+   "vendor": "Lầu 5, Số 10 Đường Mai Chí Thọ, Khu đô thị Sala, Thủ Thiêm, Thủ Đức, TPHCM, Ho Chi Minh City, Vietnam, Quận Thủ Đức",
+   "google": "10 Mai Chí Thọ, An Khánh, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "tiền tố 'Đường' bị bỏ; hai bản ghi marry.vn khác nhau cùng khớp một nơi"
+  },
+  {
+   "vendor": "112 Đ. Võ Thị Liễu, An Phú Đông, Quận 12, Hồ Chí Minh, Quận 12, Thành phố Hồ Chí Minh",
+   "google": "112 Đ. Võ Thị Liễu, An Phú Đông, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "tiền tố 'Đ.' hai bên"
+  },
+  {
+   "vendor": "137/27A Lê Văn Sỹ, P.14, Quận Phú Nhuận",
+   "google": "137/27A, Đ. Lê Văn Sỹ, Phú Nhuận, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G",
+   "expected": true,
+   "why": "Google tách số nhà và đường thành hai đoạn; 'Đ.' bị bỏ"
+  },
+  {
+   "vendor": "18E Cộng Hòa, Phường 4, Quận Tân Bình, Thành phố Hồ Chí Minh",
+   "google": "18E Cộng Hòa, Bảy Hiền, Hồ Chí Minh 70000",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "hậu tố chữ của số nhà phải bằng"
+  },
+  {
+   "vendor": "52-56 Tản Đà Quận 5 TPHCM, Quận 5, Thành phố Hồ Chí Minh",
+   "google": "54 Tản Đà, Chợ Lớn, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "54 nằm GIỮA khoảng nhưng không phải đầu mút: chỉ đầu mút (52, 56) tính"
+  },
+  {
+   "vendor": "746 Kha Vạn Cân, P.Linh Đông, Quận Thủ Đức, Thành phố Hồ Chí Minh",
+   "google": "746 Kha Vạn Cân, Hiệp Bình, Hồ Chí Minh 700000",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "hai bản ghi marry.vn (Ro..., R...) đều khớp cùng một địa chỉ"
+  },
+  {
+   "vendor": "15A Hồ Văn Huê, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
+   "google": "123 Hồ Văn Huê, Đức Nhuận, Hồ Chí Minh 70000",
+   "vendor_origin": "V",
+   "google_origin": "G",
+   "expected": false,
+   "why": "cùng đường, khác số nhà (Google thật của studio khác)"
+  },
+  {
+   "vendor": "197/2 Nguyễn Văn Hưởng, Quận 2, Thành phố Hồ Chí Minh",
+   "google": "Lầu 1, 215e4 Nguyễn Văn Hưởng, An Khánh, Hồ Chí Minh 70000",
+   "vendor_origin": "V",
+   "google_origin": "G",
+   "expected": false,
+   "why": "cùng đường, khác số nhà; đoạn 'Lầu 1' bỏ qua"
+  },
+  {
+   "vendor": "4429A Nguyễn Cửu Phú, P. Tân Tạo A, Quận Bình Tân",
+   "google": "156 Lý Chiêu Hoàng, Bình Phú, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "chuỗi Đại Hỷ: Garden (Bình Tân) vs Palace (Quận 6) khác đường"
+  },
+  {
+   "vendor": "156 Lý Chiêu Hoàng, Phường 10, Quận 6, Thành phố Hồ Chí Minh",
+   "google": "156 Lý Thường Kiệt, Diên Hồng, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "cùng số nhà, khác đường"
+  },
+  {
+   "vendor": "142/18 Cộng Hòa, P.4, Quận Tân Bình",
+   "google": "Cộng Hòa, Bảy Hiền, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "Google không có số nhà -> không đủ để khẳng định"
+  },
+  {
+   "vendor": "Cuối đường Bình Quới, P.28, Quận Bình Thạnh",
+   "google": "Bình Quới, Thạnh Mỹ Tây, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "vendor không có số nhà -> false"
+  },
+  {
+   "vendor": "02 Đường D2, Phường Sơn Kỳ, Quận Tân Phú",
+   "google": "2 Đường D2, Sơn Kỳ, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "tên đường 'D2' < 4 ký tự -> không dùng được (đi review)"
+  },
+  {
+   "vendor": "285/C145 Cách Mạng Tháng 8, P.12, Quận 10",
+   "google": "285/C145 Cách Mạng Tháng Tám, Hòa Hưng, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "'Tháng 8' khác 'Tháng Tám': không quy đổi chữ-số (cố ý, đi review)"
+  },
+  {
+   "vendor": "50-52 quốc lộ 1 K, P.Linh Trung, Quận Thủ Đức",
+   "google": "50 Quốc lộ 1K, Linh Xuân, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "bỏ mọi ký tự không phải chữ/số: '1 K' = '1K'"
+  },
+  {
+   "vendor": "Tam đông. Hóc  mon, Thành phố Hồ Chí Minh",
+   "google": "Tam Đông, Hóc Môn, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "vendor không có số nhà -> false"
+  },
+  {
+   "vendor": "35 Nguyễn Huệ, Phường Bến Nghé, Quận 1",
+   "google": "Becamex Tower, 35 Nguyễn Huệ, Bến Nghé, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "đoạn đầu của Google là tên toà nhà (không có số) bị bỏ qua"
+  },
+  {
+   "vendor": "Tầng 5 Tòa nhà Harbour View Tower, số 35 Nguyễn Huệ, Phường Bến Nghé, Quận 1, Quận 1",
+   "google": "35 Nguyễn Huệ, Bến Nghé, Hồ Chí Minh",
+   "vendor_origin": "V",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "vendor: đoạn 'Tầng 5 Tòa nhà…' bỏ, tiền tố 'số' bỏ"
+  },
+  {
+   "vendor": "137/27A Lê Văn Sỹ, P.14, Quận Phú Nhuận",
+   "google": "137/5, Đ. Lê Văn Sỹ, Phú Nhuận, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "cùng hẻm 137, khác nhà 27A vs 5: số nhà đủ cả phần hẻm (A4) phải bằng"
+  },
+  {
+   "vendor": "137/27A Lê Văn Sỹ, P.14, Quận Phú Nhuận",
+   "google": "137/027A, Đ. Lê Văn Sỹ, Phú Nhuận, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "bỏ số 0 đầu ở từng phần: 137/27a = 137/27a"
+  },
+  {
+   "vendor": "137/27A Lê Văn Sỹ, P.14, Quận Phú Nhuận",
+   "google": "137 Lê Văn Sỹ, Phú Nhuận, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "Google bỏ phần hẻm: 137 khác 137/27a (đi review, không đoán)"
+  },
+  {
+   "vendor": "12 Đường D2, 45 Lê Lợi, Phường Bến Thành, Quận 1",
+   "google": "45 Lê Lợi, Bến Thành, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "A6: đoạn '12 Đường D2' có khoá 'd2' < 4 ký tự nên bỏ qua, xét đoạn kế '45 Lê Lợi'"
+  },
+  {
+   "vendor": "45, 49, 65 đường Hòa Bình, P.Hiệp Tân, Quận Tân Phú",
+   "google": "45 Hòa Bình, Hiệp Tân, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "ca biên: A3 không nhận đoạn kế bắt đầu bằng chữ số nên vế vendor rút ra {65}, không phải {45}; Google ghi 45 thì đi review"
+  }
+ ]
+}
