@@ -9,7 +9,7 @@ Spec: products/T-110-duyet-tay-venue.md, "Áp ADR-048 cho 4 venue". Cần TOHONG
     closed_state='temporarily_closed' và manual_override=temporarily_closed; KHÔNG có trong pool tohong-back (ADR-049: tạm đóng cửa không hiển thị trên app).
     Ngoại lệ: nếu audit có reopened=true và đã có place_id thì Pergola được nhận (Google mở lại + qua sáu cổng) và phải có trong pool với ảnh Google.
   Log chạy thật tools/scraper/run-logs/T-110/*.log: tổng GOOGLE_USAGE text_search <= 3 (resolve <= 2 + thử lại Pergola 1), photo_details <= 4, photo_media <= 4, tổng <= 9; không chứa khoá AIza….
-  Nếu đặt T110_BASE_REF (mốc git của tohong-back trước PR): pool chỉ khác ở Én, Thiskyhall (photos/styles/tags), Tự Do và Pergola (bị gỡ khỏi pool); không vendor khác đổi.
+  Nếu đặt T110_BASE_REF (mốc git của tohong-back trước PR): pool chỉ khác ở Én, Thiskyhall (photos/styles/tags), Tự Do và Pergola (bị gỡ khỏi pool) và marry_e781d0f5a91b (CHỈ photos, sang ảnh Google); không vendor khác đổi.
 In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import glob, json, os, re, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -17,6 +17,7 @@ import _t110 as t
 
 c = t.c
 EN, TD, PG, TH = "marry_d4380c0b3cf3", "marry_e38f1e755f9c", "marry_2ee808943c08", "marry_f8b40ba4ddef"
+MG = "marry_e781d0f5a91b"  # đổi đúng trường photos nhờ luật gộp pool (ảnh marry -> ảnh Google)
 LH = re.compile(r"^https://lh\d+\.googleusercontent\.com/")
 bad = []
 root = os.path.join(c.tohong(), "tools", "scraper")
@@ -116,8 +117,13 @@ if ref:
     if base is not None:
         b = {p["id"]: p for p in base}
         changed = {i for i in set(b) | set(pool) if b.get(i) != pool.get(i)}
-        if changed != {EN, TH, TD, PG}:
-            bad.append("pool đổi ở %r (mong đúng Én, Thiskyhall, Tự Do, Pergola)" % sorted(changed)[:5])
+        if changed != {EN, TH, TD, PG, MG}:
+            bad.append("pool đổi ở %r (mong đúng Én, Thiskyhall, Tự Do, Pergola, marry_e781d0f5a91b)" % sorted(changed)[:5])
+        if MG in b and MG in pool:
+            if {k: v for k, v in b[MG].items() if k != "photos"} != {k: v for k, v in pool[MG].items() if k != "photos"}:
+                bad.append("marry_e781d0f5a91b: pool đổi trường ngoài photos")
+            if not pool[MG].get("photos") or any(p.get("source") != "google" or not str(p.get("attribution") or "").strip() for p in pool[MG]["photos"]):
+                bad.append("marry_e781d0f5a91b: ảnh trong pool phải là ảnh Google có attribution")
         for i in (EN, TH):
             if i in b and i in pool and {k: v for k, v in b[i].items() if k not in ("photos", "styles", "tags")} != {k: v for k, v in pool[i].items() if k not in ("photos", "styles", "tags")}:
                 bad.append("%s: pool đổi trường ngoài photos/styles/tags" % i)
