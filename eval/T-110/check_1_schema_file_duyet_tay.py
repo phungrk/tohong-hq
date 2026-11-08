@@ -7,6 +7,7 @@ A. Dữ liệu thật (repo tohong): tools/scraper/output/HCMC/manual_overrides.
 B. Fixture: file sai bị `enrich.py` từ chối TRƯỚC khi làm gì: mã thoát 2, dòng `OVERRIDE_FILE_INVALID <mã>` (kèm vendor_id nếu lỗi ở một mục), 0 lượt gọi Google,
    mọi file trong output/ giữ nguyên byte. Mã: bad_json, bad_schema_version, unknown_action, missing_field, bad_approver, bad_date, duplicate_vendor,
    missing_target (accept_place thiếu cả maps_link lẫn place_id; reject_match thiếu place_id), unexpected_field (remove/temporarily_closed mang place_id hay maps_link),
+   bad_decision (decision không có dạng decisions/<tên>.md; enrich chỉ kiểm định dạng, việc kiểm file tồn tại + decided_by: capu do bất biến A phía HQ và phần A của eval này),
    bad_link (maps_link không thuộc share.google, goo.gl, maps.app.goo.gl, google.com/maps).
 C. Fixture: file hợp lệ + vendor_id không tồn tại ở đâu: dòng `OVERRIDE_ERROR <vendor_id> unknown_vendor`, các mục khác vẫn áp, mã thoát 2.
 D. Sau enrich và refresh_photos, file duyệt tay không đổi byte (code tự động không được ghi).
@@ -98,6 +99,7 @@ CASES = [
     ("missing_target", {"schema_version": 1, "overrides": [t.entry("t110_v2", "accept_place")]}, "t110_v2"),
     ("missing_target", {"schema_version": 1, "overrides": [t.entry("t110_v2", "reject_match")]}, "t110_v2"),
     ("unexpected_field", {"schema_version": 1, "overrides": [mut(lambda e: e.update(place_id="ChIJxxxx"))]}, "t110_v2"),
+    ("bad_decision", {"schema_version": 1, "overrides": [mut(lambda e: e.update(decision="C:/tmp/x.txt"))]}, "t110_v2"),
     ("bad_link", {"schema_version": 1, "overrides": [t.entry("t110_v2", "accept_place", maps_link="http://evil.example/maps/place/x")]}, "t110_v2"),
 ]
 for code, doc, vid in CASES:
@@ -132,4 +134,4 @@ if not t.has_pid(r.vendor("t110_v1")):
 rc, out, calls = r.run(t.REFRESH, t.fixture(pl, []))
 if open(r.p(t.OVERRIDES), "rb").read() != raw:
     bad.append("enrich hoặc refresh_photos đã sửa file duyệt tay (chỉ Capu và bước resolve được ghi)")
-t.done(bad, "file duyệt tay thật đúng schema và đủ 4 mục ADR-048 có quyết định của Capu; 11 kiểu file sai bị từ chối trước khi làm gì; unknown_vendor không chặn mục khác; code tự động không ghi file")
+t.done(bad, "file duyệt tay thật đúng schema và đủ 4 mục ADR-048 có quyết định của Capu; 12 kiểu file sai bị từ chối trước khi làm gì; unknown_vendor không chặn mục khác; code tự động không ghi file")

@@ -4,7 +4,9 @@ INV-? · Dữ liệu venue khớp file duyệt tay (duyệt tay thắng luật t
   accept_place có `resolved` -> vendor trong venue/vendors.json có enrichment_log[google_maps].place_id = resolved.place_id;
   remove -> id không có ở vendors.json nào của HCMC và có bản ghi manual=true trong removed_vendors.json (khôi phục được);
   temporarily_closed -> nếu vendor chưa có place_id thì dòng audit mới nhất có retry=true;
-  reject_match -> vendor không giữ place_id bị loại.
+  reject_match -> vendor không giữ place_id bị loại;
+  vendor có mục duyệt tay khác `remove` không nằm trong removed_vendors.json (luật tự động, kể cả T-111, không gỡ vendor đã có mục);
+  vendor có dòng audit closed_state='temporarily_closed' không có trong pool tohong-back (nếu có repo tohong-back).
 Chưa có manual_overrides.json hoặc repo tohong: PASS 'chưa áp dụng'. Không gọi Google. Chạy không tham số (python3 -I). Mã thoát 0 = đạt."""
 import glob, json, os, sys
 HQ = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
@@ -34,8 +36,15 @@ allv = {c: {v.get("id"): v for v in vend(c)} for c in cats}
 audit = {r.get("vendor_id"): r for r in load(os.path.join(out, "venue", "enrichment-audit.json"), [])}
 removed = [(c, (x.get("vendor") or {}).get("id"), x.get("manual")) for c in cats for x in load(os.path.join(out, c, "removed_vendors.json"), [])]
 bad = []
+b = next((os.path.abspath(x) for x in (os.environ.get("TOHONG_BACK_REPO"), os.path.join(HQ, "..", "tohong-back")) if x and os.path.isfile(os.path.join(x, "lib", "vendorPool.generated.js"))), None)
+if b:
+    txt = open(os.path.join(b, "lib", "vendorPool.generated.js"), encoding="utf-8").read()
+    pool_ids = {p.get("id") for p in json.loads(txt[txt.index("= [") + 2:txt.rindex("]") + 1])}
+    for i, a in audit.items():
+        if a.get("closed_state") == "temporarily_closed" and i in pool_ids: bad.append("%s: tạm đóng cửa mà còn trong pool" % i)
 for e in load(os.path.join(out, "manual_overrides.json"), {}).get("overrides") or []:
     i, a = e.get("vendor_id"), e.get("action")
+    if a != "remove" and any(r[1] == i for r in removed): bad.append("%s: có mục %s nhưng nằm trong removed_vendors.json" % (i, a))
     v = allv.get("venue", {}).get(i)
     if a == "accept_place" and e.get("resolved"):
         if not v or pid(v) != e["resolved"].get("place_id"): bad.append("%s: accept_place nhưng place_id thực = %r" % (i, v and pid(v)))

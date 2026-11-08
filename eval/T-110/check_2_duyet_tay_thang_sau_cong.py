@@ -7,9 +7,11 @@ Bước 1 (có file duyệt tay, mọi mục có snapshot `resolved`): chạy Đ
   A..E accept_place: có place_id Google đúng, bản ghi log có manual_override=true, contact.address = địa chỉ Google, address_source nguyên vẹn, audit enriched +
       manual_override="accept_place", không bị G1/G3/G4/G5 hạ.
   E (G6): được giữ; F (tự động, chung place_id PE, địa chỉ gốc khác) bị hạ shared_place_id: duyệt tay không bao giờ bị G6 hạ, nhưng vẫn là thành viên nhóm.
+  Confidence KHÔNG bị ghi đè: log và audit giữ số đo tên thật của pipeline (< 1,0 với A..E) kèm name_similarity bằng nó.
+  Z2 (cùng địa chỉ gốc với W, W bị gỡ vì lý do khác CLOSED_PERMANENTLY do Google báo, kiểu T-111 no_match): được nhận, vì tập G4 chỉ nhận CLOSED_PERMANENTLY do Google báo.
   X remove: gỡ khỏi vendors.json, vào removed_vendors.json (manual=true); địa chỉ của X KHÔNG vào tập G4 (kể cả khi lý do của Capu chứa chữ CLOSED_PERMANENTLY)
       nên Z (cùng địa chỉ X) được nhận; địa chỉ nhà hàng đóng cửa thật (Y) vẫn vào G4 (D bị bỏ qua vì duyệt tay, không vì G4 hỏng).
-  R, R2 reject_match: không place_id, không ảnh Google, audit low_confidence + reject_reason=manual_reject, có dòng review-needed.csv; R2 (đã khớp từ trước) bị hạ.
+  R, R2 reject_match (đã khớp tự động từ trước, KHÔNG bị Text Search lại): không place_id, không ảnh Google, audit low_confidence + reject_reason=manual_reject, có dòng review-needed.csv; R2 (đã khớp từ trước) bị hạ.
 Bước 2: chạy lại offline (không khoá, mọi HTTP bị chặn): 0 lượt gọi, A..E còn nguyên, F/R/R2 còn bị hạ. File duyệt tay không đổi byte.
 Bước 3: đảo thứ tự vendor trong file: kết quả mỗi vendor như nhau.
 Bước 4 (bất biến thắng duyệt tay): accept_place bị từ chối bằng dòng `OVERRIDE_ERROR <vendor_id> <mã>` (mã: out_of_province, place_conflict cho CẢ HAI mục chung
@@ -25,9 +27,9 @@ bad = []
 
 def setup(x_in_vendors, entries=None, reverse=False):
     r = t.Root({"venue": t.scen_vendors(x_in_vendors, reverse), "honeymoon": []})
-    rem = [t.closed_record(t.CLOSED_Y)] + ([] if x_in_vendors else [t.closed_record(t.X)])
+    rem = t.scen_removed(not x_in_vendors)
     r.write("venue/removed_vendors.json", rem)
-    r.write("venue/enrichment-audit.json", [t.scen_r2_audit()])
+    r.write("venue/enrichment-audit.json", t.scen_audit_rows())
     if entries is not None:
         r.set_overrides(entries)
     return r
@@ -77,6 +79,8 @@ for vid, (n, a, (pid, pn, pa), code) in t.SCEN.items():
         bad.append("%s: duyệt tay %s không thắng cổng %s (place_id=%r)" % (vid, pid, code, g and g["place_id"])); continue
     if g.get("manual_override") is not True:
         bad.append("%s: bản ghi log thiếu manual_override=true" % vid)
+    if not isinstance(g.get("confidence"), (int, float)) or g["confidence"] >= 1.0 or g.get("name_similarity") != g.get("confidence"):
+        bad.append("%s: confidence/name_similarity phải là số đo tên thật (< 1,0, bằng nhau); thấy %r/%r" % (vid, g.get("confidence"), g.get("name_similarity")))
     if v["contact"].get("address") != pa or v["contact"].get("address_source") != a:
         bad.append("%s: contact.address=%r (mong địa chỉ Google), address_source=%r (mong nguyên vẹn)" % (vid, v["contact"].get("address"), v["contact"].get("address_source")))
     if a_.get("status") != "enriched" or a_.get("manual_override") != "accept_place" or a_.get("reject_reason"):
@@ -97,6 +101,10 @@ if not any((x.get("vendor") or {}).get("id") == "t110_closedY" for x in r.remove
 z = r.vendor("t110_Z")
 if not t.has_pid(z):
     bad.append("Z (cùng địa chỉ X bị Capu loại) bị từ chối %r: địa chỉ vendor bị Capu loại không được vào tập G4" % (r.audit().get("t110_Z") or {}).get("reject_reason"))
+if not t.has_pid(r.vendor("t110_Z2")):
+    bad.append("Z2 bị từ chối %r: tập G4 chỉ nhận CLOSED_PERMANENTLY do Google báo (không nhận bản ghi bị gỡ vì lý do khác)" % (r.audit().get("t110_Z2") or {}).get("reject_reason"))
+if any(x["kind"] == "search" and ("Romeo" in x["q"] or "Sierra" in x["q"]) for x in calls):
+    bad.append("vendor reject_match bị Text Search lại")
 for vid in ("t110_R", "t110_R2"):
     v, a_ = r.vendor(vid), r.audit().get(vid) or {}
     if t.has_pid(v) or v.get("google_photos") or a_.get("status") != "low_confidence" or a_.get("reject_reason") != "manual_reject":

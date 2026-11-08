@@ -221,37 +221,69 @@ def scen_places():
         pl[pid] = place(pn, pa)
     for (vid, n, a, (pid, pn, pa)) in (F, Z, R, R2):
         pl[pid] = place(pn, pa)
+    pl.update(scen_places_extra())
     return pl
 
 
 def scen_search_rules():
     """Luật Text Search giả theo TÊN vendor (truy vấn chứa tên). Tên F 'Epsilon Palace' không trùng tên E 'Hội trường Sao Mai'."""
     rules = [(v[0], [v[2][0]]) for v in SCEN.values()]
-    rules += [(F[1], [F[3][0]]), (Z[1], [Z[3][0]]), (R[1], [R[3][0]]), (R2[1], [R2[3][0]])]
+    rules += [(F[1], [F[3][0]]), (Z[1], [Z[3][0]]), (Z2[1], [Z2[3][0]]), (R[1], [R[3][0]]), (R2[1], [R2[3][0]])]
     return rules
+
+
+def prematched(vid, name, addr, g):
+    """Vendor đã nhận khớp tự động từ trước (place_id + ảnh Google), như dữ liệu #72."""
+    v = vendor(vid, name, addr)
+    v["contact"]["address"] = g[2]
+    v["google_photos"] = [{"uri": "https://lh3.googleusercontent.com/old-" + vid, "attributions": [{"name": "t"}], "fetched_at": "2026-11-08T04:00:00Z"}]
+    v["enrichment_log"] = [{"source": "google_maps", "timestamp": "2026-11-08T04:03:36", "matched_name": g[1], "confidence": 1.0, "place_id": g[0],
+                            "formatted_address": g[2], "address_match": c.address_match(addr, g[2]), "changes": {"address": g[2]}}]
+    return v
+
+
+# Z2: địa chỉ gốc trùng W, W là bản ghi bị gỡ vì lý do KHÔNG phải Google báo CLOSED_PERMANENTLY (kiểu T-111 no_match): không vào tập G4.
+W = vendor("t110_W", "Nhà hàng Whiskey", "88 Nguyễn Trãi, Quận 5, Thành phố Hồ Chí Minh")
+Z2 = ("t110_Z2", "Nhà hàng Zebra", "88 Nguyễn Trãi, Quận 5, Thành phố Hồ Chí Minh", ("PZ2", "Nhà hàng Zebra", "Tòa nhà Zebra, Phường 1, Hồ Chí Minh"))
+
+
+def scen_places_extra():
+    return {Z2[3][0]: place(Z2[3][1], Z2[3][2])}
 
 
 def scen_vendors(with_x_in_vendors, reverse=False):
     vs = [vendor(i, n, a) for i, (n, a, _, _) in SCEN.items()]
     vs.append(vendor(F[0], F[1], F[2]))
     vs.append(vendor(Z[0], Z[1], Z[2]))
-    vs.append(vendor(R[0], R[1], R[2]))
-    # R2: đã nhận khớp từ trước (place_id + ảnh Google + dòng audit enriched)
-    r2 = vendor(R2[0], R2[1], R2[2])
-    r2["contact"]["address"] = R2[3][2]
-    r2["google_photos"] = [{"uri": "https://lh3.googleusercontent.com/old-R2", "attributions": [{"name": "t"}], "fetched_at": "2026-11-08T04:00:00Z"}]
-    r2["enrichment_log"] = [{"source": "google_maps", "timestamp": "2026-11-08T04:03:36", "matched_name": R2[3][1], "confidence": 1.0, "place_id": R2[3][0],
-                             "formatted_address": R2[3][2], "address_match": c.address_match(R2[2], R2[3][2]), "changes": {"address": R2[3][2]}}]
-    vs.append(r2)
+    vs.append(vendor(Z2[0], Z2[1], Z2[2]))
+    vs.append(prematched(R[0], R[1], R[2], R[3]))
+    vs.append(prematched(R2[0], R2[1], R2[2], R2[3]))
     if with_x_in_vendors:
         vs.append(copy.deepcopy(X))
     return list(reversed(vs)) if reverse else vs
 
 
-def scen_r2_audit():
-    return {"vendor_id": R2[0], "status": "enriched", "matched_name": R2[3][1], "confidence": 1.0, "place_id": R2[3][0],
-            "formatted_address": R2[3][2], "address_match": c.address_match(R2[2], R2[3][2])}
+def scen_audit_rows():
+    return [{"vendor_id": vid, "status": "enriched", "matched_name": gg[1], "confidence": 1.0, "place_id": gg[0],
+             "formatted_address": gg[2], "address_match": c.address_match(addr, gg[2])} for vid, addr, gg in ((R[0], R[2], R[3]), (R2[0], R2[2], R2[3]))]
+
+
+def scen_removed(x_in_removed):
+    rows = [closed_record(CLOSED_Y), {"removed_at": "2026-11-08T04:04:01Z", "reason": "T-111: no_match sau hai lần thử", "vendor": copy.deepcopy(W)}]
+    if x_in_removed:
+        rows.append(closed_record(X))
+    return rows
 
 
 def closed_record(v):
     return {"removed_at": "2026-11-08T04:04:01Z", "reason": "google business CLOSED_PERMANENTLY", "vendor": copy.deepcopy(v)}
+
+
+def pool_ids(root):
+    """Chạy build_pool.py (pool cho matcher) trong thư mục scraper tạm; trả tập id vendor trong pool. Offline."""
+    rc, out, _ = root.run(["build_pool.py", "--out", "output/pool-vendors.json"], fixture({}, [], deny=True), key=False)
+    try:
+        d = json.load(open(os.path.join(root.path, "output", "pool-vendors.json"), encoding="utf-8"))
+    except (OSError, ValueError):
+        fail("build_pool.py không ghi được output/pool-vendors.json (rc=%r): %s" % (rc, out[-120:]))
+    return {v.get("id") for v in d.get("vendors", [])}

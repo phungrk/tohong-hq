@@ -9,6 +9,7 @@ Bước 2: khôi phục khi mục remove còn trong file: `enrich.py --state HCM
   `--restore` id không có trong removed_vendors.json: 'RESTORE_ERROR <id> not_removed'.
 Bước 3: Capu xoá mục remove khỏi file, chạy --restore: thoát 0, in 'RESTORED t110_X1', X1 trở lại vendors.json của cả hai category với bản ghi bằng bản ghi gốc, bản ghi
   rời khỏi removed_vendors.json (cả hai), chạy lại --restore: not_removed. Sau đó enrich không gỡ lại và không tìm lại X1 (có dòng audit).
+Bước 4: accept_place cho vendor đang nằm trong removed_vendors.json (gỡ bởi luật tự động): khôi phục rồi nhận khớp, không báo unknown_vendor.
 Không gọi Google ở bất kỳ bước nào của restore. In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import copy, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -73,4 +74,13 @@ snap = r.tree()
 rc, out, calls = r.run(t.ENRICH, FX)
 if r.vendor("t110_X1") is None or any(x["kind"] == "search" for x in calls) or r.tree() != snap:
     bad.append("bước 3: sau khôi phục enrich gỡ lại hoặc tìm lại X1 (có dòng audit) hoặc đổi file")
+# ---- Bước 4: accept_place cho vendor đang nằm trong removed_vendors.json (bị luật tự động gỡ, kiểu T-111): khôi phục rồi nhận --------------------------
+x4 = t.vendor("t110_X4", "Nhà hàng Bốn", "4 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh")
+p4 = {"PX4": t.place("Nhà hàng Bốn", "4 Lê Lợi, Bến Thành, Hồ Chí Minh")}
+r4 = t.Root({"venue": [t.vendor("t110_X5", "Nhà hàng Năm", "5 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh")], "honeymoon": []})
+r4.write("venue/removed_vendors.json", [{"removed_at": "2026-11-08T04:04:01Z", "reason": "T-111: no_match sau hai lần thử", "vendor": x4}])
+r4.set_overrides([t.accept_with_snapshot("t110_X4", "PX4", p4["PX4"])])
+rc, out, calls = r4.run(t.ENRICH, t.fixture(p4, []))
+if "unknown_vendor" in out or not t.has_pid(r4.vendor("t110_X4")) or any((x.get("vendor") or {}).get("id") == "t110_X4" for x in r4.removed()):
+    bad.append("bước 4: accept_place cho vendor đang trong removed_vendors.json phải khôi phục rồi nhận (có place_id, rời removed); thấy pid=%r" % t.pid_of(r4.vendor("t110_X4")))
 t.done(bad, "remove gỡ ở mọi category, lưu nguyên bản ghi + lý do + manual, chạy lại không đổi; --restore bị chặn khi mục còn, khôi phục nguyên vẹn khi Capu đã xoá mục")
