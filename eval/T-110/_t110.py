@@ -200,9 +200,9 @@ CLOSED_Y = vendor("t110_closedY", "Nhà hàng Đã Đóng Y", "7 Nguyễn Huệ,
 SCEN = {
     # id: (tên vendor, địa chỉ gốc, (place_id, tên Google, địa chỉ Google), mã cổng mong đợi khi KHÔNG duyệt tay)
     "t110_A": ("Nhà hàng Alpha", "10 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh", ("PA", "Hội trường Zeta", "55 Lê Lợi, Bến Thành, Hồ Chí Minh"), "low_score"),
-    "t110_B": ("Nhà hàng Beta", "10 Hai Bà Trưng, Quận 1, Thành phố Hồ Chí Minh", ("PB", "Nhà hàng Beta", "88 Pasteur, Bến Nghé, Hồ Chí Minh"), "address_conflict"),
+    "t110_B": ("Nhà hàng Beta", "10 Hai Bà Trưng, Quận 1, Thành phố Hồ Chí Minh", ("PB", "Nhà hàng Beta Garden", "88 Pasteur, Bến Nghé, Hồ Chí Minh"), "address_conflict"),
     "t110_C": ("Nhà hàng Gamma", "Khu đô thị Sala, Thủ Đức, Thành phố Hồ Chí Minh", ("PC", "Nhà hàng Gamma Garden", "Tầng 2, Phường Bến Nghé, Hồ Chí Minh"), "address_unconfirmed"),
-    "t110_D": ("Nhà hàng Delta", "7 Nguyễn Huệ, Quận 1, Thành phố Hồ Chí Minh", ("PD", "Nhà hàng Delta", "Tòa nhà Delta, Phường Bến Nghé, Hồ Chí Minh"), "same_address_as_closed"),
+    "t110_D": ("Nhà hàng Delta", "7 Nguyễn Huệ, Quận 1, Thành phố Hồ Chí Minh", ("PD", "Nhà hàng Deltaa", "Tòa nhà Delta, Phường Bến Nghé, Hồ Chí Minh"), "same_address_as_closed"),
     "t110_E": ("Hội trường Sao Mai", "100 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh", ("PE", "Epsilon Palace", "100 Lê Lợi, Bến Thành, Hồ Chí Minh"), "low_score"),
 }
 # F nhận khớp tự động khi đứng một mình (qua G1-G5), nhưng chung place_id PE với E (địa chỉ gốc khác): khi E được duyệt tay thì F bị G6 hạ.
@@ -287,3 +287,21 @@ def pool_ids(root):
     except (OSError, ValueError):
         fail("build_pool.py không ghi được output/pool-vendors.json (rc=%r): %s" % (rc, out[-120:]))
     return {v.get("id") for v in d.get("vendors", [])}
+
+
+def name_sim(a, b):
+    """Số đo tên của pipeline (GoogleMapsEnricher._name_similarity): SequenceMatcher trên tên bỏ dấu, chữ thường, chỉ a-z0-9 và khoảng trắng; làm tròn 3."""
+    import re, unicodedata
+    from difflib import SequenceMatcher
+
+    def n(s):
+        s = unicodedata.normalize("NFD", s.lower())
+        s = "".join(ch for ch in s if unicodedata.category(ch) != "Mn")
+        return re.sub(r"[^a-z0-9 ]", "", s).strip()
+    return round(SequenceMatcher(None, n(a), n(b)).ratio(), 3)
+
+
+def premise_sim_below(a, b, limit):
+    v = name_sim(a, b)
+    if v >= limit:
+        fail("fixture hỏng: độ giống tên %r/%r = %s >= %s" % (a, b, v, limit))

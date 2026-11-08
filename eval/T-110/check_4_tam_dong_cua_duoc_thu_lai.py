@@ -22,8 +22,8 @@ PL = {"PP1": t.place("Pergola Garden Restaurant", "28A Trần Cao Vân, Phườn
       "PP3": t.place("Hội trường Zeta Ba", "30 Lê Lợi, Bến Thành, Hồ Chí Minh", status="CLOSED_TEMPORARILY"),
       "PP4": t.place("Nhà hàng Tư Test", "4 Lê Lợi, Bến Thành, Hồ Chí Minh", status="CLOSED_PERMANENTLY"),
       "PP5": t.place("Nhà hàng Năm Test", "5 Lê Lợi, Bến Thành, Hồ Chí Minh", status="CLOSED_TEMPORARILY")}
-RULES = [("Pergola Test", ["PP1"]), ("Nhà hàng Hai Test", ["PP2"]), ("Nhà hàng Ba Test", ["PP3"]), ("Nhà hàng Tư Test", ["PP4"]), ("Nhà hàng Năm Test", ["PP5"])]
-vs = [t.vendor("t110_P1", "Nhà Hàng Pergola Test", ADDR1), t.vendor("t110_P2", "Nhà hàng Hai Test", "2 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh"),
+RULES = [("Ngoài Trời Pergola", ["PP1"]), ("Nhà hàng Hai Test", ["PP2"]), ("Nhà hàng Ba Test", ["PP3"]), ("Nhà hàng Tư Test", ["PP4"]), ("Nhà hàng Năm Test", ["PP5"])]
+vs = [t.vendor("t110_P1", "Nhà Hàng Tiệc Cưới Ngoài Trời Pergola", ADDR1), t.vendor("t110_P2", "Nhà hàng Hai Test", "2 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh"),
       t.vendor("t110_P3", "Nhà hàng Ba Test", "3 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh"), t.vendor("t110_P4", "Nhà hàng Tư Test", "4 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh"),
       t.vendor("t110_P5", "Nhà hàng Năm Test", "5 Lê Lợi, Quận 1, Thành phố Hồ Chí Minh"), t.vendor("t110_Q", "Nhà hàng Quebec Cũ", "9 Pasteur, Quận 1, Thành phố Hồ Chí Minh")]
 r = t.Root({"venue": vs, "honeymoon": []})
@@ -40,9 +40,10 @@ def searches(calls):
 
 
 def names_in(qs):
-    return sorted({n for n in ("Pergola Test", "Hai Test", "Ba Test", "Tư Test", "Quebec", "Năm Test") for q in qs if n in q})
+    return sorted({n for n in ("Ngoài Trời Pergola", "Hai Test", "Ba Test", "Tư Test", "Quebec", "Năm Test") for q in qs if n in q})
 
 
+t.premise_sim_below("Nhà Hàng Tiệc Cưới Ngoài Trời Pergola", PL["PP1"]["name"], 0.4)
 FX = t.fixture(PL, RULES)
 rc, out, calls = r.run(t.ENRICH, FX)
 rc, out, calls_r = r.run(t.REFRESH, FX)
@@ -78,7 +79,7 @@ for vid in ("t110_P1", "t110_P2", "t110_P3", "t110_P5"):
 if "t110_Q" not in pool:
     bad.append("vendor bình thường Q bị loại khỏi pool")
 rc, out, calls = r.run(t.ENRICH, FX)
-if names_in(searches(calls)) != ["Ba Test", "Hai Test", "Pergola Test", "Năm Test"] or len(searches(calls)) != 4:
+if names_in(searches(calls)) != sorted(["Ba Test", "Hai Test", "Ngoài Trời Pergola", "Năm Test"]) or len(searches(calls)) != 4:
     bad.append("bước 2: mong đúng 4 lượt Text Search của P1, P2, P3, P5 (không phải Q, P4); thấy %r" % names_in(searches(calls)))
 
 PL["PP2"]["status"] = "OPERATIONAL"
@@ -113,13 +114,13 @@ r.set_overrides([])
 PL["PP1"]["status"] = "OPERATIONAL"
 FX = t.fixture(PL, RULES)
 rc, out, calls = r.run(t.ENRICH, FX)
-if names_in(searches(calls)).count("Pergola Test") != 1:
+if names_in(searches(calls)).count("Ngoài Trời Pergola") != 1:
     bad.append("bước 4: P1 hết dấu nhưng dòng audit còn retry: enrich phải thử lại đúng 1 lần; thấy %r" % names_in(searches(calls)))
 a1 = r.audit().get("t110_P1") or {}
 if a1.get("retry") or a1.get("reject_reason") != "low_score":
     bad.append("bước 4: P1 mong hết retry và vẫn low_score (tên khác); thấy retry=%r reject=%r" % (a1.get("retry"), a1.get("reject_reason")))
 rc, out, calls = r.run(t.ENRICH, FX)
-if "Pergola Test" in "".join(searches(calls)):
+if "Ngoài Trời Pergola" in "".join(searches(calls)):
     bad.append("bước 4: P1 hết lý do retry mà enrich vẫn tìm lại")
 if "t110_P1" not in t.pool_ids(r):
     bad.append("bước 4: P1 hết trạng thái tạm đóng cửa (ảnh minh hoạ, không place_id) phải quay lại pool")

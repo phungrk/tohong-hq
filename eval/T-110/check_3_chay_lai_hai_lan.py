@@ -18,12 +18,12 @@ PL["PL"] = t.place("Nhà hàng Lima Garden", "40 Pasteur, Bến Nghé, Hồ Chí
 PL["PP"] = t.place("Pergola Garden Restaurant", "28A Trần Cao Vân, Phường, Phú Nhuận, Hồ Chí Minh", status="CLOSED_TEMPORARILY")
 LINK = "https://share.google/lima1"
 LINKS = {LINK: {"status": 200, "to": "https://www.google.com/maps/place/Nh%C3%A0+h%C3%A0ng+Lima+Garden/@10.7800,106.7000,17z/data=!3m1!4b1"}}
-RULES = RULES + [("Lima Garden", ["PL"]), ("Pergola Test", ["PP"])]
+RULES = RULES + [("Lima Garden", ["PL"]), ("Ngoài Trời Pergola", ["PP"])]
 FX = t.fixture(PL, RULES, LINKS)
 
 vs = t.scen_vendors(True)
 vs.append(t.vendor("t110_L", "Nhà hàng Lima", "40 Pasteur, Quận 1, Thành phố Hồ Chí Minh"))
-vs.append(t.vendor("t110_P", "Nhà Hàng Pergola Test", "28A Trần Cao Vân, P.12, Quận Phú Nhuận, Thành phố Hồ Chí Minh"))
+vs.append(t.vendor("t110_P", "Nhà Hàng Tiệc Cưới Ngoài Trời Pergola", "28A Trần Cao Vân, P.12, Quận Phú Nhuận, Thành phố Hồ Chí Minh"))
 r = t.Root({"venue": vs, "honeymoon": []})
 r.write("venue/removed_vendors.json", t.scen_removed(False))
 r.write("venue/enrichment-audit.json", t.scen_audit_rows() + [
@@ -72,7 +72,7 @@ for step in ("resolve", "refresh"):
 ts = [x for step in ("enrich", "enrich2") for x in res2[step][2] if x["kind"] == "search"]
 if len(ts) != 2:  # mỗi lệnh enrich của lượt 2 thử lại đúng P một lần
     bad.append("lượt 2: tổng Text Search của hai lệnh enrich = %d (mong 2, chỉ vendor tạm đóng cửa P, mỗi lệnh một lần)" % len(ts))
-elif any("Pergola Test" not in x["q"] for x in ts):
+elif any("Ngoài Trời Pergola" not in x["q"] for x in ts):
     bad.append("lượt 2: Text Search không phải của P")
 u = t.usage(res2["enrich"][1])
 if u != {"text_search": 1, "photo_details": 0, "photo_media": 0}:
