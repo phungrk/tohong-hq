@@ -1,6 +1,6 @@
 {
   "task": "T-102",
-  "at": "2026-11-08T00:15",
+  "at": "2026-11-08T00:38",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 eval/T-102/check_1_ho_so.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 28,
+      "ms": 34,
       "out": "FAIL chưa có báo cáo insights/T-102-graphify-do-token.md",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 eval/T-102/check_2_khoanh_vung.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 47,
+      "ms": 34,
       "out": "FAIL chưa có insights/T-102-runs/install-manifest.json",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 eval/T-102/check_3_go_sach.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 33,
+      "ms": 34,
       "out": "FAIL chưa có insights/T-102-runs/install-manifest.json",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "python3 eval/T-102/check_5_ket_luan.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 27,
+      "ms": 32,
       "out": "FAIL chưa có hồ sơ lượt chạy insights/T-102-runs/T-xxx-<A|B>-r<n>.json",
       "tier": 1
     },
@@ -52,15 +52,15 @@
       "eval": "python3 eval/T-102/check_6_khong_du_lieu_nguoi_dung.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 441,
-      "out": "FAIL chưa có insights/T-102-runs/install-manifest.json",
+      "ms": 387,
+      "out": "FAIL chưa có hồ sơ lượt chạy insights/T-102-runs/T-xxx-<A|B>-r<n>.json",
       "tier": 1
     },
     {
       "eval": "python3 eval/T-102/check_7_giam_nhieu.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 28,
+      "ms": 36,
       "out": "FAIL chưa có hồ sơ lượt chạy insights/T-102-runs/T-xxx-<A|B>-r<n>.json",
       "tier": 1
     },
@@ -68,7 +68,15 @@
       "eval": "python3 eval/T-102/check_8_do_thi_cu.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 31,
+      "ms": 33,
+      "out": "FAIL chưa có hồ sơ lượt chạy insights/T-102-runs/T-xxx-<A|B>-r<n>.json",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-102/check_9_ngan_sach.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 35,
       "out": "FAIL chưa có hồ sơ lượt chạy insights/T-102-runs/T-xxx-<A|B>-r<n>.json",
       "tier": 1
     },
@@ -76,7 +84,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 41,
+      "ms": 27,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -84,7 +92,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 141,
+      "ms": 143,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -92,7 +100,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 639,
+      "ms": 568,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -100,15 +108,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2409,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-X1iT3o/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2346,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-7jios7/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1543,
+      "ms": 1501,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -116,8 +124,8 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 918,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-4Pij5M/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 932,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-J0SBwC/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     }
   ],
