@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Nguồn: T-108 / spec T-106 v4.1 (products/T-106-enrich-venue.md, Hành vi 2-3: sáu cổng G1-G6, hàm chuẩn eval/T-106/_common.py); rút từ eval đối kháng
 eval/T-108/adv-07-code-bang-ham-chuan-tich-cheo.py (adversary, Code Gate v7, 2026-11-08), Chief of Staff đồng ý 2026-11-08.
-CHỜ MERGE (ADR-028): đọc code tools/scraper/enrichment/ của PR tohong#72 (chưa merge); chuyển vào eval/invariants/planner/vendor/images/ khi #72 merge.
+Đã vào bể sau khi tohong#72 merge (ADR-028).
 INV-018 · Hàm cổng của code bằng hàm chuẩn trên mọi tổ hợp dữ liệu thật.
 tools/scraper/enrichment/address_match.py (code) phải cho ĐÚNG kết quả của eval/T-106/_common.py (chuẩn) cho: province_key, in_province (mọi địa chỉ Google),
 address_match, street_conflict (mọi địa chỉ gốc trong eval/T-106/venue_address_snapshot.json x mọi formatted_address Google đã lưu trong audit và enrichment_log
