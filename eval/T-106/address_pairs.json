@@ -208,6 +208,46 @@
    "google_origin": "G*",
    "expected": false,
    "why": "ca biên: A3 không nhận đoạn kế bắt đầu bằng chữ số nên vế vendor rút ra {65}, không phải {45}; Google ghi 45 thì đi review"
+  },
+  {
+   "vendor": "88 QL13, P.26, Quận Bình Thạnh, Thành phố Hồ Chí Minh",
+   "google": "88 Quốc lộ 13, Hiệp Bình Chánh, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "v4 A5: 'QL13' = 'Quốc lộ 13' (ca biên QL)"
+  },
+  {
+   "vendor": "88 Đường QL13, P.26, Quận Bình Thạnh, Thành phố Hồ Chí Minh",
+   "google": "88 Quốc Lộ 13, Hiệp Bình Chánh, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": true,
+   "why": "v4 A5: tiền tố 'Đường' bỏ trước, rồi QL13 = quốc lộ 13"
+  },
+  {
+   "vendor": "88 QL13, P.26, Quận Bình Thạnh, Thành phố Hồ Chí Minh",
+   "google": "88 Quốc lộ 1, Hiệp Bình Chánh, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "v4 A5: QL13 khác Quốc lộ 1 (khoá 'quoclo13' khác 'quoclo1')"
+  },
+  {
+   "vendor": "50 Quốc lộ 1, P.Linh Trung, Quận Thủ Đức, Thành phố Hồ Chí Minh",
+   "google": "50 Quốc lộ 1K, Linh Xuân, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "Quốc lộ 1 khác Quốc lộ 1K (hai con đường khác nhau)"
+  },
+  {
+   "vendor": "88 ĐT743, P.An Phú, Thuận An, Bình Dương",
+   "google": "88 Đường tỉnh 743, An Phú, Hồ Chí Minh",
+   "vendor_origin": "V*",
+   "google_origin": "G*",
+   "expected": false,
+   "why": "v4 A5: ĐT/TL cố ý KHÔNG quy đổi; vendor đó đi review (hướng an toàn)"
   }
  ]
 }
