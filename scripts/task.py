@@ -222,14 +222,21 @@ def next_id():
 
 
 # ---------- nhật ký ----------
+class LedgerLockError(LedgerError):
+    """Không giữ được khóa sổ cái trong thời gian chờ (chỉ ở chế độ strict)."""
+
+
 @contextlib.contextmanager
-def ledger_lock(wait_s=10.0):
+def ledger_lock(wait_s=10.0, strict=False):
     """Khóa ghi sổ cái giữa các tiến trình (task.py và hook chi phí chạy song song).
 
-    File khóa nằm trong thư mục tạm, không nằm trong repo. Chờ tối đa wait_s giây rồi
-    vẫn chạy tiếp: thà hiếm khi ghi chen còn hơn treo agent.
+    File khóa nằm trong thư mục tạm, không nằm trong repo. Mặc định chờ tối đa wait_s giây
+    rồi vẫn chạy tiếp: thà hiếm khi ghi chen còn hơn treo agent (hook, task.py).
+    strict=True (cost.py backfill): không giữ được khóa thì raise LedgerLockError, người gọi
+    không được ghi gì.
     """
     f = None
+    got = False
     try:
         import fcntl
         key = hashlib.sha1(str(ROOT.resolve()).encode()).hexdigest()[:12]
@@ -238,6 +245,7 @@ def ledger_lock(wait_s=10.0):
         while True:
             try:
                 fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                got = True
                 break
             except OSError:
                 if time.time() > deadline:
@@ -245,6 +253,10 @@ def ledger_lock(wait_s=10.0):
                 time.sleep(0.05)
     except Exception:
         pass
+    if strict and not got:
+        if f:
+            f.close()
+        raise LedgerLockError(f"không giữ được khóa sổ cái sau {wait_s:g} giây (tiến trình khác đang ghi)")
     try:
         yield
     finally:
