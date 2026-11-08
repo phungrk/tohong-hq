@@ -102,10 +102,11 @@ for inv in t.inv_scripts(12, 13):
     if p.returncode != 0 or "chưa áp dụng" in p.stdout:
         bad.append("%s trên pool tạm: %s" % (os.path.basename(inv), (p.stdout or p.stderr).strip()[:140]))
 # (a) quay lại
-v = r.vendor("P_temp")
+_vs = r.vendors("venue")   # đọc một lần, sửa trên CHÍNH danh sách sẽ ghi xuống (r.vendor() trả bản đọc lại từ file)
+v = next(x_ for x_ in _vs if x_["id"] == "P_temp")
 v["google_photos"] = [{"uri": "https://lh3.googleusercontent.com/P_temp/0", "attributions": [{"name": "A"}], "fetched_at": "2026-11-09T00:00:00Z"}]
 v["enrichment_log"] = [{"source": "google_maps", "timestamp": "2026-11-09T04:03:36", "matched_name": "Nhà hàng Ptemp", "confidence": 1.0, "place_id": "PID_T", "formatted_address": x.GADDR % 2, "address_match": True, "changes": {}}]
-r.write("venue/vendors.json", {"vendors": r.vendors("venue")})
+r.write("venue/vendors.json", {"vendors": _vs})
 ar = [a for a in r.read("venue/enrichment-audit.json") if a["vendor_id"] != "P_temp"] + [{"vendor_id": "P_temp", "status": "enriched", "place_id": "PID_T", "reopened": True, "matched_name": "Nhà hàng Ptemp", "confidence": 1.0}]
 r.write("venue/enrichment-audit.json", ar)
 rc, o = regen()
