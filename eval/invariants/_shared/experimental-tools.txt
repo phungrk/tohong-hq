@@ -1,0 +1,6 @@
+# Danh sách công cụ đang thử nghiệm (nguồn: T-102, spec products/T-102-graphify-thu-nghiem.md v3, mục "Bất biến đề xuất").
+# Dùng bởi eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py.
+# Mỗi dòng một tên, không phân biệt hoa thường; dòng trống và dòng bắt đầu bằng # bị bỏ qua.
+# Thêm thử nghiệm mới = thêm một dòng (spec-critic, adversary, insight). Bỏ một tên (vd khi Capu quyết dùng thật)
+# = sửa bất biến: qua Chief of Staff, ghi decisions/.
+graphify
