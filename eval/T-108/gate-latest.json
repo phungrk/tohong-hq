@@ -1,6 +1,6 @@
 {
   "task": "T-108",
-  "at": "2026-11-08T04:41",
+  "at": "2026-11-08T04:45",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 -I eval/T-106/check_1_place_id.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 146,
+      "ms": 66,
       "out": "PASS 76/91 vendor venue có place_id Google (>= 60)",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 -I eval/T-106/check_2_anh_google.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 40,
+      "ms": 39,
       "out": "PASS 76/91 vendor venue có >= 1 ảnh Google (>= 50)",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 -I eval/T-106/check_3_han_muc.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 28,
+      "ms": 23,
       "out": "PASS Photos 812 <= 1000 (baseline 606 + 206); Text Search 99 lượt <= $3.96 (2 log chạy thật)",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "python3 -I eval/T-106/check_4_khong_url_api.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 72,
+      "ms": 96,
       "out": "PASS pool và vendors.json không chứa places.googleapis.com",
       "tier": 1
     },
@@ -44,15 +44,15 @@
       "eval": "python3 -I eval/T-106/check_5_khop_sai_vao_review.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 101,
-      "out": "FAIL marry_1e7c855f8dfa: luật v4 từ chối vì address_unconfirmed nhưng audit reject_reason=None",
+      "ms": 98,
+      "out": "FAIL marry_14b4d1b1b7f0: dòng audit bị từ chối thiếu candidate_place_id",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-106/check_6_pool_chi_doi_photos.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 677,
+      "ms": 651,
       "out": "PASS pool chỉ đổi photos/styles ở 76 vendor venue so với d3dfa182; giá và mọi trường khác giữ nguyên; inv-001 pool đạt",
       "tier": 1
     },
@@ -60,15 +60,15 @@
       "eval": "python3 -I eval/T-106/check_7_cong_chong_khop_nham.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 405,
-      "out": "w-needed.csv có 0 dòng (mong 1)\n04:40:55 [INFO] Eligible for enrichment: 38/38\n04:40:55 [INFO] Eligible for enrichment: 38/38\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 2/2\n04:40:55 [INFO] Eligible for enrichment: 3/3\n04:40:55 [INFO] Eligible for enrichment: 3/3\n04:40:55 [INFO] Eligible for enrichment: 1/1",
+      "ms": 381,
+      "out": "w-needed.csv có 0 dòng (mong 1)\n04:45:03 [INFO] Eligible for enrichment: 43/43\n04:45:03 [INFO] Eligible for enrichment: 43/43\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 2/2\n04:45:03 [INFO] Eligible for enrichment: 3/3\n04:45:03 [INFO] Eligible for enrichment: 3/3\n04:45:03 [INFO] Eligible for enrichment: 1/1",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-106/check_8_ap_lai_luat_offline.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 242,
+      "ms": 341,
       "out": "FAIL lệnh enrich venue chết khi chạy offline (không đặt GOOGLE_MAPS_API_KEY, mọi HTTP bị chặn): ValueError: GOOGLE_MAPS_API_KEY not set. Export it, or use dry_run=True for testing.",
       "tier": 1
     },
@@ -76,15 +76,15 @@
       "eval": "python3 -I eval/T-106/adv-01-dong-cua-van-giu-place-id.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 241,
-      "out": "PASS ADR-044: CLOSED_PERMANENTLY gỡ + removed_vendors.json + audit closed_permanently có place_id/formatted_address, không review; CLOSED_TEMPORARILY nhận khớp + temporarily_closed\n04:40:56 [INFO] Eligible for enrichment: 2/2",
+      "ms": 249,
+      "out": "PASS ADR-044: CLOSED_PERMANENTLY gỡ + removed_vendors.json + audit closed_permanently có place_id/formatted_address, không review; CLOSED_TEMPORARILY nhận khớp + temporarily_closed\n04:45:03 [INFO] Eligible for enrichment: 2/2",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-106/adv-02-log-chay-lai-khong-ghi-de.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 26,
+      "ms": 39,
       "out": "PASS mỗi lần chạy thật có log riêng hoặc ghi nối; check_3 không đếm thiếu khi chạy lại cùng ngày",
       "tier": 1
     },
@@ -92,23 +92,23 @@
       "eval": "python3 -I eval/T-106/adv-03-dong-cua-nhieu-category.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 267,
-      "out": "PASS CLOSED_PERMANENTLY gỡ ở mọi category file, lưu removed_vendors.json\n04:40:56 [INFO] Eligible for enrichment: 1/1",
+      "ms": 321,
+      "out": "PASS CLOSED_PERMANENTLY gỡ ở mọi category file, lưu removed_vendors.json\n04:45:04 [INFO] Eligible for enrichment: 1/1",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-108/adv-06-khop-nham-dia-diem-conf-cao.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 68,
-      "out": "22b3a8f79b 'Trung Tâm Hội nghị - Tiệc Cưới Grand Palace' (142/18 Cộng Hòa, P.4, Quận Tân Bình, Thà) và marry_9c3f1ad337b2 'Trung Tâm Hội Nghị Tiệc Cưới Luxury Palace' (171 Nguyễn Thái Sơn, Phường 7, Quận Gò V) cùng place_id ChIJR1VVtjkpdTERTlmF1aY3cag\n  (b) marry_f1281c3914e0 'Trung tâm hội nghị tiệc cưới TDG CENTER' (02 Đường D2, Phường Sơn Kỳ, Quận Tân Phú) và marry_6babc2dabab7 'Trung Tâm Hội Nghị & Tiệc Cưới GALA' (415 Hoàng Văn Thụ, P.2, Quận Tân Bình, T) cùng place_id ChIJ2U7dJDEpdTERJk3dmKSAllM\n  (c) marry_8909e36e73bf 'TRUNG TÂM HỘI NGHỊ TIỆC CƯỚI ROSE PALACE' cùng địa chỉ với marry_5076cd75074e đã đóng cửa ('Nhà Hàng Tiệc Cưới Hội Nghị Rose Palace, 746 Kha Vạn Cân, Thủ Đức, Hồ Chí Minh'), nhưng nhận 'Trung Tâm Hội Nghị - Tiệc Cưới Rosa Palace' ở '12a, 2 ĐT743, An Phú, Hồ Chí Minh'",
+      "ms": 113,
+      "out": "1ad337b2 (b) G6 place_id ChIJR1VVtjkpdTERTlmF1aY3cag chung với marry_ae22b3a8f79b 'Trung Tâm Hội nghị - Tiệc Cưới Grand Palace' (gốc '142/18 Cộng Hòa, P.4, Quận Tân Bình, Thà' khác gốc '171 Nguyễn Thái Sơn, Phường 7, Quận Gò V'); spec từ chối: address_conflict\n  marry_ae22b3a8f79b (b) G6 place_id ChIJR1VVtjkpdTERTlmF1aY3cag chung với marry_9c3f1ad337b2 'Trung Tâm Hội Nghị Tiệc Cưới Luxury Palace' (gốc '171 Nguyễn Thái Sơn, Phường 7, Quận Gò V' khác gốc '142/18 Cộng Hòa, P.4, Quận Tân Bình, Thà'); spec từ chối: address_conflict\n  marry_f1281c3914e0 (b) G6 place_id ChIJ2U7dJDEpdTERJk3dmKSAllM chung với marry_6babc2dabab7 'Trung Tâm Hội Nghị & Tiệc Cưới GALA' (gốc '415 Hoàng Văn Thụ, P.2, Quận Tân Bình, T' khác gốc '02 Đường D2, Phường Sơn Kỳ, Quận Tân Phú'); spec từ chối: address_unconfirmed",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 604,
+      "ms": 36,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 187,
+      "ms": 181,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 40,
+      "ms": 29,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 631,
+      "ms": 680,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -140,15 +140,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2759,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-e5X5qe/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2408,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-vqdC8q/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1516,
+      "ms": 1593,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -156,15 +156,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 943,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-Ki41lB/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 982,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-iLUhfC/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 22,
+      "ms": 20,
       "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 40,
+      "ms": 29,
       "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 566,
+      "ms": 638,
       "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1812,
+      "ms": 1828,
       "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 6296,
+      "ms": 6288,
       "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-006-wayback-chi-khi-bat-co-va-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 6699,
+      "ms": 6679,
       "out": "PASS Wayback chỉ khi bật cờ; 4 yêu cầu, giãn cách nhỏ nhất 2.00 giây, tối đa 1 cùng lúc",
       "tier": 2
     },
@@ -212,7 +212,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-007-khong-goi-wayback-available.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 690,
+      "ms": 720,
       "out": "PASS 6 yêu cầu tới Wayback, không có /wayback/available",
       "tier": 2
     },
@@ -220,7 +220,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-008-san-toc-do-wayback.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 561,
+      "ms": 562,
       "out": "PASS 6 cách hạ tốc độ / dùng --wayback-* sai đều bị từ chối mã 2, không yêu cầu, không ghi manifest",
       "tier": 2
     },
@@ -228,7 +228,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-009-wayback-429-khong-go-cua-mai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 16265,
+      "ms": 16307,
       "out": "PASS 429 mọi yêu cầu: 20 yêu cầu tổng, tối đa 4 liên tiếp cùng đường dẫn, lần gửi lại sớm nhất sau 1.00 giây, 1 cùng lúc",
       "tier": 2
     },
@@ -236,7 +236,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-010-eval-khong-kill-theo-ten.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 418,
+      "ms": 358,
       "out": "PASS không eval nào kill tiến trình theo tên",
       "tier": 2
     },
@@ -244,7 +244,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-011-file-thu-eval-khong-vao-git-front.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 53,
+      "ms": 38,
       "out": "PASS repo front không chứa file tạm của eval (__t0NN*, __nonce-*)",
       "tier": 2
     },
@@ -252,7 +252,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-012-pool-khong-url-places-api.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 153,
+      "ms": 93,
       "out": "PASS 1 file pool (lib/vendorPool.generated.js) không chứa URL API Places/khoá Google",
       "tier": 2
     },
@@ -260,7 +260,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-013-anh-google-co-ghi-cong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 57,
+      "ms": 78,
       "out": "PASS 284 ảnh Google trong pool đều có attribution không rỗng",
       "tier": 2
     },
@@ -268,7 +268,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-014-anh-google-truy-ve-place-id.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 64,
+      "ms": 90,
       "out": "PASS 144 vendor có ảnh Google đều có place_id nguồn",
       "tier": 2
     },
@@ -276,7 +276,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-015-nhan-khop-google-co-cong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 67,
+      "ms": 69,
       "out": "PASS nhận khớp có cổng (79 bản ghi place_id mới tính lại được address_match từ địa chỉ gốc)",
       "tier": 2
     },
@@ -284,8 +284,8 @@
       "eval": "eval/T-108/adv-06-khop-nham-dia-diem-conf-cao.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 63,
-      "out": "22b3a8f79b 'Trung Tâm Hội nghị - Tiệc Cưới Grand Palace' (142/18 Cộng Hòa, P.4, Quận Tân Bình, Thà) và marry_9c3f1ad337b2 'Trung Tâm Hội Nghị Tiệc Cưới Luxury Palace' (171 Nguyễn Thái Sơn, Phường 7, Quận Gò V) cùng place_id ChIJR1VVtjkpdTERTlmF1aY3cag\n  (b) marry_f1281c3914e0 'Trung tâm hội nghị tiệc cưới TDG CENTER' (02 Đường D2, Phường Sơn Kỳ, Quận Tân Phú) và marry_6babc2dabab7 'Trung Tâm Hội Nghị & Tiệc Cưới GALA' (415 Hoàng Văn Thụ, P.2, Quận Tân Bình, T) cùng place_id ChIJ2U7dJDEpdTERJk3dmKSAllM\n  (c) marry_8909e36e73bf 'TRUNG TÂM HỘI NGHỊ TIỆC CƯỚI ROSE PALACE' cùng địa chỉ với marry_5076cd75074e đã đóng cửa ('Nhà Hàng Tiệc Cưới Hội Nghị Rose Palace, 746 Kha Vạn Cân, Thủ Đức, Hồ Chí Minh'), nhưng nhận 'Trung Tâm Hội Nghị - Tiệc Cưới Rosa Palace' ở '12a, 2 ĐT743, An Phú, Hồ Chí Minh'",
+      "ms": 118,
+      "out": "1ad337b2 (b) G6 place_id ChIJR1VVtjkpdTERTlmF1aY3cag chung với marry_ae22b3a8f79b 'Trung Tâm Hội nghị - Tiệc Cưới Grand Palace' (gốc '142/18 Cộng Hòa, P.4, Quận Tân Bình, Thà' khác gốc '171 Nguyễn Thái Sơn, Phường 7, Quận Gò V'); spec từ chối: address_conflict\n  marry_ae22b3a8f79b (b) G6 place_id ChIJR1VVtjkpdTERTlmF1aY3cag chung với marry_9c3f1ad337b2 'Trung Tâm Hội Nghị Tiệc Cưới Luxury Palace' (gốc '171 Nguyễn Thái Sơn, Phường 7, Quận Gò V' khác gốc '142/18 Cộng Hòa, P.4, Quận Tân Bình, Thà'); spec từ chối: address_conflict\n  marry_f1281c3914e0 (b) G6 place_id ChIJ2U7dJDEpdTERJk3dmKSAllM chung với marry_6babc2dabab7 'Trung Tâm Hội Nghị & Tiệc Cưới GALA' (gốc '415 Hoàng Văn Thụ, P.2, Quận Tân Bình, T' khác gốc '02 Đường D2, Phường Sơn Kỳ, Quận Tân Phú'); spec từ chối: address_unconfirmed",
       "tier": 3
     }
   ],
