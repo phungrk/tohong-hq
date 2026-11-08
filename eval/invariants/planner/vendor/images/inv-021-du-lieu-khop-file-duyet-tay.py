@@ -2,7 +2,7 @@
 """Nguồn: T-110 (spec products/T-110-duyet-tay-venue.md v2, Hành vi 2, 3, 6; ADR-048, ADR-049 mục 2; bản nháp eval/T-110/inv-proposed-du-lieu-khop-file-duyet-tay.py;
 qua Spec Gate lần 2 2026-11-08, spec-critic; sửa so với bản nháp: dấu hiệu tạm đóng cửa đọc ở mọi category (spec: "dòng audit mới nhất ở bất kỳ category file nào"),
 accept_place xét mọi category, và mục accept_place bị OVERRIDE_ERROR hợp lệ (ngoài tỉnh, đóng cửa, place_conflict, unknown_vendor) không bị tính là lệch).
-Nằm ở eval/T-110/bat-bien-cho-merge/ cho tới khi PR T-110 merge (ADR-028); Chief of Staff đưa vào eval/invariants/planner/vendor/images/.
+Nằm ở eval/invariants/planner/vendor/images/ cho tới khi PR T-110 merge (ADR-028); Chief of Staff đưa vào eval/invariants/planner/vendor/images/.
 INV-021 · Dữ liệu vendor khớp file duyệt tay, và vendor tạm đóng cửa không hiện trên app.
   (a) accept_place có `resolved` (OPERATIONAL hoặc vắng, trong tỉnh, không chung resolved.place_id với mục accept_place khác, vendor có ở vendors.json nào đó):
       vendor có enrichment_log[google_maps].place_id = resolved.place_id.

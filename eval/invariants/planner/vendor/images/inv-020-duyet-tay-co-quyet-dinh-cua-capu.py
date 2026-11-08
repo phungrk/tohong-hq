@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Nguồn: T-110 (spec products/T-110-duyet-tay-venue.md v2, Hành vi 1; bản nháp eval/T-110/inv-proposed-duyet-tay-co-quyet-dinh-cua-capu.py;
 qua Spec Gate lần 2 2026-11-08, spec-critic; siết thêm: `decision` phải nằm trong decisions/ của HQ, `decided_by: capu` phải ở frontmatter).
-Nằm ở eval/T-110/bat-bien-cho-merge/ cho tới khi PR T-110 merge (ADR-028); Chief of Staff đưa vào eval/invariants/planner/vendor/images/.
+Nằm ở eval/invariants/planner/vendor/images/ cho tới khi PR T-110 merge (ADR-028); Chief of Staff đưa vào eval/invariants/planner/vendor/images/.
 INV-020 · Mọi mục duyệt tay có quyết định của Capu.
 tools/scraper/output/HCMC/manual_overrides.json (repo tohong): schema_version=1; vendor_id có và duy nhất; action thuộc {accept_place, remove, temporarily_closed,
 reject_match}; reason không rỗng; approved_by='capu'; approved_on dạng YYYY-MM-DD; `decision` là đường dẫn tương đối, sau chuẩn hoá vẫn nằm trong
