@@ -1,0 +1,149 @@
+{
+  "task": "T-116",
+  "at": "2026-11-09T07:57",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/front/vendor-images",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "bash eval/T-114/run.sh /home/user/tohong-front 1",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 3,
+      "out": "bash: eval/T-114/run.sh: No such file or directory",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-114/run.sh /home/user/tohong-front 2",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 3,
+      "out": "bash: eval/T-114/run.sh: No such file or directory",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-114/run.sh /home/user/tohong-front 3",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 2,
+      "out": "bash: eval/T-114/run.sh: No such file or directory",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-114/run.sh /home/user/tohong-front 4",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 3,
+      "out": "bash: eval/T-114/run.sh: No such file or directory",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-114/run.sh /home/user/tohong-front 5",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 2,
+      "out": "bash: eval/T-114/run.sh: No such file or directory",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-114/bat-bien-cho-merge/inv-005-khong-chu-anh-minh-hoa-nhin-thay.sh",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 62639,
+      "out": "N1 FAIL S1 venue: còn chữ \"Ảnh minh hoạ\" nhìn thấy (text:Ảnh minh hoạ ; text:Ảnh minh hoạ) || S1 venue Hong: ô >= 80px còn chữ \"Ảnh minh hoạ\" nhìn thấy trên ảnh || S1 venue Khong: ô >= 80px còn chữ \"Ảnh minh hoạ\" nhìn thấy trên ảnh || S1 ceremony: còn chữ \"Ảnh minh hoạ\" nhìn thấy (text:Ảnh minh hoạ ; text:Ảnh minh hoạ) (+35 lỗi nữa)\nN2 PASS mỗi ô ảnh hỏng/thiếu có đúng một role=img tên \"Ảnh minh hoạ: <hạng mục>\"\nFAIL",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 40,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 170,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 33,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 949,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2791,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-yi7KxC/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1721,
+      "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1272,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-G0gULm/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/vendor-images/inv-001-anh-khong-dung-duoc-co-minh-hoa-dung-hang-muc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 63712,
+      "out": "C1 PASS ảnh hỏng/thiếu ra minh hoạ đúng hạng mục ở 6 bề mặt\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/vendor-images/inv-002-minh-hoa-noi-bo-token-moi-hang-muc-mot-hinh.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 63346,
+      "out": "C3 PASS minh hoạ svg nội bộ, token màu, nhẹ, sáng/tối, riêng từng hạng mục, không mạng ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/vendor-images/inv-003-anh-tot-va-dang-kiem-khong-minh-hoa.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 62389,
+      "out": "C4 PASS ảnh tốt vẫn là ảnh thật; đang kiểm ảnh giữ cách hiện cũ\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/vendor-images/inv-004-o-nho-co-tooltip-khi-re-chuot.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 4946,
+      "out": "h hỏng + ảnh thiếu)\n  ok  [tooltip] #s4 ô 73x30 \"Ảnh minh hoạ: Chụp ảnh / quay\": rê chuột vào tâm ô phải ra tooltip = tên truy cập (thuộc tính title trên ô: \"Ảnh minh hoạ: Chụp ảnh / quay\")\n  ok  [tooltip] #s4 ô 73x30 \"Ảnh minh hoạ: Chụp ảnh / quay\": rê chuột vào tâm ô phải ra tooltip = tên truy cập (thuộc tính title trên ô: \"Ảnh minh hoạ: Chụp ảnh / quay\")\n  ok  [tooltip] #s5: có ô minh hoạ để đo (ảnh hỏng + ảnh thiếu)\n  ok  [tooltip] #s5 ô 32x32 \"Ảnh minh hoạ: Chụp ảnh / quay\": rê chuột vào tâm ô phải ra tooltip = tên truy cập (thuộc tính title trên ô: \"Ảnh minh hoạ: Chụp ảnh / quay\")\n  ok  [tooltip] #s5 ô 32x32 \"Ảnh minh hoạ: Chụp ảnh / quay\": rê chuột vào tâm ô phải ra tooltip = tên truy cập (thuộc tính title trên ô: \"Ảnh minh hoạ: Chụp ảnh / quay\")\n  ok  [tooltip] không lỗi trang\nPASS",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
