@@ -13,18 +13,19 @@ Capu (2026-11-09, ảnh chụp iPhone Safari ~390x844, thanh địa chỉ dướ
 | 430x932 | 76 / 856 | 174..813 | 489 | 513..547 | 813 / 119 | không che (cách 266px) |
 | 1280x800 (desktop) | 76 / 724 | 174..681 | 448 | 472..506 | 681 / 119 | không che |
 
-Giới hạn của bằng chứng: trong Chromium 390x844 mục số khách hiện đủ, **không tái hiện** đúng ảnh của Capu. Chỉ 375x667 tái hiện được hiện tượng bị che. Ảnh của Capu là Safari thật với thanh công cụ dưới; Playwright không giả lập được. Giả định: thanh công cụ làm vùng nhìn thấy thấp hơn cửa sổ bố cục khoảng 90px (tự tin ~60%), nên eval thêm các viewport thấp hơn 90px (375x577, 390x754, 430x842) để mô phỏng. Khi vùng thấp như vậy, nội dung bắt buộc phải cuộn được và footer không được che hàng nào sau khi cuộn hết.
+Viewport tái hiện ảnh Capu: **390x664**. Đo trên main: sheet 76 / 588, tiêu đề Số khách đỉnh 530 (lộ ~15px, "chỉ thấy mép chữ"), hàng đầu 554..588, footer đỉnh 545 / cao 119, che cả hàng (khe -43px). 664 là vùng nhìn thấy khi thanh trạng thái, thanh Safari dưới và vùng home ăn ~180px của màn 844; con số là ĐOÁN (tự tin ~65%, spec-critic D1), nguồn chốt là `?vvdebug=1` (T-056) trên máy Capu. Mô hình "thấp hơn 90px" của v1 bị bỏ: ở 390x754 main vốn đã đủ chỗ, không giải thích được ảnh.
 
 ## Giả thuyết
 Nếu nâng đỉnh sheet lên và bảo đảm vùng nội dung cuộn tới hết, thì người dùng điện thoại thấy và chọn được số khách ở bước 2 mà không bị nút che. Chỉ số bảo vệ: desktop không đổi; không cuộn ngang; nút Tiếp theo vẫn cao >= 44px.
 
 ## Hành vi (người dùng thấy gì)
-1. Khi mở bước 2/3 trên điện thoại ở 375x667, 390x844 hoặc 430x932, chưa cuộn: tiêu đề mục "Số khách ..." và hàng lựa chọn đầu tiên của mục đó (nút 80) nằm trọn trong vùng nhìn thấy, phía dưới đỉnh vùng nội dung và phía trên footer, cách đỉnh footer ít nhất 4px.
-2. Sheet cao hơn bản gốc ít nhất 24px ở cả ba viewport, và không vượt ra ngoài vùng nhìn thấy (đỉnh >= 0, đáy <= chiều cao cửa sổ).
-3. Khi vùng nhìn thấy thấp hơn (có thanh công cụ trình duyệt, mô phỏng bằng viewport thấp hơn 90px): nội dung cuộn được; sau khi cuộn hết, tiêu đề Số khách, hàng lựa chọn đầu và phần tử cuối của vùng nội dung đều nằm trên footer, không bị che.
-4. Footer (Tiếp theo + Quay lại bước 1) luôn nằm trọn trong vùng nhìn thấy, nút Tiếp theo cao >= 44px, trang không cuộn ngang.
-5. Desktop 1280x800: sheet, vùng nội dung và footer giữ nguyên số đo gốc (sai số 1px): sheet đỉnh 76, cao 724, trái 256, phải 1024; đỉnh vùng nội dung 174; footer đỉnh 681, cao 119.
-6. Ở 320x568 và 375x667, sau khi cuộn hết, không tràn ngang và hàng lựa chọn đầu của mục Số khách không bị footer che.
+1. Khi mở bước 2/3 trên điện thoại ở **375x667, 390x664 hoặc 430x932**, chưa cuộn: tiêu đề mục "Số khách ..." và hàng lựa chọn đầu tiên của mục đó (nút 80) nằm trọn trong vùng nhìn thấy, dưới đỉnh vùng nội dung, trên footer (cách đỉnh footer >= 4px), và không bị phần tử nào khác phủ (điểm giữa của nó trả về chính nó khi hỏi phần tử trên cùng).
+2. Sheet cao hơn bản gốc ít nhất 24px ở cả ba viewport (591/588/856 thành >= 615/612/880), và trong vùng nhìn thấy (đỉnh >= 0, đáy <= chiều cao cửa sổ). Ở 390x664 hành vi 1 đòi sheet thực tế cao hơn gốc khoảng 47px.
+3. Màn rất thấp (320x568, 375x548): chỉ cần vùng nội dung cuộn được; sau khi cuộn hết, tiêu đề Số khách và nút cuối của mục này nằm trên footer, không bị che, nút Tiếp theo không bị che. Không bắt buộc có dấu hiệu "còn nội dung bên dưới" (Chief of Staff chốt).
+4. Footer luôn trong vùng nhìn thấy ở 375x667, 390x664, 430x932, 320x568, 375x548; nút Tiếp theo cao >= 44px, không bị che, trang không cuộn ngang.
+5. Desktop 1280x800 giữ nguyên số đo gốc (sai số 1px): sheet đỉnh 76, cao 724, trái 256, phải 1024; đỉnh vùng nội dung 174; footer đỉnh 681, cao 119.
+6. Chiều cao sheet tính theo vùng nhìn thấy: dùng `dvh`/`svh` hoặc `window.visualViewport` (hoặc neo vào lớp phủ cố định như hiện nay). **Cấm** `vh`/`lvh` cho chiều cao sheet, vì trên Safari có thanh công cụ chúng lớn hơn vùng nhìn thấy mà Chromium không phân biệt được.
+7. MANUAL: Capu mở trên iPhone thật (có thể kèm `?vvdebug=1`), bước 2/3 thấy thanh "BƯỚC 2 / 3", tiêu đề Số khách và nút 80 đầu, không cuộn, nút Tiếp theo không bị thanh Safari che (`eval/T-115/checklist.md`).
 
 "Có tính 3 bước": thanh tiến trình ba bước (Bước 2/3) nằm trong phần đầu sheet và được tính vào chiều cao; không được bỏ nó để lấy chỗ.
 
@@ -36,21 +37,24 @@ Nếu nâng đỉnh sheet lên và bảo đảm vùng nội dung cuộn tới h�
 - Bậc đề xuất: A, giữ nguyên (UI thuần, eval tự động phủ hết tiêu chí).
 
 ## Tiêu chí chấp nhận và eval
-Chạy từ `/home/user/tohong-hq`; `--repo` trỏ tới repo front đang làm việc (mặc định cwd).
+Chạy bằng `python3 scripts/gate.py T-115 --cwd /home/user/tohong-front` (lệnh eval có tiền tố `cd /home/user/tohong-hq &&`).
 
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Hành vi 1: không cuộn, tiêu đề Số khách + hàng đầu nằm trên footer ở 375x667, 390x844, 430x932 | `node eval/T-115/check.cjs --repo /home/user/tohong-front --only 1` |
-| 2 | Hành vi 2: sheet cao hơn gốc >= 24px (591/768/856 -> 615/792/880), trong vùng nhìn thấy | `node eval/T-115/check.cjs --repo /home/user/tohong-front --only 2` |
-| 3 | Hành vi 3: viewport thấp hơn 90px, nội dung cuộn được, sau khi cuộn hết không bị footer che | `node eval/T-115/check.cjs --repo /home/user/tohong-front --only 3` |
-| 4 | Hành vi 4: footer trong vùng nhìn thấy, nút >= 44px, không cuộn ngang | `node eval/T-115/check.cjs --repo /home/user/tohong-front --only 4` |
-| 5 | Hành vi 5: desktop 1280x800 giữ nguyên | `node eval/T-115/check.cjs --repo /home/user/tohong-front --only 5` |
-| 6 | Hành vi 6: 320x568 và 375x667 không tràn ngang, hàng đầu không bị che sau khi cuộn hết | `node eval/T-115/check.cjs --repo /home/user/tohong-front --only 6` |
+| 1 | Hành vi 1: không cuộn, tiêu đề Số khách + hàng đầu trọn, trên footer, không bị che (elementFromPoint), 3 viewport | `cd /home/user/tohong-hq && node eval/T-115/check.cjs --repo /home/user/tohong-front --only 1` |
+| 2 | Hành vi 2: sheet cao hơn gốc >= 24px, trong vùng nhìn thấy | `cd /home/user/tohong-hq && node eval/T-115/check.cjs --repo /home/user/tohong-front --only 2` |
+| 3 | Hành vi 3: màn rất thấp cuộn được, không bị che | `cd /home/user/tohong-hq && node eval/T-115/check.cjs --repo /home/user/tohong-front --only 3` |
+| 4 | Hành vi 4: footer trong vùng nhìn thấy, nút >= 44px, không cuộn ngang | `cd /home/user/tohong-hq && node eval/T-115/check.cjs --repo /home/user/tohong-front --only 4` |
+| 5 | Hành vi 5: desktop giữ nguyên | `cd /home/user/tohong-hq && node eval/T-115/check.cjs --repo /home/user/tohong-front --only 5` |
+| 6 | Hành vi 6: chiều cao sheet không dùng vh/lvh (kiểm tĩnh trong `Onboarding.jsx` và các luật `.ov-fixed` của `index.css`; vì Chromium không phân biệt vh với svh) | `cd /home/user/tohong-hq && node eval/T-115/check.cjs --repo /home/user/tohong-front --only 6` |
+| 7 | Hành vi 7: Capu kiểm trên iPhone thật | `eval/T-115/checklist.md` (MANUAL: Chromium không có thanh Safari thật) |
 
-Trạng thái trên main a7e5807: eval 1 và 2 đỏ (đúng kỳ vọng); eval 3, 4, 5, 6 xanh (chặn hồi quy: Chromium cuộn được sẵn). Eval chạy qua `eval/_lib/vite_dev.cjs`, chặn mạng ngoài.
+Tự kiểm phép đo (không phải tiêu chí sản phẩm): `cd /home/user/tohong-hq && node eval/T-115/check.cjs --repo /home/user/tohong-front --only 7` chạy lại phép đo với hai biến thể cấu trúc (thêm dấu hiệu cuộn giữa nội dung và footer, bọc nút trong div) và đòi kết quả y hệt bản thường. Phần tử được tìm theo hành vi: vùng nội dung = tổ tiên cuộn dọc được của tiêu đề Số khách; footer = hộp bao hai nút Tiếp theo và Quay lại bước 1; sheet = tổ tiên chung của chữ BƯỚC 2 / 3 và nút Tiếp theo.
+
+Trạng thái trên main a7e5807: eval 1 và 2 đỏ (đúng kỳ vọng); 3, 4, 5, 6, 7 xanh (chặn hồi quy). Eval dùng `eval/_lib/vite_dev.cjs` với `files: {}`, chặn mạng ngoài.
 
 ## Bất biến đề xuất (tầng 2)
-Đề xuất cho Spec critic: "Ở bước 2/3 Onboarding, ở mọi viewport điện thoại 375x667..430x932, sau khi cuộn hết, mục Số khách và nút Tiếp theo không che nhau" = tiêu chí 3 và 4 (`--only 3`, `--only 4`). Không đề xuất bất biến chiều cao tuyệt đối.
+"Chiều cao sheet/modal không dựa `vh`/`lvh`" = tiêu chí 6 (`--only 6`), và "bước 2/3, hàng Số khách không bị che ở 390x664" = tiêu chí 1. Không đề xuất bất biến chiều cao tuyệt đối.
 
 ## Không làm
 - Không đổi nội dung, thứ tự hay nhãn các mục (không đổi "Số khách dự kiến" thành "Số khách mời").
@@ -58,4 +62,10 @@ Trạng thái trên main a7e5807: eval 1 và 2 đỏ (đúng kỳ vọng); eval 
 - Không dùng thủ thuật riêng cho Safari (đo thanh công cụ bằng user agent).
 
 ## Câu hỏi mở
-Không. Lưu ý cho Capu: ảnh Safari thật không tái hiện được trong headless; sau khi ship, Capu kiểm lại trên iPhone, nếu vẫn che thì cần ảnh mới để chỉnh GIẢ ĐỊNH ~90px.
+Không. Lưu ý cho Capu: 664 là đoán; nếu có thể, gửi ảnh bước 2/3 với `?vvdebug=1` để chốt `innerHeight` thật.
+
+## Sửa ở v2 (spec rework, defect T-115-D1)
+- Hành vi 1 và Bằng chứng: bỏ mô hình "thấp hơn 90px" (mâu thuẫn số đo của chính spec); viewport bắt buộc 375x667, 390x664, 430x932 (bỏ 390x844 vì đã xanh trên main).
+- Thêm Hành vi 6 (cấm vh/lvh) và 7 (MANUAL) vì cách cài dùng `100vh` qua hết eval Chromium mà hỏng trên Safari.
+- Hành vi 3: chọn nhánh "chỉ cần cuộn được" cho màn rất thấp.
+- Eval: tìm phần tử theo hành vi, kiểm "bị che" bằng elementFromPoint, thêm tự kiểm hai biến thể; lệnh có tiền tố `cd /home/user/tohong-hq &&`.
