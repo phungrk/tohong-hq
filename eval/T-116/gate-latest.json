@@ -1,6 +1,6 @@
 {
   "task": "T-116",
-  "at": "2026-11-09T08:12",
+  "at": "2026-11-09T08:26",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-114/run.sh ${TOHONG_FRONT_REPO:-/home/user/tohong-front} 1",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 62095,
+      "ms": 62855,
       "out": "C1 PASS không còn chữ \"Ảnh minh hoạ\" nhìn thấy ở 6 bề mặt\nPASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-114/run.sh ${TOHONG_FRONT_REPO:-/home/user/tohong-front} 2",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 61988,
+      "ms": 61982,
       "out": "C2 PASS tên truy cập, khung ảnh, title ô nhỏ vẫn đúng\nPASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-114/run.sh ${TOHONG_FRONT_REPO:-/home/user/tohong-front} 3",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 62419,
+      "ms": 62786,
       "out": "C3 PASS ô có ảnh thật / đang kiểm không đổi\nPASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-114/run.sh ${TOHONG_FRONT_REPO:-/home/user/tohong-front} 4",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 62361,
+      "ms": 62810,
       "out": "C4 PASS ô lớn không chặn chuột\nPASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-114/run.sh ${TOHONG_FRONT_REPO:-/home/user/tohong-front} 5",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 62704,
+      "ms": 63095,
       "out": "C5 PASS khung 390 không cuộn ngang\nPASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-114/bat-bien-cho-merge/inv-005-khong-chu-anh-minh-hoa-nhin-thay.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 62773,
+      "ms": 62814,
       "out": "N1 PASS không có chữ \"Ảnh minh hoạ\" (mọi cách viết dấu) nhìn thấy ở 6 bề mặt vendor\nN2 PASS mỗi ô ảnh hỏng/thiếu có đúng một role=img tên \"Ảnh minh hoạ: <hạng mục>\"\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 36,
+      "ms": 39,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 175,
+      "ms": 204,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 36,
+      "ms": 39,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 748,
+      "ms": 960,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -92,15 +92,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2983,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-wppHcg/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 3292,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-NiCHNV/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1699,
+      "ms": 1896,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -108,15 +108,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1250,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-TBbSXC/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1225,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-0MMx0i/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/front/vendor-images/inv-001-anh-khong-dung-duoc-co-minh-hoa-dung-hang-muc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 63125,
+      "ms": 63830,
       "out": "C1 PASS ảnh hỏng/thiếu ra minh hoạ đúng hạng mục ở 6 bề mặt\nPASS",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/front/vendor-images/inv-002-minh-hoa-noi-bo-token-moi-hang-muc-mot-hinh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 61822,
+      "ms": 63733,
       "out": "C3 PASS minh hoạ svg nội bộ, token màu, nhẹ, sáng/tối, riêng từng hạng mục, không mạng ngoài\nPASS",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/front/vendor-images/inv-003-anh-tot-va-dang-kiem-khong-minh-hoa.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 62561,
+      "ms": 63550,
       "out": "C4 PASS ảnh tốt vẫn là ảnh thật; đang kiểm ảnh giữ cách hiện cũ\nPASS",
       "tier": 2
     },
@@ -140,9 +140,33 @@
       "eval": "eval/invariants/planner/front/vendor-images/inv-004-o-nho-co-tooltip-khi-re-chuot.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 4925,
+      "ms": 5071,
       "out": "h hỏng + ảnh thiếu)\n  ok  [tooltip] #s4 ô 73x30 \"Ảnh minh hoạ: Chụp ảnh / quay\": rê chuột vào tâm ô phải ra tooltip = tên truy cập (thuộc tính title trên ô: \"Ảnh minh hoạ: Chụp ảnh / quay\")\n  ok  [tooltip] #s4 ô 73x30 \"Ảnh minh hoạ: Chụp ảnh / quay\": rê chuột vào tâm ô phải ra tooltip = tên truy cập (thuộc tính title trên ô: \"Ảnh minh hoạ: Chụp ảnh / quay\")\n  ok  [tooltip] #s5: có ô minh hoạ để đo (ảnh hỏng + ảnh thiếu)\n  ok  [tooltip] #s5 ô 32x32 \"Ảnh minh hoạ: Chụp ảnh / quay\": rê chuột vào tâm ô phải ra tooltip = tên truy cập (thuộc tính title trên ô: \"Ảnh minh hoạ: Chụp ảnh / quay\")\n  ok  [tooltip] #s5 ô 32x32 \"Ảnh minh hoạ: Chụp ảnh / quay\": rê chuột vào tâm ô phải ra tooltip = tên truy cập (thuộc tính title trên ô: \"Ảnh minh hoạ: Chụp ảnh / quay\")\n  ok  [tooltip] không lỗi trang\nPASS",
       "tier": 2
+    },
+    {
+      "eval": "eval/T-116/adv-01.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 6914,
+      "out": "PASS không chữ \"minh hoạ\" nhìn thấy, ô lớn không title/svg title và xuyên chuột ở tâm + 4 góc, desktop và mobile, mọi hạng mục + catId lạ/rỗng",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-116/adv-02.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 26,
+      "out": "PASS không còn prop chip/chipBottom; ô lớn VMatchChatCard và VDetailChatCard truyền large",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-116/adv-03.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 46,
+      "out": "PASS nhánh không xoá dòng ghi công/Google nào trong src (13 dòng xoá đã xét)",
+      "tier": 3
     }
   ],
   "hint": ""
