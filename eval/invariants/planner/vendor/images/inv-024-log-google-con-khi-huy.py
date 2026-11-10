@@ -11,7 +11,9 @@ mong đợi một file run-logs/*/*-run-777-* chứa GOOGLE_REQUEST (đủ để
 đưa về *.log cho add-paths/check_runs: phần đó đo bằng eval đầu-cuối của từng workflow, vd eval/T-119/adv-01). Không mạng, không Google."""
 import glob, json, os, re, signal, subprocess, sys, tempfile, time, yaml
 
-HQ = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
+HQ = os.path.dirname(os.path.abspath(__file__))
+while HQ != "/" and not os.path.isfile(os.path.join(HQ, "scripts", "gate.py")):  # ADR-057: tìm gốc tohong-hq, chạy được ở mọi độ sâu
+    HQ = os.path.dirname(HQ)
 repo = os.environ.get("TOHONG_REPO") or (os.getcwd() if os.path.isdir(".github/workflows") and os.path.isdir("tools/scraper") else os.path.join(HQ, "..", "tohong"))
 wfdir = os.path.join(repo, ".github", "workflows")
 CTX = {"github.run_id": "777", "github.run_attempt": "1", "github.run_number": "5"}
