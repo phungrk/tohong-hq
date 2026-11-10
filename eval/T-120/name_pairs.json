@@ -139,6 +139,16 @@
    "expect_accept": false,
    "note": "tổng hợp: sim >= 0,95 nhưng dãy chữ số khác (chi nhánh 2 và 3): N3 giữ",
    "source": "synthetic"
+  },
+  {
+   "id": "synthetic-bd-cu",
+   "name": "Eden Plaza Wedding Gallery",
+   "matched": "Eden Plaza Wedding Gallery",
+   "gaddr": "333 Đ. 22 Tháng 12, Thuận Giao, Hồ Chí Minh",
+   "conf": null,
+   "expect_accept": true,
+   "note": "tổng hợp, GIỚI HẠN ĐÃ BIẾT (spec M1): địa chỉ Google ở Thuận An, Bình Dương cũ nay ghi 'Hồ Chí Minh'; N2 theo G2 (TP.HCM mới, gồm Bình Dương và Bà Rịa-Vũng Tàu cũ) nên NHẬN. Địa chỉ mẫu có thật trong audit venue (Eden Plaza)",
+   "source": "synthetic"
   }
  ]
 }

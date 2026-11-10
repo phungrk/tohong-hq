@@ -22,8 +22,12 @@ if rc != 0:
 
 
 def addrs(vid):
-    v, cat = h.find_vendor(root, vid)
-    return v, cat, (v or {}).get("contact", {}).get("address"), (v or {}).get("contact", {}).get("address_source")
+    recs = h.records(root, vid)
+    ads = {(v.get("contact") or {}).get("address") for _, v, _ in recs}
+    srcs = {(v.get("contact") or {}).get("address_source") for _, v, _ in recs}
+    if len(ads) > 1 or len(srcs) > 1:
+        bad.append("%s: các category file có contact.address/address_source khác nhau" % vid[-6:])
+    return (recs[0][1] if recs else None), (recs[0][0] if recs else None), next(iter(ads), None), next(iter(srcs), None)
 
 
 changed = 0

@@ -28,7 +28,7 @@ for p in allinv:
     if rc != 0:
         bad.append("dữ liệu thật: %s: %s" % (os.path.basename(p), last[0][:140]))
 root, rows, FX, dropped = h.prepare(parent="repo")
-n_pid = lambda: sum(1 for r in rows if t.has_pid(h.find_vendor(root, r["id"])[0]))
+n_pid = lambda: sum(1 for r in rows if any(t.has_pid(v_) for _, v_, _ in h.records(root, r["id"])))
 before = n_pid()
 prop = os.path.join(h.HERE, "inv-proposed-nhan-khop-theo-ten.py")
 for label in ("lần 1", "lần 2"):
