@@ -1,0 +1,144 @@
+{
+ "pairs": [
+  {
+   "id": "marry_5ca094a3ae62",
+   "name": "Halady Makeup",
+   "matched": "Halady Makeup",
+   "gaddr": "1120 Cách Mạng Tháng Tám, Tân Sơn Nhất, Hồ Chí Minh",
+   "conf": 1.0,
+   "expect_accept": true,
+   "note": "tên trùng tuyệt đối; địa chỉ gốc viết tắt CMT8 nên bị G3 hạ nhầm hôm nay",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_898934ddb738",
+   "name": "L'indochine chocolate",
+   "matched": "L’indochine chocolate",
+   "gaddr": "17/22 Lương Minh Nguyệt, Phú Thạnh, Hồ Chí Minh",
+   "conf": 1.0,
+   "expect_accept": true,
+   "note": "khác dấu nháy: sau chuẩn hoá bằng nhau",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_f0db05ad2243",
+   "name": "Helen's Bridal",
+   "matched": "Helen Bridal",
+   "gaddr": "Số nhà, 130 Tân Sơn Nhì, Hồ Chí Minh 700000",
+   "conf": 0.96,
+   "expect_accept": true,
+   "note": "sim 0,960",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_c75d256d36c9",
+   "name": "Wings Decor",
+   "matched": "Wing Decor",
+   "gaddr": "15 Nguyễn Lương Bằng, Khu đô thị Phú Mỹ Hưng, Tân Mỹ, Hồ Chí Minh 700000",
+   "conf": 0.952,
+   "expect_accept": true,
+   "note": "sim 0,952: ca được nhận thấp nhất (số ít/số nhiều)",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_d4c7df71c68f",
+   "name": "Ben Flower",
+   "matched": "Ben Flowers",
+   "gaddr": "15N Nguyễn Thị Minh Khai, Sài Gòn, Hồ Chí Minh 700000",
+   "conf": 0.952,
+   "expect_accept": true,
+   "note": "sim 0,952",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_ac26c0bd3aff",
+   "name": "K.I.S.S  wedding event Planner",
+   "matched": "KISS Wedding Event Planner",
+   "gaddr": "1441 Đường Nguyễn Văn Linh, Khu đô thị Phú Mỹ Hưng, Tân Hưng, Hồ Chí Minh",
+   "conf": 0.981,
+   "expect_accept": true,
+   "note": "sim 0,981",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_a80a3b2b08e8",
+   "name": "Mơ Bridal",
+   "matched": "M.O.T Bridal",
+   "gaddr": "Tòa, S6 06, Vinhomes Grand Park, Long Bình, Hồ Chí Minh",
+   "conf": 0.947,
+   "expect_accept": false,
+   "note": "sim 0,947: ca bị từ chối cao nhất, tên riêng khác (Mơ / M.O.T)",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_8a5fb687ce53",
+   "name": "Studio Cherry",
+   "matched": "Studio Cherry 3",
+   "gaddr": "Lô H, QMXP+RX8 chung cư A4, Lô H/001 Phan Xích Long, Cầu Kiệu, Hồ Chí Minh 72200",
+   "conf": 0.929,
+   "expect_accept": false,
+   "note": "sim 0,929: chi nhánh số 3, dưới ngưỡng",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_986949b23933",
+   "name": "Dịch vụ cưới hỏi Hải Sơn",
+   "matched": "Dịch Vụ Cưới Hỏi Hải Đăng",
+   "gaddr": "18/4e Đường Xuân Thới Sơn 19, Ấp 3, Xuân Thới Sơn, Hồ Chí Minh",
+   "conf": 0.917,
+   "expect_accept": false,
+   "note": "sim 0,917: tên riêng khác (Hải Sơn / Hải Đăng)",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_4de91e2f632a",
+   "name": "Phước Thanh Jewelry",
+   "matched": "Huy Thanh Jewelry",
+   "gaddr": "221A Đ. Hoàng Văn Thụ, Phú Nhuận, Hồ Chí Minh",
+   "conf": 0.889,
+   "expect_accept": false,
+   "note": "sim 0,889: tên riêng khác",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_01d280cec75c",
+   "name": "Dịch vụ cưới hỏi SunMoon",
+   "matched": "Dịch Vụ Cưới Hỏi 24H",
+   "gaddr": "108 Đông Hưng Thuận 3, Đông Hưng Thuận, Hồ Chí Minh",
+   "conf": 0.773,
+   "expect_accept": false,
+   "note": "sim 0,773: từ chung (dịch vụ cưới hỏi) chiếm phần lớn, đúng ca Capu nêu",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_90a100f91106",
+   "name": "Flower You",
+   "matched": "Flower You",
+   "gaddr": "122 E 25th St, New York, NY 10010, Hoa Kỳ",
+   "conf": 1.0,
+   "expect_accept": false,
+   "note": "tên trùng tuyệt đối nhưng ở New York: G2 giữ",
+   "source": "snapshot"
+  },
+  {
+   "id": "marry_78962bbb2546",
+   "name": "Thiệp cưới Sweetie",
+   "matched": "Thiệp Cưới Sweetie",
+   "gaddr": "Phan Châu Trinh/341 Bình Hiên, Hải Châu, Đà Nẵng 550000",
+   "conf": 1.0,
+   "expect_accept": false,
+   "note": "tên trùng tuyệt đối nhưng ở Đà Nẵng: G2 giữ",
+   "source": "snapshot"
+  },
+  {
+   "id": "synthetic-digits",
+   "name": "Cherry Boutique Saigon Bridal Studio 2",
+   "matched": "Cherry Boutique Saigon Bridal Studio 3",
+   "gaddr": "55 Hai Bà Trưng, Bến Nghé, Hồ Chí Minh",
+   "conf": null,
+   "expect_accept": false,
+   "note": "tổng hợp: sim >= 0,95 nhưng dãy chữ số khác (chi nhánh 2 và 3): N3 giữ",
+   "source": "synthetic"
+  }
+ ]
+}
