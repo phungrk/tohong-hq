@@ -1,0 +1,118 @@
+# Spec T-120: nhận khớp Google theo tên (vendor ngoài venue), địa chỉ theo Google
+
+## Ý định
+Capu, 2026-11-10: "tên khớp gần tuyệt đối và cùng TP.HCM thì nhận, không bắt địa chỉ khớp. Tuy nhiên update địa chỉ theo địa chỉ mới trên google map." Vì sao: run 42635049304 (ADR-056) để 640 vendor ở "cần duyệt" vì luật hai yếu tố của T-106 (viết cho venue) từ chối cả khi tên trùng tuyệt đối mà địa chỉ marry.vn lệch hoặc thiếu; marry.vn đã chết từ 2026-11-03 nên địa chỉ gốc có thể đã cũ. Nguồn: `board/T-120.md`, `decisions/2026-11-09-adr-056-ket-qua-chay-that-enrich-vendors.md`.
+
+## Bằng chứng
+Mọi số đo ngày 2026-11-10, **không gọi Google**, trên `tohong@a682fc3` (PR #81, run 42635049304): `output/HCMC/*/enrichment-audit.json`, `review-needed.csv`, `vendors.json`, `run-logs/T-111/20261109-142858-run-42635049304-enrich.log`. Bản chụp bất biến để eval dùng: `eval/T-120/audit_snapshot.json` (664 dòng = 639 ngoài venue + 25 venue; dữ liệu do Google và marry.vn sinh, không do code).
+
+1. **Quy mô và phân bố.** 640 dòng review của run = 639 ngoài venue + 1 venue (24 dòng venue khác là của T-106/T-110, cũ hơn). 639 vendor ngoài venue, theo độ giống tên (`confidence`, phép đo tên của pipeline: `SequenceMatcher` trên tên bỏ dấu) và lý do bị từ chối:
+
+   | Độ giống | số vendor | address_conflict | address_unconfirmed | out_of_province | low_score |
+   | --- | --- | --- | --- | --- | --- |
+   | < 0,6 | 339 | 0 | 0 | 0 | 339 |
+   | 0,60-0,70 | 95 | 61 | 22 | 12 | 0 |
+   | 0,70-0,80 | 75 | 38 | 26 | 11 | 0 |
+   | 0,80-0,90 | 49 | 31 | 12 | 6 | 0 |
+   | 0,90-0,95 | 13 | 5 | 4 | 4 | 0 |
+   | 0,95-0,99 | 9 | 6 | 0 | 3 | 0 |
+   | >= 0,99 (đủ 59 ca đúng 1,00) | 59 | 45 | 0 | 14 | 0 |
+
+2. **Ngưỡng 0,95 nằm trong một khoảng trống của dữ liệu.** Trong 250 vendor cùng TP.HCM có độ giống >= 0,6, ca bị từ chối cao nhất là 0,947 ("Mơ Bridal" so "M.O.T Bridal", tên riêng khác) và ca thấp nhất được nhận là 0,952 ("Wings Decor" so "Wing Decor"); **không có vendor nào trong (0,947, 0,952)**, nên mọi ngưỡng T trong (0,947, 0,952] cho kết quả y hệt trên dữ liệu này; chọn 0,95. Dưới 0,95 tên khác thật nhiều hơn tên giống: trong dải 0,88-0,95 (14 cặp ngoài tên trùng tuyệt đối) tôi đọc tên và xếp **khoảng 10 cặp là hai nhà khác nhau** (Hải Sơn / Hải Đăng 0,917; Phước Thanh / Huy Thanh 0,889; Studio Cherry / Studio Cherry 3 0,929; vận tải / trang trí cưới hỏi Ngọc Trinh 0,927...) và khoảng 4 cặp là cùng một nhà (tự tin ~65%, chỉ dựa vào tên, không có sự thật nền). Từ 0,95 trở lên: 6/6 cặp không hoàn toàn trùng (0,952 đến 0,981, cùng TP.HCM) đều trông là cùng nhà (viết số ít/nhiều, dấu nháy, "K.I.S.S" so "KISS"), tự tin ~75%.
+3. **Ca biên hai phía** (đều nằm trong `eval/T-120/name_pairs.json`, check_1 khoá bằng hàm chuẩn): nhận: Halady Makeup 1,00 (gốc "1120 CMT8", Google "1120 Cách Mạng Tháng Tám": cùng số nhà, bị G3 hạ nhầm vì viết tắt), Helen's Bridal / Helen Bridal 0,960, Wings Decor / Wing Decor 0,952. Từ chối: Mơ Bridal / M.O.T Bridal 0,947, Studio Cherry / Studio Cherry 3 0,929, **Dịch vụ cưới hỏi SunMoon / Dịch Vụ Cưới Hỏi 24H 0,773** (từ chung "dịch vụ cưới hỏi" chiếm phần lớn, đúng ca Capu cần chặn), Flower You / Flower You ở New York 1,00, Thiệp cưới Sweetie / Thiệp Cưới Sweetie ở Đà Nẵng 1,00.
+4. **Tên trùng tuyệt đối vẫn có thể là nơi khác.** Trong 59 vendor tên trùng (>= 0,99), **14 (24%) khớp một nơi ở Mỹ, Anh, Ireland, Ai Cập, Hà Nội, Đà Nẵng, Đồng Nai** (danh sách trong audit: Flower You New York, Marks & Spencer Dublin, Thiệp cưới Sweetie Đà Nẵng...). Vì vậy "cùng TP.HCM" (G2 của T-106) là điều kiện thật, không phải nghi thức; spec giữ nguyên G2. Còn 45 ca tên trùng và cùng TP.HCM: 41 ca khác cả số nhà lẫn tên đường, 4 ca cùng số nhà (viết tắt đường). **Dữ liệu không phân biệt được "đã dọn đi" với "trùng tên khác chỗ"** cho 41 ca đó; đây là rủi ro còn lại của ý định Capu (xem "Câu hỏi mở", và báo cáo Hành vi 5 để Capu soát mắt).
+5. **Số vendor sẽ được nhận.** Luật tên + TP.HCM + cùng chữ số cho 51 ứng viên; nhóm G6 (hai vendor khác địa chỉ gốc chung place_id) loại 2 ("Thiệp Cưới Hiện Đại" hai bản ghi, 85 Nguyễn Bá Tòng và 364/10 Trịnh Đình Trọng cùng Google "85 Bá Tòng") → **49 vendor / 639 (7,7%)**; theo hạng mục: wedding_gift 11, wedding_attire 8, invitation 7, flower 6, ceremony 5, makeup 3, wedding_ring 3, photography 2, wedding_car 2, honeymoon 1, wedding_interior 1. Độ nhạy theo ngưỡng (cùng bộ lọc, sau G6): T=0,90 → 57; 0,95 → 49; 0,97 → 45; 1,00 → 43. **590 vendor còn lại không đổi:** 339 Google trả tên khác hẳn (< 0,6), 50 ngoài TP.HCM, 199 tên giống 0,6-0,95 mà địa chỉ không xác nhận, 2 bị G6. Tức là **"phần lớn trong 640" (mục tiêu ghi trong brief) không đạt được bằng luật Capu nêu**: luật nhận được 8%, không phải đa số.
+6. **Venue giữ sáu cổng.** 5 vendor venue có tên trùng >= 0,95 và cùng TP.HCM đang bị từ chối. Trong dữ liệu venue có ca "Trung Tâm Hội Nghị - Tiệc Cưới" gốc 142/18 Cộng Hòa so Google "Trung tâm Hội nghị Tiệc cưới G" ở 63 Mạc Đĩnh Chi, độ giống 0,988: tên chung chuỗi chi nhánh, nhận theo tên sẽ gắn ảnh nhà khác (cùng họ lỗi adv-06 của T-108: Grand Palace / Luxury Palace, TDG CENTER / GALA, Fleur de Lys Quy Nhơn). Cách hiểu của spec: Capu nói "vendor" theo nghĩa chung, ADR-056 và brief giao việc nói "ngoài venue"; tôi theo ADR-056 (tự tin ~80%). 5 venue đó vẫn cứu được bằng duyệt tay `accept_place` (T-110).
+7. **Địa chỉ gốc và địa chỉ hiển thị hôm nay.** Mã `_apply_enrichment` (`enrichment/pipeline.py`) đã ghi `contact.address = formattedAddress` khi nhận khớp và giữ `contact.address_source` (marry.vn gốc, T-106 giữ vĩnh viễn): đo 147/147 vendor có `formatted_address` trong log đều có `contact.address` bằng chuỗi Google. Vậy "update địa chỉ theo Google" đã đúng cho mọi đường nhận; việc của spec là khoá nó bằng eval cho đường mới. `tools/generate-vendor-pool.js` không đọc `contact.address` (chỉ `city`), nên pool hôm nay không mang địa chỉ (tự tin ~75%; tôi không có `tohong-back` trong phiên này): địa chỉ vendor nằm ở `vendors.json`, spec không đổi schema pool.
+8. **Hai chỗ code dễ phá ý định.** Thử trên một bản nháp bỏ đi (chỉ nới cổng nhận trong `google_maps.py`, không ghi vào repo): lượt chạy nhận 49 vendor, nhưng bước "áp lại luật" (`enrichment/settle.py`) chạy cuối lượt gọi lại `reject_reason` sáu cổng và **hạ cả 49 về low_confidence** (log báo "vendor bị luật nhận khớp hạ: 49"). Sau khi vá `settle` bản nháp đó nhận đủ 49. Vì thế Hành vi 7 là yêu cầu riêng, và check_2 bắt đúng lỗi này.
+9. **Chi phí chạy lại.** Đơn giá `enrichment/usage.py`: Text Search $0,040, ảnh (media) $0,007 mỗi request; log run 42635049304: tháng 11 đã dùng Text Search 103 + 1032 = 1135 và ảnh 1224 + 127 = 1351, **cả hai SKU đã quá hạn mức miễn phí 1.000**, nên mỗi request thêm tính đủ tiền (net ≈ gross). Chi net của đợt đã $10,21 / trần $30 (còn $19,79). Dữ liệu đã lưu đủ để **quyết định nhận hay không mà không gọi Google** (tên, địa chỉ, place_id ứng viên, độ giống), nhưng **không đủ để nhận**: `demote_record` đã xoá ảnh, điện thoại, website, rating, review, toạ độ, và `businessStatus` của ứng viên bị từ chối chưa từng được lưu (ứng viên đóng cửa vĩnh viễn phải bị gỡ theo ADR-044). Nên mỗi vendor đủ điều kiện cần **1 Text Search** (cùng truy vấn lượt 1, không lượt 2) + tối đa 2 ảnh: **49 × $0,040 + 98 × $0,007 = $1,96 + $0,686 = $2,646 gross**, chặn trên cứng (1 lượt/vendor, không thử lại); kỳ vọng ~43 vendor có ảnh (65/75 vendor được giữ ở run trước có ảnh, 87%) nên ~$2,5. Sau lượt này tổng net khoảng $12,9 / $30, còn ~$17. Hỏi lại toàn bộ 639 vendor sẽ tốn 639 × $0,040 = $25,56 (vượt trần: 10,21 + 25,56 = 35,77 > 30), nên bước lọc ngoại tuyến là bắt buộc. Phương án Place Details theo place_id (rẻ hơn chút) cần SKU chưa kiểm giá và đường mã mới: không chọn (tiết kiệm < $1).
+
+## Giả thuyết
+Nếu nhận khớp theo tên (>= 0,95, cùng TP.HCM, cùng chữ số) cho vendor ngoài venue và lấy địa chỉ Google thì ~49 vendor đang ở "cần duyệt" có ảnh Google thật và địa chỉ mới, với chi khoảng $2,6, trong khi số vendor hiện ảnh của nơi khác không tăng. Chỉ số: số vendor có `place_id` Google ngoài venue 75 → ~124 (+49). Chỉ số bảo vệ: không vendor venue nào được nhận theo tên; không vendor nào ngoài TP.HCM được nhận theo tên; tổng chi net của đợt <= $30. Tự tin ~70% rằng >= 85% trong 49 vendor là đúng nhà (không có sự thật nền; Capu soát bằng báo cáo ở Hành vi 5).
+
+## Hành vi (người dùng thấy gì)
+"Người dùng" gồm cặp đôi (xem card vendor) và Capu (bấm chạy, đọc báo cáo, merge hai PR).
+
+### 1. Luật nhận khớp có hai đường
+Một ứng viên Google của một vendor được nhận khi **đường 1 hoặc đường 2** cho nhận. Cách tính độ giống tên (`confidence`) không đổi.
+- **Đường 1 = sáu cổng G1-G6 của T-106 v4.1, nguyên văn.** Hàm chuẩn `reject_reason(...)` và `shared_place_id_groups(...)` trong `eval/T-106/_common.py` và bảng `gate_cases.json` **không đổi**; code không được đổi hành vi hàm `reject_reason` (INV-018).
+- **Đường 2 (mới) = khớp tên gần tuyệt đối**, chỉ cho vendor **không phải venue**. Nhận khi **cả bốn** điều sau đúng, không xét `address_match`, G3 và G5:
+  - N1 `confidence` >= **0,95**.
+  - N2 địa chỉ Google thuộc TP.HCM theo G2 (nguyên văn P1-P3 của T-106).
+  - N3 dãy các nhóm chữ số liên tiếp trong tên vendor và trong tên Google, sau chuẩn hoá của phép đo tên (bỏ dấu, chữ thường, chỉ giữ a-z, 0-9 và dấu cách), **bằng nhau theo đúng thứ tự** (hai tên không có chữ số cũng bằng nhau). "Studio Cherry" so "Studio Cherry 3" không qua; "Dịch vụ cưới 24h" so "Dịch Vụ Cưới Hỏi 24H" qua N3 (nhưng không qua N1).
+  - N4 không bị G4 (trùng địa chỉ nhà hàng đã gỡ vì CLOSED_PERMANENTLY) và không bị G6 (hai vendor khác địa chỉ gốc chung place_id thì **cả hai** bị từ chối, không đoán ai đúng; vendor nhận theo đường 2 cũng là thành viên nhóm G6 như mọi vendor đã nhận).
+- Còn nguyên cho mọi vendor, hai đường: xử lý đóng cửa (ADR-044: `CLOSED_PERMANENTLY` thì gỡ; T-110/T-111: `CLOSED_TEMPORARILY` thì ẩn, `closed_state` + `retry`), duyệt tay của Capu (T-110: `accept_place`, `reject_match`, `remove`, `temporarily_closed` thắng mọi luật), nhận khớp phải có cùng tên vendor đang xét.
+- **Venue = vendor có bản ghi ở category file `venue`** (cùng id ở nhiều category file mà một file là `venue` thì là venue, ở mọi file). Venue chỉ có đường 1.
+- Vendor không qua đường nào: `low_confidence` + `reject_reason` như T-106 (mã của cổng đầu tiên bị vi phạm, giữ nguyên các mã hiện có), đúng một dòng `review-needed.csv`, không place_id, không ảnh, `contact.address` = địa chỉ gốc.
+
+### 2. Địa chỉ của vendor được nhận (mọi đường)
+- `contact.address` = chuỗi `formattedAddress` Google trả về **đúng từng ký tự** (không chuẩn hoá, không cắt mã bưu chính, không thay đổi hoa/thường); `enrichment_log[google_maps].formatted_address` cùng chuỗi.
+- `contact.address_source` (địa chỉ marry.vn gốc) **không bao giờ đổi** (T-106). Địa chỉ gốc còn ở đó, và ở dòng báo cáo `name-match-accepted.csv` (Hành vi 5).
+- Vendor không được nhận, hoặc bị hạ sau đó (G6, duyệt tay, gỡ luật): `contact.address` = `contact.address_source` (hành vi sẵn có của `demote_record`).
+- Spec không đổi schema pool, không thêm `place_id` vào pool. Nếu app đọc địa chỉ vendor từ nguồn, đó là `contact.address`.
+
+### 3. Dấu vết trong dữ liệu
+Vendor nhận theo đường 2: dòng audit có hiệu lực `status = "enriched"`, `address_match = false`, `accepted_by = "name_near_exact"`, không `reject_reason`; bản ghi `enrichment_log[google_maps]` cùng `accepted_by = "name_near_exact"` và `address_match = false`. Vendor nhận theo đường 1 **không** có trường `accepted_by`. Không giá trị `accepted_by` nào khác.
+
+### 4. Chạy lại cho 640 vendor đã ở review
+Lệnh mới (tên cờ do spec định): `python3 enrich.py --state HCMC --category <danh sách hạng mục> --budget-usd N --max-photos 2 --usage-root run-logs --month YYYY-MM --recheck-name-match` (thêm `--cap-basis`, `--dry-run` như hôm nay).
+- (a) **Chọn ngoại tuyến, 0 lượt Google:** vendor đủ điều kiện hỏi lại khi dòng audit có hiệu lực là `low_confidence` với `reject_reason` là `address_conflict` hoặc `address_unconfirmed`, không phải venue, qua N1-N3 trên ứng viên **đã lưu** (`matched_name`, `confidence`, `formatted_address`), không có mục duyệt tay của Capu, và không nằm trong nhóm G6 tính trên `candidate_place_id` đã lưu. Vendor không đủ điều kiện: **0 lượt**, bản ghi và dòng audit **y nguyên từng byte**.
+- (b) **Hỏi Google đúng một lượt cho mỗi vendor đủ điều kiện:** 1 Text Search (cùng truy vấn lượt 1 như lần đầu), **không lượt 2, không Place Details**, tối đa `max_photos` request ảnh cho vendor được nhận.
+- (c) **Kết quả lượt hỏi lại được xét bằng luật mục 1 như một ứng viên mới**, cùng xử lý đóng cửa: `CLOSED_PERMANENTLY` thì gỡ (như ADR-044, có `REMOVED_VENDOR`); `CLOSED_TEMPORARILY` thì ẩn; Google trả **nơi khác** với ứng viên cũ thì chỉ xét nơi mới (không qua luật thì vendor vẫn là `low_confidence`); Google **không trả gì** hoặc lỗi HTTP thì vendor **giữ nguyên** `low_confidence` cũ (đã có ứng viên trước đó nên **không bao giờ bị remove** vì lượt này).
+- (d) **Lặp lại không tốn gì:** chạy lần hai ngay sau: 0 lượt Google, không file nào đổi. `enrich.py` thường (không cờ) sau đó cũng không hỏi lại vendor nào.
+- (e) `--dry-run`: 0 lượt Google, không đổi file, in đúng một dòng `RECHECK_SCOPE eligible=<n> text_search=<n> media_max=<n> est_gross_usd=<x> est_net_usd=<y>` (`text_search` = `eligible`, `media_max` = `eligible × max_photos`, `est_gross_usd` = 0,040 × `text_search` + 0,007 × `media_max`, `est_net_usd` theo công thức net tích luỹ của T-111). Trần `--budget-usd` và `--cap-basis` của T-111 áp nguyên: dừng trước khi vượt, lần chạy sau làm tiếp phần còn lại và không đếm đôi.
+- (f) Bước kiểm trần `check_runs.py` và sổ log (`run-logs/T-111/`) của workflow `enrich-vendors.yml` áp như mọi lần chạy thật: lần chạy này cần một input mới của workflow (`recheck_name_match`, mặc định false) và là việc **"Hỏi trước"**: Capu bấm chạy thật sau dry run. ADR-055 chỉ uỷ quyền cho run 42635049304; không dùng lại cho lần này.
+
+### 5. Báo cáo cho Capu
+Mỗi hạng mục có vendor được nhận theo đường 2 trong lượt chạy lại có file `output/HCMC/<hạng mục>/name-match-accepted.csv`, UTF-8, cột đúng thứ tự `id,name,google_name,similarity,address_source,google_address,place_id,maps_url`, **đúng một dòng cho mỗi vendor đó**, sắp theo `id`; `maps_url` = `https://www.google.com/maps/place/?q=place_id:<place_id>`. Hạng mục không có vendor được nhận thì không có file. Vendor được nhận bỏ khỏi `review-needed.csv` (hết cờ `low_confidence_place`); vendor còn bị từ chối giữ nguyên dòng review. Body của PR dữ liệu liệt kê 49 dòng này (Capu đọc ở đây, là **diff hành vi** của bậc C) cùng chi phí thật.
+
+### 6. Hai vendor cùng place_id
+Giữ G6 nguyên: cả hai bị `shared_place_id`, vào review. Trong dữ liệu có đúng một cặp ("Thiệp Cưới Hiện Đại"): mất một ca có vẻ đúng (85 Nguyễn Bá Tòng so "85 Bá Tòng") để không nhận nhầm ca kia; Capu cứu bằng `accept_place`.
+
+### 7. Áp lại luật trên dữ liệu đã lưu
+Bước áp lại luật mà `enrich.py` chạy cuối mỗi lượt (T-106 "Áp lại", nay `settle`) dùng **luật hợp nhất của mục 1** (đường 1 hoặc đường 2): **không được hạ vendor đã nhận theo đường 2 khi N1-N4 vẫn đúng**, và hạ nó (như mọi vendor) khi hết đúng (vd. vì G6 mới). Lượt `enrich.py` thường và lượt `--recheck-name-match` đều thế.
+
+## Ràng buộc (vòi)
+- Repo: `phungrk/tohong` (`tools/scraper/enrich.py`, `enrichment/*`, `.github/workflows/enrich-vendors.yml` thêm một input, dữ liệu `output/HCMC/*`) · `phungrk/tohong-back` (PR pool riêng sau PR dữ liệu) · Nhánh: `t-120-nhan-khop-theo-ten` (mỗi repo) · Vùng (`area`): `planner/vendor/images`.
+- Bất biến đã đọc: `eval/invariants/_shared/` và `planner/vendor/images/` INV-001..024. **Giữ nguyên, không đề nghị sửa INV nào:**
+  - INV-015 (nhận khớp có cổng): đo bằng G1 (`confidence` >= 0,6) và cờ `address_match` ghi = tính lại: vendor nhận theo đường 2 có `confidence` >= 0,95 và cờ `address_match=false` đúng bằng tính lại. check_7 chạy lại trên trạng thái sau chạy.
+  - INV-016 (không ứng viên ngoài tỉnh): G2 giữ nguyên là N2.
+  - INV-017 (một place_id một địa chỉ gốc, chỉ venue): venue không đổi; ngoài venue do G6 (INV-019) lo.
+  - INV-018 (code bằng hàm chuẩn): giữ **với điều kiện** hàm sáu cổng không đổi hành vi; đường 2 là luật riêng. Engineering mà muốn sửa `reject_reason` thì phải đề nghị đổi INV-018, `_common.py`, `gate_cases.json` qua Chief of Staff, không tự sửa.
+  - INV-019 (G6 mọi category), INV-012/013/014 (pool, ảnh, ghi công): không chạm.
+  - INV-020/021/022: không chạm. **INV-021 và INV-022 đang đỏ hôm nay** (2 vendor tạm đóng và 83 vendor đã gỡ còn trong pool) vì PR pool của run 42635049304 chưa merge (ADR-056): việc đã có, ngoài phạm vi T-120; hai PR của lượt chạy lại cũng phải merge liền nhau.
+- Kiến trúc: ảnh chỉ qua `photoUri` (spec 005), pool không URL `places.googleapis.com`, ảnh Google có ghi công; không thêm `place_id` vào pool.
+- Không chạm: payment, auth, schema DB, dữ liệu cá nhân người dùng, giá vendor, UI, `main.py`, `scrape-vendors.yml`, trần $30 (ADR-049); không liên hệ vendor.
+- Bậc lưới lọc đề xuất: **C** (đã giao) — chạm dữ liệu vendor trong app và dịch vụ trả phí (Google), lượt chạy thật cần Capu bấm và Capu merge hai PR.
+
+## Tiêu chí chấp nhận và eval
+Mọi eval chạy offline: Google giả (`eval/T-111/_fake`), chạy ĐÚNG lệnh CLI trong bản sao `tools/scraper` của repo `tohong`; cần `TOHONG_REPO` (mặc định `../tohong`, repo ở nhánh có dữ liệu run 42635049304). `python3 -I eval/T-120/<file>`. Hạ tầng dùng lại của T-110/T-111. Bước 0 của check_2..7 chạy luật hiện hành trên 663 vendor dựng từ snapshot và phải **tái hiện đúng lý do từ chối của dữ liệu thật** (đã xác nhận 2026-11-10: 197 address_conflict, 69 address_unconfirmed, 51 out_of_province, 346 low_score). Thiếu cài đặt thì in `FAIL`, không `ERROR`.
+
+| # | Tiêu chí (có/không) | Eval |
+| --- | --- | --- |
+| 1 | Ngưỡng "tên gần tuyệt đối" đo trên dữ liệu thật: 14 ca biên đúng hai phía (gồm SunMoon 0,773 và tên trùng ở New York/Đà Nẵng); đúng 51 ứng viên và 49 sau G6 trên 639 vendor ngoài venue; khoảng trống (0,947, 0,952); venue tên trùng bị loại | `python3 -I eval/T-120/check_1_nguong_tren_du_lieu_that.py` (xanh sẵn: khoá hàm chuẩn trước khi code) |
+| 2 | Chạy lại trên dữ liệu thật: nhận đúng tập 49 vendor (place_id đúng ứng viên, đúng 2 ảnh có ghi công), đúng 49 Text Search + 98 ảnh + 0 Details, 0 lượt cho vendor khác, vendor còn lại y nguyên từng byte, lần hai không tốn gì và không đổi file | `python3 -I eval/T-120/check_2_chay_lai_tren_du_lieu_that.py` |
+| 3 | Địa chỉ vendor được nhận = chuỗi Google từng ký tự; `address_source` bất biến; vendor không nhận giữ địa chỉ gốc; `enrich.py` thường không đổi gì; duyệt tay loại thì về địa chỉ gốc | `python3 -I eval/T-120/check_3_dia_chi_theo_google.py` |
+| 4 | Lưới chặn còn nguyên: lệch chữ số, dưới ngưỡng (0,947), ngoài TP.HCM, venue (kể cả id có bản ghi venue), duyệt tay, `CLOSED_PERMANENTLY` gỡ, `CLOSED_TEMPORARILY` ẩn, Google không trả gì thì không remove, trả nơi khác thì không nhận; đúng 6 Text Search | `python3 -I eval/T-120/check_4_bao_ve_khong_nhan_nham.py` |
+| 5 | Chi phí: `--dry-run` in `RECHECK_SCOPE` đúng (49/49/98/$2,646) với 0 lượt; trần gross $1,0 chặn đúng; chạy tiếp không đếm đôi, tổng 49 Text Search + 98 ảnh | `python3 -I eval/T-120/check_5_chi_phi_va_tran.py` |
+| 6 | Capu soát được: `name-match-accepted.csv` đủ cột và đúng nội dung mỗi vendor được nhận 1 dòng; review không còn vendor đã nhận, dòng review khác y nguyên; audit/log có `accepted_by` đúng | `python3 -I eval/T-120/check_6_bao_cao_cho_capu.py` |
+| 7 | Bất biến cũ giữ: INV-012..019 xanh trên dữ liệu thật; INV-015..019 và bất biến đề xuất xanh sau chạy lại hai lần (kể cả không hạ lại vendor đã nhận) | `python3 -I eval/T-120/check_7_bat_bien_cu_xanh.py` |
+
+Đỏ hôm nay (đúng dự kiến, FAIL không ERROR): check_2..7 (CLI chưa có cờ `--recheck-name-match`). Xanh sẵn: check_1 và bản nháp bất biến. Đã kiểm eval bằng một bản nháp bỏ đi (không ghi vào repo): check_2 xanh khi cài đặt đúng, bắt được lỗi `settle` hạ lại 49 vendor; check_3 xanh; check_4 bắt đúng 7 chỗ bản nháp làm sai (venue nhiều file, duyệt tay, remove khi không trả gì, lượt 2); check_5 bắt thiếu `RECHECK_SCOPE`; check_6 bắt thiếu báo cáo; check_7 bắt thiếu `accepted_by`.
+
+Giới hạn đã biết: (a) Google giả trả đúng ứng viên đã lưu nên eval **không đo được** "nhận đúng nhà hay nhầm"; đó là mắt Capu trên `name-match-accepted.csv` (49 dòng) và là rủi ro chấp nhận của ý định; (b) giá và hạn mức miễn phí là công thức trên log, hoá đơn thật Capu đối chiếu console (agent không đọc được); (c) lượt hỏi lại có thể trả khác lần đầu (Google đổi xếp hạng): spec cho phép (Hành vi 4c), nên số vendor thật nhận có thể lệch vài ca so với 49.
+
+## Bất biến đề xuất (tầng 2)
+**INV-025 (`planner/vendor/images`): nhận khớp không khớp địa chỉ chỉ hợp lệ qua luật tên, và địa chỉ hiển thị luôn là địa chỉ Google.** Bản nháp chạy được: `eval/T-120/inv-proposed-nhan-khop-theo-ten.py` (xanh hôm nay trên 144 bản ghi nhận khớp). Với mọi vendor có bản ghi `google_maps` có `place_id`, `formatted_address` và `address_source` (trừ `manual_override`): `contact.address` = `formatted_address`; nếu `address_match` tính lại là false thì phải qua sáu cổng (đường 1) hoặc có `accepted_by = "name_near_exact"` kèm độ giống >= 0,95, cùng TP.HCM, cùng chữ số, và id không có bản ghi ở venue. Bất biến này khoá "venue không bao giờ nhận theo tên" mãi mãi. Không đề nghị sửa hay xoá bất biến cũ nào.
+
+## Không làm
+- Đổi sáu cổng hay hàm chuẩn T-106; áp luật tên cho venue; hạ ngưỡng dưới 0,95 hay thêm "nấc hai" (tên 0,6-0,95 cộng tín hiệu khác): dữ liệu không có tín hiệu nào đủ (ngoài 4 ca cùng số nhà, 2 trong dải dưới 0,95 mà tên đã khác).
+- Hỏi lại Google cho vendor không đủ điều kiện ngoại tuyến; lượt 2 hay Place Details ở lượt chạy lại; xoá vendor chỉ vì lượt hỏi lại không trả gì.
+- Đổi schema pool, thêm `place_id` hay địa chỉ vào pool; sửa trần $30; tự sửa bể bất biến.
+- Gọi Google, chạy workflow, đổi dữ liệu thật hay commit trong việc viết spec này.
+
+## Câu hỏi mở
+Luật Capu nêu chỉ nhận **49/639 vendor (7,7%)**, không phải "phần lớn trong 640" như mục tiêu ghi ở brief: 339 Google trả tên khác hẳn, 50 ngoài TP.HCM, 199 tên giống 0,6-0,95 mà địa chỉ không xác nhận. **Đề xuất mặc định (đã viết vào spec): chốt ngưỡng 0,95, nhận 49, chạy lại tốn ~$2,6; 590 vendor còn lại giữ ảnh minh hoạ, Capu duyệt tay (T-110) những ca đáng cứu.** Capu có chấp nhận con số 49 đó không, hay muốn mở rộng thêm (mở rộng nghĩa là nhận ảnh của nơi khác nhiều hơn; hiện không có bằng chứng dữ liệu để chọn mức)?
+
+## Lịch sử sửa
+- v1 (2026-11-10): bản đầu. Chưa qua Spec Gate.
