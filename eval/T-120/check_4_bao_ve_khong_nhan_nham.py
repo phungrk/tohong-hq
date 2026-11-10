@@ -34,6 +34,8 @@ V = [  # id, tên, địa chỉ gốc, tên Google, địa chỉ Google, các ca
     ("i", "Tiệm Indigo Vanish", S % 20, "Tiệm Indigo Vanish", "30 Pasteur, Bến Nghé, Hồ Chí Minh", ("flower",)),
     ("j", "Juliet Reject Atelier", S % 21, "Juliet Reject Atelier", "31 Pasteur, Bến Nghé, Hồ Chí Minh", ("makeup",)),
     ("k", "Kilo Switch Atelier", S % 22, "Kilo Switch Atelier", "32 Pasteur, Bến Nghé, Hồ Chí Minh", ("makeup",)),
+    ("m", "Mikado Retry Studio", S % 23, "Mikado Retry Studio", "33 Pasteur, Bến Nghé, Hồ Chí Minh", ("makeup",)),
+    ("n", "November Twin Boutique", S % 24, "November Twin Boutique", "34 Pasteur, Bến Nghé, Hồ Chí Minh", ("makeup", "flower")),
 ]
 files, PL, rules = {}, {}, []
 for vid, n, a, gn, ga, cats in V:
@@ -66,6 +68,7 @@ PL2["Ph"]["status"] = "CLOSED_TEMPORARILY"
 PL2["Pk2"] = t.place("Hoàn Toàn Khác Biệt Địa Điểm", "99 Trần Hưng Đạo, Cô Giang, Hồ Chí Minh", pid="Pk2", nphotos=3)
 rules2 = [r for r in rules if r[0] != h.fold("Tiệm Indigo Vanish")]
 rules2 = [(m, ["Pk2"]) if m == h.fold("Kilo Switch Atelier") else (m, ids) for m, ids in rules2]
+rules2 = [(m, ids, None, 500) if m == h.fold("Mikado Retry Studio") else (m, ids) for m, ids in rules2]
 FX1 = x.fx(PL2, rules2)
 rc, out, calls = root.run(h.recheck_argv([{"cat": c_} for c_ in files]), FX1)
 if rc != 0:
@@ -76,12 +79,21 @@ def get(vid):
     return {cat: root.vendor("t120_" + vid, cat) for cat in files if root.vendor("t120_" + vid, cat)}
 
 
-for vid in ("a", "l"):
-    v = get(vid)[V[[x_[0] for x_ in V].index(vid)][5][0]]
-    gp = v.get("google_photos") or []
-    if t.pid_of(v) != "P" + vid or len(gp) != 2:
-        bad.append("%s: mong được nhận (place_id P%s, 2 ảnh), thấy pid=%r ảnh=%d" % (vid.upper(), vid, t.pid_of(v), len(gp)))
-for vid in ("b", "c", "d", "e", "f", "j", "k", "i"):
+for vid in ("a", "l", "n"):
+    for cat, v in get(vid).items():   # n nằm ở 2 file: 1 Text Search, kết cục áp cho CẢ HAI file
+        gp = v.get("google_photos") or []
+        if t.pid_of(v) != "P" + vid or len(gp) != 2:
+            bad.append("%s (%s): mong được nhận (place_id P%s, 2 ảnh), thấy pid=%r ảnh=%d" % (vid.upper(), cat, vid, t.pid_of(v), len(gp)))
+for vid in ("i", "k"):   # đã hỏi mà không nhận: vẫn low_confidence, chỉ thêm dấu recheck_done=true vào dòng audit
+    for key, (v0, a0) in before.items():
+        if key[0] == "t120_" + vid:
+            a1 = dict(root.audit(key[1]).get(key[0]) or {})
+            if a1.pop("recheck_done", None) is not True or a1 != a0 or root.vendor(*key) != v0:
+                bad.append("%s (%s): đã hỏi lại mà không nhận: mong bản ghi y nguyên và dòng audit chỉ thêm recheck_done=true" % (vid.upper(), key[1]))
+ma = root.audit("makeup").get("t120_m") or {}
+if "recheck_done" in ma:
+    bad.append("M (lỗi HTTP 500): không được ghi recheck_done (lần sau phải hỏi lại)")
+for vid in ("b", "c", "d", "e", "f", "j", "k", "i", "m"):
     for cat, v in get(vid).items():
         if t.has_pid(v) or v.get("google_photos"):
             bad.append("%s (%s): không được nhận mà có place_id/ảnh" % (vid.upper(), cat))
@@ -90,7 +102,7 @@ for vid in ("b", "c", "d", "e", "f", "j", "k", "i"):
     if not get(vid):
         bad.append("%s bị gỡ khỏi vendors.json (chỉ G và đóng cửa vĩnh viễn được gỡ)" % vid.upper())
     for key, (v0, a0) in before.items():
-        if key[0] == "t120_" + vid and (root.vendor(*key) != v0 or root.audit(key[1]).get(key[0]) != a0) and vid in ("b", "c", "d", "e", "f", "j", "i"):
+        if key[0] == "t120_" + vid and (root.vendor(*key) != v0 or root.audit(key[1]).get(key[0]) != a0) and vid in ("b", "c", "d", "e", "f", "j", "m"):
             bad.append("%s (%s): vendor không được hỏi lại mà bản ghi/audit đã đổi" % (vid.upper(), key[1]))
 if get("g") or not [e for e in root.removed("flower") if (e.get("vendor") or {}).get("id") == "t120_g"] or "REMOVED_VENDOR" not in out and "CLOSED_PERMANENTLY" not in "".join(
         str(e.get("reason")) for e in root.removed("flower")):
@@ -104,11 +116,19 @@ for vid in ("e", "f"):
     if any((a or {}).get("status") != "low_confidence" for a in a_):
         bad.append("%s: audit venue mong vẫn low_confidence" % vid.upper())
 qs = x.queries(calls)
-exp = {"lumen alpha": 1, "wings decor": 1, "hoa gamma": 1, "hoa hotel": 1, "indigo vanish": 1, "kilo switch": 1}
+exp = {"lumen alpha": 1, "wings decor": 1, "hoa gamma": 1, "hoa hotel": 1, "indigo vanish": 1, "kilo switch": 1, "mikado retry": 1, "november twin": 1}
 got = {k: x.count_for(calls, k) for k in list(exp) + ["cherry boutique", "mo bridal", "echo gelato", "foxtrot garden", "golf hotel", "juliet reject"]}
 for k, n in got.items():
     if n != exp.get(k, 0):
         bad.append("lượt Text Search cho %r: mong %d, thấy %d" % (k, exp.get(k, 0), n))
-if len(qs) != 6 or t.n_kind(calls, "media") != 4 or t.n_kind(calls, "details", "share", "geocode", "maps"):
-    bad.append("mong đúng 6 Text Search, 4 media, 0 Details; thấy %d, %d, %d" % (len(qs), t.n_kind(calls, "media"), t.n_kind(calls, "details", "share", "geocode", "maps")))
-t.done(bad, "các lưới chặn còn nguyên: lệch chữ số, dưới ngưỡng, ngoài TP.HCM, venue (kể cả vendor có bản ghi venue), duyệt tay, đóng cửa vĩnh viễn/tạm thời, Google không trả, trả nơi khác; đúng 6 lượt Text Search")
+if len(qs) != 8 or t.n_kind(calls, "media") != 6 or t.n_kind(calls, "details", "share", "geocode", "maps"):
+    bad.append("mong đúng 8 Text Search, 6 media, 0 Details; thấy %d, %d, %d" % (len(qs), t.n_kind(calls, "media"), t.n_kind(calls, "details", "share", "geocode", "maps")))
+# Lần chạy lại thứ hai (Google hết lỗi): chỉ M (lỗi HTTP lần trước, không ghi dấu) được hỏi lại; I và K (đã hỏi, không nhận) KHÔNG bị hỏi lại; G đã gỡ; H đã ẩn (không còn low_confidence)
+rulesB = [(m, ["Pk2"]) if m == h.fold("Kilo Switch Atelier") else (m, ids) for m, ids in rules if m != h.fold("Tiệm Indigo Vanish")]
+rcb, outb, callsb = root.run(h.recheck_argv([{"cat": c_} for c_ in files]), x.fx(PL2, rulesB))
+qb = x.queries(callsb)
+if rcb != 0 or len(qb) != 1 or x.count_for(callsb, "mikado retry") != 1 or t.n_kind(callsb, "media") != 2:
+    bad.append("lần recheck thứ hai: mong đúng 1 Text Search (chỉ M) và 2 media; thấy rc=%d, %d lượt %r, %d media" % (rcb, len(qb), qb[:3], t.n_kind(callsb, "media")))
+if not t.has_pid(root.vendor("t120_m", "makeup")):
+    bad.append("M: lần hai Google hết lỗi mà vẫn không được nhận")
+t.done(bad, "các lưới chặn còn nguyên (lệch chữ số, dưới ngưỡng, ngoài TP.HCM, venue, duyệt tay, đóng cửa, Google không trả/lỗi/trả nơi khác); vendor 2 file: 1 lượt, áp cả hai; đúng 8 lượt lần 1, 1 lượt lần 2")

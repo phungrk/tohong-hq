@@ -41,7 +41,7 @@ def norm(s):
 
 
 def sim(a, b):
-    return SequenceMatcher(None, norm(a), norm(b)).ratio()
+    return round(SequenceMatcher(None, norm(a), norm(b)).ratio(), 3)   # pipeline ghi confidence đã làm tròn 3 chữ số
 
 
 def digits(s):
@@ -79,7 +79,7 @@ for f in sorted(glob.glob(os.path.join(out, "*", "vendors.json"))):
                 bad.append((vid, "accepted_by=name_near_exact mà cờ address_match không phải false"))
             elif vid in venue_ids:
                 bad.append((vid, "venue được nhận theo tên"))
-            elif sim(v.get("name"), e.get("matched_name")) < 0.95 - 1e-9 or not C.in_province(fa) or digits(v.get("name")) != digits(e.get("matched_name")):
+            elif sim(v.get("name"), e.get("matched_name")) < 0.95 or not C.in_province(fa) or digits(v.get("name")) != digits(e.get("matched_name")):
                 bad.append((vid, "nhận theo tên mà không đủ: độ giống %.3f, tỉnh %s, chữ số %r/%r" % (sim(v.get("name"), e.get("matched_name")), C.in_province(fa), digits(v.get("name")), digits(e.get("matched_name")))))
         elif C.reject_reason(src, fa, e.get("confidence")) is not None:
             bad.append((vid, "không khớp địa chỉ, không qua sáu cổng, không có accepted_by=name_near_exact (reject_reason=%s)" % C.reject_reason(src, fa, e.get("confidence"))))

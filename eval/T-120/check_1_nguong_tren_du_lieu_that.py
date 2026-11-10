@@ -20,7 +20,7 @@ for p in json.load(open(os.path.join(h.HERE, "name_pairs.json"), encoding="utf-8
     got = h.name_rule(p["name"], p["matched"], p["gaddr"])
     if got is not p["expect_accept"]:
         bad.append("ca %r vs %r: mong %s, hàm chuẩn cho %s" % (p["name"][:30], p["matched"][:30], p["expect_accept"], got))
-    if p["source"] == "synthetic" and h.name_sim(p["name"], p["matched"]) < h.THRESHOLD:
+    if p["source"] == "synthetic" and "chữ số" in p["note"] and h.name_sim(p["name"], p["matched"]) < h.THRESHOLD:
         bad.append("ca tổng hợp chữ số phải có độ giống >= 0,95 (để chỉ N3 từ chối), thấy %s" % h.name_sim(p["name"], p["matched"]))
 el, cand = h.ref_eligible(rows)
 if (len(cand), len(el)) != (51, 49):
@@ -40,4 +40,4 @@ if len(vn) < 3 or any(r["id"] in {e["id"] for e in el} for r in vn):
     bad.append("venue có tên trùng (mong >= 3 ca) phải bị loại khỏi tập được nhận theo tên; thấy %d ca, %d lọt" % (len(vn), sum(1 for r in vn if r["id"] in {e["id"] for e in el})))
 if bad:
     print("FAIL %d vi phạm, vd: %s" % (len(bad), " | ".join(bad[:4]))); sys.exit(1)
-print("PASS ngưỡng 0,95: %d/%d vendor ngoài venue được nhận theo tên (G6 offline loại thêm %d), khoảng trống (0,947, 0,952), %d ca biên đúng hai phía, %d venue tên trùng vẫn bị giữ" % (len(el), len(nv), len(cand) - len(el), 14, len(vn)))
+print("PASS ngưỡng 0,95: %d/%d vendor ngoài venue được nhận theo tên (G6 offline loại thêm %d), khoảng trống (0,947, 0,952), %d ca biên đúng hai phía, %d venue tên trùng vẫn bị giữ" % (len(el), len(nv), len(cand) - len(el), 15, len(vn)))

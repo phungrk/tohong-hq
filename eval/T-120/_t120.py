@@ -79,16 +79,37 @@ def seed_rows(rows):
     return [r for r in rows if r["id"] not in drop], sorted(drop)
 
 
-def vendor_of(r):
-    v = t.vendor(r["id"], r["name"], r["src"], (DIR_CATEGORY[r["cat"]],))
-    return v
+def row_cats(r):
+    """Mọi category file có id này (dữ liệu thật: 38/639 vendor nằm ở 2-3 file; 4/49 vendor được nhận)."""
+    return [k for k in ORDER if k in (r.get("cats") or [r["cat"]])] or [r["cat"]]
+
+
+def first_cat(r):
+    return row_cats(r)[0]
+
+
+def vendor_of(r, cat=None):
+    cat = cat or r["cat"]
+    return t.vendor(r["id"], r["name"], r["src"], (DIR_CATEGORY[cat],))
 
 
 def build_files(rows):
     files = {}
     for r in rows:
-        files.setdefault(r["cat"], []).append(vendor_of(r))
+        for cat in row_cats(r):
+            files.setdefault(cat, []).append(vendor_of(r, cat))
     return files
+
+
+def records(root, vid):
+    """[(category, bản ghi vendor, dòng audit có hiệu lực)] ở MỌI category file có id."""
+    out = []
+    for cat in sorted(os.listdir(root.out)):
+        if os.path.isdir(root.p(cat)):
+            v = root.vendor(vid, cat)
+            if v:
+                out.append((cat, v, (root.audit(cat) or {}).get(vid)))
+    return out
 
 
 def build_fixture(rows, extra_places=None, extra_rules=()):
@@ -101,7 +122,7 @@ def build_fixture(rows, extra_places=None, extra_rules=()):
 
 
 def cats_arg(rows):
-    present = {r["cat"] for r in rows}
+    present = {k for r in rows for k in row_cats(r)}
     return [k for k in ORDER if k in present]
 
 
@@ -142,10 +163,9 @@ def prepare(parent=None):
     if rc != 0:
         t.fail("fixture hỏng (đối chứng): luật hiện hành thoát %d: %s" % (rc, (out.strip().splitlines() or [""])[-1][:160]))
     au = all_audit(root)
-    byid = {k[1]: v for k, v in au.items()}
     wrong = []
     for r in rows:
-        a = byid.get(r["id"]) or {}
+        a = next((au[(k, r["id"])] for k in row_cats(r) if (k, r["id"]) in au), {})
         if a.get("status") != "low_confidence" or a.get("reject_reason") != r["reason"] or abs((a.get("confidence") or 0) - r["conf"]) > 0.0006:
             wrong.append((r["id"][-6:], a.get("status"), a.get("reject_reason"), r["reason"]))
     if len(wrong) > 8:   # dung sai nhỏ: vài vendor có thể lệch vì G4/G6 chéo giữa các vendor trong fixture

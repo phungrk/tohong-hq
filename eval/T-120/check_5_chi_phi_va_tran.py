@@ -6,6 +6,7 @@
   (b) chạy thật với `--cap-basis gross --budget-usd 1.0`: tổng đơn giá (GOOGLE_USAGE: 0,040 x text_search + 0,007 x photo_media) <= 1,0, đã làm được ít nhất 10 vendor, chưa hết 49;
       vendor chưa làm y nguyên (còn low_confidence, 0 lượt);
   (c) lưu log lần (b) như workflow rồi chạy tiếp với `--budget-usd 30`: không hỏi lại vendor đã làm; cộng hai lần đúng 49 lượt Text Search và 98 media, tổng gross <= 2,70; đủ 49 vendor được nhận;
+  (c2) name-match-accepted.csv sau hai lượt = 49 dòng của cả hai lượt (sổ dựng lại từ trạng thái, không ghi đè mất lần 1) và `enrich.py` thường không đổi nó;
   (d) ước tính trong spec: gross 2,646 cộng chi net đã có 10,21 USD < trần 30 USD (kiểm số học trên hằng số của spec).
 In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import os, sys
@@ -58,6 +59,19 @@ if repeat:
 got = {k[1] for k, a in h.all_audit(root).items() if a.get("status") == "enriched"}
 if got != want:
     bad.append("sau hai lần: tập được nhận %d, mong 49" % len(got))
+# name-match-accepted.csv là SỔ DỰNG LẠI từ trạng thái hiện tại (mọi ID đang mang accepted_by=name_near_exact, ở category đầu tiên chứa id): sau hai lượt đủ 49 dòng, không mất dòng lần 1
+import csv
+ids_csv = []
+for cat in os.listdir(root.out):
+    p_ = root.p(os.path.join(cat, "name-match-accepted.csv"))
+    if os.path.exists(p_):
+        ids_csv += [r_["id"] for r_ in csv.DictReader(open(p_, encoding="utf-8-sig", newline=""))]
+if sorted(ids_csv) != sorted(want):
+    bad.append("sau hai lượt chạy (trần chia làm hai): name-match-accepted.csv có %d dòng (%d id khác nhau), mong đúng 49 id của cả hai lượt" % (len(ids_csv), len(set(ids_csv))))
+tree_csv = root.tree()
+root.run(x.enrich_all(h.cats_arg(rows)), FX, timeout=900)   # enrich.py thường dựng lại cùng sổ, không xoá, không đổi
+if {k: v for k, v in root.tree().items() if k.endswith("name-match-accepted.csv")} != {k: v for k, v in tree_csv.items() if k.endswith("name-match-accepted.csv")}:
+    bad.append("enrich.py thường làm đổi name-match-accepted.csv")
 if not (2.646 + 10.21 < 30):
     bad.append("số học trần: 2,646 + 10,21 phải < 30")
 t.done(bad, "chạy lại ước tính 49 Text Search + 98 ảnh = $2,646 gross; dry-run in RECHECK_SCOPE; trần chặn đúng, tiếp tục không đếm đôi")
