@@ -1,6 +1,6 @@
 {
   "task": "T-120",
-  "at": "2026-11-10T03:59",
+  "at": "2026-11-10T04:07",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "eval/T-120/check_1_nguong_tren_du_lieu_that.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 71,
+      "ms": 78,
       "out": "PASS ngưỡng 0,95: 49/639 vendor ngoài venue được nhận theo tên (G6 offline loại thêm 2), khoảng trống (0,947, 0,952), 14 ca biên đúng hai phía, 5 venue tên trùng vẫn bị giữ",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "eval/T-120/check_2_chay_lai_tren_du_lieu_that.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 12547,
+      "ms": 13711,
       "out": "FAIL enrich --recheck-name-match thoát 2: enrich.py: error: unrecognized arguments: --recheck-name-match",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "eval/T-120/check_3_dia_chi_theo_google.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 12154,
+      "ms": 12460,
       "out": "FAIL enrich --recheck-name-match thoát 2: enrich.py: error: unrecognized arguments: --recheck-name-match",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "eval/T-120/check_4_bao_ve_khong_nhan_nham.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 619,
+      "ms": 604,
       "out": "FAIL enrich --recheck-name-match thoát 2: enrich.py: error: unrecognized arguments: --recheck-name-match",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "eval/T-120/check_5_chi_phi_va_tran.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 12761,
+      "ms": 13570,
       "out": "FAIL --dry-run thoát 2: enrich.py: error: unrecognized arguments: --recheck-name-match",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "eval/T-120/check_6_bao_cao_cho_capu.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 12278,
+      "ms": 12773,
       "out": "FAIL enrich --recheck-name-match thoát 2: enrich.py: error: unrecognized arguments: --recheck-name-match",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "eval/T-120/check_7_bat_bien_cu_xanh.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 124391,
+      "ms": 126325,
       "out": "FAIL enrich --recheck-name-match thoát 2 (lần 1)",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 1072,
+      "ms": 43,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 157,
+      "ms": 199,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 30,
+      "ms": 31,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 787,
+      "ms": 784,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -100,15 +100,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 8880,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-GPUv6p/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2380,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-5pIszP/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1293,
+      "ms": 1519,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -116,15 +116,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 920,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-kJDZDR/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 939,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-KhqS0h/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/vendor/images/inv-001-pool-chi-tro-pages-hoac-anh-chua-mirror.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 30,
+      "ms": 22,
       "out": "PASS chưa áp dụng (chưa có scripts/vendor-images/manifest.json hoặc lib/vendorPool.generated.js)",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-002-entry-ok-khong-mat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 32,
+      "ms": 46,
       "out": "PASS chưa áp dụng (mốc so trên main chưa có manifest)",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-003-rewrite-check-khong-xanh-gia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 506,
+      "ms": 618,
       "out": "PASS rewrite --check không xanh giả, rewrite thay đủ trên 5 định dạng pool",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-004-ma-4-khong-doi-manifest.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1757,
+      "ms": 1772,
       "out": "PASS INV-004: thoát mã 4 không tạo, không đổi manifest (3/3 ca dừng sớm)",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-005-stdout-du-dong-du-doc-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 6254,
+      "ms": 6311,
       "out": "PASS INV-005 stdout đủ dòng dù người đọc ống chậm (3 ca đo)",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-006-wayback-chi-khi-bat-co-va-cham.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 7310,
+      "ms": 6659,
       "out": "PASS Wayback chỉ khi bật cờ; 4 yêu cầu, giãn cách nhỏ nhất 2.00 giây, tối đa 1 cùng lúc",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-007-khong-goi-wayback-available.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 675,
+      "ms": 692,
       "out": "PASS 6 yêu cầu tới Wayback, không có /wayback/available",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-008-san-toc-do-wayback.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 555,
+      "ms": 552,
       "out": "PASS 6 cách hạ tốc độ / dùng --wayback-* sai đều bị từ chối mã 2, không yêu cầu, không ghi manifest",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-009-wayback-429-khong-go-cua-mai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 16255,
+      "ms": 16272,
       "out": "PASS 429 mọi yêu cầu: 20 yêu cầu tổng, tối đa 4 liên tiếp cùng đường dẫn, lần gửi lại sớm nhất sau 1.00 giây, 1 cùng lúc",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-010-eval-khong-kill-theo-ten.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 409,
+      "ms": 454,
       "out": "PASS không eval nào kill tiến trình theo tên",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-011-file-thu-eval-khong-vao-git-front.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 25,
+      "ms": 30,
       "out": "PASS repo front không chứa file tạm của eval (__t0NN*, __nonce-*)",
       "tier": 2
     },
@@ -212,7 +212,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-012-pool-khong-url-places-api.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 90,
+      "ms": 86,
       "out": "PASS 1 file pool (lib/vendorPool.generated.js) không chứa URL API Places/khoá Google",
       "tier": 2
     },
@@ -220,7 +220,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-013-anh-google-co-ghi-cong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 56,
+      "ms": 49,
       "out": "PASS 258 ảnh Google trong pool đều có attribution không rỗng",
       "tier": 2
     },
@@ -228,7 +228,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-014-anh-google-truy-ve-place-id.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 65,
+      "ms": 66,
       "out": "PASS 131 vendor có ảnh Google đều có place_id nguồn",
       "tier": 2
     },
@@ -236,7 +236,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-015-nhan-khop-google-co-cong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 137,
+      "ms": 120,
       "out": "PASS nhận khớp có cổng (147 bản ghi place_id mới tính lại được address_match từ địa chỉ gốc)",
       "tier": 2
     },
@@ -244,7 +244,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-016-khong-ung-vien-ngoai-tinh.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 67,
+      "ms": 70,
       "out": "PASS 294 bản ghi/dòng audit nhận khớp đều cùng tỉnh/thành với vendor",
       "tier": 2
     },
@@ -252,7 +252,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-017-mot-place-id-mot-dia-chi-goc.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 34,
+      "ms": 30,
       "out": "PASS 63 place_id venue, không place_id nào cho hai địa chỉ gốc khác nhau",
       "tier": 2
     },
@@ -260,7 +260,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-018-cong-code-bang-ham-chuan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 107224,
+      "ms": 110126,
       "out": "PASS code khớp hàm chuẩn: 72666 cặp (địa chỉ gốc x địa chỉ Google) x 4 mức confidence, 734 địa chỉ tỉnh, 200 nhóm G6 giả lập",
       "tier": 2
     },
@@ -268,7 +268,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-019-g6-xet-moi-category.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 266,
+      "ms": 332,
       "out": "PASS G6 xét mọi category file: V bị hạ shared_place_id khi photography X chung place_id với địa chỉ gốc khác; hai thứ tự chạy category hội tụ, chạy thêm không đổi",
       "tier": 2
     },
@@ -276,7 +276,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-020-duyet-tay-co-quyet-dinh-cua-capu.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 20,
+      "ms": 25,
       "out": "PASS 4 mục duyệt tay đều hợp schema và có quyết định của Capu trong decisions/",
       "tier": 2
     },
@@ -284,7 +284,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-021-du-lieu-khop-file-duyet-tay.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 85,
+      "ms": 103,
       "out": "FAIL 2 lệch file duyệt tay, vd marry_6f30161924f4: tạm đóng cửa mà còn trong pool (ADR-049)",
       "tier": 2
     },
@@ -292,7 +292,7 @@
       "eval": "eval/invariants/planner/vendor/images/inv-022-pool-khong-vendor-da-go.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 65,
+      "ms": 67,
       "out": "FAIL 83 vendor đã gỡ còn trong pool, vd marry_011a8a940ba1, marry_06923dad74e2, marry_086f44541ea9, marry_0b4112331a05",
       "tier": 2
     },
@@ -300,16 +300,16 @@
       "eval": "eval/invariants/planner/vendor/images/inv-023-cong-rerun-chay-truoc-checkout-chan-truoc-google.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 118,
+      "ms": 139,
       "out": "job Google đã kiểm: enrich-vendors.yml:enrich-vendors, enrich-venue.yml:enrich-venue, refresh-vendor-photos.yml:refresh, resolve-overrides.yml:resolve-overrides, scrape-vendors.yml:scrape\nPASS cổng chạy trong workspace trống, attempt 1 qua, attempt 2/3 chặn trước mọi bước Google",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/vendor/images/inv-024-log-google-con-khi-huy.py",
       "kind": "py",
-      "status": "PASS",
-      "ms": 24109,
-      "out": "PASS 8 bước gọi Google: bị huỷ giữa chừng vẫn còn log -run-<id>- có GOOGLE_REQUEST trong run-logs",
+      "status": "FAIL",
+      "ms": 73,
+      "out": "Traceback (most recent call last):\n  File \"/home/user/tohong-hq/eval/invariants/planner/vendor/images/inv-024-log-google-con-khi-huy.py\", line 36, in <module>\n    for name in sorted(os.listdir(wfdir)):\n                       ~~~~~~~~~~^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/home/user/tohong-hq/eval/invariants/../tohong/.github/workflows'",
       "tier": 2
     }
   ],
