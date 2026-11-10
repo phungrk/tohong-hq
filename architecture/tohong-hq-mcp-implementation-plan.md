@@ -1,240 +1,170 @@
-# Tohong HQ MCP — Implementation Plan
+# Tohong HQ — Browser-Only Implementation Plan
 
-- Version: 1.0
+- Version: 2.0
 - Status: Proposed execution plan
-- Parent: `architecture/tohong-hq-mcp-architecture.md`
-- Confirmed decisions: Private repository; dedicated Workspace Runner; automatic PR creation; no automatic merge.
+- Parent: `architecture/tohong-hq-mcp-architecture.md` (v2.0)
+- Operating decision: ChatGPT Go in browser only; GitHub Connector + GitHub Actions; no Claude Code, Codex desktop, local terminal, AWS Runner, or custom MCP in this phase.
+- Governance: PR creation allowed; automatic merge prohibited.
 
 ## 1. Delivery strategy
 
-Implement in gated increments. Do not begin production credential provisioning until repository visibility is Private and verified. Do not enable ChatGPT code execution until identity, policy, isolation, and audit foundations pass.
+Deliver the smallest secure browser-first workflow. ChatGPT authors and reviews; GitHub stores and controls changes; GitHub Actions executes scripts and checks; a human approves merges and high-impact operations.
 
-Each milestone ends with a demonstrable acceptance test and a Capu review point. No milestone grants merge authority to the MCP server or Workspace Runner.
+Do not build a custom MCP service or execution infrastructure unless a measured limitation of the browser-only model justifies a later architecture decision.
 
-## 2. Work breakdown
+## 2. Milestones
 
-### M0 — Security and repository readiness
-
-**Purpose:** establish a safe baseline before adding services or credentials.
+### M0 — Repository and permission readiness (P0)
 
 Tasks:
-- M0.1 Change `phungrk/tohong-hq` visibility from Public to Private through GitHub repository Settings.
-- M0.2 Verify Capu, Claude Code automation, GitHub Actions, and required service identities retain least-privilege access.
-- M0.3 Inspect existing branch protection and rulesets; document who can merge and required checks.
-- M0.4 Create a GitHub App or equivalent narrowly scoped identity for MCP/Runner.
-- M0.5 Establish a secret manager and separate development/staging/production credentials.
-- M0.6 Record repository visibility and access verification as deployment evidence.
+- M0.1 Verify repository visibility. If still Public, an authorized administrator changes it to Private.
+- M0.2 Audit the connected GitHub integration's repository and write permissions.
+- M0.3 Protect `main`: require PR, required status checks, and appropriate human review.
+- M0.4 Confirm no ChatGPT-connected credential has repository administration or merge authority beyond what is strictly necessary.
+- M0.5 Review Actions permissions, secrets, environment protection, and workflow write scopes.
 
 Acceptance:
-- Repository API/UI reports `private`.
-- Required human and automation access is verified.
-- No production credential is installed while the repository remains Public.
-- Runner/MCP identity has no repository administration or merge permission.
+- Repository visibility is verified Private before production secrets are provisioned.
+- Main branch protections are active and tested.
+- GitHub access is least-privilege and documented.
+- No claim of privacy or protection is made without verification.
 
-Gate: Capu approval required before M1.
-
-### M1 — Contract, identity, and policy foundation
-
-**Purpose:** define and test trust boundaries before enabling writes.
+### M1 — Browser operating protocol (P0)
 
 Tasks:
-- M1.1 Define MCP tool schemas and versioning conventions.
-- M1.2 Implement authenticated MCP transport and request context.
-- M1.3 Implement principal registry for Claude and ChatGPT organizations.
-- M1.4 Implement deny-by-default Policy Engine.
-- M1.5 Implement artifact provenance schema and policy decision records.
-- M1.6 Add unit tests for forged agent IDs, forged roles, expired/revoked credentials, and cross-organization access.
-- M1.7 Add review-matrix tests for all required ALLOW/DENY scenarios.
+- M1.1 Document ChatGPT role prompts and handoff formats for CEO/CoS, Product, Spec Critic, Engineering, and Adversary.
+- M1.2 Define a standard task brief: task ID, objective, scope, owner, reviewer, tier, acceptance criteria, risks, and required evidence.
+- M1.3 Define a standard PR body and review checklist.
+- M1.4 Document connector capability fallback: when a GitHub operation is unavailable, produce a patch and manual steps.
+- M1.5 Establish evidence language: distinguish authored, committed, workflow-executed, reviewed, and merged states.
 
 Acceptance:
-- Claude and ChatGPT resolve to distinct verified principals.
-- A model cannot elevate its role by passing a different `agent_id`.
-- All review policy tests pass.
-- No write tools are exposed to unverified identities.
+- Every task starts from an existing HQ task or a human-approved task proposal.
+- ChatGPT does not claim an action without a tool result or GitHub evidence.
+- One authenticated ChatGPT identity is not represented as several independently authenticated agents.
 
-Gate: Capu approves identity and permission matrix.
-
-### M2 — Read-only HQ integration
-
-**Purpose:** connect both organizations to the real HQ without risking state changes.
+### M2 — GitHub Actions quality pipeline (P1)
 
 Tasks:
-- M2.1 Implement GitHub read adapter.
-- M2.2 Implement `hq_list_tasks`, `hq_get_task`, `hq_get_task_history`, and evidence reads.
-- M2.3 Normalize legacy Ledger events without rewriting them.
-- M2.4 Add audit records for read access where required.
-- M2.5 Test rate limits, pagination, stale reads, and GitHub outage behavior.
-- M2.6 Connect a ChatGPT test client and a Claude test client.
+- M2.1 Inventory existing workflows and current CI coverage.
+- M2.2 Add/verify PR-triggered lint, type-check, unit-test, and build jobs appropriate to the repository.
+- M2.3 Add dependency/security checks where applicable.
+- M2.4 Upload test logs and machine-readable result artifacts.
+- M2.5 Ensure each run reports commit SHA and a stable status check name.
+- M2.6 Configure required checks on protected branches.
 
 Acceptance:
-- Both organizations read the same Board/Specs/Ledger from GitHub.
-- No shadow task database is created.
-- Read-only mode cannot mutate repository content.
-- GitHub outage is reported clearly; no stale state is represented as current.
+- PRs receive reproducible checks on the exact head commit.
+- Failed, cancelled, skipped, or absent required checks cannot be treated as success.
+- Workflow permissions are read-only by default and elevated only per job.
 
-Gate: Capu validates shared visibility and data interpretation.
-
-### M3 — Task lifecycle and artifact writes
-
-**Purpose:** enable governed work creation and handoff.
+### M3 — Governed task lifecycle via Actions (P1)
 
 Tasks:
-- M3.1 Build a trusted HQ command adapter that invokes `scripts/task.py`.
-- M3.2 Define schema evolution for organization/agent provenance in task metadata.
-- M3.3 Add compatibility tests for old Board files and old Ledger events.
-- M3.4 Implement per-task mutation locks and idempotency keys.
-- M3.5 Implement artifact create/version/submit operations.
-- M3.6 Implement handoff, blocker, accept/reject, and escalation wrappers.
-- M3.7 Prohibit direct Board frontmatter and Ledger mutation through MCP.
-- M3.8 Add reconciliation tests between script output, Board state, and Ledger event.
+- M3.1 Keep `scripts/task.py` as the sole task-state transition interface.
+- M3.2 Add a manually dispatched workflow with an allowlisted set of task transitions and validated task ID input.
+- M3.3 Validate actor authorization, current task state, allowed transition, and required fields before invoking the script.
+- M3.4 Run `scripts/task.py` in a clean checkout; do not accept arbitrary shell or path inputs.
+- M3.5 Validate Board/Ledger consistency and publish run evidence.
+- M3.6 Add idempotency/retry protections and concurrency control per task.
+- M3.7 Consider an Issue/label command adapter only after the manual-dispatch workflow is secure and proven.
 
 Acceptance:
-- Every state transition is executed through `task.py`.
-- Duplicate requests do not create duplicate transitions/events.
-- Old tasks and events remain readable.
-- Artifact versions preserve creator and organization provenance.
+- Every state transition is made by `task.py`.
+- Unauthorized, invalid, duplicate, or stale transitions fail closed.
+- The resulting workflow run is the evidence of the transition.
+- ChatGPT cannot directly write task status or Ledger events.
 
-Gate: Capu approves the first end-to-end Product task.
-
-### M4 — Cross-organization review and GitHub PR integration
-
-**Purpose:** allow controlled collaboration across the two AI organizations.
+### M4 — ChatGPT-to-GitHub change workflow (P1)
 
 Tasks:
-- M4.1 Implement review service with server-side policy revalidation.
-- M4.2 Implement review records bound to immutable artifact versions.
-- M4.3 Add ChatGPT branch namespace `agents/chatgpt/<task-or-session>`.
-- M4.4 Extend `sync-ledger.yml` and `sync_branch.py` to support ChatGPT branches without changing Claude behavior.
-- M4.5 Add regression tests for append-only/deduplicated Ledger sync.
-- M4.6 Implement branch and PR creation using a no-merge GitHub identity.
-- M4.7 Add PR templates/metadata for task, organization, creator, checks, Gate, risks, and reviewer.
-- M4.8 Add negative tests proving MCP cannot merge, enable auto-merge, or push to main.
+- M4.1 Validate which branch, file, commit, and PR operations the connected GitHub integration exposes.
+- M4.2 Define ChatGPT branch namespace `agents/chatgpt/<task-or-session>`.
+- M4.3 Define file-change limits and require reading current content/SHA before updates.
+- M4.4 Standardize PR title/body with task, rationale, changed files, risk, test plan, and evidence.
+- M4.5 Require Actions checks before review/merge.
+- M4.6 Keep merge and auto-merge unavailable to ChatGPT automation.
+- M4.7 Preserve Ledger append-only behavior and add namespace sync tests only if the existing workflow needs extension.
 
 Acceptance:
-- Review matrix is enforced at the write endpoint, not merely shown to the model.
-- ChatGPT Product Spec can be handed to Claude Spec Critic.
-- ChatGPT Product cannot review any Spec.
-- ChatGPT Engineering can review Claude Code but cannot review Claude Spec.
-- Claude review permissions follow the agreed matrix.
-- PR creation works; merge and auto-merge attempts are denied.
-- Existing Claude sync tests pass unchanged.
+- Changes are isolated from `main` and visible in a PR.
+- PR metadata identifies the task and evidence.
+- No direct main writes, merge, or auto-merge by ChatGPT.
+- If connector write operations are unavailable, the documented patch/manual path works.
 
-Gate: Capu approves cross-organization review and PR behavior.
-
-### M5 — Dedicated Workspace Runner
-
-**Purpose:** enable ChatGPT Engineering to execute real code tasks safely.
+### M5 — Code Gate and adversarial review (P1)
 
 Tasks:
-- M5.1 Select hosting platform and isolation primitive (ephemeral container or microVM).
-- M5.2 Implement task-scoped workspace provisioning and cleanup.
-- M5.3 Implement short-lived GitHub credential injection.
-- M5.4 Implement bounded file read/write/patch operations.
-- M5.5 Implement command profiles and allowlists for test, lint, build, and gate.
-- M5.6 Implement CPU/RAM/disk/time/process/network limits.
-- M5.7 Implement job cancellation, timeout, output truncation, and secret redaction.
-- M5.8 Implement execution evidence collection.
-- M5.9 Implement branch push and automatic PR creation.
-- M5.10 Enforce no merge permission at credential, API, and policy layers.
-- M5.11 Run hostile workspace tests and cross-task isolation tests.
+- M5.1 Run `scripts/gate.py` in GitHub Actions on the required PR/task events.
+- M5.2 Tie gate output to exact commit SHA and workflow run.
+- M5.3 Store machine-readable gate evidence as workflow artifacts and/or repository evidence through a controlled workflow.
+- M5.4 Define RED/missing/stale evidence blocking rules.
+- M5.5 Add a human adversarial review step for security-sensitive and high-tier changes.
+- M5.6 Ensure ChatGPT's own review is labeled AI-assisted, not independent approval.
 
 Acceptance:
-- Task A cannot read or alter Task B's workspace.
-- Runner cannot access host secrets or production systems.
-- Disallowed commands and network egress are blocked.
-- Test/Gate results are actual process results tied to commit SHA.
-- RED/missing Gate blocks handoff.
-- PR is created only after policy-required checks.
-- No execution path can merge a PR or enable auto-merge.
+- Gate result is generated by a real workflow execution.
+- Gate RED or missing evidence blocks handoff as policy requires.
+- A green gate is not equivalent to human approval or independent adversarial acceptance.
 
-Gate: Security review and Capu approval before enabling ChatGPT Engineering on production tasks.
-
-### M6 — Production hardening and rollout
+### M6 — Pilot and operational hardening (P2)
 
 Tasks:
-- M6.1 Add structured logs, metrics, traces, request/correlation IDs.
-- M6.2 Add rate limits and per-organization quotas.
-- M6.3 Add backup/recovery and reconciliation procedures.
-- M6.4 Add credential rotation and revocation runbooks.
-- M6.5 Add load, fault-injection, and end-to-end tests.
-- M6.6 Conduct security review of MCP, Runner, GitHub App, and CI workflows.
-- M6.7 Run a limited pilot with one low-risk ChatGPT Engineering task.
-- M6.8 Expand gradually after pilot evidence is accepted.
+- M6.1 Pilot one low-risk documentation-only PR.
+- M6.2 Pilot one low-risk code PR with CI and Code Gate.
+- M6.3 Test connector permission failures and fallback procedures.
+- M6.4 Test unauthorized task transitions and protected-branch behavior.
+- M6.5 Document runbooks for failed Actions, stale evidence, rejected PRs, and credential revocation.
+- M6.6 Review whether browser-only constraints justify any future MCP or runner investment.
 
 Acceptance:
-- All critical security and lifecycle tests pass.
-- No regression in Claude Code workflows.
-- Monitoring can identify failed jobs, policy denials, sync errors, and orphaned workspaces.
-- Rollback and credential revocation have been tested.
-- Capu approves production rollout.
+- End-to-end workflow completes without local terminal or dedicated runner.
+- All checks are traceable to GitHub workflow runs and commit SHAs.
+- Human approval boundary and no-merge rule are enforced.
+- Capu approves expansion beyond the pilot.
 
 ## 3. Dependency graph
 
 ```text
-M0 Repository & Security Readiness
-                 |
-                 v
-M1 Identity + Policy Foundation
-                 |
-                 v
-M2 Read-only HQ Integration
-                 |
-                 v
-M3 Task Lifecycle + Artifact Writes
-                 |
-                 v
-M4 Cross-review + PR Integration
-                 |
-                 v
-M5 Dedicated Workspace Runner
-                 |
-                 v
-M6 Production Hardening + Pilot
+M0 Repository + Permissions
+          |
+          v
+M1 Browser Operating Protocol
+          |
+          +----------------------+
+          |                      |
+          v                      v
+M2 GitHub Actions CI       M3 Task Lifecycle Actions
+          |                      |
+          +----------+-----------+
+                     |
+                     v
+          M4 ChatGPT-to-GitHub PR Flow
+                     |
+                     v
+          M5 Code Gate + Adversarial Review
+                     |
+                     v
+          M6 Pilot + Hardening
 ```
 
-M5 infrastructure design can be explored in parallel with M2–M4, but ChatGPT code execution must remain disabled until M1, M3, M4 security controls and runner isolation are accepted.
+## 4. Explicitly deferred
 
-## 4. Priority and sequencing
+- Custom MCP gateway and identity/policy services.
+- Dedicated cloud runner, container/microVM isolation, queues, and workspace lifecycle.
+- Multi-organization Claude/ChatGPT cross-review and independent agent credentials.
+- 24/7 autonomous execution, scheduled coding agents, and automatic deployment.
 
-| Priority | Milestone | Why |
-|---|---|---|
-| P0 | M0 | Repository currently reports Public; resolve before credentials |
-| P0 | M1 | Establish identity and deny-by-default permissions |
-| P1 | M2 | Safely expose shared HQ context |
-| P1 | M3 | Enable governed task and artifact lifecycle |
-| P1 | M4 | Enforce cross-organization collaboration and no-merge PRs |
-| P2 | M5 | Enable code execution only after governance foundation |
-| P2 | M6 | Production readiness and controlled rollout |
+Revisit these only through a new architecture decision backed by an observed requirement, usage volume, security review, and cost justification.
 
-## 5. Initial backlog proposal
+## 5. Rollback
 
-Create implementation tasks only after Architecture Spec approval. Suggested task grouping:
+- Disable the affected GitHub Actions workflow or revoke its write permission.
+- Revoke or narrow the connected GitHub integration's permissions if compromised.
+- Keep existing branches and PRs for human disposition; do not automatically delete user work.
+- Never rewrite historical Ledger events.
+- Return to patch/manual GitHub operation if connector or workflow capabilities are unavailable.
 
-| Workstream | Proposed tasks |
-|---|---|
-| Security | M0 repository privacy, access audit, GitHub App, secrets |
-| Platform | MCP service skeleton, transport, configuration, health checks |
-| Identity | principal registry, authentication, delegation |
-| Governance | policy engine, review matrix, authorization tests |
-| HQ Core | task.py adapter, task schema migration, artifact service |
-| GitHub | branch namespace, sync workflow, PR publisher |
-| Runner | workspace lifecycle, sandbox, command profiles, evidence |
-| Quality | integration tests, adversarial tests, regression suite |
-| Operations | deployment, observability, recovery, runbooks |
+## 6. Definition of done
 
-The Chief of Staff should split these into concrete HQ tasks with explicit owner, reviewer, tier, area, acceptance criteria, and executable evals. Engineering tasks must not be assigned until their required evals are registered under the existing HQ rules.
-
-## 6. Rollback strategy
-
-- M0/M1: disable MCP endpoint and revoke credentials; existing Claude workflow remains untouched.
-- M2: disable read integration; GitHub repository remains authoritative.
-- M3: disable write tools; do not reverse or rewrite Ledger events.
-- M4: disable ChatGPT branch trigger and PR publisher; retain already-created branches/PRs for human disposition.
-- M5: stop queue intake, cancel jobs, destroy ephemeral workspaces, revoke runner credentials; do not merge or delete user branches automatically.
-- M6: return to pilot-only mode and rotate credentials if compromise is suspected.
-
-Rollback must never rewrite historical Ledger events or silently revert accepted product changes.
-
-## 7. Definition of delivery complete
-
-The project is complete when all M0–M6 acceptance criteria pass, both AI organizations use distinct verified identities, ChatGPT Engineering can complete a bounded code task in the dedicated runner, the system creates a reviewable PR, and no MCP/Runner credential or API can merge it. Existing Claude workflows must pass regression tests throughout.
+The browser-only operating model is ready when ChatGPT can prepare repository changes through the connected integration (or documented patch fallback), GitHub Actions executes tests and Code Gate with traceable evidence, task transitions run only through `scripts/task.py`, main is protected, and no ChatGPT automation can merge or enable auto-merge. No local terminal, custom MCP server, or dedicated runner is required.
