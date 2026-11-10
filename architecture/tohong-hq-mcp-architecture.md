@@ -1,320 +1,148 @@
-# Tohong HQ MCP Server — Architecture Specification
+# Tohong HQ — Browser-Only ChatGPT Architecture
 
-- Version: 1.1
-- Status: Proposed / awaiting Capu approval through PR
-- Owner: Capu (CEO / Spec Owner)
+- Version: 2.0
+- Status: Proposed / supersedes the Workspace Runner architecture in v1.1
+- Owner: Capu (CEO / Architecture Owner)
 - Repository: phungrk/tohong-hq
-- Decision baseline: Repository Private = YES; dedicated Workspace Runner = YES; automatic PR creation = YES; automatic merge = NO.
+- Operating decision: ChatGPT Go in browser only; no Claude Code, no Codex desktop, no local terminal, no dedicated cloud runner.
+- Governance decisions retained: repository must be Private before production secrets; PR creation allowed; automatic merge prohibited.
 
-## 1. Executive summary
+## 1. Executive decision
 
-Build a shared MCP governance gateway for two independent AI organizations—Claude and ChatGPT—using the existing Tohong HQ repository as the source of truth.
+Tohong HQ will operate as a browser-first AI governance system. ChatGPT is the reasoning, planning, documentation, code-authoring, and review interface. GitHub is the system of record and the controlled change interface. GitHub Actions is the only execution environment for repository scripts, tests, builds, and Code Gate.
 
-The gateway exposes controlled task, artifact, review, audit, and workspace capabilities. It does not replace GitHub, `scripts/task.py`, `scripts/gate.py`, the Board, Event Ledger, existing Claude Code workflows, or Capu's approval authority.
+The design deliberately does not provide ChatGPT with a shell, persistent workspace, arbitrary command execution, or a custom MCP/runner service in this phase.
 
-ChatGPT Engineering receives a dedicated isolated Workspace Runner. The runner may create task branches, modify code, execute approved tests and gates, and create Pull Requests. It MUST NOT merge Pull Requests. Merge authority remains with the existing Tier A/B/C policy and its designated human/role approver; Tier C remains Capu-controlled.
+ChatGPT may use the connected GitHub integration when available to read repository content, create or update branches/files, and manage pull requests within the integration's granted permissions. All repository mutations must be visible, attributable, and reviewable.
 
-## 2. Confirmed decisions
+## 2. Operating model
 
-| Decision | Approved value | Architectural consequence |
-|---|---|---|
-| Repository visibility | Private | Make the HQ repository private before adding credentials, internal artifacts, or operational secrets; verify access for all required users and automation identities |
-| Workspace Runner | Dedicated runner | Build an isolated execution service for ChatGPT Engineering; do not treat MCP itself as a shell |
-| PR creation | Automatic | Runner/MCP may create a PR after required checks and metadata are present |
-| PR merge | Prohibited for ChatGPT automation | No MCP tool, runner credential, or service identity may merge PRs or enable auto-merge |
+### 2.1 ChatGPT browser — Governance and authoring plane
 
-**Operational limitation:** the current GitHub integration can read and write repository content but does not expose a repository-visibility administration action. The repository is currently reported as Public. An authorized repository administrator must change it to Private in GitHub Settings and verify the result before production credentials are installed. This spec does not claim that visibility has already changed.
+ChatGPT roles remain logical roles within the conversation/workflow, not independently authenticated runtime agents:
 
-## 3. Goals and non-goals
+- CEO / Chief of Staff: clarify goals, prioritize, coordinate, report status.
+- Product: PRD, user stories, acceptance criteria, product decisions.
+- Spec Critic: inspect completeness, ambiguity, testability, and consistency.
+- Engineering: design changes, author patches, explain implementation, prepare PR content.
+- Adversary: review proposed changes, identify security, reliability, and regression risks.
 
-### Goals
+Role labels do not create separate security identities. ChatGPT must not claim independent-agent execution or cross-agent review isolation where only one authenticated ChatGPT principal exists. Independent review requires a human reviewer or a separately authenticated external reviewer.
 
-1. Connect Claude Code and ChatGPT to one shared HQ control plane.
-2. Give each organization and agent a verifiable identity.
-3. Enforce role, organization, task, artifact-origin, and review permissions server-side.
-4. Preserve Board and Event Ledger as the authoritative task history.
-5. Route all task-state transitions through `scripts/task.py`.
-6. Run code in a dedicated, isolated Workspace Runner.
-7. Allow automatic branch and PR creation without merge capability.
-8. Preserve current Claude Code behavior and existing sync semantics.
-9. Provide auditability, idempotency, and recovery from GitHub.
+### 2.2 GitHub Connector — Repository interface
 
-### Non-goals for the first release
+Use the connected GitHub integration for supported operations only:
+- Read repository files, issues, branches, commits, Actions results, and PRs.
+- Create a task branch and make bounded file changes where the connector supports it.
+- Create/update PRs and submit review comments where authorized.
+- Read CI and Code Gate results after GitHub Actions completes.
 
-- Replacing GitHub or creating a second authoritative task database.
-- Replacing Claude Code, its subagents, or the existing Adversary role.
-- Arbitrary unrestricted shell access from an LLM.
-- Automatic production deployment, data migration, or external side effects.
-- Automatic PR merge by ChatGPT, the MCP server, or the runner.
-- Rewriting the entire existing HQ workflow.
+Connector availability, repository access, and write permissions are runtime prerequisites. If a requested operation is not exposed or authorized, ChatGPT must provide a patch or exact instructions rather than claim it completed the operation.
 
-## 4. Current-system constraints to preserve
+### 2.3 GitHub Actions — Execution plane
 
-The implementation MUST account for these observed repository behaviors:
+GitHub-hosted Actions runners execute:
+- Syntax/lint/type checks.
+- Unit and integration tests.
+- Build and packaging.
+- Security and dependency scans.
+- `scripts/task.py` for approved task lifecycle operations.
+- `scripts/gate.py` for Code Gate evaluation.
+- Ledger validation, schema checks, and synchronization.
 
-1. `scripts/task.py` declares that all task state changes must pass through that script. It validates transitions, updates `board/T-xxx.md`, and appends to `ledger/events.jsonl`.
-2. `scripts/task.py` has a fixed `FIELDS` list. Any new task metadata (for example organization or agent provenance) must be added through a deliberate schema change and compatibility tests—not arbitrary frontmatter writes.
-3. `scripts/gate.py` runs the Code Gate and writes gate evidence under `eval/T-xxx/`. MCP must call the gate in a real repository workspace; it must never claim a gate passed without an actual result.
-4. `scripts/sync_branch.py` currently classifies ledger directories and syncs `ledger/events.jsonl` append-only/deduplicated; non-ledger changes are staged on a review branch.
-5. `.github/workflows/sync-ledger.yml` currently triggers on `claude/**`. ChatGPT must use a separate namespace and an explicitly reviewed extension to the sync workflow.
-6. Existing Tier A/B/C merge authority remains in force. Automatic PR creation does not imply automatic merge.
+Every result must be linked to a workflow run, commit SHA, job, exit status, and retained artifact/log reference. ChatGPT cannot fabricate, infer, or manually declare a successful run.
 
-## 5. Logical architecture
+### 2.4 GitHub — Source of Truth
 
-### 5.1 Control plane
+GitHub remains authoritative for:
+- Board/task files and task history.
+- Append-only Event Ledger.
+- Specs, ADRs, implementation plans, and handoffs.
+- Source code, branches, commits, PRs, reviews, and CI evidence.
 
-- MCP Transport/API: authenticated MCP Streamable HTTP endpoint.
-- Identity Service: maps verified credentials to organization and principal.
-- Policy Engine: evaluates every protected operation.
-- Task Service: reads tasks and invokes the approved task lifecycle commands.
-- Artifact Service: creates immutable/versioned specs, handoffs, eval references, and review records.
-- Review Service: enforces artifact-origin and reviewer-role constraints.
-- GitHub Adapter: reads repository state and creates branches, commits, and PRs with least-privilege credentials.
-- Audit Service: records actor, action, resource, policy decision, request ID, and result.
+No second task database, shadow ledger, or independent status store is introduced.
 
-### 5.2 Execution plane
+## 3. Change and task lifecycle
 
-- Workspace API: accepts bounded operations against an assigned workspace.
-- Queue/Job Coordinator: tracks execution jobs and timeouts.
-- Workspace Runner: isolated container/VM per task or execution lease.
-- Git Worktree: task-scoped checkout and branch.
-- Test/Gate Executor: allowlisted test, lint, build, and `scripts/gate.py` commands.
-- PR Publisher: pushes task branch and creates a PR; has no merge permission.
+### 3.1 Repository changes
 
-### 5.3 Data authority
+1. ChatGPT reads the current base branch and relevant files.
+2. ChatGPT prepares a scoped patch on a non-main branch using the GitHub integration, when supported.
+3. ChatGPT opens or updates a PR with task ID, rationale, scope, risk, test plan, and required checks.
+4. GitHub Actions executes required checks against the PR commit.
+5. ChatGPT reads actual results and reports pass/fail with run and commit references.
+6. A human or authorized reviewer reviews and merges. ChatGPT does not merge or enable auto-merge.
 
-GitHub remains authoritative for repository files, Board, Ledger, specs, handoffs, eval evidence, decisions, and PRs. A database may hold ephemeral sessions, job state, token metadata, locks, and idempotency keys, but must not become a second source of truth for task state.
+If the connector cannot create a branch/commit/PR in the current session, the output is a proposed patch and manual GitHub instructions. Do not imply a write succeeded without a successful tool result.
 
-## 6. Organization and agent model
+### 3.2 Task state transitions
 
-Initial principals:
+The repository rule remains: task state changes must go through `scripts/task.py`. ChatGPT must never directly edit task status/frontmatter or append to the Ledger to simulate a transition.
 
-| Organization | Agent ID | Role |
-|---|---|---|
-| Claude | `claude-chief-of-staff` | Chief of Staff |
-| Claude | `claude-product` | Product / Spec Writer |
-| Claude | `claude-spec-critic` | Spec Gate |
-| Claude | `claude-engineering` | Engineering |
-| Claude | `claude-adversary` | Adversarial Code Gate |
-| ChatGPT | `chatgpt-chief-of-staff` | Chief of Staff |
-| ChatGPT | `chatgpt-product` | Product / Spec Writer |
-| ChatGPT | `chatgpt-engineering` | Engineering |
+Because browser-only ChatGPT cannot execute local scripts, approved transitions are delegated to GitHub Actions:
+- Preferred MVP: a manually dispatched, tightly scoped workflow with task ID and allowed transition inputs, requiring an authorized GitHub actor.
+- Later option: a controlled GitHub Issue/label command adapter that validates the actor, task ID, current state, transition, and idempotency before invoking `scripts/task.py`.
+- The workflow checks out the exact repository revision, runs `scripts/task.py`, validates Board/Ledger consistency, and uploads execution evidence.
+- ChatGPT may prepare the request and inspect the result; an Action run is the evidence of execution.
 
-Each agent belongs to exactly one organization and has a server-controlled role. A model-supplied `agent_id` is not proof of identity.
+No generic workflow input may accept arbitrary shell commands or arbitrary file paths.
 
-### Identity requirements
+## 4. Code Gate and evidence
 
-- Authenticate the client and bind the credential to a principal.
-- Prefer OAuth 2.1/OIDC or an equivalent short-lived, revocable credential flow supported by the client.
-- Use separate credentials/scopes for each organization and, where technically supportable, each role.
-- If the client cannot prove a sub-agent identity, authorize it only as the broader authenticated principal. Never accept a free-form role claim from the model.
-- Record delegation: initiating principal, delegated agent (if verified), organization, and task.
+- `scripts/gate.py` runs only inside GitHub Actions against the exact commit under evaluation.
+- Required tests and gates are defined by repository policy and task acceptance criteria.
+- RED, cancelled, skipped, missing, or stale evidence blocks handoff/acceptance as required by the existing HQ policy.
+- A green CI run does not automatically imply Adversary acceptance or human approval.
+- Evidence records include workflow run URL/ID, commit SHA, job, exit code, timestamps, test profile, and artifact references.
+- ChatGPT summarizes evidence; it does not create or edit gate result files.
 
-## 7. Authorization and review policy
+## 5. Security and governance
 
-All protected operations are deny-by-default and checked server-side immediately before execution.
-
-### 7.1 Review matrix
-
-| Artifact creator | Reviewer | Decision |
-|---|---|---|
-| ChatGPT Product Spec | Claude Spec Critic | ALLOW |
-| Claude Product Spec | ChatGPT Product | DENY |
-| Claude Product Spec | ChatGPT Engineering | DENY |
-| ChatGPT Engineering Code | Claude Engineering | ALLOW |
-| Claude Engineering Code | ChatGPT Engineering | ALLOW |
-| ChatGPT Engineering Code | same ChatGPT Engineering principal | DENY |
-| Claude Engineering Code | same Claude Engineering principal | DENY |
-
-Additional rules:
-
-- ChatGPT Product cannot review Specs, regardless of origin.
-- ChatGPT Engineering cannot review Claude-originated Specs.
-- ChatGPT Engineering may review Claude-originated Code.
-- Claude Spec Critic remains the Spec Gate for ChatGPT Product Specs.
-- Adversary remains independent of the code author and continues to run the existing Code Gate/adversarial process.
-- A policy preflight result is advisory only; the actual review operation must re-evaluate policy to prevent time-of-check/time-of-use bypass.
-- Review permission does not grant merge permission.
-
-### 7.2 Policy decision record
-
-A denial or allowance should include `policy_id`, actor principal, organization, action, resource, task ID, artifact version, decision, reason code, request ID, and timestamp. Do not expose secrets or private policy internals to an untrusted principal.
-
-## 8. Task Service
-
-### Read operations
-
-- `hq_list_tasks`
-- `hq_get_task`
-- `hq_get_task_history`
-- `hq_get_task_evidence`
-
-### Write operations
-
-- `hq_create_task`
-- `hq_claim_task`
-- `hq_start_task`
-- `hq_submit_handoff`
-- `hq_report_blocker`
-- `hq_escalate_task`
-- `hq_accept_task`
-- `hq_reject_task`
-- `hq_respec_task`
-
-The server must validate the caller, task owner, current state, legal transition, reviewer, tier, and required evidence. It then invokes the corresponding supported `scripts/task.py` command in a trusted HQ checkout. No direct Board frontmatter or Ledger mutation is allowed.
-
-Task ownership must remain singular. Cross-organization collaboration is represented by reviewer/participant/handoff metadata, not by silently assigning multiple owners.
-
-## 9. Artifact Service
-
-Supported artifact types:
-
-- Product Spec
-- Acceptance Criteria
-- Eval Definition
-- Engineering Handoff
-- Review Record
-- Defect / Adversarial Finding
-- Gate Result
-- Decision Request
-
-Every artifact must carry server-verified provenance:
-
-- artifact ID
-- task ID
-- artifact type and version
-- creator principal and organization
-- repository path or PR/commit reference
-- creation timestamp
-- content hash
-- review history
-
-Submitted artifacts are immutable versions. Edits create a new version; previous versions remain addressable. Artifact content must be treated as untrusted input when consumed by another agent.
-
-## 10. Workspace Runner
-
-### 10.1 Required behavior
-
-The dedicated runner provides ChatGPT Engineering with a task-scoped execution environment:
-
-1. Create an isolated workspace for an authorized task.
-2. Checkout the target repository and a task-specific branch.
-3. Read, patch, and write files within the workspace.
-4. Execute only approved test profiles and command allowlists.
-5. Run relevant invariants and `scripts/gate.py` where required.
-6. Collect stdout/stderr, exit status, duration, commit SHA, and test evidence.
-7. Push the branch and create a Pull Request when policy conditions pass.
-8. Tear down the workspace and revoke its short-lived credentials.
-
-### 10.2 Isolation and security
-
-- Use ephemeral containers or microVMs; one task's workspace cannot access another's.
-- Apply CPU, memory, disk, process, and wall-clock limits.
-- Default-deny network egress; allow only explicitly required package registries and GitHub endpoints.
-- Inject short-lived credentials at runtime; never place them in model-visible files, command output, or logs.
-- No production credentials in the general-purpose runner.
-- No Docker socket, host filesystem, cloud metadata endpoint, or privileged container access.
-- Sanitize logs and cap output size.
-- Support cancellation and guaranteed cleanup.
-- Treat repository files, issues, PR descriptions, test fixtures, and tool output as untrusted data/instructions.
-- Arbitrary shell execution is not exposed as an unrestricted MCP tool.
-
-### 10.3 Gate and handoff rules
-
-- A required Gate must actually execute in the correct workspace and repository.
-- RED or missing Gate evidence blocks handoff.
-- A GREEN Gate is not equivalent to Adversary acceptance.
-- The runner must not fabricate or manually edit `eval/T-xxx/gate-latest.json`.
-- Existing test environment caveats must be included in the handoff.
-
-## 11. Pull Request policy — create, never merge
-
-### Allowed
-
-- Create a task branch.
-- Commit changes to that branch.
-- Push the branch.
-- Open or update a PR.
-- Add task metadata, test results, Gate evidence, and risk summary.
-- Request reviewers when the identity is configured.
-
-### Prohibited
-
-- Merge PR.
-- Enable auto-merge.
-- Update branch protection or repository rulesets.
-- Bypass required reviews/checks.
-- Push directly to `main`.
-- Use a credential with `Contents: write` plus `Pull requests: write` if it also has merge/admin authority unnecessarily.
-
-The GitHub App/token used by the PR Publisher must have only the minimum permissions required to create branches/commits and PRs. It must not receive repository administration or merge capability. If GitHub's permission model cannot technically separate PR creation from merge in the selected setup, enforce the prohibition with a separate merge-capable credential that is never present in MCP/Runner, plus repository rulesets and explicit tests.
-
-All PRs must identify task ID, organization, creator principal, branch, test profile, Gate result, known limitations, and required reviewer. PR creation does not alter the task's final state.
-
-## 12. GitHub branch and synchronization strategy
-
-- Preserve Claude namespace: `claude/<session>`.
-- Add ChatGPT namespace: `agents/chatgpt/<task-or-session>`.
-- Never impersonate Claude branches.
-- Extend `sync-ledger.yml` and `scripts/sync_branch.py` only after tests cover both namespaces.
-- Preserve append-only/deduplicated Ledger behavior and review-branch behavior for non-ledger changes.
-- Add provenance metadata without breaking older events or dashboards.
-- No agent writes directly to `main`.
-
-## 13. Audit and observability
-
-Every state-changing or security-relevant action records:
-
-- event/request/correlation ID
-- actor principal and organization
-- action and resource
-- task and artifact IDs where applicable
-- policy ID and decision
-- result, timestamp, and evidence reference
-
-Never log passwords, OAuth tokens, API keys, or unnecessary personal data. Audit events are append-only. A failed GitHub write must not be represented as a successful HQ event.
-
-## 14. Reliability and consistency
-
-- Read current GitHub state before a write.
-- Use idempotency keys for create/submit/review/PR operations.
-- Serialize task-state mutations per Task ID.
-- Revalidate task state and authorization immediately before commit.
-- Retry only idempotent operations or operations with verified deduplication.
-- On GitHub outage, fail closed for authoritative writes; do not create an independent shadow Ledger.
-- Maintain reconciliation checks for runner jobs, branch commits, PRs, and HQ events.
-
-## 15. Deployment units
-
-1. `tohong-hq-mcp`: MCP transport, identity, policy, task, artifact, review, audit, GitHub adapter.
-2. `tohong-hq-runner`: isolated workspace provisioning and command execution.
-3. Optional queue/cache/database: ephemeral job coordination, locks, idempotency, and session metadata only.
-
-Suggested implementation stack: Python + FastAPI + official MCP Python SDK for the gateway; container/microVM runner with a narrow internal API. Final stack is an implementation decision and must be validated against hosting, OAuth support, and operational constraints.
-
-## 16. Acceptance criteria
-
-1. Claude and ChatGPT authenticate as distinct principals.
-2. A client cannot self-assert another organization or role.
-3. Every review-matrix scenario returns the expected ALLOW/DENY.
-4. All task-state transitions go through `scripts/task.py`.
-5. Ledger remains append-only and backward-compatible.
-6. ChatGPT Engineering can modify code in an isolated task workspace.
-7. Required tests and Code Gate execute in the actual workspace.
-8. Gate RED or absent evidence prevents handoff.
-9. The runner can create a PR with complete provenance and evidence.
-10. No MCP/Runner path can merge a PR or enable auto-merge.
-11. Claude's existing branch sync and task workflow continue to pass regression tests.
-12. Repository visibility is verified Private before production secrets are provisioned.
-13. No secrets are exposed in model-visible output, logs, artifacts, or PRs.
-
-## 17. Open implementation prerequisites
-
-- Repository is currently reported as Public; an authorized administrator must switch it to Private and verify access before production rollout.
-- Confirm hosting target, OAuth/OIDC provider, GitHub App installation, and secret manager.
-- Confirm whether ChatGPT and Claude clients can present separate verified principals or whether initial authorization must be organization-scoped.
-- Inspect existing branch protection/rulesets and establish a merge boundary independent of the Runner.
-
-## 18. Architecture decision summary
-
-Tohong HQ becomes a shared governance system with independent AI organizations. MCP is the controlled interface, GitHub remains the source of truth, `task.py` owns task transitions, `gate.py` owns Code Gate execution, and the dedicated Runner owns isolated code execution. Automatic PR creation is approved; automatic merge is explicitly prohibited.
+- Repository must be verified Private before production secrets or sensitive internal artifacts are added. This architecture does not claim that repository visibility has changed.
+- Use the connected GitHub identity with least privilege. Review granted repository permissions periodically.
+- No PAT, OAuth token, deploy key, or secret may be pasted into ChatGPT messages, committed files, PR descriptions, or logs.
+- GitHub Actions uses scoped GitHub permissions, protected environments where appropriate, and repository secrets only when necessary.
+- Protect `main` with required PR reviews and required status checks.
+- No ChatGPT-connected identity or workflow may bypass branch protection, merge PRs, enable auto-merge, or modify rulesets.
+- Treat repository content, issue bodies, PR comments, and workflow output as untrusted input.
+- Human approval is required for merge, production deployment, destructive operations, permission changes, and Tier C decisions.
+- Do not claim separate ChatGPT sub-agent identities: all ChatGPT roles share the authenticated ChatGPT principal unless an independently verified identity is introduced later.
+
+## 6. Branch, PR, and synchronization policy
+
+- Keep the existing Claude namespace only if Claude workflows remain in the repository; Claude is outside the browser-only operating scope and is not a dependency for this architecture.
+- ChatGPT-authored changes use `agents/chatgpt/<task-or-session>`.
+- No direct pushes to `main`.
+- Preserve append-only/deduplicated Ledger behavior.
+- Extend `sync-ledger.yml` and `scripts/sync_branch.py` only with regression tests for the ChatGPT namespace.
+- PR creation is permitted when supported by the connector and policy.
+- Merge and auto-merge are prohibited for ChatGPT automation.
+
+## 7. Explicit non-goals
+
+- Dedicated Workspace Runner, AWS ECS/Fargate, SQS, S3, or microVM infrastructure.
+- Local Mac execution, Codex desktop, Claude Code, or a persistent developer VM.
+- Custom MCP gateway in the MVP.
+- Arbitrary terminal/shell access from ChatGPT.
+- 24/7 autonomous coding or background agent execution.
+- Automatic merge or production deployment.
+- Claiming tests, builds, task transitions, or file writes without verifiable GitHub evidence.
+
+## 8. Acceptance criteria
+
+1. ChatGPT can read the required HQ files through the connected GitHub integration.
+2. ChatGPT can prepare a scoped patch and, where supported, create a non-main branch and PR.
+3. Unsupported connector actions degrade to a patch/manual procedure without false success claims.
+4. PR checks execute in GitHub Actions and are tied to the evaluated commit SHA.
+5. `scripts/task.py` is the only task-state transition mechanism.
+6. `scripts/gate.py` executes in GitHub Actions and produces verifiable evidence.
+7. ChatGPT cannot mark a task complete or a gate green based only on its own statement.
+8. Required reviews and status checks protect `main`.
+9. ChatGPT automation has no merge or auto-merge capability.
+10. Ledger remains append-only and existing task/Claude sync behavior is not regressed.
+11. Repository visibility is verified Private before production secrets are provisioned.
+12. No secrets are exposed in model-visible output, repository files, PRs, or logs.
+
+## 9. Architecture decision summary
+
+Tohong HQ v2.0 is browser-only: ChatGPT Go provides reasoning and governed authoring; the GitHub Connector provides supported repository operations; GitHub Actions executes trusted scripts and CI; GitHub remains the source of truth; a human retains merge and high-impact approval authority. There is no dedicated runner, local coding environment, or custom MCP server in this phase.
