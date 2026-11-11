@@ -7,6 +7,7 @@ Kịch bản (bước 0 = luật hiện hành chạy `enrich.py` thường, rồ
   k flower CLOSED_PERMANENTLY với 0 đánh giá -> few_reviews thắng: KHÔNG gỡ, ở lại · l flower CLOSED_TEMPORARILY với 0 đánh giá -> few_reviews, không ở trạng thái tạm đóng cửa (không retry)
   m makeup địa chỉ mâu thuẫn + 0 đánh giá -> mã từ chối cũ (address_conflict) GIỮ NGUYÊN: few_reviews chỉ xét ứng viên đã qua luật nhận khớp
   n makeup 0 đánh giá nhưng Capu duyệt tay accept_place -> NHẬN (duyệt tay thắng), 0 Text Search cho n
+  r venue (như Pergola, ADR-048) Capu duyệt tay `temporarily_closed`, Google trả CLOSED_TEMPORARILY với 0 đánh giá -> DUYỆT TAY THẮNG few_reviews: audit giữ retry=true + closed_state=temporarily_closed (INV-021(d)), không place_id, không few_reviews
   đường tên (--recheck-name-match): o invitation 0 đánh giá và q wedding_gift 1 đánh giá -> few_reviews (1 Text Search mỗi vendor, 0 ảnh); p invitation 4 đánh giá -> nhận theo tên (2 ảnh)
 Đếm: baseline đúng 13 Text Search (n được duyệt tay thì không); recheck đúng 4 (m, o, p, q). Không có lượt Details, không có lượt ảnh cho vendor few_reviews. In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import os, re, sys
@@ -31,6 +32,7 @@ V = [  # id, tên, category file, địa chỉ gốc, địa chỉ Google, số 
     ("o", "Opal Name Invitation", "invitation", S % 22, G, 0, "OPERATIONAL"),
     ("p", "Pearl Name Invitation", "invitation", S % 23, G, 4, "OPERATIONAL"),
     ("q", "Quartz Name Gift", "wedding_gift", S % 24, G, 1, "OPERATIONAL"),
+    ("r", "Nhà Hàng Pergola Rooftop", "venue", S % 25, S % 25, 0, "CLOSED_TEMPORARILY"),
 ]
 files, PL, rules = {}, {}, []
 for vid, name, cat, src, gaddr, n, st in V:
@@ -40,7 +42,7 @@ for vid, name, cat, src, gaddr, n, st in V:
 rules.sort(key=lambda r: -len(r[0]))
 root = t.Root(files)
 x.usage_logs(root, ts=0, details=0, media=0)
-root.set_overrides([t.accept_with_snapshot("t126_n", "Pn", PL["Pn"])])
+root.set_overrides([t.accept_with_snapshot("t126_n", "Pn", PL["Pn"]), t.entry("t126_r", "temporarily_closed", reason="Capu: Google ghi tạm thời đóng cửa (fixture eval T-126, như Pergola ADR-048)")])
 FX = x.fx(PL, rules)
 cats = [c for c in h.ORDER if c in files]
 rc, out, calls = root.run(x.enrich_all(cats), FX)
@@ -71,7 +73,10 @@ if x.is_temp_closed(la) or la.get("retry") or la.get("closed_state"):
 ma = root.audit("makeup").get("t126_m") or {}
 if ma.get("reject_reason") != "address_conflict" or ma.get("status") != "low_confidence" or t.has_pid(root.vendor("t126_m", "makeup")):
     bad.append("m (địa chỉ mâu thuẫn + 0 đánh giá): mong mã từ chối cũ address_conflict giữ nguyên, thấy %r" % {x_: ma.get(x_) for x_ in ("status", "reject_reason")})
-qs = x.queries(calls)
+ra = root.audit("venue").get("t126_r") or {}
+if not x.is_temp_closed(ra) or ra.get("reject_reason") == k.CODE or t.has_pid(root.vendor("t126_r", "venue")):
+    bad.append("r (duyệt tay temporarily_closed, Google tạm đóng + 0 đánh giá): duyệt tay thắng few_reviews, mong retry=true + closed_state=temporarily_closed, không few_reviews, không place_id; thấy %r" % {x_: ra.get(x_) for x_ in ("status", "retry", "closed_state", "reject_reason")})
+qs = [q for q in x.queries(calls) if "pergola" not in h.fold(q)]   # số lượt hỏi lại r (duyệt tay tạm đóng cửa, T-110) do T-110 quyết, không đo ở đây
 if len(qs) != 13 or x.count_for(calls, "november manual") != 0:
     bad.append("baseline mong đúng 13 Text Search (n được duyệt tay thì không), thấy %d (n: %d)" % (len(qs), x.count_for(calls, "november manual")))
 if t.n_kind(calls, "details", "share", "geocode", "maps"):
@@ -96,10 +101,11 @@ for cat, v in recs("p").items():
     if t.pid_of(v) != "Pp" or len(v.get("google_photos") or []) != 2:
         bad.append("p (đường tên, 4 đánh giá): mong NHẬN theo tên với 2 ảnh, thấy pid=%r" % t.pid_of(v))
 bad += k.demoted_state_ok(root, "t126_m", 0)   # m (mâu thuẫn địa chỉ ở bước 0) cũng đủ điều kiện hỏi lại; qua đường tên nhưng 0 đánh giá -> few_reviews
-if len(x.queries(calls2)) != 4 or t.n_kind(calls2, "media") != 2 or t.n_kind(calls2, "details", "share", "geocode", "maps"):
-    bad.append("recheck mong đúng 4 Text Search (m, o, p, q), 2 media (chỉ p), 0 Details; thấy %d, %d, %d" % (len(x.queries(calls2)), t.n_kind(calls2, "media"), t.n_kind(calls2, "details")))
+if len([q for q in x.queries(calls2) if "pergola" not in h.fold(q)]) != 4 or t.n_kind(calls2, "media") != 2 or t.n_kind(calls2, "details", "share", "geocode", "maps"):
+    bad.append("recheck mong đúng 4 Text Search (m, o, p, q), 2 media (chỉ p), 0 Details; thấy %d, %d, %d" % (len([q for q in x.queries(calls2) if "pergola" not in h.fold(q)]), t.n_kind(calls2, "media"), t.n_kind(calls2, "details")))
 # few_reviews là kết cục cuối của lần hỏi: lần recheck thứ hai KHÔNG hỏi lại o và q
 rc3, out3, calls3 = root.run(h.recheck_argv([{"cat": c} for c in files]), FX)
-if x.queries(calls3):
-    bad.append("recheck lần 2 hỏi lại %d vendor (mong 0: o, q đã có kết cục few_reviews; p đã nhận)" % len(x.queries(calls3)))
-t.done(bad, "ứng viên < 2 đánh giá không được nhận ở mọi category và cả hai đường (sáu cổng, tên); đúng ngưỡng 2 nhận; few_reviews không gỡ, không tốn ảnh, không che mã từ chối cũ; duyệt tay thắng; hỏi lại không lặp")
+q3 = [q for q in x.queries(calls3) if "pergola" not in h.fold(q)]
+if q3:
+    bad.append("recheck lần 2 hỏi lại %d vendor (mong 0: o, q đã có kết cục few_reviews; p đã nhận)" % len(q3))
+t.done(bad, "ứng viên < 2 đánh giá không được nhận ở mọi category và cả hai đường (sáu cổng, tên); đúng ngưỡng 2 nhận; few_reviews không gỡ, không tốn ảnh, không che mã từ chối cũ; duyệt tay (accept_place, temporarily_closed) thắng; hỏi lại không lặp")

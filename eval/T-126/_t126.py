@@ -33,14 +33,17 @@ def pl(name, addr, pid, n=None, status="OPERATIONAL", nphotos=2, details_status=
     return p
 
 
-def matched(vid, name, addr, cat, pid, ts, count, cats=None, manual=False):
-    """Vendor ĐÃ nhận khớp Google (đọc ở thời điểm ts, số đánh giá đã lưu = count; None = log không có trường rating). Địa chỉ gốc = địa chỉ Google nên sáu cổng giữ nguyên nhận khớp."""
+def matched(vid, name, addr, cat, pid, ts, count, cats=None, manual=False, reviews_count="same"):
+    """Vendor ĐÃ nhận khớp Google (đọc ở thời điểm ts; count = số đánh giá trong dòng log MỚI NHẤT, None = dòng đó không có rating;
+    reviews_count = reviews[google_maps].count, mặc định bằng count; đặt khác để dựng ca số CŨ còn sót trong reviews[], vd marry_c7de39c8872c). Địa chỉ gốc = địa chỉ Google nên sáu cổng giữ nguyên nhận khớp."""
     v = t.vendor(vid, name, addr, tuple(h.DIR_CATEGORY.get(c, c) for c in (cats or [cat])))
     ch = {"address": addr, "geo": True, "geo_confidence": "exact"}
+    rc = count if reviews_count == "same" else reviews_count
     if count is not None:
         ch["rating"] = 4.5
         ch["review_count"] = count
-        v["reviews"] = [{"source": "google_maps", "rating": 4.5, "count": count, "last_updated": ts}]
+    if rc is not None:
+        v["reviews"] = [{"source": "google_maps", "rating": 4.5, "count": rc, "last_updated": ts}]
     log = {"source": "google_maps", "timestamp": ts, "matched_name": name, "confidence": 1.0, "place_id": pid, "formatted_address": addr, "address_match": True, "changes": ch}
     if manual:
         log["manual_override"] = True
@@ -128,6 +131,18 @@ def ids_with_pid(root):
         if os.path.isdir(root.p(cat)):
             out |= {v["id"] for v in root.vendors(cat) if t.has_pid(v)}
     return out
+
+
+def retry_vendor(vid, name, addr, cat):
+    """Vendor đang chờ thử lại vì tạm đóng cửa (T-110): chưa place_id, audit retry=true + closed_state. Batch thường sẽ hỏi lại nó; chế độ riêng của T-126 thì không."""
+    v = t.vendor(vid, name, addr, (h.DIR_CATEGORY[cat],))
+    row = {"vendor_id": vid, "status": "temporarily_closed", "reason": "CLOSED_TEMPORARILY", "retry": True, "closed_state": "temporarily_closed", "candidate_place_id": "P" + vid, "_cat": cat}
+    return v, row
+
+
+def untried_vendor(vid, name, addr, cat):
+    """Vendor chưa từng được hỏi Google (không place_id, không dòng audit): Batch thường sẽ Text Search nó; chế độ riêng của T-126 thì không."""
+    return t.vendor(vid, name, addr, (h.DIR_CATEGORY[cat],))
 
 
 def mask_of(calls, kind):
