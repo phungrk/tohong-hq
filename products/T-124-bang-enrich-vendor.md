@@ -1,0 +1,145 @@
+# Spec T-124: bang-enrich-vendor
+
+> v1 · Spec Writer (product) · 2026-11-11 · bậc C · vùng `planner/admin/vendor-enrich` · chạm 3 repo (tohong, tohong-back, tohong-front)
+
+## Ý định
+Capu (2026-11-10/11): trong admin web Tơ Hồng, mục vendor có một bảng **STT, vendor, thông tin trên marry.vn, sau enrich Google Maps, status, action Approve / Sửa thủ công**, để nhìn vào biết bao nhiêu vendor *enrich 100% (khớp tên + địa chỉ, có hình)*, *chưa có hình Google*, *tên hơi giống*, *địa chỉ không giống marry*. Hướng giao diện: bản phác Capu đã xem (artifact Vjjd1oP6vicBsb99w3LXQT, bản bảng; file `Main.dc.html`). Nguồn: `board/T-124.md`; bất biến và spec nền: `products/T-106-enrich-venue.md`, `T-110-duyet-tay-venue.md`, `T-111-enrich-toan-bo-vendor.md`, `T-120-nhan-khop-theo-ten.md`.
+
+## Bằng chứng
+- Dữ liệu thật: tohong `origin/main` 62ee2f8 (`tools/scraper/output/HCMC/*/vendors.json`, `enrichment-audit.json`, `manual_overrides.json`) và pool tohong-back 3d51872 (873 vendor). Ảnh chụp rút gọn: `eval/T-124/snapshot.json`; hàm chuẩn: `eval/T-124/_t124.py`. Đo bằng `python3 eval/T-124/_t124.py <đường dẫn tohong>`. Tự tin cao (~95%): số đếm lặp lại được từ dữ liệu, không ước lượng.
+- Bản phác Capu xem ghi 876 vendor, 105 / 244 / 666 / 107. 876 = số id khác nhau trong `vendors.json` của 12 category app (bỏ `other`, `wedding_planner`; pool app 873 = 876 trừ 3 vendor tạm đóng, đúng INV-021 (f)). Bốn con số khác nhau về cách đếm, xem "Khác bản phác" bên dưới.
+- Pool tohong-back **không** có địa chỉ marry, độ giống tên hay trạng thái enrich (`vendorPool.generated.js` chỉ có tên, giá, ảnh): dữ liệu bảng phải đi từ tohong sang.
+- `ADMIN_USER_IDS` (Clerk user id) quyết định ai là admin; mọi route `/api/admin/*` đã qua `requirePlatformAdmin` (`tohong-back/api/admin.js`). Không biết chắc env production có bao nhiêu admin: GIẢ ĐỊNH, tự tin ~70% là chỉ Capu; spec không dựa vào điều này (xem Hành vi 5).
+
+## Giả thuyết
+Nếu Capu có một bảng một-vendor-một-nhóm với số đếm đúng thì quyết định duyệt tay (T-110) dồn vào nhóm đáng duyệt (73 tên trùng/địa chỉ lệch, 244 tên hơi giống) thay vì mở `review-needed.csv` từng category. Chỉ số: số vendor có nhóm `name_same_addr_diff` + `name_similar` giảm sau mỗi lần Capu duyệt và enrich lại. Chỉ số bảo vệ: **không** có thay đổi nào về dữ liệu vendor đang chạy trên app (pool, giá, ảnh) do chính trang này; INV-020 vẫn xanh.
+
+## Hành vi (người dùng thấy gì)
+
+### 1. Nhóm: một vendor đúng một nhóm (đo trên dữ liệu thật)
+**Tập vendor**: mọi id khác nhau có bản ghi trong `vendors.json` của ít nhất một category ngoài `other`, `wedding_planner` (hiện **876**). **Bản ghi nhà** của vendor = bản ghi ở category đứng đầu theo thứ tự pipeline: venue, photography, wedding_attire, makeup, flower, wedding_interior, ceremony, invitation, wedding_gift, wedding_ring, wedding_car, honeymoon (giống INV-026). Từ đó:
+- **G** = bản ghi `enrichment_log[source=google_maps]` MỚI NHẤT có `place_id` của bản ghi nhà; không có thì của bản ghi cùng id ở category khác theo cùng thứ tự; không có nữa thì G = rỗng.
+- **dòng audit** = dòng `enrichment-audit.json` của vendor ở category nhà; không có thì ở category khác theo cùng thứ tự.
+- **số ảnh Google** = số lớn nhất của `len(google_photos)` giữa các bản ghi cùng id.
+- **độ giống tên** = `confidence` của G (nếu có G) hoặc của dòng audit (nếu không).
+
+Nhóm, xét **theo thứ tự này, gặp điều kiện nào trước thì dừng**:
+
+| # | Mã nhóm | Nhãn trên bảng | Điều kiện | Số hiện tại |
+| --- | --- | --- | --- | --- |
+| 1 | `temp_closed` | Tạm đóng cửa | G rỗng và dòng audit có `closed_state="temporarily_closed"` hoặc `status="temporarily_closed"` | 3 |
+| 2 | `unverified` | Có ảnh Google, chưa kiểm khớp | G có và **không có khoá** `address_match` (bản ghi đợt ảnh T-104, chưa qua cổng) | 71 |
+| 3 | `full` | Enrich 100% | G có, `address_match = true`, số ảnh Google >= 1 | 98 |
+| 4 | `matched_no_photo` | Khớp, chưa có ảnh Google | G có, `address_match = true`, số ảnh Google = 0 (Google không có ảnh cho nơi này) | 7 |
+| 5 | `addr_diff_accepted` | Địa chỉ khác marry | G có, `address_match = false` (đã nhận khớp qua sáu cổng hoặc duyệt tay, địa chỉ hiển thị là địa chỉ Google) | 34 |
+| 6 | `name_same_addr_diff` | Tên trùng, địa chỉ lệch | G rỗng, dòng audit `low_confidence`, độ giống tên **>= 0,95** | 73 |
+| 7 | `name_similar` | Tên hơi giống | G rỗng, dòng audit `low_confidence`, **0,6 <= độ giống tên < 0,95** | 244 |
+| 8 | `not_found` | Không thấy trên Maps | G rỗng, dòng audit `low_confidence` với độ giống tên **< 0,6**, hoặc dòng audit có status khác (`no_match`, `closed_permanently`, `business_closed`) | 346 |
+| 9 | `not_enriched` | Chưa enrich | G rỗng và không có dòng audit | 0 |
+
+Tổng 98 + 7 + 34 + 71 + 73 + 244 + 346 + 3 + 0 = **876**. Ranh giới: 0,95 vào nhóm 6; 0,9499 vào nhóm 7; 0,6 vào nhóm 7; 0,5999 vào nhóm 8 (so trên số thật, không làm tròn).
+
+**Bốn ô đếm** (Capu hỏi) là các phép đếm trên nhóm, **được phép chồng nhau** và luôn tính trên toàn bộ danh sách (không đổi khi lọc):
+
+| Ô | Nhãn | Luật | Số hiện tại |
+| --- | --- | --- | --- |
+| `full` | Enrich 100% | số vendor nhóm 3 | 98 |
+| `no_google_photo` | Chưa có ảnh Google | số vendor có số ảnh Google = 0, mọi nhóm | 680 |
+| `name_similar` | Tên hơi giống | số vendor nhóm 7 | 244 |
+| `addr_diff` | Địa chỉ khác marry | nhóm 5 + nhóm 6 | 34 + 73 = 107 |
+
+Cộng thêm ô "Tất cả" = 876. Bảng còn hiện số từng nhóm (`summary.groups`) để Capu thấy đủ 9 nhóm.
+
+**Khác bản phác Capu đã xem** (đã đo, không phải ý kiến): (a) bản phác ghi *Enrich 100% = 105*, nhưng 7 vendor trong đó Google không có ảnh; theo chữ Capu viết ("có hình") chúng thuộc nhóm 4, nên ô là **98** (xem Câu hỏi mở); (b) *Chưa có ảnh Google = 666* chỉ đếm vendor chưa gắn Google; vendor đã gắn mà không có ảnh (14) cũng là "chưa có ảnh Google", nên ô là **680**; (c) *Không thấy trên Maps = 347* và *tạm đóng = 2*: Pergola (ADR-048 mục 3, `temporarily_closed` do Capu duyệt, không nằm trong pool) cũng là tạm đóng, nên **346** và **3**; (d) nhóm 71 *ảnh Google đợt T-104* và nhóm 4 là nhóm riêng (bản phác để lẫn trong 666 / 105); (e) bản phác có ô "Địa chỉ dùng cho vendor" trong form: **bỏ** (T-110 không có chỗ ghi địa chỉ tự do; sau khi nhận, địa chỉ hiển thị lấy theo Google, và "không sửa giá/mô tả vendor" nằm trong phạm vi Không làm của việc này).
+
+### 2. Luồng dữ liệu tohong → back (đề xuất ít rủi ro nhất)
+**Một file báo cáo sinh sẵn, cùng kiểu với pool; back không tự đọc tohong và không gọi mạng.**
+1. tohong: `python3 tools/scraper/build_enrich_report.py --state HCMC --output-dir tools/scraper/output --out tools/scraper/output/HCMC/enrich-report.json` đọc **chỉ** các file đã có trong `output/`, không gọi Google, không ghi file nào khác, tất định (hai lần chạy cho cùng byte; không có dấu thời gian lúc chạy, `data_as_of` = thời điểm `google_maps` mới nhất trong dữ liệu). Chạy lại và commit cùng PR dữ liệu sau mỗi lần enrich / refresh ảnh / resolve / áp duyệt tay (thêm bước vào các workflow `enrich-vendors.yml`, `enrich-venue.yml`, `refresh-vendor-photos.yml`, `resolve-overrides.yml`, hoặc chạy tay trong PR; chọn cách ít đụng workflow nhất).
+2. back: `node tools/generate-vendor-enrich-report.js` sinh `lib/vendorEnrichReport.generated.js` = `// AUTO-GENERATED — do not edit manually.` + `export const VENDOR_ENRICH_REPORT = <JSON nguyên văn>;`. Merge PR tohong trước, PR back ngay sau (đúng cách pool đang làm; giữa hai lần merge back còn hiện dữ liệu cũ, không hỏng gì).
+3. Lý do chọn: không thêm lưu trữ, không thêm bí mật, không thêm dịch vụ, không đọc dữ liệu sống của tohong lúc chạy; rủi ro tệ nhất là bảng cũ vài ngày, và `data_as_of` hiện ngay trên đầu bảng. Cách thay thế đã loại: back đọc GitHub/R2 lúc chạy (cần token, thêm đường lỗi); nhét trạng thái enrich vào `vendorPool.generated.js` (pool lên app của cặp đôi, địa chỉ marry và độ giống tên không được lộ ra ngoài admin).
+
+**Hợp đồng báo cáo** (`enrich-report.json`):
+`{schema_version:1, state:"HCMC", data_as_of, summary:{total, groups:{<9 mã nhóm>:n}, chips:{full, no_google_photo, name_similar, addr_diff}, approvable:n}, vendors:[…]}`; mỗi phần tử `vendors`:
+`{id, name, category (id hạng mục app: venue, ceremony, photography, jewelry, attire, decor, makeup, transport, stationery, honeymoon), group, marry:{address (= contact.address_source, nếu rỗng thì contact.address), price_min_vnd, price_max_vnd, price_unit, source_url}, google:null|{matched (G có), place_id, name, similarity, address, address_match (true|false|null), rating, review_count, photo_count, maps_url, reject_reason}, approvable, override:null|{action, approved_on}}`.
+- `google` = null khi vendor không có `place_id` nào (G rỗng và audit không có `candidate_place_id`); khác thì `place_id` = G.place_id, nếu không có G thì `candidate_place_id` của dòng audit; `maps_url` = `https://www.google.com/maps/place/?q=place_id:<place_id>`; `photo_count` = số ảnh Google (Hành vi 1).
+- `approvable` = true khi nhóm thuộc {`addr_diff_accepted`, `unverified`, `name_same_addr_diff`, `name_similar`}, có `google.place_id` và `override` rỗng. Hiện **422** vendor (34 + 71 + 73 + 244).
+- `override` = mục của vendor trong `manual_overrides.json` (có thì `action`, `approved_on`), để bảng cho biết Capu đã duyệt tay và lần enrich đã áp.
+- Thứ tự `vendors`: category nhà theo thứ tự pipeline, rồi tên không phân biệt hoa thường, rồi id.
+
+### 3. API admin (repo tohong-back, mọi route nằm dưới `/api/admin/vendor-enrich`, đều sau `requirePlatformAdmin`, trả `Cache-Control: no-store`)
+- `GET /api/admin/vendor-enrich?filter=&category=&q=&offset=&limit=` → `{summary, total, offset, limit, rows}`. `filter` ∈ {`all` (mặc định), 4 mã ô đếm, 9 mã nhóm}; lạ thì 400 `invalid_filter`. `q`: so không dấu, không phân biệt hoa thường, trên tên vendor. `category`: id hạng mục app. `limit` mặc định 50, tối đa 100. `summary` là của toàn danh sách. Mỗi dòng `rows[i]` = dòng báo cáo + `n` (= `offset` + vị trí + 1, đây là STT trên bảng) + `catLabel` (nhãn hạng mục của app) + `review` (null hoặc quyết định đang chờ, Hành vi 4). Chỉ GET (còn lại 405).
+- `PUT /api/admin/vendor-enrich/<id>/review`, `DELETE …/review`, `GET /api/admin/vendor-enrich/export`: Hành vi 4.
+
+### 4. Approve và Sửa thủ công: ghi một "quyết định chờ áp dụng", chưa phải override
+Bấm trên bảng **không** đổi dữ liệu vendor, không đổi pool, không đổi nhóm, không gọi Google (Google chỉ được gọi bởi workflow resolve/enrich ở tohong, như T-110/T-112). Nó ghi một review vào khoá R2 **riêng** `data/admin/vendor_enrich_reviews.json` (`{vendors:{<id>:review}}`, ghi có kiểm etag như `vendorOverlay`, hai ghi đồng thời không mất cái nào). Khoá `data/admin/vendor_overrides.json` (giá/ẩn/liên hệ của admin hiện có) **không bị chạm**.
+- **Approve** (`PUT {decision:"approve"}`): chỉ dòng `approvable`; không thì 409 `not_approvable`. Review = `accept_place` với `place_id` = `google.place_id` của dòng (nhóm 6, 7: ứng viên mà Google trả về nhưng bị cổng từ chối; nhóm 5, 2: chính nơi đang gắn, để khoá bằng duyệt tay), lý do tự sinh ("Admin duyệt nhận khớp Google: <tên Google>").
+- **Sửa thủ công** (`PUT {decision:"manual", action, maps_link?, place_id?, note?}`), `action` ∈ bốn hành động của T-110: `accept_place` (đúng MỘT trong `maps_link` hoặc `place_id`; thiếu 400 `missing_target`, cả hai 400 `ambiguous_target`; link phải `https` và host `share.google`, `goo.gl`, `maps.app.goo.gl` hoặc `google.com/maps…`, sai 400 `bad_link`), `remove` và `temporarily_closed` (không mang link/place_id, 400 `unexpected_field`; **bắt buộc** `note`, 400 `note_required`), `reject_match` (`place_id` mặc định = `google.place_id` của dòng, không có thì 400 `missing_target`; không mang link; bắt buộc `note`). `note` tối đa 300 ký tự (400 `note_too_long`). Mọi dòng đều Sửa thủ công được, kể cả nhóm `full`.
+- Lỗi chung: `decision` hoặc `action` lạ 400 `invalid_decision`; id không có trong báo cáo 404 `not_found`; dòng đã có `override` (đã nằm trong `manual_overrides.json`) 409 `already_overridden` (T-110 không cho hai mục một vendor; muốn đổi thì sửa file bằng PR như cũ).
+- Review lưu `{state:"pending", decision, action, place_id|maps_link, reason, reviewed_by, reviewed_at}`. `reviewed_by` = Clerk user id lấy **từ token**, không bao giờ từ thân yêu cầu (không dùng email: dữ liệu cá nhân). Mỗi vendor một review; PUT lại thay cái cũ. `DELETE` rút lại (200 `{review:null}`, gọi lại vẫn 200).
+- Mỗi PUT thành công và mỗi DELETE ghi nhật ký admin có sẵn (`appendAudit`): `vendor_enrich.review` / `vendor_enrich.review_withdraw`, `admin_id` = người duyệt, `target_type:"vendor_enrich"`, `target_id` = id vendor. Người duyệt xem lại ở tab "Nhật ký" đã có.
+- `GET /api/admin/vendor-enrich/export` → `{count, entries:[{vendor_id, action, place_id|maps_link, reason, reviewed_by, reviewed_at}]}` chỉ các review đang chờ, sắp theo `vendor_id`; **không** có `approved_by`/`decision` (back không biết và không được tự nhận hộ Capu).
+
+### 5. Từ review thành override T-110, và "người duyệt" không phá INV-020
+INV-020 đòi mọi mục trong `manual_overrides.json` có `approved_by="capu"` và `decision` trỏ một file trong `decisions/` của HQ có `decided_by: capu` ở frontmatter và nhắc `vendor_id`. Một cú bấm trên trang admin **không** tự là quyết định ghi vào `decisions/` (agent không được tự thêm; platform admin có thể không chỉ có Capu). Vì vậy:
+1. Capu (hoặc admin khác) bấm Approve / Sửa thủ công: review ở trạng thái `pending`, kèm `reviewed_by` + `reviewed_at` + nhật ký admin. **Đây là dấu vết "ai duyệt".**
+2. Khi Capu muốn áp một lô: Chief of Staff lấy file export, đưa Capu đọc danh sách (diff hành vi), và **chỉ khi Capu xác nhận** mới ghi một file `decisions/<ngày>-adr-NNN-duyet-qua-admin-<lô>.md` với `decided_by: capu` và liệt kê đủ `vendor_id` của lô. Bước này là cổng người; không script nào làm thay.
+3. tohong: `python3 tools/scraper/apply_admin_reviews.py --state HCMC --reviews <export.json> --decision decisions/<file>.md --approved-on <YYYY-MM-DD> [--hq <gốc tohong-hq>]` thêm mục vào `manual_overrides.json` đúng schema T-110: `{vendor_id, action, [maps_link|place_id], reason, approved_by:"capu", approved_on, decision}` với `reason` = lý do của export + ` [duyệt qua admin: <reviewed_by>, <reviewed_at>]` (dấu vết người duyệt nằm trong `reason`, **không thêm trường mới** vào schema). Mục đã có cho vendor đó: giữ nguyên byte, in `SKIP_EXISTING <id>`. Từ chối cả lượt (thoát 2, file không đổi, `APPLY_REFUSED <mã> [<id>]`): `unknown_vendor`, `bad_entry` (không qua `enrichment.overrides.validate`), `bad_decision` (sai dạng, hoặc với `--hq`: không có file / không `decided_by: capu` / thiếu `vendor_id`). Chạy lại cùng đầu vào không đổi byte. Không mở mạng.
+4. PR vào tohong là bậc C: Capu tự merge. Sau đó chạy như T-110/T-112: workflow `resolve-overrides.yml` điền `resolved` cho `accept_place` (đây là lần Google duy nhất, đã có sẵn, không thuộc việc này), rồi lần enrich/refresh kế tiếp áp override, rồi sinh lại báo cáo: vendor đổi nhóm và dòng hiện `override`. Ngoài ra không có đường nào để review thành dữ liệu vendor.
+- **Kết luận cho câu "duyệt qua admin có phải quyết định của Capu không": không tự động.** Review là đề xuất đã ghi người; quyết định là file `decisions/` mà Capu xác nhận cho cả lô. INV-020 **không cần đổi**. Phương án thay thế (nếu Capu thấy bước 2 nặng): đổi INV-020 để chấp nhận `decision` kiểu `admin:<khoá nhật ký>` khi người duyệt thuộc danh sách Capu chỉ định. Spec **không** làm vậy; đổi bất biến phải qua Chief of Staff và `decisions/`.
+
+### 6. Quyền
+Mọi route ở Hành vi 3 và 4 chỉ cho user có trong `ADMIN_USER_IDS`. Không token, token rác, user thường, `ADMIN_USER_IDS` rỗng hoặc thiếu, token `dev:` khi `DEV_AUTH_BYPASS` tắt: 403 `{"error":"forbidden"}` (thân đúng một khoá), R2 không có lần ghi nào. Đường dẫn không tồn tại dưới `/api/admin/` cũng 403 trước khi tìm route (hành vi có sẵn, giữ nguyên). Không route nào đọc `conversations/`.
+
+### 7. Giao diện (repo tohong-front, `src/admin/`)
+- Admin > tab **Dữ liệu vendor**: hai nút **Danh sách vendor** (màn cũ, giữ nguyên) và **Enrich Google Maps**. Nút sau mở bảng tên **Bảng enrich vendor** (`<table>` có tên trợ năng đó); đầu bảng ghi tổng "876 vendor · enrich lần cuối <data_as_of>".
+- Cột đúng nhãn: **#**, **Vendor**, **Thông tin trên marry.vn**, **Sau enrich Google Maps**, **Status**, **Action**.
+- Năm chip (button, `aria-pressed`): **Tất cả · 876**, **Enrich 100% · 98**, **Chưa có ảnh Google · 680**, **Tên hơi giống · 244**, **Địa chỉ khác marry · 107** (số lấy từ `summary`, không đổi khi lọc). Bấm chip gọi API với `filter` tương ứng và về trang đầu. Ô **Tìm vendor** (searchbox, Enter để tìm), chọn **Hạng mục**, chia trang 50: chữ "Hiển thị 1–50 / 876", nút **Trang trước** / **Trang sau**.
+- Dòng: STT = `n`; tên vendor + hạng mục; ô marry: "Địa chỉ: …" (+ giá nếu có); ô Google nếu có `google`: "Tên: …", "giống NN%", "Địa chỉ: …", thẻ **khớp marry** / **khác marry**, rating nếu có, liên kết **Mở Maps ↗** (href = `maps_url`); nếu `matched=false` hiển thị rõ đó là ứng viên chưa nhận; không có `google`: "Không tìm thấy trên Google Maps". Status = nhãn nhóm (bảng ở Hành vi 1) hoặc **Chờ áp dụng** khi có `review`. Action: nút **Approve** chỉ ở dòng `approvable` và chưa có review; dòng `full` ghi **Đã khớp** thay Approve; dòng có review hiện **Rút lại** thay Approve; nút **Sửa thủ công** ở mọi dòng.
+- **Approve** gọi `PUT …/review {decision:"approve"}`, dòng đổi sang "Chờ áp dụng". **Rút lại** gọi `DELETE`.
+- **Sửa thủ công** mở hộp thoại tên "Sửa thủ công · #<STT> <tên vendor>" với: **Quyết định** (bốn lựa chọn đúng chữ bản phác: *Gắn đúng nơi trên Google Maps*, *Không có trên Maps → gỡ vendor*, *Tạm đóng cửa → ẩn, kiểm lại sau*, *Giữ nguyên, không dùng Google*; ứng với `accept_place`, `remove`, `temporarily_closed`, `reject_match`), ô **Link Google Maps hoặc place_id** (giá trị bắt đầu `http` gửi là `maps_link`, còn lại gửi là `place_id`), ô **Ghi chú**, nút **Lưu**, **Huỷ**. Không có ô địa chỉ tự do. Chọn gỡ / tạm đóng / giữ nguyên mà thiếu ghi chú: hiện "Cần ghi chú", không gửi gì. Lỗi từ API hiện bằng lời, không đóng hộp thoại.
+- API trả 403: hiện thông báo lỗi chung của admin, không hiện bảng. Điện thoại 390px: trang không cuộn ngang (bảng tự cuộn trong khung). Không `track` (research R8 của admin).
+
+## Ràng buộc (vòi)
+- Repo và nhánh (đề xuất): `phungrk/tohong` · `t-124-bao-cao-enrich`; `phungrk/tohong-back` · `t-124-api-enrich`; `phungrk/tohong-front` · `t-124-bang-enrich`. Vùng: `planner/admin/vendor-enrich`.
+- **Chia việc Engineering**:
+  - **tohong**: `tools/scraper/build_enrich_report.py` (+ test), file `output/HCMC/enrich-report.json` commit kèm; `tools/scraper/apply_admin_reviews.py` (+ test); thêm bước sinh lại báo cáo vào quy trình chạy dữ liệu (workflow hoặc README). Không đổi luật nhận khớp, không đổi `enrich.py`, `settle.py`, `refresh_photos.py`. Merge trước.
+  - **tohong-back**: `tools/generate-vendor-enrich-report.js` + `lib/vendorEnrichReport.generated.js`; module store review (`lib/vendorEnrichReviews.js`: đọc/ghi `data/admin/vendor_enrich_reviews.json` có etag); route mới trong `api/admin.js` (nhánh `vendor-enrich` sau `requirePlatformAdmin`); thêm file test vào script `npm test`. Merge thứ hai.
+  - **tohong-front**: `src/admin/EnrichTable.jsx` (+ hộp thoại), hai nút chuyển trong `VendorData.jsx`, hàm gọi API trong `src/api.js`, CSS trong `admin.css`. Merge cuối (cần back đã deploy).
+  - **tohong-hq (Chief of Staff, không phải Engineering)**: file `decisions/` của từng lô sau khi Capu xác nhận (Hành vi 5.2); đưa `inv-proposed-…` vào bể khi spec qua cổng.
+- Bất biến đã đọc: `eval/invariants/_shared/` và `planner/vendor/images/` (INV-012…028) cùng vùng `planner/admin/`. Spec **không vi phạm**: INV-020 (không thêm trường, không thêm mục không có `decision` Capu; `approved_by` luôn `"capu"` chỉ sau file decision của lô); INV-021 (không đổi cách áp duyệt tay; `temp_closed` vẫn không có trong pool); INV-022, 025–028 (không ghi dữ liệu vendor, không đổi pool, không đổi luật nhận khớp). Không đề nghị đổi bất biến nào.
+- Kiến trúc / design system: admin hiện có (`adm-*` trong `src/admin/admin.css`, `useLoad`, `Badge`, `ErrorNote`); route admin theo mẫu `handleAdmin`; ghi R2 theo `vendorOverlay.js`/`adminStore.js` (etag, `appendAudit`).
+- Không chạm: payment, auth (chỉ dùng `requirePlatformAdmin` có sẵn), schema DB, dữ liệu cặp đôi, `vendorPool.generated.js`, `vendor_overrides.json`, `conversations/`. Không gọi Google, Places, Wayback từ bất kỳ đoạn mã nào của việc này; `reviewed_by` là user id, không lưu email.
+- Bậc lưới lọc: **C** (Capu đã giao bậc C) — đây là đường ghi quyết định duyệt tay lên dữ liệu vendor và chạm quyền admin; Capu đọc diff hành vi và tự merge ba PR.
+
+## Tiêu chí chấp nhận và eval
+Chạy từ gốc `tohong-hq`; hai repo tohong và tohong-back được tìm bằng `TOHONG_REPO` / `TOHONG_BACK_REPO` rồi `../tohong`, `../tohong-back`. Mỗi tiêu chí đúng một eval. Hiện đỏ trên `origin/main` (chưa có code) là đúng, trừ #1 xanh sẵn (khoá hàm chuẩn).
+
+| # | Tiêu chí (có/không) | Eval |
+| --- | --- | --- |
+| 1 | Luật nhóm trên dữ liệu thật đã chụp cho đúng 876 vendor, mỗi vendor đúng một nhóm, số từng nhóm 98/7/34/71/73/244/346/3/0, bốn ô 98/680/244/107, Approve được ở 422; ranh giới 0,95 / 0,6 / ảnh 0 vs 1 / tạm đóng thắng mọi nhóm | `python3 -I eval/T-124/check_1_nhom_va_so_dem.py` |
+| 2 | `build_enrich_report.py` sinh báo cáo từ dữ liệu thật: summary và từng dòng (nhóm, ứng viên, ảnh, địa chỉ marry, override) bằng hàm chuẩn; thoát 0 khi mạng bị chặn; không đổi byte dữ liệu; hai lần chạy cùng byte | `python3 -I eval/T-124/check_2_bao_cao_tohong.py` |
+| 3 | Dữ liệu nhúng ở back bằng đúng báo cáo đã commit ở tohong, báo cáo commit bằng báo cáo sinh lại, mọi vendor của pool đều có dòng | `python3 -I eval/T-124/check_3_dong_bo_tohong_back.py` |
+| 4 | `GET /api/admin/vendor-enrich` trả đúng summary, lọc theo 4 ô + 9 nhóm, hạng mục, từ khoá không dấu, chia trang, STT, `invalid_filter`, 405, no-store | `cd /home/user/tohong-back && node /home/user/tohong-hq/eval/T-124/check_4_api_danh_sach.mjs` |
+| 5 | Approve / Sửa thủ công ghi đúng một review chờ áp dụng có người duyệt lấy từ token, kiểm đúng luật T-110 (11 ca lỗi), rút lại được, export đúng, nhật ký admin có đủ, chỉ ghi khoá `vendor_enrich_reviews` và audit, không gọi mạng | `cd /home/user/tohong-back && node /home/user/tohong-hq/eval/T-124/check_5_api_duyet.mjs` |
+| 6 | Không phải admin (6 kiểu người gọi x 7 đường dẫn) nhận 403 `forbidden` và không ghi gì; admin thật gọi được | `cd /home/user/tohong-back && node /home/user/tohong-hq/eval/T-124/check_6_quyen_admin.mjs` |
+| 7 | `apply_admin_reviews.py` biến export thành mục `manual_overrides.json` đúng schema T-110 (6 mục mới, 1 bỏ qua, 4 mục cũ giữ byte), INV-020 nguyên văn xanh và đỏ khi decision thiếu id, 5 ca từ chối không đổi file, chạy lại không đổi, `resolve_overrides.py --dry-run` đếm đúng mục mới, mạng bị chặn | `python3 -I eval/T-124/check_7_ap_dung_override.py` |
+| 8 | Bảng trên giao diện: 6 cột đúng nhãn, 5 chip đúng số, lọc / tìm / chia trang gọi đúng API, Approve / Rút lại / Sửa thủ công gửi đúng thân yêu cầu, thiếu ghi chú thì chặn, không có ô địa chỉ, 403 hiện lỗi, 390px không cuộn ngang, không request ra ngoài | `cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-124/check_8_ui_bang.cjs --repo .` |
+
+Eval đo theo nhãn người dùng thấy và hợp đồng API ở trên, không bám tên hàm hay class. Bốn eval cần dữ liệu thật dùng hàm chuẩn `eval/T-124/_t124.py` và ảnh chụp `snapshot.json` (tohong 62ee2f8); khi dữ liệu tohong đổi sau này, #2 và #3 so với dữ liệu sống nên vẫn đúng, #1 và #8 giữ ảnh chụp để khoá luật.
+Đã chạy thử từng eval trên bản dựng thử (không giao) để chắc chạy được và phân biệt đúng: #1 xanh sẵn; #2, #4, #5, #6, #7, #8 xanh trên bản dựng thử, #5 đỏ khi cố ý để `reviewed_by` lấy từ thân yêu cầu hoặc bỏ kiểm `not_approvable`; trên `origin/main` thật cả bảy eval còn lại đỏ (FAIL, không ERROR).
+
+## Bất biến đề xuất (tầng 2)
+- **Báo cáo enrich là một phân hoạch** (bản nháp chạy được: `eval/T-124/inv-proposed-bao-cao-enrich-phan-hoach.py`): mỗi id đúng một dòng, nhóm thuộc 9 nhóm, tổng nhóm = tổng = số dòng, mọi vendor của pool có dòng, `approvable` chỉ ở bốn nhóm và có `place_id`, `full` chỉ khi khớp địa chỉ và có ảnh. Lý do: ô đếm Capu đọc để quyết định; một vendor đếm hai lần hoặc rơi mất thì mọi số sai mà không ai thấy. Xanh trên dữ liệu hiện tại sau khi T-124 ship; "chưa áp dụng" trước đó.
+- Không đề xuất thêm: "chỉ ghi khoá riêng" và "mọi route sau `requirePlatformAdmin`" đã được khoá bởi eval #5, #6 và bởi INV-020 cho đường vào `manual_overrides.json`.
+
+## Không làm
+- Gọi Google (Places, Text Search, Photos, Maps) từ admin, từ back hay từ bước sinh báo cáo / áp review; tự chạy resolve/enrich.
+- Đổi luật nhận khớp (sáu cổng, luật tên T-120), ngưỡng 0,95 / 0,6 của nhóm (chỉ để phân nhóm hiển thị, không quyết nhận hay loại).
+- Sửa giá, mô tả, liên hệ, địa chỉ tự do của vendor; ghi `vendor_overrides.json`; ghi thẳng `manual_overrides.json` hay `decisions/` từ back hoặc front.
+- Tự động hoá bước quyết định của Capu (file `decisions/` của lô) hoặc đổi INV-020.
+- Hiện lỗi `OVERRIDE_ERROR` (ngoài tỉnh, trùng place_id, đã đóng cửa) của lần áp trên bảng: lần này chỉ hiện `override` và nhóm mới; hiển thị lỗi áp là việc sau nếu Capu cần.
+- Xuất CSV, thao tác hàng loạt (chọn nhiều dòng), phân quyền theo vai (xem/duyệt), thông báo Slack.
+- Bảng cho thành phố khác HCMC (`state` đã là tham số, nhưng chỉ HCMC được kiểm).
+
+## Câu hỏi mở
+**"Enrich 100%" có đòi vendor phải có ảnh Google không?** Bản phác ghi 105; theo chữ anh viết ("khớp tên + địa chỉ, có hình") spec dùng **98**, và 7 vendor khớp mà Google không có ảnh nằm ở nhóm riêng "Khớp, chưa có ảnh Google" (cũng được tính vào ô "Chưa có ảnh Google"). **Mặc định nếu anh không trả lời: 98.** Đổi sang 105 chỉ là gộp nhóm 4 vào ô, không đổi gì khác.
