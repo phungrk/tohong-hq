@@ -23,7 +23,7 @@ if not root:
 if not os.path.isfile(os.path.join(root, "tools", "scraper", "apply_admin_reviews.py")):
     print("FAIL thiếu tools/scraper/apply_admin_reviews.py trong repo tohong"); sys.exit(1)
 
-snap = t.load_snapshot()["facts"]
+snap = t.facts_from_repo(root)   # dữ liệu SỐNG của repo tohong (không cứng theo ảnh chụp: PR dữ liệu mới có thể gỡ/nhận vendor)
 def pick(group, n=1, skip=()):
     return [f for f in snap if t.classify(f) == group and t.candidate_place_id(f) and f["id"] not in skip][:n]
 ap = pick("name_similar") + pick("name_same_addr_diff") + pick("unverified")
