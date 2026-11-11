@@ -1,6 +1,6 @@
 {
   "task": "T-123",
-  "at": "2026-11-11T05:05",
+  "at": "2026-11-11T05:16",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-122/check.cjs --repo ${TOHONG_FRONT_REPO:-/home/user/tohong-front} --only 1",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 22738,
+      "ms": 22567,
       "out": "PASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-122/check.cjs --repo ${TOHONG_FRONT_REPO:-/home/user/tohong-front} --only 2",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 27526,
+      "ms": 27268,
       "out": "PASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-122/check.cjs --repo ${TOHONG_FRONT_REPO:-/home/user/tohong-front} --only 3",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 30575,
+      "ms": 30694,
       "out": "PASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-122/check.cjs --repo ${TOHONG_FRONT_REPO:-/home/user/tohong-front} --only 4",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 31755,
+      "ms": 32614,
       "out": "PASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-122/check.cjs --repo ${TOHONG_FRONT_REPO:-/home/user/tohong-front} --only 5",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 34403,
+      "ms": 34718,
       "out": "PASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-122/check.cjs --repo ${TOHONG_FRONT_REPO:-/home/user/tohong-front} --only 6",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 30334,
+      "ms": 29748,
       "out": "PASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-122/bat-bien-cho-merge/inv-017-footer-onboarding-mo-khi-con-noi-dung.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 40002,
+      "ms": 38734,
       "out": "PASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-115/bat-bien-cho-merge/inv-014-onboarding-buoc2-thay-so-khach-khong-cuon.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 7789,
+      "ms": 7722,
       "out": "PASS",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-123/adv-01-focus-khong-bi-footer-che.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 16976,
+      "ms": 16157,
       "out": "PASS",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-123/adv-02-hang-dac-1px-khong-cham-xuyen.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 31431,
+      "ms": 31473,
       "out": "PASS",
       "tier": 1
     },
@@ -100,7 +100,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-123/adv-03-chuyen-trang-thai-khi-doi-buoc-xoay-ban-phim.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 18074,
+      "ms": 17978,
       "out": "PASS",
       "tier": 1
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 37,
+      "ms": 29,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 151,
+      "ms": 130,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 25,
+      "ms": 24,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 692,
+      "ms": 668,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -140,15 +140,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2307,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-8FPXjh/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 1977,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-udtbr6/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1307,
+      "ms": 1284,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -156,15 +156,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 924,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-sSwOAI/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 919,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-yiIEnM/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/front/layout/inv-001-khung-min-viewport-appmax.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 13597,
+      "ms": 13343,
       "out": "n giữa (lề trái 0.0, lề phải 0.0)\n  ok  [769] khung rộng 768px (đo 768.0)\n  ok  [769] khung căn giữa (lề trái 0.5, lề phải 0.5)\n  ok  [1024] khung rộng 768px (đo 768.0)\n  ok  [1024] khung căn giữa (lề trái 128.0, lề phải 128.0)\n  ok  [1280] khung rộng 768px (đo 768.0)\n  ok  [1280] khung căn giữa (lề trái 256.0, lề phải 256.0)\n  ok  [1440] khung rộng 768px (đo 768.0)\n  ok  [1440] khung căn giữa (lề trái 336.0, lề phải 336.0)\n  ok  [biến=600, vw 1024] khung rộng 600px (đo 600.0)\n  ok  [biến=600, vw 1024] khung căn giữa (lề trái 212.0, lề phải 212.0)\n  ok  [biến=600, vw 700] khung rộng 600px (đo 600.0)\n  ok  [biến=600, vw 700] khung căn giữa (lề trái 50.0, lề phải 50.0)\n  ok  [biến=600, vw 600] khung rộng 600px (đo 600.0)\n  ok  [biến=600, vw 600] khung căn giữa (lề trái 0.0, lề phải 0.0)\nPASS",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-002-khong-cuon-ngang.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 8517,
+      "ms": 8340,
       "out": "ok  [320] không cuộn ngang  :: scrollWidth html=320 body=320 khung=320 vw=320\n  ok  [390] không cuộn ngang  :: scrollWidth html=390 body=390 khung=390 vw=390\n  ok  [767] không cuộn ngang  :: scrollWidth html=767 body=767 khung=767 vw=767\n  ok  [768] không cuộn ngang  :: scrollWidth html=768 body=768 khung=768 vw=768\n  ok  [769] không cuộn ngang  :: scrollWidth html=769 body=769 khung=766 vw=769\n  ok  [1024] không cuộn ngang  :: scrollWidth html=1024 body=1024 khung=766 vw=1024\n  ok  [1280] không cuộn ngang  :: scrollWidth html=1280 body=1280 khung=766 vw=1280\n  ok  [1440] không cuộn ngang  :: scrollWidth html=1440 body=1440 khung=766 vw=1440\nPASS",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-003-phu-nam-trong-khung.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 49194,
+      "ms": 48613,
       "out": "Mời hiện ra  :: div[div] z1000,div[Mời người ấy hoặc gia đình cùng xem] z1001,div[ov-fixed] z500,button[Đóng menu] z50,div[ov-fixed] z900\n  ok  [1280] sheet vendor ở Ngân sách: 6 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] sheet vendor ở Ngân sách hiện ra\n  ok  [1280] sheet Kết nối: 8 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] sheet Kết nối hiện ra\n  ok  [1280] chat AI: 3 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] chat AI sau khi trả lời: 3 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] ngăn kéo: 4 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\n  ok  [1280] ngăn kéo hiện ra\n  ok  [biến=600, vw 1024] sheet Mời: 5 phần tử cố định/phủ nằm trong khung và vừa bề ngang khung\nPASS",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-004-vien-bong-theo-khung.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 12572,
+      "ms": 12521,
       "out": " sáng sát khung 231.4 vs xa 248.6\n  ok  [1024] viewport 1024 > khung 768: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [1280] viewport 1280 > khung 768: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [1440] viewport 1440 > khung 768: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [biến=600, vw 1024] viewport 1024 > khung 600: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [biến=600, vw 700] viewport 700 > khung 600: thấy viền/bóng quanh khung  :: border 1/1, shadow none, độ sáng sát khung 231.4 vs xa 231.4\n  ok  [biến=600, vw 600] viewport 600 <= khung 600: không viền  :: border 0/0\nPASS",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-005-cham-ngoai-khung-dong-sheet.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 10265,
+      "ms": 10226,
       "out": "ok  [1024] sheet Mời mở\n  ok  [1024] chạm ngoài khung (x=64) đóng sheet Mời  :: khung 128..896\n  ok  [1280] sheet Mời mở\n  ok  [1280] chạm ngoài khung (x=128) đóng sheet Mời  :: khung 256..1024\n  ok  [1280] sheet vendor ở Ngân sách mở\n  ok  [1280] chạm ngoài khung đóng sheet vendor ở Ngân sách\nPASS",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-006-cham-ngoai-khung-chi-dong-lop-tren.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 6543,
+      "ms": 6372,
       "out": "ok  [1280] sheet Kết nối mở chồng trên sheet vendor\n  ok  [1280] chạm ngoài khung lần 1: sheet Kết nối đóng\n  ok  [1280] chạm ngoài khung lần 1: sheet vendor bên dưới vẫn mở\n  ok  [1280] chạm ngoài khung lần 2: sheet vendor đóng\nPASS",
       "tier": 2
     },
@@ -212,15 +212,15 @@
       "eval": "eval/invariants/planner/front/layout/inv-007-document-la-thu-cuon.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 15983,
-      "out": "g (scrollY 0)\n  ok  [TC1] Khách mời: nội dung dài hơn màn hình thấp 360px nên document cuộn được (dài thêm 4246px)\n  ok  [TC1] Khách mời: lăn nội dung thì window.scrollY tăng (đo 120)\n  ok  [TC1] Khách mời: không phần tử con nào tự cuộn nội dung\n  ok  [TC1] Khách mời: cuộn tới cuối được bằng document (scrollY 4246/4246)\n  ok  [TC1] Khách mời: lăn ngược về đầu trang (scrollY 0)\n  ok  [TC1] Ngân sách: chạm được hạng mục \"Nhà hàng tiệc cưới\" để mở trang con\n  ok  [TC1] Trang con: mở từ danh sách thì bắt đầu ở đầu trang (scrollY 0)\n  ok  [TC1] Trang con: lăn nội dung thì window.scrollY tăng (đo 150)\n  ok  [TC1] Trang con: không phần tử con nào tự cuộn nội dung\n  ok  [TC1] Cảm ứng: kéo nội dung lên thì window.scrollY tăng (đo 162)\n  ok  [TC1] Cảm ứng: không phần tử con nào tự cuộn nội dung\nPASS",
+      "ms": 15895,
+      "out": "g (scrollY 0)\n  ok  [TC1] Khách mời: nội dung dài hơn màn hình thấp 360px nên document cuộn được (dài thêm 4246px)\n  ok  [TC1] Khách mời: lăn nội dung thì window.scrollY tăng (đo 120)\n  ok  [TC1] Khách mời: không phần tử con nào tự cuộn nội dung\n  ok  [TC1] Khách mời: cuộn tới cuối được bằng document (scrollY 4246/4246)\n  ok  [TC1] Khách mời: lăn ngược về đầu trang (scrollY 0)\n  ok  [TC1] Ngân sách: chạm được hạng mục \"Nhà hàng tiệc cưới\" để mở trang con\n  ok  [TC1] Trang con: mở từ danh sách thì bắt đầu ở đầu trang (scrollY 0)\n  ok  [TC1] Trang con: lăn nội dung thì window.scrollY tăng (đo 150)\n  ok  [TC1] Trang con: không phần tử con nào tự cuộn nội dung\n  ok  [TC1] Cảm ứng: kéo nội dung lên thì window.scrollY tăng (đo 163)\n  ok  [TC1] Cảm ứng: không phần tử con nào tự cuộn nội dung\nPASS",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/front/layout/inv-008-header-va-thanh-tab-dinh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 18858,
+      "ms": 18744,
       "out": " mời (có khối gợi ý cài app, iPhone): cuộn tới giữa: header (nút \"Mở menu\") vẫn ở đầu màn hình\n  ok  [TC3] Khách mời (có khối gợi ý cài app, iPhone): cuộn tới cuối: thanh tab đủ 4 nút, dính đáy màn hình\n  ok  [TC3] Khách mời (có khối gợi ý cài app, iPhone): cuộn tới cuối: header (nút \"Mở menu\") vẫn ở đầu màn hình\n  ok  [TC3] Khách mời (có khối gợi ý cài app, iPhone): ở cuối trang, thanh tab và khối gợi ý không che chữ nào của nội dung\n  ok  [TC3] Khách mời (có khối gợi ý cài app, iPhone): đang ở cuối trang vẫn chạm tab \"Trang chủ\" chuyển được trang\n  ok  [TC3] Trang con: thấy nút \"Quay lại\" ở đầu trang\n  ok  [TC3] Trang con: cuộn tới cuối vẫn thấy nút \"Quay lại\" dính đầu màn hình (top 17)\n  ok  [TC3] Trang con: thanh tab dính đáy\n  ok  [TC3] Trang con: ở cuối trang không có chữ bị che\nPASS",
       "tier": 2
     },
@@ -228,7 +228,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-009-lop-mo-khoa-cuon-nen.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 17949,
+      "ms": 18210,
       "out": "\"Cách hoạt động\" (trang con Nhà hàng): nằm trong vùng nhìn thấy, dính đáy vùng nhìn thấy theo bề rộng khung\n  ok  [TC5] Hộp thoại \"Cách hoạt động\" (trang con Nhà hàng): vừa mở nền không nhảy (scrollY 80 so với 80; mốc \"Cách hoạt động\" 188 so với 188)\n  ok  [TC5] Hộp thoại \"Cách hoạt động\" (trang con Nhà hàng): lăn khi lớp đang mở thì nền đứng yên (scrollY 80, mốc 188)\n  ok  [TC5] Hộp thoại \"Cách hoạt động\" (trang con Nhà hàng): đóng được\n  ok  [TC5] Hộp thoại \"Cách hoạt động\" (trang con Nhà hàng): đóng xong giữ đúng vị trí cũ, không nhảy (scrollY 80 so với 80; mốc 188 so với 188)\n  ok  [TC5] Hộp thoại \"Cách hoạt động\" (trang con Nhà hàng): đóng xong lăn lại bình thường (scrollY 120)\n  ok  [TC5] Hộp thoại \"Cách hoạt động\" (trang con Nhà hàng): đóng xong không để lại khung con đang cuộn\nPASS",
       "tier": 2
     },
@@ -236,7 +236,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-010-thanh-tab-tron-trong-vung-nhin-thay.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 8055,
+      "ms": 8148,
       "out": "t đáy vùng nhìn thấy (đáy nút 557, vùng nhìn thấy 557, cửa sổ 640)\n  ok  [TC1] Khách mời, cuối trang: thanh Chrome 83px, thanh tab sát đáy vùng nhìn thấy (đáy nút 557, vùng nhìn thấy 557, cửa sổ 640)\n  ok  [TC2] không có thanh Chrome (như T-055): thanh tab sát đáy vùng nhìn thấy (đáy nút 640, cần 640)\n  ok  [TC2] Chrome hiện thanh 83px: thanh tab sát đáy vùng nhìn thấy (đáy nút 557, cần 557)\n  ok  [TC2] Chrome thu thanh còn 30px: thanh tab sát đáy vùng nhìn thấy (đáy nút 610, cần 610)\n  ok  [TC2] Chrome thu hẳn: thanh tab sát đáy vùng nhìn thấy (đáy nút 640, cần 640)\n  ok  [TC2] Chrome hiện lại 83px: thanh tab sát đáy vùng nhìn thấy (đáy nút 557, cần 557)\n  ok  [TC2] offsetTop 12px (vùng nhìn thấy lệch xuống): đáy thanh tab bằng offsetTop + height = 569 (đo 569); không vượt đáy cửa sổ\nPASS",
       "tier": 2
     },
@@ -244,7 +244,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-011-mep-tren-khong-nen-sam-khi-khong-lop.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 3092,
+      "ms": 2915,
       "out": " không lớp nào mở: không phần tử fixed/sticky chạm mép trên có nền màu lạ (0)\n  ok  [TC1] Trang chủ, giữa trang (scrollY 0), không lớp nào mở: như trên (0)\n  ok  [TC1] Kế hoạch, đầu trang, không lớp nào mở: không phần tử fixed/sticky chạm mép trên có nền màu lạ (0)\n  ok  [TC1] Kế hoạch, giữa trang (scrollY 150), không lớp nào mở: như trên (0)\n  ok  [TC1] Ngân sách, đầu trang, không lớp nào mở: không phần tử fixed/sticky chạm mép trên có nền màu lạ (0)\n  ok  [TC1] Ngân sách, giữa trang (scrollY 150), không lớp nào mở: như trên (0)\n  ok  [TC1] Khách mời, đầu trang, không lớp nào mở: không phần tử fixed/sticky chạm mép trên có nền màu lạ (0)\n  ok  [TC1] Khách mời, giữa trang (scrollY 150), không lớp nào mở: như trên (0)\n  ok  [TC1] Phép quét có thấy phần tử fixed/sticky (không quét rỗng)\nPASS",
       "tier": 2
     },
@@ -252,7 +252,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-012-onboarding-buoc2-cuon-het-khong-bi-che.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 33609,
+      "ms": 33511,
       "out": "PASS",
       "tier": 2
     },
@@ -260,7 +260,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-013-sheet-onboarding-khong-cao-theo-vh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 5624,
+      "ms": 5483,
       "out": "PASS",
       "tier": 2
     },
@@ -268,7 +268,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-015-footer-onboarding-phan-dac-khong-cham-xuyen.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 43645,
+      "ms": 43078,
       "out": "PASS",
       "tier": 2
     },
@@ -276,7 +276,7 @@
       "eval": "eval/invariants/planner/front/layout/inv-016-nut-footer-onboarding-dac-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 27209,
+      "ms": 27189,
       "out": "PASS",
       "tier": 2
     },
@@ -284,7 +284,7 @@
       "eval": "eval/T-123/adv-01-focus-khong-bi-footer-che.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 16689,
+      "ms": 16321,
       "out": "PASS",
       "tier": 3
     },
@@ -292,7 +292,7 @@
       "eval": "eval/T-123/adv-02-hang-dac-1px-khong-cham-xuyen.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 31704,
+      "ms": 31430,
       "out": "PASS",
       "tier": 3
     },
@@ -300,7 +300,7 @@
       "eval": "eval/T-123/adv-03-chuyen-trang-thai-khi-doi-buoc-xoay-ban-phim.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 18383,
+      "ms": 17920,
       "out": "PASS",
       "tier": 3
     }
