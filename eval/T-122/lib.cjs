@@ -57,6 +57,8 @@ async function install(page, step) {
       // chạm tại (x,y): trả về 'footer' nếu phần tử trên cùng nằm trong footer, 'content' nếu trong vùng nội dung, 'other'
       hit(x0, y0) { const x = mk(); const t = document.elementFromPoint(x0, y0); if (!t) return 'none'; if (x.footer.contains(t) || t === x.footer) return 'footer'; if (x.scroller.contains(t)) return 'content'; return 'other'; },
       hitIs(sel, x0, y0) { const x = mk(); const e = x[sel]; const t = document.elementFromPoint(x0, y0); return !!(t && (t === e || e.contains(t))); },
+      // có chữ của vùng nội dung nằm (một phần) trong dải y0..y1 không
+      textIn(y0, y1) { const x = mk(); for (const e of x.scroller.querySelectorAll('*')) { if (e.children.length || txt(e) === '') continue; const r = e.getBoundingClientRect(); if (r.bottom > y0 + 2 && r.top < y1 - 2 && r.width > 0) return true; } return false; },
       // nút trong vùng nội dung giao với dải y0..y1 (để thử chạm xuyên): trả tâm x của nút đầu tiên giao
       contentBtnAt(y0, y1) { const x = mk(); for (const b of x.scroller.querySelectorAll('button')) { const r = b.getBoundingClientRect(); if (r.bottom > y0 + 2 && r.top < y1 - 2 && r.width > 0) return { cx: r.left + r.width / 2, y: (Math.max(r.top, y0) + Math.min(r.bottom, y1)) / 2 }; } return null; },
     };
@@ -76,12 +78,12 @@ function diffPct(page, r) {
   return page.evaluate((r) => { const a = window.__img.n, b = window.__img.h; let n = 0, t = 0; for (let y = Math.round(r.top); y < Math.round(r.bottom); y++) for (let x = Math.round(r.left); x < Math.round(r.right); x++) { const i = (y * a.width + x) * 4; t++; if (Math.abs(a.data[i] - b.data[i]) > 40 || Math.abs(a.data[i + 1] - b.data[i + 1]) > 40 || Math.abs(a.data[i + 2] - b.data[i + 2]) > 40) n++; } return t ? 100 * n / t : 0; }, r);
 }
 // Màu nền (màu hay gặp nhất) và tương phản chữ/nền trong hình chữ nhật của ảnh 'n'.
-function contrastIn(page, r) {
-  return page.evaluate((r) => { const d = window.__img.n; const lum = c => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(c[0]) + .7152 * f(c[1]) + .0722 * f(c[2]); };
+function contrastIn(page, r, slot = 'n') {
+  return page.evaluate(({ r, slot }) => { const d = window.__img[slot]; const lum = c => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(c[0]) + .7152 * f(c[1]) + .0722 * f(c[2]); };
     const h = new Map(); const all = [];
     for (let y = Math.round(r.top) + 2; y < Math.round(r.bottom) - 2; y++) for (let x = Math.round(r.left) + 6; x < Math.round(r.right) - 6; x++) { const i = (y * d.width + x) * 4; const c = [d.data[i], d.data[i + 1], d.data[i + 2]]; const k = c.join(','); h.set(k, (h.get(k) || 0) + 1); all.push(c); }
     let bk = null, bn = 0; for (const [k, n] of h) if (n > bn) { bn = n; bk = k; } const bg = bk.split(',').map(Number); const lb = lum(bg);
     let far = bg, fd = -1; for (const c of all) { const dl = Math.abs(lum(c) - lb); if (dl > fd) { fd = dl; far = c; } }
-    const l1 = Math.max(lb, lum(far)), l2 = Math.min(lb, lum(far)); return { bg, ratio: (l1 + .05) / (l2 + .05) }; }, r);
+    const l1 = Math.max(lb, lum(far)), l2 = Math.min(lb, lum(far)); return { bg, ratio: (l1 + .05) / (l2 + .05) }; }, { r, slot });
 }
 module.exports = { run, open, install, shot, alphaAt, diffPct, contrastIn, STEPS };
