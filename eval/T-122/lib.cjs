@@ -54,6 +54,8 @@ async function install(page, step) {
       scrollTo(y) { const x = mk(); x.scroller.scrollTop = y; },
       probe(on) { const x = mk(); for (const e of [x.sheet, x.scroller]) { if (on) { e.dataset.__bg = e.getAttribute('style') || ''; e.style.setProperty('background', '#f0f', 'important'); } else { e.setAttribute('style', e.dataset.__bg || ''); } } },
       hide(on) { const x = mk(); if (on) x.scroller.style.setProperty('visibility', 'hidden', 'important'); else x.scroller.style.removeProperty('visibility'); },
+      // quét lưới: đếm điểm (x từ mép sheet+4 tới mép-4 bước 12, y thuộc ys) mà phần tử trên cùng thuộc vùng nội dung
+      scan(ys, x0, x1) { const x = mk(); const bad = []; for (const y of ys) for (let X = x0 + 4; X <= x1 - 4; X += 12) { const t = document.elementFromPoint(X, y); if (t && !x.footer.contains(t) && x.scroller.contains(t)) bad.push([Math.round(X), Math.round(y), t.tagName + "." + String(t.className).slice(0, 20) + "/" + (x.footer.tagName)]); } return bad; },
       // chạm tại (x,y): trả về 'footer' nếu phần tử trên cùng nằm trong footer, 'content' nếu trong vùng nội dung, 'other'
       hit(x0, y0) { const x = mk(); const t = document.elementFromPoint(x0, y0); if (!t) return 'none'; if (x.footer.contains(t) || t === x.footer) return 'footer'; if (x.scroller.contains(t)) return 'content'; return 'other'; },
       hitIs(sel, x0, y0) { const x = mk(); const e = x[sel]; const t = document.elementFromPoint(x0, y0); return !!(t && (t === e || e.contains(t))); },
@@ -70,8 +72,8 @@ async function shot(page, slot) {
   await page.evaluate(async ({ b64, slot }) => { const bmp = await createImageBitmap(await (await fetch('data:image/png;base64,' + b64)).blob()); const c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height; const g = c.getContext('2d'); g.drawImage(bmp, 0, 0); (window.__img = window.__img || {})[slot] = g.getImageData(0, 0, c.width, c.height); }, { b64, slot });
 }
 // Đặc của footer: min và max alpha dọc lề trái, tại các y cho trước (toạ độ trang). Cần slot 'n' (không tô) và 'p' (tô tím).
-function alphaAt(page, x, ys, paperY) {
-  return page.evaluate(({ x, ys, paperY }) => { const px = (s, X, Y) => { const d = window.__img[s]; const i = (Math.round(Y) * d.width + Math.round(X)) * 4; return [d.data[i], d.data[i + 1], d.data[i + 2]]; }; const gp = px('n', x, paperY)[1]; return ys.map(y => Math.max(0, Math.min(1, 1 - (px('n', x, y)[1] - px('p', x, y)[1]) / gp))); }, { x, ys, paperY });
+function alphaAt(page, x, ys, paperY, sn = 'h', sp = 'q') {
+  return page.evaluate(({ x, ys, paperY, sn, sp }) => { const px = (s, X, Y) => { const d = window.__img[s]; const i = (Math.round(Y) * d.width + Math.round(X)) * 4; return [d.data[i], d.data[i + 1], d.data[i + 2]]; }; const gp = px(sn, x, paperY)[1]; return ys.map(y => Math.max(0, Math.min(1, 1 - (px(sn, x, y)[1] - px(sp, x, y)[1]) / gp))); }, { x, ys, paperY, sn, sp });
 }
 // Số điểm ảnh khác nhau (>40 ở một kênh) giữa hai lần chụp 'n' và 'h' trong hình chữ nhật, tính theo % diện tích.
 function diffPct(page, r) {

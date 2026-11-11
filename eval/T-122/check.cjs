@@ -16,14 +16,22 @@ async function capture(page, y) {
   const g = await page.evaluate(() => window.__m.geo());
   await shot(page, 'n');
   await page.evaluate(() => window.__m.probe(true)); await page.waitForTimeout(300); await shot(page, 'p'); await page.evaluate(() => window.__m.probe(false));
-  await page.evaluate(() => window.__m.hide(true)); await page.waitForTimeout(300); await shot(page, 'h'); await page.evaluate(() => window.__m.hide(false));
+  await page.evaluate(() => window.__m.hide(true)); await page.waitForTimeout(300); await shot(page, 'h');
+  await page.evaluate(() => window.__m.probe(true)); await page.waitForTimeout(300); await shot(page, 'q'); await page.evaluate(() => window.__m.probe(false)); await page.evaluate(() => window.__m.hide(false));
   g.x = g.sheet.left + 3; g.paperY = g.scroller.top - 6;
-  g.aTop = (await alphaAt(page, g.x, [g.footer.top + 1], g.paperY))[0];
+  // độ đục đo trên ba cột (lề trái+3, giữa, lề phải-3), trên ảnh có vùng nội dung bị ẩn để nội dung không lẫn vào
+  g.cols = [g.sheet.left + 3, (g.sheet.left + g.sheet.right) / 2, g.sheet.right - 3];
   const yp = []; for (let y2 = g.footer.top - 16; y2 <= g.prim.top; y2 += 2) yp.push(y2);
-  g.prof = await alphaAt(page, g.x, yp, g.paperY); g.aAbove0 = g.prof[0];
-  g.aAboveMax = Math.max(...(await alphaAt(page, g.x, [g.footer.top - 14, g.footer.top - 8, g.footer.top - 2], g.paperY)));
+  g.profs = []; for (const cx of g.cols) g.profs.push(await alphaAt(page, cx, yp, g.paperY));
+  g.aAbove0 = Math.max(...g.profs.map(p => p[0]));
+  g.aTop = Math.max(...g.profs.map(p => p[yp.indexOf(g.footer.top + 1) >= 0 ? yp.indexOf(g.footer.top + 1) : 8]));
+  g.aAboveMax = 0; for (const cx of g.cols) g.aAboveMax = Math.max(g.aAboveMax, ...(await alphaAt(page, cx, [g.footer.top - 14, g.footer.top - 8, g.footer.top - 2], g.paperY)));
+  g.rows = []; for (let y2 = g.footer.top + 1; y2 < g.footer.bottom - 1; y2 += 4) g.rows.push(y2);
+  g.rowAlpha = await alphaAt(page, g.x, g.rows, g.paperY);
+  g.solidRows = g.rows.filter((y, i) => g.rowAlpha[i] >= A_BAND);
+  g.scanHits = g.solidRows.length ? await page.evaluate(([ys, a, b]) => window.__m.scan(ys, a, b), [g.solidRows, g.sheet.left, g.sheet.right]) : [];
   const ys = []; for (let y2 = g.footer.top + 1; y2 < g.footer.top + 31; y2 += 3) ys.push(y2);
-  g.aMin30 = Math.min(...(await alphaAt(page, g.x, ys, g.paperY)));
+  g.aMin30 = Math.min(...(await Promise.all(g.cols.map(cx => alphaAt(page, cx, ys, g.paperY)))).flat());
   const ys2 = []; for (let y2 = g.prim.top; y2 < g.footer.bottom - 1; y2 += 6) ys2.push(y2);
   g.aLow = Math.min(...(await alphaAt(page, g.x, ys2, g.paperY)));
   return g;
@@ -33,13 +41,18 @@ async function btnsOk(page, vp, g, tag) {
   for (const k of ['prim', 'sec']) { const [cx, cy] = mid(g[k]); if (!(await page.evaluate(([k, cx, cy]) => window.__m.hitIs(k, cx, cy), [k, cx, cy]))) bad(vp, `${tag}: nút ${k === 'prim' ? 'chính' : 'phụ'} bị phủ hoặc ngoài vùng nhìn thấy`); }
   if (g.prim.h < 44) bad(vp, `${tag}: nút chính cao ${f1(g.prim.h)}px < 44`);
 }
+// Phần footer đặc (alpha >= 0.95 trên cột lề trái) không bao giờ cho chạm xuyên xuống nội dung, ở cả hai trạng thái.
+async function scanSolid(page, vp, tag, g) {
+  if (!g.solidRows.length) { bad(vp, `${tag}: footer không có hàng nào đặc >= ${A_BAND}`); return; }
+  if (g.scanHits.length) bad(vp, `${tag}: ${g.scanHits.length} điểm trong phần đặc của footer chạm xuyên xuống nội dung (vd ${JSON.stringify(g.scanHits.slice(0, 3))})`);
+}
 // Phát biểu trạng thái đúng theo luật: còn nội dung dưới đỉnh footer đặc -> mờ; hết -> đặc.
 function expectState(c, solidTop) { return c.contentBottom > solidTop - GAP ? 'fade' : 'solid'; }
 function checkState(vp, tag, c, want) {
   if (want === 'fade') {
     if (c.aAbove0 > A_VEIL0) bad(vp, `${tag}: 16px trên đỉnh footer đã mờ đục (alpha ${f1(c.aAbove0)} > ${A_VEIL0})`);
     if (c.aTop > A_TOP) bad(vp, `${tag}: còn nội dung dưới footer nhưng mép trên footer đã đặc (alpha ${f1(c.aTop)} > ${A_TOP})`);
-    for (let i = 1; i < c.prof.length; i++) if (c.prof[i] < c.prof[i - 1] - 0.05) { bad(vp, `${tag}: độ đặc không tăng dần từ 16px trên footer tới nút Tiếp theo (tụt ${f1(c.prof[i - 1])} -> ${f1(c.prof[i])})`); break; }
+    c.profs.forEach((pr, k) => { for (let i = 1; i < pr.length; i++) if (pr[i] < pr[i - 1] - 0.05) { bad(vp, `${tag}: độ đặc cột ${k} không tăng dần từ 16px trên footer tới nút Tiếp theo (tụt ${f1(pr[i - 1])} -> ${f1(pr[i])})`); break; } });
   } else {
     if (c.aMin30 < A_SOLID) bad(vp, `${tag}: hết nội dung dưới footer nhưng footer chưa đặc (alpha nhỏ nhất ${f1(c.aMin30)} < ${A_SOLID})`);
     if (c.aAboveMax > A_VEIL0) bad(vp, `${tag}: hết nội dung dưới footer nhưng còn dải mờ phủ nội dung phía trên footer (alpha ${f1(c.aAboveMax)} > ${A_VEIL0})`);
@@ -57,7 +70,7 @@ function checkState(vp, tag, c, want) {
       if (ONLY.includes('1')) {
         if (top.maxScroll <= 0) bad(vp, 'vùng nội dung không cuộn được');
         if (expectState(top, solidTop) !== 'fade') bad(vp, `tiền đề sai: chưa cuộn mà không còn nội dung dưới footer (đáy nội dung ${f1(top.contentBottom)} <= ${f1(solidTop - GAP)})`);
-        checkState(vp, '1 chưa cuộn', top, 'fade');
+        checkState(vp, '1 chưa cuộn', top, 'fade'); await scanSolid(page, vp, '1 chưa cuộn', top);
         if (Math.abs(top.footer.top - end.footer.top) > 1 || Math.abs(top.footer.h - end.footer.h) > 1) bad(vp, `1: hộp footer đổi chỗ/cao giữa lúc mờ (đỉnh ${f1(top.footer.top)}, cao ${f1(top.footer.h)}) và lúc đặc (${f1(end.footer.top)}, ${f1(end.footer.h)})`);
         const band = { left: top.sheet.left + 16, right: top.sheet.right - 16, top: top.footer.top, bottom: top.prim.top };
         const hasInk = await page.evaluate(([a, c]) => window.__m.textIn(a, c), [top.footer.top, top.prim.top]);
@@ -75,7 +88,7 @@ function checkState(vp, tag, c, want) {
         if (cp.bg.some((v, i) => Math.abs(v - ce.bg[i]) > 8)) bad(vp, `2: nền nút Tiếp theo khi mờ (${cp.bg}) khác khi đặc (${ce.bg}): nút bị làm mờ`);
       }
       if (ONLY.includes('3')) {
-        checkState(vp, '3 đã cuộn hết', end, 'solid');
+        checkState(vp, '3 đã cuộn hết', end, 'solid'); await scanSolid(page, vp, '3 đã cuộn hết', end);
         if (Math.abs(end.footer.h - 119) > 1) bad(vp, `3 đã cuộn hết: footer cao ${f1(end.footer.h)} != 119`);
         if (Math.abs(end.footer.bottom - end.inner.h) > 1) bad(vp, '3 đã cuộn hết: footer không sát đáy vùng nhìn thấy');
         if (end.contentBottom > end.footer.top - GAP) bad(vp, `3 đã cuộn hết: nội dung cuối còn dưới footer (đáy ${f1(end.contentBottom)} > ${f1(end.footer.top - GAP)})`);
@@ -130,7 +143,7 @@ function checkState(vp, tag, c, want) {
         const end = await capture(page, 1e5), top = await capture(page, 0);
         checkState(vp, '5 đã cuộn hết', end, 'solid'); if (end.contentBottom > end.footer.top - GAP) bad(vp, '5 đã cuộn hết: ảnh cuối còn dưới footer');
         const want = expectState(top, end.footer.top); if (want !== 'fade') bad(vp, '5: tiền đề sai (lưới ảnh không tràn dưới footer)');
-        checkState(vp, '5 chưa cuộn', top, 'fade');
+        checkState(vp, '5 chưa cuộn', top, 'fade'); await scanSolid(page, vp, '5 chưa cuộn', top);
         const b = await page.evaluate(([a, c]) => window.__m.contentBtnAt(a, c), [top.footer.top + 1, top.footer.top + 10]);
         if (b) { const h = await page.evaluate(([x, y]) => window.__m.hit(x, y), [b.cx, b.y]); if (h !== 'content') bad(vp, `5 chưa cuộn: chạm vào dải mờ không xuống tới nội dung ("${h}")`); }
         const [cx, cy] = mid(top.prim); if (!(await page.evaluate(([cx, cy]) => window.__m.hitIs('prim', cx, cy), [cx, cy]))) bad(vp, '5: nút chính bị phủ khi footer mờ');

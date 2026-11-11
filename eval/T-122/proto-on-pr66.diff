@@ -1,21 +1,22 @@
 diff --git a/src/index.css b/src/index.css
-index 1532558..b37ed12 100644
+index 1532558..d2b99cb 100644
 --- a/src/index.css
 +++ b/src/index.css
-@@ -731,5 +731,8 @@ textarea {
+@@ -731,5 +731,9 @@ textarea {
  .ov-fixed { overflow: hidden; position: fixed !important; top: 0 !important; bottom: 0 !important; left: var(--ov-l) !important; right: var(--ov-l) !important; }
  /* T-117: điện thoại thấp, sheet onboarding nâng đỉnh để đủ chỗ cho bước 2/3 (px, không dùng vh/lvh) */
  @media (max-width: 600px) { .ob-sheet { top: 24px !important; } }
 +/* T-122 (proto) */
 +.ob-foot[data-fade="1"] { pointer-events: none; }
-+.ob-foot[data-fade="1"] > * { pointer-events: auto; }
++.ob-foot > *:not([aria-hidden]) { position: relative; }
++.ob-foot[data-fade="1"] > *:not([aria-hidden]) { pointer-events: auto; }
  html.doc-locked { overflow: hidden; }
  html { scrollbar-gutter: stable; } /* Firefox thanh cuộn cổ điển: khoá nền không làm khung dịch ngang */
 diff --git a/src/screens/Onboarding.jsx b/src/screens/Onboarding.jsx
-index db6ce6f..8d9c962 100644
+index db6ce6f..cb055a0 100644
 --- a/src/screens/Onboarding.jsx
 +++ b/src/screens/Onboarding.jsx
-@@ -5,10 +5,44 @@
+@@ -5,10 +5,45 @@
     Step 3a · Khám phá phong cách (grid)
     Step 3b · Kết quả */
  
@@ -51,17 +52,18 @@ index db6ce6f..8d9c962 100644
 +  });
 +  const bodyStyle = tight ? {} : { paddingBottom: fh + 8 };
 +  const veil = <div aria-hidden="true" style={{ position:'absolute', left:0, right:0, top:-17, height:16, pointerEvents:'none', display: tight?'none':'block', opacity: fade?1:0, background:'linear-gradient(to bottom, rgba(252,248,243,0), rgba(252,248,243,.5))' }}/>;
++  const hold = <div aria-hidden="true" style={{ position:'absolute', left:0, right:0, top:12, bottom:0, pointerEvents:'auto', display: tight?'none':'block' }}/>;
 +  const footStyle = tight ? { flexShrink:0, borderTop:'1px solid var(--line-100)', background:'var(--paper)' } : { position:'absolute', left:0, right:0, bottom:0,
 +    paddingTop: fade ? 12 + FADE_EXTRA : 12,
 +    background: fade ? 'linear-gradient(to bottom, rgba(252,248,243,.5) 0, var(--paper) 12px) border-box' : 'var(--paper)',
 +    borderTop: fade ? '1px solid transparent' : '1px solid var(--line-100)' };
-+  return { body, foot, fade, bodyStyle, footStyle, veil };
++  return { body, foot, fade, bodyStyle, footStyle, veil: <>{veil}{hold}</> };
 +}
 +
  /* ── constants ── */
  const OB_QUICK_CITIES = ['TP.HCM', 'Hà Nội', 'Đà Nẵng'];
  const OB_OTHER_CITIES = [
-@@ -406,6 +440,7 @@ function OBWelcome({ onStart }) {
+@@ -406,6 +441,7 @@ function OBWelcome({ onStart }) {
     STEP 1 · Couple info
  ═══════════════════════════════════════════ */
  function OBStep1({ data, set, onNext }) {
@@ -69,7 +71,7 @@ index db6ce6f..8d9c962 100644
    const ready = data.brideName.trim() && data.groomName.trim();
    return (
      <>
-@@ -422,7 +457,7 @@ function OBStep1({ data, set, onNext }) {
+@@ -422,7 +458,7 @@ function OBStep1({ data, set, onNext }) {
        </div>
        <div style={{ height:1, background:'var(--line-100)', flexShrink:0 }}/>
  
@@ -78,7 +80,7 @@ index db6ce6f..8d9c962 100644
          <OBRoleSelector role={data.userRole} onPick={v => set('userRole',v)}/>
          <div style={{ height:1, background:'var(--line-100)' }}/>
          <OBPerson icon="flower" label="Cô dâu"
-@@ -432,7 +467,8 @@ function OBStep1({ data, set, onNext }) {
+@@ -432,7 +468,8 @@ function OBStep1({ data, set, onNext }) {
            name={data.groomName} onName={v => set('groomName',v)} namePh="Tên chú rể"/>
        </div>
  
@@ -88,7 +90,7 @@ index db6ce6f..8d9c962 100644
          {!ready && (
            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, marginBottom:9 }}>
              <Icon name="info" size={12} color="var(--ink-400)"/>
-@@ -462,6 +498,7 @@ function OBStep1({ data, set, onNext }) {
+@@ -462,6 +499,7 @@ function OBStep1({ data, set, onNext }) {
     STEP 2 · Wedding plan
  ═══════════════════════════════════════════ */
  function OBStep2({ data, set, onBack, onNext }) {
@@ -96,7 +98,7 @@ index db6ce6f..8d9c962 100644
    return (
      <>
        <div style={{ flexShrink:0, padding:'0 20px 14px', display:'flex', alignItems:'flex-end', gap:2 }}>
-@@ -484,7 +521,7 @@ function OBStep2({ data, set, onBack, onNext }) {
+@@ -484,7 +522,7 @@ function OBStep2({ data, set, onBack, onNext }) {
        </div>
        <div style={{ height:1, background:'var(--line-100)', flexShrink:0 }}/>
  
@@ -105,7 +107,7 @@ index db6ce6f..8d9c962 100644
          <OBSection label="Ngày cưới dự kiến" icon="calendar-heart">
            <OBDatePicker weddingD={data.weddingD} weddingM={data.weddingM} weddingY={data.weddingY} set={set}/>
          </OBSection>
-@@ -501,8 +538,9 @@ function OBStep2({ data, set, onBack, onNext }) {
+@@ -501,8 +539,9 @@ function OBStep2({ data, set, onBack, onNext }) {
          </OBSection>
        </div>
  
@@ -117,7 +119,7 @@ index db6ce6f..8d9c962 100644
          <button onClick={onNext}
            style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:8,
              fontFamily:'var(--font-ui)', fontSize:16, fontWeight:700,
-@@ -554,6 +592,7 @@ function PCPhoto({ item, selected, onClick }) {
+@@ -554,6 +593,7 @@ function PCPhoto({ item, selected, onClick }) {
  }
  
  function OBStep3Grid({ likes, toggle, onBack, onNext, onSkip }) {
@@ -125,7 +127,7 @@ index db6ce6f..8d9c962 100644
    const n = likes.size, ready = n>=4;
    return (
      <>
-@@ -577,7 +616,7 @@ function OBStep3Grid({ likes, toggle, onBack, onNext, onSkip }) {
+@@ -577,7 +617,7 @@ function OBStep3Grid({ likes, toggle, onBack, onNext, onSkip }) {
        </div>
        <div style={{ height:1, background:'var(--line-100)', flexShrink:0 }}/>
  
@@ -134,7 +136,7 @@ index db6ce6f..8d9c962 100644
          <div style={{ fontFamily:'var(--font-body)', fontSize:14, color:'var(--ink-500)', marginBottom:12, lineHeight:1.45 }}>
            Không cần gọi tên phong cách — Tơ Hồng tự đọc được gu của hai bạn.
          </div>
-@@ -586,7 +625,8 @@ function OBStep3Grid({ likes, toggle, onBack, onNext, onSkip }) {
+@@ -586,7 +626,8 @@ function OBStep3Grid({ likes, toggle, onBack, onNext, onSkip }) {
          </div>
        </div>
  
