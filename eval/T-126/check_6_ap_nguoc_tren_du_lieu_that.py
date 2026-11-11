@@ -32,6 +32,7 @@ files = {}
 for v in V:
     for c in v["cats"]:
         files.setdefault(c, []).append(k.matched(v["id"], v["name"], addr_of_pid[v["place_id"]], c, v["place_id"], v["ts"] if "." in v["ts"] else v["ts"] + ".000000", v["count"], cats=v["cats"], manual=v["manual"], reviews_count=v["reviews_count"]))
+k.MANUAL_REASON = "Capu duyệt tay (ADR-048)"
 root = k.seed(files)
 acc = [v for v in V if v["manual"]]
 root.set_overrides([t.entry(v["id"], "accept_place", place_id=v["place_id"], resolved=t.resolved(v["place_id"], k.pl(v["name"], addr_of_pid[v["place_id"]], v["place_id"], n=0)), reason="Capu duyệt tay (ADR-048)") for v in acc])

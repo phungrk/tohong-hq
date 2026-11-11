@@ -53,9 +53,12 @@ def matched(vid, name, addr, cat, pid, ts, count, cats=None, manual=False, revie
     return v
 
 
+MANUAL_REASON = "Capu duyệt tay (fixture eval T-126)"   # = `reason` của mục accept_place trong fixture; T-110 ghi audit reason = "duyệt tay (accept_place) bởi capu: " + reason
+
+
 def audit_row(v, pid, manual=False):
     log = t.glog(v)
-    row = {"vendor_id": v["id"], "status": "enriched", "reason": "", "enriched_fields": {}, "matched_name": v["name"], "confidence": 1.0, "place_id": pid,
+    row = {"vendor_id": v["id"], "status": "enriched", "reason": ("duyệt tay (accept_place) bởi capu: " + MANUAL_REASON) if manual else "", "enriched_fields": {}, "matched_name": v["name"], "confidence": 1.0, "place_id": pid,
            "formatted_address": log["formatted_address"], "address_match": True}
     if manual:
         row["manual_override"] = "accept_place"
