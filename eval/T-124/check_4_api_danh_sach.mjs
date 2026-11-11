@@ -2,9 +2,9 @@
 // T-124 tiêu chí 4 (repo tohong-back): GET /api/admin/vendor-enrich trả đúng bảng, đếm, lọc, chia trang.
 // Chạy: node eval/T-124/check_4_api_danh_sach.mjs   (TOHONG_BACK_REPO hoặc ../tohong-back). Gọi thẳng worker.fetch với R2 giả; không mạng.
 // Hợp đồng: GET /api/admin/vendor-enrich?filter=<all|full|no_google_photo|name_similar|addr_diff|tên nhóm>&category=<id>&q=<từ khoá>&offset=&limit=
-//   -> 200, Cache-Control: no-store, {summary:{total,groups,chips,approvable,data_as_of}, total, offset, limit, rows:[{n,id,name,category,catLabel,group,marry,google,approvable,override,review}]}
+//   -> 200, Cache-Control: no-store, {data_as_of (GỐC phản hồi, = data_as_of của báo cáo), summary:{total,groups,chips,approvable}, total, offset, limit, rows:[{n,id,name,category,catLabel,group,marry,google,approvable,override,review}]}
 //   summary luôn là của TOÀN BỘ danh sách (không đổi theo filter); total là số dòng sau lọc; n = offset + vị trí + 1; limit mặc định 50, tối đa 100.
-//   Dữ liệu = báo cáo nhúng ở back (lib/vendorEnrichReport.generated.js). q so không dấu, không phân biệt hoa thường, trên tên vendor.
+//   Dữ liệu = báo cáo nhúng ở back (lib/vendorEnrichReport.generated.js). q so không dấu (đ/Đ tính là d), không phân biệt hoa thường, trên tên vendor.
 //   filter lạ -> 400 {"error":"invalid_filter"}; POST/PUT/DELETE trên đường dẫn danh sách -> 405.
 import fs from "node:fs";
 import path from "node:path";
@@ -26,6 +26,7 @@ let r = await asAdmin(env, "GET", "/api/admin/vendor-enrich");
 R.check("GET danh sách trả 200", r.status === 200, r.status);
 if (r.status !== 200) R.done();
 const j = r.json;
+R.check("data_as_of nằm ở GỐC phản hồi và bằng data_as_of của báo cáo (không nằm trong summary)", typeof j.data_as_of === "string" && j.data_as_of === rep.data_as_of && !("data_as_of" in (j.summary || {})), [j.data_as_of, rep.data_as_of]);
 R.check("summary bằng summary của báo cáo", JSON.stringify(j.summary && { t: j.summary.total, g: j.summary.groups, c: j.summary.chips, a: j.summary.approvable }) === JSON.stringify({ t: rep.summary.total, g: rep.summary.groups, c: rep.summary.chips, a: rep.summary.approvable }), j.summary);
 R.check("tổng các nhóm bằng total (một vendor một nhóm)", Object.values(j.summary.groups).reduce((a, b) => a + b, 0) === j.summary.total && j.summary.total === all.length);
 R.check("mặc định 50 dòng, n bắt đầu từ 1, total = tổng", j.rows.length === Math.min(50, all.length) && j.rows[0].n === 1 && j.total === all.length && j.limit === 50 && j.offset === 0, [j.rows.length, j.total, j.limit]);
