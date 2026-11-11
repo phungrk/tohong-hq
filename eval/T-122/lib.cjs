@@ -57,10 +57,10 @@ async function install(page, step) {
       // chạm tại (x,y): trả về 'footer' nếu phần tử trên cùng nằm trong footer, 'content' nếu trong vùng nội dung, 'other'
       hit(x0, y0) { const x = mk(); const t = document.elementFromPoint(x0, y0); if (!t) return 'none'; if (x.footer.contains(t) || t === x.footer) return 'footer'; if (x.scroller.contains(t)) return 'content'; return 'other'; },
       hitIs(sel, x0, y0) { const x = mk(); const e = x[sel]; const t = document.elementFromPoint(x0, y0); return !!(t && (t === e || e.contains(t))); },
-      // có chữ của vùng nội dung nằm (một phần) trong dải y0..y1 không
-      textIn(y0, y1) { const x = mk(); for (const e of x.scroller.querySelectorAll('*')) { if (e.children.length || txt(e) === '') continue; const r = e.getBoundingClientRect(); if (r.bottom > y0 + 2 && r.top < y1 - 2 && r.width > 0) return true; } return false; },
+      // có chữ của vùng nội dung có tâm nằm trong dải y0..y1 không
+      textIn(y0, y1) { const x = mk(); for (const e of x.scroller.querySelectorAll('*')) { if (e.children.length || txt(e) === '') continue; const r = e.getBoundingClientRect(); const cy = (r.top + r.bottom) / 2; if (cy >= y0 && cy < y1 && r.width > 0) return true; } return false; },
       // nút trong vùng nội dung giao với dải y0..y1 (để thử chạm xuyên): trả tâm x của nút đầu tiên giao
-      contentBtnAt(y0, y1) { const x = mk(); for (const b of x.scroller.querySelectorAll('button')) { const r = b.getBoundingClientRect(); if (r.bottom > y0 + 2 && r.top < y1 - 2 && r.width > 0) return { cx: r.left + r.width / 2, y: (Math.max(r.top, y0) + Math.min(r.bottom, y1)) / 2 }; } return null; },
+      contentBtnAt(y0, y1) { const x = mk(); for (const b of x.scroller.querySelectorAll('button')) { const r = b.getBoundingClientRect(); if (r.bottom > y0 && r.top < y1 && r.width > 0) return { cx: r.left + r.width / 2, y: (Math.max(r.top, y0) + Math.min(r.bottom, y1)) / 2 }; } return null; },
     };
   }, { L: S.label.source, P: S.primary.source, Q: S.secondary.source });
 }

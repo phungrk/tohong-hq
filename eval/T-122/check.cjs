@@ -4,7 +4,7 @@
 const { run, open, install, shot, alphaAt, diffPct, contrastIn } = require('./lib.cjs');
 const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
 const REPO = arg('--repo') || process.env.TOHONG_FRONT_REPO || process.cwd();
-const ONLY = (arg('--only') || '1,2,3,4,5').split(',');
+const ONLY = (arg('--only') || '1,2,3,4,5,6').split(',');
 const FADE_VPS = [[390, 650], [375, 632], [390, 664], [393, 662]];
 const A_TOP = 0.6, A_VEIL0 = 0.1, A_BAND = 0.95, A_SOLID = 0.98, DIFF_MIN = 0.5, CONTRAST = 4.5, GAP = 4;
 const fails = []; const bad = (vp, m) => fails.push(`${vp}: ${m}`);
@@ -58,10 +58,11 @@ function checkState(vp, tag, c, want) {
         if (top.maxScroll <= 0) bad(vp, 'vùng nội dung không cuộn được');
         if (expectState(top, solidTop) !== 'fade') bad(vp, `tiền đề sai: chưa cuộn mà không còn nội dung dưới footer (đáy nội dung ${f1(top.contentBottom)} <= ${f1(solidTop - GAP)})`);
         checkState(vp, '1 chưa cuộn', top, 'fade');
+        if (Math.abs(top.footer.top - end.footer.top) > 1 || Math.abs(top.footer.h - end.footer.h) > 1) bad(vp, `1: hộp footer đổi chỗ/cao giữa lúc mờ (đỉnh ${f1(top.footer.top)}, cao ${f1(top.footer.h)}) và lúc đặc (${f1(end.footer.top)}, ${f1(end.footer.h)})`);
         const band = { left: top.sheet.left + 16, right: top.sheet.right - 16, top: top.footer.top, bottom: top.prim.top };
         const hasInk = await page.evaluate(([a, c]) => window.__m.textIn(a, c), [top.footer.top, top.prim.top]);
         const d = hasInk ? await diffPct(page, band) : 100; if (process.env.DBG) console.log('band', JSON.stringify(band), d); if (d < DIFF_MIN) bad(vp, `1 chưa cuộn: không thấy nội dung xuyên qua footer (khác biệt ${f1(d)}% < ${DIFF_MIN}% trong dải trên nút Tiếp theo)`);
-        const b = await page.evaluate(([a, c]) => window.__m.contentBtnAt(a, c), [top.footer.top, top.prim.top]);
+        const b = await page.evaluate(([a, c]) => window.__m.contentBtnAt(a, c), [top.footer.top + 1, top.footer.top + 10]);
         if (!b) bad(vp, '1 chưa cuộn: không có nút nội dung nào nằm dưới dải mờ của footer'); else { const h = await page.evaluate(([x, y]) => window.__m.hit(x, y), [b.cx, b.y]); if (h !== 'content') bad(vp, `1 chưa cuộn: chạm vào dải mờ không xuống tới nội dung (phần tử trên cùng thuộc "${h}")`); }
       }
       if (ONLY.includes('2')) {
@@ -114,6 +115,15 @@ function checkState(vp, tag, c, want) {
         if (Math.abs(c.footer.top - 681) > 1 || Math.abs(c.footer.h - 119) > 1 || Math.abs(c.sheet.top - 76) > 1 || Math.abs(c.sheet.h - 724) > 1) bad(vp, `3 desktop đổi: sheet ${f1(c.sheet.top)}/${f1(c.sheet.h)}, footer ${f1(c.footer.top)}/${f1(c.footer.h)}, mong 76/724 và 681/119`);
         await ctx.close(); }
     }
+    if (ONLY.includes('6')) {
+      for (const [W, H] of [[390, 300], [360, 300]]) {
+        const vp = `${W}x${H}`; const { ctx, page } = await open(browser, url, W, H, 2); await install(page, 2);
+        const c = await capture(page, 0);
+        if (c.scroller.bottom > c.footer.top + 1) bad(vp, `6 bàn phím ảo: footer đè lên vùng nội dung (nội dung tới ${f1(c.scroller.bottom)}, footer từ ${f1(c.footer.top)})`);
+        checkState(vp, '6 bàn phím ảo', c, 'solid'); await btnsOk(page, vp, c, '6 bàn phím ảo');
+        await ctx.close();
+      }
+    }
     if (ONLY.includes('5')) {
       for (const [W, H] of [[390, 650], [320, 568]]) {
         const vp = `3a ${W}x${H}`; const { ctx, page } = await open(browser, url, W, H, 'grid'); await install(page, 'grid');
@@ -121,7 +131,7 @@ function checkState(vp, tag, c, want) {
         checkState(vp, '5 đã cuộn hết', end, 'solid'); if (end.contentBottom > end.footer.top - GAP) bad(vp, '5 đã cuộn hết: ảnh cuối còn dưới footer');
         const want = expectState(top, end.footer.top); if (want !== 'fade') bad(vp, '5: tiền đề sai (lưới ảnh không tràn dưới footer)');
         checkState(vp, '5 chưa cuộn', top, 'fade');
-        const b = await page.evaluate(([a, c]) => window.__m.contentBtnAt(a, c), [top.footer.top, top.prim.top]);
+        const b = await page.evaluate(([a, c]) => window.__m.contentBtnAt(a, c), [top.footer.top + 1, top.footer.top + 10]);
         if (b) { const h = await page.evaluate(([x, y]) => window.__m.hit(x, y), [b.cx, b.y]); if (h !== 'content') bad(vp, `5 chưa cuộn: chạm vào dải mờ không xuống tới nội dung ("${h}")`); }
         const [cx, cy] = mid(top.prim); if (!(await page.evaluate(([cx, cy]) => window.__m.hitIs('prim', cx, cy), [cx, cy]))) bad(vp, '5: nút chính bị phủ khi footer mờ');
         await ctx.close();
