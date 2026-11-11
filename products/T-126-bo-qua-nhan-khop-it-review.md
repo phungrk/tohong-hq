@@ -1,0 +1,150 @@
+# Spec T-126: bỏ qua nơi Google có ít hơn 2 đánh giá (không nhận khớp), áp cả vendor đã nhận
+
+## Ý định
+Capu, 2026-11-11: "tôi kiểm tra trên google map 2 vendor này trong csv không đáng tin cậy. Tôi muốn thêm điều kiện để khi enrich vendor: vendor nào không có số lượng review > 1 thì bỏ qua. 2 vendor này có số lượng review = 0": Thiệp cưới thơm (`ChIJMah3G9QodTERGCmJNNuiQ2Y`) và La Petite Epicerie Saigon (`ChIJm2jnlUbfdDER-LxA02bOZWc`), cả hai nằm trong PR dữ liệu tohong#83 (ADR-061). Board: `board/T-126.md`.
+
+## Bằng chứng
+Đo trên tohong `origin/main` 62ee2f8 và nhánh PR #83 `enrich-vendors/run-43026321789` (chỉ đọc, 2026-11-11); ảnh chụp ở `eval/T-126/data_snapshot.json`.
+1. **Dữ liệu CÓ lưu số đánh giá, ngược với ghi chú trên board.** `pipeline._apply_enrichment` ghi `reviews[source=google_maps].count` và `enrichment_log.changes.review_count` mỗi khi Google trả `rating`. Khi nơi đó 0 đánh giá, Google **bỏ cả `rating` lẫn `userRatingCount`**, nên vendor không có trường nào (code hiện coi là "không có rating"). Trên main có **210 id** có `place_id` Google (không phải 258; 258 có lẽ gồm dòng log không có place_id), 192 id lưu số đánh giá; với #83 là **246 id**. Vì thế áp ngược **không bắt buộc hỏi lại Google** cho phần lớn.
+2. **Số vendor ≤ 1 đánh giá (hoặc không có trường rating) đang giữ nhận khớp: 37 trên 246 (15%).** 209 vendor có ≥ 2 đánh giá. Trong 37: **23 đọc mới** (log từ 2026-11-08, lần chạy có `userRatingCount` trong mask; 16 ở main + **7 trong #83**, gồm đúng 2 vendor của Capu; 5 vendor #83 có 0 đánh giá, 2 có 1: Tiệm Bánh Family 1, Nội Thất One 1), **12 đọc cũ** (cùng lần chạy 2026-06-16, số đã lưu có thể đã lỗi thời: 6 lưu 1 đánh giá, 6 không có trường rating mà không phân biệt được "0 đánh giá" với "log cũ chưa lấy rating"), **2 Capu duyệt tay** (Én Banquet & Event Space và Thiskyhall, venue, 0 đánh giá, ADR-048). Bảng đầy đủ ở cuối spec.
+3. **Mọi category, mọi đường nhận bị ảnh hưởng**: 37 vendor trải trên 12 category (photography 12, makeup 5, wedding_gift 4, invitation 4, flower 3, wedding_car 2, wedding_ring 2, wedding_attire/other/venue/honeymoon/wedding_interior mỗi nơi 1; 7 của #83 đều qua đường tên `name_near_exact`).
+4. **Field mask hiện tại đã có `places.userRatingCount`** (`enrichment/google_maps.py` `ENRICHMENT_FIELD_MASK`), nên luật mới ở đường enrich **không thêm field, không đổi SKU, không đổi giá**.
+5. **SKU và giá Google Places API (New)** (tra 2026-11-11; trang tài liệu `developers.google.com` không mở trực tiếp được trong phiên này, số lấy từ kết quả tìm kiếm trích đúng trang chính thức, đối chiếu lại trên console trước khi chạy thật):
+   - `rating`, `userRatingCount` thuộc nhóm field **Enterprise** của Place Details (New) và của Text Search (New): nguồn [Place Details (New)](https://developers.google.com/maps/documentation/places/web-service/place-details), [Place Data Fields (New)](https://developers.google.com/maps/documentation/places/web-service/data-fields), [Places API Usage and Billing](https://developers.google.com/maps/documentation/places/web-service/usage-and-billing). Quy tắc tính tiền: một request tính theo **SKU cao nhất** trong field mask.
+   - **Text Search Enterprise: 1.000 request miễn phí/tháng, $35,00/1000**; bản có nhóm Atmosphere (mask của ta có `places.reviews`): $40,00/1000 (usage.py dùng `TS_USD = 0,040`, đã đúng). **Place Details Enterprise: 1.000 miễn phí/tháng, $20,00/1000** (SKU ID 2D9A-3DE0-3766). Place Details Pro: 5.000 miễn phí, $17,00/1000. Nguồn: [Google Maps Platform core services pricing list](https://developers.google.com/maps/billing-and-pricing/pricing), [Place Details Enterprise (SKU)](https://developers.google.com/maps/billing-and-pricing/sku-details). Giá Place Details Enterprise + Atmosphere $25/1000 và hạn mức từng SKU: nguồn thứ cấp (openplacesapi.com, bizcollect.dev), không dùng cho tính toán ở đây.
+   - Ghi chú nhỏ: chú thích trong `google_maps.py` ghi `userRatingCount` là "Pro tier"; theo tài liệu trên là Enterprise. Không ảnh hưởng chi vì mask đã có `photos`, `reviews` (Enterprise, Atmosphere) và `usage.py` tính $0,040.
+6. **Ngân sách**: ADR-061: net ước tính tháng 11 đã chi **$12,60** / trần $30 (ADR-049) → còn **$17,40**.
+7. Bằng chứng 2 vendor Capu: log PR #83 cho Thiệp cưới thơm và La Petite Epicerie Saigon không có `rating` (đúng 0 đánh giá), đều nhận theo tên (`accepted_by=name_near_exact`, `address_match=false`).
+
+## Giả thuyết
+Nếu từ chối nhận khớp ứng viên có < 2 đánh giá Google (và hạ 35 vendor đang giữ nhận khớp loại này) thì app không còn hiện ảnh/địa chỉ/điện thoại của một nơi Google gần như không có người dùng, những nơi dễ là nhận nhầm (cả 2 ca Capu soát đều là 0 đánh giá, đều qua đường tên). Chỉ số: số vendor có `place_id` mà < 2 đánh giá: 37 → 2 (chỉ 2 ca Capu duyệt tay). Chỉ số bảo vệ: không vendor nào bị gỡ vì luật này; 209 vendor ≥ 2 đánh giá y nguyên từng byte; chi thêm ≤ $0,24, tổng ≤ $30. Cái giá phải chịu: nơi thật mà Google ít người đánh giá (cửa hàng nhỏ mới mở) cũng mất ảnh Google, quay về ảnh minh hoạ; Capu cứu từng ca bằng `accept_place`. **Tự tin ~85%** rằng số đã lưu ≤ 1 của lần đọc mới đúng là ≤ 1 thật (2/2 ca Capu kiểm tay đều 0); với 12 lần đọc cũ tự tin thấp hơn nên có bước xác nhận live (Hành vi 4).
+
+## Hành vi (người dùng thấy gì)
+Người dùng cuối (cặp đôi) thấy: vendor có ≤ 1 đánh giá Google giữ **ảnh minh hoạ và địa chỉ gốc**, không còn ảnh/ghi công Google, không địa chỉ/điện thoại/website do Google ghi; vendor **vẫn có mặt** trên app. Capu thấy báo cáo `low-review-demoted.csv` (Hành vi 5).
+
+**Hành vi 0. Định nghĩa (một lần).**
+- *Số đánh giá Google của ứng viên* = `userRatingCount` Google trả; **vắng trường = 0**. Ngưỡng cố định `MIN_REVIEWS = 2`: ứng viên có số đánh giá **< 2 (0 hoặc 1)** là ít đánh giá; **đúng 2 là đủ** (nhận).
+- **"Bỏ qua" = không nhận khớp**: không `place_id`, không `google_photos`, không phone/website/địa chỉ/toạ độ/mô tả của Google; vendor giữ như chưa enrich (địa chỉ = `contact.address_source`, ảnh minh hoạ). **Không gỡ vendor** (không vào `removed_vendors.json`). Hiểu khác (gỡ hẳn khỏi app) bị loại: lý do ghi ở "Không làm".
+- Kết cục ghi vào dòng audit: `status=low_confidence`, `reject_reason="few_reviews"`, `candidate_place_id=<place_id Google>`, `matched_name`, `formatted_address`, `google_review_count=<n>`; `place_id` rỗng. `few_reviews` là mã **ngoài** sáu cổng: hàm `reject_reason` của sáu cổng và hàm chuẩn T-106 **không đổi** (INV-018).
+- "Đọc mới" = dòng log `google_maps` mới nhất có `timestamp` >= `2026-11-08` (ngày lần chạy có `userRatingCount` trong mask, ADR-049); trước đó là "đọc cũ".
+- Số đánh giá **đã lưu** của vendor = `audit.google_review_count` (dòng audit có hiệu lực ở bất kỳ category file có id) nếu có; không thì `reviews[source=google_maps].count`; không thì `enrichment_log.changes.review_count` (khi có rating); không có trường nào = 0.
+
+**Hành vi 1. Lần enrich từ nay (mọi category, mọi đường nhận tự động).** Với mọi lần hỏi Google (`enrich.py` thường cho venue và mọi category, batch T-111, `--recheck-name-match` T-120/T-121): sau khi ứng viên **đã qua** luật nhận khớp hiện hành (đường 1 sáu cổng, hoặc đường 2 tên gần tuyệt đối), nếu số đánh giá < 2 thì kết cục là few_reviews (Hành vi 0) thay vì nhận. Ghi rõ:
+- (a) **Thứ tự**: few_reviews chỉ xét ứng viên đã qua luật nhận khớp. Ứng viên bị luật cũ từ chối vẫn mang **mã cũ** (`address_conflict`, `low_score`...), kể cả khi 0 đánh giá. Ca đường tên: ứng viên 0 đánh giá, trước đó `address_conflict`, được hỏi lại và qua luật tên nhưng ít đánh giá → đổi mã thành `few_reviews`.
+- (b) **Ít đánh giá thắng đóng cửa**: ứng viên ít đánh giá mà Google báo `CLOSED_PERMANENTLY` hoặc `CLOSED_TEMPORARILY` thì **không gỡ, không ẩn, không retry**: chỉ few_reviews. Lý do: nơi 0-1 đánh giá không đủ tin để gỡ vendor. Điều này **thu hẹp** ADR-044 mục 1 (gỡ khi đóng cửa vĩnh viễn) và T-110 hành vi 6 (tạm đóng cửa) cho đúng ca ít đánh giá; ca ≥ 2 đánh giá giữ nguyên. Đảo ngược được (một dòng điều kiện), Chief of Staff ghi `decisions/`.
+- (c) **Không tốn ảnh**: ảnh (Place Photos) chỉ lấy sau khi nhận; ứng viên few_reviews tốn 0 lượt ảnh.
+- (d) **Kết cục cuối**: vendor few_reviews đã "được thử" (như `low_confidence` khác): lần chạy sau không hỏi lại, `--recheck-name-match` không chọn lại (`few_reviews` không nằm trong `ELIGIBLE_REASONS`). Số đánh giá tăng về sau: Capu thêm `accept_place` nếu muốn, hoặc lần enrich làm mới tương lai (ngoài T-126).
+- (e) Ứng viên ≥ 2 đánh giá được nhận như cũ, và dòng audit `enriched` ghi thêm `google_review_count`.
+- (f) `google_review_count` không làm đổi pool: pool không thêm trường nào.
+
+**Hành vi 2. Duyệt tay `accept_place` của Capu thắng (đề xuất, đã viết vào spec).** Vendor có mục `accept_place` (T-110) **không bao giờ** bị hỏi lại Google vì luật này và **không bao giờ** bị hạ, ở mọi chế độ (Hành vi 1, 3, 4), dù Google có 0 đánh giá. Lý do: ADR-048 cho thấy Capu chọn tay đúng sau khi tự kiểm trên Google Maps (Én Banquet & Event Space, Thiskyhall: 0 đánh giá nhưng Capu xác nhận có trên Google Maps); INV-015 đã miễn vế accept_match cho duyệt tay vì lý do đó. Ý định mới của Capu nhắm luật **tự động** ("khi enrich"). Hai vendor này **ở lại**; Capu muốn bỏ thì dùng `reject_match` hoặc `remove` như trước. Các mục duyệt tay khác (`remove`, `reject_match`, `temporarily_closed`) không đổi. Vendor ghim (pinned) vẫn không bị hạ.
+
+**Hành vi 3. Áp ngược OFFLINE cho vendor đã nhận: `enrich.py --state HCMC --category all --apply-review-rule`.** 0 request, **không cần `GOOGLE_MAPS_API_KEY`**, áp trên dữ liệu trên đĩa mọi category file có vendor đó (kể cả ngoài pool: không tốn gì). Vendor có `place_id` Google, không có `accept_place`, **đọc mới** và số đánh giá đã lưu < 2 → **hạ** như settle (bỏ `place_id`, `google_photos`, reviews/`top_reviews` Google, phone/website/mô tả/toạ độ do Google ghi, địa chỉ về `address_source`, cờ suy ra từ dữ liệu trở lại) ở **mọi** category file chứa id; dòng audit có hiệu lực ở mọi file chuyển sang few_reviews (INV-027); không gỡ. Vendor đọc cũ, ≥ 2 đánh giá, hoặc duyệt tay: **giữ nguyên từng byte**. Idempotent. `enrich.py` thường (không cờ) **không tự hạ** ai, chỉ cờ này mới áp luật ngược. Bước hạ dùng lại đúng hàm hạ của settle để không sinh trạng thái thứ hai.
+
+**Hành vi 4. Xác nhận LIVE cho lần đọc cũ: thêm `--confirm-review-count` (đi cùng `--apply-review-rule`).** Diện = vendor có `place_id`, không `accept_place`, **đọc cũ** mà số đã lưu < 2 hoặc không có rating, chưa xác nhận. Mỗi vendor **đúng một** Place Details `GET /v1/places/<place_id>` với `X-Goog-FieldMask: userRatingCount` (chỉ field này; không Text Search, không ảnh). Kết cục: thật < 2 (vắng = 0) → hạ như Hành vi 3; thật ≥ 2 → **giữ nguyên bản ghi**, ghi `audit.google_review_count=<n thật>` (nên không hỏi lại và INV-029 đo được); lỗi HTTP/timeout → không ghi gì (lần sau hỏi lại). Vendor đọc mới và vendor duyệt tay: 0 lượt. Sổ chi: mỗi request ghi `GOOGLE_REQUEST run=<id> kind=details_count` **trước khi gửi**; `GOOGLE_USAGE` thêm `details_count=<n>`; `usage.py` có **bộ đếm riêng** `PD_USD = 0,020`, hạn mức miễn phí 1000/tháng riêng, biên 50: `net = 0,020 x max(0, PD_cum + 50 - 1000)`; **không** đếm vào `photo_details` ($0,007, SKU ảnh). `--dry-run` in đúng một dòng `REVIEW_SCOPE candidates=<n> details_count=<n> est_gross_usd=<x> est_net_usd=<y>` với 0 request. Trần (`--budget-usd`, `--cap-basis`) chặn như T-111 (dòng `BUDGET_STOP`), chạy tiếp không hỏi đôi. Mọi cờ vẫn chịu cổng `OPEN_DATA_PR` / Re-run (INV-023) khi có khoá.
+
+**Hành vi 5. Báo cáo cho Capu: `low-review-demoted.csv`.** Sổ DỰNG LẠI từ trạng thái hiện tại (như `name-match-accepted.csv`, INV-026): mỗi ID đang có audit `few_reviews` đúng một dòng, ở thư mục category đầu tiên chứa id (thứ tự chuẩn). Cột: `id, name, category, google_name, google_address, place_id, maps_url, review_count, stage, was_matched`; `maps_url = https://www.google.com/maps/place/?q=place_id:<place_id>`; `stage` = `new` (lần enrich thường, chưa từng nhận) | `stored` (Hành vi 3) | `live` (Hành vi 4); `was_matched=true` khi vendor từng có ảnh Google. `enrich.py` thường dựng lại cùng kết quả (không nhân đôi, không xoá); vendor sau đó được Capu `accept_place` ra khỏi sổ. Chief of Staff gửi Capu bản gộp (file + danh sách tên) trước khi Capu merge PR dữ liệu (Diff hành vi). Danh sách dự kiến theo dữ liệu hôm nay ở cuối spec.
+
+**Hành vi 6. Trình tự với PR #83 (ít rủi ro nhất).** #83 đang MỞ, chứa 7 vendor ít đánh giá (cả hai ca Capu) và đang chặn lần chạy thật (`OPEN_DATA_PR`). Đề xuất:
+1. **Không merge #83 nguyên trạng** (sẽ đưa 7 vendor không đáng tin vào app) và **không đóng/chạy lại** (tốn thêm ~$2,65, ADR-060).
+2. Code T-126 (repo `tohong`, bậc C) qua Code Gate, Capu merge code. PR code **không phải PR dữ liệu** nên không bị `OPEN_DATA_PR` chặn.
+3. Engineering (hoặc Chief of Staff) chạy `--apply-review-rule` **offline** (0 Google, không khoá) trên nhánh #83 `enrich-vendors/run-43026321789`, commit thêm vào chính nhánh đó: hạ **23** vendor (7 của #83 gồm 2 ca Capu + 16 ở main) và sinh `low-review-demoted.csv`. Dữ liệu 7 vendor #83 vừa đọc 2026-11-11 nên không cần hỏi Google.
+4. Capu soát `low-review-demoted.csv` + `name-match-accepted.csv` (29 dòng còn lại), merge #83 và PR pool tohong-back **liền nhau** (INV-021/022).
+5. Hết `OPEN_DATA_PR`: chạy thật **một lần** `--apply-review-rule --confirm-review-count` cho **12** vendor đọc cũ (≤ 12 Place Details, ≤ $0,24 gross, trong trần): PR dữ liệu thứ hai + PR pool, Capu merge. Cần Capu bấm chạy thật (bậc C).
+Phương án khác (đã cân): merge #83 trước rồi áp ngược bằng PR riêng → app hiện 7 vendor không tin cậy trong giữa hai lần merge; chờ tới khi xác nhận live xong rồi mới merge #83 → bị `OPEN_DATA_PR` chặn chính nó, không khả thi.
+
+## Chi phí
+| Hạng mục | Request | $ gross | $ net (hạn mức miễn phí còn) |
+| --- | --- | --- | --- |
+| Luật mới cho lần enrich từ nay | 0 thêm (mask đã có `userRatingCount`) | 0 | 0; lại **tiết kiệm** 2 lượt ảnh ($0,014) mỗi vendor few_reviews |
+| Áp ngược offline (23 vendor) | 0 | 0 | 0 |
+| Xác nhận live 12 vendor đọc cũ (Place Details Enterprise, mask `userRatingCount`) | 12 | **0,240** (12 x $0,020) | ~0 nếu hạn mức miễn phí 1000 của SKU này chưa dùng trong tháng (SKU riêng, chưa có log nào dùng); cận trên 0,24 |
+| So sánh: Text Search lại 12 vendor (mask hiện tại, Enterprise+Atmosphere) | 12 | 0,480 | rẻ hơn không có |
+| So sánh: Place Details cho cả 246 vendor | 246 | 4,92 | không cần: 209 vendor đã có số ≥ 2 |
+Trần còn lại $30 - $12,60 = **$17,40**; sau bước xác nhận còn ≥ $17,16. Cách rẻ nhất = offline cho phần đọc mới + Place Details chỉ `userRatingCount` cho phần đọc cũ. Hóa đơn thật Capu đối chiếu console (agent không đọc được).
+
+## Ràng buộc (vòi)
+- Repo: `phungrk/tohong` (`tools/scraper/enrich.py`, `enrichment/google_maps.py`, `pipeline.py`/`batch.py`/`recheck.py`/`settle.py` (dùng lại hàm hạ), `usage.py` (kind `details_count`), `review.py`/báo cáo mới, `.github/workflows/enrich-vendors.yml` thêm hai input boolean nếu cần chạy thật; dữ liệu `output/HCMC/*`) · `phungrk/tohong-back` (PR pool riêng sau mỗi PR dữ liệu) · Nhánh: `t-126-bo-qua-it-review` · Vùng (`area`): `planner/vendor/images`.
+- Bất biến đã đọc: `eval/invariants/_shared/` và `planner/vendor/images/` INV-001..028. **Không đề nghị sửa INV nào**:
+  - INV-015/016/017/018/019: sáu cổng và hàm chuẩn không đổi; few_reviews là bước sau. INV-020/021 (duyệt tay thắng, dữ liệu khớp file duyệt tay): Hành vi 2 giữ nguyên; `accept_place` luôn còn `place_id`.
+  - INV-022 và INV-021 (f): vendor few_reviews ở lại `vendors.json`, không phải "đã gỡ"; không tạm đóng cửa. INV-021/022 đang đỏ vì PR pool #83 chưa merge: ngoài T-126.
+  - INV-012/013/014 (pool, ghi công, ảnh truy về place_id): hạ vendor làm ảnh Google biến khỏi vendor, không thêm gì vào pool. INV-023/024 (Re-run gate, log còn khi huỷ): bước live dùng workflow hiện có, log `GOOGLE_REQUEST` ghi trước khi gửi.
+  - INV-025/026/027/028: hạ vendor đã nhận theo tên phải cập nhật audit mọi file có id (INV-027) và không để sót G6 (INV-028); `name-match-accepted.csv` dựng lại từ trạng thái nên vendor bị hạ ra khỏi sổ đó (INV-026).
+- Kiến trúc: ảnh chỉ qua `photoUri`; pool không URL `places.googleapis.com`; không thêm `place_id`/số đánh giá vào pool.
+- Không chạm: payment, auth, schema DB, dữ liệu cá nhân người dùng, giá vendor, UI, `main.py`, `scrape-vendors.yml`, trần $30; không liên hệ vendor.
+- Bậc lưới lọc đề xuất: **C** (đã giao): đổi dữ liệu vendor hiển thị trong app + dịch vụ trả phí Google (lượt chạy thật cần Capu bấm và merge).
+
+## Tiêu chí chấp nhận và eval
+Mọi eval chạy offline: Google giả `eval/T-126/_fake` (bản của T-111 + `userRatingCount` + Place Details theo field mask), chạy ĐÚNG lệnh CLI trong bản sao `tools/scraper` của `tohong`; cần `TOHONG_REPO` (mặc định `../tohong`). `python3 -I eval/T-126/<file>`. Hạ tầng dùng lại của T-110/T-111/T-120. Dữ liệu thật: `eval/T-126/data_snapshot.json`.
+
+| # | Tiêu chí (có/không) | Eval |
+| --- | --- | --- |
+| 1 | Lần enrich từ nay: ứng viên 0 hoặc 1 đánh giá không được nhận (mọi category gồm venue, cả đường sáu cổng lẫn đường tên); đúng 2 đánh giá nhận; few_reviews không gỡ vendor (kể cả Google báo đóng cửa), không tốn ảnh, không che mã từ chối cũ, không hỏi lại; duyệt tay `accept_place` với 0 đánh giá vẫn nhận | `python3 -I eval/T-126/check_1_nhan_khop_moi_bo_qua_it_review.py` |
+| 2 | Áp ngược offline: 0 request, không cần khoá; hạ đúng vendor đọc mới < 2 đánh giá ở mọi category file (hai file = một dòng báo cáo); duyệt tay, đọc cũ, ≥ 2 giữ từng byte; idempotent; `enrich.py` thường không tự hạ | `python3 -I eval/T-126/check_2_ap_nguoc_offline.py` |
+| 3 | Xác nhận live: đúng một Place Details/vendor đọc cũ < 2, mask chính xác `userRatingCount`, hạ khi thật < 2, giữ + ghi số thật khi ≥ 2, lỗi thì hỏi lại, đã xác nhận không hỏi lại; sổ `details_count` riêng | `python3 -I eval/T-126/check_3_xac_nhan_live_place_details.py` |
+| 4 | Chi phí đúng SKU: `REVIEW_SCOPE` (6 x $0,020 = $0,120), net theo SKU riêng (không lẫn ảnh), 0 request khi dry-run, trần gross chặn đúng, chạy tiếp không hỏi đôi | `python3 -I eval/T-126/check_4_chi_phi_sku_va_tran.py` |
+| 5 | Báo cáo cho Capu: `low-review-demoted.csv` đúng cột/nội dung/stage/was_matched, mỗi ID một dòng, dựng lại ổn định, duyệt tay đưa ra khỏi sổ | `python3 -I eval/T-126/check_5_bao_cao_cho_capu.py` |
+| 6 | Dữ liệu thật (246 vendor, main + #83): 23 hạ offline (gồm 2 vendor Capu), 2 duyệt tay giữ, 12 xác nhận live ($0,24), 209 y nguyên từng byte | `python3 -I eval/T-126/check_6_ap_nguoc_tren_du_lieu_that.py` |
+| 7 | Bất biến cũ giữ (INV-012..020, 025..028 xanh trên dữ liệu thật); INV-029 nháp đỏ trước, xanh sau áp ngược; INV-028 xanh | `python3 -I eval/T-126/check_7_bat_bien_cu_xanh_va_inv029.py` |
+
+Đỏ hôm nay (đúng dự kiến, FAIL không ERROR): check_1..7 (CLI chưa có `--apply-review-rule`/`--confirm-review-count`, luật chưa có); check_7 phần A xanh sẵn (13 bất biến cũ). Kiểm tra eval chạy được: cả 7 chạy tới đúng điểm FAIL; check_1 đã chạy đủ hai bước CLI hiện hành và các đối chứng (a, b, g nhận; m giữ `address_conflict` ở bước 0) xanh. **Chưa kiểm xanh bằng bản cài đặt nháp** (khác T-120): rủi ro còn lại là định dạng dòng log/field mask mà Engineering chọn; eval nhận `userRatingCount` hoặc `places.userRatingCount` cho mask.
+Giới hạn đã biết: (a) Google giả trả đúng số đánh giá fixture nên eval không đo được "Google có thật sự 0 đánh giá"; đó là mắt Capu trên `low-review-demoted.csv` (`maps_url`); (b) giá/hạn mức là công thức trên log, hoá đơn thật Capu đối chiếu console; (c) lần đọc cũ có thể đổi kết quả khi xác nhận live (spec cho phép: 12 ca có thể giữ lại).
+
+## Bất biến đề xuất (tầng 2)
+**INV-029 (`planner/vendor/images`): vendor đang giữ nhận khớp Google thì nơi đó có ≥ 2 đánh giá Google, trừ khi Capu duyệt tay.** Bản nháp chạy được: `eval/T-126/inv-proposed-google-match-du-review.py`. Đỏ hôm nay: **22 vendor** trên main 62ee2f8, **29** trên #83 (đo bằng chính script, `TOHONG_REPO` trỏ bản chụp); xanh sau khi áp ngược Hành vi 3+4 được merge. Theo ADR-028, vào bể sau khi PR dữ liệu áp ngược merge (giữa chừng đỏ là tình trạng thật, như INV-021/022). Phần 12 vendor đọc cũ không có số: bất biến chỉ đo chúng sau khi xác nhận live ghi `google_review_count`.
+
+## Không làm
+- Gỡ vendor vì ít đánh giá (chỉ ẩn ảnh/địa chỉ Google, vendor ở lại app); đổi sáu cổng, hàm chuẩn T-106, luật tên T-120, ngưỡng 0,95; hạ vendor có `accept_place` của Capu.
+- Hỏi lại Google cho vendor đọc mới hoặc vendor ≥ 2 đánh giá; Text Search lại; Place Details cho cả 246 vendor; lấy thêm field nào khác ngoài `userRatingCount` ở bước xác nhận.
+- Tự động hỏi lại vendor few_reviews khi số đánh giá tăng (ngoài phạm vi; Capu dùng `accept_place`).
+- Đổi schema pool, thêm số đánh giá hay `place_id` vào pool; sửa trần $30; tự sửa bể bất biến; liên hệ vendor.
+- Gọi Google, chạy workflow, đổi dữ liệu thật, chạy git trong `tohong-hq`, hay merge #83 trong việc viết spec này.
+
+## Câu hỏi mở
+**Một câu cho Capu:** Én Banquet & Event Space và Thiskyhall (venue, **0 đánh giá** trên Google, Capu duyệt tay `accept_place` ở ADR-048) có **ở lại** như hiện nay, vì duyệt tay của Capu thắng luật tự động không? **Đề xuất mặc định (đã viết vào spec, Hành vi 2): ở lại**; Capu muốn bỏ thì ghi `reject_match` cho hai id đó (không cần đổi code).
+
+## Danh sách dự kiến theo dữ liệu hôm nay (cho báo cáo Capu; `*` = log không có trường rating, đọc là 0)
+Nguồn: `eval/T-126/data_snapshot.json` (tohong origin/main 62ee2f8 + PR #83). "Hạ offline" = đọc từ 2026-11-08; "Cần xác nhận live" = đọc 2026-06-16, có thể đã có thêm đánh giá.
+
+| Nhóm | Vendor | Category | Đánh giá | Nguồn | place_id |
+| --- | --- | --- | --- | --- | --- |
+| Hạ offline | Wings Decor | ceremony | 0* | #83 | ChIJRz_2__kldTERMpDyItmUPyc |
+| Hạ offline | Hoa mẹ cắm | flower | 0* | main | ChIJSY137SwpdTERNtq2PGoBgMs |
+| Hạ offline | Slow Florist | flower | 1 | main | ChIJxentfQApdTERFBj-Tji7QnM |
+| Hạ offline | Sweet Flower and event Decoration | flower | 0* | main | ChIJs03M1dkodTER4TbOPy0cM7s |
+| Hạ offline | Sky Pacific Travel | honeymoon | 1 | main | ChIJAQAAwJwvdTERX1u6Sh84oF0 |
+| Hạ offline | Thiệp Cưới Pepi | invitation | 0* | main | ChIJVxGR86wudTERD5FyuDgB52Y |
+| Hạ offline | Thiệp cưới Smiling | invitation | 0* | main | ChIJq4oOXNcodTERwcvx2VjjjUg |
+| Hạ offline | Thiệp cưới rẻ Quận 4 | invitation | 0* | main | ChIJwdZw1AwvdTERPDgn-MeLGLU |
+| Hạ offline | Thiệp cưới thơm | invitation | 0* | #83 | ChIJMah3G9QodTERGCmJNNuiQ2Y |
+| Hạ offline | ENDY MAKEUP STORE | makeup | 0* | main | ChIJa3YLrwovdTERweUKH-thM8U |
+| Hạ offline | Felecia Bridal | makeup | 0* | #83 | ChIJrS3xV-QpdTERJl-C53msoyw |
+| Hạ offline | Phan Bridal | makeup | 0* | main | ChIJdx8ic9godTERYOztWY72eOk |
+| Hạ offline | Studio Nguyên Hồng | makeup | 1 | main | ChIJg3NhJegodTER4jasdRfkZ1k |
+| Hạ offline | Tâm Nguyễn MakeUp | makeup | 0* | #83 | ChIJSca6HPErdTERda5gXdYF9RM |
+| Hạ offline | Studio áo cưới Nguyên Hồng | wedding_attire | 1 | main | ChIJg3NhJegodTER4jasdRfkZ1k |
+| Hạ offline | Cty TMDV XD MAI PHƯƠNG | wedding_car | 0* | main | ChIJ54gyuyopdTERNO9frk7CASw |
+| Hạ offline | Color life - Tranh ký tên | wedding_gift | 0* | main | ChIJ9xpoSdoodTERrMu-VKqTeS4 |
+| Hạ offline | Ideas1000 Factory | wedding_gift | 1 | main | ChIJGTZbUEAvdTERKqKIdUZVk4k |
+| Hạ offline | La Petite Epicerie Saigon | wedding_gift | 0* | #83 | ChIJm2jnlUbfdDER-LxA02bOZWc |
+| Hạ offline | Tiệm Bánh Family | wedding_gift | 1 | #83 | ChIJC34monQvdTER1WgywgG6Eq0 |
+| Hạ offline | Nội Thất One | wedding_interior | 1 | #83 | ChIJaYCLDSotdTERCldbRXY3UJw |
+| Hạ offline | Nhẫn Vàng Kim Thành Bà Chiểu | wedding_ring | 1 | main | ChIJycGyto4udTERbCtI1E9vhTI |
+| Hạ offline | Trang sức đá SNJ | wedding_ring | 1 | main | ChIJsWxwNyQpdTER7ebINSKnfJk |
+| Cần xác nhận live | Angel Áo cưới | photography | 1 | main | ChIJITV7YgAvdTERPWJa2i0pemY |
+| Cần xác nhận live | Hera Studio - Quận 12 - Hồ Chí Minh | photography | 0* | main | ChIJ12NnVt8pdTERYMtAuJOYsQM |
+| Cần xác nhận live | KEN weddings - phóng sự cưới | photography | 1 | main | ChIJcY7ErkQrdTERWavMj5tVnLM |
+| Cần xác nhận live | Loca Studio | photography | 0* | main | ChIJo4qkIwApdTERyV26DlnLsj0 |
+| Cần xác nhận live | Loca bridal & studio | photography | 0* | main | ChIJo4qkIwApdTERyV26DlnLsj0 |
+| Cần xác nhận live | Moza Wedding | photography | 1 | main | ChIJ4c4OutmrNTERW0BQRVAshqE |
+| Cần xác nhận live | Mxinh Bridal | photography | 1 | main | ChIJU62fs7cudTER8YTajSa0T-o |
+| Cần xác nhận live | Mốc Nguyễn Productions - Phóng sự cưới | photography | 0* | main | ChIJV3cHoUEldTERr2JAbVFPmf4 |
+| Cần xác nhận live | Orange Studio | photography | 0* | main | ChIJr4w7Un4hdTERAPCtrK-6_Xo |
+| Cần xác nhận live | Phim trường HeBe Wedding House | photography | 1 | main | ChIJP7B8_S4pdTERsz0Xuw1zZdo |
+| Cần xác nhận live | Quayphimchuphinhcuoinet | photography | 0* | main | ChIJZz6gL3YpdTERyqglaeD2WJQ |
+| Cần xác nhận live | Tường Lâm Photos | photography | 1 | main | ChIJMwqCkOjRdDERTFpoAn1gyVo |
+| Duyệt tay giữ | Én Banquet & Event Space | other | 0* | main | ChIJ_Q8PLiQvdTERNk66UVRKf8U |
+| Duyệt tay giữ | Thiskyhall | venue | 0* | main | ChIJYXnCmV8vdTERiGx61oHIb1E |
+
+## Lịch sử sửa
+- v1 (2026-11-11): bản đầu, Product.
