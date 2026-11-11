@@ -1,0 +1,2970 @@
+{
+"source": "tohong origin/main 62ee2f8 + PR #83 (enrich-vendors/run-43026321789) đọc 2026-11-11; count = reviews[google_maps].count hoặc enrichment_log.changes.review_count; null = không có trường rating (Google bỏ qua khi 0 đánh giá, hoặc log cũ)",
+"fresh_from": "2026-11-08",
+"vendors": [
+{
+"id": "marry_e88965816275",
+"name": "Trung tâm Hội Nghị - Tiệc Cưới Vườn Cau",
+"cats": [
+"ceremony",
+"wedding_planner"
+],
+"place_id": "ChIJCemb_u0odTERxkqx31WJbfI",
+"ts": "2026-11-09T14:31:32.909809",
+"count": 5424,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_3122d81d9853",
+"name": "Your Dreams Wedding & Event",
+"cats": [
+"ceremony",
+"wedding_planner"
+],
+"place_id": "ChIJscpBIUkpdTERX7NtWmUo8sQ",
+"ts": "2026-11-09T14:31:35.218782",
+"count": 3,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c75d256d36c9",
+"name": "Wings Decor",
+"cats": [
+"ceremony",
+"flower"
+],
+"place_id": "ChIJRz_2__kldTERMpDyItmUPyc",
+"ts": "2026-11-11T13:08:11.545688",
+"count": null,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_80f85f2f6c26",
+"name": "Dịch vụ cưới hỏi Khánh Vân",
+"cats": [
+"ceremony"
+],
+"place_id": "ChIJxfU6mNgldTERd7AA0pCnXIc",
+"ts": "2026-11-09T14:31:43.880637",
+"count": 7,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_064945310cb7",
+"name": "Gold Wedding",
+"cats": [
+"ceremony"
+],
+"place_id": "ChIJUwXzCJ8RdTERhnlnSWnxwTA",
+"ts": "2026-11-09T14:31:47.462292",
+"count": 5,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_d238d40e657a",
+"name": "Dianthus Wedding Decor",
+"cats": [
+"ceremony"
+],
+"place_id": "ChIJgzvGuSwvdTERKRwe_267jiI",
+"ts": "2026-11-11T13:08:13.322099",
+"count": 5,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_e8b1db85e098",
+"name": "Leminhbee Studio",
+"cats": [
+"ceremony"
+],
+"place_id": "ChIJuf4ctNgodTERAHEiE1-aqfg",
+"ts": "2026-11-09T14:31:56.910815",
+"count": 3,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c09cd73df13e",
+"name": "Lynh Thùy Wedding Team",
+"cats": [
+"ceremony"
+],
+"place_id": "ChIJcdm0L2cvdTERr6-AJwqsJ-I",
+"ts": "2026-11-09T14:32:01.032332",
+"count": 59,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ac26c0bd3aff",
+"name": "K.I.S.S  wedding event Planner",
+"cats": [
+"ceremony"
+],
+"place_id": "ChIJa4dqSYYpdTERdWqg0MH-rSs",
+"ts": "2026-11-11T13:08:14.026601",
+"count": 18,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_14ac9dbace36",
+"name": "Son Design House",
+"cats": [
+"flower"
+],
+"place_id": "ChIJb7BNTqMvdTERUBzlKVHDQrE",
+"ts": "2026-11-11T13:08:10.466802",
+"count": 5,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_d53c945c614e",
+"name": "Mie Flower",
+"cats": [
+"flower"
+],
+"place_id": "ChIJX1SezM4vdTERyhp2qAfoi0c",
+"ts": "2026-11-11T13:08:10.844394",
+"count": 190,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_56bfe1168b5e",
+"name": "Hoa mẹ cắm",
+"cats": [
+"flower"
+],
+"place_id": "ChIJSY137SwpdTERNtq2PGoBgMs",
+"ts": "2026-11-09T14:30:38.515271",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_1b43f1b53ae2",
+"name": "Slow Florist",
+"cats": [
+"flower",
+"wedding_car",
+"wedding_planner"
+],
+"place_id": "ChIJxentfQApdTERFBj-Tji7QnM",
+"ts": "2026-11-09T14:30:43.668822",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_241959bfb409",
+"name": "Sweet Flower and event Decoration",
+"cats": [
+"flower",
+"wedding_planner"
+],
+"place_id": "ChIJs03M1dkodTER4TbOPy0cM7s",
+"ts": "2026-11-09T14:30:46.356487",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_5c3ecdcc6e78",
+"name": "Quý Flowers",
+"cats": [
+"flower"
+],
+"place_id": "ChIJ4Wt6udUvdTERJPFgrjiVPXM",
+"ts": "2026-11-09T14:30:50.740214",
+"count": 2,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_4939cb86145f",
+"name": "Hoa khô Iris",
+"cats": [
+"flower"
+],
+"place_id": "ChIJvRTXkt0udTERuhG9f7J-vGk",
+"ts": "2026-11-11T13:08:11.243151",
+"count": 25,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_d4c7df71c68f",
+"name": "Ben Flower",
+"cats": [
+"flower"
+],
+"place_id": "ChIJV0k7ckovdTERmFeoYVb_uQM",
+"ts": "2026-11-11T13:08:11.928807",
+"count": 78,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_c4279a8c09a9",
+"name": "Hoa Tươi Huy Thảo",
+"cats": [
+"flower"
+],
+"place_id": "ChIJ81lW5Y8udTER6DINm9E11Wk",
+"ts": "2026-11-09T14:31:03.588686",
+"count": 52,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_62a5e168fea7",
+"name": "Phụ Kiện Cưới Giang",
+"cats": [
+"flower"
+],
+"place_id": "ChIJkU0LkOwvdTERVH2TsxlSg5Y",
+"ts": "2026-11-11T13:08:12.339219",
+"count": 26,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_b51bc2903935",
+"name": "AST travel",
+"cats": [
+"honeymoon"
+],
+"place_id": "ChIJURpyPDAvdTERcomJqJ6oKH0",
+"ts": "2026-11-09T14:34:28.628152",
+"count": 30,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_fdf10d6e6ac3",
+"name": "Adachi Hotel",
+"cats": [
+"honeymoon"
+],
+"place_id": "ChIJCYD0a9wudTERjiQwtd7tFR0",
+"ts": "2026-11-09T14:34:33.648008",
+"count": 596,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ff5436fb350c",
+"name": "Sky Pacific Travel",
+"cats": [
+"honeymoon"
+],
+"place_id": "ChIJAQAAwJwvdTERX1u6Sh84oF0",
+"ts": "2026-11-09T14:34:36.205611",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_5bb3b6f8c74a",
+"name": "TST tourist",
+"cats": [
+"honeymoon"
+],
+"place_id": "ChIJLbtU2DEvdTERcBBqieVfhp8",
+"ts": "2026-11-09T14:34:40.568066",
+"count": 122,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_48cb8b527494",
+"name": "TST Tourist",
+"cats": [
+"honeymoon"
+],
+"place_id": "ChIJLbtU2DEvdTERcBBqieVfhp8",
+"ts": "2026-11-09T14:34:46.389418",
+"count": 122,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f3d00577946b",
+"name": "Công ty du lịch Văn Hóa Việt",
+"cats": [
+"honeymoon"
+],
+"place_id": "ChIJ4_gPutcudTERr8cyL5vhaxs",
+"ts": "2026-11-09T14:34:48.850496",
+"count": 28,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_233f0d140253",
+"name": "Vietravel",
+"cats": [
+"honeymoon"
+],
+"place_id": "ChIJi3tLRi0vdTERlVmnWXMXJGE",
+"ts": "2026-11-09T14:34:50.140501",
+"count": 750,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_09db2542e3a6",
+"name": "In Thiệp Cưới Ngọc Diễm",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJcUZRU2ApdTERO27sorwDE5E",
+"ts": "2026-11-09T14:32:14.814944",
+"count": 2,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_8a8d7140d4f7",
+"name": "Phôi thiệp cưới Hoàng Hải Yến",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJ19leeagudTER-oMYZVhtPVw",
+"ts": "2026-11-09T14:32:15.236526",
+"count": 48,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_570c328afbd7",
+"name": "Thiệp cưới Tufa",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJITv2W7ondTER59jBmWJdIfs",
+"ts": "2026-11-11T13:08:14.668035",
+"count": 14,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_f99c545270d7",
+"name": "Thiệp cưới Forever",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJf9XQDigpdTERIjAYaVB-Jk4",
+"ts": "2026-11-09T14:32:16.800494",
+"count": 244,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_625fc3584154",
+"name": "THIỆP CƯỚI DÂU",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJu5aiHA4vdTERqw0LsbyUmHE",
+"ts": "2026-11-11T13:08:15.036043",
+"count": 93,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_a0e79aa9e909",
+"name": "Thiệp cưới QUANG HƯNG",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJXUbSI-AudTERPR3Cc9LGWTg",
+"ts": "2026-11-09T14:32:19.402858",
+"count": 7,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_d1485af45518",
+"name": "Thiệp cưới Chất",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJsWRLm_8pdTERV8sct5wO2wA",
+"ts": "2026-11-11T13:08:15.417089",
+"count": 35,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_9006fbd57a3e",
+"name": "Thiệp Việt Tú",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJVVVVVTosdTERUDDJTrPQVfw",
+"ts": "2026-11-09T14:32:25.605043",
+"count": 9,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_4a07de310b39",
+"name": "Thiệp Cưới Minh Nguyên",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJ3Q0uqtQudTERZmDNruio8Zc",
+"ts": "2026-11-09T14:32:28.945970",
+"count": 27,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_e742ec75a6af",
+"name": "Công Ty TNHH SX Thiệp Việt Tú",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJVVVVVTosdTERUDDJTrPQVfw",
+"ts": "2026-11-09T14:32:30.686770",
+"count": 9,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_31f5859d0388",
+"name": "Thiệp cưới rẻ Quận 4",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJwdZw1AwvdTERPDgn-MeLGLU",
+"ts": "2026-11-09T14:32:31.518825",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_e82ac1c11689",
+"name": "Thiệp cưới Smiling",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJq4oOXNcodTERwcvx2VjjjUg",
+"ts": "2026-11-09T14:32:32.258993",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c13a61ee68a3",
+"name": "Thiệp Cưới La’co",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJKbu3UtAudTER1GtKCLP0ex4",
+"ts": "2026-11-09T14:32:34.710943",
+"count": 7,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_35b20104f508",
+"name": "Phụ kiện cưới Tiel",
+"cats": [
+"invitation",
+"other"
+],
+"place_id": "ChIJ5yT-vHbVdDER3S2BzHLdM9w",
+"ts": "2026-11-09T14:32:37.127745",
+"count": 3,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_cba8df406483",
+"name": "Lubi Wedding Paper",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJtf8sPZkvdTER0NMCG-brtqE",
+"ts": "2026-11-09T14:32:37.494422",
+"count": 5,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_97a28864947c",
+"name": "Thiệp cưới Lê lai",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJR3h1MxwpdTERkjXREiCWZgU",
+"ts": "2026-11-11T13:08:15.772814",
+"count": 2,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_5525221e8741",
+"name": "Thiệp cưới TC",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJEcb98w4pdTERaAdUuthKqqc",
+"ts": "2026-11-11T13:08:16.143830",
+"count": 44,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_21df314acbbb",
+"name": "Thiệp Cưới Pepi",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJVxGR86wudTERD5FyuDgB52Y",
+"ts": "2026-11-09T14:32:43.750789",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_78a5641a379c",
+"name": "Thiệp cưới thơm",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJMah3G9QodTERGCmJNNuiQ2Y",
+"ts": "2026-11-11T13:08:16.476095",
+"count": null,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_0d9e3d48349b",
+"name": "Công ty TNHH Thiết Kế In Ấn Phạm Hiền",
+"cats": [
+"invitation"
+],
+"place_id": "ChIJWcFwWZMndTERzrbNq6rYYuY",
+"ts": "2026-11-09T14:32:51.544468",
+"count": 35,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_63b238fca544",
+"name": "Studio Nguyên Hồng",
+"cats": [
+"makeup"
+],
+"place_id": "ChIJg3NhJegodTER4jasdRfkZ1k",
+"ts": "2026-11-09T14:29:55.885364",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_34345968690c",
+"name": "TRUNG VO Studio | Vietnam Wedding Photographer",
+"cats": [
+"makeup",
+"wedding_attire"
+],
+"place_id": "ChIJYdwmeyMvdTERh0ZAYebO9Xg",
+"ts": "2026-11-11T13:08:09.017287",
+"count": 24,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_b83d05c24fbb",
+"name": "Tâm Nguyễn MakeUp",
+"cats": [
+"makeup"
+],
+"place_id": "ChIJSca6HPErdTERda5gXdYF9RM",
+"ts": "2026-11-11T13:08:09.404092",
+"count": null,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_df6d113654e1",
+"name": "Phan Bridal",
+"cats": [
+"makeup"
+],
+"place_id": "ChIJdx8ic9godTERYOztWY72eOk",
+"ts": "2026-11-09T14:30:09.074998",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_afac8cc60b96",
+"name": "Felecia Bridal",
+"cats": [
+"makeup"
+],
+"place_id": "ChIJrS3xV-QpdTERJl-C53msoyw",
+"ts": "2026-11-11T13:08:10.075342",
+"count": null,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_2eed4dc6a8e4",
+"name": "Nga Dinh Bridal",
+"cats": [
+"makeup"
+],
+"place_id": "ChIJTyk7WF4ndTERKFeR46BZ8Nc",
+"ts": "2026-11-09T14:30:25.053351",
+"count": 16,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_a3fde388ddcb",
+"name": "An An Bridal",
+"cats": [
+"makeup"
+],
+"place_id": "ChIJVVVVVaARdTERzfPBvD4um3U",
+"ts": "2026-11-09T14:30:25.569034",
+"count": 7,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_2c2cd6b98636",
+"name": "ENDY MAKEUP STORE",
+"cats": [
+"makeup"
+],
+"place_id": "ChIJa3YLrwovdTERweUKH-thM8U",
+"ts": "2026-11-09T14:30:28.165324",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_74156646ce7c",
+"name": "Noir Nguyễn Studio",
+"cats": [
+"makeup"
+],
+"place_id": "ChIJ_TYQsa0odTERfzeiHqsFl5U",
+"ts": "2026-11-09T14:30:29.386149",
+"count": 2,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_d4380c0b3cf3",
+"name": "Én Banquet & Event Space",
+"cats": [
+"other",
+"venue"
+],
+"place_id": "ChIJ_Q8PLiQvdTERNk66UVRKf8U",
+"ts": "2026-11-08T10:51:16.834898",
+"count": null,
+"manual": true,
+"pr83": false
+},
+{
+"id": "marry_1531956f45c5",
+"name": "LOVIDOVI – Chụp ảnh cưới ở Paris",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ6Ux73mrZdDERRXdrq08fQq8",
+"ts": "2026-06-16T14:34:46.575222",
+"count": 22,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_8d5a5ec4d7df",
+"name": "Juva Media",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ34ibHQAtdTERntp7NomY1mA",
+"ts": "2026-06-16T14:34:47.006844",
+"count": 11,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_6e012e4cd31f",
+"name": "PEGASUS STUDIO",
+"cats": [
+"photography"
+],
+"place_id": "ChIJTVxKbFEpdTERqEtkhgj5qSw",
+"ts": "2026-06-16T14:34:47.413518",
+"count": 164,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_307ad7997ec3",
+"name": "JustMarry Wedding - Phóng Sự Cưới",
+"cats": [
+"photography"
+],
+"place_id": "ChIJq2Z5FlApdTER2TJkaeRP8o0",
+"ts": "2026-06-16T14:34:47.819467",
+"count": 3,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_4e4c160e9454",
+"name": "Enter Production Phóng Sự Cưới",
+"cats": [
+"photography"
+],
+"place_id": "ChIJcWwN8hQrdTERjYLQD9mV8q0",
+"ts": "2026-06-16T14:34:48.220644",
+"count": 7,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_9248085ec553",
+"name": "Mốc Nguyễn Productions - Phóng sự cưới",
+"cats": [
+"photography"
+],
+"place_id": "ChIJV3cHoUEldTERr2JAbVFPmf4",
+"ts": "2026-06-16T14:34:48.651189",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_37b430398e00",
+"name": "CEM Bridal Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJKbVbxZ0pdTERxM59L9csUPc",
+"ts": "2026-06-16T14:34:49.156589",
+"count": 70,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f28a16ece776",
+"name": "Will Love - Phóng Sự Cưới",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ6wuclUgndTERQ6UFstqCCFg",
+"ts": "2026-06-16T14:34:49.585371",
+"count": 9,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f186d2e0ad06",
+"name": "Tường Lâm Photos",
+"cats": [
+"photography"
+],
+"place_id": "ChIJMwqCkOjRdDERTFpoAn1gyVo",
+"ts": "2026-06-16T14:34:50.079271",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_1cf3d7f304cf",
+"name": "Lamour Digital",
+"cats": [
+"photography"
+],
+"place_id": "ChIJwdQDrDovdTERbz1g6ZNkYjA",
+"ts": "2026-06-16T14:34:50.387111",
+"count": 3,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_95d8ba0d9af5",
+"name": "Studio THIÊN ÁI",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ98E8jLQvdTERjWUTQDkgGxo",
+"ts": "2026-06-16T14:34:50.925899",
+"count": 4,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_5cf5f23d6a20",
+"name": "Omni Bridal",
+"cats": [
+"photography"
+],
+"place_id": "ChIJlY1zCqIpdTERawVKUgfkvYQ",
+"ts": "2026-06-16T14:34:51.613469",
+"count": 478,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_8ae5897ca010",
+"name": "Ngôi Sao Bridal",
+"cats": [
+"photography"
+],
+"place_id": "ChIJq_EG94ovdTERFSr5p-OnT0o",
+"ts": "2026-06-16T14:34:52.023789",
+"count": 11,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_0cdae4d185ec",
+"name": "Annie Vy Wedding Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ2xXjkbgvdTER2mYXteq5UA8",
+"ts": "2026-06-16T14:34:52.361743",
+"count": 6,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_79e8038bfdcb",
+"name": "Béo production - Phóng sự cưới",
+"cats": [
+"photography"
+],
+"place_id": "ChIJcWwN8hQrdTERjYLQD9mV8q0",
+"ts": "2026-06-16T14:34:52.846234",
+"count": 7,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_bea9ab3d1195",
+"name": "Nupakachi Wedding & Events",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ25LUuLkpdTERNmEXOBlZ7Ko",
+"ts": "2026-06-16T14:34:53.170747",
+"count": 34,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_8845ce925361",
+"name": "Calla Wedding",
+"cats": [
+"photography"
+],
+"place_id": "ChIJG3paZdgodTERMloKX0SIXHQ",
+"ts": "2026-06-16T14:34:54.071047",
+"count": 15,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c7de39c8872c",
+"name": "Hỷ Phóng sự cưới",
+"cats": [
+"photography"
+],
+"place_id": "ChIJcWwN8hQrdTERjYLQD9mV8q0",
+"ts": "2026-06-16T13:28:44.815513",
+"count": 7,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_e6c418f70687",
+"name": "Áo cưới Lucky Anh&Em",
+"cats": [
+"photography"
+],
+"place_id": "ChIJZ7oEsGcvdTERh6L1iz7flTI",
+"ts": "2026-06-16T14:34:54.894003",
+"count": 69,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_8f9fc795121f",
+"name": "KEN weddings - phóng sự cưới",
+"cats": [
+"photography"
+],
+"place_id": "ChIJcY7ErkQrdTERWavMj5tVnLM",
+"ts": "2026-06-16T14:34:55.301500",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f7a78b786c97",
+"name": "Kami Anna Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJCat1IKotdTERYr5TJs7DS_g",
+"ts": "2026-06-16T14:34:55.710772",
+"count": 101,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c56ccfee8b58",
+"name": "Win's Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ_dGFXDUpdTERSr1H6ly4r6Y",
+"ts": "2026-06-16T14:34:56.119627",
+"count": 103,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_e543850b5f9f",
+"name": "Nắng Wedding - Chụp Ảnh Cưới Đẹp Thủ Đức Dĩ An",
+"cats": [
+"photography"
+],
+"place_id": "ChIJc9tDg6rZdDERe8VREcBj4ng",
+"ts": "2026-06-16T14:34:57.083441",
+"count": 360,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_40917c8745e0",
+"name": "Nhà hàng tiệc cưới Minh Thùy",
+"cats": [
+"photography",
+"venue"
+],
+"place_id": "ChIJI7HNf6gndTER__TifttGuK4",
+"ts": "2026-06-16T14:34:57.602551",
+"count": 870,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_824dcc3ee6d2",
+"name": "STAY wedding",
+"cats": [
+"photography"
+],
+"place_id": "ChIJk1uSoLgpdTER1lsciCmDeek",
+"ts": "2026-06-16T14:34:57.965432",
+"count": 2,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_79fc271d70e8",
+"name": "Villa Song Saigon",
+"cats": [
+"photography",
+"venue"
+],
+"place_id": "ChIJY2bT9RsmdTERe4ivhhtmG4c",
+"ts": "2026-06-16T13:28:49.789106",
+"count": 1044,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_7f01648a0081",
+"name": "Jessica Bridal",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ-c8ztFApdTERRXIQQxB3f6g",
+"ts": "2026-06-16T13:28:50.461520",
+"count": 172,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_d7290a8429b6",
+"name": "HayDay Media - Phóng sự cưới",
+"cats": [
+"photography"
+],
+"place_id": "ChIJOTeeu3EldTER442JdHK7hvI",
+"ts": "2026-06-16T13:28:51.456065",
+"count": 47,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_6c3505d6564c",
+"name": "Tài Nguyễn Makeup Academy",
+"cats": [
+"photography"
+],
+"place_id": "ChIJTZa4MwAvdTER-XMf9-HhZD4",
+"ts": "2026-06-16T13:28:51.820402",
+"count": 12,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_742e7da7087a",
+"name": "Anna Wedding",
+"cats": [
+"photography"
+],
+"place_id": "ChIJdb6HySEvdTERJp1lVzUEZrg",
+"ts": "2026-06-16T13:28:52.101207",
+"count": 20,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ed3470998e8b",
+"name": "Nhi Dip Bridal",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ8yqKGl8vdTER6mSLqwtigio",
+"ts": "2026-06-16T13:28:52.419424",
+"count": 178,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_64c75b8f7958",
+"name": "Rin Wedding Hồ Chí Minh",
+"cats": [
+"photography"
+],
+"place_id": "ChIJd2ZGlrUrdTEREeo1sXOvNdA",
+"ts": "2026-06-16T13:28:52.757921",
+"count": 155,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_09ce1e407efb",
+"name": "Ảnh viện áo cưới Mailisa",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ6wCmBDIvdTERFqo45EHwjeM",
+"ts": "2026-06-16T13:28:56.132449",
+"count": 111,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_627b292b32ab",
+"name": "Ahihi Studio - Chụp hình cưới Đẹp, Giá Rẻ TP.HCM",
+"cats": [
+"photography"
+],
+"place_id": "ChIJlzLGcwEpdTER4Lb8M572nKc",
+"ts": "2026-06-16T13:28:56.536581",
+"count": 1003,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ef482a63a2de",
+"name": "Loca Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJo4qkIwApdTERyV26DlnLsj0",
+"ts": "2026-06-16T13:28:56.871252",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_b6379a31fd91",
+"name": "TuArt Wedding Ho Chi Minh",
+"cats": [
+"photography"
+],
+"place_id": "ChIJa7KgkoopdTERhONZDVfFeMc",
+"ts": "2026-06-16T13:28:57.248266",
+"count": 762,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_331043b435ee",
+"name": "Quý Nguyễn Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ6z5yreEodTERSINMOayQxsc",
+"ts": "2026-06-16T13:28:57.623160",
+"count": 68,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_4182a418f495",
+"name": "REN Bridal Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJacq8UlspdTERwz1q1pj9Fj4",
+"ts": "2026-06-16T13:28:58.025428",
+"count": 444,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c1bdad67ab0f",
+"name": "Ktiu studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ9w4mcNgodTERbjjIbxsCONA",
+"ts": "2026-06-16T13:28:58.433602",
+"count": 87,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_3c053829e52f",
+"name": "Bonjour Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ3Sw-FCIvdTERjV6XVSWEMOQ",
+"ts": "2026-06-16T13:28:59.384992",
+"count": 2,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_0e752724a7e2",
+"name": "Tony Wedding",
+"cats": [
+"photography"
+],
+"place_id": "ChIJBQ_sXdYodTER0s3pMweMGAw",
+"ts": "2026-06-16T13:28:59.742916",
+"count": 376,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f867e5bb6a4c",
+"name": "VERA Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ1Qc9VJgldTERwMhWzZjhPY4",
+"ts": "2026-06-16T13:29:00.132494",
+"count": 5,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_e781d0f5a91b",
+"name": "Orange Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJr4w7Un4hdTERAPCtrK-6_Xo",
+"ts": "2026-06-16T13:29:00.582478",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_0c6ca03ff310",
+"name": "DANNYSTUDIO",
+"cats": [
+"photography"
+],
+"place_id": "ChIJkeTwqZUpdTERXnrtEvJ89Pk",
+"ts": "2026-06-16T13:29:00.921097",
+"count": 2,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_0a26ddbc9f0f",
+"name": "Tapu Bridal",
+"cats": [
+"photography"
+],
+"place_id": "ChIJF-2eNAApdTERvOXWiByQYGE",
+"ts": "2026-06-16T13:29:03.913333",
+"count": 136,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_715f91eddb69",
+"name": "Mxinh Bridal",
+"cats": [
+"photography"
+],
+"place_id": "ChIJU62fs7cudTER8YTajSa0T-o",
+"ts": "2026-06-16T13:29:04.271957",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f715c49a3f14",
+"name": "Hera Studio - Quận 12 - Hồ Chí Minh",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ12NnVt8pdTERYMtAuJOYsQM",
+"ts": "2026-06-16T13:29:04.644546",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_0efef86a78d9",
+"name": "Moza Wedding",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ4c4OutmrNTERW0BQRVAshqE",
+"ts": "2026-06-16T13:29:05.859006",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_056aff919e4f",
+"name": "Lê Thành Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJCeTKFoYpdTERLQu-cVUb2YM",
+"ts": "2026-06-16T13:29:06.173982",
+"count": 24,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_141244c98f1b",
+"name": "PHOTOTELLER",
+"cats": [
+"photography"
+],
+"place_id": "ChIJO9NRvI0pdTERKbzrdUwWR_U",
+"ts": "2026-06-16T13:29:06.462501",
+"count": 636,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_d3009bd6dea3",
+"name": "Jovian Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJWTgMPd0pdTERjvIEmsdWIzs",
+"ts": "2026-06-16T13:29:07.348680",
+"count": 275,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_b703a45d171c",
+"name": "June Bridal",
+"cats": [
+"photography"
+],
+"place_id": "ChIJa7CMAQApdTERes5ewFfwUKs",
+"ts": "2026-06-16T13:29:07.697650",
+"count": 2,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_7f50b8074b30",
+"name": "Dos.prostudio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ4wb-PJQndTERuV7SZNs3KL0",
+"ts": "2026-06-16T13:29:08.543686",
+"count": 50,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_b054bffb1d4d",
+"name": "Phim trường HeBe Wedding House",
+"cats": [
+"photography"
+],
+"place_id": "ChIJP7B8_S4pdTERsz0Xuw1zZdo",
+"ts": "2026-06-16T13:29:08.820217",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_8c216e7f653a",
+"name": "Thiên Nga Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJR-c4nUopdTERpkBmlb8fhgU",
+"ts": "2026-06-16T13:29:09.113285",
+"count": 163,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_1f0a284d385c",
+"name": "Ngan Vo Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJxR2DiaQpdTER3WGlfnZkoVM",
+"ts": "2026-06-16T13:29:09.552475",
+"count": 51,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_96dbd3a44a24",
+"name": "Loca bridal & studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJo4qkIwApdTERyV26DlnLsj0",
+"ts": "2026-06-16T13:29:09.836795",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_3176c64830ae",
+"name": "1989 Bridal",
+"cats": [
+"photography"
+],
+"place_id": "ChIJI5KmCyspdTER4Vs0Do-85FU",
+"ts": "2026-06-16T13:29:10.120461",
+"count": 8,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_9663a6fbfeb6",
+"name": "HappyHouse Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ__8u5egpdTERQzk53AKGLYk",
+"ts": "2026-06-16T13:29:10.472293",
+"count": 17,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_63e4b58fbc42",
+"name": "LYN Wedding",
+"cats": [
+"photography"
+],
+"place_id": "ChIJeU_G26gpdTERjTXp6JaXuKk",
+"ts": "2026-06-16T13:29:10.741620",
+"count": 2114,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c66a4e9fc02d",
+"name": "Phượt Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJJdiZv_YpdTERvLqAA9BTJUc",
+"ts": "2026-06-16T13:29:11.794717",
+"count": 27,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ac6f6168306e",
+"name": "Lamp Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJxfQuV80rdTER77XN54mxawQ",
+"ts": "2026-06-16T13:29:12.717578",
+"count": 221,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_34c9ef1ab79c",
+"name": "Angel Áo cưới",
+"cats": [
+"photography"
+],
+"place_id": "ChIJITV7YgAvdTERPWJa2i0pemY",
+"ts": "2026-06-16T13:29:13.012965",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_e2a5d14c3a88",
+"name": "2Lstudiosaigon",
+"cats": [
+"photography"
+],
+"place_id": "ChIJZTrRGRIpdTERuaPOqkCDDvw",
+"ts": "2026-06-16T13:29:13.369327",
+"count": 25,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ec919a1c2724",
+"name": "Áo cưới Giang Nguyễn",
+"cats": [
+"photography"
+],
+"place_id": "ChIJdwB1-VAqdTERCj2e8R8J8uk",
+"ts": "2026-06-16T13:29:13.760563",
+"count": 3,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_9489d4336371",
+"name": "Quayphimchuphinhcuoinet",
+"cats": [
+"photography"
+],
+"place_id": "ChIJZz6gL3YpdTERyqglaeD2WJQ",
+"ts": "2026-06-16T13:29:15.136968",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_59a6aba6ce72",
+"name": "Studio BB Kỳ Hân",
+"cats": [
+"photography"
+],
+"place_id": "ChIJk93HbDctdTERpcHBNLYGt5M",
+"ts": "2026-06-16T13:29:15.487895",
+"count": 105,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_0a8b5d2212d9",
+"name": "Cachi Bridal",
+"cats": [
+"photography"
+],
+"place_id": "ChIJTQIGOwApdTERnCPMCtmJrxE",
+"ts": "2026-06-16T13:29:17.446566",
+"count": 82,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_d8fc3249b1d8",
+"name": "TINA STUDIO",
+"cats": [
+"photography"
+],
+"place_id": "ChIJLclKewDbdDEROx2ee5SMnac",
+"ts": "2026-06-16T13:29:17.834061",
+"count": 13,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_b1d0ab0e8dc6",
+"name": "Luana Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJVUQHb_0rdTER5y6ciiTnuuU",
+"ts": "2026-06-16T13:29:18.645473",
+"count": 33,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_95b968a18c45",
+"name": "Anh Hiếu Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJfVzy7NgodTERAIx9zU8ydBQ",
+"ts": "2026-06-16T13:29:19.022398",
+"count": 108,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_27c6baabad7f",
+"name": "Alohastudio - Chụp Hình Cưới Đẹp Giá Rẻ Tp.HCM",
+"cats": [
+"photography"
+],
+"place_id": "ChIJ-yNmi9godTERKrlN5c7nZ9o",
+"ts": "2026-06-16T13:29:19.940499",
+"count": 1087,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ad0ad3be0549",
+"name": "HANR Studio",
+"cats": [
+"photography"
+],
+"place_id": "ChIJaWubewAvdTER4EobwlOgmmo",
+"ts": "2026-06-16T13:29:20.307892",
+"count": 61,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_4aecf734d43e",
+"name": "Trung tâm Hội nghị Asiana Plaza Bình Thạnh",
+"cats": [
+"venue"
+],
+"place_id": "ChIJLbA34MQodTERj4i9sBpI_yc",
+"ts": "2026-11-08T04:03:30.905112",
+"count": 2648,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_dd2bb6a21eae",
+"name": "Trung tâm hội nghị Asiana Plaza Tân Phú",
+"cats": [
+"venue"
+],
+"place_id": "ChIJGfyIWJ0tdTERiKEMSqh2LRc",
+"ts": "2026-11-08T04:03:31.351406",
+"count": 1331,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f8b40ba4ddef",
+"name": "Thiskyhall",
+"cats": [
+"venue"
+],
+"place_id": "ChIJYXnCmV8vdTERiGx61oHIb1E",
+"ts": "2026-11-08T10:51:16.836956",
+"count": null,
+"manual": true,
+"pr83": false
+},
+{
+"id": "marry_c526c6ff5908",
+"name": "HIDDEN MANSIONS SAIGON RESORT",
+"cats": [
+"venue"
+],
+"place_id": "ChIJhaUMHdApdTERtqj6HbiiqbE",
+"ts": "2026-11-08T04:03:32.068300",
+"count": 358,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_65bc269766e2",
+"name": "Renaissance Riverside Saigon Hotel",
+"cats": [
+"venue"
+],
+"place_id": "ChIJhVoKJiQvdTERgTDgHl_sSUs",
+"ts": "2026-11-08T04:03:32.492576",
+"count": 4149,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f2be7805cc88",
+"name": "Le Méridien Saigon",
+"cats": [
+"venue"
+],
+"place_id": "ChIJwbgTGE8vdTERz3h0y18gFm0",
+"ts": "2026-11-08T04:03:32.792126",
+"count": 5015,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_d6024f93961f",
+"name": "Holiday Inn & Suites Saigon Airport",
+"cats": [
+"venue"
+],
+"place_id": "ChIJ_eaM5x4pdTERlegTAEoaBXs",
+"ts": "2026-11-08T04:03:33.158611",
+"count": 2127,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_afc1ada354c8",
+"name": "Trung Tâm Hội Nghị Yến Tiệc Đại Hỷ Garden",
+"cats": [
+"venue"
+],
+"place_id": "ChIJRxuE7VQsdTER52qB-7a4xRA",
+"ts": "2026-11-08T04:03:33.476320",
+"count": 343,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_eff1bc92ae84",
+"name": "Trung Tâm Hội Nghị Yến Tiệc Đại Hỷ Palace",
+"cats": [
+"venue"
+],
+"place_id": "ChIJG_MvX9ctdTERPAhLgyUmj8w",
+"ts": "2026-11-08T04:03:33.767748",
+"count": 1221,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ebccd33f7b98",
+"name": "Khách sạn LOTTE Sài Gòn",
+"cats": [
+"venue"
+],
+"place_id": "ChIJq6tuBUQvdTERPrUo2ili-N4",
+"ts": "2026-11-08T04:03:34.784393",
+"count": 6449,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_183afd120516",
+"name": "Hotel Grand Saigon",
+"cats": [
+"venue"
+],
+"place_id": "ChIJf1gziDwvdTERWyvojyS-heg",
+"ts": "2026-11-08T04:03:35.091603",
+"count": 4170,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_436694ea5dfa",
+"name": "Novotel Saigon Centre",
+"cats": [
+"venue"
+],
+"place_id": "ChIJv3u21EkvdTERd8RlwzZlJMI",
+"ts": "2026-11-08T04:03:35.437770",
+"count": 3889,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_fdd53a4652be",
+"name": "Nhà hàng tiệc cưới hội nghị Dìn Ký Center",
+"cats": [
+"venue"
+],
+"place_id": "ChIJB4N66_QpdTER9vKJiuQLyO0",
+"ts": "2026-11-08T04:03:36.119690",
+"count": 97,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_57790d6f6f08",
+"name": "Capella Gallery Hall",
+"cats": [
+"venue"
+],
+"place_id": "ChIJCyB5bCYvdTERnN4DHHXehT4",
+"ts": "2026-11-08T04:03:36.458972",
+"count": 2543,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_d2aaaca36256",
+"name": "Khách sạn Equatorial Thành phố Hồ Chí Minh",
+"cats": [
+"venue"
+],
+"place_id": "ChIJBUZZeh4vdTERjcZTglYc-B4",
+"ts": "2026-11-08T04:03:37.123600",
+"count": 5266,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_2a560ca1cfbb",
+"name": "Thien Hong Hotel",
+"cats": [
+"venue"
+],
+"place_id": "ChIJfc7H4_kudTERLkDwasA8UeI",
+"ts": "2026-11-08T04:03:38.133217",
+"count": 563,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_7e7e52545b79",
+"name": "Trung Tâm Hội Nghị - Tiệc Cưới Hoàng Long",
+"cats": [
+"venue"
+],
+"place_id": "ChIJSQw5ZvEpdTERzb0ESMqf3BY",
+"ts": "2026-11-08T04:03:38.463489",
+"count": 172,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c6f3c54184ac",
+"name": "Chloe Gallery",
+"cats": [
+"venue"
+],
+"place_id": "ChIJNx6XKbsvdTER_G0aMECttLA",
+"ts": "2026-11-08T04:03:38.764943",
+"count": 832,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_6dbdd79310d1",
+"name": "Khách sạn Caravelle Saigon",
+"cats": [
+"venue"
+],
+"place_id": "ChIJc_9VekYvdTERtvfHUbJKWBA",
+"ts": "2026-11-08T04:03:39.112719",
+"count": 4431,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_e7fbbbd2b1fb",
+"name": "Khách sạn Sofitel Saigon Plaza",
+"cats": [
+"venue"
+],
+"place_id": "ChIJpV-7MUovdTERS3tmu3Rt9kw",
+"ts": "2026-11-08T04:03:39.526644",
+"count": 8143,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_9822e898afb9",
+"name": "Trung Tâm Hội nghị - Tiệc Cưới Long Biên Palace - Tân Sơn Nhất Golf",
+"cats": [
+"venue"
+],
+"place_id": "ChIJ3dTKg3MpdTERsmpW---TIBs",
+"ts": "2026-11-08T04:03:39.947156",
+"count": 1345,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_6dcedbda3286",
+"name": "Claris Palace",
+"cats": [
+"venue"
+],
+"place_id": "ChIJmce5MXQodTERclpuVo3Q1E8",
+"ts": "2026-11-08T04:03:40.249657",
+"count": 1868,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c56947feceb7",
+"name": "Sheraton Saigon Hotel & Towers",
+"cats": [
+"venue"
+],
+"place_id": "ChIJA0evAkgvdTERLNUql8b4ipU",
+"ts": "2026-11-08T04:03:40.927712",
+"count": 9653,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f558977038ec",
+"name": "Trung tâm Hội Nghị - Tiệc Cưới Hoàng Long",
+"cats": [
+"venue"
+],
+"place_id": "ChIJu2QAa0svdTERhw2Ouao8CDw",
+"ts": "2026-11-08T04:03:41.136835",
+"count": 92,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_6c54b78133f0",
+"name": "Capella Park View",
+"cats": [
+"venue"
+],
+"place_id": "ChIJiVng3NgodTER9tZF5dR6X0M",
+"ts": "2026-11-08T04:03:41.494648",
+"count": 3827,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_e177e0674ab8",
+"name": "Hotel Nikko Saigon",
+"cats": [
+"venue"
+],
+"place_id": "ChIJF9cbwBsvdTERxQn29H80jjU",
+"ts": "2026-11-08T04:03:42.246805",
+"count": 10028,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_965830c4dd2c",
+"name": "Riverside Palace",
+"cats": [
+"venue"
+],
+"place_id": "ChIJDbU1yQ8vdTERYRUNO-CLG8E",
+"ts": "2026-11-08T04:03:42.510485",
+"count": 2141,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_9e065f2d8fe2",
+"name": "Trung Tâm Yến Tiệc Và Hội Nghị Aqua Palace",
+"cats": [
+"venue"
+],
+"place_id": "ChIJv9Qo1ewodTERZHA-i8p9zbc",
+"ts": "2026-11-08T04:03:42.788700",
+"count": 1776,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_7875b362b28a",
+"name": "Trung Tâm Tiệc Cưới Hội Nghị Melisa Center",
+"cats": [
+"venue"
+],
+"place_id": "ChIJn2BYZq8udTERN0JNJ48Dlx4",
+"ts": "2026-11-08T04:03:43.085039",
+"count": 3358,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_bff6e0cdfd2d",
+"name": "TRUNG TÂM HỘI NGHỊ WHITE PALACE",
+"cats": [
+"venue"
+],
+"place_id": "ChIJPaYDQigpdTER7RvTfnEiTR4",
+"ts": "2026-11-08T04:03:43.393400",
+"count": 4894,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_e4172918655d",
+"name": "Oscar Saigon Hotel",
+"cats": [
+"venue"
+],
+"place_id": "ChIJFffW-kYvdTER43H2mD8lla4",
+"ts": "2026-11-08T04:03:44.645979",
+"count": 1224,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_5ec257b82f96",
+"name": "Nhà hàng tiệc cưới Bạch Kim",
+"cats": [
+"venue"
+],
+"place_id": "ChIJ4Z9iwrEudTERr50usO8Afgs",
+"ts": "2026-11-08T04:03:44.947415",
+"count": 2289,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_33e4ecd3a090",
+"name": "Trung tâm hội nghị tiệc cưới Diamond Place",
+"cats": [
+"venue"
+],
+"place_id": "ChIJMaRAECgpdTERKoV7-C9X838",
+"ts": "2026-11-08T04:03:46.176265",
+"count": 3761,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_36b9b78e9a2e",
+"name": "Trung tâm hội nghị tiệc cưới 272",
+"cats": [
+"venue"
+],
+"place_id": "ChIJH5bA_CUvdTER8w-eVVHIqB4",
+"ts": "2026-11-08T04:03:46.424211",
+"count": 1635,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_fc36301c509f",
+"name": "Eden Saigon Hotel",
+"cats": [
+"venue"
+],
+"place_id": "ChIJH0A7aA8vdTERh5rL_W08Gu8",
+"ts": "2026-11-08T04:03:48.226072",
+"count": 1107,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_90e9d1ebcbed",
+"name": "Elisa Floating Restaurant",
+"cats": [
+"venue"
+],
+"place_id": "ChIJO3Xob0IvdTERnLnuIUQ66fw",
+"ts": "2026-11-08T04:03:48.474916",
+"count": 1986,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_997bb9f34eaf",
+"name": "Trung tâm tiệc cưới và hội nghị The White House Wedding",
+"cats": [
+"venue"
+],
+"place_id": "ChIJT2RqfCEqdTERLE_u5ug9-gw",
+"ts": "2026-11-08T04:03:50.070530",
+"count": 801,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_a33c892989a2",
+"name": "Pullman Saigon Centre",
+"cats": [
+"venue"
+],
+"place_id": "ChIJk_3V7hYvdTERiYmhSgvmA88",
+"ts": "2026-11-08T04:03:51.685960",
+"count": 7032,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_b5cffe810b8c",
+"name": "Nhà hàng hoa viên Nam Bộ",
+"cats": [
+"venue"
+],
+"place_id": "ChIJc5lfnJ8udTEREa8GivnG6mU",
+"ts": "2026-11-08T04:03:52.049118",
+"count": 1751,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_d6381e903067",
+"name": "Royal Palace Q12",
+"cats": [
+"venue"
+],
+"place_id": "ChIJOXEn8NArdTER9TL2Jo5zofA",
+"ts": "2026-11-08T04:03:52.277697",
+"count": 1291,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c96f4799166f",
+"name": "New World Saigon Hotel",
+"cats": [
+"venue"
+],
+"place_id": "ChIJZfXdjj4vdTER1-XCkv7ltio",
+"ts": "2026-11-08T04:03:52.573226",
+"count": 11609,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_7e0c49db5e78",
+"name": "Khách san Mai House Saigon",
+"cats": [
+"venue"
+],
+"place_id": "ChIJZfg1SZwvdTERDnigNkg9xaI",
+"ts": "2026-11-08T04:03:53.543157",
+"count": 3666,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_597d56365622",
+"name": "Nhà hàng tiệc cưới Tân Sơn Nhất",
+"cats": [
+"venue"
+],
+"place_id": "ChIJq91K8SgpdTERaBmYaH2JB-w",
+"ts": "2026-11-08T04:03:54.424928",
+"count": 715,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_604e8973f53e",
+"name": "Park Hyatt Saigon",
+"cats": [
+"venue"
+],
+"place_id": "ChIJN6yML0YvdTERu3qIwePETD0",
+"ts": "2026-11-08T04:03:54.688138",
+"count": 4599,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_b92e8a86175d",
+"name": "Khu du lịch Bình Quới 2",
+"cats": [
+"venue"
+],
+"place_id": "ChIJV9-d4jImdTERaWRbHxBsaWo",
+"ts": "2026-11-08T04:03:55.261062",
+"count": 273,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_6a6dc5ec7c7e",
+"name": "Trung Tâm Tân Sơn Nhất Pavillon",
+"cats": [
+"venue"
+],
+"place_id": "ChIJP7yPtigpdTERIIRwhlbqi8U",
+"ts": "2026-11-08T04:03:55.800165",
+"count": 1394,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ee9f9a427838",
+"name": "Trung tâm Hội Nghị - Tiệc Cưới Tân Sơn Nhất Pavillon",
+"cats": [
+"venue"
+],
+"place_id": "ChIJP7yPtigpdTERIIRwhlbqi8U",
+"ts": "2026-11-08T04:03:56.061913",
+"count": 1394,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_9fcd97672a4f",
+"name": "Khu du lịch Văn Thánh",
+"cats": [
+"venue"
+],
+"place_id": "ChIJV8BHDV0pdTERvGqxdSId_50",
+"ts": "2026-11-08T04:03:56.374947",
+"count": 5321,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_34823351990f",
+"name": "Trung tâm Hội nghị 108 Nguyễn Du",
+"cats": [
+"venue"
+],
+"place_id": "ChIJexuTDjkvdTER-dIut0Bc-z4",
+"ts": "2026-11-08T04:03:56.634019",
+"count": 237,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_6920b64d9fab",
+"name": "Trung tâm hội nghị và tiệc cưới Khách sạn Đệ Nhất",
+"cats": [
+"venue"
+],
+"place_id": "ChIJU5lx2jMpdTERWEbW1k_KkQQ",
+"ts": "2026-11-08T04:03:56.998911",
+"count": 19,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_2473694e23e7",
+"name": "Trung tâm Hội nghị & Tiệc cưới Metropole",
+"cats": [
+"venue"
+],
+"place_id": "ChIJK_GoUy8vdTER7o7W3nSgZiE",
+"ts": "2026-11-08T04:03:57.244617",
+"count": 2269,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_47d743e7079b",
+"name": "Rex Hotel Saigon",
+"cats": [
+"venue"
+],
+"place_id": "ChIJ25VPnkcvdTERSLUZtdUn4co",
+"ts": "2026-11-08T04:03:57.562858",
+"count": 8677,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f31a1b58729c",
+"name": "Nhà hàng tiệc cưới Ngọc Trâm",
+"cats": [
+"venue"
+],
+"place_id": "ChIJe5lQIo8pdTERLf2iRkHsFm4",
+"ts": "2026-11-08T04:03:57.864831",
+"count": 1233,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ae56859283dd",
+"name": "Diamond Place II",
+"cats": [
+"venue"
+],
+"place_id": "ChIJPwYkCLIudTERm7PRQ4NSBR4",
+"ts": "2026-11-08T04:03:58.327565",
+"count": 2435,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_fac1da067090",
+"name": "Nhà hàng Ái Huê",
+"cats": [
+"venue"
+],
+"place_id": "ChIJaW-KVvcudTERPQNq-A0a5bk",
+"ts": "2026-11-08T04:03:58.588917",
+"count": 3545,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_a4902dadfe30",
+"name": "Khách Sạn Liberty Central Saigon Citypoint",
+"cats": [
+"venue"
+],
+"place_id": "ChIJsYxZbkcvdTERYJLrWBMLcnY",
+"ts": "2026-11-08T04:03:58.917770",
+"count": 3712,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_cfe1a75eee47",
+"name": "Nhà hàng tiệc cưới Đông Phương",
+"cats": [
+"venue"
+],
+"place_id": "ChIJMXO9STEpdTERlTxWAcmizE8",
+"ts": "2026-11-08T04:03:59.534033",
+"count": 64,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_6babc2dabab7",
+"name": "Trung Tâm Hội Nghị & Tiệc Cưới GALA",
+"cats": [
+"venue"
+],
+"place_id": "ChIJ2U7dJDEpdTERJk3dmKSAllM",
+"ts": "2026-11-08T04:03:59.789680",
+"count": 1954,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_8a598c176efc",
+"name": "MerPerle Crystal Palace Hotel - Convention",
+"cats": [
+"venue"
+],
+"place_id": "ChIJyXPPdIovdTERUPZkDbAzMao",
+"ts": "2026-11-08T04:04:00.284216",
+"count": 2202,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c95e4d2a1bd3",
+"name": "Nhà hàng Phúc An Khang",
+"cats": [
+"venue"
+],
+"place_id": "ChIJU1z90B4vdTER2kOVDOBJ7Tc",
+"ts": "2026-11-08T04:04:00.565643",
+"count": 2713,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_bf43aee36047",
+"name": "Callary Wedding & Events",
+"cats": [
+"venue"
+],
+"place_id": "ChIJ24jarCgvdTERx1cIkILHX28",
+"ts": "2026-11-08T04:04:00.783929",
+"count": 2046,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_4cce3050e39c",
+"name": "September Studio",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJBaZuDCovdTERLEsXy5yai5g",
+"ts": "2026-11-11T13:08:06.084677",
+"count": 374,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_0771cdea079b",
+"name": "Kingbridal",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJ9wLkygQqdTERFffmxyDUW00",
+"ts": "2026-11-09T14:29:15.960926",
+"count": 29,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_7995ddfb23d1",
+"name": "Olivia Ng Bridal",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJ6cmw6c4udTER2VMHMrEMX84",
+"ts": "2026-11-11T13:08:06.487774",
+"count": 42,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_22bc39c4b981",
+"name": "Min Bridal",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJawi4do4pdTERbKoePB-ydpI",
+"ts": "2026-11-11T13:08:06.901676",
+"count": 59,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_cb950b2b749a",
+"name": "Min Studio",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJB7zpzXUpdTERIzn4dIfKJ1E",
+"ts": "2026-11-11T13:08:07.346682",
+"count": 2,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_1d77739dc6b8",
+"name": "Shila Bridal",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJjT3OJaUpdTERofMuYfX-4-A",
+"ts": "2026-11-11T13:08:07.757683",
+"count": 26,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_66bafdd4f505",
+"name": "THẢO NGUYÊN WEDDING",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJxyCpc0kvdTERaSAz3XB67Wg",
+"ts": "2026-11-09T14:29:25.567264",
+"count": 7,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_101f24365b03",
+"name": "Marymy",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJGeA55OEvdTERHN7xHV0ikM8",
+"ts": "2026-11-09T14:29:26.948415",
+"count": 216,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f0db05ad2243",
+"name": "Helen's Bridal",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJzX9kxVUpdTERYIZlW5drbog",
+"ts": "2026-11-11T13:08:08.194319",
+"count": 4144,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_9dcbcd58946a",
+"name": "Áo Cưới Mẫn Nhi",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJ78KD2ncvdTERmZljGiLHuuM",
+"ts": "2026-11-09T14:29:29.760748",
+"count": 15,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_9ce4d514cdca",
+"name": "Áo dài Hạnh",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJv8UUAAgpdTERzoWvkTZFXqU",
+"ts": "2026-11-09T14:29:32.802045",
+"count": 136,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_0050d6b64f35",
+"name": "Áo cưới Paris",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJZ1m36VcodTER2aSGgIesI_U",
+"ts": "2026-11-09T14:29:35.327198",
+"count": 5,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_a7faac51a257",
+"name": "Studio áo cưới Nguyên Hồng",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJg3NhJegodTER4jasdRfkZ1k",
+"ts": "2026-11-09T14:29:35.746498",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_9e0121202131",
+"name": "Áo cưới Mẫn Nhi",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJ78KD2ncvdTERmZljGiLHuuM",
+"ts": "2026-11-09T14:29:37.389587",
+"count": 15,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_397a0fda8af0",
+"name": "IDY Shoes",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJi6be2M8odTERk78HRTSTYLE",
+"ts": "2026-11-09T14:29:39.121520",
+"count": 321,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_95b82fbca031",
+"name": "Em Bridal",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJP5IO7ZIvdTERUl9MtKXsg88",
+"ts": "2026-11-11T13:08:08.593685",
+"count": 24,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_426dd7e11911",
+"name": "An Lee Wedding",
+"cats": [
+"wedding_attire",
+"wedding_planner"
+],
+"place_id": "ChIJjTuTvr4ndTERMNZWDH2Ynpk",
+"ts": "2026-11-09T14:29:42.443642",
+"count": 2,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_3d6c9a90df88",
+"name": "Veston Sơn",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJ98TqmNIodTERffkBBugB4fg",
+"ts": "2026-11-09T14:29:44.846607",
+"count": 12,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_b2f95eecfbc2",
+"name": "Studio Quốc Huy",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJQ2Sd2dUodTER6diFHssINsw",
+"ts": "2026-11-09T14:29:46.154861",
+"count": 11,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_c75cc1e0bf8e",
+"name": "Áo cưới Minh Khoa",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJGy3X7jgvdTERZX-pzukpE7w",
+"ts": "2026-11-09T14:29:46.533405",
+"count": 3,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_1a2eaaafe8c0",
+"name": "Khải Vinh Bridal",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJ9-iZtMMpdTERHFrvqfHMYwc",
+"ts": "2026-11-09T14:29:47.718987",
+"count": 65,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f57e65958a55",
+"name": "BLUSH Corner Bridal",
+"cats": [
+"wedding_attire"
+],
+"place_id": "ChIJJf8OOwApdTERuxt-2A2RMS4",
+"ts": "2026-11-09T14:29:49.961787",
+"count": 6,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_db1b397c6543",
+"name": "Công ty TNHH TM DV Nam Khôi",
+"cats": [
+"wedding_car"
+],
+"place_id": "ChIJme7BEosodTERnHyW1d7keLU",
+"ts": "2026-11-09T14:34:16.175013",
+"count": 5,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_ec0eb187b3fd",
+"name": "Công ty cổ phần FIDITOUR",
+"cats": [
+"wedding_car"
+],
+"place_id": "ChIJ25gu080pdTERr2EjV2UU_N8",
+"ts": "2026-11-11T13:08:22.633793",
+"count": 71,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_7d37a6407449",
+"name": "Cty TMDV XD MAI PHƯƠNG",
+"cats": [
+"wedding_car"
+],
+"place_id": "ChIJ54gyuyopdTERNO9frk7CASw",
+"ts": "2026-11-09T14:34:24.753348",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_eb981f215b0c",
+"name": "MANA HOUSE",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJWTeXv8YvdTERM-KOafgBmaQ",
+"ts": "2026-11-09T14:32:57.154662",
+"count": 4,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_5e46f4f8b406",
+"name": "Chocolate Graphics",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJoVRJUtErdTERq5GvKM6TLjw",
+"ts": "2026-11-11T13:08:17.364571",
+"count": 52,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_f246ba4d794c",
+"name": "Fairy Corner",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJadJ1UsMudTERRzNF9i8KlCs",
+"ts": "2026-11-11T13:08:17.781530",
+"count": 57,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_898934ddb738",
+"name": "L'indochine chocolate",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJjzi5oHZzdTERfK7gQ2ifhn8",
+"ts": "2026-11-11T13:08:18.490012",
+"count": 5,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_dfd0086a35aa",
+"name": "Khung Xinh - Nice Frames",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJwcSI4Q8vdTERA6IFUiWfvW0",
+"ts": "2026-11-11T13:08:18.875576",
+"count": 105,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_b5ea7df12e12",
+"name": "Shop Tình Nhân",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJJcpIHCQvdTER0qjb35O75aI",
+"ts": "2026-11-11T13:08:19.250557",
+"count": 5,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_cf181dccb200",
+"name": "Tiệm Bánh Family",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJC34monQvdTER1WgywgG6Eq0",
+"ts": "2026-11-11T13:08:19.714002",
+"count": 1,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_64d17055f76e",
+"name": "La Petite Epicerie Saigon",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJm2jnlUbfdDER-LxA02bOZWc",
+"ts": "2026-11-11T13:08:20.057119",
+"count": null,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_419401266c3c",
+"name": "Đồng Hồ Hải Triều",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJkz6gaM0odTERgvXTbsiM5OA",
+"ts": "2026-11-11T13:08:20.742316",
+"count": 1387,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_9afa6d62e9a7",
+"name": "Mây Tre Decor",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJ7Xr_sOUudTER_OIiMtXmJPQ",
+"ts": "2026-11-11T13:08:21.124696",
+"count": 100,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_e50c66b134c7",
+"name": "Color life - Tranh ký tên",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJ9xpoSdoodTERrMu-VKqTeS4",
+"ts": "2026-11-09T14:33:22.037690",
+"count": null,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_336491a25ca7",
+"name": "7 Gift Shop",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJj4JiMPEudTERSLTXHj2Xkdo",
+"ts": "2026-11-09T14:33:25.024549",
+"count": 29,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_73f9caa037aa",
+"name": "Ideas1000 Factory",
+"cats": [
+"wedding_gift"
+],
+"place_id": "ChIJGTZbUEAvdTERKqKIdUZVk4k",
+"ts": "2026-11-09T14:33:26.825955",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_4b64f33297b8",
+"name": "KYMDAN",
+"cats": [
+"wedding_interior"
+],
+"place_id": "ChIJeyCLQJUudTERSze6PabISmo",
+"ts": "2026-11-09T14:31:19.234818",
+"count": 79,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_5ab1e709486f",
+"name": "Noi That Passion",
+"cats": [
+"wedding_interior"
+],
+"place_id": "ChIJj-nIYbIpdTERDpQQrxpVl1E",
+"ts": "2026-11-09T14:31:25.565493",
+"count": 23,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_a8277733eaef",
+"name": "Nệm Liên Á",
+"cats": [
+"wedding_interior"
+],
+"place_id": "ChIJX5p0FYEudTERpjsAjwWTGoc",
+"ts": "2026-11-09T14:31:26.361858",
+"count": 96,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_5d88b5da97fc",
+"name": "Công Ty TNHH Sản Xuất Thương Mại Thanh Thủy",
+"cats": [
+"wedding_interior"
+],
+"place_id": "ChIJF1XtCKzUdDERi0j3EQKlceE",
+"ts": "2026-11-09T14:31:27.960463",
+"count": 6,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_2cabc0e5d44f",
+"name": "Nội Thất One",
+"cats": [
+"wedding_interior"
+],
+"place_id": "ChIJaYCLDSotdTERCldbRXY3UJw",
+"ts": "2026-11-11T13:08:12.739783",
+"count": 1,
+"manual": false,
+"pr83": true
+},
+{
+"id": "marry_d4c94b933238",
+"name": "Chăn Drap Gối Nệm cao cấp VIVIAN",
+"cats": [
+"wedding_interior"
+],
+"place_id": "ChIJc83FCkDRdDERS4gXeDY1YAw",
+"ts": "2026-11-09T14:31:30.678361",
+"count": 7,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_292493a763b6",
+"name": "Tierra Diamond",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJWTmhRjcpdTERl4ctFGSZ9dY",
+"ts": "2026-11-09T14:33:35.932555",
+"count": 269,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_816caff1b505",
+"name": "Công ty Cổ phần Vàng Bạc Đá Quý Lộc Phúc",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJVW68Wc0odTERHhafHYwg66I",
+"ts": "2026-11-09T14:33:38.735140",
+"count": 66,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_978cde35bd99",
+"name": "Nhẫn Cưới Kim Ngọc Thủy",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJBcubZAQvdTERLFXHoJAlVDE",
+"ts": "2026-11-09T14:33:39.166738",
+"count": 1710,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_5dfa2f490481",
+"name": "Vàng bạc đá quý Phú Nhuận - PNJ",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJvZurAdoodTER9A0q4elxg7U",
+"ts": "2026-11-09T14:33:39.683225",
+"count": 297,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_0853c9efcd63",
+"name": "Thế giới Kim Cương",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJN0vNyoopdTERJ1PGQaU_7xY",
+"ts": "2026-11-09T14:33:40.255998",
+"count": 18,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_23d880569aeb",
+"name": "Trang sức đá SNJ",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJsWxwNyQpdTER7ebINSKnfJk",
+"ts": "2026-11-09T14:33:43.268677",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_f8401af718cb",
+"name": "Thế giới trang sức",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJZX3FKAUvdTERmNmddqwcXxQ",
+"ts": "2026-11-09T14:33:45.282728",
+"count": 117,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_03342a8f6451",
+"name": "Anh Phương Jewelry",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJCcLpoB8vdTERMDQg216xsNg",
+"ts": "2026-11-09T14:33:47.147672",
+"count": 334,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_86e8d45060f8",
+"name": "Nhẫn Vàng Kim Thành Bà Chiểu",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJycGyto4udTERbCtI1E9vhTI",
+"ts": "2026-11-09T14:33:52.303541",
+"count": 1,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_fedf9fad5774",
+"name": "Trang sức Opal",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJpebcKz4vdTERqYOefH_4qmQ",
+"ts": "2026-11-09T14:33:55.450559",
+"count": 44,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_d8ad8f8fd723",
+"name": "Win Win Shop88",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJydlQMPEudTER6bv8Dkd-9RA",
+"ts": "2026-11-09T14:34:05.806535",
+"count": 83,
+"manual": false,
+"pr83": false
+},
+{
+"id": "marry_a0e1e9a99dd8",
+"name": "Vĩnh Cara - Diamond Jewelry",
+"cats": [
+"wedding_ring"
+],
+"place_id": "ChIJD9l0Uk0vdTER_IBYGbcbhhc",
+"ts": "2026-11-11T13:08:22.028925",
+"count": 149,
+"manual": false,
+"pr83": true
+}
+]
+}
