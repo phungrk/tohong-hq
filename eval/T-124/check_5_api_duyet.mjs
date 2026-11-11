@@ -9,6 +9,8 @@
 //         note tối đa 300 ký tự (400 note_too_long). decision/action lạ -> 400 invalid_decision. id không có trong báo cáo -> 404 not_found. Dòng đã có override (đã áp ở lần enrich trước) -> 409 already_overridden.
 //  review lưu: {state:"pending", decision, action, place_id|maps_link, reason (khác rỗng; Approve tự sinh), reviewed_by (= user id admin, lấy từ token, KHÔNG từ thân yêu cầu), reviewed_at (ISO)}. Mỗi vendor một review, PUT lại thì thay.
 //  DELETE <id>/review -> 200 {review:null} (rút lại; idempotent).   GET export -> {count, entries:[{vendor_id, action, place_id|maps_link, reason, reviewed_by, reviewed_at}]} chỉ review đang chờ, sắp theo vendor_id; KHÔNG có approved_by/decision.
+//  Vòng đời: review nằm trong R2 của dòng ĐÃ có override (đã áp) hoặc của id không còn trong báo cáo được coi là đã xong: GET danh sách trả review:null cho dòng đó, export bỏ ra, GET không ghi R2.
+//  PUT và DELETE trên dòng có override -> 409 already_overridden. Ứng viên bị từ chối vì ngoài TP.HCM (google.reject_reason="out_of_province", INV-016) -> approvable=false, Approve -> 409 not_approvable.
 //  Mọi PUT/DELETE ghi nhật ký admin (GET /api/admin/audit?action=vendor_enrich.review | vendor_enrich.review_withdraw, admin_id = người duyệt, target_id = id vendor).
 //  Chỉ được ghi vào khoá R2 có "vendor_enrich_reviews" và nhật ký audit; KHÔNG ghi data/admin/vendor_overrides.json (overlay giá/ẩn) và không thêm khoá nào khác.
 import fs from "node:fs";
@@ -28,6 +30,23 @@ const bare = rows.find((r) => !r.google && !r.override);
 if (appr.length < 6 || !nonAppr || !withG) { console.log("FAIL báo cáo thiếu ca để đo (cần >= 6 dòng approvable, 1 dòng không approvable)"); process.exit(1); }
 const bucket = new MemoryBucket();
 const env = makeEnv(bucket);
+const oop = rows.find((r) => r.google && r.google.reject_reason === "out_of_province" && !r.override);
+const KEY = "data/admin/vendor_enrich_reviews.json";
+const stale = { state: "pending", decision: "approve", action: "accept_place", place_id: "ChIJstaleXXXXXXXXXXXXXXXX", reason: "cũ", reviewed_by: "user_admin", reviewed_at: "2026-11-01T00:00:00Z" };
+const seeded = { ...(ovr ? { [ovr.id]: stale } : {}), marry_000000000001: stale };
+bucket.data.set(KEY, JSON.stringify({ vendors: seeded }));
+{
+  const putsBefore = bucket.putLog.length;
+  const l = await asAdmin(env, "GET", `/api/admin/vendor-enrich?q=${encodeURIComponent(ovr ? ovr.name : "a")}&limit=100`);
+  const e = await asAdmin(env, "GET", "/api/admin/vendor-enrich/export");
+  if (ovr) R.check("dòng đã có override mà R2 còn review: danh sách trả review:null", l.json?.rows?.find((x) => x.id === ovr.id)?.review === null, l.json?.rows?.find((x) => x.id === ovr.id)?.review);
+  R.check("export bỏ review của dòng đã có override và của id không còn trong báo cáo", e.json?.count === 0 && e.json.entries.length === 0, e.json);
+  R.check("GET không ghi R2", bucket.putLog.length === putsBefore, bucket.putLog.slice(putsBefore));
+  if (ovr) { const d = await asAdmin(env, "DELETE", `/api/admin/vendor-enrich/${ovr.id}/review`); R.check("DELETE trên dòng có override -> 409 already_overridden", d.status === 409 && d.json?.error === "already_overridden", [d.status, d.json]); }
+  if (oop) { const a = await asAdmin(env, "PUT", `/api/admin/vendor-enrich/${oop.id}/review`, { decision: "approve" }); R.check("Approve ứng viên ngoài TP.HCM -> 409 not_approvable, approvable=false", a.status === 409 && a.json?.error === "not_approvable" && oop.approvable === false, [a.status, a.json, oop.approvable]); }
+  else R.check("báo cáo có ít nhất một ứng viên out_of_province để đo INV-016", false);
+  bucket.data.delete(KEY); bucket.putLog.length = 0;
+}
 const URL_ = (id, s = "review") => `/api/admin/vendor-enrich/${id}/${s}`;
 const before = JSON.stringify(await asAdmin(env, "GET", "/api/admin/vendor-enrich?limit=100").then((x) => x.json.summary));
 const OK_PID = "ChIJ_Q8PLiQvdTERNk66UVRKf8U";

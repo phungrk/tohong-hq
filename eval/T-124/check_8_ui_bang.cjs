@@ -4,11 +4,14 @@
  * Chạy:   cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-124/check_8_ui_bang.cjs --repo . [--shots DIR] [--dist DIR]
  * Tự `vite build` ra thư mục tạm (VITE_ADMIN_DEV_TOKEN=dev:admin, VITE_API_BASE=http://api.test, không Clerk), tự phục vụ bản build, giả API
  * (dữ liệu = 876 vendor trong eval/T-124/snapshot.json, nhóm theo hàm chuẩn). Mọi request ra ngoài khác bị chặn và ghi lại (không Google). Không đọc mã nguồn.
- * Hợp đồng giao diện (spec products/T-124-bang-enrich-vendor.md, Hành vi 6-9):
+ * Hợp đồng giao diện (spec products/T-124-bang-enrich-vendor.md, Hành vi 7; dữ liệu API Hành vi 3, 4):
  *  - Admin > tab "Dữ liệu vendor" > nút "Enrich Google Maps" mở bảng (table) tên "Bảng enrich vendor"; nút "Danh sách vendor" trở về danh sách cũ.
  *  - Cột (columnheader): "#", "Vendor", "Thông tin trên marry.vn", "Sau enrich Google Maps", "Status", "Action".
  *  - 5 chip (button, aria-pressed): "Tất cả · 876", "Enrich 100% · 98", "Chưa có ảnh Google · 680", "Tên hơi giống · 244", "Địa chỉ khác marry · 107" (số lấy từ summary của API, không đổi khi lọc).
  *  - Ô "Tìm vendor", chọn "Hạng mục", chia trang 50 dòng: chữ "Hiển thị 1–50 / 876", nút "Trang sau"/"Trang trước".
+ *  - Đầu bảng: "enrich lần cuối" + data_as_of (ở GỐC phản hồi API, dạng ISO hoặc dd/mm/yyyy).
+ *  - Dòng ứng viên bị từ chối ghi "Chưa nhận: <lý do bằng lời>" (out_of_province = "nơi này ngoài TP.HCM"; ứng viên đó không có nút Approve). Dòng ĐÃ có override (đã áp):
+ *    Status = nhãn nhóm + "Đã duyệt tay", Action = chữ "Đã duyệt tay", không còn nút Approve hay Sửa thủ công.
  *  - Mỗi dòng: STT (n của API); tên vendor + hạng mục; "Địa chỉ: …" của marry; cột Google có "Tên: …", "giống NN%", "Địa chỉ: …", thẻ "khớp marry"/"khác marry", liên kết "Mở Maps" (href = maps_url);
  *    Status = nhãn nhóm; Action: nút "Approve" chỉ ở dòng approvable (dòng full ghi "Đã khớp"), nút "Sửa thủ công" ở mọi dòng.
  *  - Approve: gửi PUT /api/admin/vendor-enrich/<id>/review {decision:"approve"}; dòng hiện "Chờ áp dụng", không còn nút Approve (có "Rút lại" -> DELETE).
@@ -52,6 +55,7 @@ const classify = (f) => {
   if (a) { const c = a.conf || 0; return a.status === 'low_confidence' ? (c >= HI ? 'name_same_addr_diff' : c >= MID ? 'name_similar' : 'not_found') : 'not_found'; }
   return 'not_enriched';
 };
+const LOI = { low_score: 'tên chưa đủ giống', address_conflict: 'địa chỉ Google khác địa chỉ marry', address_unconfirmed: 'không so được địa chỉ', out_of_province: 'nơi này ngoài TP.HCM' };
 const APPROVABLE = new Set(['addr_diff_accepted', 'unverified', 'name_same_addr_diff', 'name_similar']);
 const LABEL = { full: 'Enrich 100%', matched_no_photo: 'Khớp, chưa có ảnh Google', addr_diff_accepted: 'Địa chỉ khác marry', unverified: 'Có ảnh Google, chưa kiểm khớp',
   name_same_addr_diff: 'Tên trùng, địa chỉ lệch', name_similar: 'Tên hơi giống', not_found: 'Không thấy trên Maps', temp_closed: 'Tạm đóng cửa', not_enriched: 'Chưa enrich' };
@@ -62,11 +66,15 @@ const ROWS = SNAP.map((f) => {
   return { id: f.id, name: f.name, category: f.category, catLabel: CAT[f.category], group,
     marry: { address: f.marry_address, price_min_vnd: null, price_max_vnd: null, price_unit: null, source_url: null },
     google: cand ? { matched: !!f.g, place_id: cand, name: nm, similarity: sim, address: (f.g && f.g.address) || 'Địa chỉ Google mẫu', address_match: f.g ? f.g.address_match : null,
-      rating: null, review_count: null, photo_count: f.photos, maps_url: 'https://www.google.com/maps/place/?q=place_id:' + cand, reject_reason: null } : null,
-    approvable: APPROVABLE.has(group) && !!cand, override: null, review: null };
+      rating: null, review_count: null, photo_count: f.photos, maps_url: 'https://www.google.com/maps/place/?q=place_id:' + cand, reject_reason: f.g ? null : (f.audit && f.audit.reject_reason) || null } : null,
+    approvable: APPROVABLE.has(group) && !!cand && !(!f.g && f.audit && f.audit.reject_reason === 'out_of_province'), override: null, review: null };
 });
+ROWS.sort((a, b) => ((a.group === 'name_similar' && !a.approvable) ? 1 : 0) - ((b.group === 'name_similar' && !b.approvable) ? 1 : 0)); // ổn định: đẩy ứng viên không Approve được xuống cuối để các ca bên dưới dùng dòng đầu
+const OVR = ROWS.filter((r) => r.group === 'name_similar')[6]; OVR.override = { action: 'remove', approved_on: '2026-11-12' }; OVR.approvable = false;
+const OOP = ROWS.find((r) => r.google && r.google.reject_reason === 'out_of_province');
 const sum = (p) => ROWS.filter(p).length;
-const SUMMARY = { total: ROWS.length, data_as_of: '2026-11-09T14:31:43',
+const DATA_AS_OF = '2026-11-09T14:31:43.880637';
+const SUMMARY = { total: ROWS.length,
   groups: Object.fromEntries(Object.keys(LABEL).map((g) => [g, sum((r) => r.group === g)])),
   chips: { full: sum((r) => r.group === 'full'), no_google_photo: sum((r) => !r.google || r.google.photo_count === 0), name_similar: sum((r) => r.group === 'name_similar'),
     addr_diff: sum((r) => r.group === 'addr_diff_accepted' || r.group === 'name_same_addr_diff') },
@@ -119,7 +127,7 @@ async function scenario(opts = {}) {
       if (q.get('category')) rows = rows.filter((r) => r.category === q.get('category'));
       if (q.get('q')) rows = rows.filter((r) => fold(r.name).includes(fold(q.get('q'))));
       const limit = Math.min(100, parseInt(q.get('limit')) || 50); const offset = parseInt(q.get('offset')) || 0;
-      return json({ summary: SUMMARY, total: rows.length, offset, limit, rows: rows.slice(offset, offset + limit).map((r, i) => ({ n: offset + i + 1, ...r, review: S.store.get(r.id) || null })) });
+      return json({ data_as_of: DATA_AS_OF, summary: SUMMARY, total: rows.length, offset, limit, rows: rows.slice(offset, offset + limit).map((r, i) => ({ n: offset + i + 1, ...r, review: r.override ? null : (S.store.get(r.id) || null) })) });
     }
     const mm = u.pathname.match(/^\/api\/admin\/vendor-enrich\/([^/]+)\/review$/);
     if (mm && (m === 'PUT' || m === 'DELETE')) {
@@ -197,6 +205,19 @@ const rowText = async (loc) => (await loc.innerText()).replace(/\s+/g, ' ').trim
     check('tìm "Asiana": gọi q=Asiana và dòng nào cũng chứa Asiana', S.lists.some((s) => /q=Asiana/.test(s)) && (await S.rows().evaluateAll((els) => els.every((e) => /asiana/i.test(e.innerText)))));
     await page.getByRole('searchbox', { name: 'Tìm vendor' }).fill('');
     await page.getByRole('searchbox', { name: 'Tìm vendor' }).press('Enter');
+    await page.waitForFunction(() => /Hiển thị 1–50 \/ 876/.test(document.body.innerText));
+
+    // ứng viên bị từ chối, dòng đã áp, ngày dữ liệu
+    check('đầu bảng ghi "enrich lần cuối" cùng ngày dữ liệu (2026-11-09 hoặc 09/11/2026)', /enrich lần cuối/.test(await page.locator('body').innerText()) && /2026-11-09|09\/11\/2026/.test(await page.locator('body').innerText()) && !/undefined|Invalid/.test(await page.locator('body').innerText()));
+    const find = async (r) => { const sb = page.getByRole('searchbox', { name: 'Tìm vendor' }); const n0 = S.lists.length; await sb.fill(r.name); await sb.press('Enter'); for (let i = 0; i < 40 && S.lists.length === n0; i++) await page.waitForTimeout(50); await page.waitForTimeout(250); const row = S.rows().filter({ hasText: r.name }).first(); await row.waitFor(); return row; };
+    const oopRow = await find(OOP); const ot = await rowText(oopRow);
+    check('ứng viên ngoài TP.HCM: ghi "Chưa nhận: nơi này ngoài TP.HCM", KHÔNG có nút Approve, vẫn có Sửa thủ công', ot.includes('Chưa nhận: nơi này ngoài TP.HCM') && (await oopRow.getByRole('button', { name: 'Approve', exact: true }).count()) === 0 && (await oopRow.getByRole('button', { name: 'Sửa thủ công', exact: true }).count()) === 1, ot.slice(0, 220));
+    const other = ROWS.find((r) => r.google && !r.google.matched && r.google.reject_reason && r.google.reject_reason !== 'out_of_province');
+    const otherRow = await find(other);
+    check('ứng viên bị từ chối vì lý do khác cũng ghi "Chưa nhận: " + lý do bằng lời', (await rowText(otherRow)).includes('Chưa nhận: ' + LOI[other.google.reject_reason]), (await rowText(otherRow)).slice(0, 220));
+    const ovRow = await find(OVR); const vt = await rowText(ovRow);
+    check('dòng đã có override: Status có "Đã duyệt tay", không còn nút Approve, Sửa thủ công, Rút lại', vt.includes('Đã duyệt tay') && (await ovRow.getByRole('button').count()) === 0, vt.slice(0, 220));
+    await page.getByRole('searchbox', { name: 'Tìm vendor' }).fill(''); await page.getByRole('searchbox', { name: 'Tìm vendor' }).press('Enter');
     await page.waitForFunction(() => /Hiển thị 1–50 \/ 876/.test(document.body.innerText));
 
     // Approve

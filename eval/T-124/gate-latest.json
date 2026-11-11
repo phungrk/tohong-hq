@@ -1,6 +1,6 @@
 {
   "task": "T-124",
-  "at": "2026-11-11T07:36",
+  "at": "2026-11-11T13:02",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -9,74 +9,18 @@
   },
   "results": [
     {
-      "eval": "python3 -I eval/T-124/check_1_nhom_va_so_dem.py",
-      "kind": "cmd",
-      "status": "PASS",
-      "ms": 31,
-      "out": "PASS",
-      "tier": 1
-    },
-    {
-      "eval": "python3 -I eval/T-124/check_2_bao_cao_tohong.py",
+      "eval": "python3 -I eval/T-124/check_9_bat_bien_du_lieu_tohong.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 38,
-      "out": "FAIL thiếu tools/scraper/build_enrich_report.py trong repo tohong",
-      "tier": 1
-    },
-    {
-      "eval": "python3 -I eval/T-124/check_3_dong_bo_tohong_back.py",
-      "kind": "cmd",
-      "status": "FAIL",
-      "ms": 32,
-      "out": "FAIL thiếu tools/scraper/output/HCMC/enrich-report.json",
-      "tier": 1
-    },
-    {
-      "eval": "cd /home/user/tohong-back && node /home/user/tohong-hq/eval/T-124/check_4_api_danh_sach.mjs",
-      "kind": "cmd",
-      "status": "FAIL",
-      "ms": 77,
-      "out": "FAIL thiếu lib/vendorEnrichReport.generated.js ở tohong-back",
-      "tier": 1
-    },
-    {
-      "eval": "cd /home/user/tohong-back && node /home/user/tohong-hq/eval/T-124/check_5_api_duyet.mjs",
-      "kind": "cmd",
-      "status": "FAIL",
-      "ms": 101,
-      "out": "FAIL thiếu lib/vendorEnrichReport.generated.js ở tohong-back",
-      "tier": 1
-    },
-    {
-      "eval": "cd /home/user/tohong-back && node /home/user/tohong-hq/eval/T-124/check_6_quyen_admin.mjs",
-      "kind": "cmd",
-      "status": "FAIL",
-      "ms": 132,
-      "out": "FAIL thiếu lib/vendorEnrichReport.generated.js ở tohong-back",
-      "tier": 1
-    },
-    {
-      "eval": "python3 -I eval/T-124/check_7_ap_dung_override.py",
-      "kind": "cmd",
-      "status": "FAIL",
-      "ms": 33,
-      "out": "FAIL thiếu tools/scraper/apply_admin_reviews.py trong repo tohong",
-      "tier": 1
-    },
-    {
-      "eval": "cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-124/check_8_ui_bang.cjs --repo .",
-      "kind": "cmd",
-      "status": "FAIL",
-      "ms": 6525,
-      "out": "XX  bước thao tác không thực hiện được (thiếu phần tử mà spec yêu cầu?)  :: locator.click: Timeout 4000ms exceeded.\nFAIL bước thao tác không thực hiện được (thiếu phần tử mà spec yêu cầu?) [locator.click: Timeout 4000ms exceeded.]",
+      "ms": 199,
+      "out": "FAIL INV-021: FAIL 2 lệch file duyệt tay, vd marry_6f30161924f4: tạm đóng cửa mà còn trong pool (ADR-049) (+1 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 41,
+      "ms": 11458,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -84,7 +28,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 153,
+      "ms": 179,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -92,7 +36,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 27,
+      "ms": 26,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -100,7 +44,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 639,
+      "ms": 628,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -108,15 +52,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2366,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-kd19z8/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 3654,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-1HUVBR/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1241,
+      "ms": 1214,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -124,8 +68,8 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 937,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-X1VtkC/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 894,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-q8DAM9/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     }
   ],

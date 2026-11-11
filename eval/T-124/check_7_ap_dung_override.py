@@ -3,7 +3,7 @@
 Lệnh (hợp đồng): python3 tools/scraper/apply_admin_reviews.py --state HCMC --reviews <export.json> --decision decisions/<file>.md --approved-on YYYY-MM-DD
                  [--output-dir <thư mục chứa HCMC/>] [--hq <gốc tohong-hq>]
   Việc nó làm: thêm vào output/HCMC/manual_overrides.json (tạo nếu chưa có, schema_version 1) một mục cho mỗi entry của export, theo thứ tự vendor_id, SAU các mục đã có:
-  {vendor_id, action, maps_link|place_id (nếu có), reason = "<reason của export> [duyệt qua admin: <reviewed_by>, <reviewed_at>]", approved_by:"capu", approved_on, decision}.
+  {vendor_id, action, maps_link|place_id (nếu có), reason = "<reason của export> [duyệt qua admin: admin:<8 ký tự đầu của sha256(reviewed_by)>, <reviewed_at>]" (nhãn băm, KHÔNG đưa Clerk user id thô vào repo; tra ngược bằng nhật ký admin), approved_by:"capu", approved_on, decision}.
   Không thêm trường nào khác (T-110 schema). Mục đã có cho vendor đó: GIỮ NGUYÊN byte, in "SKIP_EXISTING <vendor_id>", mã thoát vẫn 0 cho các mục còn lại.
   Từ chối cả lượt (thoát 2, file không đổi byte, in "APPLY_REFUSED <mã> [<vendor_id>]"): vendor không có ở vendors.json/removed_vendors.json nào (unknown_vendor); entry không qua
   kiểm schema của enrichment.overrides.validate (bad_entry); --decision không dạng decisions/<tên>.md (bad_decision); khi có --hq: file không có, không có `decided_by: capu` ở frontmatter,
@@ -12,7 +12,7 @@ Lệnh (hợp đồng): python3 tools/scraper/apply_admin_reviews.py --state HCM
 (b) enrichment.overrides.load_overrides đọc được file; không mục nào có trường ngoài T-110; (c) INV-020 NGUYÊN VĂN (bản trong bể, chạy trong HQ giả có decision) PASS, và ĐỎ khi decision thiếu một vendor_id;
 (d) từ chối đúng 5 ca xấu, file không đổi; (e) chạy lại không đổi byte; (f) resolve_overrides.py --dry-run đếm đúng các mục accept_place mới (chưa có `resolved`) để bước resolve/enrich sau áp dụng, mạng bị chặn.
 In PASS hoặc FAIL <lý do>; thoát 0/1."""
-import copy, json, os, re, shutil, subprocess, sys, tempfile
+import copy, hashlib, json, os, re, shutil, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import _t124 as t
@@ -30,6 +30,7 @@ ap = pick("name_similar") + pick("name_same_addr_diff") + pick("unverified")
 nf = pick("not_found", 3)
 EXISTING = "marry_d4380c0b3cf3"
 AT = "2026-11-12T03:04:05Z"
+LABEL = "admin:" + hashlib.sha256(b"user_admin").hexdigest()[:8]
 def reason(s): return s
 entries = [{"vendor_id": f["id"], "action": "accept_place", "place_id": t.candidate_place_id(f), "reason": "Admin duyệt nhận khớp Google", "reviewed_by": "user_admin", "reviewed_at": AT} for f in ap]
 entries += [{"vendor_id": nf[0]["id"], "action": "remove", "reason": "Không có trên Maps", "reviewed_by": "user_admin", "reviewed_at": AT},
@@ -100,7 +101,7 @@ try:
             if set(e) - allowed: bad.append("%s có trường ngoài T-110: %s" % (e["vendor_id"], sorted(set(e) - allowed)))
             if e.get("approved_by") != "capu" or e.get("approved_on") != "2026-11-12" or e.get("decision") != dec_rel: bad.append("%s: approved_by/approved_on/decision sai" % e["vendor_id"])
             if e.get("action") != s.get("action") or e.get("place_id") != s.get("place_id"): bad.append("%s: action/place_id không theo export" % e["vendor_id"])
-            if not (e["reason"].startswith(s.get("reason", "?")) and "user_admin" in e["reason"] and AT in e["reason"]): bad.append("%s: reason thiếu lý do gốc hoặc dấu vết người duyệt: %r" % (e["vendor_id"], e["reason"]))
+            if not (e["reason"].startswith(s.get("reason", "?")) and LABEL in e["reason"] and "user_admin" not in e["reason"] and AT in e["reason"]): bad.append("%s: reason thiếu lý do gốc hoặc dấu vết người duyệt: %r" % (e["vendor_id"], e["reason"]))
         # (b) load_overrides của chính pipeline
         q = run(["-c", "import sys,pathlib; sys.path.insert(0,'.'); from enrichment import overrides as o; d=o.load_overrides(pathlib.Path('output/HCMC')); print('OK',len(d['overrides']))"], sc, env=NONET)
         if q.returncode != 0 or "OK %d" % len(ov) not in q.stdout: bad.append("enrichment.overrides.load_overrides từ chối file: %s" % (q.stderr or q.stdout).strip()[-200:])

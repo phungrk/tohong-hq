@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """T-124 tiêu chí 2 (repo tohong): bước sinh báo cáo enrich từ dữ liệu có sẵn, không gọi Google, tất định, chỉ đọc.
 Lệnh (hợp đồng): python3 tools/scraper/build_enrich_report.py --state HCMC --output-dir <thư mục chứa HCMC/> --out <file.json>
-Báo cáo: {schema_version:1, state, data_as_of, summary:{total,groups,chips,approvable},
+Báo cáo: {schema_version:1, state, data_as_of (= max `timestamp` của enrichment_log google_maps trong tập vendor, chuỗi nguyên văn), summary:{total,groups,chips,approvable},
           vendors:[{id,name,category,group,marry:{address,price_min_vnd,price_max_vnd,price_unit,source_url},
                     google:null|{matched,place_id,name,similarity,address,address_match,rating,review_count,photo_count,maps_url,reject_reason},
                     approvable,override:null|{action,approved_on}}]}
 Đo trên bản sao dữ liệu thật của repo tohong (TOHONG_REPO hoặc ../tohong): (a) thoát 0 khi mạng bị chặn hoàn toàn (socket ném lỗi) và không đổi byte
 nào trong thư mục dữ liệu; (b) summary bằng hàm chuẩn eval/T-124/_t124.py tính trên cùng dữ liệu (tổng 876 = id khác nhau ngoài other/wedding_planner);
 (c) vendors đúng thứ tự (category nhà theo thứ tự pipeline, tên, id), mỗi dòng đúng nhóm, approvable, google.place_id (= ứng viên), matched, photo_count,
-maps_url = https://www.google.com/maps/place/?q=place_id:<place_id>, marry.address = địa chỉ marry.vn; (d) chạy hai lần cho cùng byte; (e) dòng có mục trong
+maps_url = https://www.google.com/maps/place/?q=place_id:<place_id>, marry.address = địa chỉ marry.vn; (d) chạy hai lần cho cùng byte; (e) data_as_of đúng; google.reject_reason = lý do từ chối của dòng audit (null khi đã nhận); (f) dòng có mục trong
 manual_overrides.json thì override.action đúng mục đó, còn lại override=null. Thiếu repo tohong: PASS "chưa áp dụng". In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import hashlib, json, os, shutil, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -62,6 +62,15 @@ try:
     rows = rep.get("vendors") or []
     if [r.get("id") for r in rows] != [f["id"] for f in facts]:
         bad.append("danh sách/thứ tự id khác hàm chuẩn (%d dòng, mong %d)" % (len(rows), len(facts)))
+    uni = {f["id"] for f in facts}; stamps = []
+    for c in t.ORDER:
+        vf = os.path.join(root, "tools", "scraper", "output", "HCMC", c, "vendors.json")
+        if os.path.exists(vf):
+            for x in json.load(open(vf, encoding="utf-8"))["vendors"]:
+                if x["id"] in uni:
+                    stamps += [e["timestamp"] for e in (x.get("enrichment_log") or []) if e.get("source") == "google_maps" and e.get("timestamp")]
+    if rep.get("data_as_of") != max(stamps):
+        bad.append("data_as_of (gốc báo cáo) %r != thời điểm google_maps mới nhất %r" % (rep.get("data_as_of"), max(stamps)))
     ov = {}
     p_ov = os.path.join(root, "tools", "scraper", "output", "HCMC", "manual_overrides.json")
     if os.path.isfile(p_ov):
@@ -77,6 +86,7 @@ try:
               and ((gg is None) == (not t.candidate_place_id(f)))
               and (gg is None or (gg.get("place_id") == t.candidate_place_id(f) and gg.get("matched") is bool(f["g"])
                                    and gg.get("photo_count") == f["photos"]
+                                   and gg.get("reject_reason") == (None if f["g"] else (f["audit"] or {}).get("reject_reason"))
                                    and gg.get("maps_url") == "https://www.google.com/maps/place/?q=place_id:" + gg["place_id"])))
         if not ok:
             n_bad += 1

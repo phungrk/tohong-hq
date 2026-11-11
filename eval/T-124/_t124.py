@@ -42,7 +42,7 @@ def facts_from_repo(root):
         a = os.path.join(base, c, "enrichment-audit.json")
         if os.path.exists(a):
             for r in json.load(open(a, encoding="utf-8")):
-                audit.setdefault(r["vendor_id"], {}).setdefault(c, r)
+                audit.setdefault(r["vendor_id"], {})[c] = r   # dòng MỚI NHẤT (cuối file) của vendor trong category này
     out = []
     for vid, byc in recs.items():
         cats = [c for c in ORDER if c in byc]
@@ -52,6 +52,7 @@ def facts_from_repo(root):
         rec = byc[home]
         g = _last_google(rec) or next((_last_google(byc[c]) for c in cats if _last_google(byc[c])), None)
         row = audit.get(vid, {}).get(home) or next((audit[vid][c] for c in cats if c in audit.get(vid, {})), None)
+        closed = any((r.get("closed_state") == "temporarily_closed" or r.get("status") == "temporarily_closed") for r in audit.get(vid, {}).values())  # mọi category, như INV-021 (f)
         contact = rec.get("contact") or {}
         out.append({
             "id": vid, "name": rec["name"], "category": TO_APP[home], "home": home,
@@ -63,6 +64,7 @@ def facts_from_repo(root):
             "audit": None if not row else {"status": row.get("status"), "conf": row.get("confidence"), "name": row.get("matched_name"),
                                            "candidate": row.get("candidate_place_id") or "", "reject_reason": row.get("reject_reason"),
                                            "closed_state": row.get("closed_state")},
+            "closed_any": closed,
         })
     out.sort(key=lambda f: (ORDER.index(f["home"]), f["name"].casefold(), f["id"]))
     return out
@@ -70,7 +72,7 @@ def facts_from_repo(root):
 
 def classify(f):
     a, g = f["audit"], f["g"]
-    if not g and a and (a.get("closed_state") == "temporarily_closed" or a.get("status") == "temporarily_closed"):
+    if not g and (f.get("closed_any") or (a and (a.get("closed_state") == "temporarily_closed" or a.get("status") == "temporarily_closed"))):
         return "temp_closed"
     if g:
         if not g["has_flag"]:
@@ -93,7 +95,9 @@ def candidate_place_id(f):
 
 
 def approvable(f):
-    return classify(f) in APPROVABLE and bool(candidate_place_id(f))
+    """Approve được: nhóm thuộc APPROVABLE, có place_id, và ứng viên KHÔNG bị từ chối vì ngoài tỉnh/thành (INV-016: duyệt tay cũng không thắng)."""
+    reason = (f["audit"] or {}).get("reject_reason")
+    return classify(f) in APPROVABLE and bool(candidate_place_id(f)) and not (not f["g"] and reason == "out_of_province")
 
 
 def summarize(facts):
