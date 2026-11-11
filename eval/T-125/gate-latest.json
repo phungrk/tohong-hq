@@ -1,7 +1,7 @@
 {
   "task": "T-125",
-  "at": "2026-11-11T13:27",
-  "verdict": "RED",
+  "at": "2026-11-11T13:29",
+  "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/admin/vendor-enrich",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-124/check_1_nhom_va_so_dem.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 26,
+      "ms": 29,
       "out": "PASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-124/check_2_bao_cao_tohong.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 381,
+      "ms": 455,
       "out": "PASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-124/check_3_dong_bo_tohong_back.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 204,
+      "ms": 242,
       "out": "PASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd ${TOHONG_BACK_REPO:-/home/user/tohong-back} && node /home/user/tohong-hq/eval/T-124/check_4_api_danh_sach.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 144,
+      "ms": 168,
       "out": "PASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd ${TOHONG_BACK_REPO:-/home/user/tohong-back} && node /home/user/tohong-hq/eval/T-124/check_5_api_duyet.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 137,
+      "ms": 153,
       "out": "PASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd ${TOHONG_BACK_REPO:-/home/user/tohong-back} && node /home/user/tohong-hq/eval/T-124/check_6_quyen_admin.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 118,
+      "ms": 164,
       "out": "PASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-124/check_7_ap_dung_override.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1508,
+      "ms": 1713,
       "out": "PASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "cd ${TOHONG_FRONT_REPO:-/home/user/tohong-front} && node /home/user/tohong-hq/eval/T-124/check_8_ui_bang.cjs --repo .",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 6754,
+      "ms": 7056,
       "out": "có \"Rút lại\"\n  ok  \"Rút lại\" gửi DELETE …/<id>/review\n  ok  hộp thoại có tên vendor trong tiêu đề\n  ok  hộp thoại có đủ 4 lựa chọn \"Quyết định\", ô link/place_id, ô Ghi chú, nút Lưu, Huỷ\n  ok  KHÔNG có ô địa chỉ tự do\n  ok  \"Gỡ vendor\" thiếu ghi chú: báo \"Cần ghi chú\" và không gửi gì\n  ok  Lưu gửi PUT manual action=remove kèm note, không kèm place_id/maps_link\n  ok  dòng vừa sửa hiện \"Chờ áp dụng\"\n  ok  dán link -> gửi maps_link (không gửi place_id)\n  ok  dán place_id -> gửi place_id (không gửi maps_link)\n  ok  Huỷ đóng hộp thoại và không gửi gì\n  ok  nút \"Danh sách vendor\" trở về danh sách cũ (bảng enrich biến mất)\n  ok  không request nào ra ngoài (Google) trong cả phiên\n  ok  API trả 403: không hiện bảng, có thông báo lỗi\n  ok  390px: trang không cuộn ngang (bảng tự cuộn trong khung)\nPASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-124/check_9_bat_bien_du_lieu_tohong.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 185,
+      "ms": 220,
       "out": "PASS",
       "tier": 1
     },
@@ -84,15 +84,39 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-124/bat-bien-cho-merge/inv-001-bao-cao-enrich-phan-hoach.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 35,
+      "ms": 42,
       "out": "PASS 876 dòng, 9 nhóm cộng đúng, 370 approvable, ô đếm khớp nhóm",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-125/adv-01-maps-link-back-nhan-thi-tohong-nhan.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 272,
+      "out": "PASS 5 link hợp lệ cả hai nhận; 19 link mập mờ: back nhận thì tohong cũng nhận",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-125/adv-02-r2-review-hong-khong-im-lang.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 151,
+      "out": "PASS file review hỏng: export báo lỗi rõ, PUT không kẹt 412",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-125/adv-03-decision-ngoai-decisions-bi-tu-choi.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 463,
+      "out": "PASS decision ngoài decisions/ (symlink) bị APPLY_REFUSED bad_decision, file thật vẫn áp được",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 31,
+      "ms": 33,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -100,7 +124,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 138,
+      "ms": 139,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -108,7 +132,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 28,
+      "ms": 23,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -116,7 +140,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 639,
+      "ms": 670,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -124,15 +148,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2299,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-bjy0iW/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2298,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-Q76sm5/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1247,
+      "ms": 1551,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -140,34 +164,10 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 911,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-zDhRJy/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1005,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-Lc7yvt/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
-    },
-    {
-      "eval": "eval/T-125/adv-01-maps-link-back-nhan-thi-tohong-nhan.py",
-      "kind": "py",
-      "status": "FAIL",
-      "ms": 223,
-      "out": "FAIL back nhận 'https://goo.gl\\\\@evil.com' (lưu 'https://goo.gl\\\\@evil.com') nhưng tohong valid_maps_link từ chối: lô export sẽ bị APPLY_REFUSED bad_entry (+9 lỗi nữa)",
-      "tier": 3
-    },
-    {
-      "eval": "eval/T-125/adv-02-r2-review-hong-khong-im-lang.py",
-      "kind": "py",
-      "status": "FAIL",
-      "ms": 135,
-      "out": "FAIL file cụt: export trả 200 count=0 như thể không có review nào (phải báo lỗi rõ) (+3 lỗi nữa)",
-      "tier": 3
-    },
-    {
-      "eval": "eval/T-125/adv-03-decision-ngoai-decisions-bi-tu-choi.py",
-      "kind": "py",
-      "status": "FAIL",
-      "ms": 387,
-      "out": "FAIL decision là symlink ra ngoài decisions/ vẫn được nhận (thoát 0, file đổi=True: APPLY_OK added=1 skipped=0 -> /tmp/t125-adv03-gxls2n6a/tohong/tools/scraper/output/HCMC/manual_overrides.json)",
-      "tier": 3
     }
   ],
-  "hint": "code"
+  "hint": ""
 }
