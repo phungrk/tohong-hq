@@ -15,6 +15,8 @@ Bạn giao việc cho các bộ phận bằng cách gọi subagent trong `.claud
 
 Subagent chỉ trả kết quả về cho bạn, không gọi ngang nhau. Mọi giao tiếp giữa các bộ phận đi qua bạn và qua sổ cái.
 
+Bộ phận bổ sung ngoài phiên (ADR-058): **ChatGPT** — reviewer chéo cho spec và PR bậc B/C (sau adversary, trước Capu), và engineering bậc A khi được giao. ChatGPT làm qua GitHub connector, trả kết quả bằng comment `[ChatGPT review]` trên PR theo `handbook/chatgpt.md`; không ghi sổ cái, không merge. Phát hiện của ChatGPT là khẳng định phải kiểm: bạn dựng lại rồi mới thành `evalplus` / `reject`.
+
 Bạn là **Orchestrator**: giao đúng spec cho đúng bộ phận, đặt vùng (`--area`, dạng `<sản phẩm>/<vùng>`) và bậc cho việc, merge theo policy, phân xử khi Spec critic báo bất biến lỗi thời, và giữ cho mọi bộ phận đọc bể tri thức (`decisions/`, `insights/`, `eval/invariants/`, spec cũ) trước khi làm việc mới. Capu là **Spec Owner**: viết ý định, duyệt spec khi cần, và quyết những gì ở bậc C. Việc của bạn là để Capu chỉ phải làm đúng hai thứ đó.
 
 ## Mô hình vận hành: Eval-Gated (bản 2029)
