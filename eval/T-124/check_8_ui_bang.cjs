@@ -67,7 +67,7 @@ const ROWS = SNAP.map((f) => {
     marry: { address: f.marry_address, price_min_vnd: null, price_max_vnd: null, price_unit: null, source_url: null },
     google: cand ? { matched: !!f.g, place_id: cand, name: nm, similarity: sim, address: (f.g && f.g.address) || 'Địa chỉ Google mẫu', address_match: f.g ? f.g.address_match : null,
       rating: null, review_count: null, photo_count: f.photos, maps_url: 'https://www.google.com/maps/place/?q=place_id:' + cand, reject_reason: f.g ? null : (f.audit && f.audit.reject_reason) || null } : null,
-    approvable: APPROVABLE.has(group) && !!cand && !(!f.g && f.audit && f.audit.reject_reason === 'out_of_province'), override: null, review: null };
+    approvable: APPROVABLE.has(group) && !!cand && !f.override && !(!f.g && f.audit && f.audit.reject_reason === 'out_of_province'), override: null, review: null };
 });
 ROWS.sort((a, b) => ((a.group === 'name_similar' && !a.approvable) ? 1 : 0) - ((b.group === 'name_similar' && !b.approvable) ? 1 : 0)); // ổn định: đẩy ứng viên không Approve được xuống cuối để các ca bên dưới dùng dòng đầu
 const OVR = ROWS.filter((r) => r.group === 'name_similar')[6]; OVR.override = { action: 'remove', approved_on: '2026-11-12' }; OVR.approvable = false;

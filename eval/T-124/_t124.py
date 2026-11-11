@@ -43,6 +43,8 @@ def facts_from_repo(root):
         if os.path.exists(a):
             for r in json.load(open(a, encoding="utf-8")):
                 audit.setdefault(r["vendor_id"], {})[c] = r   # dòng MỚI NHẤT (cuối file) của vendor trong category này
+    p_ov = os.path.join(base, "manual_overrides.json")
+    ov_ids = {e["vendor_id"] for e in json.load(open(p_ov, encoding="utf-8")).get("overrides", [])} if os.path.exists(p_ov) else set()
     out = []
     for vid, byc in recs.items():
         cats = [c for c in ORDER if c in byc]
@@ -64,7 +66,7 @@ def facts_from_repo(root):
             "audit": None if not row else {"status": row.get("status"), "conf": row.get("confidence"), "name": row.get("matched_name"),
                                            "candidate": row.get("candidate_place_id") or "", "reject_reason": row.get("reject_reason"),
                                            "closed_state": row.get("closed_state")},
-            "closed_any": closed,
+            "closed_any": closed, "override": vid in ov_ids,
         })
     out.sort(key=lambda f: (ORDER.index(f["home"]), f["name"].casefold(), f["id"]))
     return out
@@ -95,9 +97,9 @@ def candidate_place_id(f):
 
 
 def approvable(f):
-    """Approve được: nhóm thuộc APPROVABLE, có place_id, và ứng viên KHÔNG bị từ chối vì ngoài tỉnh/thành (INV-016: duyệt tay cũng không thắng)."""
+    """Approve được: nhóm thuộc APPROVABLE, có place_id, override rỗng (chưa có mục trong manual_overrides.json), và ứng viên KHÔNG bị từ chối vì ngoài tỉnh/thành (INV-016)."""
     reason = (f["audit"] or {}).get("reject_reason")
-    return classify(f) in APPROVABLE and bool(candidate_place_id(f)) and not (not f["g"] and reason == "out_of_province")
+    return classify(f) in APPROVABLE and bool(candidate_place_id(f)) and not f.get("override") and not (not f["g"] and reason == "out_of_province")
 
 
 def summarize(facts):
