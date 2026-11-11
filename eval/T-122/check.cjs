@@ -6,7 +6,7 @@ const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.arg
 const REPO = arg('--repo') || process.env.TOHONG_FRONT_REPO || process.cwd();
 const ONLY = (arg('--only') || '1,2,3,4,5').split(',');
 const FADE_VPS = [[390, 650], [375, 632], [390, 664], [393, 662]];
-const A_TOP = 0.3, A_8 = 0.7, A_BAND = 0.95, A_SOLID = 0.98, DIFF_MIN = 0.5, CONTRAST = 4.5, GAP = 4;
+const A_TOP = 0.6, A_VEIL0 = 0.1, A_BAND = 0.95, A_SOLID = 0.98, DIFF_MIN = 0.5, CONTRAST = 4.5, GAP = 4;
 const fails = []; const bad = (vp, m) => fails.push(`${vp}: ${m}`);
 const f1 = v => Math.round(v * 100) / 100;
 
@@ -19,7 +19,9 @@ async function capture(page, y) {
   await page.evaluate(() => window.__m.hide(true)); await page.waitForTimeout(300); await shot(page, 'h'); await page.evaluate(() => window.__m.hide(false));
   g.x = g.sheet.left + 3; g.paperY = g.scroller.top - 6;
   g.aTop = (await alphaAt(page, g.x, [g.footer.top + 1], g.paperY))[0];
-  g.a8 = (await alphaAt(page, g.x, [g.footer.top + 8], g.paperY))[0];
+  const yp = []; for (let y2 = g.footer.top - 16; y2 <= g.prim.top; y2 += 2) yp.push(y2);
+  g.prof = await alphaAt(page, g.x, yp, g.paperY); g.aAbove0 = g.prof[0];
+  g.aAboveMax = Math.max(...(await alphaAt(page, g.x, [g.footer.top - 14, g.footer.top - 8, g.footer.top - 2], g.paperY)));
   const ys = []; for (let y2 = g.footer.top + 1; y2 < g.footer.top + 31; y2 += 3) ys.push(y2);
   g.aMin30 = Math.min(...(await alphaAt(page, g.x, ys, g.paperY)));
   const ys2 = []; for (let y2 = g.prim.top; y2 < g.footer.bottom - 1; y2 += 6) ys2.push(y2);
@@ -34,8 +36,14 @@ async function btnsOk(page, vp, g, tag) {
 // Phát biểu trạng thái đúng theo luật: còn nội dung dưới đỉnh footer đặc -> mờ; hết -> đặc.
 function expectState(c, solidTop) { return c.contentBottom > solidTop - GAP ? 'fade' : 'solid'; }
 function checkState(vp, tag, c, want) {
-  if (want === 'fade') { if (c.aTop > A_TOP) bad(vp, `${tag}: còn nội dung dưới footer nhưng mép trên footer đặc (alpha ${f1(c.aTop)} > ${A_TOP})`); if (c.a8 > A_8) bad(vp, `${tag}: 8px dưới mép trên footer đã quá đặc (alpha ${f1(c.a8)} > ${A_8})`); }
-  else if (c.aMin30 < A_SOLID) bad(vp, `${tag}: hết nội dung dưới footer nhưng footer chưa đặc (alpha nhỏ nhất ${f1(c.aMin30)} < ${A_SOLID})`);
+  if (want === 'fade') {
+    if (c.aAbove0 > A_VEIL0) bad(vp, `${tag}: 16px trên đỉnh footer đã mờ đục (alpha ${f1(c.aAbove0)} > ${A_VEIL0})`);
+    if (c.aTop > A_TOP) bad(vp, `${tag}: còn nội dung dưới footer nhưng mép trên footer đã đặc (alpha ${f1(c.aTop)} > ${A_TOP})`);
+    for (let i = 1; i < c.prof.length; i++) if (c.prof[i] < c.prof[i - 1] - 0.05) { bad(vp, `${tag}: độ đặc không tăng dần từ 16px trên footer tới nút Tiếp theo (tụt ${f1(c.prof[i - 1])} -> ${f1(c.prof[i])})`); break; }
+  } else {
+    if (c.aMin30 < A_SOLID) bad(vp, `${tag}: hết nội dung dưới footer nhưng footer chưa đặc (alpha nhỏ nhất ${f1(c.aMin30)} < ${A_SOLID})`);
+    if (c.aAboveMax > A_VEIL0) bad(vp, `${tag}: hết nội dung dưới footer nhưng còn dải mờ phủ nội dung phía trên footer (alpha ${f1(c.aAboveMax)} > ${A_VEIL0})`);
+  }
   if (c.aLow < A_BAND) bad(vp, `${tag}: vùng từ đỉnh nút Tiếp theo trở xuống không đặc (alpha nhỏ nhất ${f1(c.aLow)} < ${A_BAND})`);
 }
 
@@ -51,7 +59,8 @@ function checkState(vp, tag, c, want) {
         if (expectState(top, solidTop) !== 'fade') bad(vp, `tiền đề sai: chưa cuộn mà không còn nội dung dưới footer (đáy nội dung ${f1(top.contentBottom)} <= ${f1(solidTop - GAP)})`);
         checkState(vp, '1 chưa cuộn', top, 'fade');
         const band = { left: top.sheet.left + 16, right: top.sheet.right - 16, top: top.footer.top, bottom: top.prim.top };
-        const d = await diffPct(page, band); if (process.env.DBG) console.log('band', JSON.stringify(band), d); if (d < DIFF_MIN) bad(vp, `1 chưa cuộn: không thấy nội dung xuyên qua footer (khác biệt ${f1(d)}% < ${DIFF_MIN}% trong dải trên nút Tiếp theo)`);
+        const hasInk = await page.evaluate(([a, c]) => window.__m.textIn(a, c), [top.footer.top, top.prim.top]);
+        const d = hasInk ? await diffPct(page, band) : 100; if (process.env.DBG) console.log('band', JSON.stringify(band), d); if (d < DIFF_MIN) bad(vp, `1 chưa cuộn: không thấy nội dung xuyên qua footer (khác biệt ${f1(d)}% < ${DIFF_MIN}% trong dải trên nút Tiếp theo)`);
         const b = await page.evaluate(([a, c]) => window.__m.contentBtnAt(a, c), [top.footer.top, top.prim.top]);
         if (!b) bad(vp, '1 chưa cuộn: không có nút nội dung nào nằm dưới dải mờ của footer'); else { const h = await page.evaluate(([x, y]) => window.__m.hit(x, y), [b.cx, b.y]); if (h !== 'content') bad(vp, `1 chưa cuộn: chạm vào dải mờ không xuống tới nội dung (phần tử trên cùng thuộc "${h}")`); }
       }
@@ -60,6 +69,8 @@ function checkState(vp, tag, c, want) {
         const cp = await contrastIn(page, top.prim), cs = await contrastIn(page, top.sec), ce = await contrastIn(page, end.prim);
         if (cp.ratio < CONTRAST) bad(vp, `2: chữ nút Tiếp theo tương phản ${f1(cp.ratio)}:1 < ${CONTRAST}:1`);
         if (cs.ratio < CONTRAST) bad(vp, `2: chữ "Quay lại bước 1" tương phản ${f1(cs.ratio)}:1 < ${CONTRAST}:1`);
+        const cpp = await contrastIn(page, top.prim, 'p');
+        if (cp.bg.some((v, i) => Math.abs(v - cpp.bg[i]) > 8)) bad(vp, `2: nút Tiếp theo trong suốt, lộ nền phía sau (${cp.bg} so với ${cpp.bg} khi nền sau đổi màu)`);
         if (cp.bg.some((v, i) => Math.abs(v - ce.bg[i]) > 8)) bad(vp, `2: nền nút Tiếp theo khi mờ (${cp.bg}) khác khi đặc (${ce.bg}): nút bị làm mờ`);
       }
       if (ONLY.includes('3')) {
