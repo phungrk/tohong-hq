@@ -3,9 +3,11 @@
 INV-029 · Vendor đang giữ nhận khớp Google (place_id) thì nơi đó có >= 2 đánh giá Google, trừ khi Capu duyệt tay.
 Với mọi vendor ở tools/scraper/output/HCMC/*/vendors.json có enrichment_log[google_maps] (mới nhất) có place_id, TRỪ bản ghi manual_override=true hoặc có mục accept_place cùng vendor_id
 trong manual_overrides.json (Capu thắng, ADR-048):
-  số đánh giá đã biết = audit.google_review_count (dòng audit ở bất kỳ category file có id, nếu có) | reviews[source=google_maps].count | enrichment_log.changes.review_count (khi có rating);
+  số đánh giá đã biết bám dòng log MỚI NHẤT: audit.google_review_count (dòng audit ở bất kỳ category file có id, nếu có; chỉ mã T-126 ghi, luôn không cũ hơn dòng log mới nhất) | enrichment_log[mới nhất].changes.review_count
+  khi dòng đó có changes.rating. KHÔNG đọc reviews[] (pipeline chỉ ghi đè khi có rating, nên có thể còn số CŨ: ca marry_c7de39c8872c, reviews[].count=7 nhưng log mới nhất không rating);
   (i) nếu đã biết thì phải >= 2;
-  (ii) nếu KHÔNG biết (log không có rating): vi phạm khi timestamp của dòng log >= 2026-11-08 (lần đọc có userRatingCount trong mask; Google bỏ trường khi 0 đánh giá); log cũ hơn: chưa đo được, không tính.
+  (ii) nếu dòng log mới nhất KHÔNG có rating (và không có audit.google_review_count): số đánh giá = 0 nếu timestamp >= 2026-11-08 (lần đọc có userRatingCount trong mask; Google bỏ trường khi 0 đánh giá) -> vi phạm;
+       log cũ hơn: không biết, chưa đo được, không tính (chỉ đo sau khi xác nhận live ghi google_review_count).
 Lý do: cặp đôi không thấy trên app ảnh/địa chỉ Google của một nơi chỉ có 0-1 đánh giá (không đáng tin: ý định Capu 2026-11-11, 2 vendor trong tohong#83).
 Đỏ hôm nay trên tohong origin/main (62ee2f8) và trên PR #83; xanh sau khi lần áp ngược T-126 (--apply-review-rule rồi --confirm-review-count) được merge (dữ liệu, ADR-028).
 Repo: TOHONG_REPO, rồi ../tohong cạnh tohong-hq. Không thấy dữ liệu: PASS "chưa áp dụng". Không gọi Google. Chạy không tham số (python3 -I). In PASS hoặc FAIL <lý do>. Thoát 0/1."""
@@ -46,10 +48,7 @@ for f in sorted(glob.glob(os.path.join(out, "*", "vendors.json"))):
         e = lg[-1]
         if e.get("manual_override") or vid in accepted:
             continue
-        gr = [r for r in v.get("reviews") or [] if r.get("source") == "google_maps" and r.get("count") is not None]
         n = audit_count.get(vid)
-        if n is None and gr:
-            n = gr[-1]["count"]
         if n is None and "rating" in (e.get("changes") or {}):
             n = (e["changes"]).get("review_count", 0)
         if n is None:

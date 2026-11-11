@@ -1,5 +1,5 @@
 {
-"source": "tohong origin/main 62ee2f8 + PR #83 (enrich-vendors/run-43026321789) đọc 2026-11-11; count = reviews[google_maps].count hoặc enrichment_log.changes.review_count; null = không có trường rating (Google bỏ qua khi 0 đánh giá, hoặc log cũ)",
+"source": "tohong origin/main 62ee2f8 + PR #83 (enrich-vendors/run-43026321789) đọc 2026-11-11. count = enrichment_log[google_maps] MỚI NHẤT: changes.review_count khi có changes.rating; null = dòng mới nhất không có rating. reviews_count = reviews[google_maps].count (có thể CŨ, KHÔNG dùng làm nguồn; ca marry_c7de39c8872c: log mới nhất không rating, reviews_count=7)",
 "fresh_from": "2026-11-08",
 "vendors": [
 {
@@ -12,6 +12,7 @@
 "place_id": "ChIJCemb_u0odTERxkqx31WJbfI",
 "ts": "2026-11-09T14:31:32.909809",
 "count": 5424,
+"reviews_count": 5424,
 "manual": false,
 "pr83": false
 },
@@ -25,6 +26,7 @@
 "place_id": "ChIJscpBIUkpdTERX7NtWmUo8sQ",
 "ts": "2026-11-09T14:31:35.218782",
 "count": 3,
+"reviews_count": 3,
 "manual": false,
 "pr83": false
 },
@@ -38,6 +40,7 @@
 "place_id": "ChIJRz_2__kldTERMpDyItmUPyc",
 "ts": "2026-11-11T13:08:11.545688",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": true
 },
@@ -50,6 +53,7 @@
 "place_id": "ChIJxfU6mNgldTERd7AA0pCnXIc",
 "ts": "2026-11-09T14:31:43.880637",
 "count": 7,
+"reviews_count": 7,
 "manual": false,
 "pr83": false
 },
@@ -62,6 +66,7 @@
 "place_id": "ChIJUwXzCJ8RdTERhnlnSWnxwTA",
 "ts": "2026-11-09T14:31:47.462292",
 "count": 5,
+"reviews_count": 5,
 "manual": false,
 "pr83": false
 },
@@ -74,6 +79,7 @@
 "place_id": "ChIJgzvGuSwvdTERKRwe_267jiI",
 "ts": "2026-11-11T13:08:13.322099",
 "count": 5,
+"reviews_count": 5,
 "manual": false,
 "pr83": true
 },
@@ -86,6 +92,7 @@
 "place_id": "ChIJuf4ctNgodTERAHEiE1-aqfg",
 "ts": "2026-11-09T14:31:56.910815",
 "count": 3,
+"reviews_count": 3,
 "manual": false,
 "pr83": false
 },
@@ -98,6 +105,7 @@
 "place_id": "ChIJcdm0L2cvdTERr6-AJwqsJ-I",
 "ts": "2026-11-09T14:32:01.032332",
 "count": 59,
+"reviews_count": 59,
 "manual": false,
 "pr83": false
 },
@@ -110,6 +118,7 @@
 "place_id": "ChIJa4dqSYYpdTERdWqg0MH-rSs",
 "ts": "2026-11-11T13:08:14.026601",
 "count": 18,
+"reviews_count": 18,
 "manual": false,
 "pr83": true
 },
@@ -122,6 +131,7 @@
 "place_id": "ChIJb7BNTqMvdTERUBzlKVHDQrE",
 "ts": "2026-11-11T13:08:10.466802",
 "count": 5,
+"reviews_count": 5,
 "manual": false,
 "pr83": true
 },
@@ -134,6 +144,7 @@
 "place_id": "ChIJX1SezM4vdTERyhp2qAfoi0c",
 "ts": "2026-11-11T13:08:10.844394",
 "count": 190,
+"reviews_count": 190,
 "manual": false,
 "pr83": true
 },
@@ -146,6 +157,7 @@
 "place_id": "ChIJSY137SwpdTERNtq2PGoBgMs",
 "ts": "2026-11-09T14:30:38.515271",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -160,6 +172,7 @@
 "place_id": "ChIJxentfQApdTERFBj-Tji7QnM",
 "ts": "2026-11-09T14:30:43.668822",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -173,6 +186,7 @@
 "place_id": "ChIJs03M1dkodTER4TbOPy0cM7s",
 "ts": "2026-11-09T14:30:46.356487",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -185,6 +199,7 @@
 "place_id": "ChIJ4Wt6udUvdTERJPFgrjiVPXM",
 "ts": "2026-11-09T14:30:50.740214",
 "count": 2,
+"reviews_count": 2,
 "manual": false,
 "pr83": false
 },
@@ -197,6 +212,7 @@
 "place_id": "ChIJvRTXkt0udTERuhG9f7J-vGk",
 "ts": "2026-11-11T13:08:11.243151",
 "count": 25,
+"reviews_count": 25,
 "manual": false,
 "pr83": true
 },
@@ -209,6 +225,7 @@
 "place_id": "ChIJV0k7ckovdTERmFeoYVb_uQM",
 "ts": "2026-11-11T13:08:11.928807",
 "count": 78,
+"reviews_count": 78,
 "manual": false,
 "pr83": true
 },
@@ -221,6 +238,7 @@
 "place_id": "ChIJ81lW5Y8udTER6DINm9E11Wk",
 "ts": "2026-11-09T14:31:03.588686",
 "count": 52,
+"reviews_count": 52,
 "manual": false,
 "pr83": false
 },
@@ -233,6 +251,7 @@
 "place_id": "ChIJkU0LkOwvdTERVH2TsxlSg5Y",
 "ts": "2026-11-11T13:08:12.339219",
 "count": 26,
+"reviews_count": 26,
 "manual": false,
 "pr83": true
 },
@@ -245,6 +264,7 @@
 "place_id": "ChIJURpyPDAvdTERcomJqJ6oKH0",
 "ts": "2026-11-09T14:34:28.628152",
 "count": 30,
+"reviews_count": 30,
 "manual": false,
 "pr83": false
 },
@@ -257,6 +277,7 @@
 "place_id": "ChIJCYD0a9wudTERjiQwtd7tFR0",
 "ts": "2026-11-09T14:34:33.648008",
 "count": 596,
+"reviews_count": 596,
 "manual": false,
 "pr83": false
 },
@@ -269,6 +290,7 @@
 "place_id": "ChIJAQAAwJwvdTERX1u6Sh84oF0",
 "ts": "2026-11-09T14:34:36.205611",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -281,6 +303,7 @@
 "place_id": "ChIJLbtU2DEvdTERcBBqieVfhp8",
 "ts": "2026-11-09T14:34:40.568066",
 "count": 122,
+"reviews_count": 122,
 "manual": false,
 "pr83": false
 },
@@ -293,6 +316,7 @@
 "place_id": "ChIJLbtU2DEvdTERcBBqieVfhp8",
 "ts": "2026-11-09T14:34:46.389418",
 "count": 122,
+"reviews_count": 122,
 "manual": false,
 "pr83": false
 },
@@ -305,6 +329,7 @@
 "place_id": "ChIJ4_gPutcudTERr8cyL5vhaxs",
 "ts": "2026-11-09T14:34:48.850496",
 "count": 28,
+"reviews_count": 28,
 "manual": false,
 "pr83": false
 },
@@ -317,6 +342,7 @@
 "place_id": "ChIJi3tLRi0vdTERlVmnWXMXJGE",
 "ts": "2026-11-09T14:34:50.140501",
 "count": 750,
+"reviews_count": 750,
 "manual": false,
 "pr83": false
 },
@@ -329,6 +355,7 @@
 "place_id": "ChIJcUZRU2ApdTERO27sorwDE5E",
 "ts": "2026-11-09T14:32:14.814944",
 "count": 2,
+"reviews_count": 2,
 "manual": false,
 "pr83": false
 },
@@ -341,6 +368,7 @@
 "place_id": "ChIJ19leeagudTER-oMYZVhtPVw",
 "ts": "2026-11-09T14:32:15.236526",
 "count": 48,
+"reviews_count": 48,
 "manual": false,
 "pr83": false
 },
@@ -353,6 +381,7 @@
 "place_id": "ChIJITv2W7ondTER59jBmWJdIfs",
 "ts": "2026-11-11T13:08:14.668035",
 "count": 14,
+"reviews_count": 14,
 "manual": false,
 "pr83": true
 },
@@ -365,6 +394,7 @@
 "place_id": "ChIJf9XQDigpdTERIjAYaVB-Jk4",
 "ts": "2026-11-09T14:32:16.800494",
 "count": 244,
+"reviews_count": 244,
 "manual": false,
 "pr83": false
 },
@@ -377,6 +407,7 @@
 "place_id": "ChIJu5aiHA4vdTERqw0LsbyUmHE",
 "ts": "2026-11-11T13:08:15.036043",
 "count": 93,
+"reviews_count": 93,
 "manual": false,
 "pr83": true
 },
@@ -389,6 +420,7 @@
 "place_id": "ChIJXUbSI-AudTERPR3Cc9LGWTg",
 "ts": "2026-11-09T14:32:19.402858",
 "count": 7,
+"reviews_count": 7,
 "manual": false,
 "pr83": false
 },
@@ -401,6 +433,7 @@
 "place_id": "ChIJsWRLm_8pdTERV8sct5wO2wA",
 "ts": "2026-11-11T13:08:15.417089",
 "count": 35,
+"reviews_count": 35,
 "manual": false,
 "pr83": true
 },
@@ -413,6 +446,7 @@
 "place_id": "ChIJVVVVVTosdTERUDDJTrPQVfw",
 "ts": "2026-11-09T14:32:25.605043",
 "count": 9,
+"reviews_count": 9,
 "manual": false,
 "pr83": false
 },
@@ -425,6 +459,7 @@
 "place_id": "ChIJ3Q0uqtQudTERZmDNruio8Zc",
 "ts": "2026-11-09T14:32:28.945970",
 "count": 27,
+"reviews_count": 27,
 "manual": false,
 "pr83": false
 },
@@ -437,6 +472,7 @@
 "place_id": "ChIJVVVVVTosdTERUDDJTrPQVfw",
 "ts": "2026-11-09T14:32:30.686770",
 "count": 9,
+"reviews_count": 9,
 "manual": false,
 "pr83": false
 },
@@ -449,6 +485,7 @@
 "place_id": "ChIJwdZw1AwvdTERPDgn-MeLGLU",
 "ts": "2026-11-09T14:32:31.518825",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -461,6 +498,7 @@
 "place_id": "ChIJq4oOXNcodTERwcvx2VjjjUg",
 "ts": "2026-11-09T14:32:32.258993",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -473,6 +511,7 @@
 "place_id": "ChIJKbu3UtAudTER1GtKCLP0ex4",
 "ts": "2026-11-09T14:32:34.710943",
 "count": 7,
+"reviews_count": 7,
 "manual": false,
 "pr83": false
 },
@@ -486,6 +525,7 @@
 "place_id": "ChIJ5yT-vHbVdDER3S2BzHLdM9w",
 "ts": "2026-11-09T14:32:37.127745",
 "count": 3,
+"reviews_count": 3,
 "manual": false,
 "pr83": false
 },
@@ -498,6 +538,7 @@
 "place_id": "ChIJtf8sPZkvdTER0NMCG-brtqE",
 "ts": "2026-11-09T14:32:37.494422",
 "count": 5,
+"reviews_count": 5,
 "manual": false,
 "pr83": false
 },
@@ -510,6 +551,7 @@
 "place_id": "ChIJR3h1MxwpdTERkjXREiCWZgU",
 "ts": "2026-11-11T13:08:15.772814",
 "count": 2,
+"reviews_count": 2,
 "manual": false,
 "pr83": true
 },
@@ -522,6 +564,7 @@
 "place_id": "ChIJEcb98w4pdTERaAdUuthKqqc",
 "ts": "2026-11-11T13:08:16.143830",
 "count": 44,
+"reviews_count": 44,
 "manual": false,
 "pr83": true
 },
@@ -534,6 +577,7 @@
 "place_id": "ChIJVxGR86wudTERD5FyuDgB52Y",
 "ts": "2026-11-09T14:32:43.750789",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -546,6 +590,7 @@
 "place_id": "ChIJMah3G9QodTERGCmJNNuiQ2Y",
 "ts": "2026-11-11T13:08:16.476095",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": true
 },
@@ -558,6 +603,7 @@
 "place_id": "ChIJWcFwWZMndTERzrbNq6rYYuY",
 "ts": "2026-11-09T14:32:51.544468",
 "count": 35,
+"reviews_count": 35,
 "manual": false,
 "pr83": false
 },
@@ -570,6 +616,7 @@
 "place_id": "ChIJg3NhJegodTER4jasdRfkZ1k",
 "ts": "2026-11-09T14:29:55.885364",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -583,6 +630,7 @@
 "place_id": "ChIJYdwmeyMvdTERh0ZAYebO9Xg",
 "ts": "2026-11-11T13:08:09.017287",
 "count": 24,
+"reviews_count": 24,
 "manual": false,
 "pr83": true
 },
@@ -595,6 +643,7 @@
 "place_id": "ChIJSca6HPErdTERda5gXdYF9RM",
 "ts": "2026-11-11T13:08:09.404092",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": true
 },
@@ -607,6 +656,7 @@
 "place_id": "ChIJdx8ic9godTERYOztWY72eOk",
 "ts": "2026-11-09T14:30:09.074998",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -619,6 +669,7 @@
 "place_id": "ChIJrS3xV-QpdTERJl-C53msoyw",
 "ts": "2026-11-11T13:08:10.075342",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": true
 },
@@ -631,6 +682,7 @@
 "place_id": "ChIJTyk7WF4ndTERKFeR46BZ8Nc",
 "ts": "2026-11-09T14:30:25.053351",
 "count": 16,
+"reviews_count": 16,
 "manual": false,
 "pr83": false
 },
@@ -643,6 +695,7 @@
 "place_id": "ChIJVVVVVaARdTERzfPBvD4um3U",
 "ts": "2026-11-09T14:30:25.569034",
 "count": 7,
+"reviews_count": 7,
 "manual": false,
 "pr83": false
 },
@@ -655,6 +708,7 @@
 "place_id": "ChIJa3YLrwovdTERweUKH-thM8U",
 "ts": "2026-11-09T14:30:28.165324",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -667,6 +721,7 @@
 "place_id": "ChIJ_TYQsa0odTERfzeiHqsFl5U",
 "ts": "2026-11-09T14:30:29.386149",
 "count": 2,
+"reviews_count": 2,
 "manual": false,
 "pr83": false
 },
@@ -680,6 +735,7 @@
 "place_id": "ChIJ_Q8PLiQvdTERNk66UVRKf8U",
 "ts": "2026-11-08T10:51:16.834898",
 "count": null,
+"reviews_count": null,
 "manual": true,
 "pr83": false
 },
@@ -692,6 +748,7 @@
 "place_id": "ChIJ6Ux73mrZdDERRXdrq08fQq8",
 "ts": "2026-06-16T14:34:46.575222",
 "count": 22,
+"reviews_count": 22,
 "manual": false,
 "pr83": false
 },
@@ -704,6 +761,7 @@
 "place_id": "ChIJ34ibHQAtdTERntp7NomY1mA",
 "ts": "2026-06-16T14:34:47.006844",
 "count": 11,
+"reviews_count": 11,
 "manual": false,
 "pr83": false
 },
@@ -716,6 +774,7 @@
 "place_id": "ChIJTVxKbFEpdTERqEtkhgj5qSw",
 "ts": "2026-06-16T14:34:47.413518",
 "count": 164,
+"reviews_count": 164,
 "manual": false,
 "pr83": false
 },
@@ -728,6 +787,7 @@
 "place_id": "ChIJq2Z5FlApdTER2TJkaeRP8o0",
 "ts": "2026-06-16T14:34:47.819467",
 "count": 3,
+"reviews_count": 3,
 "manual": false,
 "pr83": false
 },
@@ -740,6 +800,7 @@
 "place_id": "ChIJcWwN8hQrdTERjYLQD9mV8q0",
 "ts": "2026-06-16T14:34:48.220644",
 "count": 7,
+"reviews_count": 7,
 "manual": false,
 "pr83": false
 },
@@ -752,6 +813,7 @@
 "place_id": "ChIJV3cHoUEldTERr2JAbVFPmf4",
 "ts": "2026-06-16T14:34:48.651189",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -764,6 +826,7 @@
 "place_id": "ChIJKbVbxZ0pdTERxM59L9csUPc",
 "ts": "2026-06-16T14:34:49.156589",
 "count": 70,
+"reviews_count": 70,
 "manual": false,
 "pr83": false
 },
@@ -776,6 +839,7 @@
 "place_id": "ChIJ6wuclUgndTERQ6UFstqCCFg",
 "ts": "2026-06-16T14:34:49.585371",
 "count": 9,
+"reviews_count": 9,
 "manual": false,
 "pr83": false
 },
@@ -788,6 +852,7 @@
 "place_id": "ChIJMwqCkOjRdDERTFpoAn1gyVo",
 "ts": "2026-06-16T14:34:50.079271",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -800,6 +865,7 @@
 "place_id": "ChIJwdQDrDovdTERbz1g6ZNkYjA",
 "ts": "2026-06-16T14:34:50.387111",
 "count": 3,
+"reviews_count": 3,
 "manual": false,
 "pr83": false
 },
@@ -812,6 +878,7 @@
 "place_id": "ChIJ98E8jLQvdTERjWUTQDkgGxo",
 "ts": "2026-06-16T14:34:50.925899",
 "count": 4,
+"reviews_count": 4,
 "manual": false,
 "pr83": false
 },
@@ -824,6 +891,7 @@
 "place_id": "ChIJlY1zCqIpdTERawVKUgfkvYQ",
 "ts": "2026-06-16T14:34:51.613469",
 "count": 478,
+"reviews_count": 478,
 "manual": false,
 "pr83": false
 },
@@ -836,6 +904,7 @@
 "place_id": "ChIJq_EG94ovdTERFSr5p-OnT0o",
 "ts": "2026-06-16T14:34:52.023789",
 "count": 11,
+"reviews_count": 11,
 "manual": false,
 "pr83": false
 },
@@ -848,6 +917,7 @@
 "place_id": "ChIJ2xXjkbgvdTER2mYXteq5UA8",
 "ts": "2026-06-16T14:34:52.361743",
 "count": 6,
+"reviews_count": 6,
 "manual": false,
 "pr83": false
 },
@@ -860,6 +930,7 @@
 "place_id": "ChIJcWwN8hQrdTERjYLQD9mV8q0",
 "ts": "2026-06-16T14:34:52.846234",
 "count": 7,
+"reviews_count": 7,
 "manual": false,
 "pr83": false
 },
@@ -872,6 +943,7 @@
 "place_id": "ChIJ25LUuLkpdTERNmEXOBlZ7Ko",
 "ts": "2026-06-16T14:34:53.170747",
 "count": 34,
+"reviews_count": 34,
 "manual": false,
 "pr83": false
 },
@@ -884,6 +956,7 @@
 "place_id": "ChIJG3paZdgodTERMloKX0SIXHQ",
 "ts": "2026-06-16T14:34:54.071047",
 "count": 15,
+"reviews_count": 15,
 "manual": false,
 "pr83": false
 },
@@ -895,7 +968,8 @@
 ],
 "place_id": "ChIJcWwN8hQrdTERjYLQD9mV8q0",
 "ts": "2026-06-16T13:28:44.815513",
-"count": 7,
+"count": null,
+"reviews_count": 7,
 "manual": false,
 "pr83": false
 },
@@ -908,6 +982,7 @@
 "place_id": "ChIJZ7oEsGcvdTERh6L1iz7flTI",
 "ts": "2026-06-16T14:34:54.894003",
 "count": 69,
+"reviews_count": 69,
 "manual": false,
 "pr83": false
 },
@@ -920,6 +995,7 @@
 "place_id": "ChIJcY7ErkQrdTERWavMj5tVnLM",
 "ts": "2026-06-16T14:34:55.301500",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -932,6 +1008,7 @@
 "place_id": "ChIJCat1IKotdTERYr5TJs7DS_g",
 "ts": "2026-06-16T14:34:55.710772",
 "count": 101,
+"reviews_count": 101,
 "manual": false,
 "pr83": false
 },
@@ -944,6 +1021,7 @@
 "place_id": "ChIJ_dGFXDUpdTERSr1H6ly4r6Y",
 "ts": "2026-06-16T14:34:56.119627",
 "count": 103,
+"reviews_count": 103,
 "manual": false,
 "pr83": false
 },
@@ -956,6 +1034,7 @@
 "place_id": "ChIJc9tDg6rZdDERe8VREcBj4ng",
 "ts": "2026-06-16T14:34:57.083441",
 "count": 360,
+"reviews_count": 360,
 "manual": false,
 "pr83": false
 },
@@ -969,6 +1048,7 @@
 "place_id": "ChIJI7HNf6gndTER__TifttGuK4",
 "ts": "2026-06-16T14:34:57.602551",
 "count": 870,
+"reviews_count": 870,
 "manual": false,
 "pr83": false
 },
@@ -981,6 +1061,7 @@
 "place_id": "ChIJk1uSoLgpdTER1lsciCmDeek",
 "ts": "2026-06-16T14:34:57.965432",
 "count": 2,
+"reviews_count": 2,
 "manual": false,
 "pr83": false
 },
@@ -994,6 +1075,7 @@
 "place_id": "ChIJY2bT9RsmdTERe4ivhhtmG4c",
 "ts": "2026-06-16T13:28:49.789106",
 "count": 1044,
+"reviews_count": 1044,
 "manual": false,
 "pr83": false
 },
@@ -1006,6 +1088,7 @@
 "place_id": "ChIJ-c8ztFApdTERRXIQQxB3f6g",
 "ts": "2026-06-16T13:28:50.461520",
 "count": 172,
+"reviews_count": 172,
 "manual": false,
 "pr83": false
 },
@@ -1018,6 +1101,7 @@
 "place_id": "ChIJOTeeu3EldTER442JdHK7hvI",
 "ts": "2026-06-16T13:28:51.456065",
 "count": 47,
+"reviews_count": 47,
 "manual": false,
 "pr83": false
 },
@@ -1030,6 +1114,7 @@
 "place_id": "ChIJTZa4MwAvdTER-XMf9-HhZD4",
 "ts": "2026-06-16T13:28:51.820402",
 "count": 12,
+"reviews_count": 12,
 "manual": false,
 "pr83": false
 },
@@ -1042,6 +1127,7 @@
 "place_id": "ChIJdb6HySEvdTERJp1lVzUEZrg",
 "ts": "2026-06-16T13:28:52.101207",
 "count": 20,
+"reviews_count": 20,
 "manual": false,
 "pr83": false
 },
@@ -1054,6 +1140,7 @@
 "place_id": "ChIJ8yqKGl8vdTER6mSLqwtigio",
 "ts": "2026-06-16T13:28:52.419424",
 "count": 178,
+"reviews_count": 178,
 "manual": false,
 "pr83": false
 },
@@ -1066,6 +1153,7 @@
 "place_id": "ChIJd2ZGlrUrdTEREeo1sXOvNdA",
 "ts": "2026-06-16T13:28:52.757921",
 "count": 155,
+"reviews_count": 155,
 "manual": false,
 "pr83": false
 },
@@ -1078,6 +1166,7 @@
 "place_id": "ChIJ6wCmBDIvdTERFqo45EHwjeM",
 "ts": "2026-06-16T13:28:56.132449",
 "count": 111,
+"reviews_count": 111,
 "manual": false,
 "pr83": false
 },
@@ -1090,6 +1179,7 @@
 "place_id": "ChIJlzLGcwEpdTER4Lb8M572nKc",
 "ts": "2026-06-16T13:28:56.536581",
 "count": 1003,
+"reviews_count": 1003,
 "manual": false,
 "pr83": false
 },
@@ -1102,6 +1192,7 @@
 "place_id": "ChIJo4qkIwApdTERyV26DlnLsj0",
 "ts": "2026-06-16T13:28:56.871252",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -1114,6 +1205,7 @@
 "place_id": "ChIJa7KgkoopdTERhONZDVfFeMc",
 "ts": "2026-06-16T13:28:57.248266",
 "count": 762,
+"reviews_count": 762,
 "manual": false,
 "pr83": false
 },
@@ -1126,6 +1218,7 @@
 "place_id": "ChIJ6z5yreEodTERSINMOayQxsc",
 "ts": "2026-06-16T13:28:57.623160",
 "count": 68,
+"reviews_count": 68,
 "manual": false,
 "pr83": false
 },
@@ -1138,6 +1231,7 @@
 "place_id": "ChIJacq8UlspdTERwz1q1pj9Fj4",
 "ts": "2026-06-16T13:28:58.025428",
 "count": 444,
+"reviews_count": 444,
 "manual": false,
 "pr83": false
 },
@@ -1150,6 +1244,7 @@
 "place_id": "ChIJ9w4mcNgodTERbjjIbxsCONA",
 "ts": "2026-06-16T13:28:58.433602",
 "count": 87,
+"reviews_count": 87,
 "manual": false,
 "pr83": false
 },
@@ -1162,6 +1257,7 @@
 "place_id": "ChIJ3Sw-FCIvdTERjV6XVSWEMOQ",
 "ts": "2026-06-16T13:28:59.384992",
 "count": 2,
+"reviews_count": 2,
 "manual": false,
 "pr83": false
 },
@@ -1174,6 +1270,7 @@
 "place_id": "ChIJBQ_sXdYodTER0s3pMweMGAw",
 "ts": "2026-06-16T13:28:59.742916",
 "count": 376,
+"reviews_count": 376,
 "manual": false,
 "pr83": false
 },
@@ -1186,6 +1283,7 @@
 "place_id": "ChIJ1Qc9VJgldTERwMhWzZjhPY4",
 "ts": "2026-06-16T13:29:00.132494",
 "count": 5,
+"reviews_count": 5,
 "manual": false,
 "pr83": false
 },
@@ -1198,6 +1296,7 @@
 "place_id": "ChIJr4w7Un4hdTERAPCtrK-6_Xo",
 "ts": "2026-06-16T13:29:00.582478",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -1210,6 +1309,7 @@
 "place_id": "ChIJkeTwqZUpdTERXnrtEvJ89Pk",
 "ts": "2026-06-16T13:29:00.921097",
 "count": 2,
+"reviews_count": 2,
 "manual": false,
 "pr83": false
 },
@@ -1222,6 +1322,7 @@
 "place_id": "ChIJF-2eNAApdTERvOXWiByQYGE",
 "ts": "2026-06-16T13:29:03.913333",
 "count": 136,
+"reviews_count": 136,
 "manual": false,
 "pr83": false
 },
@@ -1234,6 +1335,7 @@
 "place_id": "ChIJU62fs7cudTER8YTajSa0T-o",
 "ts": "2026-06-16T13:29:04.271957",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -1246,6 +1348,7 @@
 "place_id": "ChIJ12NnVt8pdTERYMtAuJOYsQM",
 "ts": "2026-06-16T13:29:04.644546",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -1258,6 +1361,7 @@
 "place_id": "ChIJ4c4OutmrNTERW0BQRVAshqE",
 "ts": "2026-06-16T13:29:05.859006",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -1270,6 +1374,7 @@
 "place_id": "ChIJCeTKFoYpdTERLQu-cVUb2YM",
 "ts": "2026-06-16T13:29:06.173982",
 "count": 24,
+"reviews_count": 24,
 "manual": false,
 "pr83": false
 },
@@ -1282,6 +1387,7 @@
 "place_id": "ChIJO9NRvI0pdTERKbzrdUwWR_U",
 "ts": "2026-06-16T13:29:06.462501",
 "count": 636,
+"reviews_count": 636,
 "manual": false,
 "pr83": false
 },
@@ -1294,6 +1400,7 @@
 "place_id": "ChIJWTgMPd0pdTERjvIEmsdWIzs",
 "ts": "2026-06-16T13:29:07.348680",
 "count": 275,
+"reviews_count": 275,
 "manual": false,
 "pr83": false
 },
@@ -1306,6 +1413,7 @@
 "place_id": "ChIJa7CMAQApdTERes5ewFfwUKs",
 "ts": "2026-06-16T13:29:07.697650",
 "count": 2,
+"reviews_count": 2,
 "manual": false,
 "pr83": false
 },
@@ -1318,6 +1426,7 @@
 "place_id": "ChIJ4wb-PJQndTERuV7SZNs3KL0",
 "ts": "2026-06-16T13:29:08.543686",
 "count": 50,
+"reviews_count": 50,
 "manual": false,
 "pr83": false
 },
@@ -1330,6 +1439,7 @@
 "place_id": "ChIJP7B8_S4pdTERsz0Xuw1zZdo",
 "ts": "2026-06-16T13:29:08.820217",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -1342,6 +1452,7 @@
 "place_id": "ChIJR-c4nUopdTERpkBmlb8fhgU",
 "ts": "2026-06-16T13:29:09.113285",
 "count": 163,
+"reviews_count": 163,
 "manual": false,
 "pr83": false
 },
@@ -1354,6 +1465,7 @@
 "place_id": "ChIJxR2DiaQpdTER3WGlfnZkoVM",
 "ts": "2026-06-16T13:29:09.552475",
 "count": 51,
+"reviews_count": 51,
 "manual": false,
 "pr83": false
 },
@@ -1366,6 +1478,7 @@
 "place_id": "ChIJo4qkIwApdTERyV26DlnLsj0",
 "ts": "2026-06-16T13:29:09.836795",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -1378,6 +1491,7 @@
 "place_id": "ChIJI5KmCyspdTER4Vs0Do-85FU",
 "ts": "2026-06-16T13:29:10.120461",
 "count": 8,
+"reviews_count": 8,
 "manual": false,
 "pr83": false
 },
@@ -1390,6 +1504,7 @@
 "place_id": "ChIJ__8u5egpdTERQzk53AKGLYk",
 "ts": "2026-06-16T13:29:10.472293",
 "count": 17,
+"reviews_count": 17,
 "manual": false,
 "pr83": false
 },
@@ -1402,6 +1517,7 @@
 "place_id": "ChIJeU_G26gpdTERjTXp6JaXuKk",
 "ts": "2026-06-16T13:29:10.741620",
 "count": 2114,
+"reviews_count": 2114,
 "manual": false,
 "pr83": false
 },
@@ -1414,6 +1530,7 @@
 "place_id": "ChIJJdiZv_YpdTERvLqAA9BTJUc",
 "ts": "2026-06-16T13:29:11.794717",
 "count": 27,
+"reviews_count": 27,
 "manual": false,
 "pr83": false
 },
@@ -1426,6 +1543,7 @@
 "place_id": "ChIJxfQuV80rdTER77XN54mxawQ",
 "ts": "2026-06-16T13:29:12.717578",
 "count": 221,
+"reviews_count": 221,
 "manual": false,
 "pr83": false
 },
@@ -1438,6 +1556,7 @@
 "place_id": "ChIJITV7YgAvdTERPWJa2i0pemY",
 "ts": "2026-06-16T13:29:13.012965",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -1450,6 +1569,7 @@
 "place_id": "ChIJZTrRGRIpdTERuaPOqkCDDvw",
 "ts": "2026-06-16T13:29:13.369327",
 "count": 25,
+"reviews_count": 25,
 "manual": false,
 "pr83": false
 },
@@ -1462,6 +1582,7 @@
 "place_id": "ChIJdwB1-VAqdTERCj2e8R8J8uk",
 "ts": "2026-06-16T13:29:13.760563",
 "count": 3,
+"reviews_count": 3,
 "manual": false,
 "pr83": false
 },
@@ -1474,6 +1595,7 @@
 "place_id": "ChIJZz6gL3YpdTERyqglaeD2WJQ",
 "ts": "2026-06-16T13:29:15.136968",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -1486,6 +1608,7 @@
 "place_id": "ChIJk93HbDctdTERpcHBNLYGt5M",
 "ts": "2026-06-16T13:29:15.487895",
 "count": 105,
+"reviews_count": 105,
 "manual": false,
 "pr83": false
 },
@@ -1498,6 +1621,7 @@
 "place_id": "ChIJTQIGOwApdTERnCPMCtmJrxE",
 "ts": "2026-06-16T13:29:17.446566",
 "count": 82,
+"reviews_count": 82,
 "manual": false,
 "pr83": false
 },
@@ -1510,6 +1634,7 @@
 "place_id": "ChIJLclKewDbdDEROx2ee5SMnac",
 "ts": "2026-06-16T13:29:17.834061",
 "count": 13,
+"reviews_count": 13,
 "manual": false,
 "pr83": false
 },
@@ -1522,6 +1647,7 @@
 "place_id": "ChIJVUQHb_0rdTER5y6ciiTnuuU",
 "ts": "2026-06-16T13:29:18.645473",
 "count": 33,
+"reviews_count": 33,
 "manual": false,
 "pr83": false
 },
@@ -1534,6 +1660,7 @@
 "place_id": "ChIJfVzy7NgodTERAIx9zU8ydBQ",
 "ts": "2026-06-16T13:29:19.022398",
 "count": 108,
+"reviews_count": 108,
 "manual": false,
 "pr83": false
 },
@@ -1546,6 +1673,7 @@
 "place_id": "ChIJ-yNmi9godTERKrlN5c7nZ9o",
 "ts": "2026-06-16T13:29:19.940499",
 "count": 1087,
+"reviews_count": 1087,
 "manual": false,
 "pr83": false
 },
@@ -1558,6 +1686,7 @@
 "place_id": "ChIJaWubewAvdTER4EobwlOgmmo",
 "ts": "2026-06-16T13:29:20.307892",
 "count": 61,
+"reviews_count": 61,
 "manual": false,
 "pr83": false
 },
@@ -1570,6 +1699,7 @@
 "place_id": "ChIJLbA34MQodTERj4i9sBpI_yc",
 "ts": "2026-11-08T04:03:30.905112",
 "count": 2648,
+"reviews_count": 2648,
 "manual": false,
 "pr83": false
 },
@@ -1582,6 +1712,7 @@
 "place_id": "ChIJGfyIWJ0tdTERiKEMSqh2LRc",
 "ts": "2026-11-08T04:03:31.351406",
 "count": 1331,
+"reviews_count": 1331,
 "manual": false,
 "pr83": false
 },
@@ -1594,6 +1725,7 @@
 "place_id": "ChIJYXnCmV8vdTERiGx61oHIb1E",
 "ts": "2026-11-08T10:51:16.836956",
 "count": null,
+"reviews_count": null,
 "manual": true,
 "pr83": false
 },
@@ -1606,6 +1738,7 @@
 "place_id": "ChIJhaUMHdApdTERtqj6HbiiqbE",
 "ts": "2026-11-08T04:03:32.068300",
 "count": 358,
+"reviews_count": 358,
 "manual": false,
 "pr83": false
 },
@@ -1618,6 +1751,7 @@
 "place_id": "ChIJhVoKJiQvdTERgTDgHl_sSUs",
 "ts": "2026-11-08T04:03:32.492576",
 "count": 4149,
+"reviews_count": 4149,
 "manual": false,
 "pr83": false
 },
@@ -1630,6 +1764,7 @@
 "place_id": "ChIJwbgTGE8vdTERz3h0y18gFm0",
 "ts": "2026-11-08T04:03:32.792126",
 "count": 5015,
+"reviews_count": 5015,
 "manual": false,
 "pr83": false
 },
@@ -1642,6 +1777,7 @@
 "place_id": "ChIJ_eaM5x4pdTERlegTAEoaBXs",
 "ts": "2026-11-08T04:03:33.158611",
 "count": 2127,
+"reviews_count": 2127,
 "manual": false,
 "pr83": false
 },
@@ -1654,6 +1790,7 @@
 "place_id": "ChIJRxuE7VQsdTER52qB-7a4xRA",
 "ts": "2026-11-08T04:03:33.476320",
 "count": 343,
+"reviews_count": 343,
 "manual": false,
 "pr83": false
 },
@@ -1666,6 +1803,7 @@
 "place_id": "ChIJG_MvX9ctdTERPAhLgyUmj8w",
 "ts": "2026-11-08T04:03:33.767748",
 "count": 1221,
+"reviews_count": 1221,
 "manual": false,
 "pr83": false
 },
@@ -1678,6 +1816,7 @@
 "place_id": "ChIJq6tuBUQvdTERPrUo2ili-N4",
 "ts": "2026-11-08T04:03:34.784393",
 "count": 6449,
+"reviews_count": 6449,
 "manual": false,
 "pr83": false
 },
@@ -1690,6 +1829,7 @@
 "place_id": "ChIJf1gziDwvdTERWyvojyS-heg",
 "ts": "2026-11-08T04:03:35.091603",
 "count": 4170,
+"reviews_count": 4170,
 "manual": false,
 "pr83": false
 },
@@ -1702,6 +1842,7 @@
 "place_id": "ChIJv3u21EkvdTERd8RlwzZlJMI",
 "ts": "2026-11-08T04:03:35.437770",
 "count": 3889,
+"reviews_count": 3889,
 "manual": false,
 "pr83": false
 },
@@ -1714,6 +1855,7 @@
 "place_id": "ChIJB4N66_QpdTER9vKJiuQLyO0",
 "ts": "2026-11-08T04:03:36.119690",
 "count": 97,
+"reviews_count": 97,
 "manual": false,
 "pr83": false
 },
@@ -1726,6 +1868,7 @@
 "place_id": "ChIJCyB5bCYvdTERnN4DHHXehT4",
 "ts": "2026-11-08T04:03:36.458972",
 "count": 2543,
+"reviews_count": 2543,
 "manual": false,
 "pr83": false
 },
@@ -1738,6 +1881,7 @@
 "place_id": "ChIJBUZZeh4vdTERjcZTglYc-B4",
 "ts": "2026-11-08T04:03:37.123600",
 "count": 5266,
+"reviews_count": 5266,
 "manual": false,
 "pr83": false
 },
@@ -1750,6 +1894,7 @@
 "place_id": "ChIJfc7H4_kudTERLkDwasA8UeI",
 "ts": "2026-11-08T04:03:38.133217",
 "count": 563,
+"reviews_count": 563,
 "manual": false,
 "pr83": false
 },
@@ -1762,6 +1907,7 @@
 "place_id": "ChIJSQw5ZvEpdTERzb0ESMqf3BY",
 "ts": "2026-11-08T04:03:38.463489",
 "count": 172,
+"reviews_count": 172,
 "manual": false,
 "pr83": false
 },
@@ -1774,6 +1920,7 @@
 "place_id": "ChIJNx6XKbsvdTER_G0aMECttLA",
 "ts": "2026-11-08T04:03:38.764943",
 "count": 832,
+"reviews_count": 832,
 "manual": false,
 "pr83": false
 },
@@ -1786,6 +1933,7 @@
 "place_id": "ChIJc_9VekYvdTERtvfHUbJKWBA",
 "ts": "2026-11-08T04:03:39.112719",
 "count": 4431,
+"reviews_count": 4431,
 "manual": false,
 "pr83": false
 },
@@ -1798,6 +1946,7 @@
 "place_id": "ChIJpV-7MUovdTERS3tmu3Rt9kw",
 "ts": "2026-11-08T04:03:39.526644",
 "count": 8143,
+"reviews_count": 8143,
 "manual": false,
 "pr83": false
 },
@@ -1810,6 +1959,7 @@
 "place_id": "ChIJ3dTKg3MpdTERsmpW---TIBs",
 "ts": "2026-11-08T04:03:39.947156",
 "count": 1345,
+"reviews_count": 1345,
 "manual": false,
 "pr83": false
 },
@@ -1822,6 +1972,7 @@
 "place_id": "ChIJmce5MXQodTERclpuVo3Q1E8",
 "ts": "2026-11-08T04:03:40.249657",
 "count": 1868,
+"reviews_count": 1868,
 "manual": false,
 "pr83": false
 },
@@ -1834,6 +1985,7 @@
 "place_id": "ChIJA0evAkgvdTERLNUql8b4ipU",
 "ts": "2026-11-08T04:03:40.927712",
 "count": 9653,
+"reviews_count": 9653,
 "manual": false,
 "pr83": false
 },
@@ -1846,6 +1998,7 @@
 "place_id": "ChIJu2QAa0svdTERhw2Ouao8CDw",
 "ts": "2026-11-08T04:03:41.136835",
 "count": 92,
+"reviews_count": 92,
 "manual": false,
 "pr83": false
 },
@@ -1858,6 +2011,7 @@
 "place_id": "ChIJiVng3NgodTER9tZF5dR6X0M",
 "ts": "2026-11-08T04:03:41.494648",
 "count": 3827,
+"reviews_count": 3827,
 "manual": false,
 "pr83": false
 },
@@ -1870,6 +2024,7 @@
 "place_id": "ChIJF9cbwBsvdTERxQn29H80jjU",
 "ts": "2026-11-08T04:03:42.246805",
 "count": 10028,
+"reviews_count": 10028,
 "manual": false,
 "pr83": false
 },
@@ -1882,6 +2037,7 @@
 "place_id": "ChIJDbU1yQ8vdTERYRUNO-CLG8E",
 "ts": "2026-11-08T04:03:42.510485",
 "count": 2141,
+"reviews_count": 2141,
 "manual": false,
 "pr83": false
 },
@@ -1894,6 +2050,7 @@
 "place_id": "ChIJv9Qo1ewodTERZHA-i8p9zbc",
 "ts": "2026-11-08T04:03:42.788700",
 "count": 1776,
+"reviews_count": 1776,
 "manual": false,
 "pr83": false
 },
@@ -1906,6 +2063,7 @@
 "place_id": "ChIJn2BYZq8udTERN0JNJ48Dlx4",
 "ts": "2026-11-08T04:03:43.085039",
 "count": 3358,
+"reviews_count": 3358,
 "manual": false,
 "pr83": false
 },
@@ -1918,6 +2076,7 @@
 "place_id": "ChIJPaYDQigpdTER7RvTfnEiTR4",
 "ts": "2026-11-08T04:03:43.393400",
 "count": 4894,
+"reviews_count": 4894,
 "manual": false,
 "pr83": false
 },
@@ -1930,6 +2089,7 @@
 "place_id": "ChIJFffW-kYvdTER43H2mD8lla4",
 "ts": "2026-11-08T04:03:44.645979",
 "count": 1224,
+"reviews_count": 1224,
 "manual": false,
 "pr83": false
 },
@@ -1942,6 +2102,7 @@
 "place_id": "ChIJ4Z9iwrEudTERr50usO8Afgs",
 "ts": "2026-11-08T04:03:44.947415",
 "count": 2289,
+"reviews_count": 2289,
 "manual": false,
 "pr83": false
 },
@@ -1954,6 +2115,7 @@
 "place_id": "ChIJMaRAECgpdTERKoV7-C9X838",
 "ts": "2026-11-08T04:03:46.176265",
 "count": 3761,
+"reviews_count": 3761,
 "manual": false,
 "pr83": false
 },
@@ -1966,6 +2128,7 @@
 "place_id": "ChIJH5bA_CUvdTER8w-eVVHIqB4",
 "ts": "2026-11-08T04:03:46.424211",
 "count": 1635,
+"reviews_count": 1635,
 "manual": false,
 "pr83": false
 },
@@ -1978,6 +2141,7 @@
 "place_id": "ChIJH0A7aA8vdTERh5rL_W08Gu8",
 "ts": "2026-11-08T04:03:48.226072",
 "count": 1107,
+"reviews_count": 1107,
 "manual": false,
 "pr83": false
 },
@@ -1990,6 +2154,7 @@
 "place_id": "ChIJO3Xob0IvdTERnLnuIUQ66fw",
 "ts": "2026-11-08T04:03:48.474916",
 "count": 1986,
+"reviews_count": 1986,
 "manual": false,
 "pr83": false
 },
@@ -2002,6 +2167,7 @@
 "place_id": "ChIJT2RqfCEqdTERLE_u5ug9-gw",
 "ts": "2026-11-08T04:03:50.070530",
 "count": 801,
+"reviews_count": 801,
 "manual": false,
 "pr83": false
 },
@@ -2014,6 +2180,7 @@
 "place_id": "ChIJk_3V7hYvdTERiYmhSgvmA88",
 "ts": "2026-11-08T04:03:51.685960",
 "count": 7032,
+"reviews_count": 7032,
 "manual": false,
 "pr83": false
 },
@@ -2026,6 +2193,7 @@
 "place_id": "ChIJc5lfnJ8udTEREa8GivnG6mU",
 "ts": "2026-11-08T04:03:52.049118",
 "count": 1751,
+"reviews_count": 1751,
 "manual": false,
 "pr83": false
 },
@@ -2038,6 +2206,7 @@
 "place_id": "ChIJOXEn8NArdTER9TL2Jo5zofA",
 "ts": "2026-11-08T04:03:52.277697",
 "count": 1291,
+"reviews_count": 1291,
 "manual": false,
 "pr83": false
 },
@@ -2050,6 +2219,7 @@
 "place_id": "ChIJZfXdjj4vdTER1-XCkv7ltio",
 "ts": "2026-11-08T04:03:52.573226",
 "count": 11609,
+"reviews_count": 11609,
 "manual": false,
 "pr83": false
 },
@@ -2062,6 +2232,7 @@
 "place_id": "ChIJZfg1SZwvdTERDnigNkg9xaI",
 "ts": "2026-11-08T04:03:53.543157",
 "count": 3666,
+"reviews_count": 3666,
 "manual": false,
 "pr83": false
 },
@@ -2074,6 +2245,7 @@
 "place_id": "ChIJq91K8SgpdTERaBmYaH2JB-w",
 "ts": "2026-11-08T04:03:54.424928",
 "count": 715,
+"reviews_count": 715,
 "manual": false,
 "pr83": false
 },
@@ -2086,6 +2258,7 @@
 "place_id": "ChIJN6yML0YvdTERu3qIwePETD0",
 "ts": "2026-11-08T04:03:54.688138",
 "count": 4599,
+"reviews_count": 4599,
 "manual": false,
 "pr83": false
 },
@@ -2098,6 +2271,7 @@
 "place_id": "ChIJV9-d4jImdTERaWRbHxBsaWo",
 "ts": "2026-11-08T04:03:55.261062",
 "count": 273,
+"reviews_count": 273,
 "manual": false,
 "pr83": false
 },
@@ -2110,6 +2284,7 @@
 "place_id": "ChIJP7yPtigpdTERIIRwhlbqi8U",
 "ts": "2026-11-08T04:03:55.800165",
 "count": 1394,
+"reviews_count": 1394,
 "manual": false,
 "pr83": false
 },
@@ -2122,6 +2297,7 @@
 "place_id": "ChIJP7yPtigpdTERIIRwhlbqi8U",
 "ts": "2026-11-08T04:03:56.061913",
 "count": 1394,
+"reviews_count": 1394,
 "manual": false,
 "pr83": false
 },
@@ -2134,6 +2310,7 @@
 "place_id": "ChIJV8BHDV0pdTERvGqxdSId_50",
 "ts": "2026-11-08T04:03:56.374947",
 "count": 5321,
+"reviews_count": 5321,
 "manual": false,
 "pr83": false
 },
@@ -2146,6 +2323,7 @@
 "place_id": "ChIJexuTDjkvdTER-dIut0Bc-z4",
 "ts": "2026-11-08T04:03:56.634019",
 "count": 237,
+"reviews_count": 237,
 "manual": false,
 "pr83": false
 },
@@ -2158,6 +2336,7 @@
 "place_id": "ChIJU5lx2jMpdTERWEbW1k_KkQQ",
 "ts": "2026-11-08T04:03:56.998911",
 "count": 19,
+"reviews_count": 19,
 "manual": false,
 "pr83": false
 },
@@ -2170,6 +2349,7 @@
 "place_id": "ChIJK_GoUy8vdTER7o7W3nSgZiE",
 "ts": "2026-11-08T04:03:57.244617",
 "count": 2269,
+"reviews_count": 2269,
 "manual": false,
 "pr83": false
 },
@@ -2182,6 +2362,7 @@
 "place_id": "ChIJ25VPnkcvdTERSLUZtdUn4co",
 "ts": "2026-11-08T04:03:57.562858",
 "count": 8677,
+"reviews_count": 8677,
 "manual": false,
 "pr83": false
 },
@@ -2194,6 +2375,7 @@
 "place_id": "ChIJe5lQIo8pdTERLf2iRkHsFm4",
 "ts": "2026-11-08T04:03:57.864831",
 "count": 1233,
+"reviews_count": 1233,
 "manual": false,
 "pr83": false
 },
@@ -2206,6 +2388,7 @@
 "place_id": "ChIJPwYkCLIudTERm7PRQ4NSBR4",
 "ts": "2026-11-08T04:03:58.327565",
 "count": 2435,
+"reviews_count": 2435,
 "manual": false,
 "pr83": false
 },
@@ -2218,6 +2401,7 @@
 "place_id": "ChIJaW-KVvcudTERPQNq-A0a5bk",
 "ts": "2026-11-08T04:03:58.588917",
 "count": 3545,
+"reviews_count": 3545,
 "manual": false,
 "pr83": false
 },
@@ -2230,6 +2414,7 @@
 "place_id": "ChIJsYxZbkcvdTERYJLrWBMLcnY",
 "ts": "2026-11-08T04:03:58.917770",
 "count": 3712,
+"reviews_count": 3712,
 "manual": false,
 "pr83": false
 },
@@ -2242,6 +2427,7 @@
 "place_id": "ChIJMXO9STEpdTERlTxWAcmizE8",
 "ts": "2026-11-08T04:03:59.534033",
 "count": 64,
+"reviews_count": 64,
 "manual": false,
 "pr83": false
 },
@@ -2254,6 +2440,7 @@
 "place_id": "ChIJ2U7dJDEpdTERJk3dmKSAllM",
 "ts": "2026-11-08T04:03:59.789680",
 "count": 1954,
+"reviews_count": 1954,
 "manual": false,
 "pr83": false
 },
@@ -2266,6 +2453,7 @@
 "place_id": "ChIJyXPPdIovdTERUPZkDbAzMao",
 "ts": "2026-11-08T04:04:00.284216",
 "count": 2202,
+"reviews_count": 2202,
 "manual": false,
 "pr83": false
 },
@@ -2278,6 +2466,7 @@
 "place_id": "ChIJU1z90B4vdTER2kOVDOBJ7Tc",
 "ts": "2026-11-08T04:04:00.565643",
 "count": 2713,
+"reviews_count": 2713,
 "manual": false,
 "pr83": false
 },
@@ -2290,6 +2479,7 @@
 "place_id": "ChIJ24jarCgvdTERx1cIkILHX28",
 "ts": "2026-11-08T04:04:00.783929",
 "count": 2046,
+"reviews_count": 2046,
 "manual": false,
 "pr83": false
 },
@@ -2302,6 +2492,7 @@
 "place_id": "ChIJBaZuDCovdTERLEsXy5yai5g",
 "ts": "2026-11-11T13:08:06.084677",
 "count": 374,
+"reviews_count": 374,
 "manual": false,
 "pr83": true
 },
@@ -2314,6 +2505,7 @@
 "place_id": "ChIJ9wLkygQqdTERFffmxyDUW00",
 "ts": "2026-11-09T14:29:15.960926",
 "count": 29,
+"reviews_count": 29,
 "manual": false,
 "pr83": false
 },
@@ -2326,6 +2518,7 @@
 "place_id": "ChIJ6cmw6c4udTER2VMHMrEMX84",
 "ts": "2026-11-11T13:08:06.487774",
 "count": 42,
+"reviews_count": 42,
 "manual": false,
 "pr83": true
 },
@@ -2338,6 +2531,7 @@
 "place_id": "ChIJawi4do4pdTERbKoePB-ydpI",
 "ts": "2026-11-11T13:08:06.901676",
 "count": 59,
+"reviews_count": 59,
 "manual": false,
 "pr83": true
 },
@@ -2350,6 +2544,7 @@
 "place_id": "ChIJB7zpzXUpdTERIzn4dIfKJ1E",
 "ts": "2026-11-11T13:08:07.346682",
 "count": 2,
+"reviews_count": 2,
 "manual": false,
 "pr83": true
 },
@@ -2362,6 +2557,7 @@
 "place_id": "ChIJjT3OJaUpdTERofMuYfX-4-A",
 "ts": "2026-11-11T13:08:07.757683",
 "count": 26,
+"reviews_count": 26,
 "manual": false,
 "pr83": true
 },
@@ -2374,6 +2570,7 @@
 "place_id": "ChIJxyCpc0kvdTERaSAz3XB67Wg",
 "ts": "2026-11-09T14:29:25.567264",
 "count": 7,
+"reviews_count": 7,
 "manual": false,
 "pr83": false
 },
@@ -2386,6 +2583,7 @@
 "place_id": "ChIJGeA55OEvdTERHN7xHV0ikM8",
 "ts": "2026-11-09T14:29:26.948415",
 "count": 216,
+"reviews_count": 216,
 "manual": false,
 "pr83": false
 },
@@ -2398,6 +2596,7 @@
 "place_id": "ChIJzX9kxVUpdTERYIZlW5drbog",
 "ts": "2026-11-11T13:08:08.194319",
 "count": 4144,
+"reviews_count": 4144,
 "manual": false,
 "pr83": true
 },
@@ -2410,6 +2609,7 @@
 "place_id": "ChIJ78KD2ncvdTERmZljGiLHuuM",
 "ts": "2026-11-09T14:29:29.760748",
 "count": 15,
+"reviews_count": 15,
 "manual": false,
 "pr83": false
 },
@@ -2422,6 +2622,7 @@
 "place_id": "ChIJv8UUAAgpdTERzoWvkTZFXqU",
 "ts": "2026-11-09T14:29:32.802045",
 "count": 136,
+"reviews_count": 136,
 "manual": false,
 "pr83": false
 },
@@ -2434,6 +2635,7 @@
 "place_id": "ChIJZ1m36VcodTER2aSGgIesI_U",
 "ts": "2026-11-09T14:29:35.327198",
 "count": 5,
+"reviews_count": 5,
 "manual": false,
 "pr83": false
 },
@@ -2446,6 +2648,7 @@
 "place_id": "ChIJg3NhJegodTER4jasdRfkZ1k",
 "ts": "2026-11-09T14:29:35.746498",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -2458,6 +2661,7 @@
 "place_id": "ChIJ78KD2ncvdTERmZljGiLHuuM",
 "ts": "2026-11-09T14:29:37.389587",
 "count": 15,
+"reviews_count": 15,
 "manual": false,
 "pr83": false
 },
@@ -2470,6 +2674,7 @@
 "place_id": "ChIJi6be2M8odTERk78HRTSTYLE",
 "ts": "2026-11-09T14:29:39.121520",
 "count": 321,
+"reviews_count": 321,
 "manual": false,
 "pr83": false
 },
@@ -2482,6 +2687,7 @@
 "place_id": "ChIJP5IO7ZIvdTERUl9MtKXsg88",
 "ts": "2026-11-11T13:08:08.593685",
 "count": 24,
+"reviews_count": 24,
 "manual": false,
 "pr83": true
 },
@@ -2495,6 +2701,7 @@
 "place_id": "ChIJjTuTvr4ndTERMNZWDH2Ynpk",
 "ts": "2026-11-09T14:29:42.443642",
 "count": 2,
+"reviews_count": 2,
 "manual": false,
 "pr83": false
 },
@@ -2507,6 +2714,7 @@
 "place_id": "ChIJ98TqmNIodTERffkBBugB4fg",
 "ts": "2026-11-09T14:29:44.846607",
 "count": 12,
+"reviews_count": 12,
 "manual": false,
 "pr83": false
 },
@@ -2519,6 +2727,7 @@
 "place_id": "ChIJQ2Sd2dUodTER6diFHssINsw",
 "ts": "2026-11-09T14:29:46.154861",
 "count": 11,
+"reviews_count": 11,
 "manual": false,
 "pr83": false
 },
@@ -2531,6 +2740,7 @@
 "place_id": "ChIJGy3X7jgvdTERZX-pzukpE7w",
 "ts": "2026-11-09T14:29:46.533405",
 "count": 3,
+"reviews_count": 3,
 "manual": false,
 "pr83": false
 },
@@ -2543,6 +2753,7 @@
 "place_id": "ChIJ9-iZtMMpdTERHFrvqfHMYwc",
 "ts": "2026-11-09T14:29:47.718987",
 "count": 65,
+"reviews_count": 65,
 "manual": false,
 "pr83": false
 },
@@ -2555,6 +2766,7 @@
 "place_id": "ChIJJf8OOwApdTERuxt-2A2RMS4",
 "ts": "2026-11-09T14:29:49.961787",
 "count": 6,
+"reviews_count": 6,
 "manual": false,
 "pr83": false
 },
@@ -2567,6 +2779,7 @@
 "place_id": "ChIJme7BEosodTERnHyW1d7keLU",
 "ts": "2026-11-09T14:34:16.175013",
 "count": 5,
+"reviews_count": 5,
 "manual": false,
 "pr83": false
 },
@@ -2579,6 +2792,7 @@
 "place_id": "ChIJ25gu080pdTERr2EjV2UU_N8",
 "ts": "2026-11-11T13:08:22.633793",
 "count": 71,
+"reviews_count": 71,
 "manual": false,
 "pr83": true
 },
@@ -2591,6 +2805,7 @@
 "place_id": "ChIJ54gyuyopdTERNO9frk7CASw",
 "ts": "2026-11-09T14:34:24.753348",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -2603,6 +2818,7 @@
 "place_id": "ChIJWTeXv8YvdTERM-KOafgBmaQ",
 "ts": "2026-11-09T14:32:57.154662",
 "count": 4,
+"reviews_count": 4,
 "manual": false,
 "pr83": false
 },
@@ -2615,6 +2831,7 @@
 "place_id": "ChIJoVRJUtErdTERq5GvKM6TLjw",
 "ts": "2026-11-11T13:08:17.364571",
 "count": 52,
+"reviews_count": 52,
 "manual": false,
 "pr83": true
 },
@@ -2627,6 +2844,7 @@
 "place_id": "ChIJadJ1UsMudTERRzNF9i8KlCs",
 "ts": "2026-11-11T13:08:17.781530",
 "count": 57,
+"reviews_count": 57,
 "manual": false,
 "pr83": true
 },
@@ -2639,6 +2857,7 @@
 "place_id": "ChIJjzi5oHZzdTERfK7gQ2ifhn8",
 "ts": "2026-11-11T13:08:18.490012",
 "count": 5,
+"reviews_count": 5,
 "manual": false,
 "pr83": true
 },
@@ -2651,6 +2870,7 @@
 "place_id": "ChIJwcSI4Q8vdTERA6IFUiWfvW0",
 "ts": "2026-11-11T13:08:18.875576",
 "count": 105,
+"reviews_count": 105,
 "manual": false,
 "pr83": true
 },
@@ -2663,6 +2883,7 @@
 "place_id": "ChIJJcpIHCQvdTER0qjb35O75aI",
 "ts": "2026-11-11T13:08:19.250557",
 "count": 5,
+"reviews_count": 5,
 "manual": false,
 "pr83": true
 },
@@ -2675,6 +2896,7 @@
 "place_id": "ChIJC34monQvdTER1WgywgG6Eq0",
 "ts": "2026-11-11T13:08:19.714002",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": true
 },
@@ -2687,6 +2909,7 @@
 "place_id": "ChIJm2jnlUbfdDER-LxA02bOZWc",
 "ts": "2026-11-11T13:08:20.057119",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": true
 },
@@ -2699,6 +2922,7 @@
 "place_id": "ChIJkz6gaM0odTERgvXTbsiM5OA",
 "ts": "2026-11-11T13:08:20.742316",
 "count": 1387,
+"reviews_count": 1387,
 "manual": false,
 "pr83": true
 },
@@ -2711,6 +2935,7 @@
 "place_id": "ChIJ7Xr_sOUudTER_OIiMtXmJPQ",
 "ts": "2026-11-11T13:08:21.124696",
 "count": 100,
+"reviews_count": 100,
 "manual": false,
 "pr83": true
 },
@@ -2723,6 +2948,7 @@
 "place_id": "ChIJ9xpoSdoodTERrMu-VKqTeS4",
 "ts": "2026-11-09T14:33:22.037690",
 "count": null,
+"reviews_count": null,
 "manual": false,
 "pr83": false
 },
@@ -2735,6 +2961,7 @@
 "place_id": "ChIJj4JiMPEudTERSLTXHj2Xkdo",
 "ts": "2026-11-09T14:33:25.024549",
 "count": 29,
+"reviews_count": 29,
 "manual": false,
 "pr83": false
 },
@@ -2747,6 +2974,7 @@
 "place_id": "ChIJGTZbUEAvdTERKqKIdUZVk4k",
 "ts": "2026-11-09T14:33:26.825955",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -2759,6 +2987,7 @@
 "place_id": "ChIJeyCLQJUudTERSze6PabISmo",
 "ts": "2026-11-09T14:31:19.234818",
 "count": 79,
+"reviews_count": 79,
 "manual": false,
 "pr83": false
 },
@@ -2771,6 +3000,7 @@
 "place_id": "ChIJj-nIYbIpdTERDpQQrxpVl1E",
 "ts": "2026-11-09T14:31:25.565493",
 "count": 23,
+"reviews_count": 23,
 "manual": false,
 "pr83": false
 },
@@ -2783,6 +3013,7 @@
 "place_id": "ChIJX5p0FYEudTERpjsAjwWTGoc",
 "ts": "2026-11-09T14:31:26.361858",
 "count": 96,
+"reviews_count": 96,
 "manual": false,
 "pr83": false
 },
@@ -2795,6 +3026,7 @@
 "place_id": "ChIJF1XtCKzUdDERi0j3EQKlceE",
 "ts": "2026-11-09T14:31:27.960463",
 "count": 6,
+"reviews_count": 6,
 "manual": false,
 "pr83": false
 },
@@ -2807,6 +3039,7 @@
 "place_id": "ChIJaYCLDSotdTERCldbRXY3UJw",
 "ts": "2026-11-11T13:08:12.739783",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": true
 },
@@ -2819,6 +3052,7 @@
 "place_id": "ChIJc83FCkDRdDERS4gXeDY1YAw",
 "ts": "2026-11-09T14:31:30.678361",
 "count": 7,
+"reviews_count": 7,
 "manual": false,
 "pr83": false
 },
@@ -2831,6 +3065,7 @@
 "place_id": "ChIJWTmhRjcpdTERl4ctFGSZ9dY",
 "ts": "2026-11-09T14:33:35.932555",
 "count": 269,
+"reviews_count": 269,
 "manual": false,
 "pr83": false
 },
@@ -2843,6 +3078,7 @@
 "place_id": "ChIJVW68Wc0odTERHhafHYwg66I",
 "ts": "2026-11-09T14:33:38.735140",
 "count": 66,
+"reviews_count": 66,
 "manual": false,
 "pr83": false
 },
@@ -2855,6 +3091,7 @@
 "place_id": "ChIJBcubZAQvdTERLFXHoJAlVDE",
 "ts": "2026-11-09T14:33:39.166738",
 "count": 1710,
+"reviews_count": 1710,
 "manual": false,
 "pr83": false
 },
@@ -2867,6 +3104,7 @@
 "place_id": "ChIJvZurAdoodTER9A0q4elxg7U",
 "ts": "2026-11-09T14:33:39.683225",
 "count": 297,
+"reviews_count": 297,
 "manual": false,
 "pr83": false
 },
@@ -2879,6 +3117,7 @@
 "place_id": "ChIJN0vNyoopdTERJ1PGQaU_7xY",
 "ts": "2026-11-09T14:33:40.255998",
 "count": 18,
+"reviews_count": 18,
 "manual": false,
 "pr83": false
 },
@@ -2891,6 +3130,7 @@
 "place_id": "ChIJsWxwNyQpdTER7ebINSKnfJk",
 "ts": "2026-11-09T14:33:43.268677",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -2903,6 +3143,7 @@
 "place_id": "ChIJZX3FKAUvdTERmNmddqwcXxQ",
 "ts": "2026-11-09T14:33:45.282728",
 "count": 117,
+"reviews_count": 117,
 "manual": false,
 "pr83": false
 },
@@ -2915,6 +3156,7 @@
 "place_id": "ChIJCcLpoB8vdTERMDQg216xsNg",
 "ts": "2026-11-09T14:33:47.147672",
 "count": 334,
+"reviews_count": 334,
 "manual": false,
 "pr83": false
 },
@@ -2927,6 +3169,7 @@
 "place_id": "ChIJycGyto4udTERbCtI1E9vhTI",
 "ts": "2026-11-09T14:33:52.303541",
 "count": 1,
+"reviews_count": 1,
 "manual": false,
 "pr83": false
 },
@@ -2939,6 +3182,7 @@
 "place_id": "ChIJpebcKz4vdTERqYOefH_4qmQ",
 "ts": "2026-11-09T14:33:55.450559",
 "count": 44,
+"reviews_count": 44,
 "manual": false,
 "pr83": false
 },
@@ -2951,6 +3195,7 @@
 "place_id": "ChIJydlQMPEudTER6bv8Dkd-9RA",
 "ts": "2026-11-09T14:34:05.806535",
 "count": 83,
+"reviews_count": 83,
 "manual": false,
 "pr83": false
 },
@@ -2963,6 +3208,7 @@
 "place_id": "ChIJD9l0Uk0vdTER_IBYGbcbhhc",
 "ts": "2026-11-11T13:08:22.028925",
 "count": 149,
+"reviews_count": 149,
 "manual": false,
 "pr83": true
 }
