@@ -80,6 +80,11 @@ try:
             m = re.search(r"--budget\s+(\S+)", a)
             if "--all" in a.split() or "--budget-usd" in a: bad.append("enrich.py chạy với --all/--budget-usd (đó là việc của enrich-vendors.yml): %s" % a[:80])
             elif not m or float(m.group(1)) > 1.0: bad.append("enrich.py thiếu --budget hoặc > 1.0 (lô duyệt tay chỉ thử lại vài vendor tạm đóng cửa): %s" % a[:80])
+        if "enrich.py" in a and "--dry-run" not in a and "--apply-review-rule" not in a:
+            m2 = re.search(r"--max-requests\s+(\d+)", a)
+            if not m2 or int(m2.group(1)) > 2: bad.append("enrich.py thiếu --max-requests hoặc > 2 (enrich_max_requests, tiêu chí 10): %s" % a[:80])
+        if "resolve_overrides.py" in a and "--probe" not in a and "--dry-run" not in a and "--max-requests" not in a:
+            bad.append("resolve_overrides.py thiếu --max-requests (tiêu chí 10): %s" % a[:80])
         if "refresh_photos.py" in a:
             m = re.search(r"--max-requests\s+(\d+)", a)
             if not m or int(m.group(1)) > 6: bad.append("refresh_photos.py thiếu --max-requests hoặc > 6: %s" % a[:80])

@@ -8,7 +8,7 @@ Tình huống: (A) 3 cú bấm của Capu khác ngày -> PR chỉ có manual_ove
   (B) chạy lại cùng export (và ngày chạy khác) -> nội dung PR giống hệt byte (không viết lại khi không có cú bấm mới); (C) Capu Rút lại một mục -> PR dựng lại không còn mục đó; (D) export trống -> PR rỗng (đóng);
   (E) mục đã có trên main -> PR rỗng; (F) chữ ký bị sửa -> job đỏ ở bước áp, không có PR; (G) key_id lạ -> job đỏ; (H) curl --fail thoát 22 (sai khoá/URL/back 403) -> job đỏ, không PR.
 Tĩnh: chỉ workflow_dispatch/schedule; permissions đúng {contents: write, pull-requests: write}; concurrency; chỉ hai secret ENRICH_EXPORT_TOKEN, GITHUB_TOKEN; không GOOGLE_MAPS_API_KEY, không chạy resolve_overrides/enrich/refresh_photos/main.py;
-  không nội suy secrets/inputs vào run:; `uses` chỉ trong {actions/checkout, actions/setup-python, peter-evans/create-pull-request}; add-paths đúng một đường dẫn manual_overrides.json; branch cố định không phải main/master; không git push/--force/git add -A;
+  không nội suy secrets/inputs vào run:; `uses` chỉ trong {actions/checkout, actions/setup-python, peter-evans/create-pull-request}; add-paths đúng hai đường dẫn manual_overrides.json và enrich-report.json (ADR-074: báo cáo đọc manual_overrides.json, T-135); branch cố định không phải main/master; không git push/--force/git add -A;
   requirements.txt có cryptography; và INV-030, INV-031 nguyên văn xanh trên repo.
 Repo: TOHONG_REPO hoặc ../tohong. In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import base64, importlib.util, json, os, re, shutil, stat, subprocess, sys, tempfile
@@ -72,7 +72,7 @@ if pr is None or bad:
     print("FAIL " + bad[0] + (" (+%d lỗi nữa)" % (len(bad) - 1) if len(bad) > 1 else "")); sys.exit(1)
 w = pr.get("with") or {}
 paths = [x.strip() for x in str(w.get("add-paths", "")).split("\n") if x.strip()]
-if paths != ["tools/scraper/output/HCMC/manual_overrides.json"]: bad.append("add-paths %r (chỉ manual_overrides.json)" % paths)
+if paths != ["tools/scraper/output/HCMC/manual_overrides.json", "tools/scraper/output/HCMC/enrich-report.json"]: bad.append("add-paths %r (đúng manual_overrides.json và enrich-report.json, ADR-074)" % paths)
 BRANCH, BASE, BODY = str(w.get("branch", "")), str(w.get("base", "")), str(w.get("body-path", ""))
 if not BRANCH or BRANCH in ("main", "master") or "${{" in BRANCH or BASE not in ("main", "master") or not BODY: bad.append("branch %r / base %r / body-path %r không hợp lệ (nhánh cố định, base main, có body-path)" % (BRANCH, BASE, BODY))
 if bad:
@@ -92,6 +92,9 @@ try:
         shutil.copytree(os.path.join(repo, rel), os.path.join(ws, rel), ignore=shutil.ignore_patterns("__pycache__", "run-logs", ".git"))
     json.dump({"schema_version": 1, "keys": {"k1": P1}}, open(os.path.join(ws, "tools", "scraper", "admin_review_keys.json"), "w"))
     G = lambda *a: subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", *a], cwd=ws, capture_output=True, text=True)
+    # main ở trạng thái INV-003 xanh (báo cáo tươi): để tình huống "không có gì đổi" vẫn cho PR rỗng khi workflow sinh lại báo cáo (ADR-074)
+    _sc = os.path.join(ws, "tools", "scraper")
+    subprocess.run([sys.executable, os.path.join(_sc, "build_enrich_report.py"), "--state", "HCMC", "--output-dir", os.path.join(_sc, "output"), "--out", os.path.join(_sc, "output", "HCMC", "enrich-report.json")], cwd=tmp, capture_output=True, env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
     G("init", "-q", "-b", "main"); G("add", "-A"); G("commit", "-q", "-m", "main")
     fb = os.path.join(tmp, "fakebin"); os.makedirs(fb)
     def script(name, body):
@@ -154,13 +157,14 @@ try:
         return True, log, {"files": {}, "body": None, "other": []}
 
     MO = "tools/scraper/output/HCMC/manual_overrides.json"
+    RP = "tools/scraper/output/HCMC/enrich-report.json"
     def entries_of(pr): return json.loads(pr["files"][MO])["overrides"]
     keys = {"k1": P1}
     # A
     ok, log, a = simulate(ent)
     if not ok or a is None: bad.append("(A) workflow đỏ với 3 cú bấm của Capu: %s" % log[-300:])
     else:
-        if list(a["files"]) != [MO] or a["other"]: bad.append("(A) PR phải chỉ chứa manual_overrides.json; thấy %s, ngoài add-paths: %s" % (list(a["files"]), a["other"][:3]))
+        if MO not in a["files"] or set(a["files"]) - {MO, RP} or a["other"]: bad.append("(A) PR phải chỉ chứa manual_overrides.json và enrich-report.json (ADR-074); thấy %s, ngoài add-paths: %s" % (list(a["files"]), a["other"][:3]))
         else:
             added = [e for e in entries_of(a) if e["vendor_id"] in ids]
             if sorted(e["vendor_id"] for e in added) != sorted(e["vendor_id"] for e in ent): bad.append("(A) PR không có đúng 3 mục của export")
@@ -185,7 +189,8 @@ try:
     # E: mục đã có trên main
     ok0, _, first = simulate(ent[:1])
     if ok0 and first and first["files"]:
-        open(os.path.join(ws, MO), "w", encoding="utf-8").write(first["files"][MO]); G("add", "-A"); G("commit", "-q", "-m", "merged PR")
+        for _f, _txt in first["files"].items(): open(os.path.join(ws, _f), "w", encoding="utf-8").write(_txt)
+        G("add", "-A"); G("commit", "-q", "-m", "merged PR")
         ok, log, e_ = simulate(ent[:1])
         if not ok or e_ is None or e_["files"]: bad.append("(E) mục đã nằm trên main: PR phải rỗng; thấy %s" % list((e_ or {"files": {}})["files"]))
         G("reset", "-q", "--hard", "HEAD~1")
