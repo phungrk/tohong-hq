@@ -482,7 +482,7 @@ def tohong_tree_with_removed(n=1):
     return root, picked, tmp
 
 
-def run_back_sync(bk, wf, tohong_root, sha, branch, secrets=None, rec=None, checkouts=None, inputs=None):
+def run_back_sync(bk, wf, tohong_root, sha, branch, secrets=None, rec=None, checkouts=None, inputs=None, run_id="9001"):
     """Chạy NGUYÊN VĂN job của workflow pool ở tohong-back trong Box `bk` (bản sao git của back). Trả kết quả run_job."""
     rec = rec if rec is not None else []
     checkouts = checkouts if checkouts is not None else []
@@ -498,7 +498,7 @@ def run_back_sync(bk, wf, tohong_root, sha, branch, secrets=None, rec=None, chec
             shutil.rmtree(dst, ignore_errors=True); _copytree(tohong_root, dst)
         return {}
     uses = {"actions/checkout": checkout, "actions/": lambda w, s: {}, "peter-evans/create-pull-request": make_cpr(bk, rec)}
-    ctx = gh_ctx(bk, "workflow_dispatch", inputs=inputs if inputs is not None else {"tohong_ref": sha, "tohong_branch": branch}, repo=BACK_REPO_NAME, secrets=secrets)
+    ctx = gh_ctx(bk, "workflow_dispatch", inputs=inputs if inputs is not None else {"tohong_ref": sha, "tohong_branch": branch}, repo=BACK_REPO_NAME, secrets=secrets, run_id=run_id)
     job = next(iter(wf["jobs"]))
     return run_job(bk, wf, job, ctx, uses=uses), rec, checkouts
 
