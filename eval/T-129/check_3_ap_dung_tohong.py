@@ -12,7 +12,7 @@ Từ chối cả lượt (thoát 2, file không đổi byte, "APPLY_REFUSED <mã
 Chạy lại cùng đầu vào: file giữ nguyên byte. Không mạng. enrichment.overrides.load_overrides đọc được; dạng decisions/<tên>.md vẫn hợp lệ.
 Đo trên bản sao dữ liệu thật: (a) 8 entry ký đúng (3 Approve, remove, temporarily_closed, reject_match, 1 vendor đã có mục ADR-048) với reviewed_at KHÁC NGÀY nhau -> 6 mục mới, 1 bỏ qua, mục cũ giữ byte, approved_on từng mục = ngày bấm;
 (b) load_overrides; (c) INV-020 v2 PASS trong HQ giả có ADR khai khoá và ĐỎ khi ADR không khai; (d) từ chối đúng các ca xấu, file không đổi; (e) chạy lại không đổi byte; (f) resolve_overrides.py --dry-run đếm đúng; mạng bị chặn;
-(g) INV-015 (v1 nguyên văn và v2), INV-021 nguyên văn trên bản dữ liệu sau khi áp: xanh.
+(g) INV-015 (v1 nguyên văn và v2) xanh sau khi áp; INV-021 nguyên văn xanh trước khi áp và sau khi áp chỉ đỏ vì chính các vendor vừa thêm (file duyệt tay đi trước dữ liệu tới lần resolve/enrich kế).
 In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import base64, copy, importlib.util, json, os, re, shutil, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -175,11 +175,20 @@ try:
         m = re.search(r"DRY RUN: (\d+) mục", r.stdout)
         if r.returncode != 0 or not m or int(m.group(1)) != n_acc or n_acc < 3:
             bad.append("resolve_overrides.py --dry-run phải đếm %d mục accept_place chưa resolve, thấy %r (thoát %s)" % (n_acc, r.stdout.strip()[:80], r.returncode))
-        # (g) INV-015 (v1, v2) và INV-021 nguyên văn trên dữ liệu sau khi áp
+        # (g) INV-015 (v1, v2) nguyên văn xanh sau khi áp; INV-021 nguyên văn xanh TRƯỚC khi áp và, sau khi áp, chỉ đỏ vì chính các vendor vừa thêm
+        #     (đặc tính sẵn có của T-110: file duyệt tay đi trước dữ liệu cho tới lần resolve/enrich kế; spec ghi rõ khoảng đỏ này)
         ib = os.path.join(t.HQ, "eval", "invariants", "planner", "vendor", "images")
-        for path in (os.path.join(ib, "inv-015-nhan-khop-google-co-cong.py"), os.path.join(HERE, "inv-proposed-inv-015-v2-mien-theo-quyet-dinh-capu.py"), os.path.join(ib, "inv-021-du-lieu-khop-file-duyet-tay.py")):
+        for path in (os.path.join(ib, "inv-015-nhan-khop-google-co-cong.py"), os.path.join(HERE, "inv-proposed-inv-015-v2-mien-theo-quyet-dinh-capu.py")):
             x = run([path], t.HQ, env=env2)
             if x.returncode != 0: bad.append("%s đỏ trên dữ liệu sau khi áp: %s" % (os.path.basename(path)[:7], x.stdout.strip()[:140]))
+        i21 = os.path.join(ib, "inv-021-du-lieu-khop-file-duyet-tay.py")
+        open(mo, "wb").write(old_bytes)
+        x = run([i21], t.HQ, env=env2)
+        if x.returncode != 0: bad.append("INV-021 đỏ trên dữ liệu trước khi áp (lệch sẵn có, không phải do T-129): %s" % x.stdout.strip()[:140])
+        open(mo, "wb").write(b1)
+        x = run([i21], t.HQ, env=env2)
+        mm = re.search(r"vd (marry_[0-9a-f]+)", x.stdout)
+        if x.returncode == 0 or not mm or mm.group(1) not in new_ids: bad.append("INV-021 sau khi áp: mong đỏ chỉ vì vendor vừa thêm, thấy %r" % x.stdout.strip()[:140])
     print("FAIL " + bad[0] + (" (+%d lỗi nữa)" % (len(bad) - 1) if len(bad) > 1 else "") if bad else "PASS")
     sys.exit(1 if bad else 0)
 finally:
