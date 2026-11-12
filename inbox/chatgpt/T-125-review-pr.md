@@ -2,7 +2,7 @@
 task: T-125
 type: review-pr
 priority: P1
-status: open
+status: done
 assigned: 2026-11-11
 due: 2026-11-13
 source:
@@ -34,4 +34,8 @@ source:
 
 **Giới hạn:** không sửa sổ cái, `main`, eval, bất biến; không merge, không approve, không đẩy commit lên ba nhánh PR. Chỉ comment.
 
-**Kết quả (Chief of Staff ghi khi đóng):**
+**Kết quả (Chief of Staff ghi khi đóng, 2026-11-12, adversary xác minh):**
+1. back#46 normalize() nuốt file R2 sai schema → kho rỗng, PUT ghi đè mất dữ liệu — **ĐÚNG** (lỗi thật adversary bỏ sót; thành eval/T-125/adv-04, sửa ở T-132).
+2. tohong#84 apply bỏ kiểm decision khi thiếu `--hq` — **ĐÚNG về hành vi**, spec T-124 cho phép (spec lỏng, không phải lỗi code); xử lý trong T-129; luật tạm: chỉ chạy apply với `--hq` (ADR-068).
+3. front#68 thiếu `version_conflict` trong ERR — **SAI** (khoá có ở format.js:45; chỉ câu chữ lệch nghĩa, minor đã biết).
+KPI: 2/3 đúng, 1 sai; 1 lỗi thật ngoài tầm adversary.
