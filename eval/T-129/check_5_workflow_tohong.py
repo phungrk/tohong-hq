@@ -59,6 +59,8 @@ for s in steps:
 for r in runs:
     for ln in r.splitlines():
         if re.search(r"\bgit\s+push\b", ln) or re.search(r"\bgit\s+add\s+(-A|--all|\.)(\s|$)", ln) or "--force" in ln: bad.append("dòng cấm: %s" % ln.strip()[:80])
+curl = next((r for r in runs if "curl" in r), "")
+if not re.search(r"curl\b[^\n]*(\s--fail\b|\s-[a-zA-Z]*f[a-zA-Z]*\s)", curl) or "Authorization: Bearer $" not in curl: bad.append("curl phải có --fail và Authorization: Bearer lấy từ biến môi trường")
 pr = next((s for s in steps if str(s.get("uses", "")).startswith("peter-evans/create-pull-request")), None)
 if not pr: bad.append("thiếu bước peter-evans/create-pull-request")
 req = os.path.join(repo, "tools", "scraper", "requirements.txt")
@@ -86,7 +88,7 @@ tmp = tempfile.mkdtemp(prefix="t129-wf-")
 try:
     ws = os.path.join(tmp, "repo")
     os.makedirs(ws)
-    for rel in ("tools/scraper", ".github"):
+    for rel in ("tools", ".github"):
         shutil.copytree(os.path.join(repo, rel), os.path.join(ws, rel), ignore=shutil.ignore_patterns("__pycache__", "run-logs", ".git"))
     json.dump({"schema_version": 1, "keys": {"k1": P1}}, open(os.path.join(ws, "tools", "scraper", "admin_review_keys.json"), "w"))
     G = lambda *a: subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", *a], cwd=ws, capture_output=True, text=True)
@@ -140,7 +142,7 @@ try:
                     st = G("status", "--porcelain", "--", path).stdout
                     if st.strip():
                         files[path] = open(os.path.join(ws, path), encoding="utf-8").read()
-                other = [l[3:] for l in G("status", "--porcelain").stdout.splitlines() if l[3:] not in paths and not l[3:].startswith("tools/scraper/__pycache__")]
+                other = [l[3:] for l in G("status", "--porcelain").stdout.splitlines() if l[3:] not in paths and "__pycache__" not in l[3:]]
                 return True, log, {"files": files, "body": open(g["body-path"], encoding="utf-8").read() if os.path.isfile(g["body-path"]) else None, "other": other}
             env = dict(os.environ, PATH=fb + os.pathsep + os.environ["PATH"], PYTHONPATH=nd, GOOGLE_MAPS_API_KEY="", RUNNER_TEMP=rt, GITHUB_WORKSPACE=ws, CI="true",
                        FAKE_EXPORT=exp, FAKE_URL=URL, FAKE_TOKEN=TOKEN, FAKE_CURL_FAIL="1" if fail_curl else "0")
