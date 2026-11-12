@@ -57,7 +57,7 @@ try:
         t.remove_vendor_in_tree(troot, c2, v2)
         regen()
         bk.reset()  # main của back = pool CŨ (PR 1 chưa merge)
-        res2, rec2, _ = t.run_back_sync(bk, wf, troot, S2, BR)
+        res2, rec2, _ = t.run_back_sync(bk, wf, troot, S2, BR, run_id="9002")  # run id khác: nhánh pool không được phụ thuộc run id
         m2 = [r for r in rec2 if r["operation"] == "created"]
         if res2["status"] != "success" or len(m2) != 1: bad.append("(3) sync lần 2 (SHA mới, cùng nhánh) không cho đúng một PR: %s" % res2["log"][-200:])
         else:
