@@ -9,6 +9,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { BACK, MemoryBucket, makeEnv, call, reporter, outbound, worker } from "./lib/back.mjs";
+import { makeKey, signingEnv, verifyEntry } from "./lib/signing.mjs";
 
 const R = reporter();
 const fp = path.join(BACK, "lib", "vendorEnrichReport.generated.js");
@@ -18,7 +19,8 @@ const [A, B] = rep.vendors.filter((r) => r.approvable && !r.override).map((r) =>
 const TOKEN = "t129-khoa-may-0123456789abcdef";
 const CAPU = "user_capu_0001", ADM = "user_admin_0002";
 const bucket = new MemoryBucket();
-const env = makeEnv(bucket, { ADMIN_USER_IDS: `${CAPU},${ADM}`, CAPU_USER_IDS: CAPU, ENRICH_EXPORT_TOKEN: TOKEN });
+const KEY = makeKey("k1");
+const env = makeEnv(bucket, { ...signingEnv(KEY), ADMIN_USER_IDS: `${CAPU},${ADM}`, CAPU_USER_IDS: CAPU, ENRICH_EXPORT_TOKEN: TOKEN });
 const as = (u, m, p, b) => call(env, m, p, { token: `dev:${u}`, body: b });
 await as(CAPU, "PUT", `/api/admin/vendor-enrich/${A}/review`, { decision: "approve" });
 await as(ADM, "PUT", `/api/admin/vendor-enrich/${B}/review`, { decision: "approve" });
@@ -29,7 +31,12 @@ const put0 = bucket.putLog.length;
 const ok = await call(env, "GET", P, { token: TOKEN });
 const adm = await as(ADM, "GET", "/api/admin/vendor-enrich/export");
 R.check("token máy đúng -> 200, đúng 1 entry (review của Capu), nhãn băm, không lộ user id", ok.status === 200 && ok.json?.count === 1 && ok.json.entries[0].vendor_id === A && ok.json.entries[0].by_capu === true && /^admin:[0-9a-f]{8}$/.test(ok.json.entries[0].reviewer_label) && !/user_/.test(ok.text), [ok.status, ok.text.slice(0, 200)]);
-R.check("thân giống export của admin", JSON.stringify(ok.json) === JSON.stringify(adm.json), [ok.json?.count, adm.json?.count]);
+const strip = (j) => ({ ...j, exported_at: 0 });
+R.check("thân giống export của admin (trừ exported_at)", JSON.stringify(strip(ok.json)) === JSON.stringify(strip(adm.json)), [ok.json?.count, adm.json?.count]);
+R.check("entry có chữ ký Ed25519 đúng", verifyEntry(ok.json.entries[0], KEY.publicKey));
+const noKey = makeEnv(bucket, { ADMIN_USER_IDS: `${CAPU},${ADM}`, CAPU_USER_IDS: CAPU, ENRICH_EXPORT_TOKEN: TOKEN });
+const nk = await call(noKey, "GET", P, { token: TOKEN });
+R.check("token đúng nhưng chưa có khoá ký -> 503 signing_unavailable (không trả entry chưa ký)", nk.status === 503 && nk.json?.error === "signing_unavailable" && !/vendor_id/.test(nk.text), [nk.status, nk.text.slice(0, 80)]);
 const r2 = await worker.fetch(new Request("http://localhost" + P, { headers: { Authorization: `Bearer ${TOKEN}` } }), env, { waitUntil() {} });
 R.check("Cache-Control: no-store", /no-store/.test(r2.headers.get("Cache-Control") || ""), r2.headers.get("Cache-Control"));
 const deny = async (name, e, opts, p = P, method = "GET") => {
@@ -43,7 +50,7 @@ await deny("token thêm một ký tự", env, { token: TOKEN + "x" });
 await deny("token dev của admin", env, { token: `dev:${ADM}` });
 await deny("token dev của Capu", env, { token: `dev:${CAPU}` });
 await deny("token trong query string", env, {}, `${P}?token=${TOKEN}`);
-for (const [n, e] of [["ENRICH_EXPORT_TOKEN thiếu", makeEnv(bucket, { ADMIN_USER_IDS: CAPU, CAPU_USER_IDS: CAPU })], ["ENRICH_EXPORT_TOKEN rỗng", makeEnv(bucket, { ENRICH_EXPORT_TOKEN: "" })], ["ENRICH_EXPORT_TOKEN quá ngắn (gửi đúng chuỗi đó)", makeEnv(bucket, { ENRICH_EXPORT_TOKEN: "abc" })]]) {
+for (const [n, e] of [["ENRICH_EXPORT_TOKEN thiếu", makeEnv(bucket, { ...signingEnv(KEY), ADMIN_USER_IDS: CAPU, CAPU_USER_IDS: CAPU })], ["ENRICH_EXPORT_TOKEN rỗng", makeEnv(bucket, { ...signingEnv(KEY), ENRICH_EXPORT_TOKEN: "" })], ["ENRICH_EXPORT_TOKEN quá ngắn (gửi đúng chuỗi đó)", makeEnv(bucket, { ...signingEnv(KEY), ENRICH_EXPORT_TOKEN: "abc" })]]) {
   await deny(n, e, { token: n.includes("ngắn") ? "abc" : "" });
 }
 for (const m of ["POST", "PUT", "DELETE"]) {

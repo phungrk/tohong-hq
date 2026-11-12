@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Đề xuất SỬA INV-015 (T-129, ADR-065): chỉ đổi điều khoản miễn `_exempt` để chấp nhận quyết định hợp lệ của Capu nguồn (B) như INV-020 v2. Mọi phần khác giữ nguyên byte so với bản trong bể.
+"""Đề xuất SỬA INV-015 (T-129, ADR-065/066): chỉ đổi điều khoản miễn `_exempt` để chấp nhận quyết định hợp lệ của Capu nguồn (B, có chữ ký) như INV-020 v2. Mọi phần khác giữ nguyên byte so với bản trong bể.
 Bản gốc ghi tiếp bên dưới.
 
 Nguồn: T-106 (spec products/T-106-enrich-venue.md v3, Hành vi 2-3 + "Bất biến đề xuất" B; defect handoffs/T-106-D1.md, T-106-D2.md;
@@ -52,23 +52,19 @@ def _frontmatter(txt):
     return m.group(1) if m else ""
 
 
-def _capu_labels():
-    """T-129 (ADR-065): nhãn người được coi là Capu = dòng `capu_admin_labels:` ở frontmatter của file decisions/ có decided_by: capu."""
-    out, dec_root = set(), os.path.realpath(os.path.join(HQ, "decisions"))
-    for name in sorted(os.listdir(dec_root)):
-        d = os.path.realpath(os.path.join(dec_root, name))
-        if not name.endswith(".md") or os.path.dirname(d) != dec_root or not os.path.isfile(d):
-            continue
-        fm = _frontmatter(open(d, encoding="utf-8").read())
-        if _re.search(r"^decided_by:\s*capu\s*$", fm, _re.M):
-            for m in _re.finditer(r"^capu_admin_labels:\s*(.+?)\s*$", fm, _re.M):
-                out.update(_re.findall(r"admin:[0-9a-f]{8}", m.group(1)))
-    return out
+def _cd():
+    """T-129 (ADR-065/066): định nghĩa chuẩn chữ ký Capu (eval/lib/capu_decision.py)."""
+    for rel in (("eval", "lib", "capu_decision.py"), ("eval", "T-129", "capu_decision.py")):
+        f = os.path.join(HQ, *rel)
+        if os.path.isfile(f):
+            sp = importlib.util.spec_from_file_location("capu_decision", f); m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m); return m
+    raise RuntimeError("thiếu eval/lib/capu_decision.py")
 
 
 def _exempt(vid, pid):
     """Có mục accept_place khớp vendor_id + resolved.place_id và quyết định HỢP LỆ của Capu (như INV-020 v2): (A) decision là file trong <HQ>/decisions/ có
-    decided_by: capu ở frontmatter và nhắc vendor_id (ADR-050); hoặc (B) decision = admin-review:<label>@<reviewed_at> với label thuộc capu_admin_labels, reason khớp (ADR-065)."""
+    decided_by: capu ở frontmatter và nhắc vendor_id (ADR-050); hoặc (B) decision = admin-review:<key_id>:<label>@<reviewed_at>:<sig> với chữ ký Ed25519 đúng
+    bằng khoá Capu đã duyệt trong decisions/ (ADR-065, ADR-066)."""
     fp = os.path.join(t, "tools", "scraper", "output", "HCMC", "manual_overrides.json")
     try:
         doc = json.load(open(fp, encoding="utf-8"))
@@ -78,12 +74,12 @@ def _exempt(vid, pid):
     for e in doc.get("overrides") or []:
         if e.get("vendor_id") == vid and e.get("action") == "accept_place" and (e.get("resolved") or {}).get("place_id") == pid and pid:
             dec = str(e.get("decision") or "?")
-            am = _re.fullmatch(r"admin-review:(admin:[0-9a-f]{8})@(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z", dec)
-            if am:
-                at = dec.split("@", 1)[1]
-                return (am.group(1) in _capu_labels() and e.get("approved_by") == "capu"
-                        and str(e.get("reason") or "").endswith("[duyệt qua admin: %s, %s]" % (am.group(1), at))
-                        and str(e.get("approved_on") or "") >= am.group(2))
+            if dec.startswith("admin-review:"):
+                try:
+                    cd = _cd()
+                    return cd.check_entry(e, cd.hq_keys(HQ))[0]
+                except (ImportError, ValueError, RuntimeError):
+                    return False
             d = os.path.realpath(os.path.join(HQ, dec))
             if os.path.dirname(d) != dec_root or not os.path.isfile(d):
                 return False

@@ -10,10 +10,14 @@
 //  Nhật ký admin (vendor_enrich.review) ghi `after.by_capu`.
 //  GET export (admin): {count, waiting_capu, skipped_not_approvable, entries}; entries CHỈ gồm review by_capu hiệu lực true, sắp theo vendor_id, mỗi entry {vendor_id, action, place_id|maps_link, reason, reviewer_label, reviewed_at, by_capu:true}
 //  với reviewer_label = "admin:" + 8 ký tự hex đầu của sha256(user id) ; KHÔNG có trường reviewed_by và không chuỗi user id nào xuất hiện trong thân export; waiting_capu = số review chờ nhưng không phải của Capu.
+//  GHI THÊM (ADR-066, M3): mỗi entry export có `key_id` (= ENRICH_SIGNING_KEY_ID) và `sig` (Ed25519 base64url không đệm, 86 ký tự) trên (key_id, vendor_id, action, place_id, maps_link, reason, reviewer_label, reviewed_at)
+//  theo định dạng của eval/T-129/lib/signing.mjs; thân export có `exported_at` (ISO). ENRICH_SIGNING_KEY (PKCS8 DER base64 của khoá Ed25519) thiếu/hỏng hoặc ENRICH_SIGNING_KEY_ID sai dạng ^k[0-9a-z]{1,8}$:
+//  cả hai route export trả 503 {"error":"signing_unavailable"} (không bao giờ trả entry chưa ký). waiting_capu chỉ đếm review chờ của dòng còn trong báo cáo, chưa có override, không phải Approve hết approvable, và không phải của Capu.
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { BACK, MemoryBucket, makeEnv, call, reporter, outbound } from "./lib/back.mjs";
+import { makeKey, signingEnv, verifyEntry } from "./lib/signing.mjs";
 
 const R = reporter();
 const fp = path.join(BACK, "lib", "vendorEnrichReport.generated.js");
@@ -26,13 +30,16 @@ const label = (u) => "admin:" + crypto.createHash("sha256").update(u).digest("he
 const U = { capu: "user_capu_0001", adm: "user_admin_0002", adm2: "user_admin_0003", outsider: "user_capuonly_0004" };
 const base = "/api/admin/vendor-enrich";
 const bucket = new MemoryBucket();
-const ENV = { ADMIN_USER_IDS: `${U.capu}, ${U.adm},${U.adm2},,`, CAPU_USER_IDS: ` ${U.capu} ,${U.outsider},` };
+const KEY = makeKey("k1");
+const ENV = { ...signingEnv(KEY), ADMIN_USER_IDS: `${U.capu}, ${U.adm},${U.adm2},,`, CAPU_USER_IDS: ` ${U.capu} ,${U.outsider},` };
 const env = makeEnv(bucket, ENV);
 const as = (e, u, method, p, body) => call(e, method, p, { token: `dev:${u}`, body });
 const rv = (id) => `${base}/${id}/review`;
 const listRow = async (e, u, id) => (await as(e, u, "GET", `${base}?limit=100&q=${encodeURIComponent(rep.vendors.find((r) => r.id === id).name)}`)).json?.rows?.find((x) => x.id === id);
 const reviewsKeyBytes = () => [...bucket.data.entries()].filter(([k]) => /vendor_enrich_reviews/.test(k)).map(([, v]) => v).join("|");
 
+// khoá R2 có sẵn một review "ma" (id không còn trong báo cáo) của admin khác: không được tính vào waiting_capu
+bucket.data.set("data/admin/vendor_enrich_reviews.json", JSON.stringify({ vendors: { marry_000000000001: { state: "pending", decision: "approve", action: "accept_place", place_id: "ChIJghostXXXXXXXXXXXXXXXX", reason: "cũ", reviewed_by: U.adm, reviewed_at: "2026-11-01T00:00:00Z", by_capu: false } } }));
 // 1. ai bấm thì review mang by_capu đúng; thân yêu cầu không giả mạo được
 let r = await as(env, U.capu, "PUT", rv(A), { decision: "approve" });
 R.check("Capu Approve -> 200, review.by_capu === true, reviewed_by = Capu (từ token)", r.status === 200 && r.json?.review?.by_capu === true && r.json.review.reviewed_by === U.capu, r.json);
@@ -72,17 +79,28 @@ const e0 = (ex.json?.entries || []).find((x) => x.vendor_id === D) || {};
 R.check("entry: reviewer_label = admin:<8 hex đầu của sha256(user id Capu)>, by_capu true, reviewed_at ISO, action/reason đúng", e0.reviewer_label === label(U.capu) && e0.by_capu === true && !Number.isNaN(Date.parse(e0.reviewed_at)) && e0.action === "remove" && String(e0.reason).includes("Không có trên Maps"), e0);
 R.check("export không có trường reviewed_by và thân không chứa user id nào", ex.json.entries.every((x) => !("reviewed_by" in x)) && !/user_(capu|admin|capuonly)/.test(ex.text), ex.text.slice(0, 200));
 
+R.check("mỗi entry có key_id = k1 và chữ ký Ed25519 đúng (kiểm độc lập bằng khoá công khai)", ex.json.entries.length === 3 && ex.json.entries.every((x) => x.key_id === "k1" && verifyEntry(x, KEY.publicKey)), ex.json.entries.map((x) => [x.key_id, x.sig?.length]));
+R.check("sửa một trường bất kỳ của entry thì chữ ký hết đúng", ["reason", "action", "vendor_id", "reviewed_at", "reviewer_label"].every((f) => !verifyEntry({ ...e0, [f]: e0[f] + "x" }, KEY.publicKey)));
+R.check("thân export có exported_at ISO", !Number.isNaN(Date.parse(ex.json.exported_at)), ex.json.exported_at);
+const other = makeKey("k1");
+R.check("chữ ký không đúng dưới khoá công khai khác", !verifyEntry(e0, other.publicKey));
+for (const [name, extra] of [["thiếu ENRICH_SIGNING_KEY", { ENRICH_SIGNING_KEY: "" }], ["ENRICH_SIGNING_KEY hỏng", { ENRICH_SIGNING_KEY: "bm90LWEta2V5" }], ["ENRICH_SIGNING_KEY_ID sai dạng", { ENRICH_SIGNING_KEY_ID: "K 1" }]]) {
+  const bad = makeEnv(bucket, { ...ENV, ...extra });
+  const x = await as(bad, U.adm, "GET", `${base}/export`);
+  R.check(`${name}: export admin -> 503 signing_unavailable, không entry nào`, x.status === 503 && x.json?.error === "signing_unavailable" && !/"sig"|reviewer_label|vendor_id/.test(x.text), [x.status, x.text.slice(0, 80)]);
+}
+
 // 4. nhật ký
 const audit = (await as(env, U.adm, "GET", "/api/admin/audit?action=vendor_enrich.review&limit=200")).json;
 const mine = (audit?.entries || []).filter((e) => e.target_id === A);
 R.check("nhật ký vendor_enrich.review của cú bấm Capu ghi after.by_capu true và admin_id = Capu", mine.some((e) => e.admin_id === U.capu && e.after?.by_capu === true), mine.map((e) => [e.admin_id, e.after?.by_capu]));
 
 // 5. đóng mặc định và thu hồi
-const noCapu = makeEnv(bucket, { ADMIN_USER_IDS: ENV.ADMIN_USER_IDS });
+const noCapu = makeEnv(bucket, { ...signingEnv(KEY), ADMIN_USER_IDS: ENV.ADMIN_USER_IDS });
 const rowA = await listRow(noCapu, U.adm, A);
 const ex2 = await as(noCapu, U.adm, "GET", `${base}/export`);
 R.check("CAPU_USER_IDS thiếu: review cũ của Capu thành by_capu false, export trống, waiting_capu = số review chờ (5)", rowA?.review?.by_capu === false && ex2.json?.count === 0 && ex2.json?.waiting_capu === 5, [rowA?.review?.by_capu, ex2.json]);
-const emptyCapu = makeEnv(bucket, { ADMIN_USER_IDS: ENV.ADMIN_USER_IDS, CAPU_USER_IDS: "" });
+const emptyCapu = makeEnv(bucket, { ...signingEnv(KEY), ADMIN_USER_IDS: ENV.ADMIN_USER_IDS, CAPU_USER_IDS: "" });
 const ex3 = await as(emptyCapu, U.capu, "GET", `${base}/export`);
 R.check("CAPU_USER_IDS rỗng: không ai là Capu (export trống)", ex3.json?.count === 0, ex3.json?.count);
 r = await as(noCapu, U.capu, "PUT", rv(E), { decision: "approve" });
