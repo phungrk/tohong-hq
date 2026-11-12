@@ -1,0 +1,21 @@
+{
+ "T-110/check_8_han_muc_request.py": "0d60478bec906df91593e9e5ed3b58a9599e3ca976f0532c84981c00942eb7a9",
+ "T-111/check_10_workflow.py": "2e2541ed241f4f49dc328261c74a415052e004a185e710c151d316121fb2cecd",
+ "T-112/adv-06-workflow-concurrency-google-places.py": "93f6375337b8d784e88377a3b7b32aa33df8f308439e43cd94541fa76f017c8f",
+ "T-126/check_9_ap_nguoc_tren_nhanh_pr_du_lieu.py": "1801e9b5a37101026830f8fb8f8cc26821656c47dace07f93501d6576e515975",
+ "T-127/adv-02-workflow-apply-review-rule-chay-that.py": "0d31686107d40c8d344b83aa18f71eb600d6d5d8f2938c4bee09944f318b9177",
+ "T-129/bat-bien-cho-merge/inv-003-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py": "3f4890655326cc0533be184f7eebc482559e49d6e95d0cb16a5fc7574bd8a828",
+ "T-129/capu_decision.py": "63433645d0c58da029e1a90a3198587f9bfbfb659bff599e6cd381f3323756e4",
+ "T-129/check_1_luat_capu_back.mjs": "900bfe3f405e618cd09426aeb6445cf166216e0f6d3435adeb58bccaa63a6d5f",
+ "T-129/check_2_xuat_cho_workflow.mjs": "5ac4352f433a5cb9efb73ce9a78f3a1c7398d4b1587d502e4d6c4bffbf98e41e",
+ "T-129/check_3_ap_dung_tohong.py": "7b48afada5d0e66b529646ca77c7411313a8f93f6e0547b7629b928f97bf41a2",
+ "T-129/check_4_inv_020_v2.py": "68a07342cd271ade731aded6b6b925fd5ed634e6339bd4c75d4955b774aa5733",
+ "T-129/check_5_workflow_tohong.py": "1f093549e3f1c364cacbd23727717f6cb3913f5ac889bd5e0ff73ac03d65b93a",
+ "T-129/check_6_ui_nhan_trang_thai.cjs": "bd376b3e47fffd548080c28fe5704a3224ea204fca904762375344fd50a9ebc3",
+ "T-129/inv-proposed-inv-015-v2-mien-theo-quyet-dinh-capu.py": "36e4df7ade9fe97475808fe55c06c47e05926cc3fc1a6413cd85fcef374abcd8",
+ "T-129/inv-proposed-inv-020-v2-quyet-dinh-capu-hop-le.py": "e42a6e71c3fe3402ee92bc314d3c2ea17b1525c99bd2857e92f15dd8197325ae",
+ "T-129/lib/back.mjs": "6a4abec73fdb2c81c04b9a315af52ced045f574cd8872a95e236172e2530fff5",
+ "T-129/lib/fake_google_sitecustomize.py": "259656c6f976e0f9712eae1512f0fd63ec16a5262fbd16a6b5511b95563e9f9a",
+ "T-129/lib/signing.mjs": "7be64806334dbc8ef88107b1b3be5db3b8c4d5ce89ecdc28420f86d961b8e9f0",
+ "T-134/adv-04-workflow-ap-dung-do-khi-apply-tu-choi.py": "96e2c63e5a7ec06f6c203bebb400b9974eff6b70b4893415a3260e48805d909b"
+}

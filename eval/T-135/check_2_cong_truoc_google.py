@@ -24,7 +24,10 @@ if not names or names[0] != "Cổng: không Re-run workflow Google":
     bad.append("bước đầu tiên phải là 'Cổng: không Re-run workflow Google'; thấy %r" % (names[:1],))
 gi = next((i for i, n in enumerate(names) if n.startswith("Google:")), None)
 reg = [i for i, s in enumerate(steps) if s.get("name", "").startswith("Cổng:") and "check_runs.py" in str(s.get("run", ""))]
+quo = [i for i, n in enumerate(names) if n.startswith("Cổng: hạn mức")]
 if gi is None: bad.append("không có bước nào tên bắt đầu 'Google:'")
+if not quo: bad.append("thiếu bước 'Cổng: hạn mức…' (tiêu chí 10)")
+elif gi is not None and quo[0] > gi: bad.append("cổng hạn mức đứng SAU bước Google đầu tiên")
 if not reg: bad.append("thiếu bước 'Cổng: …' chạy check_runs.py (sổ đăng ký) — enrich-vendors.yml đã có, resolve-overrides.yml chưa")
 elif gi is not None and reg[0] > gi: bad.append("cổng sổ đăng ký đứng SAU bước Google đầu tiên")
 if bad:

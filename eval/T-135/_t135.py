@@ -343,6 +343,7 @@ def run_job(box, wf, job_name, ctx, uses=None, stop_on_fail=False, only=None):
                 p = subprocess.run(argv + [interp(s["run"], ctx)], cwd=cwd, env=env, capture_output=True, text=True, timeout=900)
                 rc, log = p.returncode, (p.stdout or "") + (p.stderr or "")
                 txt = open(outf).read()
+                open(os.path.join(box.log, "summary.txt"), "a", encoding="utf-8").write(open(sumf, encoding="utf-8").read())
                 for m in re.finditer(r"^([\w\-]+)<<(\S+)\n(.*?)\n\2$", txt, flags=re.M | re.S): outputs[m.group(1)] = m.group(3)
                 txt2 = re.sub(r"^([\w\-]+)<<(\S+)\n.*?\n\2$", "", txt, flags=re.M | re.S)
                 for m in re.finditer(r"^([\w\-]+)=(.*)$", txt2, flags=re.M): outputs[m.group(1)] = m.group(2)
@@ -511,3 +512,37 @@ def back_box():
 
 def pool_ids(text):
     return {v["id"] for v in json.loads(text[text.index("= [") + 2:text.rindex("]") + 1])}
+
+
+def add_unresolved(box, n, form="place_id"):
+    """Thêm n mục accept_place CHƯA resolve (place_id giả hoặc maps_link) cho n vendor venue chưa có mục duyệt tay, commit lên main của sandbox. Trả danh sách id."""
+    out_dir = os.path.join(box.ws, "tools", "scraper", "output", "HCMC")
+    mo_path = os.path.join(out_dir, "manual_overrides.json")
+    mo = json.load(open(mo_path, encoding="utf-8"))
+    have = {e["vendor_id"] for e in mo["overrides"]}
+    vs = [v["id"] for v in json.load(open(os.path.join(out_dir, "venue", "vendors.json"), encoding="utf-8"))["vendors"] if v["id"] not in have][:n]
+    for i, vid in enumerate(vs):
+        e = {"vendor_id": vid, "action": "accept_place", "reason": "Capu: lô thử T-135", "approved_by": "capu", "approved_on": "2026-11-13", "decision": "decisions/2026-11-08-adr-048-capu-duyet-tay-4-venue.md"}
+        if form == "place_id": e["place_id"] = "ChIJt135fake%04d" % i
+        else: e["maps_link"] = "https://www.google.com/maps/place/T135+%d" % i
+        mo["overrides"].append(e)
+    json.dump(mo, open(mo_path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    git(box.ws, "add", "-A"); git(box.ws, "commit", "-q", "-m", "lô thử: %d mục accept_place chưa resolve" % len(vs))
+    return vs
+
+
+def set_baseline(box, text_search=0, photos=0):
+    import datetime
+    ym = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m")
+    p = os.path.join(box.ws, "tools", "scraper", "run-logs", "usage-baseline.json")
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    import glob
+    for f in glob.glob(os.path.join(os.path.dirname(p), "*", "*.log")): os.remove(f)   # sổ chi của tháng chỉ còn baseline thử (kết quả không phụ thuộc log thật của repo)
+    json.dump({"month": ym, "text_search": text_search, "photos": photos, "source": "eval T-135", "decision": "decisions/2026-11-09-adr-053-baseline-anh-thang-11.md"}, open(p, "w"))
+    git(box.ws, "add", "-A"); git(box.ws, "commit", "-q", "-m", "baseline thử")
+
+
+def set_limits(box, **kw):
+    p = os.path.join(box.ws, "tools", "scraper", "auto_resolve_limits.json")
+    d = json.load(open(p)); d.update(kw); json.dump(d, open(p, "w"))
+    git(box.ws, "add", "-A"); git(box.ws, "commit", "-q", "-m", "limits thử")
