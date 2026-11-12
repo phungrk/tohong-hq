@@ -1,0 +1,117 @@
+{
+  "task": "T-129",
+  "at": "2026-11-12T13:07",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/admin/vendor-enrich",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-back && node /home/user/tohong-hq/eval/T-129/check_1_luat_capu_back.mjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 123,
+      "out": "FAIL thiếu lib/vendorEnrichReport.generated.js ở tohong-back",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-back && node /home/user/tohong-hq/eval/T-129/check_2_xuat_cho_workflow.mjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 110,
+      "out": "FAIL thiếu lib/vendorEnrichReport.generated.js ở tohong-back",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-129/check_3_ap_dung_tohong.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 2996,
+      "out": "FAIL entry không by_capu: mong thoát 2 + APPLY_REFUSED not_capu + file không đổi; thấy thoát 2, đổi=False, '    [--output-dir OUTPUT_DIR] [--hq HQ]\\napply_admin_reviews.py: error: the following arguments are required: --decision\\n' (+16 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-129/check_4_inv_020_v2.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 907,
+      "out": "PASS INV-020 v2 và INV-015 v2: nhận quyết định của Capu qua cú bấm, vẫn từ chối giả mạo",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-129/check_5_workflow_tohong.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 41,
+      "out": "FAIL thiếu .github/workflows/apply-admin-reviews.yml",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-129/check_6_ui_nhan_trang_thai.cjs --repo .",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 7027,
+      "out": "XX  chạy không lỗi  :: locator.click: Timeout 4000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Enrich Google Maps' })\u001b[22m\n\nFAIL chạy không lỗi [locator.click: Timeout 4000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Enrich Google Maps' })\u001b[22m\n]",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 45,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 177,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 44,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1444,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2633,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-cjicaN/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1685,
+      "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 949,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-BcPZ6o/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
