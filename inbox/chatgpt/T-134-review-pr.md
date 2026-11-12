@@ -2,7 +2,7 @@
 task: T-134
 type: review-pr
 priority: P0
-status: open
+status: done
 assigned: 2026-11-12
 due: 2026-11-14
 source:
@@ -33,4 +33,8 @@ source:
 
 **Giới hạn:** không sửa sổ cái, `main`, eval, bất biến; không merge, không approve, không đẩy commit lên nhánh PR. Chỉ comment.
 
-**Kết quả (Chief of Staff ghi khi đóng):**
+**Kết quả (Chief of Staff ghi khi đóng, 2026-11-12):**
+1. tohong#91 `load_keys()` không kiểm schema_version/kiểu/độ dài khoá → traceback thay vì `APPLY_REFUSED bad_keys_file` (nhỏ, fail-closed) — **ĐÚNG** (Chief of Staff đọc code xác minh). Sửa ở commit 7991903 trên #91 + 3 test.
+2. back#48: không phát hiện — trùng kết luận adversary vòng 2.
+3. front#69: không phát hiện — trùng adversary.
+KPI: 1/1 phát hiện đúng (nhỏ); không bỏ sót đã biết. Cộng dồn: 3/4 đúng.
