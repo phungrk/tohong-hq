@@ -36,4 +36,14 @@ if (!sp.includes(ok.name)) fails.push("vendor còn trong pool biến mất khỏ
 const q = await chat({ matches: [item(gone, "ZZ_DA_GO_1"), item(legacy, "ZZ_DA_GO_2")], total_pool: 2, passed_filters: 2 });
 if (/ZZ_DA_GO/.test(q.systemPrompt)) fails.push("tất cả match ngoài pool nhưng vẫn lọt prompt");
 if (!q.systemPrompt.includes("Không có vendor phù hợp")) fails.push("không còn match hợp lệ thì prompt phải là khối 'Không có vendor phù hợp'");
+// A6: quan sát được (matchMetadata.pool_filter + một dòng console.warn không chứa tên vendor)
+const warns = []; const ow = console.warn; console.warn = (...a) => warns.push(a.join(" "));
+let w = {};
+try { w = await chat({ matches: [item(gone, "ZZ_DA_GO_1"), item(legacy, "ZZ_DA_GO_2"), null, item(ok.id, "x")], total_pool: 4, passed_filters: 4 }); } catch (e) { fails.push("phần tử null làm buildChatContext ném: " + e.message); }
+console.warn = ow;
+const pf = w.matchMetadata?.pool_filter;
+if (!pf || pf.dropped !== 3 || pf.kept !== 1) fails.push("matchMetadata.pool_filter phải là {dropped:3, kept:1} (phần tử rác tính là bỏ), thấy " + JSON.stringify(pf));
+const mine = warns.filter((x) => /bỏ \d+ match ngoài pool/.test(x));
+if (mine.length !== 1) fails.push(`phải có đúng một console.warn "bỏ N match ngoài pool", thấy ${mine.length}`);
+if (warns.some((x) => /ZZ_DA_GO|marry_deadbeef|studio-da-go/.test(x))) fails.push("console.warn không được in tên/id vendor");
 done(fails);

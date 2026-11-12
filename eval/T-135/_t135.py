@@ -343,7 +343,9 @@ def run_job(box, wf, job_name, ctx, uses=None, stop_on_fail=False, only=None):
                 p = subprocess.run(argv + [interp(s["run"], ctx)], cwd=cwd, env=env, capture_output=True, text=True, timeout=900)
                 rc, log = p.returncode, (p.stdout or "") + (p.stderr or "")
                 txt = open(outf).read()
-                for m in re.finditer(r"^([\w\-]+)=(.*)$", txt, flags=re.M): outputs[m.group(1)] = m.group(2)
+                for m in re.finditer(r"^([\w\-]+)<<(\S+)\n(.*?)\n\2$", txt, flags=re.M | re.S): outputs[m.group(1)] = m.group(3)
+                txt2 = re.sub(r"^([\w\-]+)<<(\S+)\n.*?\n\2$", "", txt, flags=re.M | re.S)
+                for m in re.finditer(r"^([\w\-]+)=(.*)$", txt2, flags=re.M): outputs[m.group(1)] = m.group(2)
             ctx["env"] = {k: v for k, v in ctx["env"].items() if k not in senv or k in {**wf_env, **job_env}}
         outcome = "failure" if rc else "success"
         res["log"] += "[%s] rc=%s %s\n" % (name, rc, log[-1200:])
