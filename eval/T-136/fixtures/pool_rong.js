@@ -1,0 +1,2 @@
+// AUTO-GENERATED
+export const GENERATED_VENDOR_POOL = [];
