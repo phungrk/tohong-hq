@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Nguồn: T-106 (spec products/T-106-enrich-venue.md v3, Hành vi 2-3 + "Bất biến đề xuất" B; defect handoffs/T-106-D1.md, T-106-D2.md;
+"""Đề xuất SỬA INV-015 (T-129, ADR-065/066): chỉ đổi điều khoản miễn `_exempt` để chấp nhận quyết định hợp lệ của Capu nguồn (B, có chữ ký) như INV-020 v2. Mọi phần khác giữ nguyên byte so với bản trong bể.
+Bản gốc ghi tiếp bên dưới.
+
+Nguồn: T-106 (spec products/T-106-enrich-venue.md v3, Hành vi 2-3 + "Bất biến đề xuất" B; defect handoffs/T-106-D1.md, T-106-D2.md;
 qua Spec Gate lần 3 2026-11-08, spec-critic; bản nháp eval/T-106/inv-proposed-nhan-khop-co-cong.py, siết thêm: ứng viên thiếu formatted_address là đỏ).
 INV-015 · Nhận khớp Google Maps có cổng, và cổng được đo từ dữ liệu không do code sinh:
   (i)  Mọi enrichment_log[google_maps] có place_id thuộc venue, hoặc có formatted_address, hoặc vendor có contact.address_source ("bản ghi mới"):
@@ -49,8 +52,19 @@ def _frontmatter(txt):
     return m.group(1) if m else ""
 
 
+def _cd():
+    """T-129 (ADR-065/066): định nghĩa chuẩn chữ ký Capu (eval/lib/capu_decision.py)."""
+    for rel in (("eval", "lib", "capu_decision.py"), ("eval", "T-129", "capu_decision.py")):
+        f = os.path.join(HQ, *rel)
+        if os.path.isfile(f):
+            sp = importlib.util.spec_from_file_location("capu_decision", f); m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m); return m
+    raise RuntimeError("thiếu eval/lib/capu_decision.py")
+
+
 def _exempt(vid, pid):
-    """Có mục accept_place khớp vendor_id + resolved.place_id; decision là file trong <HQ>/decisions/ có decided_by: capu ở frontmatter (ADR-050)."""
+    """Có mục accept_place khớp vendor_id + resolved.place_id và quyết định HỢP LỆ của Capu (như INV-020 v2): (A) decision là file trong <HQ>/decisions/ có
+    decided_by: capu ở frontmatter và nhắc vendor_id (ADR-050); hoặc (B) decision = admin-review:<key_id>:<label>@<reviewed_at>:<sig> với chữ ký Ed25519 đúng
+    bằng khoá Capu đã duyệt trong decisions/ (ADR-065, ADR-066)."""
     fp = os.path.join(t, "tools", "scraper", "output", "HCMC", "manual_overrides.json")
     try:
         doc = json.load(open(fp, encoding="utf-8"))
@@ -59,7 +73,14 @@ def _exempt(vid, pid):
     dec_root = os.path.realpath(os.path.join(HQ, "decisions"))
     for e in doc.get("overrides") or []:
         if e.get("vendor_id") == vid and e.get("action") == "accept_place" and (e.get("resolved") or {}).get("place_id") == pid and pid:
-            d = os.path.realpath(os.path.join(HQ, str(e.get("decision") or "?")))
+            dec = str(e.get("decision") or "?")
+            if dec.startswith("admin-review:"):
+                try:
+                    cd = _cd()
+                    return cd.check_entry(e, cd.hq_keys(HQ))[0]
+                except (ImportError, ValueError, RuntimeError):
+                    return False
+            d = os.path.realpath(os.path.join(HQ, dec))
             if os.path.dirname(d) != dec_root or not os.path.isfile(d):
                 return False
             txt = open(d, encoding="utf-8").read()
