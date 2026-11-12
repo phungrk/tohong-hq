@@ -1,7 +1,7 @@
 {
   "task": "T-134",
-  "at": "2026-11-12T14:27",
-  "verdict": "RED",
+  "at": "2026-11-12T14:30",
+  "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/admin/vendor-enrich",
@@ -12,7 +12,7 @@
       "eval": "cd ${TOHONG_BACK_REPO:-/home/user/tohong-back} && node /home/user/tohong-hq/eval/T-129/check_1_luat_capu_back.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 237,
+      "ms": 207,
       "out": "PASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd ${TOHONG_BACK_REPO:-/home/user/tohong-back} && node /home/user/tohong-hq/eval/T-129/check_2_xuat_cho_workflow.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 181,
+      "ms": 187,
       "out": "PASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-129/check_3_ap_dung_tohong.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 7763,
+      "ms": 7528,
       "out": "PASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-129/check_4_inv_020_v2.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 2136,
+      "ms": 2182,
       "out": "PASS INV-020 v2 và INV-015 v2: chỉ nhận cú bấm của Capu có chữ ký Ed25519 đúng, từ chối giả mạo",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-129/check_5_workflow_tohong.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 6186,
+      "ms": 6620,
       "out": "PASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd ${TOHONG_FRONT_REPO:-/home/user/tohong-front} && node /home/user/tohong-hq/eval/T-129/check_6_ui_nhan_trang_thai.cjs --repo .",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 7157,
+      "ms": 6127,
       "out": " chip và số không đổi (876/98/680/244/107)\n  ok  6 cột đúng nhãn\n  ok  409 decided_by_capu: hiện lời có chữ \"Capu\", không hiện mã thô\n  ok  sau 409 dòng giữ nguyên \"Chờ áp dụng\"\n  ok  Approve khi API trả by_capu=true: PUT {decision:\"approve\"} sạch, Status \"Chờ áp dụng\" (không \"Chờ Capu\")\n  ok  Rút lại (by_capu=true) gửi DELETE và dòng hết nhãn chờ\n  ok  Sửa thủ công khi API trả by_capu=true: thân không mang by_capu/reviewed_by/capu, Status \"Chờ áp dụng\"\n  ok  không request ra ngoài\n  ok  Approve khi API trả by_capu=false: PUT {decision:\"approve\"} sạch, Status \"Chờ Capu\" (không \"Chờ áp dụng\")\n  ok  Rút lại (by_capu=false) gửi DELETE và dòng hết nhãn chờ\n  ok  Sửa thủ công khi API trả by_capu=false: thân không mang by_capu/reviewed_by/capu, Status \"Chờ Capu\"\n  ok  không request ra ngoài\nPASS",
       "tier": 1
     },
@@ -60,47 +60,47 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-129/bat-bien-cho-merge/inv-003-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 650,
+      "ms": 589,
       "out": "PASS 3 cú bấm của Capu: back ký, tohong nhận, bất biến kiểm được (kể cả mục link sau resolve); review của admin khác không vào",
       "tier": 1
     },
     {
       "eval": "eval/T-134/adv-01-worker-khoi-dong-trong-workerd.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 2058,
-      "out": "FAIL Worker không khởi động trong workerd (compatibility_date=2026-05-01, flags=[]): Unable to resolve \"out/worker.js\" dependency \"node:crypto\": no matching module rules.",
+      "status": "PASS",
+      "ms": 2570,
+      "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 1
     },
     {
       "eval": "eval/T-134/adv-02-route-noi-bo-moi-phuong-thuc-tu-choi-403.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 212,
-      "out": "FAIL OPTIONS không khoá: mong 403, thấy 204\nFAIL OPTIONS không khoá: cấp CORS Access-Control-Allow-Origin=* cho người chưa qua khoá",
+      "status": "PASS",
+      "ms": 202,
+      "out": "PASS mọi phương thức không khoá → 403 forbidden no-store, có khoá → 405, không CORS, R2 không đổi",
       "tier": 1
     },
     {
       "eval": "eval/T-134/adv-03-khoa-capu-khong-thua-ghi-dong-thoi.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 127,
-      "out": "FAIL PUT đè (dòng trống): admin khác trả 200, R2 sau đó {\"by_capu\":false,\"action\":\"remove\"} — quyết định của Capu bị đè\nFAIL PUT đè (dòng có review admin khác): admin khác trả 200, R2 sau đó {\"by_capu\":false,\"action\":\"remove\"} — quyết định của Capu bị đè\nFAIL DELETE rút: admin khác trả 200, R2 sau đó KHÔNG CÒN review — quyết định của Capu bị xoá",
+      "status": "PASS",
+      "ms": 124,
+      "out": "PASS ghi đồng thời: admin khác không đè/rút được quyết định Capu vừa ghi",
       "tier": 1
     },
     {
       "eval": "eval/T-134/adv-04-workflow-ap-dung-do-khi-apply-tu-choi.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 692,
-      "out": "FAIL khoá trống như bản ship: apply từ chối (unknown_key) nhưng bước 'Áp dụng (kiểm chữ ký)' thoát 0 dưới shell runner thật 'bash -e' → job xanh, PR dữ liệu bị đóng thay vì báo lỗi\nFAIL khoá k1 khác khoá ký: apply từ chối (bad_signature) nhưng bước 'Áp dụng (kiểm chữ ký)' thoát 0 dưới shell runner thật 'bash -e' → job xanh, PR dữ liệu bị đóng thay vì báo lỗi",
+      "status": "PASS",
+      "ms": 707,
+      "out": "PASS bước apply đỏ khi apply từ chối (shell bash --noprofile --norc -eo pipefail)",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 345,
+      "ms": 39,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 176,
+      "ms": 168,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 39,
+      "ms": 33,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1039,
+      "ms": 942,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -132,15 +132,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2729,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-ZM1jnG/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2430,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-UzPnsK/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1725,
+      "ms": 1710,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -148,15 +148,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1017,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-sG8wNQ/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1078,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-ESSe6p/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-001-bao-cao-enrich-phan-hoach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 42,
+      "ms": 53,
       "out": "PASS 870 dòng, 9 nhóm cộng đúng, 373 approvable, ô đếm khớp nhóm",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-002-maps-link-back-nhan-thi-tohong-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 365,
+      "ms": 355,
       "out": "PASS 20 link: mọi link back nhận thì tohong cũng nhận",
       "tier": 2
     },
@@ -172,10 +172,10 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-003-bao-cao-enrich-commit-bang-sinh-lai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 203,
+      "ms": 260,
       "out": "PASS 1 báo cáo enrich đã commit bằng đúng byte báo cáo sinh lại",
       "tier": 2
     }
   ],
-  "hint": "code"
+  "hint": ""
 }
