@@ -4,7 +4,7 @@ Kịch bản (bước 0 = luật hiện hành chạy `enrich.py` thường, rồ
   a makeup 5 đánh giá -> NHẬN (đối chứng) · b makeup 2 -> NHẬN (đúng ngưỡng) · g venue 2 -> NHẬN
   c makeup 1 · d flower Google KHÔNG có trường rating/userRatingCount (= 0) · e venue 0 · f venue 1 -> KHÔNG nhận: vendor ở lại (không remove), không place_id/ảnh Google, địa chỉ = địa chỉ gốc,
      audit low_confidence + reject_reason=few_reviews + candidate_place_id + google_review_count; KHÔNG tốn lượt ảnh nào cho vendor này (ảnh chỉ lấy sau khi nhận)
-  k flower CLOSED_PERMANENTLY với 0 đánh giá -> few_reviews thắng: KHÔNG gỡ, ở lại · l flower CLOSED_TEMPORARILY với 0 đánh giá -> few_reviews, không ở trạng thái tạm đóng cửa (không retry)
+  C-1 = False (ADR-065, Capu thay ADR-063): k flower CLOSED_PERMANENTLY với 0 đánh giá -> ĐÓNG CỬA THẮNG: GỠ vào removed_vendors.json như ADR-044, không few_reviews · l flower CLOSED_TEMPORARILY với 0 đánh giá -> tạm đóng cửa retry=true như T-110, không few_reviews
   m makeup địa chỉ mâu thuẫn + 0 đánh giá -> mã từ chối cũ (address_conflict) GIỮ NGUYÊN: few_reviews chỉ xét ứng viên đã qua luật nhận khớp
   n makeup 0 đánh giá nhưng Capu duyệt tay accept_place -> NHẬN (duyệt tay thắng), 0 Text Search cho n
   r venue (như Pergola, ADR-048) Capu duyệt tay `temporarily_closed`, Google trả CLOSED_TEMPORARILY với 0 đánh giá -> DUYỆT TAY THẮNG few_reviews: audit giữ retry=true + closed_state=temporarily_closed (INV-021(d)), không place_id, không few_reviews
@@ -65,11 +65,16 @@ for vid, want in (("a", 5), ("b", 2), ("g", 2)):
     a = root.audit(next(iter(recs(vid)))).get("t126_" + vid) or {}
     if a.get("status") != "enriched" or a.get("google_review_count") != want:
         bad.append("%s: audit mong enriched + google_review_count=%d, thấy %r" % (vid, want, {x_: a.get(x_) for x_ in ("status", "google_review_count")}))
-for vid, want in (("c", 1), ("d", 0), ("e", 0), ("f", 1), ("k", 0), ("l", 0)):
+for vid, want in (("c", 1), ("d", 0), ("e", 0), ("f", 1)):
     bad += k.demoted_state_ok(root, "t126_" + vid, want)
 la = root.audit("flower").get("t126_l") or {}
-if x.is_temp_closed(la) or la.get("retry") or la.get("closed_state"):
-    bad.append("l (CLOSED_TEMPORARILY, 0 đánh giá): few_reviews thắng, không được vào trạng thái tạm đóng cửa/retry; thấy %r" % {x_: la.get(x_) for x_ in ("retry", "closed_state")})
+if not x.is_temp_closed(la) or la.get("reject_reason") == k.CODE or t.has_pid(root.vendor("t126_l", "flower")):
+    bad.append("l (CLOSED_TEMPORARILY, 0 đánh giá, C-1 = False): đóng cửa thắng, mong tạm đóng cửa retry=true như T-110, không few_reviews, không place_id; thấy %r" % {x_: la.get(x_) for x_ in ("status", "retry", "closed_state", "reject_reason")})
+if root.vendor("t126_k", "flower") is not None or not [e for e in root.removed("flower") if (e.get("vendor") or {}).get("id") == "t126_k"]:
+    bad.append("k (CLOSED_PERMANENTLY, 0 đánh giá, C-1 = False): đóng cửa thắng, mong bị GỠ vào removed_vendors.json (ADR-044) và không còn trong vendors.json")
+ka = root.audit("flower").get("t126_k") or {}
+if ka.get("reject_reason") == k.CODE:
+    bad.append("k: bị gỡ vì đóng cửa thì không được mang mã few_reviews")
 ma = root.audit("makeup").get("t126_m") or {}
 if ma.get("reject_reason") != "address_conflict" or ma.get("status") != "low_confidence" or t.has_pid(root.vendor("t126_m", "makeup")):
     bad.append("m (địa chỉ mâu thuẫn + 0 đánh giá): mong mã từ chối cũ address_conflict giữ nguyên, thấy %r" % {x_: ma.get(x_) for x_ in ("status", "reject_reason")})
@@ -81,12 +86,14 @@ if len(qs) != 13 or x.count_for(calls, "november manual") != 0:
     bad.append("baseline mong đúng 13 Text Search (n được duyệt tay thì không), thấy %d (n: %d)" % (len(qs), x.count_for(calls, "november manual")))
 if t.n_kind(calls, "details", "share", "geocode", "maps"):
     bad.append("baseline có lượt Details/share/geocode/maps (mong 0)")
-for vid in ("c", "d", "e", "f", "k", "l", "m"):
+for vid in ("c", "d", "e", "f", "m"):
     if [c_ for c_ in calls if c_["kind"] == "media" and "/places/P%s/" % vid in c_["url"]]:
         bad.append("%s: không được nhận mà vẫn tốn lượt ảnh (ảnh chỉ lấy sau khi nhận)" % vid)
-for vid in ("k", "l"):   # few_reviews thắng đóng cửa: không remove ở bất kỳ category
-    if [e for e in root.removed("flower") if (e.get("vendor") or {}).get("id") == "t126_" + vid]:
-        bad.append("%s: bị gỡ vì Google báo đóng cửa trong khi chỉ có <2 đánh giá (few_reviews thắng, vendor ở lại)" % vid)
+if [e for e in root.removed("flower") if (e.get("vendor") or {}).get("id") == "t126_l"]:   # tạm đóng cửa chỉ ẩn/retry, không gỡ
+    bad.append("l: CLOSED_TEMPORARILY không được gỡ (chỉ tạm đóng cửa, retry)")
+for vid in ("c", "d", "e", "f"):   # OPERATIONAL ít đánh giá: few_reviews, không gỡ
+    if [e for e in root.removed("flower") + root.removed("makeup") + root.removed("venue") if (e.get("vendor") or {}).get("id") == "t126_" + vid]:
+        bad.append("%s: OPERATIONAL ít đánh giá không được gỡ" % vid)
 # ---- đường tên ----------------------------------------------------------------------------------------------------------------------------------
 before = {v: root.audit(c).get("t126_" + v) for v, c in (("o", "invitation"), ("q", "wedding_gift"), ("p", "invitation"))}
 for v_, a_ in before.items():
@@ -108,4 +115,4 @@ rc3, out3, calls3 = root.run(h.recheck_argv([{"cat": c} for c in files]), FX)
 q3 = [q for q in x.queries(calls3) if "pergola" not in h.fold(q)]
 if q3:
     bad.append("recheck lần 2 hỏi lại %d vendor (mong 0: o, q đã có kết cục few_reviews; p đã nhận)" % len(q3))
-t.done(bad, "ứng viên < 2 đánh giá không được nhận ở mọi category và cả hai đường (sáu cổng, tên); đúng ngưỡng 2 nhận; few_reviews không gỡ, không tốn ảnh, không che mã từ chối cũ; duyệt tay (accept_place, temporarily_closed) thắng; hỏi lại không lặp")
+t.done(bad, "ứng viên < 2 đánh giá không được nhận ở mọi category và cả hai đường (sáu cổng, tên); đúng ngưỡng 2 nhận; few_reviews (OPERATIONAL) không gỡ, không tốn ảnh; C-1 = False: CLOSED_PERMANENTLY ít đánh giá bị gỡ, CLOSED_TEMPORARILY tạm đóng cửa, không che mã từ chối cũ; duyệt tay (accept_place, temporarily_closed) thắng; hỏi lại không lặp")
