@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """T-136 tiêu chí 7: workflow đẩy file matcher lên bucket, CHẠY NGUYÊN VĂN từng bước `run:` của tohong-back/.github/workflows/sync-matcher-vendors.yml
 (cách eval/T-127/adv-02, eval/T-134/adv-04): shell mặc định của runner `bash -e {0}` (không pipefail; khai `shell: bash` thì `-eo pipefail`), các bước theo thứ tự, bước lỗi chặn bước sau trừ khi
-`if: always()/failure()`, `continue-on-error: true` được tôn trọng (nên bắt được `|| true` / continue-on-error làm job xanh giả). gcloud / gsutil / curl / sleep là bản GIẢ trên PATH:
+`if: always()/failure()`, `continue-on-error: true` ở bước được tôn trọng, ở cấp job bị cấm (kiểm YAML) (nên bắt được `|| true` / continue-on-error làm job xanh giả). gcloud / gsutil / curl / sleep là bản GIẢ trên PATH:
 bucket giả = thư mục tạm, "revision" giả nạp file bucket khi `gcloud run services update|deploy`, /health giả trả pool_size của revision đang chạy. Không mạng, không Google, không ghi GCS.
 Điều kiện theo hành vi (đường dẫn file staging cố định: matcher-data/vendors.json trong tohong-back; pool: lib/vendorPool.generated.js):
  (i) file khớp pool: xanh; prev == bản cũ; thứ tự lệnh: sao prev -> ghi đè vendors.json -> cập nhật revision (POOL_VERSION) -> health; bucket == file mới.
@@ -18,6 +18,10 @@ if not B: print("PASS chưa áp dụng (thiếu tohong-back)"); sys.exit(0)
 WFP = os.path.join(B, ".github/workflows/sync-matcher-vendors.yml")
 if not os.path.isfile(WFP): print("FAIL chưa có .github/workflows/sync-matcher-vendors.yml"); sys.exit(1)
 STAGE = "matcher-data/vendors.json"; BUCKET = "wedding-planner-vendors"; SA = "sync@proj.iam.gserviceaccount.com"
+def pm(pat, path):
+    """khớp đường dẫn kiểu GitHub paths: ** = nhiều cấp, * = trong một cấp."""
+    rx = re.escape(pat).replace(r"\*\*", "\0").replace(r"\*", "[^/]*").replace("\0", ".*")
+    return re.fullmatch(rx, path) is not None
 raw = open(WFP, encoding="utf-8").read(); wf = yaml.safe_load(raw); fails = []
 def need(c, m):
     if not c: fails.append(m)
@@ -27,9 +31,10 @@ if isinstance(on, list): on = {k: {} for k in on}
 push = (on.get("push") or {}) if isinstance(on, dict) else {}
 br = push.get("branches") or []; br = [br] if isinstance(br, str) else br
 need("main" in br, "phải chạy khi push vào main")
-need(STAGE in (push.get("paths") or []), f"on.push.paths phải có {STAGE} (chạy khi PR pool merge, không chạy mọi push)")
+need(any(pm(x, STAGE) for x in (push.get("paths") or [])), f"on.push.paths phải khớp {STAGE} (chạy khi PR pool merge, không chạy mọi push); chấp nhận chuỗi đúng hoặc glob như matcher-data/**")
 need("workflow_dispatch" in on, "phải có workflow_dispatch")
 need(not any(str(k).startswith("pull_request") for k in on), "không được chạy theo pull_request*")
+need(not any(j.get("continue-on-error") for j in (wf.get("jobs") or {}).values()), "không job nào được có continue-on-error (cả lượt chạy sẽ xanh dù bước lỗi)")
 jobs = wf.get("jobs") or {}
 perm = [wf.get("permissions")] + [j.get("permissions") for j in jobs.values()]
 need(any(p == {"contents": "read"} for p in perm), "permissions: contents: read")
@@ -40,7 +45,7 @@ dm = os.path.join(B, ".github/workflows/deploy-matcher.yml")
 if os.path.isfile(dm):
     d = yaml.safe_load(open(dm, encoding="utf-8")); don = d.get("on", d.get(True)) or {}
     for pat in (don.get("push") or {}).get("paths") or []:
-        hit = fnmatch.fnmatch(STAGE, pat) or (pat.endswith("/**") and STAGE.startswith(pat[:-2]))
+        hit = pm(pat, STAGE)
         need(not hit, f"{STAGE} khớp on.push.paths '{pat}' của deploy-matcher.yml: PR pool sẽ chạy cả deploy-matcher")
 if fails: print("FAIL " + "; ".join(fails)); sys.exit(1)
 # ---- chạy thật các bước run: ----
@@ -131,10 +136,37 @@ def run_case(file_bytes, extra=None):
         if e == "github.workspace": return ws
         if e == "github.repository": return "phungrk/tohong-back"
         if e.startswith("env."): return env.get(e[4:], "")
+        GH = {"event_name": "push", "ref": "refs/heads/main", "ref_name": "main", "run_attempt": "1", "actor": "capu", "repository_owner": "phungrk", "server_url": "https://github.com", "job": "sync", "workflow": "sync-matcher-vendors", "run_number": "1"}
+        if e.startswith("github."): return GH.get(e[7:], "")
+        if e.startswith("runner."): return {"os": "Linux", "temp": T}.get(e[7:], "")
+        if e.startswith("vars."): return ""
         m = re.match(r"steps\.([\w-]+)\.outputs\.(\w+)$", e)
         if m: return outputs.get((m.group(1), m.group(2)), "")
         raise ValueError("biểu thức chưa giả lập: ${{ %s }}" % e)
     sub = lambda s, env: re.sub(r"\$\{\{\s*(.*?)\s*\}\}", lambda m: str(val(m.group(1), env)), str(s))
+    outcomes = {}
+    def cond_ok(c, failed, env, outcomes):
+        """đánh giá `if:` cơ bản: always() failure() success() cancelled(), && || !, ==, !=, github.* env.* steps.<id>.outcome|conclusion, chuỗi/true/false. Không có hàm trạng thái thì ngầm success() &&."""
+        if c is None or str(c).strip() == "": return not failed
+        e = str(c).strip()
+        if e.startswith("${{") and e.endswith("}}"): e = e[3:-2].strip()
+        has_status = re.search(r"\b(always|failure|success|cancelled)\(\)", e) is not None
+        def atom(m):
+            t = m.group(0)
+            if t == "always()": return "True"
+            if t == "failure()": return repr(failed)
+            if t == "success()": return repr(not failed)
+            if t == "cancelled()": return "False"
+            if t in ("true", "false"): return t.capitalize()
+            mm = re.match(r"steps\.([\w-]+)\.(outcome|conclusion)$", t)
+            if mm: return repr(outcomes.get((mm.group(1), mm.group(2)), "skipped"))
+            return repr(val(t, env))
+        try:
+            py = re.sub(r"always\(\)|failure\(\)|success\(\)|cancelled\(\)|\b(?:github|env|vars|runner|secrets)\.[\w.]+|steps\.[\w-]+\.(?:outcome|conclusion)|\btrue\b|\bfalse\b", atom, e)
+            py = py.replace("&&", " and ").replace("||", " or "); py = re.sub(r"!(?!=)", " not ", py)
+            ok = bool(eval(py, {"__builtins__": {}}, {"True": True, "False": False}))
+        except Exception: return not failed
+        return ok if has_status else (ok and not failed)
     log, failed, red = [], False, False
     env = dict(genv); env.update({k: sub(v, env) for k, v in (wf.get("env") or {}).items()})
     steps = []
@@ -142,11 +174,10 @@ def run_case(file_bytes, extra=None):
         jenv = {k: sub(v, env) for k, v in (j.get("env") or {}).items()}; env.update(jenv)
         for s in j.get("steps") or []: steps.append((s, (j.get("defaults") or {}).get("run", {}).get("shell") or (wf.get("defaults") or {}).get("run", {}).get("shell")))
     for s, dshell in steps:
-        cond = str(s.get("if", "")); runs = (not failed) if not cond else ("always()" in cond or ("failure()" in cond and failed) or (not failed and "failure()" not in cond))
+        runs = cond_ok(s.get("if"), failed, env, outcomes)
         if not runs: continue
         if "uses" in s:
-            if not re.match(r"(actions/checkout|google-github-actions/(auth|setup-gcloud))@", s["uses"]): return {"err": "bước uses chưa giả lập: " + s["uses"]}
-            continue
+            continue   # mọi bước `uses:` (checkout, setup-node, auth, setup-gcloud, ...) là no-op: workspace đã có code; tác dụng lên bucket chỉ qua gcloud/gsutil giả (một action ghi bucket kiểu khác sẽ làm ca (i) FAIL)
         shell = s.get("shell") or dshell
         argv = ["bash", "-e"] if not shell else (["bash", "--noprofile", "--norc", "-eo", "pipefail"] if shell == "bash" else None)
         if argv is None: return {"err": "shell chưa giả lập: " + str(shell)}
@@ -164,6 +195,7 @@ def run_case(file_bytes, extra=None):
             if "=" in line: k, _, v = line.partition("="); env[k] = v
         for line in open(os.path.join(T, "out"), encoding="utf-8").read().splitlines():
             if "=" in line: k, _, v = line.partition("="); outputs[(s.get("id", ""), k)] = v
+        if s.get("id"): outcomes[(s["id"], "outcome")] = "success" if p.returncode == 0 else "failure"; outcomes[(s["id"], "conclusion")] = "success" if (p.returncode == 0 or s.get("continue-on-error")) else "failure"
         if p.returncode != 0 and not s.get("continue-on-error"): failed = red = True
     calls = [json.loads(l) for l in open(os.path.join(st, "calls.log")) if l.strip()]
     bucket = {}
