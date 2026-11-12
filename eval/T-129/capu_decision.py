@@ -4,6 +4,8 @@ Không mạng. Cần thư viện `cryptography` (có sẵn trong môi trường 
 Chữ ký của một entry (back ký lúc xuất, khoá bí mật là secret Worker) là Ed25519 trên chuỗi byte:
   b"tohong-enrich-review-v1|" + với mỗi trường theo thứ tự [key_id, vendor_id, action, place_id hoặc "", maps_link hoặc "", reason, reviewer_label, reviewed_at]: str(độ dài UTF-8) + b":" + UTF-8 + b","
 `sig` = base64url không đệm (86 ký tự). Mục manual_overrides.json (nguồn B):
+  Trường place_id trong chuỗi ký là chuỗi RỖNG khi mục có maps_link (back không bao giờ xuất cả hai; resolve_overrides.py ghi place_id + resolved vào mục accept_place có maps_link SAU khi ký nên không thuộc chữ ký).
+  Mục có `resolved` hoặc (maps_link + place_id) phải nhất quán: resolved.place_id == place_id (luật T-110), nếu không là giả mạo.
   decision = admin-review:<key_id>:<label>@<reviewed_at>:<sig>;  reason = "<reason> [duyệt qua admin: <label>, <reviewed_at>]";  approved_by = capu;  approved_on = ngày (UTC) của reviewed_at.
 """
 import base64, json, os, re
@@ -84,7 +86,13 @@ def check_entry(e, keys):
         return False, "reason không kết thúc bằng %s" % suffix.strip()
     if e.get("action") not in ACTIONS:
         return False, "action %r" % e.get("action")
-    data = payload(key_id, str(e.get("vendor_id") or ""), e["action"], e.get("place_id"), e.get("maps_link"), reason[:-len(suffix)], label, at)
+    link, pid = e.get("maps_link"), e.get("place_id")
+    res = e.get("resolved")
+    if res is not None and (not isinstance(res, dict) or not pid or res.get("place_id") != pid):
+        return False, "resolved.place_id không khớp place_id của mục"
+    if link and pid and res is None:
+        return False, "mục có maps_link và place_id nhưng không có resolved (place_id chỉ do resolve ghi)"
+    data = payload(key_id, str(e.get("vendor_id") or ""), e["action"], None if link else pid, link, reason[:-len(suffix)], label, at)
     if not verify_signature(keys[key_id], data, sig):
         return False, "chữ ký không khớp nội dung mục"
     return True, ""

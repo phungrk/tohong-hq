@@ -25,7 +25,7 @@ if (!fs.existsSync(fp)) { console.log("FAIL thiếu lib/vendorEnrichReport.gener
 const rep = JSON.parse(fs.readFileSync(fp, "utf8").match(/export\s+const\s+VENDOR_ENRICH_REPORT\s*=\s*([\s\S]*?);\s*$/)[1]);
 const appr = rep.vendors.filter((r) => r.approvable && !r.override);
 if (appr.length < 8) { console.log("FAIL báo cáo thiếu dòng approvable để đo"); process.exit(1); }
-const [A, B, C, D, E, F] = appr.map((r) => r.id);
+const [A, B, C, D, E, F, G, H] = appr.map((r) => r.id);
 const label = (u) => "admin:" + crypto.createHash("sha256").update(u).digest("hex").slice(0, 8);
 const U = { capu: "user_capu_0001", adm: "user_admin_0002", adm2: "user_admin_0003", outsider: "user_capuonly_0004" };
 const base = "/api/admin/vendor-enrich";
@@ -70,16 +70,19 @@ r = await as(env, U.capu, "DELETE", rv(D));
 R.check("Capu rút review của chính mình -> 200 {review:null}", r.status === 200 && r.json?.review === null, r.json);
 await as(env, U.capu, "PUT", rv(D), { decision: "manual", action: "remove", note: "Không có trên Maps" });
 await as(env, U.adm, "PUT", rv(F), { decision: "approve" });
+const gl = await as(env, U.capu, "PUT", rv(G), { decision: "manual", action: "accept_place", maps_link: "https://share.google/abcDEF", note: "Đúng nơi" });
+const hr = await as(env, U.capu, "PUT", rv(H), { decision: "manual", action: "reject_match", note: "Sai nơi" });
+R.check("Capu Sửa thủ công accept_place bằng link và reject_match -> 200", gl.status === 200 && hr.status === 200, [gl.status, gl.json, hr.status, hr.json]);
 
 // 3. export của admin: chỉ review của Capu, có nhãn băm, không lộ id
 const ex = await as(env, U.adm, "GET", `${base}/export`);
 const ids = (ex.json?.entries || []).map((x) => x.vendor_id);
-R.check("export: chỉ review by_capu (A, B, D), sắp theo vendor_id, waiting_capu đếm phần còn lại (C, F)", ex.status === 200 && JSON.stringify(ids) === JSON.stringify([A, B, D].sort()) && ex.json.count === 3 && ex.json.waiting_capu === 2, [ex.status, ids, ex.json?.count, ex.json?.waiting_capu]);
+R.check("export: chỉ review by_capu (A, B, D, G, H), sắp theo vendor_id, waiting_capu đếm phần còn lại (C, F)", ex.status === 200 && JSON.stringify(ids) === JSON.stringify([A, B, D, G, H].sort()) && ex.json.count === 5 && ex.json.waiting_capu === 2, [ex.status, ids, ex.json?.count, ex.json?.waiting_capu]);
 const e0 = (ex.json?.entries || []).find((x) => x.vendor_id === D) || {};
 R.check("entry: reviewer_label = admin:<8 hex đầu của sha256(user id Capu)>, by_capu true, reviewed_at ISO, action/reason đúng", e0.reviewer_label === label(U.capu) && e0.by_capu === true && !Number.isNaN(Date.parse(e0.reviewed_at)) && e0.action === "remove" && String(e0.reason).includes("Không có trên Maps"), e0);
 R.check("export không có trường reviewed_by và thân không chứa user id nào", ex.json.entries.every((x) => !("reviewed_by" in x)) && !/user_(capu|admin|capuonly)/.test(ex.text), ex.text.slice(0, 200));
 
-R.check("mỗi entry có key_id = k1 và chữ ký Ed25519 đúng (kiểm độc lập bằng khoá công khai)", ex.json.entries.length === 3 && ex.json.entries.every((x) => x.key_id === "k1" && verifyEntry(x, KEY.publicKey)), ex.json.entries.map((x) => [x.key_id, x.sig?.length]));
+R.check("mỗi entry có key_id = k1 và chữ ký Ed25519 đúng (kiểm độc lập bằng khoá công khai)", ex.json.entries.length === 5 && ex.json.entries.every((x) => x.key_id === "k1" && verifyEntry(x, KEY.publicKey)), ex.json.entries.map((x) => [x.key_id, x.sig?.length]));
 R.check("sửa một trường bất kỳ của entry thì chữ ký hết đúng", ["reason", "action", "vendor_id", "reviewed_at", "reviewer_label"].every((f) => !verifyEntry({ ...e0, [f]: e0[f] + "x" }, KEY.publicKey)));
 R.check("thân export có exported_at ISO", !Number.isNaN(Date.parse(ex.json.exported_at)), ex.json.exported_at);
 const other = makeKey("k1");
@@ -90,6 +93,11 @@ for (const [name, extra] of [["thiếu ENRICH_SIGNING_KEY", { ENRICH_SIGNING_KEY
   R.check(`${name}: export admin -> 503 signing_unavailable, không entry nào`, x.status === 503 && x.json?.error === "signing_unavailable" && !/"sig"|reviewer_label|vendor_id/.test(x.text), [x.status, x.text.slice(0, 80)]);
 }
 
+const eg = ex.json.entries.find((x) => x.vendor_id === G), eh = ex.json.entries.find((x) => x.vendor_id === H);
+R.check("accept_place bằng link: entry có maps_link, KHÔNG có place_id (resolve ghi place_id sau, ngoài chữ ký), chữ ký đúng", eg?.maps_link === "https://share.google/abcDEF" && !("place_id" in eg) && verifyEntry(eg, KEY.publicKey), eg);
+R.check("reject_match: entry có place_id, không maps_link, chữ ký đúng", !!eh?.place_id && !("maps_link" in eh) && verifyEntry(eh, KEY.publicKey), eh);
+R.check("không entry nào mang cả place_id lẫn maps_link", ex.json.entries.every((x) => !(x.place_id && x.maps_link)));
+
 // 4. nhật ký
 const audit = (await as(env, U.adm, "GET", "/api/admin/audit?action=vendor_enrich.review&limit=200")).json;
 const mine = (audit?.entries || []).filter((e) => e.target_id === A);
@@ -99,7 +107,7 @@ R.check("nhật ký vendor_enrich.review của cú bấm Capu ghi after.by_capu 
 const noCapu = makeEnv(bucket, { ...signingEnv(KEY), ADMIN_USER_IDS: ENV.ADMIN_USER_IDS });
 const rowA = await listRow(noCapu, U.adm, A);
 const ex2 = await as(noCapu, U.adm, "GET", `${base}/export`);
-R.check("CAPU_USER_IDS thiếu: review cũ của Capu thành by_capu false, export trống, waiting_capu = số review chờ (5)", rowA?.review?.by_capu === false && ex2.json?.count === 0 && ex2.json?.waiting_capu === 5, [rowA?.review?.by_capu, ex2.json]);
+R.check("CAPU_USER_IDS thiếu: review cũ của Capu thành by_capu false, export trống, waiting_capu = số review chờ (7)", rowA?.review?.by_capu === false && ex2.json?.count === 0 && ex2.json?.waiting_capu === 7, [rowA?.review?.by_capu, ex2.json]);
 const emptyCapu = makeEnv(bucket, { ...signingEnv(KEY), ADMIN_USER_IDS: ENV.ADMIN_USER_IDS, CAPU_USER_IDS: "" });
 const ex3 = await as(emptyCapu, U.capu, "GET", `${base}/export`);
 R.check("CAPU_USER_IDS rỗng: không ai là Capu (export trống)", ex3.json?.count === 0, ex3.json?.count);
