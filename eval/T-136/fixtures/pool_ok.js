@@ -1,0 +1,2 @@
+// AUTO-GENERATED
+export const GENERATED_VENDOR_POOL = [{"id": "marry_aaaaaaaaaaa3", "name": "V marry_aaaaaaaaaaa3", "category": "photography", "priceMin": 10, "priceMax": 20, "city": "HCMC", "photos": [], "isVerified": true}, {"id": "marry_aaaaaaaaaaa1", "name": "V marry_aaaaaaaaaaa1", "category": "photography", "priceMin": 10, "priceMax": 20, "city": "HCMC", "photos": [], "isVerified": true}, {"id": "marry_aaaaaaaaaaa2", "name": "V marry_aaaaaaaaaaa2", "category": "photography", "priceMin": 10, "priceMax": 20, "city": "HCMC", "photos": [], "isVerified": true}];

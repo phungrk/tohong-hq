@@ -314,7 +314,7 @@ def run_job(box, wf, job_name, ctx, uses=None, stop_on_fail=False, only=None):
             continue
         outputs, rc, log = {}, 0, ""
         if s.get("uses"):
-            u = str(s["uses"]); w = {k: interp(v, ctx) for k, v in (s.get("with") or {}).items()}
+            u = str(s["uses"]); w = {k: (interp(v, ctx) if isinstance(v, str) else v) for k, v in (s.get("with") or {}).items()}
             h = next((f for k, f in (uses or {}).items() if u.startswith(k)), None)
             if h:
                 try:
@@ -322,7 +322,7 @@ def run_job(box, wf, job_name, ctx, uses=None, stop_on_fail=False, only=None):
                 except Exception as e:  # noqa: BLE001
                     rc, log = 1, "uses %s lỗi: %s" % (u, e)
         else:
-            senv = {k: interp(v, ctx) for k, v in (s.get("env") or {}).items()}
+            senv = {k: (interp(v, ctx) if isinstance(v, str) else _str(v)) for k, v in (s.get("env") or {}).items()}
             ctx["env"] = {**ctx["env"], **senv}
             shell = s.get("shell") or dflt.get("shell")
             argv = ["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c"] if shell == "bash" else ["bash", "-e", "-c"]

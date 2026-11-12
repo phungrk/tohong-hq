@@ -1,0 +1,140 @@
+{
+ "schema_version": "1.0",
+ "generated_at": "2026-11-10T00:00:00+00:00",
+ "stats": {
+  "total": 5
+ },
+ "vendors": [
+  {
+   "id": "marry_aaaaaaaaaaa1",
+   "name": "V marry_aaaaaaaaaaa1",
+   "city": "HCMC",
+   "categories": [
+    "photography"
+   ],
+   "style_tags": [
+    "modern"
+   ],
+   "contact": {
+    "phone": "0900000000",
+    "address": "x"
+   },
+   "reviews": [
+    {
+     "source": "google_maps",
+     "rating": 4.5,
+     "count": 10
+    }
+   ],
+   "latitude": 10.7,
+   "longitude": 106.7,
+   "verification_status": "auto_scraped",
+   "portfolio_urls": []
+  },
+  {
+   "id": "marry_aaaaaaaaaaa2",
+   "name": "V marry_aaaaaaaaaaa2",
+   "city": "HCMC",
+   "categories": [
+    "venue",
+    "ceremony"
+   ],
+   "style_tags": [
+    "modern"
+   ],
+   "contact": {
+    "phone": "0900000000",
+    "address": "x"
+   },
+   "reviews": [
+    {
+     "source": "google_maps",
+     "rating": 4.5,
+     "count": 10
+    }
+   ],
+   "latitude": 10.7,
+   "longitude": 106.7,
+   "verification_status": "auto_scraped",
+   "portfolio_urls": []
+  },
+  {
+   "id": "marry_aaaaaaaaaaa3",
+   "name": "V marry_aaaaaaaaaaa3",
+   "city": "HCMC",
+   "categories": [
+    "makeup"
+   ],
+   "style_tags": [
+    "modern"
+   ],
+   "contact": {
+    "phone": "0900000000",
+    "address": "x"
+   },
+   "reviews": [
+    {
+     "source": "google_maps",
+     "rating": 4.5,
+     "count": 10
+    }
+   ],
+   "latitude": 10.7,
+   "longitude": 106.7,
+   "verification_status": "auto_scraped",
+   "portfolio_urls": []
+  },
+  {
+   "id": "marry_aaaaaaaaaaa4",
+   "name": "V marry_aaaaaaaaaaa4",
+   "city": "HCMC",
+   "categories": [
+    "decor"
+   ],
+   "style_tags": [
+    "modern"
+   ],
+   "contact": {
+    "phone": "0900000000",
+    "address": "x"
+   },
+   "reviews": [
+    {
+     "source": "google_maps",
+     "rating": 4.5,
+     "count": 10
+    }
+   ],
+   "latitude": 10.7,
+   "longitude": 106.7,
+   "verification_status": "auto_scraped",
+   "portfolio_urls": []
+  },
+  {
+   "id": "marry_aaaaaaaaaaa5",
+   "name": "V marry_aaaaaaaaaaa5",
+   "city": "HCMC",
+   "categories": [
+    "jewelry"
+   ],
+   "style_tags": [
+    "modern"
+   ],
+   "contact": {
+    "phone": "0900000000",
+    "address": "x"
+   },
+   "reviews": [
+    {
+     "source": "google_maps",
+     "rating": 4.5,
+     "count": 10
+    }
+   ],
+   "latitude": 10.7,
+   "longitude": 106.7,
+   "verification_status": "deprecated",
+   "portfolio_urls": []
+  }
+ ]
+}
