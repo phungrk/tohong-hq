@@ -85,6 +85,17 @@ for n, (raw, wf) in loaded.items():
         fresh = t.fresh_report(box, root)
         if after == before: bad.append("%s: sau bước sinh báo cáo, enrich-report.json không đổi dù dữ liệu đã đổi (ghi sai đường dẫn?)" % n)
         elif fresh is None or after != fresh: bad.append("%s: báo cáo sau bước KHÁC byte báo cáo sinh lại từ dữ liệu hiện có" % n)
+        if layout_rr:
+            # luật không đổi dữ liệu nào (hợp đồng T-127 [B]: không commit vô cớ): báo cáo đã tươi thì bước KHÔNG được đổi byte nào, kể cả khi bước chạy lại
+            box.reset()
+            t._copytree(os.path.join(box.ws, "tools"), os.path.join(box.ws, "code", "tools"))
+            data = os.path.join(box.ws, "data"); os.makedirs(data); t._copytree(os.path.join(box.ws, "tools"), os.path.join(data, "tools"))
+            fr0 = t.fresh_report(box, data)
+            open(os.path.join(data, t.REPORT_REL), "wb").write(fr0)
+            t.git(box.ws, "add", "-A"); t.git(box.ws, "commit", "-q", "-m", "data tươi")
+            res2 = t.run_job(box, wf, job, t.gh_ctx(box, "workflow_dispatch", inputs=inputs, run_id="4242"), uses={"actions/": lambda w, s: {}}, only=lambda s: "build_enrich_report.py" in str(s.get("run", "")))
+            if res2["status"] != "success" or open(os.path.join(data, t.REPORT_REL), "rb").read() != fr0 or t.git(box.ws, "status", "--porcelain").stdout.strip():
+                bad.append("%s: luật không đổi dữ liệu mà bước sinh báo cáo vẫn đổi file/làm bẩn cây (T-127 [B]: không commit vô cớ)" % n)
     finally:
         box.cleanup()
 t.done(bad, "6 workflow dữ liệu sinh lại enrich-report.json đúng byte trước khi mở PR/commit, 4 workflow mở PR dispatch pool bằng BACK_DISPATCH_TOKEN (thiếu token vẫn xanh), apply-admin-reviews không dispatch, apply-review-rule không secret và chỉ nhắc")
