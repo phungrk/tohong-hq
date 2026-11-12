@@ -146,7 +146,7 @@ try:
                        FAKE_EXPORT=exp, FAKE_URL=URL, FAKE_TOKEN=TOKEN, FAKE_CURL_FAIL="1" if fail_curl else "0")
             for k, v in (s.get("env") or {}).items(): env[k] = expr(v, rt)
             p = subprocess.run(["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", expr(s["run"], rt)], cwd=os.path.join(ws, s.get("working-directory", wd)), env=env, capture_output=True, text=True, timeout=600)
-            log += "[%s] rc=%s %s%s\n" % (s.get("name", "run"), p.returncode, p.stdout[-200:], p.stderr[-200:])
+            log += "[%s] rc=%s %s%s\n" % (s.get("name", "run"), p.returncode, p.stdout[-200:] if p.returncode == 0 else p.stdout[-1500:], p.stderr[-300:])
             if p.returncode != 0:
                 return False, log, None
         return True, log, {"files": {}, "body": None, "other": []}
