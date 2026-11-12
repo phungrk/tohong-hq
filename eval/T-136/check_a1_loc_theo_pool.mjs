@@ -35,7 +35,7 @@ if (!p2.systemPrompt.includes(ok.name)) fails.push("vendor còn trong pool biế
 if (!sp.includes(ok.name)) fails.push("vendor còn trong pool biến mất khỏi prompt");
 const q = await chat({ matches: [item(gone, "ZZ_DA_GO_1"), item(legacy, "ZZ_DA_GO_2")], total_pool: 2, passed_filters: 2 });
 if (/ZZ_DA_GO/.test(q.systemPrompt)) fails.push("tất cả match ngoài pool nhưng vẫn lọt prompt");
-if (!q.systemPrompt.includes("Không có vendor phù hợp")) fails.push("không còn match hợp lệ thì prompt phải là khối 'Không có vendor phù hợp'");
+// (khối thay thế khi mọi match bị bỏ vì pool do check_a4 đo; ở đây chỉ đo "không lọt prompt")
 // A6: quan sát được (matchMetadata.pool_filter + một dòng console.warn không chứa tên vendor)
 const warns = []; const ow = console.warn; console.warn = (...a) => warns.push(a.join(" "));
 let w = {};
