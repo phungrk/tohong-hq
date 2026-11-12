@@ -334,7 +334,7 @@ def run_job(box, wf, job_name, ctx, uses=None, stop_on_fail=False, only=None):
                        RUNNER_TEMP=box.rt, GITHUB_WORKSPACE=box.ws, GITHUB_RUN_ID=ctx["github"]["run_id"], GITHUB_RUN_ATTEMPT=ctx["github"]["run_attempt"], GITHUB_REPOSITORY=ctx["github"]["repository"],
                        GITHUB_OUTPUT=outf, GITHUB_STEP_SUMMARY=sumf, GITHUB_ENV=os.path.join(box.rt, "gh_env"), CI="true", HTTPS_PROXY="http://127.0.0.1:9", HTTP_PROXY="http://127.0.0.1:9",
                        GOOGLE_MAPS_API_KEY="", GH_TOKEN="", GITHUB_TOKEN="", GH_REPO="", GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
-            env.update({k: str(v) for k, v in {**ctx["env"]}.items() if k not in ("GH_TOKEN",) or True})
+            env.update({k: str(v) for k, v in ctx["env"].items()})
             for k in ("GH_REPO",):
                 if not env.get(k): env.pop(k, None)
             if not os.path.isdir(cwd):
@@ -384,8 +384,10 @@ def make_cpr(box, record):
         git(box.ws, "commit", "-q", "-m", w.get("commit-message", "chore"))
         sha = git(box.ws, "rev-parse", "HEAD").stdout.strip()
         files = {f: git(box.ws, "show", "HEAD:" + f).stdout for f in chosen if git(box.ws, "cat-file", "-e", "HEAD:" + f).returncode == 0}
+        snap = os.path.join(box.tmp, "snap-%s" % sha[:8]); os.makedirs(snap, exist_ok=True)
+        subprocess.run("git archive %s | tar -x -C %s" % (sha, snap), shell=True, cwd=box.ws, capture_output=True)
         git(box.ws, "checkout", "-q", "-f", base)
-        rec = {"operation": "created", "branch": branch, "sha": sha, "files": chosen, "contents": files, "other": other, "body": body, "title": w.get("title", ""), "number": "77", "with": w}
+        rec = {"operation": "created", "branch": branch, "sha": sha, "files": chosen, "contents": files, "other": other, "body": body, "title": w.get("title", ""), "number": "77", "with": w, "tree": snap}
         record.append(rec)
         return {"pull-request-operation": "created", "pull-request-head-sha": sha, "pull-request-number": "77", "pull-request-branch": branch}
     return h
@@ -428,6 +430,82 @@ def fresh_report(box, root=None):
     root = root or box.ws
     sc = os.path.join(root, "tools", "scraper")
     out = os.path.join(box.tmp, "fresh-report-%d.json" % len(os.listdir(box.tmp)))
-    p = subprocess.run([sys.executable, "-I", os.path.join(sc, "build_enrich_report.py"), "--state", "HCMC", "--output-dir", os.path.join(sc, "output"), "--out", out],
+    p = subprocess.run([sys.executable, os.path.join(sc, "build_enrich_report.py"), "--state", "HCMC", "--output-dir", os.path.join(sc, "output"), "--out", out],
                        cwd=box.tmp, env=dict(os.environ, PYTHONPATH=box.nonet, PYTHONDONTWRITEBYTECODE="1"), capture_output=True, text=True, timeout=300)
     return open(out, "rb").read() if p.returncode == 0 and os.path.isfile(out) else None
+
+
+def pr_event(number=12, ref="admin-reviews/capu", repo="phungrk/tohong", merged=True):
+    return {"action": "closed", "pull_request": {"number": number, "merged": merged, "head": {"ref": ref, "repo": {"full_name": repo}}, "base": {"ref": "main"}}}
+
+
+def pick_pool_vendor(tohong_root):
+    """Một vendor có trong venue/vendors.json của tohong VÀ trong pool của tohong-back (để dựng 'vendor đã gỡ nhưng còn trong pool')."""
+    s = open(os.path.join(BACK, "lib", "vendorPool.generated.js"), encoding="utf-8").read()
+    pool = {v["id"] for v in json.loads(s[s.index("= [") + 2:s.rindex("]") + 1])}
+    out = os.path.join(tohong_root, "tools", "scraper", "output", "HCMC")
+    for cat in ("venue", "photography", "makeup"):
+        vp = os.path.join(out, cat, "vendors.json")
+        for v in json.load(open(vp, encoding="utf-8"))["vendors"]:
+            if v["id"] in pool:
+                yield cat, v["id"]
+
+
+def remove_vendor_in_tree(tohong_root, cat, vid):
+    """Đưa vendor `vid` từ vendors.json sang removed_vendors.json (như một PR dữ liệu đã gỡ nó), rồi sinh lại enrich-report.json bằng chính build_enrich_report.py."""
+    d = os.path.join(tohong_root, "tools", "scraper", "output", "HCMC", cat)
+    vp = os.path.join(d, "vendors.json"); doc = json.load(open(vp, encoding="utf-8"))
+    v = next(x for x in doc["vendors"] if x["id"] == vid)
+    doc["vendors"] = [x for x in doc["vendors"] if x["id"] != vid]
+    json.dump(doc, open(vp, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    rp = os.path.join(d, "removed_vendors.json")
+    rem = json.load(open(rp, encoding="utf-8")) if os.path.isfile(rp) else []
+    rem.append({"removed_at": "2026-11-13T00:00:00Z", "reason": "Capu: lô thử T-135 (manual)", "manual": True, "vendor": v})
+    json.dump(rem, open(rp, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+
+
+def tohong_tree_with_removed(n=1):
+    """Bản sao tohong (tools) với n vendor-còn-trong-pool đã bị gỡ; trả (thư mục gốc, [(cat, id)], đường dẫn các thư mục cần dọn)."""
+    tmp = tempfile.mkdtemp(prefix="t135-tohong-")
+    root = os.path.join(tmp, "tohong"); os.makedirs(root)
+    _copytree(os.path.join(TOHONG, "tools"), os.path.join(root, "tools"))
+    picked = []
+    for cat, vid in pick_pool_vendor(root):
+        picked.append((cat, vid))
+        if len(picked) >= n: break
+    for cat, vid in picked:
+        remove_vendor_in_tree(root, cat, vid)
+    sc = os.path.join(root, "tools", "scraper")
+    out = os.path.join(sc, "output", "HCMC", "enrich-report.json")
+    subprocess.run([sys.executable, os.path.join(sc, "build_enrich_report.py"), "--state", "HCMC", "--output-dir", os.path.join(sc, "output"), "--out", out],
+                   cwd=tmp, env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"), capture_output=True, text=True)
+    return root, picked, tmp
+
+
+def run_back_sync(bk, wf, tohong_root, sha, branch, secrets=None, rec=None, checkouts=None, inputs=None):
+    """Chạy NGUYÊN VĂN job của workflow pool ở tohong-back trong Box `bk` (bản sao git của back). Trả kết quả run_job."""
+    rec = rec if rec is not None else []
+    checkouts = checkouts if checkouts is not None else []
+    secrets = {"TOHONG_READ_TOKEN": "READTOKEN-sentinel"} if secrets is None else secrets
+
+    def checkout(w, s):
+        repo = w.get("repository") or "phungrk/tohong-back"
+        checkouts.append({"repository": repo, "ref": w.get("ref"), "path": w.get("path"), "token": w.get("token"), "persist": w.get("persist-credentials")})
+        if repo.endswith("/tohong"):
+            if not w.get("token"):
+                raise RuntimeError("không có token: repo tohong là private (clone thất bại)")
+            dst = os.path.join(bk.ws, w.get("path") or "tohong")
+            shutil.rmtree(dst, ignore_errors=True); _copytree(tohong_root, dst)
+        return {}
+    uses = {"actions/checkout": checkout, "actions/": lambda w, s: {}, "peter-evans/create-pull-request": make_cpr(bk, rec)}
+    ctx = gh_ctx(bk, "workflow_dispatch", inputs=inputs if inputs is not None else {"tohong_ref": sha, "tohong_branch": branch}, repo=BACK_REPO_NAME, secrets=secrets)
+    job = next(iter(wf["jobs"]))
+    return run_job(bk, wf, job, ctx, uses=uses), rec, checkouts
+
+
+def back_box():
+    return Box(BACK, items=("lib", "tools", "package.json", ".github"), name="t135-back")
+
+
+def pool_ids(text):
+    return {v["id"] for v in json.loads(text[text.index("= [") + 2:text.rindex("]") + 1])}
