@@ -102,7 +102,17 @@ expect("trộn (A)+(B), giờ không phần lẻ, ngày khác nhau", INV20, GOOD
 expect("xoay khoá: mục ký khoá cũ k1 vẫn hợp lệ khi ADR còn k1, mục mới ký k2", INV20, TWO, [ent_b(), ent_b("marry_cccccccccccc", key=K2, kid="k2")], True)
 expect("đổi tài khoản Clerk của Capu (nhãn khác) không cần ADR nhãn", INV20, GOOD, [ent_b(label="admin:99999999")], True)
 expect("tohong giữ đúng khoá đã duyệt", INV20, GOOD, [ent_b()], True, keysfile={"k1": P1})
+LINK = "https://share.google/abcDEF"; RID = "ChIJFAKEresolvedXXXXXXX"
+def after_resolve(e, pid=RID, rid=RID):
+    e = dict(e); e["place_id"] = pid; e["resolved"] = {"place_id": rid, "name": "Ten Gia", "resolved_from": "link"}; return e
+expect("mục link đã ký, SAU resolve (resolve ghi place_id + resolved): vẫn hợp lệ", INV20, GOOD, [after_resolve(ent_b(action="accept_place", maps_link=LINK))], True)
+expect("mục place_id đã ký, sau resolve (resolved.place_id = place_id)", INV20, GOOD, [after_resolve(ent_b(action="accept_place", place_id=PID), PID, PID)], True)
 # --- INV-020 v2 đỏ
+expect("giả mạo: mục link thêm place_id khác resolved.place_id", INV20, GOOD, [after_resolve(ent_b(action="accept_place", maps_link=LINK), RID, "ChIJOTHERxxxxxxxxxxxxxx")], False, "resolved")
+expect("giả mạo: mục link có place_id nhưng không có resolved", INV20, GOOD, [{**ent_b(action="accept_place", maps_link=LINK), "place_id": RID}], False, "resolved")
+expect("giả mạo: mục có resolved nhưng không có place_id", INV20, GOOD, [{**ent_b(action="accept_place", maps_link=LINK), "resolved": {"place_id": RID}}], False, "resolved")
+expect("giả mạo: mục place_id đã ký bị đổi place_id và resolved cho khớp nhau", INV20, GOOD, [after_resolve(ent_b(action="accept_place", place_id=PID), RID, RID)], False, "chữ ký")
+expect("giả mạo: xoá maps_link khỏi mục link đã resolve (giữ place_id)", INV20, GOOD, [{k: v for k, v in after_resolve(ent_b(action="accept_place", maps_link=LINK)).items() if k != "maps_link"}], False, "chữ ký")
 expect("chép nhãn công khai, tự viết reason, chữ ký rác", INV20, GOOD, [ent_b(decision="admin-review:k1:%s@%s:%s" % (LABEL, AT, "A" * 86))], False, "chữ ký")
 expect("ký bằng khoá kẻ tấn công nhưng key_id k1", INV20, GOOD, [ent_b(key=ATTACKER)], False, "chữ ký")
 for fld, mut in (("vendor_id", lambda e: e.update(vendor_id="marry_dddddddddddd")), ("action", lambda e: e.update(action="temporarily_closed")),
@@ -153,15 +163,18 @@ else:
         hq, th = world(decisions, [entry])
         ns = {"os": os, "json": json, "_re": re, "importlib": importlib, "HQ": hq, "t": th}
         exec(m.group(0), ns)
-        return ns["_exempt"](entry["vendor_id"], "ChIJxxxxxxxxxxxxxxxxxxxxxxxx")
+        return ns["_exempt"](entry["vendor_id"], entry["resolved"]["place_id"])
     def acc(**kw):
-        e = ent_b(action="accept_place", place_id=kw.pop("place_id", PID), **kw); e["resolved"] = {"place_id": "ChIJxxxxxxxxxxxxxxxxxxxxxxxx"}; return e
+        e = ent_b(action="accept_place", place_id=kw.pop("place_id", PID), **kw); e["resolved"] = {"place_id": e["place_id"]}; return e
     def acc_a():
-        e = ent_a("marry_bbbbbbbbbbbb"); e["action"] = "accept_place"; e["resolved"] = {"place_id": "ChIJxxxxxxxxxxxxxxxxxxxxxxxx"}; return e
+        e = ent_a("marry_bbbbbbbbbbbb"); e["action"] = "accept_place"; e["resolved"] = {"place_id": "ChIJxxxxxxxxxxxxxxxxxxxxxxxx"}; e["place_id"] = "ChIJxxxxxxxxxxxxxxxxxxxxxxxx"; return e
     if not exempt(GOOD, acc()): fails.append("INV-015 v2: không miễn cho accept_place có chữ ký hợp lệ")
     if exempt(GOOD, acc(key=ATTACKER)): fails.append("INV-015 v2: miễn nhầm khi chữ ký là của kẻ tấn công")
-    e = acc(); e["place_id"] = "ChIJother" + "x" * 15
+    e = acc(); e["place_id"] = "ChIJother" + "x" * 15; e["resolved"] = {"place_id": e["place_id"]}
     if exempt(GOOD, e): fails.append("INV-015 v2: miễn nhầm khi place_id bị sửa sau khi ký")
+    lk = after_resolve(ent_b(action="accept_place", maps_link=LINK))
+    if not exempt(GOOD, lk): fails.append("INV-015 v2: không miễn cho mục link đã ký sau khi resolve ghi place_id + resolved")
+    if exempt(GOOD, after_resolve(ent_b(action="accept_place", maps_link=LINK), RID, "ChIJOTHERxxxxxxxxxxxxxx")): fails.append("INV-015 v2: miễn nhầm khi place_id lệch resolved.place_id")
     if exempt(GOOD, acc(key=K2, kid="k2")): fails.append("INV-015 v2: miễn nhầm khi key_id không có trong ADR")
     if not exempt(GOOD, acc_a()): fails.append("INV-015 v2: mất điều khoản miễn cho nguồn (A)")
     if exempt({**GOOD, "2026-11-08-adr-048-x.md": fm() + "khac\n"}, acc_a()): fails.append("INV-015 v2: miễn nhầm nguồn (A) thiếu vendor_id")

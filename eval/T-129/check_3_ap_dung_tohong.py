@@ -12,7 +12,7 @@ Từ chối cả lượt (thoát 2, file không đổi byte, "APPLY_REFUSED <mã
 Chạy lại cùng đầu vào: file giữ nguyên byte. Không mạng. enrichment.overrides.load_overrides đọc được; dạng decisions/<tên>.md vẫn hợp lệ.
 Đo trên bản sao dữ liệu thật: (a) 8 entry ký đúng (3 Approve, remove, temporarily_closed, reject_match, 1 vendor đã có mục ADR-048) với reviewed_at KHÁC NGÀY nhau -> 6 mục mới, 1 bỏ qua, mục cũ giữ byte, approved_on từng mục = ngày bấm;
 (b) load_overrides; (c) INV-020 v2 PASS trong HQ giả có ADR khai khoá và ĐỎ khi ADR không khai; (d) từ chối đúng các ca xấu, file không đổi; (e) chạy lại không đổi byte; (f) resolve_overrides.py --dry-run đếm đúng; mạng bị chặn;
-(g) INV-015 (v1 nguyên văn và v2) xanh sau khi áp; INV-021 nguyên văn xanh trước khi áp và sau khi áp chỉ đỏ vì chính các vendor vừa thêm (file duyệt tay đi trước dữ liệu tới lần resolve/enrich kế).
+(h) resolve_overrides.py THẬT (ghi file; Google giả, không mạng) trên mục accept_place có maps_link đã ký: INV-020 v2 vẫn xanh; place_id lệch resolved.place_id thì đỏ; (g) INV-015 (v1 nguyên văn và v2) xanh sau khi áp; INV-021 nguyên văn xanh trước khi áp và sau khi áp chỉ đỏ vì chính các vendor vừa thêm (file duyệt tay đi trước dữ liệu tới lần resolve/enrich kế).
 In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import base64, copy, importlib.util, json, os, re, shutil, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -189,6 +189,32 @@ try:
         x = run([i21], t.HQ, env=env2)
         mm = re.search(r"vd (marry_[0-9a-f]+)", x.stdout)
         if x.returncode == 0 or not mm or mm.group(1) not in new_ids: bad.append("INV-021 sau khi áp: mong đỏ chỉ vì vendor vừa thêm, thấy %r" % x.stdout.strip()[:140])
+        # (h) resolve THẬT (ghi file; Google giả, không mạng) trên mục accept_place có maps_link đã ký: INV-020 v2 vẫn xanh; giả mạo place_id lệch resolved bị bắt
+        fg = os.path.join(tmp, "fg"); os.makedirs(fg); shutil.copy(os.path.join(HERE, "lib", "fake_google_sitecustomize.py"), os.path.join(fg, "sitecustomize.py"))
+        FG = dict(os.environ, PYTHONPATH=fg, GOOGLE_MAPS_API_KEY="fake-key-khong-goi-mang")
+        open(mo, "wb").write(old_bytes)
+        lv = pick("name_similar", 3)[2]["id"]
+        le = E(lv, "accept_place", "Gắn đúng nơi", 1, maps_link="https://share.google/abcFAKE")
+        lex = write_ex([le], os.path.join(tmp, "link.json"))
+        pa = run(base[:4] + [lex] + base[5:], sc)
+        if pa.returncode != 0 or "APPLY_OK added=1" not in pa.stdout: bad.append("(h) apply mục link thất bại: %r" % (pa.stdout + pa.stderr)[-150:])
+        else:
+            before = json.load(open(mo, encoding="utf-8"))["overrides"]
+            pr_ = run(["resolve_overrides.py", "--state", "HCMC"], sc, env=FG)
+            if pr_.returncode != 0 or "RESOLVED %s ChIJFAKE" % lv not in pr_.stdout: bad.append("(h) resolve_overrides.py (Google giả) không resolve mục link: thoát %s %r" % (pr_.returncode, (pr_.stdout + pr_.stderr)[-200:]))
+            else:
+                after = json.load(open(mo, encoding="utf-8"))["overrides"]
+                mine = next(x for x in after if x["vendor_id"] == lv)
+                if not mine.get("place_id") or (mine.get("resolved") or {}).get("place_id") != mine["place_id"] or mine.get("maps_link") != "https://share.google/abcFAKE": bad.append("(h) mục sau resolve không có place_id/resolved/maps_link như mong đợi: %r" % mine)
+                if [x for x in after if x["vendor_id"] != lv] != [x for x in before if x["vendor_id"] != lv]: bad.append("(h) resolve đổi mục khác")
+                adr2 = os.path.join(hq, "decisions", "2026-11-12-adr-998-khoa.md")
+                open(adr2, "w", encoding="utf-8").write("---\ntype: decision\nid: ADR-998\ndecided_by: capu\ncapu_signing_keys: k1=%s\n---\n" % P1)
+                i2 = run([inv], hq, env=env2)
+                if i2.returncode != 0 or not i2.stdout.startswith("PASS"): bad.append("(h) INV-020 v2 đỏ SAU resolve thật trên mục link đã ký: %s" % i2.stdout.strip()[:160])
+                forged = json.load(open(mo, encoding="utf-8")); fm_ = next(x for x in forged["overrides"] if x["vendor_id"] == lv); fm_["place_id"] = "ChIJFORGEDxxxxxxxxxxxx"
+                json.dump(forged, open(mo, "w"), ensure_ascii=False)
+                i3 = run([inv], hq, env=env2)
+                if i3.returncode == 0: bad.append("(h) đối chứng: place_id lệch resolved.place_id phải làm INV-020 v2 ĐỎ")
     print("FAIL " + bad[0] + (" (+%d lỗi nữa)" % (len(bad) - 1) if len(bad) > 1 else "") if bad else "PASS")
     sys.exit(1 if bad else 0)
 finally:
