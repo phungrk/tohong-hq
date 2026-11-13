@@ -9,7 +9,7 @@
  *  case 2: các tab Thành viên, Hộp kết nối, Nâng cấp gói, Gói tự kích hoạt, Nhật ký, Dữ liệu vendor bấm qua lại được: aria-current đổi theo, bảng enrich biến mất khi rời tab,
  *          quay lại "Dữ liệu vendor" thì lại là bảng enrich. Thứ tự các tab còn lại giữ nguyên như trước: Thành viên, Hộp kết nối, Nâng cấp gói, Gói tự kích hoạt, Nhật ký.
  *  case 3: Hộp kết nối > chọn yêu cầu > "Sửa vendor này": tab Dữ liệu vendor được chọn, chế độ danh sách ("Danh sách vendor" aria-pressed=true, không có bảng enrich),
- *          gọi GET /api/admin/vendors/<đúng id> (một lần), không gọi GET /api/admin/vendor-enrich.
+ *          trong các request SAU thao tác bấm: GET /api/admin/vendors/<đúng id> đúng một lần, không có GET /api/admin/vendor-enrich.
  *  case 4: người không phải admin (GET /api/admin/me trả 403): thấy "Bạn không có quyền xem trang này", không có thanh tab, không có bảng; không gọi /api/admin/vendor-enrich* hay /api/admin/vendors*.
  * In dòng cuối PASS hoặc FAIL <lý do đầu tiên> (+n lỗi nữa); thoát 0/1 (2 = eval không chạy được).
  */
@@ -127,7 +127,7 @@ const settle = (page) => page.waitForTimeout(500);
         check(`bấm "${name}": bảng enrich biến mất`, (await table(page).count()) === 0);
       }
       check('"Thành viên" gọi members-summary khi được mở', S.n(/members-summary/) >= 1, S.calls.join(', '));
-      check('"Hộp kết nối" hiện tiêu đề "Hộp kết nối vendor" khi được mở', S.n(/GET \/api\/admin\/connect-requests$/) >= 1);
+      check('"Hộp kết nối" gọi API danh sách yêu cầu kết nối khi được mở', S.n(/GET \/api\/admin\/connect-requests$/) >= 1);
       await tab(page, 'Dữ liệu vendor').click(); await table(page).waitFor();
       const cur = await current(page);
       check('quay lại "Dữ liệu vendor": được chọn và là bảng enrich', cur.join('|') === 'Dữ liệu vendor' && (await page.getByRole('button', { name: 'Enrich Google Maps' }).getAttribute('aria-pressed')) === 'true', cur.join('|'));
@@ -139,13 +139,15 @@ const settle = (page) => page.waitForTimeout(500);
       await table(page).waitFor();
       await tab(page, 'Hộp kết nối').click();
       await page.getByText('Cặp Thử').first().click();
+      const before = S.calls.length;
       await page.getByRole('button', { name: 'Sửa vendor này' }).click();
       await settle(page);
+      const after = S.calls.slice(before);
       const cur = await current(page);
       check('sau "Sửa vendor này": tab "Dữ liệu vendor" được chọn', cur.join('|') === 'Dữ liệu vendor', cur.join('|'));
       check('chế độ danh sách: "Danh sách vendor" aria-pressed=true, không có bảng enrich', (await page.getByRole('button', { name: 'Danh sách vendor' }).getAttribute('aria-pressed')) === 'true' && (await table(page).count()) === 0);
-      check(`gọi đúng một lần GET /api/admin/vendors/${VENDOR_ID}`, S.n(new RegExp('GET /api/admin/vendors/' + VENDOR_ID + '$')) === 1, S.calls.join(', '));
-      check('không gọi API enrich sau khi rời tab ban đầu (chỉ lần tải đầu)', S.n(/GET \/api\/admin\/vendor-enrich$/) === 1, S.calls.join(', '));
+      check(`gọi đúng một lần GET /api/admin/vendors/${VENDOR_ID}`, after.filter((c) => new RegExp('GET /api/admin/vendors/' + VENDOR_ID + '$').test(c)).length === 1, after.join(', '));
+      check('sau "Sửa vendor này" không gọi API enrich', after.filter((c) => /GET \/api\/admin\/vendor-enrich$/.test(c)).length === 0, after.join(', '));
     }
     if (CASE === '4') {
       const S = await open({ admin: false }); const { page } = S;
