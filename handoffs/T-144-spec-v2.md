@@ -16,3 +16,8 @@ reversible: yes
   3. Thêm xoá MATCHER_URL, MATCHER_API_KEY của repo phungrk/tohong (không xoá GCP_SA_KEY/GCP_PROJECT_ID của tohong).
 Engineering chép khối lệnh trong spec vào thân PR #53 (đúng nguyên văn, không có `rm -r` bucket).
 Kết quả nằm ở: products/T-140-chat-ghep-vendor-computematches.md
+
+Bổ sung (v3, Spec Gate kiểm lại):
+  4. Bước 4 thu quyền: mặc định GIỮ binding; chỉ gỡ khi Capu khẳng định GCP_SA_KEY của tohong là service account khác gha-deployer; không xác định được thì giữ (thừa quyền, không hỏng gì). Bỏ lệnh grep log.
+  5. Phạm vi PR tohong của bước 2 thêm: gỡ khối reload matcher trong tohong/.github/workflows/scrape-vendors.yml (MATCHER_RELOAD_PATH, env MATCHER_* cấp job, bước "Reload matcher service"); giữ tải/ghi vendors/vendors.json.
+  Eval mới (chưa đăng ký, cần Chief of Staff đăng ký cho T-144): python3 -I eval/T-140/buoc2-go-cloud-run/check_go_scrape_reload.py (đỏ trên main hiện tại). check_go_cloud_run.py không sửa.
