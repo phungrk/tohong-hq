@@ -1,6 +1,6 @@
 {
   "task": "T-145",
-  "at": "2026-11-13T13:21",
+  "at": "2026-11-13T13:27",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 -I eval/T-145/check_1_workflow.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 111,
+      "ms": 120,
       "out": "FAIL cần đúng 1 bước có env lấy secrets.DASHBOARD_DATA_TOKEN, thấy 0",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "bash eval/T-145/check_2_trang.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 36,
+      "ms": 41,
       "out": "FAIL DATA_URL=https://raw.githubusercontent.com/phungrk/tohong-hq/dashboard-data/dashboard.json (phải là https://raw.githubusercontent.com/phungrk/tohong-hq-dashboard/dashboard-data/dashboard.json)",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 -I eval/T-145/check_3_cong_khai.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 136,
+      "ms": 126,
       "out": "FAIL chưa có bước đẩy dùng DASHBOARD_DATA_TOKEN",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 51,
+      "ms": 42,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -52,7 +52,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 196,
+      "ms": 228,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 33,
+      "ms": 38,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1252,
+      "ms": 1304,
       "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/hq/inv-002-workflow-context-hop-le.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 79,
+      "ms": 69,
       "out": "PASS 6 workflow: không secrets/env sai chỗ trong if, inputs đều khai, không in env khi có secret cấp job",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-001-tat-ca-luon-du.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 11739,
+      "ms": 12037,
       "out": "PASS all-complete",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-002-cay-bat-bien-khop-tong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 18498,
+      "ms": 18266,
       "out": "PASS kr-sum",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-003-doi-bo-loc-khong-doi-hinh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 6650,
+      "ms": 6546,
       "out": "PASS shape-stable",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-004-san-pham-do-so-cai-xuat.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 388,
+      "ms": 408,
       "out": "PASS product do sổ cái xuất, khớp normalize_area",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-005-export-khong-sap-vi-area-sua-tay.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 119,
+      "ms": 120,
       "out": "PASS",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-006-so-capu-bang-so-dong-modal.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 14610,
+      "ms": 14221,
       "out": "dal\nPASS không capu_queue @1280: số trên khối (2) = số dòng modal (2)\nPASS không capu_queue @1280: mỗi mã việc tối đa một dòng: T-1,T-3\nPASS không capu_queue @1280: không lỗi trang \nPASS không capu_queue @390: bấm số trên khối Capu mở #capu-modal\nPASS không capu_queue @390: số trên khối (2) = số dòng modal (2)\nPASS không capu_queue @390: mỗi mã việc tối đa một dòng: T-1,T-3\nPASS không capu_queue @390: không lỗi trang \nPASS rỗng @1280: bấm số trên khối Capu mở #capu-modal\nPASS rỗng @1280: số trên khối (0) = số dòng modal (0)\nPASS rỗng @1280: mỗi mã việc tối đa một dòng: \nPASS rỗng @1280: không lỗi trang \nPASS rỗng @390: bấm số trên khối Capu mở #capu-modal\nPASS rỗng @390: số trên khối (0) = số dòng modal (0)\nPASS rỗng @390: mỗi mã việc tối đa một dòng: \nPASS rỗng @390: không lỗi trang \nPASS",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-007-loc-san-pham-toan-man-hinh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 26758,
+      "ms": 26510,
       "out": "PASS không capu_queue: lọc P giống hệt màn hình chỉ có việc của P (gồm số, chữ phụ, đèn khối Capu)\nPASS có capu_queue: lọc P giống hệt màn hình chỉ có việc của P (gồm số, chữ phụ, đèn khối Capu)\nPASS",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-008-capu-queue-khong-chua-viec-da-xu-ly.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 355,
+      "ms": 358,
       "out": "ật: T-134 loại merge-c chỉ cho việc B/C đã done (tier C, state done)\nPASS sổ cái thật: T-135 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái thật: T-135 decision chưa được trả lời sau lần hỏi cuối (thấy trả lời ở vị trí [])\nPASS sổ cái thật: mọi việc escalated trên board có trong capu_queue: thiếu []\nPASS sổ cái giả: mỗi mã việc tối đa một phần tử (2 phần tử)\nPASS sổ cái giả: T-954 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái giả: T-954 loại diff-b chỉ cho việc B/C đã done (tier B, state done)\nPASS sổ cái giả: T-957 không chứa PR đã có sự kiện merged/closed []\nPASS sổ cái giả: mọi việc escalated trên board có trong capu_queue: thiếu []\nPASS sổ cái giả: capu_queue đúng {T-954: diff-b (PR #95 còn mở), T-957: escalated}, thấy {'T-954': 'diff-b', 'T-957': 'escalated'}\nPASS",
       "tier": 2
     },
@@ -148,15 +148,15 @@
       "eval": "eval/invariants/hq/dashboard/inv-009-link-capu-an-toan-cong-khai-khong-ro.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9230,
-      "out": "PASS (a) bản công khai: 8 phần tử capu_queue, 1154 sự kiện\nPASS all: số trên khối 8 = số dòng 8\nPASS all: 15 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS all: không lỗi trang \nPASS planner: số trên khối 8 = số dòng 8\nPASS planner: 15 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS planner: không lỗi trang \nPASS hq: số trên khối 0 = số dòng 0\nPASS hq: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS hq: không lỗi trang \nPASS",
+      "ms": 9273,
+      "out": "PASS (a) bản công khai: 8 phần tử capu_queue, 1155 sự kiện\nPASS all: số trên khối 8 = số dòng 8\nPASS all: 15 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS all: không lỗi trang \nPASS planner: số trên khối 8 = số dòng 8\nPASS planner: 15 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS planner: không lỗi trang \nPASS hq: số trên khối 0 = số dòng 0\nPASS hq: 0 link trong modal đều https github.com/phungrk, tab mới, noopener: lỗi []\nPASS hq: không lỗi trang \nPASS",
       "tier": 2
     },
     {
       "eval": "eval/invariants/hq/dashboard/inv-010-capu-queue-khong-doc-thu-muc-con-inbox.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 456,
+      "ms": 493,
       "out": "PASS capu_queue không đổi khi thêm DR vào thư mục con inbox/capu (9 phần tử)",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-011-viec-moi-pr-da-merged-khong-cho-capu.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 354,
+      "ms": 390,
       "out": "PASS việc B/C mà mọi PR đã biết đã merged/closed không còn chờ Capu, bất kể tuổi",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-012-dr-da-quyet-khong-con-dong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 418,
+      "ms": 456,
       "out": "PASS DR đã quyết (sau lần hỏi cuối) không còn dòng decision/blocked; hỏi lại thì vào lại",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-013-link-issue-dung-so-viec.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 346,
+      "ms": 355,
       "out": "PASS 8 phần tử capu_queue; (b) đang kiểm",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-014-issue-tu-do-khong-sinh-link-sai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 135,
+      "ms": 161,
       "out": "PASS 25 giá trị issue thử",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-015-cot-xong-moi-nhat-so-dem-tong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 25441,
+      "ms": 25379,
       "out": "PASS done-cap",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-016-tat-ca-du-khi-hon-10-viec-xong.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 12263,
+      "ms": 12249,
       "out": "PASS all-complete-many",
       "tier": 2
     },
@@ -212,7 +212,7 @@
       "eval": "eval/invariants/hq/dashboard/inv-017-so-be-khop-file-that.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 453,
+      "ms": 484,
       "out": "PASS",
       "tier": 2
     }
