@@ -1,6 +1,6 @@
 {
   "task": "T-154",
-  "at": "2026-11-13T22:59",
+  "at": "2026-11-13T23:05",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "bash eval/T-153/check_1_tab_dau_va_bang_enrich.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 2834,
+      "ms": 3077,
       "out": "ok  tab đầu tiên của thanh tab là \"Dữ liệu vendor\"\n  ok  đủ sáu tab\n  ok  chỉ \"Dữ liệu vendor\" có aria-current=\"page\"\n  ok  bảng \"Bảng enrich vendor\" hiện, có dòng Alpha Hall\n  ok  nút \"Enrich Google Maps\" đang chọn (aria-pressed=true), \"Danh sách vendor\" không\n  ok  đã gọi API enrich; không gọi danh sách vendor, không gọi members-summary\n  ok  không có request ra ngoài\nPASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "bash eval/T-153/check_2_chuyen_tab_qua_lai.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 5749,
+      "ms": 5928,
       "out": "ok  thứ tự năm tab còn lại giữ nguyên\n  ok  bấm \"Thành viên\": chỉ tab đó được chọn\n  ok  bấm \"Thành viên\": bảng enrich biến mất\n  ok  bấm \"Hộp kết nối\": chỉ tab đó được chọn\n  ok  bấm \"Hộp kết nối\": bảng enrich biến mất\n  ok  bấm \"Nâng cấp gói\": chỉ tab đó được chọn\n  ok  bấm \"Nâng cấp gói\": bảng enrich biến mất\n  ok  bấm \"Gói tự kích hoạt\": chỉ tab đó được chọn\n  ok  bấm \"Gói tự kích hoạt\": bảng enrich biến mất\n  ok  bấm \"Nhật ký\": chỉ tab đó được chọn\n  ok  bấm \"Nhật ký\": bảng enrich biến mất\n  ok  \"Thành viên\" gọi members-summary khi được mở\n  ok  \"Hộp kết nối\" gọi API danh sách yêu cầu kết nối khi được mở\n  ok  quay lại \"Dữ liệu vendor\": được chọn và là bảng enrich\n  ok  trong tab vẫn đổi được sang \"Danh sách vendor\" và về lại bảng enrich\nPASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "bash eval/T-153/check_3_hop_ket_noi_mo_dung_vendor.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 3085,
+      "ms": 3175,
       "out": "ok  sau \"Sửa vendor này\": tab \"Dữ liệu vendor\" được chọn\n  ok  chế độ danh sách: \"Danh sách vendor\" aria-pressed=true, không có bảng enrich\n  ok  gọi đúng một lần GET /api/admin/vendors/vd-focus-153\n  ok  sau \"Sửa vendor này\" không gọi API enrich\nPASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "bash eval/T-153/check_4_nguoi_ngoai_khong_vao_duoc.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 2865,
+      "ms": 2983,
       "out": "ok  thấy \"Bạn không có quyền xem trang này\"\n  ok  không có thanh tab, không có bảng enrich\n  ok  không gọi /api/admin/vendor-enrich* hay /api/admin/vendors*\nPASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "bash eval/T-153/check_5_bat_bien_members_inv006.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4900,
+      "ms": 5001,
       "out": "ok  [TC4] không hiện số điện thoại dù máy chủ giả có nhét thêm trường phone\n  ok  [TC4] không hiện mã người dùng hay mã cặp đôi\n  ok  [TC4] địa chỉ trang không đổi khi tìm và chuyển trang (vẫn /?admin, không chứa từ khoá)\n  ok  [TC4] request danh sách không mang từ khoá trên URL (từ khoá chỉ ở thân POST)\n  ok  [TC4] console của trình duyệt không chứa tên hay email\n  ok  [TC4] không request nào ra ngoài (analytics, bên thứ ba) mang tên hay email\n  ok  [TC4] trang admin không gọi host lạ nào ngoài máy chủ API (không analytics)\n  ok  [TC4] tiêu đề trang không đổi so với lúc mở\n  ok  [TC4] không lưu tên, email hay từ khoá vào localStorage/sessionStorage, tiêu đề trang không đổi\nPASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 52,
+      "ms": 45,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 152,
+      "ms": 164,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 34,
+      "ms": 31,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 45,
+      "ms": 60,
       "out": "PASS selftest 3 ca; 35 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 975,
+      "ms": 931,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -92,15 +92,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2367,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-sAKKO1/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2368,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-1GoKJf/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1644,
+      "ms": 1806,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -108,15 +108,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1002,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-m4hbeG/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 997,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-nJkheQ/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2430,
+      "ms": 2409,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 102,
+      "ms": 107,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1501,
+      "ms": 1472,
       "out": "PASS (worker.js nén 770694 byte)",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-001-bao-cao-enrich-phan-hoach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 66,
+      "ms": 67,
       "out": "PASS 870 dòng, 9 nhóm cộng đúng, 366 approvable, ô đếm khớp nhóm",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-002-maps-link-back-nhan-thi-tohong-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 323,
+      "ms": 338,
       "out": "PASS 20 link: mọi link back nhận thì tohong cũng nhận",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-003-bao-cao-enrich-commit-bang-sinh-lai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 441,
+      "ms": 449,
       "out": "PASS 1 báo cáo enrich đã commit bằng đúng byte báo cáo sinh lại",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-004-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 652,
+      "ms": 785,
       "out": "PASS 3 cú bấm của Capu: back ký, tohong nhận, bất biến kiểm được (kể cả mục link sau resolve); review của admin khác không vào",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-005-workflow-du-lieu-di-kem-bao-cao.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 94,
+      "ms": 72,
       "out": "PASS mọi workflow thêm file dữ liệu đều sinh lại và đưa enrich-report.json vào cùng commit",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-006-danh-muc-thuoc-tinh-pool.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 71783,
+      "ms": 71977,
       "out": "PASS",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-007-bao-cao-khong-mang-lien-he-dia-chi.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 123,
+      "ms": 144,
       "out": "PASS",
       "tier": 2
     },
@@ -196,9 +196,17 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-008-nguoi-ngoai-khong-thay-khong-goi-api-vendor.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 2929,
+      "ms": 3298,
       "out": "ok  thấy \"Bạn không có quyền xem trang này\"\n  ok  không có thanh tab, không có bảng enrich\n  ok  không gọi /api/admin/vendor-enrich* hay /api/admin/vendors*\nPASS",
       "tier": 2
+    },
+    {
+      "eval": "eval/T-154/adv-01-admin-mo-trang-bien.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 15646,
+      "out": " một phần tử mang aria-current, là \"page:Dữ liệu vendor\"\n  ok  D sau Thử lại: bảng enrich, vendor-enrich đúng 1 lần\n  ok  E ở Hộp kết nối: đúng một phần tử mang aria-current, là \"page:Hộp kết nối\"\n  ok  E sau \"Sửa vendor này\": đúng một phần tử mang aria-current, là \"page:Dữ liệu vendor\"\n  ok  E: chế độ danh sách sau \"Sửa vendor này\"\n  ok  E bấm lại tab \"Dữ liệu vendor\" khi đang mở vendor: đúng một phần tử mang aria-current, là \"page:Dữ liệu vendor\"\n  ok  E: bấm lại tab đang chọn không làm sập trang (toolbar còn)\n  ok  E sang \"Thành viên\": đúng một phần tử mang aria-current, là \"page:Thành viên\"\n  ok  E quay lại \"Dữ liệu vendor\": đúng một phần tử mang aria-current, là \"page:Dữ liệu vendor\"\n  ok  E: quay lại từ tab khác sau khi đã mở một vendor -> bảng enrich, không gọi danh sách vendor\nPASS",
+      "tier": 3
     }
   ],
   "hint": ""

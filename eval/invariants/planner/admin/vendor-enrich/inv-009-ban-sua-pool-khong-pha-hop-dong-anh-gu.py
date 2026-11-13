@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Nguồn: T-152 (spec products/T-152-drawer-phu-pool-dau-anh-admin-sua-pool.md, Hành vi 4 và "Bất biến đề xuất"); bản đề xuất của product, chờ Spec Gate (spec-critic) rồi Chief of Staff đưa vào eval/invariants/planner/admin/vendor-enrich/ và đặt số.
-Nằm ở eval/T-152/bat-bien-cho-merge/ cho tới khi PR back của T-152 merge và bất biến xanh trên main (ADR-028).
-INV-??? (planner/admin/vendor-enrich) · Bản sửa pool của admin (overlay R2) KHÔNG BAO GIỜ phá hợp đồng dữ liệu vendor mà cặp đôi thấy: sau mọi bản sửa hợp lệ (và mọi bản sửa bị từ chối), vendor hiệu lực ở
+"""Nguồn: T-152 (spec products/T-152-drawer-phu-pool-dau-anh-admin-sua-pool.md v2, Hành vi 4.2/4.3/4.6 và "Bất biến đề xuất"), qua Spec Gate 2026-11-13 (spec-critic).
+Bản nháp của product (eval/T-152/bat-bien-cho-merge/inv-xxx-…) do spec-critic sửa một chỗ: mô tả của vendor CHƯA sửa được giữ nguyên như pool (199/867 mô tả pool có CR/LF;
+spec không chuẩn hoá mô tả pool), nên kiểm "không ký tự điều khiển" chỉ áp cho mô tả hiệu lực KHÁC mô tả pool. Đã thử: bản cài đúng (lọc ảnh khi áp) PASS; bản không lọc ảnh FAIL ở pha "pool sinh lại".
+Trên main chưa có tính năng: PASS "chưa áp dụng" (không làm đỏ việc khác, ADR-028).
+INV-009 (planner/admin/vendor-enrich) · Bản sửa pool của admin (overlay R2) KHÔNG BAO GIỜ phá hợp đồng dữ liệu vendor mà cặp đôi thấy: sau mọi bản sửa hợp lệ (và mọi bản sửa bị từ chối), vendor hiệu lực ở
   tab Vendor (GET /api/vendors/<id>) có: styles ⊆ nhãn của styleContract (STYLE_LABELS_VI); mọi ảnh có url https ở host www.marry.vn hoặc lh3.googleusercontent.com; mọi ảnh Google có attribution khác rỗng (inv-013) và url nằm trong ảnh Google của CHÍNH vendor đó ở pool
   gốc (nên vẫn truy được về place_id, inv-014: overlay không thể thêm ảnh Google mới); tên 1..120, mô tả 1..300 ký tự; capacity chỉ ở venue với 1 <= min <= max <= 5000.
 Kể cả SAU KHI pool được sinh lại (photoUri Google làm mới hoặc bị gỡ): ảnh Google hiệu lực luôn nằm trong ảnh Google HIỆN HÀNH của vendor (định danh = url bỏ hậu tố kích thước `=…` + attribution); bản sửa không giữ ảnh Google đã rời pool. Tên một dòng (không ký tự điều khiển); mô tả không ký tự điều khiển.
@@ -44,7 +46,7 @@ async function audit(callX, POOLX, tag) {
   for (const v of POOLX) {
     const r = await callX("GET", `/api/vendors/${v.id}`, "u_khach"); const e = r.j?.vendor; if (!e) { bad.push(`${tag} ${v.id}: không đọc được`); continue; }
     if (!(e.name?.length >= 1 && e.name.length <= 120) || CTL.test(e.name)) bad.push(`${tag} ${v.id}: tên`);
-    if (!(typeof e.description === "string" && e.description.length <= 300) || CTL.test(e.description)) bad.push(`${tag} ${v.id}: mô tả`);
+    if (!(typeof e.description === "string" && e.description.length <= 300) || (CTL.test(e.description) && e.description !== v.description)) bad.push(`${tag} ${v.id}: mô tả`);
     if ((e.styles || []).some((s) => !labels.includes(s))) bad.push(`${tag} ${v.id}: styles ${JSON.stringify(e.styles)}`);
     const cur = new Set((v.photos || []).filter((p) => p.source === "google").map((p) => nb(p.url) + "|" + p.attribution));
     if (!(e.photos || []).length) bad.push(`${tag} ${v.id}: 0 ảnh`);
