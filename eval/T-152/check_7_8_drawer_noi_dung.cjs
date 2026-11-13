@@ -11,9 +11,12 @@ const { setup } = require('./lib/front152.cjs');
 const E = setup(process.argv.slice(2), 't152-7');
 const { check, H, urls } = E;
 const idx = (t, s) => t.indexOf(s);
+const PART = (process.argv.find((a) => a.startsWith('--part=')) || '--part=0').slice(7); // 1 = thứ tự + ảnh (tiêu chí 7), 2 = nhãn admin sửa + biểu mẫu + lịch sử (tiêu chí 8), 0 = cả hai
 E.run(async () => {
+  let S;
+  if (PART !== '2') {
   /* ===== A. thứ tự, ảnh ===== */
-  let S = await E.scenario();
+  S = await E.scenario();
   await S.openRow('Alpha Hall', 'Số 1 đường thử');
   let t = await H.text(S.dlg());
   const o = ['Kết quả trong pool', 'Lớp admin (R2)', 'Thuộc tính nguồn dùng để tạo vendor pool', 'Đầu vào ngoài vendors.json'].map((h) => idx(t, h));
@@ -32,6 +35,8 @@ E.run(async () => {
   check('không có nhãn "admin sửa" khi chưa sửa gì', !t.includes('admin sửa'));
   check('chưa có lịch sử: không có dòng lịch sử, có thể có tiêu đề "Lịch sử sửa" nhưng ghi "Chưa có sửa"', !t.includes('→') || t.includes('Chưa có sửa'));
   await S.ctx.close();
+  }
+  if (PART === '1') return;
 
   /* ===== B. đã có sửa: nhãn, lịch sử, nguồn đổi, bỏ sửa ===== */
   S = await E.scenario();
