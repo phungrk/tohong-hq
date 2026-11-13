@@ -1,7 +1,7 @@
 {
   "task": "T-149",
-  "at": "2026-11-13T15:31",
-  "verdict": "RED",
+  "at": "2026-11-13T15:36",
+  "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/admin/vendor-enrich",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-147/check_1_danh_muc_thuoc_tinh_pool.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 85505,
+      "ms": 83924,
       "out": "PASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-147/check_2_bao_cao_pool_input.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 32279,
+      "ms": 30520,
       "out": "PASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_3_api_chi_tiet.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 636,
+      "ms": 630,
       "out": "PASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_4_quyen_chi_tiet.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 267,
+      "ms": 248,
       "out": "PASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-147/check_5_bundle_worker.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4380,
+      "ms": 4878,
       "out": "PASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_6_ui_drawer.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 9037,
+      "ms": 9053,
       "out": "  không request nào ra ngoài (Google) trong cả phiên\n  ok  520px: drawer rộng min(560, khung) = 520, dính mép phải\n  ok  520px: không có tay cầm kéo (min = max)\n  ok  520px: trang không cuộn ngang\n  ok  520px: chế độ PHỦ (bảng không bị đẩy, nằm dưới drawer)\n  ok  520px: đóng drawer rồi Approve bấm được và gửi PUT\n  ok  600px: drawer rộng min(560, khung) = 560, dính mép phải\n  ok  600px: không có tay cầm kéo (min = max)\n  ok  600px: trang không cuộn ngang\n  ok  600px: chế độ PHỦ (bảng không bị đẩy, nằm dưới drawer)\n  ok  600px: đóng drawer rồi Approve bấm được và gửi PUT\n  ok  390px: drawer rộng bằng khung nhìn, phủ kín chiều cao\n  ok  390px: không có tay cầm kéo giãn\n  ok  390px: trang không cuộn ngang\n  ok  390px: nút \"Đóng\" cao >= 40px (bấm được bằng ngón tay)\n  ok  390px: đóng được\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "python3 eval/T-147/bat-bien-cho-merge/inv-001-danh-muc-thuoc-tinh-pool.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 84115,
+      "ms": 81061,
       "out": "PASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "python3 eval/T-147/bat-bien-cho-merge/inv-002-bao-cao-khong-mang-lien-he-dia-chi.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 146,
+      "ms": 158,
       "out": "PASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "python3 eval/T-147/bat-bien-cho-merge/inv-003-worker-nen-duoi-1mb.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1618,
+      "ms": 1623,
       "out": "PASS (worker.js nén 770694 byte)",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "cd /home/user/tohong-hq && node eval/T-149/adv-01-detail-nguon-null.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 305,
+      "ms": 291,
       "out": "PASS",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-149/adv-02-drawer-doi-khung-nhin.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 15939,
+      "ms": 17452,
       "out": "drawer dính mép phải, không cuộn ngang\n  ok  B 600 khi đang mở: drawer rộng 560 (min = max)\n  ok  B 600 khi đang mở: không có tay cầm (max = min)\n  ok  B 600: không cuộn ngang, không lề phải\n  ok  C 390 khi đang mở: drawer rộng đúng khung nhìn, không tay cầm, không cuộn ngang\n  ok  C 390→1280: ĐẨY lại, lề phải 560\n  ok  D localStorage=\"abc\": drawer mở, bề rộng trong [560, 1152]\n  ok  D localStorage=\"-5\": drawer mở, bề rộng trong [560, 1152]\n  ok  D localStorage=\"99999\": drawer mở, bề rộng trong [560, 1152]\n  ok  D localStorage=\"\": drawer mở, bề rộng trong [560, 1152]\n  ok  D localStorage=\"THROW\": drawer mở, bề rộng trong [560, 1152]\n  ok  E Esc khi đang gõ trong Sửa thủ công: hộp thoại đóng, drawer còn\n  ok  F đổi liên tục: cuối cùng là Theta Plain, phản hồi chậm của Eta Slow không đè\nPASS",
       "tier": 1
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 49,
+      "ms": 51,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 249,
+      "ms": 191,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 44,
+      "ms": 31,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1037,
+      "ms": 1017,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -132,15 +132,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2524,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-3ihv0d/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2422,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-4hQcDb/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1691,
+      "ms": 1652,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -148,15 +148,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1253,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-oYbrqB/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1222,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-uPLdrs/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2858,
+      "ms": 2754,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 108,
+      "ms": 104,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-001-bao-cao-enrich-phan-hoach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 76,
+      "ms": 69,
       "out": "PASS 870 dòng, 9 nhóm cộng đúng, 366 approvable, ô đếm khớp nhóm",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-002-maps-link-back-nhan-thi-tohong-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 447,
+      "ms": 386,
       "out": "PASS 20 link: mọi link back nhận thì tohong cũng nhận",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-003-bao-cao-enrich-commit-bang-sinh-lai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 498,
+      "ms": 502,
       "out": "PASS 1 báo cáo enrich đã commit bằng đúng byte báo cáo sinh lại",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-004-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 792,
+      "ms": 820,
       "out": "PASS 3 cú bấm của Capu: back ký, tohong nhận, bất biến kiểm được (kể cả mục link sau resolve); review của admin khác không vào",
       "tier": 2
     },
@@ -204,34 +204,10 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-005-workflow-du-lieu-di-kem-bao-cao.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 110,
+      "ms": 105,
       "out": "PASS mọi workflow thêm file dữ liệu đều sinh lại và đưa enrich-report.json vào cùng commit",
       "tier": 2
-    },
-    {
-      "eval": "eval/T-149/adv-01-detail-nguon-null.mjs",
-      "kind": "cmd",
-      "status": "FAIL",
-      "ms": 1,
-      "out": "/bin/sh: 1: eval/T-149/adv-01-detail-nguon-null.mjs: Permission denied",
-      "tier": 3
-    },
-    {
-      "eval": "eval/T-149/adv-02-drawer-doi-khung-nhin.cjs",
-      "kind": "cmd",
-      "status": "FAIL",
-      "ms": 6,
-      "out": "/bin/sh: 1: eval/T-149/adv-02-drawer-doi-khung-nhin.cjs: Permission denied",
-      "tier": 3
-    },
-    {
-      "eval": "eval/T-149/adv-02-drawer-doi-khung-nhin.sh",
-      "kind": "sh",
-      "status": "PASS",
-      "ms": 16876,
-      "out": "drawer dính mép phải, không cuộn ngang\n  ok  B 600 khi đang mở: drawer rộng 560 (min = max)\n  ok  B 600 khi đang mở: không có tay cầm (max = min)\n  ok  B 600: không cuộn ngang, không lề phải\n  ok  C 390 khi đang mở: drawer rộng đúng khung nhìn, không tay cầm, không cuộn ngang\n  ok  C 390→1280: ĐẨY lại, lề phải 560\n  ok  D localStorage=\"abc\": drawer mở, bề rộng trong [560, 1152]\n  ok  D localStorage=\"-5\": drawer mở, bề rộng trong [560, 1152]\n  ok  D localStorage=\"99999\": drawer mở, bề rộng trong [560, 1152]\n  ok  D localStorage=\"\": drawer mở, bề rộng trong [560, 1152]\n  ok  D localStorage=\"THROW\": drawer mở, bề rộng trong [560, 1152]\n  ok  E Esc khi đang gõ trong Sửa thủ công: hộp thoại đóng, drawer còn\n  ok  F đổi liên tục: cuối cùng là Theta Plain, phản hồi chậm của Eta Slow không đè\nPASS",
-      "tier": 3
     }
   ],
-  "hint": "code"
+  "hint": ""
 }
