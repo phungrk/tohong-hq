@@ -25,6 +25,7 @@ box = t.Box(t.TOHONG)
 bad = []
 try:
     ids = t.mutate_fixture_overrides(box, 2)
+    t.set_baseline(box, 0, 0)   # tháng trống: đường tự động được phép chạy (hạn mức đo ở eval 10); kết quả không phụ thuộc log thật của repo
     if len(ids) < 2 or len({c for c, _ in ids}) < 2:
         print("FAIL không dựng được lô thử hai category"); sys.exit(1)
     def run(secrets, event="pull_request", inputs=None, ev_=None):
