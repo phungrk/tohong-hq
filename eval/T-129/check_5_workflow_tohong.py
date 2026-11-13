@@ -112,6 +112,7 @@ try:
             k = m.group(1).strip()
             if k == "secrets.ENRICH_EXPORT_TOKEN": return TOKEN
             if k == "vars.ENRICH_BACK_URL": return URL
+            if k == "vars.AUTO_RESOLVE_OVERRIDES": return "true"   # T-135: thân PR báo trạng thái công tắc (giá trị thử; hành vi đo ở eval/T-135/check_11)
             if k == "runner.temp": return rt
             if k in ("github.run_id", "github.run_number"): return "1"
             raise KeyError(k)
