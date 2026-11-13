@@ -16,7 +16,7 @@ source:
 
 **Việc:** Review chéo hai PR bậc C trước khi Capu merge; adversary đã accept.
 
-**Đọc:** spec `products/T-135-resolve-tu-chay-pool-o-back.md` , `handoffs/T-139-v2.md` (Diff hành vi), eval `eval/T-136/` + `eval/T-139/adv-01-*`, `eval/T-139/gate-latest.json`, bất biến `eval/invariants/planner/vendor/images/`, note accept trong `board/T-139.md`.
+**Đọc:** spec `products/T-135-resolve-tu-chay-pool-o-back.md` (v3), `handoffs/T-139-v2.md` (Diff hành vi), eval `eval/T-135/` + `eval/T-139/adv-*`, `eval/T-139/gate-latest.json`, bất biến `eval/invariants/planner/vendor/images/`, note accept trong `board/T-139.md`.
 
 **Tiêu chí hoàn thành:**
 - Mỗi PR một comment `[ChatGPT review]` theo mẫu `handbook/chatgpt.md`.
