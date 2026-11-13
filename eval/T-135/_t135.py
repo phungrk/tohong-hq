@@ -507,7 +507,22 @@ def run_back_sync(bk, wf, tohong_root, sha, branch, secrets=None, rec=None, chec
 
 
 def back_box():
-    return Box(BACK, items=("lib", "tools", "package.json", ".github"), name="t135-back")
+    return Box(BACK, items=("lib", "tools", "package.json", ".github", "matcher-data"), name="t135-back")
+
+
+MATCHER_GEN = """
+# T138-SIM: như T-138 (regen-pool-styles.sh ghi matcher-data/vendors.json = id của pool)
+node -e 'const fs=require("fs");const s=fs.readFileSync(process.argv[1],"utf8");const a=JSON.parse(s.slice(s.indexOf("= [")+2,s.lastIndexOf("]")+1));fs.mkdirSync(process.argv[2],{recursive:true});fs.writeFileSync(process.argv[2]+"/vendors.json",JSON.stringify({vendors:a.map(v=>({id:v.id}))}))' "$POOL" "$BACK/matcher-data"
+"""
+
+
+def add_matcher_generator(tohong_root, on=True):
+    """Giả lập T-138 đã/chưa merge ở tohong: bước sinh pool có ghi thêm matcher-data/vendors.json hay không."""
+    sh = os.path.join(tohong_root, "tools", "regen-pool-styles.sh")
+    txt = open(sh, encoding="utf-8").read()
+    txt = txt.split("\n# T138-SIM")[0].rstrip("\n") + "\n"
+    if on: txt += MATCHER_GEN
+    open(sh, "w", encoding="utf-8").write(txt)
 
 
 def pool_ids(text):
