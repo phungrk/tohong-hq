@@ -6,7 +6,8 @@ Tĩnh (tohong): mọi workflow chỉ dùng secrets ⊆ {GOOGLE_MAPS_API_KEY, ENR
   `with:` của action khác, không in ra bằng echo/set -x); workflow có GOOGLE_MAPS_API_KEY chỉ được kích hoạt bởi workflow_dispatch hoặc pull_request{closed} (schedule chỉ còn refresh-vendor-photos.yml như hiện có) + job `if` của pull_request có merged, admin-reviews/capu, head.repo.full_name, vars.AUTO_RESOLVE_OVERRIDES.
 Tĩnh (back): sync-vendor-pool.yml dùng secrets ⊆ {TOHONG_READ_TOKEN, GITHUB_TOKEN}; TOHONG_READ_TOKEN chỉ ở `with.token` của checkout tohong và `env` của bước kiểm token; mọi `uses` ⊆ {actions/checkout, actions/setup-node,
   actions/setup-python, peter-evans/create-pull-request}; không ghi thẳng main; deploy.yml còn chỉ kích hoạt khi push main (merge PR pool vẫn deploy như cũ) và không nhắc sync-vendor-pool.
-Bất biến chạy nguyên văn (python3 -I) trên repo thật: INV-023, INV-024, INV-030, INV-031 (planner/vendor/images), inv-006 (planner), inv-004 (planner/admin/vendor-enrich) — thoát 0. (INV-003 KHÔNG ở đây: nó đỏ trên main hôm nay vì tohong#90 merge sau #89 làm báo cáo cũ lại; nó xanh khi PR dữ liệu đầu tiên theo T-133 được merge, đo ở check_3/check_4.)
+Bất biến chạy nguyên văn (python3 -I) trên repo thật: INV-023, INV-024, INV-030, INV-031 (planner/vendor/images), inv-006 (planner), vendor-enrich inv-001, inv-002, inv-004 (area `planner/vendor/images` không kéo vùng con
+vendor-enrich vào Code Gate, nên chạy ở đây), và HAI bất biến đề xuất của T-135 (eval/T-135/inv-proposed-*.py; kể cả cấm workflow khác kích workflow có khoá Google) — thoát 0. (INV-003 KHÔNG ở đây: nó đỏ trên main hôm nay vì tohong#90 merge sau #89 làm báo cáo cũ lại; nó xanh khi PR dữ liệu đầu tiên theo T-133 được merge, đo ở check_3/check_4.)
 In PASS hoặc FAIL <lý do>; thoát 0/1."""
 import glob, os, re, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -23,7 +24,7 @@ for p in sorted(glob.glob(os.path.join(wfdir, "*.y*ml"))):
     if extra: bad.append("%s: secret lạ %s" % (n, sorted(extra)))
     on = t.on_of(wf)
     if "GOOGLE_MAPS_API_KEY" in raw:
-        # refresh-vendor-photos.yml có `schedule` hàng tháng từ trước (Spec 005, trong hạn mức miễn phí): không thuộc T-135, ghi ở handoff để Chief of Staff xét.
+        # refresh-vendor-photos.yml có `schedule` hàng tháng từ trước (Spec 005): NỢ, việc xử lý T-137; xoá ngoại lệ này khi T-137 xong.
         if set(on) - {"workflow_dispatch", "pull_request", "schedule"} or ("schedule" in on and n != "refresh-vendor-photos.yml"): bad.append("%s: workflow có khoá Google chỉ được workflow_dispatch/pull_request (schedule chỉ còn ở refresh-vendor-photos.yml), thấy %s" % (n, sorted(on)))
         if "pull_request" in on:
             ifs = " ".join(str(j.get("if", "")) for j in (wf.get("jobs") or {}).values())
@@ -52,7 +53,8 @@ env = dict(os.environ, TOHONG_REPO=t.TOHONG, TOHONG_BACK_REPO=t.BACK)
 IMG = t.INV_IMAGES
 PL = os.path.join(t.HQ, "eval", "invariants", "planner")
 for f in (glob.glob(os.path.join(IMG, "inv-023-*.py")) + glob.glob(os.path.join(IMG, "inv-024-*.py")) + glob.glob(os.path.join(IMG, "inv-030-*.py")) + glob.glob(os.path.join(IMG, "inv-031-*.py"))
-          + glob.glob(os.path.join(PL, "inv-006-*.py")) + glob.glob(os.path.join(PL, "admin", "vendor-enrich", "inv-004-*.py"))):
+          + glob.glob(os.path.join(PL, "inv-006-*.py")) + glob.glob(os.path.join(PL, "admin", "vendor-enrich", "inv-001-*.py")) + glob.glob(os.path.join(PL, "admin", "vendor-enrich", "inv-002-*.py"))
+          + glob.glob(os.path.join(PL, "admin", "vendor-enrich", "inv-004-*.py")) + glob.glob(os.path.join(t.HERE, "inv-proposed-*.py"))):
     rc, msg = t.inv(f, env)
     if rc != 0: bad.append("%s đỏ: %s" % (os.path.basename(f)[:7].upper(), msg))
-t.done(bad, "quyền chéo repo tối thiểu (hai tên secret, không ghi được code), workflow Google chỉ kích hoạt có cổng, INV-023/024/030/031, inv-006, inv-004 nguyên văn xanh")
+t.done(bad, "quyền chéo repo tối thiểu (hai tên secret, không ghi được code), workflow Google chỉ kích hoạt có cổng, INV-023/024/030/031, inv-006, vendor-enrich inv-001/002/004 và hai bất biến đề xuất nguyên văn xanh")
