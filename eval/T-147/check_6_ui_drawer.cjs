@@ -20,7 +20,7 @@
  *    Tay cầm kéo chỉ hiện khi max > min (khung <= 560px thì min = max, không có tay cầm). Mọi khung nhìn: trang không cuộn ngang.
  *    Đo ở 390, 520, 600, 1280 mặc định, 1280 kéo tới max, và biên 640 (632 đẩy, 656 phủ).
  *  - Ghi chú trường pool: mỗi `pool.field_notes[]` hiện ngay sau dòng của trường đó; mục "Đầu vào ngoài vendors.json" liệt kê `extra_inputs` (label và note).
- *  - Chi tiết 403: drawer ghi "Chỉ Capu xem được chi tiết này"; 404: "Không có chi tiết cho vendor này"; không hiện mục nguồn/pool/lớp admin.
+ *  - Chi tiết 403 (người không phải admin, ADR-083 mục 2; trước đó là "Chỉ Capu…"): drawer ghi "Chỉ admin xem được chi tiết này"; 404: "Không có chi tiết cho vendor này"; không hiện mục nguồn/pool/lớp admin.
  *  - Trả lời chậm của vendor cũ không đè lên vendor mới bấm sau.
  * In dòng cuối PASS hoặc FAIL <lý do đầu tiên> (+n lỗi nữa); thoát 0/1 (2 = eval không chạy được).
  */
@@ -75,7 +75,7 @@ const CATALOG = [
 const REC = { name: 'Alpha Hall', description: 'Mô tả đã cắt của Alpha', price_range: { min_vnd: 3999000 }, top_reviews: [{ text: 'Rất tốt T147' }, { text: 'Phục vụ nhiệt tình T147' }], zz_them: 'gia-tri-zz-them' };
 const POOL_V = { id: 'vd1', name: 'Alpha Hall', category: 'venue', catLabel: 'Tiệc & nhà hàng', description: 'Mô tả pool', styles: ['luxury', 'modern'], priceMin: 3.9, priceMax: 4.7, city: 'HCMC', rating: 4.3, reviewCount: 2046, isVerified: true };
 const EXTRA = [{ id: 'pool_base', label: 'Pool nền (--base) ZZ', note: 'Ghi chú pool nền ZZ' }, { id: 'image_manifest', label: 'Manifest ảnh ZZ', note: 'Ghi chú manifest ZZ' }];
-const NOTES = [{ field: 'priceMin', code: 'kept_from_base', text: 'giữ từ pool nền (ADR-025, --styles-only): nguồn hiện cho 3.9' }, { field: 'priceMax', code: 'admin_override', text: 'admin sửa (R2): 22.5' }];
+const NOTES = [{ field: 'priceMin', code: 'kept_from_base', text: 'giữ từ pool nền (ADR-025, --styles-only): nguồn hiện cho 3.9' }, { field: 'priceMax', code: 'admin_override', text: 'admin sửa (R2): 22.5' }, { field: 'reviews', code: 'kept_from_base', text: 'giữ từ pool nền (ADR-025, --styles-only): nguồn hiện có 2 bài đánh giá có chữ, pool có 0' }];
 const detailOf = (id) => {
   const row = ROWS.find((r) => r.id === id);
   const base = { data_as_of: '2026-11-11T13:08:22.633793', id, name: row.name, catalog: CATALOG, extra_inputs: EXTRA };
@@ -198,6 +198,7 @@ const near = (a, b, tol = 2) => Math.abs(a - b) <= tol;
     check('lớp admin: "Không có ghi đè" khi overlay null', t.includes('Không có ghi đè'));
     check('mục "Đầu vào ngoài vendors.json" liệt kê pool nền và manifest ảnh (label + note)', t.includes('Đầu vào ngoài vendors.json') && has(t, 'Pool nền (--base) ZZ', 'Ghi chú pool nền ZZ') && has(t, 'Manifest ảnh ZZ', 'Ghi chú manifest ZZ'), t.slice(-700));
     const iA = t.indexOf('priceMin 3.9'), iN = t.indexOf('giữ từ pool nền (ADR-025, --styles-only): nguồn hiện cho 3.9'), iB = t.indexOf('priceMax 4.7'), iN2 = t.indexOf('admin sửa (R2): 22.5');
+    check('T-150: ghi chú lệch reviews hiện cả khi pool.vendor không có trường reviews (dòng "reviews —" rồi ghi chú)', /reviews:?\s*—\s*\n?\s*giữ từ pool nền \(ADR-025, --styles-only\): nguồn hiện có 2 bài đánh giá có chữ, pool có 0/.test(t), t.slice(-500));
     check('ghi chú trường pool nằm ngay sau dòng của trường đó (priceMin rồi ghi chú, priceMax rồi ghi chú)', iA >= 0 && iN > iA && iB > iN && iN2 > iB, [iA, iN, iB, iN2].join(','));
     const wrap = S.table.locator('xpath=ancestor::div[contains(@class,"adm-enrich-wrap")][1]');
     const gg = await geom(S); const wb = await wrap.boundingBox();
@@ -327,9 +328,9 @@ const near = (a, b, tol = 2) => Math.abs(a - b) <= tol;
     check('báo cáo chưa có nguồn: ghi rõ, vẫn hiện phần pool', (await text(S.dlg())).includes('Trong pool'));
     await S.row('Epsilon Forbidden').getByText('Số 5 đường thử', { exact: false }).click();
     await page.getByRole('dialog', { name: 'Chi tiết vendor · Epsilon Forbidden' }).waitFor();
-    await page.waitForFunction(() => /Chỉ Capu xem được chi tiết này/.test(document.body.innerText));
+    await page.waitForFunction(() => /Chỉ admin xem được chi tiết này/.test(document.body.innerText));
     t = await text(S.dlg());
-    check('403: "Chỉ Capu xem được chi tiết này", không có mục nguồn/pool/lớp admin', !t.includes('Thuộc tính nguồn') && !t.includes('Kết quả trong pool') && !t.includes('Lớp admin'), t.slice(0, 300));
+    check('403: "Chỉ admin xem được chi tiết này", không có mục nguồn/pool/lớp admin', !t.includes('Thuộc tính nguồn') && !t.includes('Kết quả trong pool') && !t.includes('Lớp admin'), t.slice(0, 300));
     await S.row('Zeta Missing').getByText('Số 6 đường thử', { exact: false }).click();
     await page.waitForFunction(() => /Không có chi tiết cho vendor này/.test(document.body.innerText));
     check('404: "Không có chi tiết cho vendor này"', true);
