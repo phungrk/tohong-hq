@@ -47,3 +47,26 @@ jobs:
           git add -A
           git commit -q -m "Dữ liệu dashboard từ main@${GITHUB_SHA::7}"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" dashboard-data
+
+      - name: Đẩy bản công khai sang repo dashboard
+        env:
+          DASHBOARD_DATA_TOKEN: ${{ secrets.DASHBOARD_DATA_TOKEN }}
+        run: |
+          if [ -z "$DASHBOARD_DATA_TOKEN" ]; then
+            echo "::warning::Thiếu secret DASHBOARD_DATA_TOKEN, bỏ qua đẩy sang tohong-hq-dashboard"
+            exit 0
+          fi
+          pub="$RUNNER_TEMP/dashboard-public"
+          rm -rf "$pub"; mkdir -p "$pub"
+          cp "$RUNNER_TEMP/out/dashboard.json" "$pub/"
+          cd "$pub"
+          git init -q -b dashboard-data
+          git config user.name "tohong-ledger-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dashboard.json
+          git commit -q -m "Dữ liệu dashboard từ main@${GITHUB_SHA::7}"
+          # Ẩn đầu ra của git push để URL chứa token không lọt vào log khi lỗi.
+          if ! git push -f "https://x-access-token:${DASHBOARD_DATA_TOKEN}@github.com/phungrk/tohong-hq-dashboard.git" dashboard-data >/dev/null 2>&1; then
+            echo "::error::git push sang phungrk/tohong-hq-dashboard lỗi (đã ẩn chi tiết để không lộ token)"
+            exit 1
+          fi
