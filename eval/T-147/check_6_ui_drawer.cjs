@@ -24,6 +24,7 @@
  *  - Trả lời chậm của vendor cũ không đè lên vendor mới bấm sau.
  * In dòng cuối PASS hoặc FAIL <lý do đầu tiên> (+n lỗi nữa); thoát 0/1 (2 = eval không chạy được).
  */
+// T-152: PHỦ (đã sửa bởi eval/T-152/ap-dung-check6-t147.py)
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -202,8 +203,8 @@ const near = (a, b, tol = 2) => Math.abs(a - b) <= tol;
     check('ghi chú trường pool nằm ngay sau dòng của trường đó (priceMin rồi ghi chú, priceMax rồi ghi chú)', iA >= 0 && iN > iA && iB > iN && iN2 > iB, [iA, iN, iB, iN2].join(','));
     const wrap = S.table.locator('xpath=ancestor::div[contains(@class,"adm-enrich-wrap")][1]');
     const gg = await geom(S); const wb = await wrap.boundingBox();
-    check('1280 mặc định (còn 720 >= 640): chế độ ĐẨY, bảng không dưới drawer', wb.x + wb.width <= gg.left + 1, JSON.stringify([wb.x + wb.width, gg.left]));
-    check('chế độ ĐẨY: trang không cuộn ngang', await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+    check('1280 mặc định: chế độ PHỦ (T-152), bảng nằm dưới drawer, không bị đẩy', wb.x + wb.width > gg.left + 20, JSON.stringify([wb.x + wb.width, gg.left]));
+    check('T-152: PHỦ: trang không cuộn ngang', await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
 
     /* ----- đóng ----- */
     await page.keyboard.press('Escape');
@@ -261,10 +262,10 @@ const near = (a, b, tol = 2) => Math.abs(a - b) <= tol;
     check('phím Home: min', near((await geom(S)).w, 560, 2));
     for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowLeft');
     const w632 = await geom(S); const wbA = await wrap.boundingBox();
-    check('biên: drawer 632 (còn 648 >= 640) vẫn ĐẨY', near(w632.w, 632, 2) && wbA.x + wbA.width <= w632.left + 1, JSON.stringify([w632.w, wbA.x + wbA.width, w632.left]));
+    check('biên: drawer 632 vẫn PHỦ (T-152: không còn ngưỡng đẩy)', near(w632.w, 632, 2) && wbA.x + wbA.width > w632.left + 20, JSON.stringify([w632.w, wbA.x + wbA.width, w632.left]));
     await page.keyboard.press('ArrowLeft');
     const w656 = await geom(S); const wbB = await wrap.boundingBox();
-    check('biên: drawer 656 (còn 624 < 640) chuyển sang PHỦ: bảng nằm dưới drawer, không bị đẩy', near(w656.w, 656, 2) && wbB.x + wbB.width > w656.left + 20, JSON.stringify([w656.w, wbB.x + wbB.width, w656.left]));
+    check('biên: drawer 656 PHỦ: bảng nằm dưới drawer, không bị đẩy', near(w656.w, 656, 2) && wbB.x + wbB.width > w656.left + 20, JSON.stringify([w656.w, wbB.x + wbB.width, w656.left]));
     check('chế độ PHỦ: trang không cuộn ngang', await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
     await page.keyboard.press('End');
     const wmax = await geom(S); const wbM = await wrap.boundingBox();
@@ -280,19 +281,19 @@ const near = (a, b, tol = 2) => Math.abs(a - b) <= tol;
     check('tải lại trang, mở lại: độ rộng còn 680 (nhớ độ rộng)', near((await geom(S)).w, 680, 2), (await geom(S)).w);
     await page.keyboard.press('Escape');
 
-    /* ----- bảng vẫn dùng được khi drawer mở (chế độ ĐẨY) ----- */
+    /* ----- T-152: PHỦ: bảng vẫn xử lý được sự kiện khi drawer mở (nút dưới drawer chỉ bấm bằng chuột sau khi đóng) ----- */
     await S.row('Alpha Hall').getByText('Số 1 đường thử', { exact: false }).click();
     await S.dlg().waitFor();
     await S.sep().focus(); await page.keyboard.press('Home');
     const n0 = S.details.length;
-    await S.row('Gamma Garden').getByRole('button', { name: 'Approve', exact: true }).click();
+    await S.row('Gamma Garden').getByRole('button', { name: 'Approve', exact: true }).dispatchEvent('click');
     await page.waitForFunction(() => /Chờ áp dụng/.test(document.body.innerText));
     check('drawer mở: Approve ở dòng khác vẫn gửi PUT {decision:"approve"}', S.writes.length === 1 && S.writes[0].method === 'PUT' && S.writes[0].id === 'vd3' && S.writes[0].body.decision === 'approve', JSON.stringify(S.writes));
     check('bấm Approve không mở drawer của dòng đó (không gọi API chi tiết mới), drawer cũ còn nguyên', S.details.length === n0 && /Chi tiết vendor · Alpha Hall/.test(await S.dlg().getAttribute('aria-label')), S.details.join(','));
-    await S.row('Gamma Garden').getByRole('button', { name: 'Rút lại', exact: true }).click();
+    await S.row('Gamma Garden').getByRole('button', { name: 'Rút lại', exact: true }).dispatchEvent('click');
     await page.waitForFunction(() => !/Chờ áp dụng/.test(document.body.innerText));
     check('"Rút lại" gửi DELETE và không mở drawer', S.writes.length === 2 && S.writes[1].method === 'DELETE' && S.details.length === n0, JSON.stringify(S.writes[1]));
-    await S.row('Delta Palace').getByRole('button', { name: 'Sửa thủ công', exact: true }).click();
+    await S.row('Delta Palace').getByRole('button', { name: 'Sửa thủ công', exact: true }).dispatchEvent('click');
     const md = page.getByRole('dialog', { name: /^Sửa thủ công/ });
     await md.waitFor();
     check('drawer mở: "Sửa thủ công" ở dòng khác vẫn mở hộp thoại, không mở drawer mới', (await md.count()) === 1 && S.details.length === n0);
