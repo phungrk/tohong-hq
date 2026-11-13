@@ -1,0 +1,5 @@
+# Nợ đã biết của INV-004 (_shared). Mỗi dòng: đường dẫn file từ gốc tohong-hq. Xoá dòng khi file đã sửa (INV-004 đỏ nếu để sót).
+# Thêm/sửa danh sách này phải qua Chief of Staff và ghi decisions/.
+# 2026-11-13 · insight: dòng 16 tính HQ bằng *[".."] * 3 từ planner/vendor/images (cần 5) → HQ = eval/invariants, repo = eval/tohong không tồn tại,
+# nên bất biến luôn "PASS chưa áp dụng" khi không đặt TOHONG_REPO (đo rỗng, cùng lớp ADR-057/070/076). Sửa sang dò ngược tới scripts/gate.py rồi xoá dòng này.
+eval/invariants/planner/vendor/images/inv-031-gh-biet-repo-o-moi-buoc.py
