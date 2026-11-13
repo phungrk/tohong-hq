@@ -1,0 +1,482 @@
+{
+ "note": "computeMatches @ main 2026-11-13, pool đông cứng; sinh bằng eval/T-140/_make_golden.mjs",
+ "cases": [
+  {
+   "label": "photography gu[]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "photography",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 80,
+   "sha256": "a8e809fbc5407ade57b784de1890c2f31c15f686b44300a425b3aa9c4e0b8599"
+  },
+  {
+   "label": "photography gu[korean,luxury]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "korean",
+     "luxury"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "photography",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 80,
+   "sha256": "e9d2bbef3c5ab9f0ae805ea3c191c8994bb4c67adc49c5689c33b76250f42025"
+  },
+  {
+   "label": "photography gu[rustic]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "rustic"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "photography",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 80,
+   "sha256": "3ee4f5a0784b6b62beef82aa54924a9c59b9ed48bcd26ef32146a03ff30ba921"
+  },
+  {
+   "label": "venue gu[]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "venue",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 85,
+   "sha256": "76573062847b85a9b4ae61346f5399a7d1f853d2c21f90b1bdc1a6a64e6621e3"
+  },
+  {
+   "label": "venue gu[korean,luxury]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "korean",
+     "luxury"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "venue",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 85,
+   "sha256": "b77ad8d236885ea7d95f5051c83323875221b1bf568c796fbe5ab2f928d73ff8"
+  },
+  {
+   "label": "venue gu[rustic]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "rustic"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "venue",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 85,
+   "sha256": "2fe3631bd8881f7ad7d7d5c69c0be68fd6680d7907c6052bfc2ff446d1412707"
+  },
+  {
+   "label": "makeup gu[]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "makeup",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 89,
+   "sha256": "e8a2be29215654eb232604be591d880031e0f40597e5709d3036b36f54d27098"
+  },
+  {
+   "label": "makeup gu[korean,luxury]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "korean",
+     "luxury"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "makeup",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 89,
+   "sha256": "82026d47422b73701412c9b64d7c6559ac896c5fac7a418a1e0fafff1eb65cc2"
+  },
+  {
+   "label": "makeup gu[rustic]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "rustic"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "makeup",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 89,
+   "sha256": "c14bb6864304fc4268cc50831fab300a3f5bfd9579c27a8ca48527d74c4bd5b7"
+  },
+  {
+   "label": "decor gu[]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "decor",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 130,
+   "sha256": "d3aff50a33b1265129c7ffea3e000a1166b9b5d5dc4c19cc0388cd5300b504fd"
+  },
+  {
+   "label": "decor gu[korean,luxury]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "korean",
+     "luxury"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "decor",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 130,
+   "sha256": "c11a9b32e5b9b1c5f1f12c3a8babc42256f88b30b9cf4df6923acaf935ae5949"
+  },
+  {
+   "label": "decor gu[rustic]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "rustic"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "decor",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 130,
+   "sha256": "a2f2eb33ae4155f9b41880eaecf559b4f0687c4e97d1bde91d3d7ba8085b6c4e"
+  },
+  {
+   "label": "attire gu[]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "attire",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 81,
+   "sha256": "c6e54cf6a57b18cafb0318b673a2d59e607add63b905e8477b3984b114eb461e"
+  },
+  {
+   "label": "attire gu[korean,luxury]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "korean",
+     "luxury"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "attire",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 81,
+   "sha256": "bdb6401257e96d1275127a3e838ba249ac487a970e2c3ced120cb5a5970e1ccc"
+  },
+  {
+   "label": "attire gu[rustic]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "rustic"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "attire",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 81,
+   "sha256": "055d7d9f85d9462210aa3b542eb9ad53334d06561c2ab23f558ab6237fa0880f"
+  },
+  {
+   "label": "all gu[]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": null,
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 865,
+   "sha256": "9815b9e3a343ab49945b38f657c0372ef13cbe9d97bacb00fa4e7c81c1879a72"
+  },
+  {
+   "label": "all gu[korean,luxury]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "korean",
+     "luxury"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": null,
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 865,
+   "sha256": "8395133a46808430e6840545180fb1cd118b03477dd5bb10711bfb574795139f"
+  },
+  {
+   "label": "all gu[rustic]",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "rustic"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": null,
+    "limit": 20,
+    "offset": 0,
+    "minScore": 0
+   },
+   "total": 865,
+   "sha256": "d01a74f2a63aa4e8dd58b21134bc1b18b18e7f4f9c16b0b84d457ed3c73cc16e"
+  },
+  {
+   "label": "photography trang 2",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "photography",
+    "limit": 10,
+    "offset": 10,
+    "minScore": 0
+   },
+   "total": 80,
+   "sha256": "e204ab3d7a256902b5dbf78d1386b5cb7f7e34c4297980ab9bc98185dd1a3a99"
+  },
+  {
+   "label": "photography minScore 70",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [
+     "modern"
+    ],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "photography",
+    "limit": 20,
+    "offset": 0,
+    "minScore": 70
+   },
+   "total": 76,
+   "sha256": "b51a40979f0004e2d962824557895083b242820692e86282c0dc6ab42b232949"
+  },
+  {
+   "label": "ngân sách thấp 5tr/hạng mục",
+   "profile": {
+    "city": "HCMC",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": {
+     "photography": 5
+    },
+    "preferredStyles": [],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "photography",
+    "limit": 20
+   },
+   "total": 80,
+   "sha256": "3ff44b449aa34b1603e711e6256a33ce6826b193664088f403fd4f8a6827a1bf"
+  },
+  {
+   "label": "cặp đôi Hà Nội (tab nới sang HCMC)",
+   "profile": {
+    "city": "Hà Nội",
+    "weddingDate": "2029-03-20",
+    "guestCount": 150,
+    "budgetTotal": 300,
+    "budgetByCategory": null,
+    "preferredStyles": [],
+    "excludedVendorIds": []
+   },
+   "opts": {
+    "category": "photography",
+    "limit": 20
+   },
+   "total": 80,
+   "sha256": "4b492c48e277095ca6eaceedacf03aa19bbef8eafeddac68f6e4a5c5d8d4509a"
+  },
+  {
+   "label": "hồ sơ rỗng",
+   "profile": {},
+   "opts": {},
+   "total": 865,
+   "sha256": "3e754f3103d11a30af992b4f57429f89b393d39ed6bbf17b1fbbab3094c46ec7"
+  }
+ ]
+}
