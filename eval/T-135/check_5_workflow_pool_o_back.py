@@ -3,7 +3,7 @@
 (tohong là repo private: checkout nó cần secret TOHONG_READ_TOKEN, chỉ đọc). Chỉ workflow_dispatch với hai input: tohong_ref (SHA 40 hex), tohong_branch.
 Tình huống (tohong thử: một vendor còn trong pool đã bị gỡ sang removed_vendors.json, báo cáo sinh lại):
   (A) đầu vào hợp lệ -> job xanh; checkout tohong dùng ref = SHA nhập, token = secrets.TOHONG_READ_TOKEN, persist-credentials=false; chạy tools/regen-pool-styles.sh --back . --photos-for all (luôn --prune bên trong)
-      và generate-vendor-enrich-report.js; PR: nhánh `vendor-pool/<tohong_branch với / thành ->`, add-paths ĐÚNG HAI file lib/vendorPool.generated.js + lib/vendorEnrichReport.generated.js; vendor đã gỡ không còn trong pool;
+      và generate-vendor-enrich-report.js; PR: nhánh `vendor-pool/<tohong_branch với / thành ->`, file của PR = (dòng trong tools/pool-paths.txt) ∩ (file bước sinh ghi ra), gồm lib/vendorPool.generated.js + lib/vendorEnrichReport.generated.js (không viết cứng hai file; đủ cả khi T-138 đã/chưa merge, eval 9); vendor đã gỡ không còn trong pool;
       file nhúng chứa nguyên văn enrich-report.json của tohong; bản sinh lại bằng build_enrich_report.py bằng đúng byte báo cáo (bước kiểm 'báo cáo tươi'); `npm test` được chạy; thân PR có dòng
       `TOHONG_SOURCE_SHA=<sha>`, `TOHONG_SOURCE_BRANCH=<nhánh>`, và thứ tự merge (tohong TRƯỚC, back NGAY SAU, vì INV-021/022 đỏ giữa hai lần merge); không đổi file nào ngoài tohong/ (thư mục checkout) và hai file trên;
   (B) đầu vào xấu (sha 'main', sha chứa $(…), nhánh 'main', nhánh có `;`, thiếu input) -> job đỏ TRƯỚC khi checkout tohong, không PR, lệnh trong đầu vào không chạy (file canary không xuất hiện);
@@ -54,7 +54,9 @@ try:
     else:
         pr = made[0]
         if pr["branch"] != "vendor-pool/resolve-overrides-run-4242": bad.append("(A) nhánh %r, mong vendor-pool/resolve-overrides-run-4242" % pr["branch"])
-        if sorted(pr["files"]) != ["lib/vendorEnrichReport.generated.js", "lib/vendorPool.generated.js"]: bad.append("(A) PR phải chỉ có hai file lib/…generated.js; thấy %s" % pr["files"])
+        listed = [l.strip() for l in open(os.path.join(bk.ws, "tools", "pool-paths.txt"), encoding="utf-8") if l.strip() and not l.startswith("#")] if os.path.isfile(os.path.join(bk.ws, "tools", "pool-paths.txt")) else []
+        if not {"lib/vendorEnrichReport.generated.js", "lib/vendorPool.generated.js"} <= set(pr["files"]) or set(pr["files"]) - set(listed):
+            bad.append("(A) PR phải gồm hai file lib/…generated.js và chỉ gồm file có trong tools/pool-paths.txt (danh sách ∩ file bước sinh ghi ra, không viết cứng); thấy %s, danh sách %s" % (pr["files"], listed))
         elif vid in t.pool_ids(pr["contents"]["lib/vendorPool.generated.js"]): bad.append("(A) vendor %s đã gỡ ở tohong vẫn còn trong pool (generator phải --prune)" % vid)
         if "lib/vendorEnrichReport.generated.js" in pr["contents"] and open(os.path.join(troot, t.REPORT_REL), encoding="utf-8").read().strip() not in pr["contents"]["lib/vendorEnrichReport.generated.js"]:
             bad.append("(A) file nhúng không chứa nguyên văn enrich-report.json của tohong")
@@ -91,4 +93,4 @@ try:
     elif "TOHONG_READ_TOKEN" not in r6["log"]: bad.append("(C) thông báo lỗi phải nêu tên secret TOHONG_READ_TOKEN: %s" % r6["log"][-200:])
 finally:
     bk.cleanup(); shutil.rmtree(ttmp, ignore_errors=True)
-t.done(bad, "sync-vendor-pool.yml: sinh pool + file nhúng từ đúng SHA tohong, một PR hai file, thân PR ghi nguồn và thứ tự, đầu vào xấu và thiếu token đều đỏ trước khi ghi, chạy lại không đổi thì không PR")
+t.done(bad, "sync-vendor-pool.yml: sinh pool + file nhúng từ đúng SHA tohong, một PR (danh sách ∩ file sinh ra), thân PR ghi nguồn và thứ tự, đầu vào xấu và thiếu token đều đỏ trước khi ghi, chạy lại không đổi thì không PR")
