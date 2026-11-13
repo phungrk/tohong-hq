@@ -10,6 +10,10 @@ và generate-vendor-pool.js (cả chế độ sinh đầy đủ lẫn --styles-o
 Đạt khi: (a) mọi trường được đọc đều có mục trong danh mục (khớp trực tiếp, hoặc mục là tổ tiên/hậu duệ của đường dẫn đo được); (b) không mục nào của danh mục là thừa (không bước nào đọc);
 (c) file/key/label/stages/pool đúng dạng, mọi tên `pool` là trường thật của vendor trong pool tohong-back; (d) không có mục nào thuộc `contact` (bước nào đọc contact thì spec phải được viết lại, không lặng lẽ lộ liên hệ);
 (e) manual_overrides.json và enrich-report.json KHÔNG được bước nào đọc (kết luận của spec): nếu đọc thì phải có mục với đúng `file` đó.
+(f) `extra_inputs` (đầu vào ngoài vendors.json) có đúng hai mục {id, label, note khác rỗng}: `pool_base` (pool nền --base: đo thực nghiệm đổi rating trong pool nền thì đầu ra --styles-only đổi) và
+    `image_manifest` (generator áp edge/scripts/vendor-images/manifest.json: chỉ kiểm tệp generator còn nhắc tới manifest đó; đo thực nghiệm không có submodule edge/).
+GIỚI HẠN (ghi trong spec, mục Ràng buộc): đo bằng đổi trường nên chỉ bắt được trường (1) có trong dữ liệu thật hoặc trong schema.py (class Vendor/Contact; fixture thêm một bản ghi tổng hợp mang mọi trường schema),
+(2) sâu tối đa hai cấp. Generator đọc một trường chưa có ở cả hai nơi, hoặc sâu hơn hai cấp, thì eval này không bắt được.
 Thiếu tohong: PASS "chưa áp dụng". Mất ~1-2 phút. Chạy: python3 -I eval/T-147/check_1_danh_muc_thuoc_tinh_pool.py. In PASS hoặc FAIL <lý do đầu> (+n); thoát 0/1."""
 import json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -59,6 +63,13 @@ for i, f in enumerate(fields):
     if "max_chars" in f and not (isinstance(f["max_chars"], int) and not isinstance(f["max_chars"], bool) and f["max_chars"] > 0): fails.append(tag + ": max_chars phải là số nguyên > 0")
     if isinstance(k, str) and (k == "contact" or k.startswith("contact.") or k.startswith("contact[")): fails.append(tag + ": liên hệ (contact) không được nằm trong danh mục")
 
+ex = cat.get("extra_inputs")
+if not (isinstance(ex, list) and sorted(x.get("id") for x in ex if isinstance(x, dict)) == ["image_manifest", "pool_base"]
+        and all(isinstance(x.get(k), str) and x[k].strip() for x in ex for k in ("label", "note"))):
+    fails.append("extra_inputs phải có đúng hai mục pool_base và image_manifest, mỗi mục có label và note")
+gp = os.path.join(root, "tools", "generate-vendor-pool.js")
+if os.path.isfile(gp) and "vendor-images/manifest.json" not in open(gp, encoding="utf-8").read():
+    fails.append("generator không còn nhắc manifest ảnh (edge/scripts/vendor-images/manifest.json) nhưng extra_inputs còn image_manifest")
 try:
     reads = pool_reads.detect(root)
 except Exception as e:  # noqa: BLE001
@@ -86,6 +97,8 @@ for fl, ps in measured.items():
     for k in keys:
         if not any(related(k, p) for p in ps):
             fails.append("danh mục có `%s` của %s nhưng không bước sinh pool nào đọc (mục thừa)" % (k, fl))
+if not reads.get("pool_base"):
+    fails.append("extra_inputs có pool_base nhưng đổi pool nền (--base) không làm đổi đầu ra --styles-only (mục thừa)")
 if fails:
     print("FAIL " + fails[0] + (" (+%d lỗi nữa)" % (len(fails) - 1) if len(fails) > 1 else "")); sys.exit(1)
 print("PASS")

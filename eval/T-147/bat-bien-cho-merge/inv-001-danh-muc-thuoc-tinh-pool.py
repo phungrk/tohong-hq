@@ -41,6 +41,8 @@ for fl, ps in measured.items():
     keys = [f["key"] for f in fields if f.get("file") == fl]
     bad += ["bước sinh pool đọc `%s` của %s mà danh mục không có" % (p, fl) for p in sorted(ps) if not any(related(k, p) for k in keys)]
     bad += ["danh mục có `%s` của %s mà không bước nào đọc" % (k, fl) for k in keys if not any(related(k, p) for p in ps)]
+if not reads.get("pool_base"):
+    bad.append("pool nền (--base) không còn là đầu vào của --styles-only mà extra_inputs còn ghi")
 if bad:
     print("FAIL " + bad[0] + (" (+%d)" % (len(bad) - 1) if len(bad) > 1 else "")); sys.exit(1)
 print("PASS")

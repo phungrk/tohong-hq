@@ -112,6 +112,39 @@ def pick_subset(vendors_by_cat, audit_by_cat, per_path=2):
     return {c: v for c, v in out_v.items() if v}, out_a
 
 
+def schema_fields(scraper):
+    """Tên trường của class Vendor / Contact trong schema.py (để nới fixture: trường có trong schema nhưng chưa có trong dữ liệu thật vẫn được thử)."""
+    import re
+    out = {"Vendor": {}, "Contact": {}}
+    cur = None
+    for line in open(os.path.join(scraper, "schema.py"), encoding="utf-8"):
+        m = re.match(r"class (\w+)\(", line)
+        if m:
+            cur = m.group(1) if m.group(1) in out else None
+            continue
+        m = re.match(r"    ([a-z_][a-z0-9_]*):\s*(.+)", line)
+        if cur and m:
+            ann = m.group(2)
+            out[cur][m.group(1)] = [] if ann.startswith("list[") else (7 if re.match(r"(Optional\[)?(int|float)", ann) else "x")
+    return out
+
+
+def add_synthetic(scraper, base_v):
+    """Một bản ghi tổng hợp mang MỌI trường của schema (kể cả cái chưa có trong dữ liệu thật) để eval bắt được generator đọc trường mới."""
+    cat = next(iter(base_v))
+    rec = copy.deepcopy(base_v[cat][0])
+    sf = schema_fields(scraper)
+    rec["id"] = "t147_synthetic"
+    for k, v in sf["Vendor"].items():
+        if k not in rec:
+            rec[k] = v
+    c = dict(rec.get("contact") or {})
+    for k, v in sf["Contact"].items():
+        c.setdefault(k, v)
+    rec["contact"] = c
+    base_v[cat].append(rec)
+
+
 def write_fixture(root, vendors_by_cat, audit_by_cat):
     shutil.rmtree(os.path.join(root, "output"), ignore_errors=True)
     for cat, recs in vendors_by_cat.items():
@@ -141,6 +174,7 @@ def detect(tohong):
             ap = os.path.join(os.path.dirname(f), "enrichment-audit.json")
             au[cat] = json.load(open(ap, encoding="utf-8")) if os.path.isfile(ap) else []
         base_v, base_a = pick_subset(vs, au)
+        add_synthetic(src, base_v)
         v_paths = set().union(*(paths_of(r) for recs in base_v.values() for r in recs))
         a_paths = set().union(*(paths_of(r) for rows in base_a.values() for r in rows))
         state = {"crash": False, "baseline": True}
@@ -183,7 +217,7 @@ def detect(tohong):
             d = json.load(open(outp, encoding="utf-8"))
             return {r["id"]: (drop(r, skip) if skip else r) for r in d["vendors"]}
 
-        res = {"style": set(), "build": set(), "audit": set(), "gen": set(), "overrides": set(), "report": set()}
+        res = {"style": set(), "build": set(), "audit": set(), "gen": set(), "overrides": set(), "report": set(), "pool_base": set()}
         # ---- bước style ----
         fixture()
         base_style = style_out()
@@ -284,6 +318,15 @@ def detect(tohong):
 
         base_all = gen_all(pool_doc, doc_nophoto)
         state["baseline"] = False
+        # pool nền (--base) có phải đầu vào không: đổi rating của vendor đầu tiên trong pool nền, chế độ --styles-only phải đổi đầu ra
+        bp = open(base_pool_js, encoding="utf-8").read()
+        h2, b2 = bp.split("= ", 1)
+        arr2 = json.loads(b2.rsplit(";", 1)[0])
+        arr2[0]["rating"] = 1234.5
+        open(base_pool_js, "w", encoding="utf-8").write(h2 + "= " + json.dumps(arr2, ensure_ascii=False) + ";\n")
+        if gen(pool_doc, "styles") != base_all[1]:
+            res["pool_base"].add("--base")
+        open(base_pool_js, "w", encoding="utf-8").write(bp)
         for p in sorted(g_paths):
             for mode in ("delete", "sent"):
                 d1, d2 = copy.deepcopy(pool_doc), copy.deepcopy(doc_nophoto)

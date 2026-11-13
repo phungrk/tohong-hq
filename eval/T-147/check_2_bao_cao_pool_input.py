@@ -10,10 +10,12 @@ Hợp đồng (spec products/T-147-drawer-vendor-enrich.md, Hành vi 2) trên `p
       audit = dòng enrichment-audit.json làm vendor tạm đóng (như build_pool: dòng mới nhất mỗi category có closed_state=temporarily_closed, hoặc status=temporarily_closed + retry=true)
               nếu có, không thì dòng audit theo luật T-124 (category nhà, rồi category khác); chỉ giữ khoá của danh mục (file enrichment-audit.json); không có dòng nào thì null.
       truncated = {khoá: độ dài gốc} (object, rỗng khi không cắt).
-  - pool_input không có khoá/giá trị liên hệ: không có khoá contact/phone/facebook/website, và số điện thoại / website / facebook của vendors.json (không nằm trong văn bản mô tả của chính vendor) không xuất hiện trong pool_input.
+  - gốc báo cáo có thêm `pool_extra_inputs` = đúng mảng `extra_inputs` của danh mục (pool nền --base, manifest ảnh).
+  - liên hệ: pool_input KHÔNG có khoá contact, phone, email, website, facebook, address, address_source (và danh mục không có mục nào như vậy). Chữ trong `description` / `top_reviews[].text` được GIỮ NGUYÊN VĂN
+    (cắt theo max_chars; description cắt 220 ký tự = đúng phần pool đang công khai): số điện thoại, URL, zalo lẫn trong mô tả là việc của T-148, eval này không che và không đòi che.
   - tất định (hai lần chạy cùng byte), thoát 0 khi mạng bị chặn, không đổi byte nào trong dữ liệu.
-  - `tools/regen-pool-styles.sh` giữ báo cáo tươi: sau khi chạy (offline, trên bản sao, --back tạm) báo cáo đã commit bằng đúng báo cáo sinh lại từ dữ liệu sau khi chạy
-    (ca thử: style_tags của một vendor bị đổi sai trước, regen-pool-styles.sh sửa lại; báo cáo mang style_tags nên phải được sinh lại cùng lúc).
+  - `tools/regen-pool-styles.sh` KHÔNG ghi `enrich-report.json` (hợp đồng T-135: sync-vendor-pool chạy script này rồi `cmp` báo cáo đã commit với báo cáo sinh lại; nếu script tự sinh lại thì cổng đó mất tác dụng).
+    Ca thử: dữ liệu bị đổi mô tả (làm style_tags phải đổi) mà báo cáo chưa sinh lại, chạy script (offline, --back tạm): báo cáo đã commit giữ nguyên byte và vẫn KHÁC báo cáo sinh lại từ dữ liệu (cổng tươi vẫn đỏ).
 Thiếu tohong: PASS "chưa áp dụng". Chạy: python3 -I eval/T-147/check_2_bao_cao_pool_input.py. In PASS hoặc FAIL <lý do đầu> (+n); thoát 0/1."""
 import copy, hashlib, json, os, shutil, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -65,6 +67,10 @@ try:
     for k in ("schema_version", "state", "data_as_of", "summary", "vendors"):
         if k not in rep: bad("báo cáo mất khoá T-124 `%s` ở gốc" % k)
     if rep.get("pool_catalog") != catalog: bad("pool_catalog ở gốc báo cáo khác `fields` của pool-input-fields.json")
+    extra = json.load(open(cp, encoding="utf-8")).get("extra_inputs")
+    if rep.get("pool_extra_inputs") != extra: bad("pool_extra_inputs ở gốc báo cáo khác `extra_inputs` của pool-input-fields.json")
+    BADKEYS = {"contact", "phone", "email", "website", "facebook", "address", "address_source"}
+    if any(f["key"].split("[]")[0].split(".")[0] in BADKEYS or f["key"].split(".")[-1] in BADKEYS for f in catalog): bad("danh mục có mục liên hệ/địa chỉ")
 
     # ---- giá trị mong đợi, tính độc lập bằng quy tắc trong docstring ----
     sys.path.insert(0, sc)
@@ -134,11 +140,6 @@ try:
 
     n_bad = 0
     first = None
-    contact_vals = set()
-    for v in raw:
-        c = v.get("contact") or {}
-        for k in ("phone", "website", "facebook"):
-            if isinstance(c.get(k), str) and len(c[k]) >= 9: contact_vals.add((v["id"], c[k]))
     for row in rep["vendors"]:
         pi = row.get("pool_input")
         vid = row["id"]
@@ -152,20 +153,22 @@ try:
             if not first:
                 dk = [k for k in set(rec) | set(pi["record"]) if rec.get(k) != pi["record"].get(k)]
                 first = "%s: pool_input khác kỳ vọng (record khoá %s, truncated %s, audit %s)" % (vid, dk[:3], pi["truncated"] == tr, pi["audit"] == want_audit)
-        txt = json.dumps(pi, ensure_ascii=False)
-        for w in ('"contact"', '"phone"', '"facebook"', '"website"'):
-            if w in txt: bad("%s: pool_input có khoá liên hệ %s" % (vid, w)); break
+        def keys_of(x):
+            if isinstance(x, dict):
+                for k, v in x.items():
+                    yield k
+                    yield from keys_of(v)
+            elif isinstance(x, list):
+                for e in x:
+                    yield from keys_of(e)
+        hit = BADKEYS & set(keys_of(pi))
+        if hit: bad("%s: pool_input có khoá liên hệ/địa chỉ %s" % (vid, sorted(hit))); n_bad += 0
     if n_bad: bad("%d/%d vendor có pool_input sai; ví dụ %s" % (n_bad, len(rep["vendors"]), first))
-    by_row = {r["id"]: json.dumps(r.get("pool_input"), ensure_ascii=False) for r in rep["vendors"]}
-    own_text = {v["id"]: json.dumps([v.get("name"), v.get("description"), v.get("merchant_description"), v.get("top_reviews")], ensure_ascii=False) for v in raw}
-    for vid, val in sorted(contact_vals):
-        if vid in by_row and val in by_row[vid] and val not in own_text.get(vid, ""):
-            bad("%s: pool_input chứa thông tin liên hệ của vendor (%s…)" % (vid, val[:4])); break
     if len(rep["vendors"]) != len([1 for _ in rep["vendors"]]) or not rep["vendors"]: bad("báo cáo không có vendor")
     ncap = sum(1 for r in rep["vendors"] if r.get("pool_input", {}).get("truncated"))
     if cap.get("description") and not ncap: bad("không vendor nào bị cắt mô tả (max_chars=%s): dữ liệu thật có mô tả dài hơn" % cap.get("description"))
 
-    # ---- regen-pool-styles.sh giữ báo cáo tươi ----
+    # ---- regen-pool-styles.sh không ghi báo cáo, cổng tươi của T-135 còn răng ----
     b = common.back()
     sh = os.path.join(t, "tools", "regen-pool-styles.sh")
     if not (b and os.path.isfile(os.path.join(b, "lib", "vendorPool.generated.js")) and os.path.isfile(sh)):
@@ -173,23 +176,23 @@ try:
     else:
         bk = os.path.join(tmp, "back"); os.makedirs(os.path.join(bk, "lib"))
         shutil.copy(os.path.join(b, "lib", "vendorPool.generated.js"), os.path.join(bk, "lib"))
-        # đổi sai style_tags của một vendor trong dữ liệu, sinh báo cáo khớp trạng thái sai đó, rồi để regen-pool-styles.sh sửa lại
+        rp = os.path.join(base, "enrich-report.json")
+        build(rp)                       # báo cáo "đã commit" khớp dữ liệu hiện tại
+        committed = open(rp, "rb").read()
         vf0 = next(f for f in build_pool.category_files(base, "vendors.json") if os.path.basename(os.path.dirname(f)) == "venue")
         d = json.load(open(vf0, encoding="utf-8"))
-        tgt = d["vendors"][0]; tgt["style_tags"] = ["korean"] if tgt.get("style_tags") != ["korean"] else ["luxury"]
+        tgt = d["vendors"][0]
+        tgt["description"] = "Sang trọng luxury hàn quốc korean rustic " + (tgt.get("description") or "")   # PR dữ liệu đổi mô tả mà không sinh lại báo cáo
+        tgt["style_tags"] = []
         json.dump(d, open(vf0, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-        rp = os.path.join(base, "enrich-report.json")
-        build(rp)
-        stale = open(rp, "rb").read()
         p = subprocess.run(["bash", sh, "--back", bk], cwd=t, env=env, capture_output=True, text=True, timeout=600)
         if p.returncode != 0:
             bad("regen-pool-styles.sh thoát %d trên bản sao (offline): %s" % (p.returncode, (p.stdout + p.stderr)[-200:]))
         else:
             fresh = os.path.join(tmp, "fresh.json"); build(fresh)
-            d2 = json.load(open(vf0, encoding="utf-8"))
-            if d2["vendors"][0].get("style_tags") == tgt["style_tags"]: bad("ca thử vô hiệu: regen-pool-styles.sh không đổi style_tags")
-            if open(rp, "rb").read() != open(fresh, "rb").read():
-                bad("sau regen-pool-styles.sh, enrich-report.json đã commit khác báo cáo sinh lại từ dữ liệu (báo cáo cũ: bước tạo lại pool phải sinh lại báo cáo, xem INV-003)")
+            if json.load(open(vf0, encoding="utf-8"))["vendors"][0].get("style_tags") == []: bad("ca thử vô hiệu: regen-pool-styles.sh không tính lại style_tags")
+            if open(rp, "rb").read() != committed: bad("regen-pool-styles.sh đã ghi đè enrich-report.json (cổng báo cáo tươi của sync-vendor-pool sẽ chỉ so hai bản sinh lại với nhau, T-135 D6)")
+            if open(fresh, "rb").read() == committed: bad("ca thử vô hiệu: báo cáo sinh lại sau khi đổi mô tả vẫn bằng báo cáo cũ")
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 if fails:

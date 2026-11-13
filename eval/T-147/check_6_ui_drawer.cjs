@@ -15,7 +15,11 @@
  *  - Đóng: nút "Đóng" hoặc phím Esc (khi hộp thoại Sửa thủ công đang mở thì Esc chỉ đóng hộp thoại đó); đóng xong tiêu điểm về dòng đã mở.
  *  - Kéo giãn: tay cầm role=separator tên "Kéo để đổi bề rộng ngăn kéo" (aria-valuemin/max/now); min = min(560, khung nhìn), max = max(min, 90% khung nhìn); kéo chuột sang trái làm rộng ra;
  *    phím ←/→ đổi 24px, Home = min, End = max; nhớ độ rộng sau khi tải lại trang. Khung nhìn <= 480px: drawer rộng bằng khung nhìn, không có tay cầm, trang không cuộn ngang.
- *  - Drawer không che bảng và không làm hỏng bảng: khi drawer mở, bấm "Approve" / "Sửa thủ công" ở dòng khác vẫn hoạt động đúng như T-124 và KHÔNG mở drawer; bấm dòng khác thì drawer đổi sang vendor đó.
+ *  - Bố cục: nội dung trang chừa lề phải bằng bề rộng drawer (chế độ ĐẨY) khi phần còn lại cho trang = khung nhìn - bề rộng drawer >= 640px; hẹp hơn thì drawer PHỦ lên bảng (chế độ PHỦ, trang không bị đẩy):
+ *    phải đóng drawer mới bấm được Approve / Sửa thủ công. Ở chế độ ĐẨY, bấm "Approve" / "Sửa thủ công" ở dòng khác vẫn đúng như T-124 và KHÔNG mở drawer; bấm dòng khác thì drawer đổi sang vendor đó.
+ *    Tay cầm kéo chỉ hiện khi max > min (khung <= 560px thì min = max, không có tay cầm). Mọi khung nhìn: trang không cuộn ngang.
+ *    Đo ở 390, 520, 600, 1280 mặc định, 1280 kéo tới max, và biên 640 (632 đẩy, 656 phủ).
+ *  - Ghi chú trường pool: mỗi `pool.field_notes[]` hiện ngay sau dòng của trường đó; mục "Đầu vào ngoài vendors.json" liệt kê `extra_inputs` (label và note).
  *  - Chi tiết 403: drawer ghi "Chỉ Capu xem được chi tiết này"; 404: "Không có chi tiết cho vendor này"; không hiện mục nguồn/pool/lớp admin.
  *  - Trả lời chậm của vendor cũ không đè lên vendor mới bấm sau.
  * In dòng cuối PASS hoặc FAIL <lý do đầu tiên> (+n lỗi nữa); thoát 0/1 (2 = eval không chạy được).
@@ -70,10 +74,12 @@ const CATALOG = [
 ];
 const REC = { name: 'Alpha Hall', description: 'Mô tả đã cắt của Alpha', price_range: { min_vnd: 3999000 }, top_reviews: [{ text: 'Rất tốt T147' }, { text: 'Phục vụ nhiệt tình T147' }], zz_them: 'gia-tri-zz-them' };
 const POOL_V = { id: 'vd1', name: 'Alpha Hall', category: 'venue', catLabel: 'Tiệc & nhà hàng', description: 'Mô tả pool', styles: ['luxury', 'modern'], priceMin: 3.9, priceMax: 4.7, city: 'HCMC', rating: 4.3, reviewCount: 2046, isVerified: true };
+const EXTRA = [{ id: 'pool_base', label: 'Pool nền (--base) ZZ', note: 'Ghi chú pool nền ZZ' }, { id: 'image_manifest', label: 'Manifest ảnh ZZ', note: 'Ghi chú manifest ZZ' }];
+const NOTES = [{ field: 'priceMin', code: 'kept_from_base', text: 'giữ từ pool nền (ADR-025, --styles-only): nguồn hiện cho 3.9' }, { field: 'priceMax', code: 'admin_override', text: 'admin sửa (R2): 22.5' }];
 const detailOf = (id) => {
   const row = ROWS.find((r) => r.id === id);
-  const base = { data_as_of: '2026-11-11T13:08:22.633793', id, name: row.name, catalog: CATALOG };
-  if (id === 'vd1') return { ...base, source: { available: true, record: REC, audit: { closed_state: 'none' }, truncated: { description: 1534 } }, pool: { in_pool: true, visible: true, vendor: POOL_V, reasons: [] }, overlay: null };
+  const base = { data_as_of: '2026-11-11T13:08:22.633793', id, name: row.name, catalog: CATALOG, extra_inputs: EXTRA };
+  if (id === 'vd1') return { ...base, source: { available: true, record: REC, audit: { closed_state: 'none' }, truncated: { description: 1534 } }, pool: { in_pool: true, visible: true, vendor: POOL_V, reasons: [], field_notes: NOTES }, overlay: null };
   if (id === 'vd2') return { ...base, source: { available: true, record: { ...REC, name: 'Beta Closed' }, audit: { closed_state: 'temporarily_closed' }, truncated: {} }, pool: { in_pool: false, visible: false, vendor: null, reasons: [{ code: 'temp_closed', text: 'Tạm đóng cửa: không vào pool' }] }, overlay: null };
   if (id === 'vd3') return { ...base, source: { available: true, record: { ...REC, name: 'Gamma Garden' }, audit: null, truncated: {} }, pool: { in_pool: true, visible: false, vendor: { ...POOL_V, id: 'vd3', name: 'Gamma Garden' }, reasons: [{ code: 'overlay_hidden', text: 'Admin đã ẩn vendor (lớp R2): cặp đôi không thấy' }] },
     overlay: { hidden: true, hidden_reason: 'Ẩn thử T-147', priceMin: 11.5, priceMax: 22.5, price_verified: true } };
@@ -190,6 +196,13 @@ const near = (a, b, tol = 2) => Math.abs(a - b) <= tol;
     check('trường bị cắt ghi "(rút gọn, gốc 1534 ký tự)"', /rút gọn, gốc 1534 ký tự/.test(t), t);
     check('pool: "Trong pool", mỗi trường vendor một dòng "<tên trường> <giá trị>"', t.includes('Trong pool') && !t.includes('Ngoài pool') && has(t, 'priceMin', '3.9') && has(t, 'priceMax', '4.7') && has(t, 'rating', '4.3') && has(t, 'reviewCount', '2046') && has(t, 'city', 'HCMC') && /styles:? luxury/.test(t) && t.includes('modern'), t.slice(-500));
     check('lớp admin: "Không có ghi đè" khi overlay null', t.includes('Không có ghi đè'));
+    check('mục "Đầu vào ngoài vendors.json" liệt kê pool nền và manifest ảnh (label + note)', t.includes('Đầu vào ngoài vendors.json') && has(t, 'Pool nền (--base) ZZ', 'Ghi chú pool nền ZZ') && has(t, 'Manifest ảnh ZZ', 'Ghi chú manifest ZZ'), t.slice(-700));
+    const iA = t.indexOf('priceMin 3.9'), iN = t.indexOf('giữ từ pool nền (ADR-025, --styles-only): nguồn hiện cho 3.9'), iB = t.indexOf('priceMax 4.7'), iN2 = t.indexOf('admin sửa (R2): 22.5');
+    check('ghi chú trường pool nằm ngay sau dòng của trường đó (priceMin rồi ghi chú, priceMax rồi ghi chú)', iA >= 0 && iN > iA && iB > iN && iN2 > iB, [iA, iN, iB, iN2].join(','));
+    const wrap = S.table.locator('xpath=ancestor::div[contains(@class,"adm-enrich-wrap")][1]');
+    const gg = await geom(S); const wb = await wrap.boundingBox();
+    check('1280 mặc định (còn 720 >= 640): chế độ ĐẨY, bảng không dưới drawer', wb.x + wb.width <= gg.left + 1, JSON.stringify([wb.x + wb.width, gg.left]));
+    check('chế độ ĐẨY: trang không cuộn ngang', await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
 
     /* ----- đóng ----- */
     await page.keyboard.press('Escape');
@@ -245,6 +258,17 @@ const near = (a, b, tol = 2) => Math.abs(a - b) <= tol;
     check('phím End: max', near((await geom(S)).w, 1152, 2));
     await page.keyboard.press('Home');
     check('phím Home: min', near((await geom(S)).w, 560, 2));
+    for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowLeft');
+    const w632 = await geom(S); const wbA = await wrap.boundingBox();
+    check('biên: drawer 632 (còn 648 >= 640) vẫn ĐẨY', near(w632.w, 632, 2) && wbA.x + wbA.width <= w632.left + 1, JSON.stringify([w632.w, wbA.x + wbA.width, w632.left]));
+    await page.keyboard.press('ArrowLeft');
+    const w656 = await geom(S); const wbB = await wrap.boundingBox();
+    check('biên: drawer 656 (còn 624 < 640) chuyển sang PHỦ: bảng nằm dưới drawer, không bị đẩy', near(w656.w, 656, 2) && wbB.x + wbB.width > w656.left + 20, JSON.stringify([w656.w, wbB.x + wbB.width, w656.left]));
+    check('chế độ PHỦ: trang không cuộn ngang', await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+    await page.keyboard.press('End');
+    const wmax = await geom(S); const wbM = await wrap.boundingBox();
+    check('1280 kéo tới max (1152): chế độ PHỦ, bảng nằm dưới drawer, không cuộn ngang', near(wmax.w, 1152, 2) && wbM.x + wbM.width > wmax.left + 20 && await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), JSON.stringify([wmax.w, wbM.x + wbM.width, wmax.left]));
+    await page.keyboard.press('Home');
     for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowLeft');
     check('đặt 680 bằng phím', near((await geom(S)).w, 680, 2));
     await page.keyboard.press('Escape');
@@ -255,9 +279,10 @@ const near = (a, b, tol = 2) => Math.abs(a - b) <= tol;
     check('tải lại trang, mở lại: độ rộng còn 680 (nhớ độ rộng)', near((await geom(S)).w, 680, 2), (await geom(S)).w);
     await page.keyboard.press('Escape');
 
-    /* ----- bảng vẫn dùng được khi drawer mở ----- */
+    /* ----- bảng vẫn dùng được khi drawer mở (chế độ ĐẨY) ----- */
     await S.row('Alpha Hall').getByText('Số 1 đường thử', { exact: false }).click();
     await S.dlg().waitFor();
+    await S.sep().focus(); await page.keyboard.press('Home');
     const n0 = S.details.length;
     await S.row('Gamma Garden').getByRole('button', { name: 'Approve', exact: true }).click();
     await page.waitForFunction(() => /Chờ áp dụng/.test(document.body.innerText));
@@ -322,6 +347,27 @@ const near = (a, b, tol = 2) => Math.abs(a - b) <= tol;
     check('không request nào ra ngoài (Google) trong cả phiên', S.external.length === 0, S.external.join(' '));
     if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'drawer-1280.png') });
     await S.ctx.close();
+
+    /* ----- khung trung bình: PHỦ, phải đóng drawer mới bấm được Approve ----- */
+    for (const vw of [520, 600]) {
+      const V = await scenario({ viewport: { width: vw, height: 800 } });
+      await V.row('Gamma Garden').getByText('Số 3 đường thử', { exact: false }).click();
+      await V.dlg().waitFor();
+      await V.page.waitForFunction(() => !/Đang tải/.test(document.body.innerText));
+      const gv = await geom(V);
+      check(`${vw}px: drawer rộng min(560, khung) = ${Math.min(560, vw)}, dính mép phải`, near(gv.w, Math.min(560, vw), 2) && near(gv.right, gv.vw), JSON.stringify(gv));
+      check(`${vw}px: không có tay cầm kéo (min = max)`, (await V.sep().filter({ visible: true }).count()) === 0);
+      check(`${vw}px: trang không cuộn ngang`, await V.page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+      const wv = V.table.locator('xpath=ancestor::div[contains(@class,"adm-enrich-wrap")][1]');
+      const wbv = await wv.boundingBox();
+      check(`${vw}px: chế độ PHỦ (bảng không bị đẩy, nằm dưới drawer)`, wbv.x + wbv.width > gv.left + 20, JSON.stringify([wbv.x + wbv.width, gv.left]));
+      await V.page.keyboard.press('Escape');
+      await V.dlg().waitFor({ state: 'detached' });
+      await V.row('Gamma Garden').getByRole('button', { name: 'Approve', exact: true }).click();
+      await V.page.waitForFunction(() => /Chờ áp dụng/.test(document.body.innerText));
+      check(`${vw}px: đóng drawer rồi Approve bấm được và gửi PUT`, V.writes.length === 1 && V.writes[0].body.decision === 'approve', JSON.stringify(V.writes));
+      await V.ctx.close();
+    }
 
     /* ----- khung hẹp ----- */
     const M = await scenario({ viewport: { width: 390, height: 844 } });

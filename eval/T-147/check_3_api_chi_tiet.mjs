@@ -3,9 +3,15 @@
 // Chạy: cd /home/user/tohong-back && node /home/user/tohong-hq/eval/T-147/check_3_api_chi_tiet.mjs   (hoặc qua check_3_api_chi_tiet.sh)
 // Hợp đồng (spec products/T-147-drawer-vendor-enrich.md, Hành vi 2 và 4). Người gọi là Capu (trong ADMIN_USER_IDS và CAPU_USER_IDS). Phản hồi 200, no-store, đúng các khoá:
 //   data_as_of (= báo cáo), id, name,
-//   catalog   = báo cáo.pool_catalog nguyên văn,
+//   catalog   = báo cáo.pool_catalog nguyên văn; extra_inputs = báo cáo.pool_extra_inputs nguyên văn ([] nếu báo cáo cũ không có),
 //   source    = {available, record, audit, truncated}: bằng pool_input của dòng trong báo cáo; dòng không có pool_input -> {available:false, record:null, audit:null, truncated:{}} (vẫn 200),
 //   pool      = {in_pool, visible, vendor, reasons:[{code,text}]}: vendor = đúng bản ghi trong vendorPool.generated.js (null nếu ngoài pool); visible = in_pool và chưa bị admin ẩn;
+//               field_notes = [{field, code, text}]: chỗ giá trị pool KHÁC giá trị sinh từ nguồn (pool nền, ADR-025) hoặc do admin sửa; [] nếu ngoài pool. Với vendor trong pool có nguồn,
+//               theo thứ tự trường name, category, city, description, rating, reviewCount, priceMin, priceMax, styles, mỗi trường: (1) nếu nguồn cho giá trị khác pool -> `kept_from_base`
+//               "giữ từ pool nền (ADR-025, --styles-only): nguồn hiện cho <giá trị nguồn>" (mảng nối ", "); nguồn không có giá (priceMin/priceMax) -> `price_default`
+//               "nguồn không có giá: pool dùng giá mặc định theo hạng mục hoặc giữ từ pool nền"; (2) nếu lớp admin có priceMin/priceMax là số -> `admin_override` "admin sửa (R2): <số>".
+//               Giá trị sinh từ nguồn: name; category = phần tử đầu của categories thuộc 10 hạng mục matcher; city (thiếu: HCMC); description cắt 220; rating/reviewCount của reviews[0] (thiếu: 0);
+//               priceMin/priceMax = làm tròn 0,1 của min_vnd/max_vnd/1e6 khi > 0 (priceMax = priceMin nếu nhỏ hơn); styles = style_tags (thiếu: []).
 //               reasons theo thứ tự, mã và chữ cố định:
 //                 temp_closed         "Tạm đóng cửa: không vào pool"                                   (ngoài pool, nhóm temp_closed)
 //                 removed             "Đã duyệt gỡ vendor: không vào pool"                             (ngoài pool, override.action = remove)
@@ -38,7 +44,8 @@ const TXT = {
   unverified: "Ảnh Google chưa qua kiểm khớp (T-104): vẫn đang chạy trong pool",
   stale_google_photos: "Pool còn ảnh Google nhưng nguồn không còn place_id: sẽ bị hạ ở lần sinh lại",
 };
-const KEYS = ["catalog", "data_as_of", "id", "name", "overlay", "pool", "source"];
+const KEYS = ["catalog", "data_as_of", "extra_inputs", "id", "name", "overlay", "pool", "source"];
+const ROW_KEYS = ["approvable", "catLabel", "category", "google", "group", "id", "marry", "n", "name", "override", "review"];
 const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const sortKeys = (o) => Object.keys(o).sort();
 const codes = (j) => (j?.pool?.reasons || []).map((r) => r.code);
@@ -57,6 +64,7 @@ const stale = (r) => poolBy.has(r.id) && (poolBy.get(r.id).photos || []).some((p
   R.check("no-store", /no-store/.test(d.headers.get("cache-control") || ""), d.headers.get("cache-control"));
   R.check("data_as_of, id, name theo báo cáo", j.data_as_of === report.data_as_of && j.id === full.id && j.name === full.name, [j.data_as_of, j.id]);
   R.check("catalog = pool_catalog của báo cáo (nguồn duy nhất, back không tự liệt kê)", Array.isArray(report.pool_catalog) && report.pool_catalog.length > 0 && eq(j.catalog, report.pool_catalog), [j.catalog?.length]);
+  R.check("extra_inputs = pool_extra_inputs của báo cáo (pool nền, manifest ảnh)", Array.isArray(report.pool_extra_inputs) && report.pool_extra_inputs.length === 2 && eq(j.extra_inputs, report.pool_extra_inputs), j.extra_inputs?.length);
   R.check("source = pool_input của dòng, available=true", full.pool_input && j.source && j.source.available === true && eq(j.source.record, full.pool_input.record) && eq(j.source.audit, full.pool_input.audit) && eq(j.source.truncated, full.pool_input.truncated), j.source && Object.keys(j.source));
   R.check("source.record có giá trị (không rỗng)", j.source?.record && Object.keys(j.source.record).length >= 3, Object.keys(j.source?.record || {}));
   R.check("pool.vendor đúng bản ghi trong vendorPool.generated.js, in_pool và visible", j.pool?.in_pool === true && j.pool.visible === true && eq(j.pool.vendor, poolBy.get(full.id)), j.pool && [j.pool.in_pool, j.pool.visible]);
@@ -74,11 +82,41 @@ const stale = (r) => poolBy.has(r.id) && (poolBy.get(r.id).photos || []).some((p
   if (unv) { const u = await B.asCapu(env, "GET", `${base}/${unv.id}/detail`); R.check("nhóm unverified trong pool: lý do unverified đúng chữ", u.status === 200 && u.json.pool.in_pool && reasonsOk(u.json, ["unverified"]), codes(u.json)); }
   else R.check("dữ liệu thật có vendor unverified trong pool để thử", false, "không có");
 
+  /* ---------- field_notes: so pool với giá trị sinh từ nguồn, mọi vendor có nguồn ---------- */
+  const MATCH = new Set(["photography", "venue", "decor", "attire", "makeup", "ceremony", "jewelry", "transport", "stationery", "honeymoon"]);
+  const r1 = (v) => Math.round((v / 1e6) * 10) / 10;
+  const disp = (v) => (Array.isArray(v) ? v.join(", ") : String(v));
+  const wantNotes = (rec, pv) => {
+    const out = [];
+    const rv = (rec.reviews || [])[0] || {};
+    const pr = rec.price_range || {};
+    let pmin = pr.min_vnd > 0 ? r1(pr.min_vnd) : undefined, pmax = pr.max_vnd > 0 ? r1(pr.max_vnd) : undefined;
+    if (pmin !== undefined && pmax !== undefined && pmin > pmax) pmax = pmin;
+    const src = { name: rec.name, category: (rec.categories || []).find((c) => MATCH.has(c)), city: rec.city || "HCMC", description: (rec.description ?? "").slice(0, 220),
+      rating: rv.rating ?? 0, reviewCount: rv.count ?? 0, priceMin: pmin, priceMax: pmax, styles: rec.style_tags || [] };
+    for (const f of ["name", "category", "city", "description", "rating", "reviewCount", "priceMin", "priceMax", "styles"]) {
+      if (src[f] === undefined) { if (f.startsWith("price")) out.push({ field: f, code: "price_default", text: "nguồn không có giá: pool dùng giá mặc định theo hạng mục hoặc giữ từ pool nền" }); }
+      else if (!eq(src[f], pv[f])) out.push({ field: f, code: "kept_from_base", text: `giữ từ pool nền (ADR-025, --styles-only): nguồn hiện cho ${disp(src[f])}` });
+    }
+    return out;
+  };
+  let nBase = 0, nChecked = 0, badNote = null;
+  for (const r of report.vendors) {
+    if (!r.pool_input || !poolBy.has(r.id)) continue;
+    const dd = await B.asCapu(env, "GET", `${base}/${r.id}/detail`);
+    nChecked++;
+    const want = wantNotes(r.pool_input.record, poolBy.get(r.id));
+    nBase += want.filter((x) => x.code === "kept_from_base").length;
+    if (!eq(dd.json?.pool?.field_notes, want) && !badNote) badNote = [r.id, JSON.stringify(dd.json?.pool?.field_notes).slice(0, 120), JSON.stringify(want).slice(0, 120)];
+  }
+  R.check(`field_notes đúng cho mọi vendor trong pool có nguồn (${nChecked} vendor)`, nChecked > 100 && !badNote, badNote);
+  R.check("dữ liệu thật có vendor mà pool nền lệch nguồn (kept_from_base) để thử", nBase > 0, nBase);
   /* ---------- lớp admin R2 ---------- */
   const secret = { phone: "0900147147", website: "https://t147-contact.invalid" };
   const ov = { hidden: true, hidden_reason: "Ẩn thử T-147", priceMin: 11.5, priceMax: 22.5, price_verified: true, contact: secret, updated_by: "user_x", updated_at: "2026-11-13T00:00:00Z" };
   bucket.data.set(OVERLAY_KEY, JSON.stringify({ seq: 1, vendors: { [full.id]: ov } }));
   const h = await B.asCapu(env, "GET", `${base}/${full.id}/detail`);
+  R.check("lớp admin có priceMin/priceMax: field_notes có admin_override cho cả hai, đúng chữ", ["priceMin", "priceMax"].every((f, i) => (h.json?.pool?.field_notes || []).some((x) => x.field === f && x.code === "admin_override" && x.text === `admin sửa (R2): ${[11.5, 22.5][i]}`)), h.json?.pool?.field_notes?.filter((x) => x.code === "admin_override"));
   R.check("overlay đúng 5 khoá hidden/hidden_reason/priceMin/priceMax/price_verified, không contact/updated_by", h.json && eq(h.json.overlay, { hidden: true, hidden_reason: "Ẩn thử T-147", priceMin: 11.5, priceMax: 22.5, price_verified: true }), h.json?.overlay);
   R.check("vendor bị admin ẩn: visible=false, in_pool=true, lý do overlay_hidden", h.json?.pool?.in_pool === true && h.json.pool.visible === false && reasonsOk(h.json, ["overlay_hidden"]), [h.json?.pool?.visible, codes(h.json)]);
   R.check("liên hệ trong ghi đè không lọt ra phản hồi", !h.text.includes(secret.phone) && !h.text.includes("t147-contact"), "lộ");
@@ -105,6 +143,7 @@ const stale = (r) => poolBy.has(r.id) && (poolBy.get(r.id).photos || []).some((p
   /* ---------- danh sách không phình ---------- */
   const l = await B.asCapu(env, "GET", `${base}?limit=100`);
   R.check("danh sách vẫn 200 và dòng không mang pool_input", l.status === 200 && l.json.rows.length > 0 && l.json.rows.every((r) => !("pool_input" in r)) && !l.text.includes('"pool_input"'), [l.status]);
+  R.check("dòng danh sách có đúng tập khoá cho phép (id,name,category,group,marry,google,approvable,override + n,catLabel,review)", l.json.rows.every((r) => eq(sortKeys(r), ROW_KEYS)), sortKeys(l.json.rows[0] || {}));
   R.check("danh sách không mang catalog/pool_catalog", !("catalog" in l.json) && !("pool_catalog" in l.json) && !l.text.includes('"pool_catalog"'), Object.keys(l.json || {}));
 
   /* ---------- route công khai không lộ nguồn ---------- */
@@ -124,6 +163,7 @@ const stale = (r) => poolBy.has(r.id) && (poolBy.get(r.id).photos || []).some((p
     for (const r of rep.vendors) {
       if (r.id === rm.id) r.override = { action: "remove", approved_on: "2026-11-12" };
       if (r.id === noSrc.id) delete r.pool_input;
+      if (r.id === stl.id) { r.zz_khoa_tuong_lai = "bi-mat-t147"; r.pool_input = r.pool_input || { record: {}, audit: null, truncated: {} }; }
     }
     fs.writeFileSync(rf, "// AUTO-GENERATED — do not edit manually.\nexport const VENDOR_ENRICH_REPORT = " + JSON.stringify(rep) + ";\n");
     const pf = path.join(d, "lib", "vendorPool.generated.js");
@@ -144,6 +184,8 @@ const stale = (r) => poolBy.has(r.id) && (poolBy.get(r.id).photos || []).some((p
     const n = await S.asCapu(env, "GET", `${base}/${noSrc.id}/detail`);
     R.check("[tổng hợp] dòng báo cáo thiếu pool_input: 200, source.available=false, record=null, truncated={}, pool vẫn có", n.status === 200 && eq(n.json.source, { available: false, record: null, audit: null, truncated: {} }) && n.json.pool.in_pool === true, [n.status, n.json?.source]);
     const s = await S.asCapu(env, "GET", `${base}/${stl.id}/detail`);
+    const ll = await S.asCapu(env, "GET", `${base}?limit=100&q=${encodeURIComponent(stl.name)}`);
+    R.check("[tổng hợp] khoá lạ thêm vào báo cáo (kể cả pool_input) không lọt ra danh sách (danh sách dùng whitelist, không ...r)", ll.status === 200 && ll.json.rows.some((r) => r.id === stl.id) && !ll.text.includes("bi-mat-t147") && !ll.text.includes("zz_khoa_tuong_lai") && !ll.text.includes("pool_input"), [ll.status, ll.text.slice(0, 60)]);
     R.check("[tổng hợp] pool còn ảnh Google mà nguồn không còn khớp: stale_google_photos", s.status === 200 && codes(s.json).includes("stale_google_photos") && s.json.pool.reasons.find((x) => x.code === "stale_google_photos").text === TXT.stale_google_photos, [s.status, codes(s.json)]);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }
