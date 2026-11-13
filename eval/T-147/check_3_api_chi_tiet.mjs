@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 // T-147 tiêu chí 3 (repo tohong-back): GET /api/admin/vendor-enrich/<id>/detail trả đủ dữ liệu cho drawer, chỉ đọc, không lộ liên hệ.
 // Chạy: cd /home/user/tohong-back && node /home/user/tohong-hq/eval/T-147/check_3_api_chi_tiet.mjs   (hoặc qua check_3_api_chi_tiet.sh)
-// Hợp đồng (spec products/T-147-drawer-vendor-enrich.md, Hành vi 2 và 4). Người gọi là Capu (trong ADMIN_USER_IDS và CAPU_USER_IDS). Phản hồi 200, no-store, đúng các khoá:
+// Hợp đồng (spec products/T-147-drawer-vendor-enrich.md, Hành vi 2 và 3; sửa theo products/T-150-drawer-moi-admin-nhan-reviews.md). Người gọi ở đây là Capu; quyền của admin khác do check_4. Phản hồi 200, no-store, đúng các khoá:
 //   data_as_of (= báo cáo), id, name,
 //   catalog   = báo cáo.pool_catalog nguyên văn; extra_inputs = báo cáo.pool_extra_inputs nguyên văn ([] nếu báo cáo cũ không có),
 //   source    = {available, record, audit, truncated}: bằng pool_input của dòng trong báo cáo; dòng không có pool_input -> {available:false, record:null, audit:null, truncated:{}} (vẫn 200),
 //   pool      = {in_pool, visible, vendor, reasons:[{code,text}]}: vendor = đúng bản ghi trong vendorPool.generated.js (null nếu ngoài pool); visible = in_pool và chưa bị admin ẩn;
 //               field_notes = [{field, code, text}]: chỗ giá trị pool KHÁC giá trị sinh từ nguồn (pool nền, ADR-025) hoặc do admin sửa; [] nếu ngoài pool. Với vendor trong pool có nguồn,
-//               theo thứ tự trường name, category, city, description, rating, reviewCount, priceMin, priceMax, styles, mỗi trường: (1) nếu nguồn cho giá trị khác pool -> `kept_from_base`
+//               theo thứ tự trường name, category, city, description, rating, reviewCount, priceMin, priceMax, styles, reviews (reviews thêm ở T-150, ADR-083 mục 3), mỗi trường: (1) nếu nguồn cho giá trị khác pool -> `kept_from_base`
 //               "giữ từ pool nền (ADR-025, --styles-only): nguồn hiện cho <giá trị nguồn>" (mảng nối ", "); nguồn không có giá (priceMin/priceMax) -> `price_default`
 //               "nguồn không có giá: pool dùng giá mặc định theo hạng mục hoặc giữ từ pool nền"; (2) nếu lớp admin có priceMin/priceMax là số -> `admin_override` "admin sửa (R2): <số>".
 //               Giá trị sinh từ nguồn: name; category = phần tử đầu của categories thuộc 10 hạng mục matcher; city (thiếu: HCMC); description cắt 220; rating/reviewCount của reviews[0] (thiếu: 0);
 //               priceMin/priceMax = làm tròn 0,1 của min_vnd/max_vnd/1e6 khi > 0 (priceMax = priceMin nếu nhỏ hơn); styles = style_tags (thiếu: []).
+//               reviews (T-150): N = số phần tử top_reviews có `text` (tối đa 5), M = số phần tử `reviews` của pool (thiếu = 0); N khác M -> `kept_from_base` "giữ từ pool nền (ADR-025, --styles-only): nguồn hiện có N bài đánh giá có chữ, pool có M".
 //               reasons theo thứ tự, mã và chữ cố định:
 //                 temp_closed         "Tạm đóng cửa: không vào pool"                                   (ngoài pool, nhóm temp_closed)
 //                 removed             "Đã duyệt gỡ vendor: không vào pool"                             (ngoài pool, override.action = remove)
@@ -98,19 +99,25 @@ const stale = (r) => poolBy.has(r.id) && (poolBy.get(r.id).photos || []).some((p
       if (src[f] === undefined) { if (f.startsWith("price")) out.push({ field: f, code: "price_default", text: "nguồn không có giá: pool dùng giá mặc định theo hạng mục hoặc giữ từ pool nền" }); }
       else if (!eq(src[f], pv[f])) out.push({ field: f, code: "kept_from_base", text: `giữ từ pool nền (ADR-025, --styles-only): nguồn hiện cho ${disp(src[f])}` });
     }
+    // T-150 (ADR-083 mục 3): trường `reviews` (đứng sau `styles`). Nguồn = số phần tử top_reviews có chữ, tối đa 5; pool = số phần tử `reviews` (thiếu = 0). Khác số lượng -> kept_from_base.
+    const nSrc = (rec.top_reviews || []).filter((x) => x && x.text).slice(0, 5).length, nPool = (pv.reviews || []).length;
+    if (nSrc !== nPool) out.push({ field: "reviews", code: "kept_from_base", text: `giữ từ pool nền (ADR-025, --styles-only): nguồn hiện có ${nSrc} bài đánh giá có chữ, pool có ${nPool}` });
     return out;
   };
-  let nBase = 0, nChecked = 0, badNote = null;
+  let nBase = 0, nChecked = 0, badNote = null, nRevSrc = 0, nRevPool = 0;
   for (const r of report.vendors) {
     if (!r.pool_input || !poolBy.has(r.id)) continue;
     const dd = await B.asCapu(env, "GET", `${base}/${r.id}/detail`);
     nChecked++;
     const want = wantNotes(r.pool_input.record, poolBy.get(r.id));
     nBase += want.filter((x) => x.code === "kept_from_base").length;
+    const rn = want.find((x) => x.field === "reviews");
+    if (rn) { if (/nguồn hiện có 0 /.test(rn.text)) nRevPool++; else nRevSrc++; }
     if (!eq(dd.json?.pool?.field_notes, want) && !badNote) badNote = [r.id, JSON.stringify(dd.json?.pool?.field_notes).slice(0, 120), JSON.stringify(want).slice(0, 120)];
   }
   R.check(`field_notes đúng cho mọi vendor trong pool có nguồn (${nChecked} vendor)`, nChecked > 100 && !badNote, badNote);
   R.check("dữ liệu thật có vendor mà pool nền lệch nguồn (kept_from_base) để thử", nBase > 0, nBase);
+  R.check("dữ liệu thật có cả hai kiểu lệch reviews (nguồn có chữ mà pool không; pool có mà nguồn không) để thử", nRevSrc > 0 && nRevPool > 0, [nRevSrc, nRevPool]);
   /* ---------- lớp admin R2 ---------- */
   const secret = { phone: "0900147147", website: "https://t147-contact.invalid" };
   const ov = { hidden: true, hidden_reason: "Ẩn thử T-147", priceMin: 11.5, priceMax: 22.5, price_verified: true, contact: secret, updated_by: "user_x", updated_at: "2026-11-13T00:00:00Z" };
