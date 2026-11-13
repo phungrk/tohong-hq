@@ -17,7 +17,7 @@ Nếu admin mở thẳng bảng enrich thì số cú bấm để duyệt vendor 
 
 ## Ràng buộc (vòi)
 - Repo: `tohong-front` · Nhánh: `t-153-admin-mo-bang-enrich` · Vùng: `planner/admin/vendor-enrich`
-- Bất biến đã đọc: `eval/invariants/_shared/` + `planner/admin/` + `planner/admin/vendor-enrich/` (INV-001..007) — spec này không vi phạm; không chạm báo cáo, chữ ký back/HQ hay workflow dữ liệu. Eval T-124 (check_8) và T-147 (check_6) mở tab bằng cách bấm "Dữ liệu vendor" rồi "Enrich Google Maps"; bấm lại tab đang chọn phải không làm hỏng điều đó.
+- Bất biến đã đọc: `eval/invariants/_shared/` + `planner/admin/` + `planner/admin/vendor-enrich/` (INV-001..007) + vùng anh em `planner/admin/members/` (INV-001..006) — spec này không vi phạm tính chất nào. Đổi tab mặc định làm cách đo điều hướng của INV-006 members lỗi thời; Chief đã phân xử và sửa `lib/members_ui_inv.cjs` (bấm tab "Thành viên" trước khi đo), ghi `decisions/2026-11-13-adr-086-inv-006-members-bam-tab-thanh-vien.md`. Vì vùng của việc là vendor-enrich nên gate không tự chạy bất biến members; tiêu chí 5 chạy nó; không chạm báo cáo, chữ ký back/HQ hay workflow dữ liệu. Eval T-124 (check_8) và T-147 (check_6) mở tab bằng cách bấm "Dữ liệu vendor" rồi "Enrich Google Maps"; bấm lại tab đang chọn phải không làm hỏng điều đó.
 - Không chạm: quyền admin, API, drawer chi tiết (T-151, T-152 đang làm), payment, auth, schema, dữ liệu người dùng.
 - Bậc đề xuất: A — chỉ đổi giao diện, eval tự động phủ hết.
 
@@ -27,6 +27,7 @@ Nếu admin mở thẳng bảng enrich thì số cú bấm để duyệt vendor 
 | 1 | Vào ?admin=: "Dữ liệu vendor" đứng đầu, aria-current="page", bảng enrich hiện, không gọi danh sách vendor / members-summary | `bash eval/T-153/check_1_tab_dau_va_bang_enrich.sh` |
 | 2 | Các tab khác chuyển qua lại được, thứ tự năm tab còn lại giữ nguyên, quay lại tab vendor là bảng enrich | `bash eval/T-153/check_2_chuyen_tab_qua_lai.sh` |
 | 3 | Hộp kết nối > "Sửa vendor này" mở đúng vendor ở chế độ danh sách | `bash eval/T-153/check_3_hop_ket_noi_mo_dung_vendor.sh` |
+| 5 | INV-006 của `planner/admin/members` vẫn xanh sau khi tab mặc định đổi (ADR-086) | `bash eval/T-153/check_5_bat_bien_members_inv006.sh` |
 | 4 | Người không phải admin không thấy tab/bảng và không gọi API vendor | `bash eval/T-153/check_4_nguoi_ngoai_khong_vao_duoc.sh` |
 
 Mọi eval chạy từ gốc tohong-hq, repo front lấy từ `${TOHONG_FRONT_REPO:-/home/user/tohong-front}`; dùng Playwright, tự build và giả API (mẫu T-147 #6). Đã kiểm trên bản sao có vá thử: cả bốn PASS; trên mã hiện tại 1, 2, 3 đỏ, 4 xanh (đúng, vì 4 là hành vi phải giữ).
@@ -39,6 +40,11 @@ Không đổi quyền, API, drawer, nội dung bảng enrich; không thêm tab; 
 
 ## Câu hỏi mở
 Không.
+
+## Sửa ở v2 (spec rework theo D1)
+- Thêm vùng `planner/admin/members` vào "Bất biến đã đọc" và tiêu chí 5 (eval chạy nguyên INV-006 members).
+- check_2: đổi tên dòng kiểm "hiện tiêu đề" thành "gọi API danh sách yêu cầu kết nối" cho khớp cách đo. check_3: chỉ đếm request SAU thao tác bấm "Sửa vendor này".
+- Phát hiện khi dựng lại: INV-006 members trên bản vá thử vẫn FAIL vì mock của `lib/members_ui_inv.cjs` trả `{}` cho `/api/admin/vendor-enrich`; tab mặc định mới tải bảng enrich ngay lúc vào nên trang sập trước khi bấm tab Thành viên. Thêm mock enrich hợp lệ vào lib thì PASS. Xem handoff v2.
 
 ## Ghi chú cho Engineering
 Eval cũ T-124 check_8 và T-147 check_6 đang đỏ sẵn trên mã hiện tại với cùng lỗi (kiểm lúc viết spec, trước khi sửa); không phải do spec này. Chỉ cần không làm chúng đỏ thêm.

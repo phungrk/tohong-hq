@@ -12,3 +12,5 @@ tasks: [T-153, T-043]
 **Phân xử:** bất biến lỗi thời ở phần điều hướng, không phải spec sai. Sửa `members_ui_inv.cjs`: sau `page.goto` bấm tab có tên bắt đầu "Thành viên" (nếu có) rồi mới đo. Mọi check tính chất (TC4: không mang từ khoá trên URL, không lưu tên/email/từ khoá vào storage, tiêu đề không đổi…) giữ nguyên. Đã chạy trên main: PASS.
 
 `eval/T-043/check_members_ui.cjs` (eval tầng 1 của việc đã xong) có thể đỏ theo cùng cách sau T-153 — lỗi thời theo ADR này, không chạy lại, không sửa.
+
+**Bổ sung (Product T-153 v2):** mock trong lib trả `{}` cho `/api/admin/vendor-enrich`; khi tab mặc định là Dữ liệu vendor, bảng enrich sập trước khi bấm được tab Thành viên. Thêm mock bảng enrich rỗng hợp lệ (summary + rows rỗng) — chỉ phần dựng trang, không đổi check tính chất. Chạy trên main: PASS. Việc EnrichTable sập khi API trả thiếu trường là lỗi hiển thị riêng, ghi để làm sau.
