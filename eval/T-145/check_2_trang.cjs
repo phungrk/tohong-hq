@@ -23,25 +23,49 @@ const tasks = [{ ...base, id: 'T-001' }, { ...base, id: 'T-002', owner: 'product
 const roster = ['capu', 'chief-of-staff', 'insight', 'product', 'spec-critic', 'engineering', 'adversary'].map(id => ({ id, name: id, role: '', kind: id === 'capu' ? 'human' : 'agent', reports_to: '', mission: '', agent_file: '', status: 'Hired' }));
 const data = { generated_at: '2026-10-31T10:00', timezone: 'Asia/Ho_Chi_Minh', public: true, tasks, events: [], roster, capu_queue: [],
   model: { invariants: { 'hq/dashboard': 2 }, invariants_total: 2, adversarial_evals: 1, regression_evals: 0, insight_reports: 1, last_insight: '2026-10-25-weekly.md', specs: 2 } };
+
+const WSDEF = 'wss://tohong-live.phungnc.workers.dev/ws';
+async function open(browser, { query = '', status = 200 }) {
+  const page = await browser.newPage({ viewport: { width: 1200, height: 1500 } });
+  const o = { page, hits: [], errors: [], ws: [] };
+  page.on('pageerror', e => o.errors.push(e.message));
+  await page.route('**/cdnjs.cloudflare.com/**', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(D3) }));
+  await page.route('**/raw.githubusercontent.com/**', r => { const u = r.request().url(); o.hits.push(u);
+    if (status === 200 && u.split('?')[0] === EXPECT) r.fulfill({ contentType: 'application/json', body: JSON.stringify(data) }); else r.fulfill({ status: status === 200 ? 404 : status, body: 'not found' }); });
+  await page.routeWebSocket(/\/ws$/, ws => { o.ws.push(ws.url()); ws.send(JSON.stringify({ type: 'snapshot', server_time: Date.now(), events: [], activity: [] })); });
+  await page.goto('file://' + INDEX + query); await page.waitForTimeout(1500);
+  return o;
+}
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1200, height: 1500 } });
-  const hits = [], errors = [];
-  page.on('pageerror', e => errors.push(e.message));
-  await page.route('**/cdnjs.cloudflare.com/**', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(D3) }));
-  await page.route('**/raw.githubusercontent.com/**', r => { const u = r.request().url(); hits.push(u);
-    if (u.split('?')[0] === EXPECT) r.fulfill({ contentType: 'application/json', body: JSON.stringify(data) }); else r.fulfill({ status: 404, body: 'not found' }); });
-  await page.routeWebSocket(/\/ws$/, ws => ws.send(JSON.stringify({ type: 'snapshot', server_time: Date.now(), events: [], activity: [] })));
-  await page.goto('file://' + INDEX); await page.waitForTimeout(1500);
-  const n = async s => page.$eval(s, e => e.textContent).catch(() => null);
   const why = [];
-  if (!hits.length) why.push('trang không tải dữ liệu từ raw.githubusercontent.com');
-  const wrong = hits.filter(u => u.split('?')[0] !== EXPECT);
+  // 1) có dữ liệu: hiển thị đúng, chỉ gọi URL mới, #live kết nối tohong-live
+  const a = await open(browser, {});
+  const n = async s => a.page.$eval(s, e => e.textContent).catch(() => null);
+  if (!a.hits.length) why.push('trang không tải dữ liệu từ raw.githubusercontent.com');
+  const wrong = a.hits.filter(u => u.split('?')[0] !== EXPECT);
   if (wrong.length) why.push('trang gọi URL khác: ' + wrong[0]);
-  if (await page.$eval('#banner', e => getComputedStyle(e).display !== 'none').catch(() => true)) why.push('banner lỗi tải dữ liệu đang hiện');
+  if (await a.page.$eval('#banner', e => getComputedStyle(e).display !== 'none').catch(() => true)) why.push('banner lỗi tải dữ liệu đang hiện');
   if ((await n('#nd_exec .n')) !== '1') why.push('#nd_exec .n phải = 1 (việc doing)');
   if ((await n('#nd_respec .n')) !== '1') why.push('#nd_respec .n phải = 1 (việc spec)');
-  if (errors.length) why.push('lỗi console: ' + errors[0]);
+  if (a.errors.length) why.push('lỗi console: ' + a.errors[0]);
+  if (!a.ws.includes(WSDEF)) why.push('trang không nối WebSocket mặc định ' + WSDEF + ' (thấy ' + JSON.stringify(a.ws) + ')');
+  if (!(await a.page.$eval('#live', e => e.classList.contains('on') && e.textContent === 'Trực tiếp').catch(() => false))) why.push('#live không sang trạng thái "Trực tiếp" khi kênh live mở');
+  // chân trang nêu nguồn mới (kiểm dương)
+  const foot = await a.page.$$eval('footer a', as => as.map(x => x.href)).catch(() => []);
+  if (!foot.includes('https://github.com/phungrk/tohong-hq-dashboard')) why.push('chân trang không có link tới github.com/phungrk/tohong-hq-dashboard làm nguồn dữ liệu (thấy ' + JSON.stringify(foot) + ')');
+  if (!(await a.page.$eval('footer', e => /dashboard-data/.test(e.textContent) && /tohong-hq-dashboard/.test(e.textContent)).catch(() => false))) why.push('chân trang phải nhắc nhánh dashboard-data và tên repo tohong-hq-dashboard');
+  await a.page.close();
+  // 2) ?live= vẫn đổi host WebSocket
+  const b = await open(browser, { query: '?live=https://live-thu.example' });
+  if (!b.ws.includes('wss://live-thu.example/ws')) why.push('?live= không còn đổi host WebSocket (thấy ' + JSON.stringify(b.ws) + ')');
+  await b.page.close();
+  // 3) tải dữ liệu lỗi: thông báo nhắc đúng repo nguồn mới
+  const c = await open(browser, { status: 404 });
+  const msg = await c.page.$eval('#banner', e => getComputedStyle(e).display !== 'none' ? e.textContent : '').catch(() => '');
+  if (!/tohong-hq-dashboard/.test(msg)) why.push('thông báo lỗi tải dữ liệu không nhắc tohong-hq-dashboard (thấy "' + msg + '")');
+  if (/repo tohong-hq(?![-\w])/.test(msg)) why.push('thông báo lỗi còn chỉ về repo tohong-hq');
+  await c.page.close();
   await browser.close();
   console.log(why.length ? 'FAIL ' + why.join(' | ') : 'PASS'); process.exit(why.length ? 1 : 0);
 })();

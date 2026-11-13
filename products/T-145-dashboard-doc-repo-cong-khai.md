@@ -6,7 +6,7 @@ Capu đã chuyển `phungrk/tohong-hq` sang private nên trang https://phungrk.g
 ## Bằng chứng
 - ADR-080 (Capu chọn A, 2026-11-13). `/home/user/tohong-hq-dashboard/index.html` dòng 436: `DATA_URL` trỏ `raw.githubusercontent.com/phungrk/tohong-hq/dashboard-data/dashboard.json`.
 - `.github/workflows/publish-dashboard-data.yml` hiện chỉ đẩy lên nhánh `dashboard-data` của chính tohong-hq, bằng `github.token`.
-- Bài học T-118/T-127/T-134: eval workflow phải chạy nguyên văn bước `run:` với git giả; ống `|` phải dưới pipefail (planner INV-006).
+- Bài học T-118/T-127/T-134: eval workflow phải chạy nguyên văn bước `run:` (git thật, URL đẩy chuyển vào bare repo cục bộ); ống `|` phải dưới pipefail (planner INV-006).
 
 ## Giả thuyết
 Nếu thêm bước đẩy sang repo dashboard và đổi `DATA_URL` thì trang hiện lại việc/trạng thái/đội ngũ trong vòng vài phút sau mỗi lần main đổi. Chỉ số bảo vệ: bản công khai không lộ thêm khoá nào so với `export_dashboard.py --public` hiện tại; main của repo dashboard không bị chạm (không dựng lại Pages mỗi lần sổ cái đổi).
@@ -15,14 +15,15 @@ Nếu thêm bước đẩy sang repo dashboard và đổi `DATA_URL` thì trang 
 Workflow, bước mới đặt SAU bước "Đẩy lên nhánh dashboard-data" hiện có (bước cũ giữ nguyên):
 1. Bước mới là MỘT step có `env` ánh xạ `secrets.DASHBOARD_DATA_TOKEN` vào một biến môi trường. Đó là nơi duy nhất trong workflow nhắc `secrets.DASHBOARD_DATA_TOKEN`. `run:` không chứa `${{ }}`, không `set -x`, không in môi trường, không in token. Không `continue-on-error`.
 2. Khi biến token rỗng hoặc không có (chưa đặt secret): bước in một dòng bắt đầu bằng `::warning::`, thoát mã 0, không gọi `git push`. Job xanh.
-3. Khi có token: bước dựng một thư mục riêng (không phải `$RUNNER_TEMP/out`) chỉ chứa đúng một file `dashboard.json`, sao nguyên bản từ `$RUNNER_TEMP/out/dashboard.json` do bước "Xuất dữ liệu" (`--public`) tạo ra. Không đẩy `tasks.json`, `events.json`, `roster.json` hay file nào khác. Thư mục đó `git init`, commit một lần, rồi đúng một lệnh `git push -f` tới `https://x-access-token:<token>@github.com/phungrk/tohong-hq-dashboard.git` với đích là nhánh `dashboard-data` (dạng `dashboard-data`, `HEAD:dashboard-data` hoặc `HEAD:refs/heads/dashboard-data`). Không `--all`, `--mirror`, `--tags`, `--delete`; không nhắc `main`; không `checkout/switch/fetch/pull/merge/rebase`.
+3. Khi có token, kết quả đo trên repo đích (không đo thư mục làm việc lúc gọi git): sau bước, ref `refs/heads/dashboard-data` của `phungrk/tohong-hq-dashboard` tồn tại, có đúng một commit, cây của nó có đúng một file `dashboard.json`, giống từng byte `$RUNNER_TEMP/out/dashboard.json` do bước "Xuất dữ liệu" (`--public`) tạo ra (không `tasks.json`, `events.json`, `roster.json`, không file nào khác, kể cả đã commit rồi xoá ở cây sau). Mọi ref khác của repo đích không đổi (main giữ nguyên SHA, không ref mới). Đúng một lệnh `git push` tới `https://x-access-token:<token>@github.com/phungrk/tohong-hq-dashboard.git` (có hoặc không `.git`), không `--all/--mirror/--tags/--delete/--prune`. Bước phải tự đủ trên runner sạch: tự đặt danh tính commit (runner không có `user.name/user.email`) và tự tạo nhánh tên `dashboard-data` (không phụ thuộc nhánh mặc định của git). Cách cài là việc của Engineering; chỉ kết quả trên ref đích được đo.
 4. Khi có token mà `git commit` hoặc `git push` lỗi: bước thoát khác 0, job đỏ. Không nuốt lỗi (`|| true`); nếu bước có ống `|` thì chạy dưới pipefail (`shell: bash` hoặc `set -o pipefail`).
 5. Token không bao giờ xuất hiện trong stdout/stderr của bước, kể cả khi git lỗi.
 
 Trang (`/home/user/tohong-hq-dashboard/index.html`):
-6. `const DATA_URL='https://raw.githubusercontent.com/phungrk/tohong-hq-dashboard/dashboard-data/dashboard.json'` (đúng chuỗi này). Trang không còn đọc dữ liệu từ `raw.githubusercontent.com/phungrk/tohong-hq/…`. Chân trang và thông báo lỗi tải nói nguồn là repo `tohong-hq-dashboard` (không ghi `tohong-hq` làm nguồn dữ liệu). Link tới thư mục `inbox/capu` của tohong-hq cho Capu giữ nguyên.
-7. Không thêm tham số `?data=` (quyết định của spec: trang công khai không nạp dữ liệu từ URL tùy ý). `?live=` giữ nguyên.
-8. Với fixture `dashboard.json` trả về từ URL trên, trang hiển thị bình thường: không banner lỗi, số trên khối Agent code / Spec rework đúng theo fixture, không lỗi console. README của repo dashboard cập nhật nguồn dữ liệu cho khớp.
+6. `const DATA_URL='https://raw.githubusercontent.com/phungrk/tohong-hq-dashboard/dashboard-data/dashboard.json'` (đúng chuỗi này). Trang không còn đọc dữ liệu từ `raw.githubusercontent.com/phungrk/tohong-hq/…`. Chân trang có link `https://github.com/phungrk/tohong-hq-dashboard` và nhắc nhánh `dashboard-data`; khi tải dữ liệu lỗi, banner nhắc `tohong-hq-dashboard` (không chỉ về repo `tohong-hq`). Link tới thư mục `inbox/capu` của tohong-hq giữ nguyên.
+7. Không thêm tham số `?data=` (trang công khai không nạp dữ liệu từ URL tùy ý). Đường realtime giữ nguyên: mặc định `#live` nối `wss://tohong-live.phungnc.workers.dev/ws` và sang "Trực tiếp" khi kênh mở; `?live=https://host` vẫn đổi host WebSocket.
+8. Với fixture `dashboard.json` trả về từ URL trên, trang hiển thị bình thường: không banner lỗi, số trên khối Agent code / Spec rework đúng theo fixture, không lỗi console.
+8b. README của repo trang: dòng nói dữ liệu đọc từ `dashboard.json` ở nhánh `dashboard-data` trỏ repo `phungrk/tohong-hq-dashboard` và không còn nhắc raw/repo `phungrk/tohong-hq` làm nguồn.
 
 Dữ liệu:
 9. `dashboard.json` được đẩy có tập khoá (đệ quy) là tập con của bản `export_dashboard.py --public` mới sinh; `public` là `true`; sự kiện không có `detail`/`link`; không chứa chuỗi giống token.
@@ -40,11 +41,15 @@ Chạy từ gốc tohong-hq. Repo trang: `${TOHONG_DASHBOARD_REPO:-/home/user/to
 
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Bước đẩy (chạy nguyên văn `run:` với git giả): thiếu secret → xanh + `::warning::` + không push; có secret → đúng 1 push `-f` tới `phungrk/tohong-hq-dashboard` nhánh `dashboard-data`, thư mục lúc push chỉ có `dashboard.json` bằng đúng output `--public`; push/commit lỗi → đỏ; không đẩy main; token không vào log | `python3 -I eval/T-145/check_1_workflow.py` |
-| 2 | `DATA_URL` đúng chuỗi mới, không còn đọc raw của tohong-hq, không có `?data=`, trang hiển thị với fixture | `bash eval/T-145/check_2_trang.sh` |
-| 3 | `dashboard.json` đã đẩy không có khoá nào ngoài bản `--public`, `public:true`, không `detail`/`link`, không token | `python3 -I eval/T-145/check_3_cong_khai.py` |
+| 1 | Bước đẩy (chạy nguyên văn `run:` bằng git thật, đo trên ref đích): thiếu secret → xanh + `::warning::` + không push; có secret → đúng 1 push tới `phungrk/tohong-hq-dashboard`; nhánh `dashboard-data` đích có đúng 1 commit, chỉ `dashboard.json` giống từng byte output `--public`, main không đổi; push/commit lỗi → đỏ; không đẩy main; token không vào log | `python3 -I eval/T-145/check_1_workflow.py` |
+| 2 | `DATA_URL` đúng chuỗi mới, không còn đọc raw của tohong-hq, không có `?data=`; trang hiển thị với fixture; chân trang và banner lỗi nhắc nguồn mới; `#live` nối tohong-live và `?live=` còn tác dụng | `bash eval/T-145/check_2_trang.sh` |
+| 3 | `dashboard.json` trên nhánh đích không có khoá nào ngoài bản `--public`, `public:true`, không `detail`/`link`, không token | `python3 -I eval/T-145/check_3_cong_khai.py` |
+| 4 | README của repo trang nói nguồn dữ liệu là `tohong-hq-dashboard` | `python3 -I eval/T-145/check_4_readme.py` |
 
-Ghi chú eval: `eval/T-145/_wf.py` là thư viện dùng chung (không phải eval). Biến `T145_WORKFLOW` cho phép trỏ tới bản workflow khác để thử. Eval đã được thử trên workflow mẫu (xanh) và 6 bản hỏng (đỏ: đẩy main, thiếu exit 0, sai repo, đẩy cả 4 file, `|| true`, `set -x`).
+Ghi chú eval: `eval/T-145/_wf.py` là thư viện dùng chung (không phải eval). Eval 1 và 3 chạy nguyên văn `run:` bằng git THẬT; URL đẩy được chuyển sang một bare repo cục bộ qua `GIT_CONFIG_COUNT` (`url.<bare>.insteadOf`), HOME giả không có `user.email` (kèm `user.useConfigOnly`), wrapper mỏng ghi argv và tiêm lỗi `commit`/`push`; đo trên ref đích. Token thử sinh lúc chạy (không có chuỗi khớp `_shared/inv-001` trong mã nguồn). `T145_WORKFLOW` trỏ tới bản workflow khác để thử. Đã thử: bản mẫu xanh; đỏ với các bản đẩy main, thiếu `exit 0`, sai repo, `|| true`, `set -x`, và ba bản D1 (commit rồi xoá file, `git init` không `-b`, thiếu git config).
+
+## Sửa sau Spec Gate (v2, D1)
+- INV-001: token thử trong eval nay ghép lúc chạy. Câu 3: bỏ mô tả "thư mục lúc push" (có ba cách hiểu a/b/c), thay bằng kết quả trên ref đích. Câu 6, 7: thêm kiểm dương cho chân trang, banner, `#live`, `?live=`. Câu 8b + eval 4 mới cho README.
 
 ## Bất biến đề xuất (tầng 2)
 - hq/dashboard: "mọi bước workflow đẩy dữ liệu ra repo/nhánh công khai chỉ đẩy đúng `dashboard.json` bản `--public`, không đẩy main, thiếu secret thì xanh + `::warning::`" — rút từ `check_1_workflow.py` + `check_3_cong_khai.py` (chạy với workflow thật, không cần repo trang).
