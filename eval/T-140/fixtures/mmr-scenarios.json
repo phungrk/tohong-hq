@@ -1,0 +1,6 @@
+{"note":"Kịch bản ghim λ MMR (eval 9): 8 photographer rating 0, có style tag, giá admin priceMax khác nhau; ngân sách 10tr, cặp đôi không chọn gu (R8 không tác động). Mỗi kịch bản cho top 5 KHÁC NHAU khi λ=0,2/0,25/0,27/0,33/0,35/0,4 so với 0,3 (đã tìm bằng tìm kiếm ngẫu nhiên trên pool đông cứng; eval tự kiểm lại tính nhạy này mỗi lần chạy).",
+"scenarios":[
+{"ids":["marry_b39a9839937e","marry_791411bd9e4e","marry_ef482a63a2de","marry_a58fea2f7d2e","marry_cc6b9bdeeac7","marry_d54961fc418a","marry_96dbd3a44a24","marry_9030059c52cc"],"priceMax":[10.2,10.3,10.4,10.4,11.1,11,10.6,10]},
+{"ids":["marry_cc6b9bdeeac7","marry_96dbd3a44a24","marry_a58fea2f7d2e","marry_244178239640","marry_b39a9839937e","marry_d54961fc418a","marry_9030059c52cc","marry_ef482a63a2de"],"priceMax":[10.1,10.5,10.2,10.6,11,10.3,10.2,10.1]},
+{"ids":["marry_cc6b9bdeeac7","marry_9030059c52cc","marry_a58fea2f7d2e","marry_ef482a63a2de","marry_244178239640","marry_d54961fc418a","marry_b39a9839937e","marry_791411bd9e4e"],"priceMax":[10.2,10.1,10.9,10.2,11,10.5,10.8,10.4]}
+]}
