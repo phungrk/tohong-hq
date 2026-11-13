@@ -1,6 +1,6 @@
 {
   "task": "T-150",
-  "at": "2026-11-13T22:29",
+  "at": "2026-11-13T22:31",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_4_quyen_chi_tiet.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 175,
+      "ms": 245,
       "out": "FAIL admin không phải Capu (CAPU_USER_IDS rỗng) · GET …/<id>/detail -> 200 và thân giống Capu [[403,\"{\\\"error\\\":\\\"forbidden\\\"}\"]] (+20 lỗi nữa)",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_3_api_chi_tiet.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 626,
+      "ms": 607,
       "out": "FAIL field_notes đúng cho mọi vendor trong pool có nguồn (867 vendor) [[\"marry_bf43aee36047\",\"[{\\\"field\\\":\\\"rating\\\",\\\"code\\\":\\\"kept_from_base\\\",\\\"text\\\":\\\"giữ từ pool nền (ADR-025, --styles-only): nguồn hiện cho 4.3\\\"},{\\\"fiel\",\"[]",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_6_ui_drawer.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 8591,
+      "ms": 9362,
       "out": "ng mở drawer, không ghi gì\n  ok  bấm dòng khác: drawer đổi sang vendor đó (vẫn một drawer)\n  ok  vendor ngoài pool vẫn xem được, \"Ngoài pool\" + lý do bằng lời + dữ liệu nguồn\n  ok  ngoài pool: không có dòng trường pool (vendor null)\n  ok  vendor bị admin ẩn: \"Trong pool · đang ẩn\" + lý do + lớp admin (ẩn, lý do ẩn, giá, xác minh)\n  ok  báo cáo chưa có nguồn: ghi rõ, vẫn hiện phần pool\n  XX  bước thao tác không thực hiện được (thiếu phần tử mà spec yêu cầu?)  :: page.waitForFunction: Timeout 4000ms exceeded.\nFAIL T-150: ghi chú lệch reviews hiện cả khi pool.vendor không có trường reviews (dòng \"reviews —\" rồi ghi chú) [Z — Trường thêm ZZ gia-tri-zz-them Audit: trạng thái đóng cửa none Đầu vào ngoài vendors.json Pool nền (--base) ZZ Ghi chú pool nền ZZ Manifest ảnh ZZ Ghi chú m] (+1 lỗi nữa)",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/T-150/check_4_cau_chu_spec.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 24,
+      "ms": 32,
       "out": "PASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-150/check_5_khong_che_lien_he.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 301,
+      "ms": 327,
       "out": "PASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 158,
+      "ms": 145,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 31,
+      "ms": 30,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 39,
+      "ms": 42,
       "out": "PASS selftest 3 ca; 35 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 884,
+      "ms": 1005,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -92,15 +92,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2352,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-8WWdVO/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2390,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-K4WiUW/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1528,
+      "ms": 1609,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -108,15 +108,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 938,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-WZzgoT/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1188,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-r1YLz0/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2403,
+      "ms": 2302,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 89,
+      "ms": 88,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1453,
+      "ms": 1421,
       "out": "PASS (worker.js nén 770694 byte)",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-001-bao-cao-enrich-phan-hoach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 73,
+      "ms": 60,
       "out": "PASS 870 dòng, 9 nhóm cộng đúng, 366 approvable, ô đếm khớp nhóm",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-002-maps-link-back-nhan-thi-tohong-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 400,
+      "ms": 342,
       "out": "PASS 20 link: mọi link back nhận thì tohong cũng nhận",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-003-bao-cao-enrich-commit-bang-sinh-lai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 410,
+      "ms": 451,
       "out": "PASS 1 báo cáo enrich đã commit bằng đúng byte báo cáo sinh lại",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-004-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 665,
+      "ms": 656,
       "out": "PASS 3 cú bấm của Capu: back ký, tohong nhận, bất biến kiểm được (kể cả mục link sau resolve); review của admin khác không vào",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-005-workflow-du-lieu-di-kem-bao-cao.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 89,
+      "ms": 91,
       "out": "PASS mọi workflow thêm file dữ liệu đều sinh lại và đưa enrich-report.json vào cùng commit",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-006-danh-muc-thuoc-tinh-pool.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 67832,
+      "ms": 70734,
       "out": "PASS",
       "tier": 2
     },
