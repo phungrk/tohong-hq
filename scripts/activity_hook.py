@@ -24,7 +24,9 @@ ACTIONS = {
 
 
 def main():
-    if not os.environ.get("TOHONG_LIVE_URL"):
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import live
+    if not live.live_url():  # env hoặc .claude/settings.json (phiên mở ở thư mục cha)
         return
     data = json.load(sys.stdin)
     agent = data.get("agent_type") or "chief-of-staff"

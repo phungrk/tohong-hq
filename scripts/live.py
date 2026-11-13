@@ -27,8 +27,23 @@ PUBLIC_EVENT_FIELDS = ("id", "t", "task", "title", "event", "from", "to", "round
                        "state", "holder", "owner", "reviewer", "rounds")
 
 
+def live_url():
+    """TOHONG_LIVE_URL từ môi trường; thiếu thì đọc env trong .claude/settings.json của repo.
+
+    Phiên mở ở thư mục cha (vd /home/user) không nạp settings của tohong-hq, nên biến môi
+    trường trống và mọi sự kiện bị bỏ qua im lặng (sự cố 2026-11-07 → 11-13: dashboard đứng).
+    """
+    url = os.environ.get("TOHONG_LIVE_URL", "")
+    if not url:
+        try:
+            url = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8")).get("env", {}).get("TOHONG_LIVE_URL", "")
+        except Exception:
+            url = ""
+    return url.rstrip("/")
+
+
 def _post(payload):
-    url = os.environ.get("TOHONG_LIVE_URL", "").rstrip("/")
+    url = live_url()
     token = os.environ.get("TOHONG_LIVE_TOKEN", "")
     if not url:
         return
@@ -45,7 +60,7 @@ def _post(payload):
 
 def emit(payload):
     """Gửi một payload. Không chặn, không ném lỗi."""
-    if not os.environ.get("TOHONG_LIVE_URL"):
+    if not live_url():
         return
     try:
         if os.environ.get("TOHONG_LIVE_SYNC") == "1":
