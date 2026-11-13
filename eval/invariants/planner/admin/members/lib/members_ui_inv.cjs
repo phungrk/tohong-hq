@@ -142,6 +142,8 @@ async function scenario(opts = {}) {
   });
   S.base = `http://127.0.0.1:${server.address().port}`;
   await page.goto(`${S.base}/?admin`);
+  // ADR-086: điều hướng tới tab Thành viên bằng cách bấm tab, không giả định đó là tab mặc định (T-153 đổi mặc định sang Dữ liệu vendor).
+  { const tab = page.getByRole('button', { name: /^Thành viên/ }).first(); await tab.waitFor({ timeout: 8000 }).catch(() => {}); if (await tab.count()) await tab.click(); }
   S.title0 = await page.title();
   S.region = page.getByRole('region', { name: 'Danh sách thành viên' });
   S.rows = () => S.region.getByRole('listitem');
