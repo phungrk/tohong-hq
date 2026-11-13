@@ -71,7 +71,8 @@ gcloud storage rm gs://wedding-planner-vendors/vendors.json gs://wedding-planner
 #    Không xác định được (scrape-vendors không in email service account ra log) thì giữ binding: thừa quyền, không hỏng gì.
 #    Gỡ nhầm thì bước tải vendors/vendors.json của scrape-vendors lỗi mà không báo (rơi về vendors rỗng), mất vendor cũ và vẫn tốn tiền enrich Google.
 #    Nếu Capu đã khẳng định service account khác thì mới gỡ đúng binding objectUser Capu cấp cho T-138 (trước đó gha-deployer không có quyền list, theo log 403 run 43342201548), không gỡ binding nào khác:
-gcloud storage buckets remove-iam-policy-binding gs://wedding-planner-vendors --member=serviceAccount:<EMAIL gha-deployer> --role=roles/storage.objectUser
+# CHỈ bỏ dấu # khi đã khẳng định GCP_SA_KEY của tohong KHÔNG phải gha-deployer:
+# gcloud storage buckets remove-iam-policy-binding gs://wedding-planner-vendors --member=serviceAccount:<EMAIL gha-deployer> --role=roles/storage.objectUser
 # 5. Secret trên GitHub của tohong-back (GCP_SA_KEY và GCP_PROJECT_ID chỉ hai workflow đã xoá dùng; kiểm lại trước khi xoá)
 gh secret delete MATCHER_URL --repo phungrk/tohong-back
 gh secret delete MATCHER_API_KEY --repo phungrk/tohong-back
