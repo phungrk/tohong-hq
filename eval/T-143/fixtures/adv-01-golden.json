@@ -1,0 +1,805 @@
+{
+ "from": "tohong-back main @ 77ea5e8",
+ "cases": [
+  {
+   "label": "none GET /api/vendors/match?category=",
+   "status": 200,
+   "sha256": "2cf408b98660bdea78ae9ea24f1bdbe828788d4ad921f7f51a33a455e4963ef5"
+  },
+  {
+   "label": "none GET /api/vendors/match?category=photography",
+   "status": 200,
+   "sha256": "cffd0dcbce08f45c5aded7fd7aec2276b4ccbc8fe672fdbecbab55f5f966cebb"
+  },
+  {
+   "label": "none GET /api/vendors/match?category=makeup",
+   "status": 200,
+   "sha256": "7701a750570b8f2fbccabe19bf3eca1d8df75aedf9915c8d4ae4dd9d7b06b67a"
+  },
+  {
+   "label": "none GET /api/vendors/match?category=venue",
+   "status": 200,
+   "sha256": "a26a1057a97f5d1533fedca6bd7098b731ac493175ca1f66d8481f8d2de5c659"
+  },
+  {
+   "label": "none GET /api/vendors/match?category=stationery",
+   "status": 200,
+   "sha256": "1dd5ea08d53a544d8a6bd7d7c0a858a3d7ca1ff7e85d1d3a851c846f0ed2296a"
+  },
+  {
+   "label": "none GET /api/vendors/match?category=khong-co",
+   "status": 200,
+   "sha256": "8001e99f65aa7b8aea38608adc2d14860053cebbdd5912a1277316b8780ede4a"
+  },
+  {
+   "label": "none GET /api/vendors/match?category=photography&limit=5&offset=5",
+   "status": 200,
+   "sha256": "292a271dea92037728394d8d3f2edcbebc70a8f7a0f474b2813d2ef482a080aa"
+  },
+  {
+   "label": "none GET /api/vendors/match?category=photography&limit=999",
+   "status": 200,
+   "sha256": "a04652102fe494a45e86204d23c1cf96cb581fbdaccd4cf849bb1139cc81b76c"
+  },
+  {
+   "label": "none GET /api/vendors/match?category=photography&limit=abc&offset=-3",
+   "status": 200,
+   "sha256": "fe329909ddb2b76e7797f82f640d7ada39993289539ec12f09ece41eeb32fb4c"
+  },
+  {
+   "label": "none GET /api/vendors/match?category=photography&minScore=60",
+   "status": 200,
+   "sha256": "cc8cbe668756a1d3b9b0384bc81e675a5afedbc7fdc35b227a3adb48f0adc159"
+  },
+  {
+   "label": "none GET /api/vendors/match?category=photography&minScore=abc&offset=10000",
+   "status": 200,
+   "sha256": "5cea89ed7da50050a98d60aed0f10a419901780861b34e7d7a8561fd469217d1"
+  },
+  {
+   "label": "none GET /api/vendors/categories?",
+   "status": 200,
+   "sha256": "4545932b038d08150037dfa1a2ff8fdb5e617aa07f4cb49c30146275ac3959a6"
+  },
+  {
+   "label": "none GET /api/vendors/marry_1531956f45c5",
+   "status": 200,
+   "sha256": "245e82e47de0e476b802345eb454a1fd8de037091a80b2264581d12cc2ace10e"
+  },
+  {
+   "label": "none GET /api/vendors/marry_8d5a5ec4d7df",
+   "status": 200,
+   "sha256": "2bd9d8cefadd04f1d37f3027137cb60a52ece275bda2e3b34322305d8b3858ff"
+  },
+  {
+   "label": "none GET /api/vendors/khong_ton_tai",
+   "status": 404,
+   "sha256": "cce749a0de586b2d9a8ddf8a362277ece6b709bb862609a8745a40c8791d5f29"
+  },
+  {
+   "label": "none POST /api/vendors/status",
+   "status": 200,
+   "sha256": "650b2cfe7936603f8c160b919129a93bda3c9021f13284870b2895b7c52ac9c8"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=",
+   "status": 200,
+   "sha256": "88506a47fb5ddda560312664893c326e805e9471f29a6f1a29b86946554e795e"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=photography",
+   "status": 200,
+   "sha256": "6c321ea3f95a55226544b7bdd8ea8675258b2f27ebcb5ac7b9dd7271ff101e88"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=makeup",
+   "status": 200,
+   "sha256": "d5905a7d1cac80118a14ffb6a40bc99cdfef18b19073a25dc8d0ead828799556"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=venue",
+   "status": 200,
+   "sha256": "a26a1057a97f5d1533fedca6bd7098b731ac493175ca1f66d8481f8d2de5c659"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=stationery",
+   "status": 200,
+   "sha256": "1dd5ea08d53a544d8a6bd7d7c0a858a3d7ca1ff7e85d1d3a851c846f0ed2296a"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=khong-co",
+   "status": 200,
+   "sha256": "8001e99f65aa7b8aea38608adc2d14860053cebbdd5912a1277316b8780ede4a"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=photography&limit=5&offset=5",
+   "status": 200,
+   "sha256": "7ce404e9005c103f0f1ce96459f9633d11184a59feb8bdc63af290e02a9d8dbe"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=photography&limit=999",
+   "status": 200,
+   "sha256": "c5327de8b004c024721e7be936b39fcce755599f721923afaf1f0a28fd685e50"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=photography&limit=abc&offset=-3",
+   "status": 200,
+   "sha256": "680c87c70cd67f9e9b14571d1e6b19fae1baa4c4e2e3713ff41fd2c5099e8d83"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=photography&minScore=60",
+   "status": 200,
+   "sha256": "19af19c2151309567a981a4f42e093b3b32f29f258e9ed3556a4d0f1b6a50a20"
+  },
+  {
+   "label": "none+ov GET /api/vendors/match?category=photography&minScore=abc&offset=10000",
+   "status": 200,
+   "sha256": "8066d8481bb6f225dcb4d9890505781dc0a6525d53bb85769157d64348953a0f"
+  },
+  {
+   "label": "none+ov GET /api/vendors/categories?",
+   "status": 200,
+   "sha256": "7ab86aecb4fbdd0928f4ff4bb4103ba88cd2ec4da277b79350bfa7e87e4978e1"
+  },
+  {
+   "label": "none+ov GET /api/vendors/marry_1531956f45c5",
+   "status": 200,
+   "sha256": "b35f3ca6cbe905657f88de4e31a8791e0ae3c4702d3009429dd9e5d20f6ae3e1"
+  },
+  {
+   "label": "none+ov GET /api/vendors/marry_8d5a5ec4d7df",
+   "status": 200,
+   "sha256": "f3dff6e63ee81bf7289e45d98b04de996dfb6308963d6acdba0792d62743bf0c"
+  },
+  {
+   "label": "none+ov GET /api/vendors/khong_ton_tai",
+   "status": 404,
+   "sha256": "cce749a0de586b2d9a8ddf8a362277ece6b709bb862609a8745a40c8791d5f29"
+  },
+  {
+   "label": "none+ov POST /api/vendors/status",
+   "status": 200,
+   "sha256": "e05e811a6b2fb107a4794538abf132070d3dfb805dc2b866f63aeca300ff9ed3"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=",
+   "status": 200,
+   "sha256": "2b6524be2a481be0f27f12fa79efea1e292529ec67ef351493bb26e629fa6e64"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography",
+   "status": 200,
+   "sha256": "fdc5865c65e9547b0c74f74b252ba5a1eaf4d31ef10db43160c7c611986c74a7"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=makeup",
+   "status": 200,
+   "sha256": "68cf7bb152ed3be731eba086447991ce306748f436a478b1fa4b7bb7eba2840b"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=venue",
+   "status": 200,
+   "sha256": "00de9b58ae6ed8a47dd37dd06b96201f7b0e3bcb049d747b3a42fed083f2a620"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=stationery",
+   "status": 200,
+   "sha256": "0945f859fb909f77db095d0549d7f3be60126f024288890e75e7454cacc69c0b"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=khong-co",
+   "status": 200,
+   "sha256": "948660780475a5abd3bddfec419a514e1e02448e284888e36c678d14685901a3"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=5&offset=5",
+   "status": 200,
+   "sha256": "4d5d72054696a0654d9a8acaf57f9ac7d3a8d459c684238c66fb897e6a263e34"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=999",
+   "status": 200,
+   "sha256": "09bd218ba227694e0084cff7a116463066af8d36e763d356a048f677e2c19fdd"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=abc&offset=-3",
+   "status": 200,
+   "sha256": "c199d69c69f1a2265e486d16d382218b2571973bfe68954678e9e21574812e00"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=60",
+   "status": 200,
+   "sha256": "41b2eca0b1ee3eeb64cef21c5ac8c1011c3e8bfb549445347af0a228703e2e4f"
+  },
+  {
+   "label": "full GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=abc&offset=10000",
+   "status": 200,
+   "sha256": "2ef55941c123e7f1e47fbd8d294f1072d5500d967345a4cf8747f731fb2298d0"
+  },
+  {
+   "label": "full GET /api/vendors/categories?coupleId=couple_20260604_q4m3st&",
+   "status": 200,
+   "sha256": "4545932b038d08150037dfa1a2ff8fdb5e617aa07f4cb49c30146275ac3959a6"
+  },
+  {
+   "label": "full GET /api/vendors/marry_1531956f45c5",
+   "status": 200,
+   "sha256": "245e82e47de0e476b802345eb454a1fd8de037091a80b2264581d12cc2ace10e"
+  },
+  {
+   "label": "full GET /api/vendors/marry_8d5a5ec4d7df",
+   "status": 200,
+   "sha256": "2bd9d8cefadd04f1d37f3027137cb60a52ece275bda2e3b34322305d8b3858ff"
+  },
+  {
+   "label": "full GET /api/vendors/khong_ton_tai",
+   "status": 404,
+   "sha256": "cce749a0de586b2d9a8ddf8a362277ece6b709bb862609a8745a40c8791d5f29"
+  },
+  {
+   "label": "full POST /api/vendors/status",
+   "status": 200,
+   "sha256": "650b2cfe7936603f8c160b919129a93bda3c9021f13284870b2895b7c52ac9c8"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=",
+   "status": 200,
+   "sha256": "c5788fc6de35555cf710e68bb101af00245d2e8a2aadc2bde81b97e83adde0e7"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography",
+   "status": 200,
+   "sha256": "ee1b3f29d3d31952c52798e7df6541d28fc8cdd83943bcba14607f1476203714"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=makeup",
+   "status": 200,
+   "sha256": "11bb7c26de4dcaaf8c7ad80fbaa62ca0b7fec91cff0f112987602ca5d936b127"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=venue",
+   "status": 200,
+   "sha256": "00de9b58ae6ed8a47dd37dd06b96201f7b0e3bcb049d747b3a42fed083f2a620"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=stationery",
+   "status": 200,
+   "sha256": "0945f859fb909f77db095d0549d7f3be60126f024288890e75e7454cacc69c0b"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=khong-co",
+   "status": 200,
+   "sha256": "948660780475a5abd3bddfec419a514e1e02448e284888e36c678d14685901a3"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=5&offset=5",
+   "status": 200,
+   "sha256": "24f2af63a6927ee5000935f69d05a9b49819092c399df7ba5eed643e10fe5582"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=999",
+   "status": 200,
+   "sha256": "6be7bba0e01fbd7a2260066d1ab1446e0ea16607ae778ee4a87946b3793b1889"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=abc&offset=-3",
+   "status": 200,
+   "sha256": "8798f009f4779cfdafcf9319df8f66327c92eff8988cd6280cdd4bfc0c7edeb1"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=60",
+   "status": 200,
+   "sha256": "bb8c5dbfe19304bd4ad69351b97381fa8ad454d331170e43e6f7e2f223927aae"
+  },
+  {
+   "label": "full+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=abc&offset=10000",
+   "status": 200,
+   "sha256": "cd96f1d4064fccd7d28b62f500ff0837344f71a91a9c5b953e5fa8c80e692bec"
+  },
+  {
+   "label": "full+ov GET /api/vendors/categories?coupleId=couple_20260604_q4m3st&",
+   "status": 200,
+   "sha256": "7ab86aecb4fbdd0928f4ff4bb4103ba88cd2ec4da277b79350bfa7e87e4978e1"
+  },
+  {
+   "label": "full+ov GET /api/vendors/marry_1531956f45c5",
+   "status": 200,
+   "sha256": "b35f3ca6cbe905657f88de4e31a8791e0ae3c4702d3009429dd9e5d20f6ae3e1"
+  },
+  {
+   "label": "full+ov GET /api/vendors/marry_8d5a5ec4d7df",
+   "status": 200,
+   "sha256": "f3dff6e63ee81bf7289e45d98b04de996dfb6308963d6acdba0792d62743bf0c"
+  },
+  {
+   "label": "full+ov GET /api/vendors/khong_ton_tai",
+   "status": 404,
+   "sha256": "cce749a0de586b2d9a8ddf8a362277ece6b709bb862609a8745a40c8791d5f29"
+  },
+  {
+   "label": "full+ov POST /api/vendors/status",
+   "status": 200,
+   "sha256": "e05e811a6b2fb107a4794538abf132070d3dfb805dc2b866f63aeca300ff9ed3"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=",
+   "status": 200,
+   "sha256": "0c84ee5db8beb5a20f805eaaba800d7408d25dd34b3ce5b88a910e13ae623be4"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography",
+   "status": 200,
+   "sha256": "ff4a57f0563071c1d35de7e4d37e167e8433ddf964b0c49da22d091813169799"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=makeup",
+   "status": 200,
+   "sha256": "76390f7b538fffc14c44fcf3020f7002c9d504e5038d80c65cba9948d0d225d2"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=venue",
+   "status": 200,
+   "sha256": "6e43fbe353373cdb7910a6fb06999491b0910f6287b68955077633a3dda32866"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=stationery",
+   "status": 200,
+   "sha256": "69e1cc2a72f0a87bcae681f900304082c046de6c522e97c2623a5dbdcee557cc"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=khong-co",
+   "status": 200,
+   "sha256": "eea4ae2f81b068942ba6ec9b9c7f8683b7c7fad0f43aa279d413ab3069ff4c9a"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=5&offset=5",
+   "status": 200,
+   "sha256": "675bc1c37571fbac1b23a2f01d14f910d2d58f980dbb6e752ecc2ba1df563043"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=999",
+   "status": 200,
+   "sha256": "c9daa9b499bc59daa82056834725165937b8b8ae7d8926844dd9ee5e7ac2246d"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=abc&offset=-3",
+   "status": 200,
+   "sha256": "0c014494b3ad1adafeb7b1d758c1f06e9119437534566a107435db5b5ea0165e"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=60",
+   "status": 200,
+   "sha256": "446ad14e8cb4bf7d591d44d35b6d1c0e80320ec7c67e3faece0c08d13667adb1"
+  },
+  {
+   "label": "hanoi GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=abc&offset=10000",
+   "status": 200,
+   "sha256": "633173aa9c8376ed65e1cca0057047886e341cad0641ab1b49a930139bb3786a"
+  },
+  {
+   "label": "hanoi GET /api/vendors/categories?coupleId=couple_20260604_q4m3st&",
+   "status": 200,
+   "sha256": "809f6edf88e24a3c127606c56fe8a946f21258f35e1b4a42d74c9eadd94e873e"
+  },
+  {
+   "label": "hanoi GET /api/vendors/marry_1531956f45c5",
+   "status": 200,
+   "sha256": "245e82e47de0e476b802345eb454a1fd8de037091a80b2264581d12cc2ace10e"
+  },
+  {
+   "label": "hanoi GET /api/vendors/marry_8d5a5ec4d7df",
+   "status": 200,
+   "sha256": "2bd9d8cefadd04f1d37f3027137cb60a52ece275bda2e3b34322305d8b3858ff"
+  },
+  {
+   "label": "hanoi GET /api/vendors/khong_ton_tai",
+   "status": 404,
+   "sha256": "cce749a0de586b2d9a8ddf8a362277ece6b709bb862609a8745a40c8791d5f29"
+  },
+  {
+   "label": "hanoi POST /api/vendors/status",
+   "status": 200,
+   "sha256": "650b2cfe7936603f8c160b919129a93bda3c9021f13284870b2895b7c52ac9c8"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=",
+   "status": 200,
+   "sha256": "ec3091ac8e51e69acb158e6cf2f438092800f6e9357f331dd725f94239d7897c"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography",
+   "status": 200,
+   "sha256": "ad1e753c733d94cf83c7e388f3fc958ef7a3ee9b521d663b0e332a65cf14d963"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=makeup",
+   "status": 200,
+   "sha256": "b20fa924a7ce8133c5598a719e7fb471eb91e9559499899852f2915c5701910f"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=venue",
+   "status": 200,
+   "sha256": "6e43fbe353373cdb7910a6fb06999491b0910f6287b68955077633a3dda32866"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=stationery",
+   "status": 200,
+   "sha256": "69e1cc2a72f0a87bcae681f900304082c046de6c522e97c2623a5dbdcee557cc"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=khong-co",
+   "status": 200,
+   "sha256": "eea4ae2f81b068942ba6ec9b9c7f8683b7c7fad0f43aa279d413ab3069ff4c9a"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=5&offset=5",
+   "status": 200,
+   "sha256": "175f04fb2980d5e716633e2aae3cd7cfd378749d2a8643337dd0c2a8297bd3ab"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=999",
+   "status": 200,
+   "sha256": "204e2c541fc4fb0b3e4d70bf83da3b421bd688d03aaaed31a840fa6d57a6c277"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=abc&offset=-3",
+   "status": 200,
+   "sha256": "77da1cb3828036c15fb8e4786ad7ae2b5739207d8de4d3070dcf561f5b1b3374"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=60",
+   "status": 200,
+   "sha256": "6154b01acec5163faaa1d689e814a84b424f828502614c40f5be6e54a21629a6"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=abc&offset=10000",
+   "status": 200,
+   "sha256": "502d589de922a3a17843a3638c009e8a56baea69cfcabd4ec00bfe8ad05d6c4d"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/categories?coupleId=couple_20260604_q4m3st&",
+   "status": 200,
+   "sha256": "809f6edf88e24a3c127606c56fe8a946f21258f35e1b4a42d74c9eadd94e873e"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/marry_1531956f45c5",
+   "status": 200,
+   "sha256": "b35f3ca6cbe905657f88de4e31a8791e0ae3c4702d3009429dd9e5d20f6ae3e1"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/marry_8d5a5ec4d7df",
+   "status": 200,
+   "sha256": "f3dff6e63ee81bf7289e45d98b04de996dfb6308963d6acdba0792d62743bf0c"
+  },
+  {
+   "label": "hanoi+ov GET /api/vendors/khong_ton_tai",
+   "status": 404,
+   "sha256": "cce749a0de586b2d9a8ddf8a362277ece6b709bb862609a8745a40c8791d5f29"
+  },
+  {
+   "label": "hanoi+ov POST /api/vendors/status",
+   "status": 200,
+   "sha256": "e05e811a6b2fb107a4794538abf132070d3dfb805dc2b866f63aeca300ff9ed3"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=",
+   "status": 200,
+   "sha256": "dc9dc5ca289997568539bd5f35e1252fe581382f2607cf93f4f63bd36fd19174"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography",
+   "status": 200,
+   "sha256": "51a4af43529b42f93c794dd3463645dff6f157231281b6540a1503c7ea92e92d"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=makeup",
+   "status": 200,
+   "sha256": "cfd4e6579c7eea564b9019c153350c0dc83044a5e433183a37aa9c3a2c404268"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=venue",
+   "status": 200,
+   "sha256": "95de28b487c12203118a4f57c6a0cdeeb54492c015400a1242e42b1774191618"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=stationery",
+   "status": 200,
+   "sha256": "3f21910abea9c42f5f5c8da8b862d32bc100e4ecca1d12ed14ef26e2f1847f9b"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=khong-co",
+   "status": 200,
+   "sha256": "b5632ba529cc8e3c1884049684242454fd0ee7b1bdf3188645130ea38a512254"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=5&offset=5",
+   "status": 200,
+   "sha256": "e6a06c9d8710c1fc19ca45080857f5b7480d3f290edde114bbc57e427d3c90e7"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=999",
+   "status": 200,
+   "sha256": "2e3fd20bcd1bb34c9a5dcd54056202c054bcc19f59779ecd549679a1dc69f314"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=abc&offset=-3",
+   "status": 200,
+   "sha256": "1240527c04a93d1f1477d4eea68445f0c80d84745296c66ad90e88fec69a02d6"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=60",
+   "status": 200,
+   "sha256": "b5632ba529cc8e3c1884049684242454fd0ee7b1bdf3188645130ea38a512254"
+  },
+  {
+   "label": "rac GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=abc&offset=10000",
+   "status": 200,
+   "sha256": "6f773b45b35c437377d149cb46011e1fdf9d68a014f51f784d667d4967f87178"
+  },
+  {
+   "label": "rac GET /api/vendors/categories?coupleId=couple_20260604_q4m3st&",
+   "status": 200,
+   "sha256": "4545932b038d08150037dfa1a2ff8fdb5e617aa07f4cb49c30146275ac3959a6"
+  },
+  {
+   "label": "rac GET /api/vendors/marry_1531956f45c5",
+   "status": 200,
+   "sha256": "245e82e47de0e476b802345eb454a1fd8de037091a80b2264581d12cc2ace10e"
+  },
+  {
+   "label": "rac GET /api/vendors/marry_8d5a5ec4d7df",
+   "status": 200,
+   "sha256": "2bd9d8cefadd04f1d37f3027137cb60a52ece275bda2e3b34322305d8b3858ff"
+  },
+  {
+   "label": "rac GET /api/vendors/khong_ton_tai",
+   "status": 404,
+   "sha256": "cce749a0de586b2d9a8ddf8a362277ece6b709bb862609a8745a40c8791d5f29"
+  },
+  {
+   "label": "rac POST /api/vendors/status",
+   "status": 200,
+   "sha256": "650b2cfe7936603f8c160b919129a93bda3c9021f13284870b2895b7c52ac9c8"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=",
+   "status": 200,
+   "sha256": "1d89335a840dd471f1b395a2efee30927b498ed0e4850c3923745bacfb12657c"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography",
+   "status": 200,
+   "sha256": "bcb438c2e0515c1693aae301f6fecc45941a8ed6dcbccc7957c097e6bc70e239"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=makeup",
+   "status": 200,
+   "sha256": "0c2f16b50700ca7cf491aee498a750a5753509c31c85bd8cc53cf695db5135a0"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=venue",
+   "status": 200,
+   "sha256": "95de28b487c12203118a4f57c6a0cdeeb54492c015400a1242e42b1774191618"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=stationery",
+   "status": 200,
+   "sha256": "3f21910abea9c42f5f5c8da8b862d32bc100e4ecca1d12ed14ef26e2f1847f9b"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=khong-co",
+   "status": 200,
+   "sha256": "b5632ba529cc8e3c1884049684242454fd0ee7b1bdf3188645130ea38a512254"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=5&offset=5",
+   "status": 200,
+   "sha256": "7c1e4aff8eac6c0487cb85c77eae5d0d7ccffa43c6e9b75df3582e07ef3771b2"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=999",
+   "status": 200,
+   "sha256": "def9269590efa223390c9f9090963f7281d782082bce987a237cb2c982b99eb3"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=abc&offset=-3",
+   "status": 200,
+   "sha256": "ec3fc99b869d9359baddf6188f65f529f562c25a19cbd6b033ff46cd492af3dd"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=60",
+   "status": 200,
+   "sha256": "b5632ba529cc8e3c1884049684242454fd0ee7b1bdf3188645130ea38a512254"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=abc&offset=10000",
+   "status": 200,
+   "sha256": "4a649ec915e0ee12163f42311dc06bfdfd073d94bb4286d7b8165c364a294e12"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/categories?coupleId=couple_20260604_q4m3st&",
+   "status": 200,
+   "sha256": "7ab86aecb4fbdd0928f4ff4bb4103ba88cd2ec4da277b79350bfa7e87e4978e1"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/marry_1531956f45c5",
+   "status": 200,
+   "sha256": "b35f3ca6cbe905657f88de4e31a8791e0ae3c4702d3009429dd9e5d20f6ae3e1"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/marry_8d5a5ec4d7df",
+   "status": 200,
+   "sha256": "f3dff6e63ee81bf7289e45d98b04de996dfb6308963d6acdba0792d62743bf0c"
+  },
+  {
+   "label": "rac+ov GET /api/vendors/khong_ton_tai",
+   "status": 404,
+   "sha256": "cce749a0de586b2d9a8ddf8a362277ece6b709bb862609a8745a40c8791d5f29"
+  },
+  {
+   "label": "rac+ov POST /api/vendors/status",
+   "status": 200,
+   "sha256": "e05e811a6b2fb107a4794538abf132070d3dfb805dc2b866f63aeca300ff9ed3"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=",
+   "status": 200,
+   "sha256": "f038c1ade58aa3069a8172e61794e5da3084ca7d19f52bdab74a69eff3f08038"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography",
+   "status": 200,
+   "sha256": "11d3f97bec950c0dcf16e8ca804a50920db8773c1bf8b805ee1e4c161058b48c"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=makeup",
+   "status": 200,
+   "sha256": "a79bf917e096b6b5bc34388547baf66d7a169607e4f0c4fcace18818b227e178"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=venue",
+   "status": 200,
+   "sha256": "6726f9252c1ac0ca2f65ed9e26d4bb9b8d563d07f94ddd22b8ff690ec9900f4a"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=stationery",
+   "status": 200,
+   "sha256": "d2bd563caa1ff6bed5e9dfb25b1a067e52ce42579dd1220f289df62c11961506"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=khong-co",
+   "status": 200,
+   "sha256": "1e40463ee5e9257a6f0d4d3d7b8a050365b8e081768dd1161b660841e8bab0f7"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=5&offset=5",
+   "status": 200,
+   "sha256": "5984b27469cc259a6d01c3e13185cad6ca8a8066ed47c0a0cc1cc2bae9b0ea11"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=999",
+   "status": 200,
+   "sha256": "8f7559c9ca40a978e0d7f50daf540406b50ebc678d3509078188daa2f49101c3"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=abc&offset=-3",
+   "status": 200,
+   "sha256": "634d1b31663f7492904d2df704bda0aece3b853f65d181f106ea5d442e0d07ff"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=60",
+   "status": 200,
+   "sha256": "a9fb61bef84e6bcfb7dd0f728da35a28253062ea4a41b3ce23dfeac1adf0a183"
+  },
+  {
+   "label": "am GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=abc&offset=10000",
+   "status": 200,
+   "sha256": "3f9670d113d69f2cd9c816dca84d401c40b8ed0ef8f1ca4eee064ea05516157d"
+  },
+  {
+   "label": "am GET /api/vendors/categories?coupleId=couple_20260604_q4m3st&",
+   "status": 200,
+   "sha256": "4545932b038d08150037dfa1a2ff8fdb5e617aa07f4cb49c30146275ac3959a6"
+  },
+  {
+   "label": "am GET /api/vendors/marry_1531956f45c5",
+   "status": 200,
+   "sha256": "245e82e47de0e476b802345eb454a1fd8de037091a80b2264581d12cc2ace10e"
+  },
+  {
+   "label": "am GET /api/vendors/marry_8d5a5ec4d7df",
+   "status": 200,
+   "sha256": "2bd9d8cefadd04f1d37f3027137cb60a52ece275bda2e3b34322305d8b3858ff"
+  },
+  {
+   "label": "am GET /api/vendors/khong_ton_tai",
+   "status": 404,
+   "sha256": "cce749a0de586b2d9a8ddf8a362277ece6b709bb862609a8745a40c8791d5f29"
+  },
+  {
+   "label": "am POST /api/vendors/status",
+   "status": 200,
+   "sha256": "650b2cfe7936603f8c160b919129a93bda3c9021f13284870b2895b7c52ac9c8"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=",
+   "status": 200,
+   "sha256": "f65494bb92c4d214d08d976f28ac0cd625ff65041f11338f8fabf65960c7adba"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography",
+   "status": 200,
+   "sha256": "36c7fb979e59104d2286e3b49c1ead85ec98c3869005cbd70b40b3e7eea24151"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=makeup",
+   "status": 200,
+   "sha256": "1b16130392e9b73bb52cffbb0584613c7c9dadabe4911647f6923292cb76b6eb"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=venue",
+   "status": 200,
+   "sha256": "6726f9252c1ac0ca2f65ed9e26d4bb9b8d563d07f94ddd22b8ff690ec9900f4a"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=stationery",
+   "status": 200,
+   "sha256": "d2bd563caa1ff6bed5e9dfb25b1a067e52ce42579dd1220f289df62c11961506"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=khong-co",
+   "status": 200,
+   "sha256": "1e40463ee5e9257a6f0d4d3d7b8a050365b8e081768dd1161b660841e8bab0f7"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=5&offset=5",
+   "status": 200,
+   "sha256": "64f9396fd8223ab8d9e4262daeb0ad67124facde9d27799b17fa225734f8794d"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=999",
+   "status": 200,
+   "sha256": "3b6cf6eb81601ef2f1a9be0c71e2a91329ffddc5fde59de3e9250d7a64869d00"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&limit=abc&offset=-3",
+   "status": 200,
+   "sha256": "0cbe398004800c903b98c7c670b0aa724e051c7d1496d49b692d9ad8b34badee"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=60",
+   "status": 200,
+   "sha256": "0d3894e30447633fa302aed0432cec22ea78471322fbd585c5987674ab7055aa"
+  },
+  {
+   "label": "am+ov GET /api/vendors/match?coupleId=couple_20260604_q4m3st&category=photography&minScore=abc&offset=10000",
+   "status": 200,
+   "sha256": "710ec5276591df6b74a0976dd4f39426d2df4973a87ec76d126db7833a31933f"
+  },
+  {
+   "label": "am+ov GET /api/vendors/categories?coupleId=couple_20260604_q4m3st&",
+   "status": 200,
+   "sha256": "7ab86aecb4fbdd0928f4ff4bb4103ba88cd2ec4da277b79350bfa7e87e4978e1"
+  },
+  {
+   "label": "am+ov GET /api/vendors/marry_1531956f45c5",
+   "status": 200,
+   "sha256": "b35f3ca6cbe905657f88de4e31a8791e0ae3c4702d3009429dd9e5d20f6ae3e1"
+  },
+  {
+   "label": "am+ov GET /api/vendors/marry_8d5a5ec4d7df",
+   "status": 200,
+   "sha256": "f3dff6e63ee81bf7289e45d98b04de996dfb6308963d6acdba0792d62743bf0c"
+  },
+  {
+   "label": "am+ov GET /api/vendors/khong_ton_tai",
+   "status": 404,
+   "sha256": "cce749a0de586b2d9a8ddf8a362277ece6b709bb862609a8745a40c8791d5f29"
+  },
+  {
+   "label": "am+ov POST /api/vendors/status",
+   "status": 200,
+   "sha256": "e05e811a6b2fb107a4794538abf132070d3dfb805dc2b866f63aeca300ff9ed3"
+  }
+ ]
+}
