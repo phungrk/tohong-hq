@@ -335,6 +335,7 @@ def run_job(box, wf, job_name, ctx, uses=None, stop_on_fail=False, only=None):
                        GITHUB_OUTPUT=outf, GITHUB_STEP_SUMMARY=sumf, GITHUB_ENV=os.path.join(box.rt, "gh_env"), CI="true", HTTPS_PROXY="http://127.0.0.1:9", HTTP_PROXY="http://127.0.0.1:9",
                        GOOGLE_MAPS_API_KEY="", GH_TOKEN="", GITHUB_TOKEN="", GH_REPO="", GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
             env.update({k: str(v) for k, v in ctx["env"].items()})
+            for k in ("HTTPS_PROXY", "HTTP_PROXY", "https_proxy", "http_proxy", "ALL_PROXY", "NO_PROXY", "no_proxy"): env.pop(k, None)   # lớp chặn mạng thấy đúng host đích
             for k in ("GH_REPO",):
                 if not env.get(k): env.pop(k, None)
             if not os.path.isdir(cwd):
