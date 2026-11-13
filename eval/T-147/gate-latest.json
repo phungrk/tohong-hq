@@ -1,0 +1,173 @@
+{
+  "task": "T-147",
+  "at": "2026-11-13T14:49",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/admin/vendor-enrich",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-147/check_1_danh_muc_thuoc_tinh_pool.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 60,
+      "out": "FAIL thiếu tools/scraper/pool-input-fields.json (danh mục thuộc tính dùng để tạo vendor pool)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-147/check_2_bao_cao_pool_input.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 68,
+      "out": "FAIL thiếu tools/scraper/pool-input-fields.json (danh mục)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_3_api_chi_tiet.sh",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 386,
+      "out": "FAIL Capu GET detail dòng Enrich 100% -> 200 [[404,\"{\\\"error\\\":\\\"not found\\\"}\"]] (+25 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_4_quyen_chi_tiet.sh",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 231,
+      "out": "FAIL admin không phải Capu (CAPU_USER_IDS rỗng) · GET …/<id>/detail -> 403 forbidden [[404,\"{\\\"error\\\":\\\"not found\\\"}\"]] (+15 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && python3 -I eval/T-147/check_5_bundle_worker.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 4051,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_6_ui_drawer.sh",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 6484,
+      "out": "ok  chưa bấm gì: không có drawer, chưa gọi API chi tiết\n  XX  bước thao tác không thực hiện được (thiếu phần tử mà spec yêu cầu?)  :: locator.waitFor: Timeout 4000ms exceeded.\nFAIL bước thao tác không thực hiện được (thiếu phần tử mà spec yêu cầu?) [locator.waitFor: Timeout 4000ms exceeded.]",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 418,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 184,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 33,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 980,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2645,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-9mYvmS/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1767,
+      "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1226,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-lfgR3O/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2516,
+      "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 110,
+      "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-001-bao-cao-enrich-phan-hoach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 49,
+      "out": "PASS 870 dòng, 9 nhóm cộng đúng, 366 approvable, ô đếm khớp nhóm",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-002-maps-link-back-nhan-thi-tohong-nhan.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 383,
+      "out": "PASS 20 link: mọi link back nhận thì tohong cũng nhận",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-003-bao-cao-enrich-commit-bang-sinh-lai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 225,
+      "out": "PASS 1 báo cáo enrich đã commit bằng đúng byte báo cáo sinh lại",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-004-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 806,
+      "out": "PASS 3 cú bấm của Capu: back ký, tohong nhận, bất biến kiểm được (kể cả mục link sau resolve); review của admin khác không vào",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-005-workflow-du-lieu-di-kem-bao-cao.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 101,
+      "out": "PASS mọi workflow thêm file dữ liệu đều sinh lại và đưa enrich-report.json vào cùng commit",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
