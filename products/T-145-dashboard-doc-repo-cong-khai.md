@@ -51,6 +51,9 @@ Ghi chú eval: `eval/T-145/_wf.py` là thư viện dùng chung (không phải ev
 ## Sửa sau Spec Gate (v2, D1)
 - INV-001: token thử trong eval nay ghép lúc chạy. Câu 3: bỏ mô tả "thư mục lúc push" (có ba cách hiểu a/b/c), thay bằng kết quả trên ref đích. Câu 6, 7: thêm kiểm dương cho chân trang, banner, `#live`, `?live=`. Câu 8b + eval 4 mới cho README.
 
+## Sửa sau Spec Gate (v3, D2)
+- Eval không phụ thuộc cú pháp gọi git: wrapper bỏ qua tuỳ chọn toàn cục (`-C`, `-c`, `--git-dir`, `--work-tree`, `--namespace`, `--exec-path`, cờ đơn) trước lệnh con, nên `git -C "$D" …` và `git -c user.name=… -c user.email=… commit` được đếm/tiêm lỗi đúng. Hai bản mẫu này nằm trong `eval/T-145/mau/` và phải PASS; `selftest_mau.py` chạy cả bộ mẫu (xanh-*/do-*). Mọi URL mạng khác (https, http, ssh, git, `git@github.com:`) bị chuyển vào chỗ không tồn tại và `GIT_SSH_COMMAND=false`. Spec (hành vi) không đổi.
+
 ## Bất biến đề xuất (tầng 2)
 - hq/dashboard: "mọi bước workflow đẩy dữ liệu ra repo/nhánh công khai chỉ đẩy đúng `dashboard.json` bản `--public`, không đẩy main, thiếu secret thì xanh + `::warning::`" — rút từ `check_1_workflow.py` + `check_3_cong_khai.py` (chạy với workflow thật, không cần repo trang).
 - hq/dashboard: "`DATA_URL` của trang trỏ nhánh `dashboard-data` của repo công khai, không phải repo sổ cái" — rút từ phần đầu `check_2_trang.cjs` (tĩnh, không cần Playwright).

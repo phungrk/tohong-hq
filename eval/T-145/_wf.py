@@ -85,14 +85,13 @@ class Sandbox:
              "GITHUB_SHA": "0123456789abcdef0123456789abcdef01234567", "GITHUB_REPOSITORY": "phungrk/tohong-hq",
              "GITHUB_WORKSPACE": str(ROOT), "GITHUB_REF": "refs/heads/main", "CI": "true", "GITHUB_ACTIONS": "true",
              "FAKE_GIT_LOG": str(self.log), "REAL_GIT": REAL_GIT, "GIT_CONFIG_NOSYSTEM": "1", "GIT_TERMINAL_PROMPT": "0",
-             "GIT_SSH_COMMAND": "false", "GIT_ASKPASS": "false", "GIT_CONFIG_COUNT": str(5 + len(NET)),
+             "GIT_SSH_COMMAND": "false", "GIT_ASKPASS": "false", 
              "GIT_CONFIG_KEY_0": "user.useConfigOnly", "GIT_CONFIG_VALUE_0": "true",       # không đoán danh tính: bản thiếu git config phải lỗi như runner thật
              "GIT_CONFIG_KEY_1": f"url.{self.tmp}/remote/dash.insteadOf",
-             "GIT_CONFIG_VALUE_1": f"https://x-access-token:{TOKEN}@github.com/phungrk/tohong-hq-dashboard",
-             "GIT_CONFIG_KEY_2": "protocol.allow", "GIT_CONFIG_VALUE_2": "never"}
+             "GIT_CONFIG_VALUE_1": f"https://x-access-token:{TOKEN}@github.com/phungrk/tohong-hq-dashboard"}
         for n, pre in enumerate(NET):                # mọi dạng URL mạng khác trỏ vào chỗ không tồn tại: không bao giờ ra mạng
-            e[f"GIT_CONFIG_KEY_{3 + n}"] = f"url.{self.tmp}/remote/khong-co/.insteadOf"; e[f"GIT_CONFIG_VALUE_{3 + n}"] = pre
-        e["GIT_CONFIG_COUNT"] = str(3 + len(NET))
+            e[f"GIT_CONFIG_KEY_{2 + n}"] = f"url.{self.tmp}/remote/khong-co/.insteadOf"; e[f"GIT_CONFIG_VALUE_{2 + n}"] = pre
+        e["GIT_CONFIG_COUNT"] = str(2 + len(NET))
         if fail: e["FAKE_GIT_FAIL"] = fail
         if token is not None:
             for k, v in (self.push[0].get("env") or {}).items():
