@@ -56,19 +56,33 @@ Lấy top 20 theo thứ tự của `computeMatches` (điểm giảm dần, bằn
 2. **PR `tohong-back`**: xoá `lib/matcherAdapter.js` (kèm `callMatcher`, test `callMatcher` trong `test/test_vendor_matching.js`), `.github/workflows/sync-matcher-vendors.yml`, `.github/workflows/deploy-matcher.yml`, thư mục `matcher-data/`, thư mục `matcher-service/` (nguồn Cloud Run; không có file nào trong đề bài nhưng nó chỉ để deploy Cloud Run; Capu duyệt), dòng `matcher-data/vendors.json` trong `tools/pool-paths.txt`, `MATCHER_URL`/`MATCHER_API_KEY` khỏi `.github/workflows/deploy.yml` (mục `secrets:` và `env:`) và mọi chỗ còn lại; `package.json` scripts.test không trỏ file đã xoá. **Giữ nguyên thư mục `matcher/` (Python)**: chuẩn so sánh của eval 4–6 và bất biến `planner/vendor/matching/inv-001..003` đọc nó.
 Eval bước 2: `python3 -I eval/T-140/buoc2-go-cloud-run/check_go_cloud_run.py` (đỏ cho tới khi xong; **chưa đăng ký vào board**, Chief of Staff đăng ký khi tạo việc bước 2).
 **Bất biến lỗi thời → Chief of Staff ghi `decisions/`** (spec không tự sửa): `planner/vendor/images/inv-033` (file matcher == pool) hết đối tượng khi `matcher-data/` bị xoá (nó tự PASS "chưa áp dụng"; đề xuất đưa vào thư mục lưu trữ). Xem thêm "Bất biến lỗi thời ngay ở bước 1" cho `inv-034`.
-**Lệnh cho Capu tự chạy sau khi PR bước 2 đã merge và deploy xong** (không đảo ngược; spec và agent **không chạy**; thay `<PROJECT>` bằng `GCP_PROJECT_ID`):
+**Lệnh cho Capu tự chạy sau khi PR bước 2 đã merge và deploy xong** (không đảo ngược; spec và agent **không chạy**; thay `<PROJECT>` bằng `GCP_PROJECT_ID`, `<EMAIL gha-deployer>` bằng email service account `gha-deployer`). **Bucket `gs://wedding-planner-vendors` được GIỮ**: `tohong/.github/workflows/scrape-vendors.yml` còn đọc và ghi `gs://wedding-planner-vendors/vendors/vendors.json` (kho vendor đã gộp). Chỉ xoá hai object ở GỐC bucket mà matcher dùng (`vendors.json`, `vendors.prev.json`); tuyệt đối không xoá bucket, không `rm -r`, không đụng `vendors/`.
 ```
-# (tuỳ chọn, trước khi xoá) sao lưu dữ liệu bucket về máy
-gcloud storage cp -r gs://wedding-planner-vendors ./wedding-planner-vendors-backup
+# 1. BẮT BUỘC, làm trước mọi lệnh xoá: sao lưu hai object sắp xoá về máy, kiểm file đã về rồi mới đi tiếp
+gcloud storage cp gs://wedding-planner-vendors/vendors.json gs://wedding-planner-vendors/vendors.prev.json ./
+ls -l vendors.json vendors.prev.json
+# 2. Xoá service và image Cloud Run
 gcloud run services delete matcher-service --region asia-southeast1 --project <PROJECT>
 gcloud artifacts repositories delete matcher --location asia-southeast1 --project <PROJECT>
-gcloud storage rm -r gs://wedding-planner-vendors
-# secret trên GitHub (chỉ hai workflow đã xoá dùng GCP_SA_KEY, GCP_PROJECT_ID; kiểm lại trước khi xoá)
+# 3. Xoá đúng hai object ở gốc bucket (KHÔNG xoá bucket, KHÔNG đụng vendors/vendors.json của scrape-vendors)
+gcloud storage rm gs://wedding-planner-vendors/vendors.json gs://wedding-planner-vendors/vendors.prev.json
+# 4. Thu quyền gha-deployer, CHỈ nếu scrape-vendors KHÔNG dùng chính gha-deployer (xem lệnh kiểm ngay dưới)
+#    Kiểm trước: xem binding hiện có trên bucket và service account scrape-vendors dùng khi ghi vendors/vendors.json
+gcloud storage buckets get-iam-policy gs://wedding-planner-vendors --format=json
+gh run list --repo phungrk/tohong --workflow scrape-vendors.yml --limit 5
+gh run view <RUN_ID> --repo phungrk/tohong --log | grep -i -E "gha-deployer|service account|iam.gserviceaccount.com"
+#    Nếu log/policy cho thấy scrape-vendors dùng gha-deployer thì BỎ QUA lệnh gỡ dưới đây (gỡ là scrape-vendors hỏng ở bước upload).
+#    Nếu dùng service account khác thì gỡ đúng binding objectUser Capu đã cấp cho T-138 (trước đó gha-deployer không có quyền list, theo log 403 của run 43342201548); không gỡ binding nào khác:
+gcloud storage buckets remove-iam-policy-binding gs://wedding-planner-vendors --member=serviceAccount:<EMAIL gha-deployer> --role=roles/storage.objectUser
+# 5. Secret trên GitHub của tohong-back (GCP_SA_KEY và GCP_PROJECT_ID chỉ hai workflow đã xoá dùng; kiểm lại trước khi xoá)
 gh secret delete MATCHER_URL --repo phungrk/tohong-back
 gh secret delete MATCHER_API_KEY --repo phungrk/tohong-back
 gh secret delete GCP_SA_KEY --repo phungrk/tohong-back
 gh secret delete GCP_PROJECT_ID --repo phungrk/tohong-back
-# secret trên Cloudflare Worker (chạy trong thư mục tohong-back SAU khi deploy.yml không còn đặt chúng, nếu không lần deploy sau tạo lại)
+# 6. Secret MATCHER_* của repo tohong (không phải tohong-back); KHÔNG xoá GCP_SA_KEY/GCP_PROJECT_ID của tohong vì scrape-vendors dùng
+gh secret delete MATCHER_URL --repo phungrk/tohong
+gh secret delete MATCHER_API_KEY --repo phungrk/tohong
+# 7. Secret trên Cloudflare Worker (chạy trong thư mục tohong-back SAU khi deploy.yml không còn đặt chúng, nếu không lần deploy sau tạo lại)
 npx wrangler secret delete MATCHER_URL
 npx wrangler secret delete MATCHER_API_KEY
 ```
@@ -134,3 +148,4 @@ Capu chấp nhận để chat khớp gu kém Python khoảng 0,06 (0,53 so 0,59 
 - λ chỉ ghi 0,3 mà eval chấp nhận 0,2–0,7: nay có eval 9 với 3 kịch bản dựng sẵn mà λ 0,2/0,25/0,27/0,33/0,35/0,4 đều cho top 5 khác. Thêm luật hoà MMR ("chọn vendor đứng trước trong top 20", so sánh chặt) và ca hoà hoàn toàn trong eval 9.
 - Vùng: giữ `planner/vendor/images`; INV-A..D (thêm INV-E) đặt ở đó vì vùng này không chạy `planner/vendor/matching`. INV-B dùng bản thay thế inv-034 của Spec Gate.
 - Diff hành vi thêm hai số đo không phụ thuộc Python, câu hỏi mở về đổi gu lấy ngân sách (mặc định có) và phương án xếp lại; "Không làm" thêm router stationery/jewelry và khuyên nới ngân sách cho thành phố ngoài pool.
+- (T-144, adversary `eval/T-144/adv-01`) Lệnh dọn GCP bước 2 sửa: không xoá bucket `wedding-planner-vendors` (scrape-vendors còn dùng `vendors/vendors.json`), chỉ xoá hai object gốc, sao lưu BẮT BUỘC trước; thu quyền chỉ gỡ binding `roles/storage.objectUser` của gha-deployer và bỏ qua nếu scrape-vendors dùng chính gha-deployer, kèm lệnh kiểm; thêm xoá `MATCHER_URL`, `MATCHER_API_KEY` của repo `phungrk/tohong`.
