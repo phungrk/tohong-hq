@@ -12,16 +12,19 @@ process.on("uncaughtException", (e) => { console.log("FAIL ngoại lệ khi ch�
 const poolFile = path.join(BACK, "lib", "vendorPool.generated.js");
 const sha = () => crypto.createHash("sha256").update(readText(poolFile)).digest("hex");
 const sha0 = sha();
-const { B, bucket, e, put, del, pub, doc } = await boot();
+const { B, bucket, e, put, del, pub } = await boot();
 const { venue } = pick();
 const P = pool();
 const NAME = "Tên Admin Sửa ZZ-152", DESC = "Mô tả do admin sửa ZZ-152", MARRY = "https://www.marry.vn/images/detailed/9/zz152.jpg";
-// Gieo sẵn (không phải vật được đo): ẩn mọi venue khác trừ hai vendor để vendor thử chắc chắn vào top 5 của chat.
+// Dựng trạng thái qua route PUT (không chèn thẳng tài liệu R2): ẩn mọi venue khác trừ hai vendor để vendor thử chắc chắn vào top 5 của chat.
 const others = P.filter((v) => v.category === "venue" && v.id !== venue.id);
 const keep = others.slice(0, 2).map((v) => v.id);
-const seed = { seq: 1, vendors: Object.fromEntries(others.filter((v) => !keep.includes(v.id)).map((v) => [v.id, { hidden: true, hidden_reason: "gieo T-152", version: 1 }])) };
-await bucket.put(OVERLAY(), JSON.stringify(seed));
-function OVERLAY() { return "data/admin/vendor_overrides.json"; }
+const hiddenIds = new Set();
+for (const v of others.filter((x) => !keep.includes(x.id))) {
+  const h = await put(v.id, { expected_version: 0, hidden: true, hidden_reason: "gieo T-152" });
+  if (h.status !== 200) { R.check("dựng ẩn vendor khác qua PUT", false, [h.status, h.text.slice(0, 80)]); R.done(); }
+  hiddenIds.add(v.id);
+}
 const ov = await lib("lib/vendorOverlay.js");
 const cm = await lib("lib/chatMatcher.js");
 ov.resetOverlayCache();
@@ -39,14 +42,14 @@ const chat = () => cm.chatMatch(mp);
 await ov.loadOverlay(e);
 let c = chat().matches.find((m) => m.vendor_id === venue.id);
 R.check("chat: ứng viên vendor thử mang tên sửa, style_tags ['korean'], price_range 7-9tr", !!c && c.name === NAME && JSON.stringify(c.style_tags) === '["korean"]' && c.price_range?.min_vnd === 7e6 && c.price_range?.max_vnd === 9e6, c);
-R.check("chat: mọi vendor_id thuộc pool; vendor bị ẩn không vào", chat().matches.every((m) => P.some((v) => v.id === m.vendor_id)) && !chat().matches.some((m) => seed.vendors[m.vendor_id]));
+R.check("chat: mọi vendor_id thuộc pool; vendor bị ẩn không vào", chat().matches.every((m) => P.some((v) => v.id === m.vendor_id)) && !chat().matches.some((m) => hiddenIds.has(m.vendor_id)));
 ov.resetOverlayCache();
 await ov.loadOverlay(e);
 c = chat().matches.find((m) => m.vendor_id === venue.id);
 R.check("isolate mới đọc lại R2: chat vẫn thấy tên sửa (bền)", !!c && c.name === NAME);
 const poolAfter = (await pub(`/api/vendors/${venue.id}`)).json?.vendor;
 R.check("isolate mới: tab Vendor vẫn thấy bản sửa", poolAfter?.name === NAME && poolAfter?.description === DESC);
-const cur = doc().vendors[venue.id].version;
+const cur = r.json?.version;
 const r2 = await put(venue.id, { expected_version: cur, name: null, description: null, styles: null, photos: null, capacity: null, priceMin: null, priceMax: null });
 R.check("bỏ sửa tất cả bằng null: 200", r2.status === 200, [r2.status, r2.text.slice(0, 100)]);
 const back = (await pub(`/api/vendors/${venue.id}`)).json?.vendor || {};

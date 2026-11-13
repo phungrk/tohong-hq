@@ -6,6 +6,7 @@
  *  - Drawer gọi thêm GET /api/admin/vendors/<id> (đọc: effective, override, version, edited_fields, source_changed, history, editable). Trường nằm trong edited_fields có nhãn "admin sửa"; trường khác không có.
  *  - Nút "Sửa dữ liệu pool" mở biểu mẫu: ô "Tên", "Mô tả", hộp chọn mỗi nhãn gu của editable.styles, ô "Ảnh (mỗi dòng một URL)", "Sức chứa tối thiểu"/"Sức chứa tối đa" (chỉ khi hạng mục venue); "Lưu" gửi PUT .../override chỉ các trường đã đổi + expected_version.
  *  - Lỗi 400 {error:code}: "Không lưu được: <code>"; 409: "Dữ liệu đã đổi, hãy tải lại" và tải lại; "Bỏ sửa <trường>" gửi trường null; "Lịch sử sửa" mỗi dòng "<by> · <at> · <trường>: <trước> → <sau>"; source_changed: "Pool nguồn đã đổi sau lần sửa: <trường> — lúc sửa: <base>, hiện: <now>".
+ *  - Ảnh Google đã đổi (source_changed có field "photos" với dropped:[url]): drawer ghi "Ảnh Google đã đổi — xem lại bản sửa ảnh"; ô "Ảnh" chỉ điền sẵn các URL của effective.photos (không có URL đã bị bỏ).
  *  - GET /api/admin/vendors/<id> lỗi: drawer vẫn hiện phần pool từ API chi tiết và chữ "Không tải được lớp sửa". */
 const { setup } = require('./lib/front152.cjs');
 const E = setup(process.argv.slice(2), 't152-7');
@@ -19,8 +20,8 @@ E.run(async () => {
   S = await E.scenario();
   await S.openRow('Alpha Hall', 'Số 1 đường thử');
   let t = await H.text(S.dlg());
-  const o = ['Kết quả trong pool', 'Lớp admin (R2)', 'Thuộc tính nguồn dùng để tạo vendor pool', 'Đầu vào ngoài vendors.json'].map((h) => idx(t, h));
-  check('thứ tự mục: pool, lớp admin, rồi nguồn, rồi đầu vào ngoài', o.every((x) => x >= 0) && o[0] < o[1] && o[1] < o[2] && o[2] < o[3], o.join(','));
+  const o = ['Kết quả trong pool', 'Lớp admin (R2)', 'Lịch sử sửa', 'Thuộc tính nguồn dùng để tạo vendor pool', 'Đầu vào ngoài vendors.json'].map((h) => idx(t, h));
+  check('thứ tự mục: pool, lớp admin, lịch sử sửa, rồi nguồn, rồi đầu vào ngoài', o.every((x) => x >= 0) && o.every((x, k) => k === 0 || o[k - 1] < x), o.join(','));
   const links = S.dlg().getByRole('link', { name: 'Mở ảnh gốc' });
   check('3 ảnh có 3 liên kết "Mở ảnh gốc"', (await links.count()) === 3, await links.count());
   const hrefs = await links.evaluateAll((as) => as.map((a) => ({ h: a.getAttribute('href'), t: a.getAttribute('target'), r: a.getAttribute('rel') || '' })));
@@ -99,6 +100,21 @@ E.run(async () => {
   await S.openRow('Beta Studio', 'Số 2 đường thử');
   await S.dlg().getByRole('button', { name: 'Sửa dữ liệu pool', exact: true }).click();
   check('vendor không phải venue: không có ô sức chứa', (await S.dlg().getByRole('spinbutton').count()) === 0);
+  await S.ctx.close();
+
+  /* ===== E. ảnh Google đã đổi ===== */
+  S = await E.scenario();
+  const OLDG = 'https://lh3.googleusercontent.com/grass-cs/CUDaRoiDi=s4800-w800';
+  S.info = (id) => { const b = E.vendorInfo(id); const eff = { ...b.vendor, photos: [{ url: urls.MARRY_URL, source: 'marry' }] };
+    return { ...b, effective: eff, version: 3, override: { photos: [{ url: OLDG, source: 'google', attribution: 'Tác giả Thử' }, { url: urls.MARRY_URL }], version: 3 }, edited_fields: ['photos'],
+      source_changed: [{ field: 'photos', base: [OLDG], now: [urls.GOOGLE_URL], dropped: [OLDG] }], history: [] }; };
+  await S.openRow('Alpha Hall', 'Số 1 đường thử');
+  t = await H.text(S.dlg());
+  check('ảnh Google đã đổi: drawer ghi "Ảnh Google đã đổi — xem lại bản sửa ảnh"', t.includes('Ảnh Google đã đổi — xem lại bản sửa ảnh'), t.slice(0, 300));
+  check('thumbnail chỉ gồm ảnh hiệu lực (1 ảnh marry), không có URL Google đã bị bỏ', (await S.dlg().locator('img').count()) === 1 && !S.photoReqs.includes(OLDG), S.photoReqs.join(' '));
+  await S.dlg().getByRole('button', { name: 'Sửa dữ liệu pool', exact: true }).click();
+  const prefill = await S.dlg().getByRole('textbox', { name: 'Ảnh (mỗi dòng một URL)', exact: true }).inputValue();
+  check('ô Ảnh chỉ điền sẵn URL còn hợp lệ (effective.photos), không có URL Google đã bỏ', prefill.split('\n').filter(Boolean).join('|') === urls.MARRY_URL, prefill);
   await S.ctx.close();
 
   /* ===== D. API lớp sửa lỗi: drawer vẫn chạy ===== */

@@ -19,7 +19,8 @@ for (const [cn, ev, token] of callers) for (const [m, p, body] of routes) {
 R.check("người ngoài không ghi được gì vào R2", bucket.putLog.length === 0, bucket.putLog);
 const e = mk({});
 for (const [u, n] of [[A1, "admin 1"], [A2, "admin 2 (không phải Capu)"]]) {
-  const r = await B.call(e, "PUT", `/api/admin/vendors/${venue.id}/override`, { token: tok(u), body: { expected_version: (JSON.parse(bucket.data.get("data/admin/vendor_overrides.json") || "{}").vendors?.[venue.id]?.version) || 0, name: `Do ${n}` } });
+  const cur = (await B.call(e, "GET", `/api/admin/vendors/${venue.id}`, { token: tok(u) })).json?.version || 0;
+  const r = await B.call(e, "PUT", `/api/admin/vendors/${venue.id}/override`, { token: tok(u), body: { expected_version: cur, name: `Do ${n}` } });
   R.check(`${n} sửa được: 200`, r.status === 200, [r.status, r.text.slice(0, 100)]);
 }
 R.check("không gọi mạng", outbound.length === 0, outbound);
