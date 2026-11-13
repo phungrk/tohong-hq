@@ -138,6 +138,8 @@ async function scenario(opts = {}) {
     S.other.push({ method: m, path: u.pathname + u.search });
     if (u.pathname === '/api/admin/me') return json({ admin: true, counts: { connect_new: 0, upgrade_pending: 0, legacy_active: 0 } });
     if (u.pathname === '/api/admin/members-summary') return json(SUMMARY);
+    // ADR-086: tab mặc định nay là Dữ liệu vendor (T-153) — trả bảng enrich rỗng hợp lệ để trang không sập trước khi bấm tab Thành viên.
+    if (u.pathname === '/api/admin/vendor-enrich') return json({ data_as_of: '2026-11-11T00:00:00', summary: { total: 0, groups: {}, chips: { full: 0, no_google_photo: 0, name_similar: 0, addr_diff: 0 }, approvable: 0 }, total: 0, offset: 0, limit: 50, rows: [] });
     return json({});
   });
   S.base = `http://127.0.0.1:${server.address().port}`;
