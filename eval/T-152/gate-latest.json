@@ -1,6 +1,6 @@
 {
   "task": "T-152",
-  "at": "2026-11-13T22:54",
+  "at": "2026-11-13T23:06",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,15 +12,15 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_1_sua_hop_le.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 211,
-      "out": "FAIL sai: name rỗng -> 400 invalid_name [[200,\"{\\\"override\\\":{\\\"priceMin\\\":3,\\\"priceMax\\\":5,\\\"price_verified\\\":true,\\\"version\\\":13,\\\"updated_at\\\":\\\"2026-11-13T2\"]] (+49 lỗi nữa)",
+      "ms": 194,
+      "out": "FAIL description đã chuẩn hoá: các ký tự điều khiển thành một dấu cách, đã trim ('a b c d e f') [\"Ngày cưới là khoảnh khắc trọng đại nhất trong cuộc đời, nhưng lại có quá nhiều thứ phải lo nghĩ, tính toán. Hãy để PARKROYAL Saigon trở thành người bạn đường t] (+61 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_2_hieu_luc_tab_vendor_va_chat.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 284,
+      "ms": 267,
       "out": "FAIL tab Vendor (chi tiết): name, description, styles, tags, photos, capacity, giá đã sửa ngay [\"{\\\"vendor\\\":{\\\"id\\\":\\\"marry_14b4d1b1b7f0\\\",\\\"name\\\":\\\"PARKROYAL Saigon\\\",\\\"category\\\":\\\"venue\\\",\\\"catLabel\\\":\\\"Tiệc & nhà hàng\\\",\\\"catIcon\\\":\\\"utensils-crossed] (+4 lỗi nữa)",
       "tier": 1
     },
@@ -28,23 +28,23 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_3_lich_su_va_etag.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 181,
-      "out": "FAIL history: 3 mục, mới nhất trước, seq giảm dần [\"[]\"] (+11 lỗi nữa)",
+      "ms": 208,
+      "out": "FAIL thân đầy đủ của tab Vendor lên vendor chưa có ghi đè: 200, không ghi R2, override null, version 0, không lịch sử [[200,2,1]] (+16 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_4_nguon_doi_khong_ghi_nguon.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 319,
-      "out": "FAIL lúc pool chưa đổi: source_changed rỗng (+3 lỗi nữa)",
+      "ms": 475,
+      "out": "FAIL lúc pool chưa đổi: source_changed là mảng rỗng (+8 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_5_quyen_403.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 199,
+      "ms": 224,
       "out": "PASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_6_drawer_phu_khong_doi_layout.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 6538,
+      "ms": 6415,
       "out": " nhìn\n  ok  520px: drawer nằm TRÊN bảng (điểm chạm ở mép trái drawer thuộc drawer)\n  ok  520px: đóng bằng nút \"Đóng\", bảng y nguyên\n  ok  520px: không request ra ngoài ngoài ảnh (không Google API)\n  ok  390px: mở drawer không đổi vị trí/kích thước bảng (không đẩy)\n  ok  390px: mở drawer không đổi bề rộng trang, không cuộn ngang\n  ok  390px: drawer dính mép phải, cao hết khung nhìn\n  ok  390px: drawer nằm TRÊN bảng (điểm chạm ở mép trái drawer thuộc drawer)\n  ok  390px: drawer rộng bằng khung nhìn, không tay cầm\n  ok  390px: đóng bằng nút \"Đóng\", bảng y nguyên\n  ok  390px: không request ra ngoài ngoài ảnh (không Google API)\nFAIL 1280px: mở drawer không đổi vị trí/kích thước bảng (không đẩy) [[{\"x\":64,\"y\":339,\"width\":1152,\"height\":274},{\"x\":64,\"y\":377,\"width\":592,\"height\":325}]] (+1 lỗi nữa)",
       "tier": 1
     },
@@ -60,15 +60,15 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_7_drawer_pool_dau_va_anh.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 3131,
-      "out": "ỗi ảnh có thumbnail <img> trỏ đúng URL\n  XX  ảnh Google ghi công \"Ảnh: Tác giả Thử\", ảnh marry không có dòng ghi công  :: Đóng Alpha Hall Thuộc tính nguồn dùng để tạo vendor pool Tên vendor Alpha Hall Mô tả Nguồn Alpha Hall Đầu vào ngoài vendors.json Pool nền ghi chú Kết quả trong pool Trong pool id vd1 name Alpha Hall category venue catLab\n  XX  ảnh hỏng: \"Ảnh không tải được\" đúng một lần, liên kết vẫn còn\n  ok  ảnh hỏng không phá drawer: các mục còn, nút \"Đóng\" bấm được\n  ok  drawer chỉ gọi API ảnh ở các URL của pool, không request nào khác ra ngoài\n  ok  không có nhãn \"admin sửa\" khi chưa sửa gì\n  ok  chưa có lịch sử: không có dòng lịch sử, có thể có tiêu đề \"Lịch sử sửa\" nhưng ghi \"Chưa có sửa\"\nFAIL thứ tự mục: pool, lớp admin, rồi nguồn, rồi đầu vào ngoài [146,670,16,102] (+5 lỗi nữa)",
+      "ms": 3336,
+      "out": "ail <img> trỏ đúng URL\n  XX  ảnh Google ghi công \"Ảnh: Tác giả Thử\", ảnh marry không có dòng ghi công  :: Đóng Alpha Hall Thuộc tính nguồn dùng để tạo vendor pool Tên vendor Alpha Hall Mô tả Nguồn Alpha Hall Đầu vào ngoài vendors.json Pool nền ghi chú Kết quả trong pool Trong pool id vd1 name Alpha Hall category venue catLab\n  XX  ảnh hỏng: \"Ảnh không tải được\" đúng một lần, liên kết vẫn còn\n  ok  ảnh hỏng không phá drawer: các mục còn, nút \"Đóng\" bấm được\n  ok  drawer chỉ gọi API ảnh ở các URL của pool, không request nào khác ra ngoài\n  ok  không có nhãn \"admin sửa\" khi chưa sửa gì\n  ok  chưa có lịch sử: không có dòng lịch sử, có thể có tiêu đề \"Lịch sử sửa\" nhưng ghi \"Chưa có sửa\"\nFAIL thứ tự mục: pool, lớp admin, lịch sử sửa, rồi nguồn, rồi đầu vào ngoài [146,670,-1,16,102] (+5 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_8_drawer_admin_sua_pool.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 6779,
+      "ms": 6899,
       "out": " \"name: Alpha Hall → Alpha Mới\", \"styles: luxury → luxury, rustic\"  :: ategory venue catLabel x description Mô tả pool Alpha Hall styles luxury tags luxury priceMin 3.9 priceMax 4.7 city HCMC rating 4.3 reviewCount 20 isVerified true photos {\"url\":\"https://www.marry.vn/images/detailed/1/thu\n  XX  nguồn đổi: \"Pool nguồn đã đổi sau lần sửa: name — lúc sửa: Alpha Cũ ZZ, hiện: Alpha Hall\"  :: l Đầu vào ngoài vendors.json Pool nền ghi chú Kết quả trong pool Trong pool id vd1 name Alpha Hall category venue catLabel x description Mô tả pool Alpha Hall styles luxury tags luxury priceMin 3.9 priceMax 4.7 city HCMC\n  XX  bước thao tác không thực hiện được (thiếu phần tử mà spec yêu cầu?)  :: locator.click: Timeout 4000ms exceeded.\nFAIL gọi API đọc lớp sửa đúng một lần cho vendor đang mở (+5 lỗi nữa)",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/invariants/planner/vendor/images/inv-038-ung-vien-chat-dung-pool-overlay.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 207,
+      "ms": 160,
       "out": "PASS ứng viên chat đúng pool + overlay, không mạng, đúng ngân sách",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_6_ui_drawer.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 9241,
+      "ms": 9219,
       "out": "ng mở drawer, không ghi gì\n  ok  bấm dòng khác: drawer đổi sang vendor đó (vẫn một drawer)\n  ok  vendor ngoài pool vẫn xem được, \"Ngoài pool\" + lý do bằng lời + dữ liệu nguồn\n  ok  ngoài pool: không có dòng trường pool (vendor null)\n  ok  vendor bị admin ẩn: \"Trong pool · đang ẩn\" + lý do + lớp admin (ẩn, lý do ẩn, giá, xác minh)\n  ok  báo cáo chưa có nguồn: ghi rõ, vẫn hiện phần pool\n  XX  bước thao tác không thực hiện được (thiếu phần tử mà spec yêu cầu?)  :: page.waitForFunction: Timeout 4000ms exceeded.\nFAIL T-150: ghi chú lệch reviews hiện cả khi pool.vendor không có trường reviews (dòng \"reviews —\" rồi ghi chú) [Z — Trường thêm ZZ gia-tri-zz-them Audit: trạng thái đóng cửa none Đầu vào ngoài vendors.json Pool nền (--base) ZZ Ghi chú pool nền ZZ Manifest ảnh ZZ Ghi chú m] (+1 lỗi nữa)",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 46,
+      "ms": 43,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 175,
+      "ms": 147,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 30,
+      "ms": 32,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 48,
+      "ms": 37,
       "out": "PASS selftest 3 ca; 35 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 988,
+      "ms": 968,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -132,15 +132,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2375,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-l4mOEX/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 3099,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-YqVhPH/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1569,
+      "ms": 1774,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -148,15 +148,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 947,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-IPVvsh/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1226,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-ZCYL3Q/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2597,
+      "ms": 2497,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 108,
+      "ms": 77,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1574,
+      "ms": 1558,
       "out": "PASS (worker.js nén 770694 byte)",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-001-bao-cao-enrich-phan-hoach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 67,
+      "ms": 113,
       "out": "PASS 870 dòng, 9 nhóm cộng đúng, 366 approvable, ô đếm khớp nhóm",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-002-maps-link-back-nhan-thi-tohong-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 381,
+      "ms": 418,
       "out": "PASS 20 link: mọi link back nhận thì tohong cũng nhận",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-003-bao-cao-enrich-commit-bang-sinh-lai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 384,
+      "ms": 445,
       "out": "PASS 1 báo cáo enrich đã commit bằng đúng byte báo cáo sinh lại",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-004-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 677,
+      "ms": 878,
       "out": "PASS 3 cú bấm của Capu: back ký, tohong nhận, bất biến kiểm được (kể cả mục link sau resolve); review của admin khác không vào",
       "tier": 2
     },
@@ -212,7 +212,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-005-workflow-du-lieu-di-kem-bao-cao.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 92,
+      "ms": 96,
       "out": "PASS mọi workflow thêm file dữ liệu đều sinh lại và đưa enrich-report.json vào cùng commit",
       "tier": 2
     },
@@ -220,7 +220,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-006-danh-muc-thuoc-tinh-pool.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 70887,
+      "ms": 73096,
       "out": "PASS",
       "tier": 2
     },
@@ -228,8 +228,16 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-007-bao-cao-khong-mang-lien-he-dia-chi.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 125,
+      "ms": 117,
       "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-008-nguoi-ngoai-khong-thay-khong-goi-api-vendor.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 3350,
+      "out": "ok  thấy \"Bạn không có quyền xem trang này\"\n  ok  không có thanh tab, không có bảng enrich\n  ok  không gọi /api/admin/vendor-enrich* hay /api/admin/vendors*\nPASS",
       "tier": 2
     }
   ],
