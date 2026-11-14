@@ -493,16 +493,23 @@ def export(out: Path, public: bool = False):
     dept_ids = []
     claude_md = ROOT / "CLAUDE.md"
     has_md = claude_md.is_file()
-    in_fence = False
+    fence = None   # loại fence đang mở ("```" hoặc "~~~"); khối chỉ đóng bằng đúng loại đã mở
     for ln in (claude_md.read_text(encoding="utf-8").splitlines() if has_md else []):
-        if re.match(r"^\s*(```|~~~)", ln):   # dòng trong khối code (fenced) không phải danh sách bộ phận
-            in_fence = not in_fence
+        fm = re.match(r"^\s*(```|~~~)", ln)
+        if fm:
+            if fence is None:
+                fence = fm.group(1)
+            elif fence == fm.group(1):
+                fence = None
             continue
-        m = None if in_fence else re.match(r"^- `([^`]+)` — ", ln)
+        m = None if fence else re.match(r"^- `([^`]+)` — ", ln)
         if m and m.group(1) not in dept_ids and m.group(1) not in ("capu", "chief-of-staff"):
             dept_ids.append(m.group(1))
     if not has_md:
-        if not os.environ.get("TOHONG_ROOT"):   # sổ cái thật (workflow): thiếu CLAUDE.md là lỗi, không ghi đè dữ liệu cũ
+        # ngoại lệ chỉ cho sổ cái giả: TOHONG_ROOT trỏ tới thư mục KHÁC kho chứa script này (so bằng realpath)
+        env_root = os.environ.get("TOHONG_ROOT")
+        own_repo = os.path.realpath(Path(__file__).resolve().parent.parent)
+        if not env_root or os.path.realpath(env_root) == own_repo:
             print("LỖI: không thấy CLAUDE.md; không ghi đè dữ liệu cũ.", file=sys.stderr)
             sys.exit(1)
         print("::warning::Không thấy CLAUDE.md (sổ cái giả, TOHONG_ROOT); roster giữ nguyên org/roster.json")

@@ -23,3 +23,5 @@ Eval nối thêm (tầng 1), trạng thái hiện tại đều đỏ như kỳ v
 Cần Spec Gate cập nhật: bất biến chờ merge inv-022 (roster xuất theo CLAUDE.md, do spec-critic giữ) phải khớp Hành vi 4 mới: nhánh thiếu CLAUDE.md theo `TOHONG_ROOT` (4c) và dòng trong code block không tính (4d). Tôi không sửa bất biến.
 Rủi ro: ngoại lệ 4(c) dựa vào việc workflow thật không đặt `TOHONG_ROOT` (publish-dashboard-data.yml dòng 39, theo defect); nếu workflow đổi thì ngoại lệ lệch.
 Kết quả nằm ở: products/T-162-so-do-luong-theo-roster.md
+
+Cập nhật v3.1 (Spec Gate, Chief chốt; không respec lại, T-163 ở engineering): products/T-162-so-do-luong-theo-roster.md sửa 4(c) ngoại lệ thiếu CLAUDE.md chỉ khi TOHONG_ROOT trỏ thư mục khác kho của export_dashboard.py (realpath), còn lại như 4(a); 4(d) fence tính cả ``` và ~~~, đóng bằng đúng loại đã mở; Hành vi 1 cắt "…" cả chữ hành động của nhịp; title hoặc tooltip đều được. Eval chưa đổi: adv-01 vẫn đúng; Engineering/Spec Gate nên cân nhắc thêm ca TOHONG_ROOT = kho của script.
