@@ -9,7 +9,7 @@ const get = async (label, o) => { const m = await matchOne(M, o); if (m.r.err ||
 let x = await get("thiếu số khách", { id: ids.R1, profile: coupleProfile({ budget: 200 }), doc: budgetDoc(90, { guests: 0 }) });
 if (x) {
   if (x.bb.kind !== "no_guests") bad(`thiếu số khách: kind mong no_guests, thấy ${x.bb.kind}`);
-  if (!/chưa có số khách/.test(x.bb.text || "")) bad(`thiếu số khách: text phải nói "chưa có số khách", thấy "${x.bb.text}"`);
+  if (!(x.bb.text || "").includes("Chưa có số khách nên chưa tính được tổng tiệc (giá ≈ 3,9tr/bàn)")) bad(`thiếu số khách: text mong "Chưa có số khách nên chưa tính được tổng tiệc (giá ≈ 3,9tr/bàn)", thấy "${x.bb.text}"`);
   if (/\bbàn\s*=|= *\d/.test(x.bb.text || "")) bad(`thiếu số khách: không được đoán tổng, thấy "${x.bb.text}"`);
   if (x.score !== 0.5) bad(`thiếu số khách: điểm trung tính 0,5, thấy ${x.score}`);
 }
@@ -17,19 +17,21 @@ if (x) {
 x = await get("thiếu ngân sách", { id: ids.R1, profile: coupleProfile({ guest_count: 200 }), doc: undefined });
 if (x) {
   if (x.bb.kind !== "no_budget") bad(`thiếu ngân sách: kind mong no_budget, thấy ${x.bb.kind}`);
-  if (!/chưa có ngân sách/.test(x.bb.text || "")) bad(`thiếu ngân sách: text phải nói "chưa có ngân sách", thấy "${x.bb.text}"`);
+  if (!(x.bb.text || "").includes("Chưa có ngân sách cho tiệc cưới nên chưa so được")) bad(`thiếu ngân sách: text mong "Chưa có ngân sách cho tiệc cưới nên chưa so được", thấy "${x.bb.text}"`);
+  for (const k of ["categoryBudgetTr", "categoryBudgetSource", "sharePct"]) if (x.bb[k] !== null) bad(`thiếu ngân sách: budgetBasis.${k} mong null, thấy ${JSON.stringify(x.bb[k])}`);
   if (x.score !== 0.5) bad(`thiếu ngân sách: điểm trung tính 0,5, thấy ${x.score}`);
 }
 // (b2) thứ tự ưu tiên: thiếu CẢ số khách lẫn ngân sách => no_budget (không có ngân sách thì số khách không giúp được gì)
 x = await get("thiếu cả hai", { id: ids.R1, profile: coupleProfile({}), doc: undefined });
 if (x) {
   if (x.bb.kind !== "no_budget") bad(`thiếu cả hai: kind mong no_budget (ưu tiên trước no_guests), thấy ${x.bb.kind}`);
-  if (!/chưa có ngân sách cho tiệc cưới/.test(x.bb.text || "") || /số khách/.test(x.bb.text || "")) bad(`thiếu cả hai: text mong "Chưa có ngân sách cho tiệc cưới…" không nhắc số khách, thấy "${x.bb.text}"`);
+  if (!(x.bb.text || "").includes("Chưa có ngân sách cho tiệc cưới nên chưa so được") || /số khách/.test(x.bb.text || "")) bad(`thiếu cả hai: text mong "Chưa có ngân sách cho tiệc cưới…" không nhắc số khách, thấy "${x.bb.text}"`);
 }
 // (b3) ngân sách hạng mục = 0 (mẫu ngân sách có honeymoon 0%) => no_budget, điểm 0,5 như main
 x = await get("honeymoon tỷ lệ 0%", { category: "honeymoon", id: ids.H1, profile: coupleProfile({ budget: 200, guest_count: 200 }), doc: undefined });
 if (x) {
   if (x.bb.kind !== "no_budget") bad(`honeymoon 0%: kind mong no_budget, thấy ${x.bb.kind}`);
+  for (const k of ["categoryBudgetTr", "categoryBudgetSource", "sharePct"]) if (x.bb[k] !== null) bad(`honeymoon 0%: budgetBasis.${k} mong null, thấy ${JSON.stringify(x.bb[k])}`);
   if (!(x.bb.text || "").includes("Chưa có ngân sách cho tuần trăng mật nên chưa so được")) bad(`honeymoon 0%: text mong "Chưa có ngân sách cho tuần trăng mật nên chưa so được", thấy "${x.bb.text}"`);
   if (x.score !== 0.5) bad(`honeymoon 0%: điểm trung tính 0,5 (không đổi so với main), thấy ${x.score}`);
 }
