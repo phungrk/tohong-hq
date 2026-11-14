@@ -19,9 +19,12 @@ else {
   if (!bb || bb.guests !== s.guestCount || bb.categoryBudgetTr !== s.budgetByCategory?.venue) bad(`budgetBasis và profileSnapshot phải cùng số: ${JSON.stringify(bb)} vs ${JSON.stringify(s)}`);
   const leaked = JSON.stringify(m.body).match(/Kín|kin\.bi|0900000777|bride_name|email|phone/); if (leaked) bad(`profileSnapshot/phản hồi lộ trường cá nhân: ${leaked[0]}`);
 }
-// (b) không bảng: nguồn là hồ sơ
+// (b) không bảng: nguồn là hồ sơ; ngân sách hạng mục ước theo tổng thì KHÔNG nằm trong budgetByCategory, số đem so nằm ở budgetBasis (96 = tổng 200 x 48%)
 m = await matchOne(M, { id: ids.R1, profile: prof(), doc: undefined });
 s = m.body?.profileSnapshot;
+{ const bb = m.v?.match?.budgetBasis;
+  if (s?.budgetByCategory && s.budgetByCategory.venue !== undefined) bad(`total_share: budgetByCategory không được chứa venue, thấy ${JSON.stringify(s.budgetByCategory)}`);
+  if (!bb || bb.categoryBudgetSource !== "total_share" || bb.sharePct !== 48 || Math.abs(bb.categoryBudgetTr - s?.budgetTotal * 0.48) > 1e-9) bad(`total_share: budgetBasis mong nguồn total_share, sharePct 48, categoryBudgetTr = budgetTotal x 48%, thấy ${JSON.stringify(bb)} / budgetTotal ${s?.budgetTotal}`); }
 if (s?.guestCount !== 200 || s?.guestCountSource !== "profile") bad(`không bảng: mong guestCount 200 nguồn "profile", thấy ${s?.guestCount} / ${s?.guestCountSource}`);
 if (s && s.budgetByCategory && s.budgetByCategory.venue !== undefined && typeof s.budgetByCategory.venue !== "number") bad("budgetByCategory.venue phải là số");
 // (e) ngày cưới lệch giữa couple.wedding_date và wedding_date top-level: snapshot cho thấy ngày server dùng (couple.* ưu tiên, api/vendors.js buildMatchProfile) và trường nguồn
@@ -38,18 +41,20 @@ if (s?.sources?.budgetByCategory?.venue !== "allocation") bad(`nguồn hạng m�
 // (g) bảng ghi khách thắng: nguồn số khách là bảng
 m = await matchOne(M, { id: ids.R1, profile: prof(), doc: budgetDoc(90, { guests: 237 }) });
 if (m.body?.profileSnapshot?.sources?.guestCount !== "budget_doc.guests") bad(`số khách từ bảng: mong nguồn "budget_doc.guests", thấy ${m.body?.profileSnapshot?.sources?.guestCount}`);
-// (c) người KHÔNG thuộc cặp đôi (kể cả khi biết coupleId) không nhận số nào của cặp đôi đó
-const b = newBucket(M, { profile: prof({ guest_count: 237 }), budgetDoc: budgetDoc(91, { guests: 237 }), members: true, overlay: M.overlayFor("venue", [ids.R1]) });
-M.resetOverlayCache();
-let body = null, err = null;
-const orig = globalThis.fetch; globalThis.fetch = async () => { throw new Error("không mạng"); };
-try { const res = await M.handleVendors(new Request(`http://localhost/api/vendors/match?coupleId=${CID}&category=venue&limit=50`), { CHAT_DATA: b }, { userId: "u2-nguoi-la" }, ["match"]); body = JSON.stringify(await res.json()); } catch (e) { err = e; }
-globalThis.fetch = orig;
-if (err) bad(`người lạ: ném ${err.message}`);
-else {
-  for (const x of ["237", "91", "Kín", "kin.bi", "0900000777"]) if (body.includes(x)) bad(`người lạ nhận được dữ liệu cặp đôi khác: thấy "${x}" trong ${body.slice(0, 200)}`);
-}
-// (d) chi tiết vendor của người lạ không có budgetBasis chứa số của cặp đôi
-const d = await tab(M, { url: `/api/vendors/${ids.R1}?coupleId=${CID}`, bucket: b, countFetch: { n: 0 } }); // AUTH mặc định u1 là thành viên: chỉ để chắc handler vẫn trả 200
+// (c) người KHÔNG thuộc cặp đôi (kể cả khi biết coupleId) không nhận số nào của cặp đôi đó. Số khó trùng: 9137 khách, 4242tr; so trên trường cụ thể, không tìm chuỗi trong cả body.
+const b = newBucket(M, { profile: prof({ guest_count: 9137 }), budgetDoc: budgetDoc(4242, { guests: 9137 }), members: true, overlay: M.overlayFor("venue", [ids.R1]) });
+const stranger = async (url) => { M.resetOverlayCache(); const orig = globalThis.fetch; globalThis.fetch = async () => { throw new Error("không mạng"); };
+  try { const u = new URL("http://localhost" + url); const segs = u.pathname.replace(/^\/api\/vendors\/?/, "").split("/").filter(Boolean); const res = await M.handleVendors(new Request(u), { CHAT_DATA: b }, { userId: "u2-nguoi-la" }, segs); return { body: await res.json() }; } catch (e) { return { err: e }; } finally { globalThis.fetch = orig; } };
+const leaks = (snap, bbs) => { const o = [];
+  if (snap) { if (snap.guestCount === 9137) o.push("snapshot.guestCount"); if (snap.budgetByCategory?.venue === 4242) o.push("snapshot.budgetByCategory.venue"); if (/Kín|kin\.bi|0900000777/.test(JSON.stringify(snap))) o.push("snapshot chứa trường cá nhân"); }
+  for (const x of bbs) if (x && (x.guests === 9137 || x.categoryBudgetTr === 4242 || /9137|4242/.test(x.text || ""))) o.push("budgetBasis " + JSON.stringify(x).slice(0, 120));
+  return o; };
+let r = await stranger(`/api/vendors/match?coupleId=${CID}&category=venue&limit=50`);
+if (r.err) bad(`người lạ (match): ném ${r.err.message}`); else { const l = leaks(r.body?.profileSnapshot, (r.body?.vendors || []).map((v) => v.match?.budgetBasis)); if (l.length) bad(`người lạ nhận dữ liệu cặp đôi khác ở match: ${l.join(", ")}`); }
+// (d) chi tiết vendor của người lạ: match null hoặc không có số của cặp đôi
+r = await stranger(`/api/vendors/${ids.R1}?coupleId=${CID}`);
+if (r.err) bad(`người lạ (chi tiết): ném ${r.err.message}`); else { const l = leaks(null, [r.body?.match?.budgetBasis]); if (l.length) bad(`người lạ nhận dữ liệu cặp đôi khác ở chi tiết: ${l.join(", ")}`); }
+// (d2) thành viên vẫn nhận 200 ở chi tiết (đối chứng: handler không hỏng)
+const d = await tab(M, { url: `/api/vendors/${ids.R1}?coupleId=${CID}`, bucket: b, countFetch: { n: 0 } });
 if (d.err || d.status !== 200) bad(`chi tiết (thành viên) lỗi ${d.err?.message || d.status}`);
 restoreNow(); done(fails);
