@@ -4,7 +4,7 @@ Chỉ ĐỌC repo (TOHONG_REPO, TOHONG_BACK_REPO, mặc định cạnh tohong-hq
 price-inputs.json = bản ghi giả dạng pool-vendors.json (id, categories, price_range, last_scraped; tên bị thay bằng "V <id>") cho generator.
 expected-prices.json = đầu ra ĐÚNG theo spec products/T-164 (bảng ngưỡng, P25-P75 giữa trung điểm đã làm tròn 0,1 triệu, n >= 10, as-of 2026-11-14).
 Chạy: python3 -I eval/T-164/fixtures/tao-fixture.py   (fixture là ảnh chụp 2026-11-14; chạy lại chỉ để kiểm lại, không để 'sửa cho khớp code')."""
-import glob, json, math, os, sys
+import glob, json, math, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); HQ = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 T = os.environ.get("TOHONG_REPO") or os.path.join(HQ, "..", "tohong"); B = os.environ.get("TOHONG_BACK_REPO") or os.path.join(HQ, "..", "tohong-back")
 s = open(os.path.join(B, "lib", "vendorPool.generated.js"), encoding="utf-8").read(); pool = json.loads(s[s.index("= [") + 2:s.rindex("]") + 1])
@@ -13,7 +13,7 @@ for f in glob.glob(os.path.join(T, "tools/scraper/output/HCMC/*/vendors.json")):
     d = json.load(open(f, encoding="utf-8")); d = d["vendors"] if isinstance(d, dict) else d
     for v in d: src.setdefault(v["id"], v)
 BANDS = {"attire": (0.3, 60), "ceremony": (0.5, 100), "decor": (0.5, 300), "honeymoon": (1, 200), "jewelry": (0.5, 150), "makeup": (1, 100),
-         "photography": (0.5, 150), "stationery": (0.3, 50), "transport": (0.5, 60), "venue": (1, 20)}
+         "photography": (0.5, 150), "stationery": (0.3, 50), "transport": (0.5, 60), "venue": (2, 20)}
 UNIT = {c: "package" for c in BANDS}; UNIT["venue"] = "per_table"
 DEFAULTS = {"photography": (15, 30), "venue": (5, 15), "decor": (10, 50), "attire": (8, 25), "makeup": (3, 8), "ceremony": (5, 15), "jewelry": (10, 40), "transport": (3, 8), "stationery": (2, 6), "honeymoon": (20, 60)}
 N_MIN = 10
@@ -23,10 +23,11 @@ def pct(a, p):
 inputs, valid, rej, legacy = [], {}, [], {}
 for v in pool:
     r = src[v["id"]].get("price_range"); cat = v["category"]
-    inputs.append({"id": v["id"], "name": "V " + v["id"], "categories": [cat], "city": "HCMC", "style_tags": [], "description": "", "price_range": r or None, "last_scraped": src[v["id"]].get("last_scraped")})
+    inputs.append({"id": v["id"], "name": v["name"], "categories": [cat], "city": "HCMC", "style_tags": [], "description": "", "price_range": r or None, "last_scraped": src[v["id"]].get("last_scraped")})
     if not r: continue
     lo, hi = BANDS[cat]; mn, mx = r["min_vnd"] / 1e6, r["max_vnd"] / 1e6
-    why = "unit" if r.get("unit") != UNIT[cat] else "order" if not (mn > 0 and mx >= mn) else "band" if (mn < lo or mx > hi) else None
+    toks = {float(t) for t in re.findall(r"\d+", v["name"])}
+    why = "name_number" if (r.get("unit") == UNIT[cat] and (mn in toks or mx in toks)) else "unit" if r.get("unit") != UNIT[cat] else "order" if not (mn > 0 and mx >= mn) else "band" if (mn < lo or mx > hi) else None
     if why: rej.append({"id": v["id"], "category": cat, "reason": why}); continue
     a, b = r1(mn), r1(mx); legacy[v["id"]] = {"priceMin": a, "priceMax": b, "priceSource": "legacy_marry", "priceAsOf": src[v["id"]]["last_scraped"][:7]}
     valid.setdefault(cat, []).append((a + b) / 2)

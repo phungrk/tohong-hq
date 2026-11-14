@@ -11,7 +11,7 @@ import json, math, os, re, subprocess, sys
 HQ = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 B = next((os.path.abspath(p) for p in (os.environ.get("TOHONG_BACK_REPO"), os.path.join(HQ, "..", "tohong-back")) if p and os.path.isfile(os.path.join(p, "lib", "vendorPool.generated.js"))), None)
 if not B: print("FAIL không thấy repo tohong-back"); sys.exit(2)
-BANDS = {"attire": (0.3, 60), "ceremony": (0.5, 100), "decor": (0.5, 300), "honeymoon": (1, 200), "jewelry": (0.5, 150), "makeup": (1, 100), "photography": (0.5, 150), "stationery": (0.3, 50), "transport": (0.5, 60), "venue": (1, 20)}
+BANDS = {"attire": (0.3, 60), "ceremony": (0.5, 100), "decor": (0.5, 300), "honeymoon": (1, 200), "jewelry": (0.5, 150), "makeup": (1, 100), "photography": (0.5, 150), "stationery": (0.3, 50), "transport": (0.5, 60), "venue": (2, 20)}
 DEFAULTS = {"photography": (15, 30), "venue": (5, 15), "decor": (10, 50), "attire": (8, 25), "makeup": (3, 8), "ceremony": (5, 15), "jewelry": (10, 40), "transport": (3, 8), "stationery": (2, 6), "honeymoon": (20, 60)}
 N_MIN = 10
 r1 = lambda x: math.floor(x * 10 + 0.5) / 10

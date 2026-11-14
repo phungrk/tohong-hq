@@ -4,6 +4,8 @@
 // A. phép thử tương đương: cùng số, chỉ đổi estimate->legacy_marry, thì danh sách chat (id, thứ tự) và điểm/thứ tự tab giống hệt, với nhiều hạng mục và ngân sách.
 // B. chip/câu khẳng định: cặp sinh đôi estimate vs legacy cùng giá.
 // C. prompt câu AI có nhãn. D. pool không priceSource: chip vẫn xuất hiện như cũ.
+// E. chat: dòng "Phù hợp vì" của vendor ước tính không nói "ngân sách" (lý do dự phòng thành "phù hợp với nhu cầu của anh chị (giá ước tính theo hạng mục)"), vendor giá riêng giữ "phù hợp với ngân sách và nhu cầu của anh chị";
+//    câu hướng dẫn trả lời bỏ "rõ ngân sách" (thành "rõ giá (kèm nhãn giá) và style") và thêm dòng cấm khẳng định vendor ước tính hợp/nằm trong ngân sách.
 import { stampedBack, loadModules, setNow, restoreNow, EXPECTED, LABEL } from "./_lib.mjs";
 import { tab, chat, coupleProfile, CID, AUTH, MSG_BY_CAT } from "../T-159/_lib.mjs";
 const fails = []; const bad = (m) => { if (fails.length < 30) fails.push(m); };
@@ -86,6 +88,30 @@ const REAL = (a, b) => ({ priceMin: a, priceMax: b, priceSource: "legacy_marry",
   const M = await loadModules(dir); const ov = {}; for (const v of M.POOL) if (v.category === "photography" && v.id !== ids[0]) ov[v.id] = { hidden: true, hidden_reason: "eval T-164" };
   const r = await tab(M, { url: `/api/vendors/match?coupleId=${CID}&category=photography&limit=50`, profile: coupleProfile({ budget: 300, budget_by_category: { photography: 20 } }), overlay: ov });
   const v = r.body?.vendors?.[0]; if (!v || !(v.match.reasons || []).some((x) => /ngân sách|^Rẻ hơn/.test(x.label))) bad("pool không priceSource: chip ngân sách phải xuất hiện như cũ");
+}
+/* E. chat */
+{
+  const { M, ids, ov } = await mk([EST(6, 8), REAL(6, 8)]);
+  const r = await chat(M, { message: MSG_BY_CAT.photography, profile: coupleProfile({ budget: 300 }), overlay: ov });
+  const lines = (r.sp || "").split("\n"); const nameOf = (id) => M.POOL.find((v) => v.id === id).name;
+  const why = (id) => { const i = lines.findIndex((l) => /^\d+\./.test(l.trim()) && l.includes(nameOf(id))); return i < 0 ? null : (lines.slice(i, i + 6).find((l) => /Phù hợp vì:/.test(l)) || ""); };
+  const we = why(ids[0]), wr = why(ids[1]);
+  if (we == null || wr == null) bad("chat E: thiếu ứng viên ước tính hoặc giá riêng trong khối");
+  else {
+    if (/ngân sách/.test(we) || !/phù hợp với nhu cầu của anh chị \(giá ước tính theo hạng mục\)/.test(we)) bad(`chat: "Phù hợp vì" của vendor ước tính không được nói ngân sách, mong "phù hợp với nhu cầu của anh chị (giá ước tính theo hạng mục)", thấy "${we.trim()}"`);
+    if (!/phù hợp với ngân sách và nhu cầu của anh chị/.test(wr)) bad(`chat: vendor giá riêng giữ "phù hợp với ngân sách và nhu cầu của anh chị", thấy "${wr.trim()}"`);
+  }
+  if (/rõ ngân sách/.test(r.sp || "") || !/rõ giá \(kèm nhãn giá\) và style/.test(r.sp || "")) bad('chat: hướng dẫn "rõ ngân sách và style" phải thành "rõ giá (kèm nhãn giá) và style"');
+  if (!/Vendor có nhãn giá "ước tính theo hạng mục": không khẳng định vendor hợp hoặc nằm trong ngân sách của anh chị\./.test(r.sp || "")) bad("chat: thiếu dòng hướng dẫn không khẳng định vendor ước tính nằm trong ngân sách");
+  // quét: mọi ứng viên chat ước tính (5 hạng mục, 3 ngân sách) không có chữ "ngân sách" ở dòng Phù hợp vì
+  let nEst = 0;
+  for (const cat of CATS) for (const bc of [3, 10, 30]) {
+    const rr = await chat(A, { message: `${MSG_BY_CAT[cat]} ${bc}tr`, profile: coupleProfile({ budget: 300 }) }); const ls = (rr.sp || "").split("\n");
+    (rr.md?.matches || []).forEach((m) => { if (!String(m.price_basis).startsWith("estimate")) return; nEst++;
+      const i = ls.findIndex((l) => /^\d+\./.test(l.trim()) && l.includes(A.POOL.find((v) => v.id === m.vendor_id).name)); const w = i < 0 ? "" : (ls.slice(i, i + 6).find((l) => /Phù hợp vì:/.test(l)) || "");
+      if (/ngân sách/.test(w)) bad(`chat quét ${cat} ${bc}tr: vendor ước tính ${m.vendor_id} có "Phù hợp vì" nói ngân sách: "${w.trim()}"`); });
+  }
+  if (nEst < 10) bad(`chat quét: chỉ ${nEst} ứng viên ước tính (eval không đo đủ)`);
 }
 restoreNow();
 if (fails.length && process.env.T164_ALL) console.log(fails.map((f) => "  - " + f).join("\n"));

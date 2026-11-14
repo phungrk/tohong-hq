@@ -22,6 +22,7 @@ const VENDORS = [
   V('t164_4', 'Delta Studio', 14, 16, { price_source: 'estimated' }),
   V('t164_5', 'Epsilon Studio', 15, 17, {}),
 ];
+const OMEGA = V('t164_7', 'Omega Hall', 4, 4.6, { category: 'venue', price_source: 'estimated', price_basis: 'legacy_marry', price_as_of: '2026-06', price_label: L1 });
 const ZETA = V('t164_6', 'Zeta Studio', 12, 14, { price_source: 'estimated', price_basis: 'estimate_category', price_as_of: '2026-06', price_label: L2 }); // đã lưu lúc 10tr, giá hiện tại 12tr
 const WANT = { Alpha: L1, Beta: L2, Gamma: L3 };
 const HTML = (f) => `<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0}</style><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/${f}"></script></body></html>`;
@@ -32,7 +33,7 @@ import { createRoot } from 'react-dom/client';
 import { VendorProvider } from '/src/screens/VendorCtx.jsx';
 import { ChatActionsCtx, VMatchChatCard } from '/src/screens/chat/VendorChatCards.jsx';
 function App() {
-  const [cards, setCards] = React.useState([{ k: 0, C: VMatchChatCard, p: { catId: 'photography' } }]);
+  const [cards, setCards] = React.useState([{ k: 0, C: VMatchChatCard, p: { catId: new URLSearchParams(location.search).get('cat') || 'photography' } }]);
   const push = (C, p) => setCards(c => [...c, { k: c.length, C, p }]);
   return <VendorProvider coupleId="t164"><ChatActionsCtx.Provider value={{ pushUser: () => {}, pushAI: push }}>
     <div id="cards" style={{ width: 390 }}>{cards.map(c => <div key={c.k} data-card={c.k}><c.C {...c.p} /></div>)}</div>
@@ -80,8 +81,8 @@ let dev, br;
       const m = r.request().method(), u = new URL(r.request().url());
       if (m === 'OPTIONS') return r.fulfill({ status: 204, headers: CORS });
       const j = (o, status = 200) => r.fulfill({ status, headers: CORS, contentType: 'application/json', body: JSON.stringify(o) });
-      if (u.pathname === '/api/vendors/match') return j({ vendors: VENDORS, total: VENDORS.length, offset: 0, whyThoseVendors: null });
-      if (u.pathname === '/api/vendors/status' && m === 'POST') { let ids = []; try { ids = JSON.parse(r.request().postData() || '{}').ids || []; } catch (e) { /* */ } const o = {}; for (const id of ids) { const v = VENDORS.concat([ZETA]).find((x) => x.id === id); o[id] = v ? { hidden: false, price_source: v.price_source || 'estimated', price_basis: v.price_basis, price_as_of: v.price_as_of, price_label: v.price_label, priceMin: v.priceMin, priceMax: v.priceMax } : null; } return j({ vendors: o }); }
+      if (u.pathname === '/api/vendors/match') return j({ vendors: u.searchParams.get('category') === 'venue' ? [OMEGA] : VENDORS, total: VENDORS.length, offset: 0, whyThoseVendors: null });
+      if (u.pathname === '/api/vendors/status' && m === 'POST') { let ids = []; try { ids = JSON.parse(r.request().postData() || '{}').ids || []; } catch (e) { /* */ } const o = {}; for (const id of ids) { const v = VENDORS.concat([ZETA, OMEGA]).find((x) => x.id === id); o[id] = v ? { hidden: false, price_source: v.price_source || 'estimated', price_basis: v.price_basis, price_as_of: v.price_as_of, price_label: v.price_label, priceMin: v.priceMin, priceMax: v.priceMax } : null; } return j({ vendors: o }); }
       const x = u.pathname.match(/^\/api\/vendors\/([^/]+)$/);
       if (x && m === 'GET' && !['match', 'categories', 'status'].includes(x[1])) { const v = VENDORS.find((q) => q.id === x[1]); return v ? j({ vendor: v, match: { totalScore: 80, scoreBreakdown: {}, reasons: [], whyThisVendor: 'x' } }) : j({}, 404); }
       if (u.pathname === '/api/couples/t164/budget') return j({ total_tr: 100, guests: 100, categories: [{ id: 'photography', name: 'Chụp ảnh', allocated_tr: 20, pct: 20, items: [] }] });
@@ -102,11 +103,24 @@ let dev, br;
       } else if (!/giá ước tính/i.test(t)) bad(`${surf}: hàng ${v.name} (back cũ, không price_label) có giá mà thiếu nhãn dự phòng "giá ước tính"`);
     }
   };
+  /* S0 venue: giá theo bàn ("/bàn") ở danh sách và chi tiết; hạng mục khác không có "/bàn" */
+  { const pg = await page(`http://127.0.0.1:${port}/__t164a.html?cat=venue`);
+    try {
+      await pg.waitForFunction(() => document.body.innerText.includes('Omega Hall'), null, { timeout: 15000 });
+      const t = await pg.evaluate(() => document.querySelector('[data-card="0"]').innerText.replace(/\s+/g, ' '));
+      if (!/4tr\s*[–-]\s*4\.6tr\/bàn/.test(t) || !t.includes(L1)) bad('venue danh sách chat: giá phải ghi theo bàn "4tr–4.6tr/bàn" kèm nhãn, thấy: ' + t.slice(0, 200));
+      await pg.locator('[data-card="0"]').getByText('Omega Hall', { exact: false }).first().click({ timeout: 5000 });
+      await pg.waitForSelector('[data-card="1"]', { timeout: 5000 }); await pg.waitForTimeout(500);
+      const d = await pg.evaluate(() => document.querySelector('[data-card="1"]').innerText.replace(/\s+/g, ' '));
+      if (!/4tr\s*[–-]\s*4\.6tr\/bàn/.test(d)) bad('venue chi tiết: giá phải ghi theo bàn "4tr–4.6tr/bàn", thấy: ' + d.slice(0, 200));
+    } catch (e) { bad('venue: lỗi chạy ' + String(e.message).split('\n')[0]); }
+    await pg.context().close(); }
   /* S1 danh sách thẻ chat + S2 chi tiết */
   { const pg = await page(`http://127.0.0.1:${port}/__t164a.html`);
     try {
       await pg.waitForFunction(() => document.body.innerText.includes('Alpha Studio'), null, { timeout: 15000 });
       const t = {}; for (const n of ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon']) t[n] = await rowText(pg, '[data-card="0"]', n + ' Studio'); checkRows('danh sách chat', t);
+      for (const n of Object.keys(t)) if (t[n] && /\/bàn/.test(t[n])) bad(`danh sách chat: hạng mục chụp ảnh không được ghi "/bàn" (${n})`);
     } catch (e) { bad('thẻ chat: lỗi chạy ' + String(e.message).split('\n')[0]); }
     await pg.context().close(); }
   for (const n of ['Alpha', 'Gamma', 'Epsilon']) {
