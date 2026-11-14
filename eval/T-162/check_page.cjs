@@ -29,6 +29,7 @@ const tasks = [
   T('T-7', 'escalated', 'capu', 'product', 'spec-critic'),
   T('T-8', 'done', 'vendor-ops', 'vendor-ops', 'reviewer'),   // việc cũ của agent đã bỏ
   T('T-9', 'done', 'chief-of-staff', 'insight', 'spec-critic'),
+  { ...T('T-10', 'doing', EXTRA, EXTRA, 'spec-critic'), area: 'planner/front', product: 'planner' },   // việc của sản phẩm khác: để thử bộ lọc
 ];
 let k = 0;
 const E = (task, event, from, to) => ({ seq: 'S-' + String(++k).padStart(5, '0'), ledger_id: 'e' + k, t: stamp, task, title: '', event, from, to, round: 0, severity: '', cost: 0, state: '', holder: '' });
@@ -40,6 +41,7 @@ const events = [
   E('T-5', 'handoff', 'engineering', 'adversary'),
   E('T-4', 'rejected', 'adversary', 'engineering'),
   E('T-9', 'accepted', 'adversary', 'chief-of-staff'),
+  E('T-9', 'accepted', 'chief-of-staff', 'done'),
   E('T-8', 'assigned', 'chief-of-staff', 'vendor-ops'),
   E('T-8', 'handoff', 'vendor-ops', 'reviewer'),
 ];
@@ -57,17 +59,21 @@ async function open(browser, { width, activity = [], query = '', status = 200 })
   await page.goto('file://' + INDEX + query); await page.waitForTimeout(1500);
   return o;
 }
-// đọc node và đường của sơ đồ luồng
+// đọc node và đường của sơ đồ luồng bằng toạ độ màn hình (getBoundingClientRect / getScreenCTM), không đọc transform
 const readFlow = page => page.evaluate(() => {
   const svg = document.querySelector('#flow svg'); if (!svg) return null;
   const sr = svg.getBoundingClientRect();
-  const nodes = [...svg.querySelectorAll('.chr[data-agent]')].map(c => { const g = c.parentNode, r = g.getBoundingClientRect(), cr = c.getBoundingClientRect();
-    const m = /translate\(([-\d.]+)[ ,]+([-\d.]+)\)/.exec(g.getAttribute('transform') || '');
-    return { id: c.getAttribute('data-agent'), text: g.textContent, cx: cr.x + cr.width / 2, cy: cr.y + cr.height / 2, x: m ? +m[1] : NaN, y: m ? +m[2] : NaN,
+  const nodes = [...svg.querySelectorAll('.chr[data-agent]')].map(c => { const g = c.parentNode, r = g.getBoundingClientRect();
+    const ring = g.querySelector(':scope > circle:not([class])') || g.querySelector('circle'), cr = ring.getBoundingClientRect();
+    return { id: c.getAttribute('data-agent'), text: g.textContent, sprite: c.getAttribute('data-state'), box: { l: cr.left, r: cr.right, t: cr.top, b: cr.bottom },
+      cx: (cr.left + cr.right) / 2, cy: (cr.top + cr.bottom) / 2,
       inside: r.left >= sr.left - 1 && r.right <= sr.right + 1 && r.top >= sr.top - 1 && r.bottom <= sr.bottom + 1 }; });
-  const near = (x, y) => nodes.reduce((b, n) => { const d = Math.hypot(n.x - x, n.y - y); return !b || d < b.d ? { id: n.id, d } : b }, null).id;
-  const statics = [...svg.querySelectorAll('path[marker-end]')].filter(p => !p.classList.contains('run-edge')).map(p => {
-    const a = p.getPointAtLength(0), b = p.getPointAtLength(p.getTotalLength()); return near(a.x, a.y) + '>' + near(b.x, b.y); });
+  const PAD = 10;   // đầu mút đường cách mép vòng vài px: gán cho node nào có hộp bao (nới PAD) chứa đầu mút; nhiều node thì lấy tâm gần nhất
+  const at = (p, path) => { const q = svg.createSVGPoint(); q.x = p.x; q.y = p.y; const m = q.matrixTransform(path.getScreenCTM());
+    const c = nodes.filter(n => m.x >= n.box.l - PAD && m.x <= n.box.r + PAD && m.y >= n.box.t - PAD && m.y <= n.box.b + PAD);
+    if (!c.length) return '?'; return c.reduce((b, n) => Math.hypot(n.cx - m.x, n.cy - m.y) < Math.hypot(b.cx - m.x, b.cy - m.y) ? n : b).id; };
+  const statics = [...svg.querySelectorAll('path[marker-end]')].filter(p => !p.classList.contains('run-edge')).map(p =>
+    at(p.getPointAtLength(0), p) + '>' + at(p.getPointAtLength(p.getTotalLength()), p));
   const running = [...svg.querySelectorAll('.run-edge')].map(p => p.getAttribute('data-from') + '>' + p.getAttribute('data-to'));
   return { nodes, statics, running, hscroll: document.documentElement.scrollWidth > innerWidth };
 });
@@ -82,16 +88,18 @@ const readFlow = page => page.evaluate(() => {
       if (!f) { why.push(nm + ': không có sơ đồ luồng'); continue; }
       if (which === '1') {
         const have = f.nodes.map(n => n.id);
+        if (!have.includes('done')) why.push(nm + ': thiếu node "Hoàn thành" (done), đích của luồng');
         for (const id of ids) if (!have.includes(id)) why.push(nm + ': roster có ' + id + ' nhưng sơ đồ không có node');
         for (const id of have) if (!ids.includes(id) && id !== 'done') why.push(nm + ': node ' + id + ' không thuộc roster');
         for (const id of OLD) if (have.includes(id)) why.push(nm + ': còn node agent cũ ' + id);
         if (new Set(have).size !== have.length) why.push(nm + ': node trùng');
         for (const n of f.nodes) if (!n.inside) why.push(nm + ': node ' + n.id + ' vượt khung sơ đồ');
-        for (let i = 0; i < f.nodes.length; i++) for (let j = i + 1; j < f.nodes.length; j++) { const a = f.nodes[i], b = f.nodes[j]; if (Math.hypot(a.cx - b.cx, a.cy - b.cy) < 40) why.push(nm + ': node ' + a.id + ' và ' + b.id + ' chồng nhau'); }
+        for (let i = 0; i < f.nodes.length; i++) for (let j = i + 1; j < f.nodes.length; j++) { const a = f.nodes[i].box, b = f.nodes[j].box, G = 4;   // hộp bao vòng tròn nới 4px mỗi phía: còn cách nhau >= 8px
+          if (a.l - G < b.r + G && b.l - G < a.r + G && a.t - G < b.b + G && b.t - G < a.b + G) why.push(nm + ': node ' + f.nodes[i].id + ' và ' + f.nodes[j].id + ' chồng nhau hoặc sát hơn 8px'); }
         if (f.hscroll) why.push(nm + ': trang cuộn ngang');
       } else {
         const need = { running: ['chief-of-staff>insight', 'product>spec-critic', 'spec-critic>product', 'adversary>engineering', 'engineering>adversary'],
-          statics: ['chief-of-staff>insight', 'insight>chief-of-staff', 'product>spec-critic', 'spec-critic>product', 'engineering>adversary', 'adversary>engineering', 'adversary>chief-of-staff'] };
+          statics: ['chief-of-staff>insight', 'insight>chief-of-staff', 'product>spec-critic', 'spec-critic>product', 'engineering>adversary', 'adversary>engineering', 'adversary>chief-of-staff', 'chief-of-staff>done'] };
         for (const p of need.running) if (!f.running.includes(p)) why.push(nm + ': thiếu đường đang chạy ' + p + ' (thấy ' + JSON.stringify(f.running) + ')');
         for (const p of need.statics) if (!f.statics.includes(p)) why.push(nm + ': thiếu luồng lịch sử ' + p + ' (thấy ' + JSON.stringify(f.statics) + ')');
         const bad = [...f.running, ...f.statics].filter(p => /vendor-ops|reviewer|growth|finance/.test(p));
@@ -100,22 +108,39 @@ const readFlow = page => page.evaluate(() => {
       await o.page.close();
     }
   } else if (which === '3') {
-    const HELD = ['insight', 'spec-critic', 'product', 'engineering', 'adversary'], NOT = ['chief-of-staff', 'capu', EXTRA];
+    // Bảng chữ trên node (một dòng): có nhịp còn hạn -> hành động, KHÔNG có "Đang làm"; không nhịp + giữ việc doing/review/spec/rework -> "Đang làm"; còn lại không chữ.
+    // Sprite 'working' khi và chỉ khi node có chữ. Cả hai luật theo bộ lọc sản phẩm.
+    const LABEL = /đang làm/i, tx = (f, id) => (f.nodes.find(n => n.id === id) || { text: '' }).text;
+    const sel = async (page, v) => { await page.selectOption('#product-filter', v); await page.waitForTimeout(400); };
+    const verdict = (nm, f, expect) => { const t = id => f.nodes.find(n => n.id === id);
+      for (const [id, want] of Object.entries(expect)) { const n = t(id); if (!n) { why.push(nm + ': không có node ' + id); continue; }
+        const act = typeof want === 'string' && want !== 'dang-lam' ? want : null, isWork = want === 'dang-lam' || act;
+        if (want === 'dang-lam' && !LABEL.test(n.text)) why.push(nm + ': ' + id + ' giữ việc, không nhịp: phải hiện "Đang làm" (thấy "' + n.text + '")');
+        if (act && !n.text.includes(act)) why.push(nm + ': ' + id + ' có nhịp: phải hiện "' + act + '" (thấy "' + n.text + '")');
+        if (act && LABEL.test(n.text)) why.push(nm + ': ' + id + ' có nhịp nhưng node vẫn có chữ "Đang làm" (thấy "' + n.text + '")');
+        if (want === null && LABEL.test(n.text)) why.push(nm + ': ' + id + ' không giữ việc hợp lệ, không nhịp mà node hiện "Đang làm"');
+        if (isWork && n.sprite !== 'working') why.push(nm + ': ' + id + ' có chữ trạng thái nhưng sprite là ' + n.sprite + ' (phải working)');
+        if (!isWork && n.sprite === 'working') why.push(nm + ': ' + id + ' không có chữ trạng thái nhưng sprite working'); } };
     for (const [nm, w] of widths) {
-      // a) không có nhịp: agent giữ việc doing/review/spec/rework hiện "đang làm"; giữ new/escalated hoặc không giữ thì không
-      let o = await open(browser, { width: w, activity: [] }); let f = await readFlow(o.page); await o.page.close();
-      const t = id => (f.nodes.find(n => n.id === id) || { text: '' }).text;
-      for (const id of HELD) if (!/đang làm/i.test(t(id))) why.push(nm + ': ' + id + ' giữ việc nhưng node không hiện "đang làm" khi không có nhịp');
-      for (const id of NOT) if (/đang làm/i.test(t(id))) why.push(nm + ': ' + id + ' không giữ việc doing/review/spec/rework mà node hiện "đang làm"');
-      // b) có nhịp: hiện hành động mới nhất (theo thời điểm, không theo thứ tự trong danh sách); nhịp quá hạn không hiện thay "đang làm"
-      o = await open(browser, { width: w, activity: [
-        { agent: 'engineering', action: 'Chạy eval', task: 'T-4', ago: 5000 }, { agent: 'engineering', action: 'Đọc spec', task: 'T-4', ago: 40000 },
-        { agent: 'adversary', action: 'Nhịp cũ quá hạn', task: 'T-5', ago: 600000 }, { agent: EXTRA, action: 'Soát bản dựng', task: 'T-1', ago: 3000 }] });
-      f = await readFlow(o.page); await o.page.close();
-      if (!t('engineering').includes('Chạy eval')) why.push(nm + ': engineering có nhịp mới nhất "Chạy eval" nhưng node không hiện (thấy "' + t('engineering') + '")');
-      if (t('engineering').includes('Đọc spec')) why.push(nm + ': engineering hiện nhịp cũ "Đọc spec" thay vì nhịp mới nhất');
-      if (!t(EXTRA).includes('Soát bản dựng')) why.push(nm + ': ' + EXTRA + ' có nhịp nhưng node không hiện hành động');
-      if (t('adversary').includes('Nhịp cũ quá hạn') || !/đang làm/i.test(t('adversary'))) why.push(nm + ': adversary giữ việc review, nhịp quá hạn: phải hiện "đang làm", không hiện hành động cũ (thấy "' + t('adversary') + '")');
+      // a) tất cả: không nhịp
+      let o = await open(browser, { width: w, activity: [] }); let f = await readFlow(o.page);
+      verdict(nm + ' (không nhịp)', f, { insight: 'dang-lam', 'spec-critic': 'dang-lam', product: 'dang-lam', engineering: 'dang-lam', adversary: 'dang-lam', [EXTRA]: 'dang-lam', 'chief-of-staff': null, capu: null });
+      await sel(o.page, 'hq'); f = await readFlow(o.page);
+      verdict(nm + ' (không nhịp, lọc hq)', f, { insight: 'dang-lam', engineering: 'dang-lam', [EXTRA]: null, 'chief-of-staff': null });
+      await sel(o.page, 'planner'); f = await readFlow(o.page);
+      verdict(nm + ' (không nhịp, lọc planner)', f, { [EXTRA]: 'dang-lam', insight: null, engineering: null });
+      await o.page.close();
+      // b) có nhịp: hành động mới nhất theo `at`, không chữ "Đang làm"; nhịp quá hạn -> "Đang làm"; nhịp của việc ngoài bộ lọc bị lọc
+      const act = [{ agent: 'engineering', action: 'Chạy eval', task: 'T-4', ago: 5000 }, { agent: 'engineering', action: 'Đọc spec', task: 'T-4', ago: 40000 },
+        { agent: 'adversary', action: 'Nhịp cũ quá hạn', task: 'T-5', ago: 600000 }, { agent: EXTRA, action: 'Soát bản dựng', task: 'T-10', ago: 3000 }];
+      o = await open(browser, { width: w, activity: act }); f = await readFlow(o.page);
+      verdict(nm + ' (có nhịp)', f, { engineering: 'Chạy eval', [EXTRA]: 'Soát bản dựng', adversary: 'dang-lam', insight: 'dang-lam', 'chief-of-staff': null });
+      if (tx(f, 'engineering').includes('Đọc spec')) why.push(nm + ': engineering hiện nhịp cũ "Đọc spec" thay vì nhịp mới nhất');
+      if (tx(f, 'adversary').includes('Nhịp cũ quá hạn')) why.push(nm + ': adversary hiện nhịp quá hạn');
+      await sel(o.page, 'hq'); f = await readFlow(o.page);
+      verdict(nm + ' (có nhịp, lọc hq)', f, { engineering: 'Chạy eval', [EXTRA]: null });
+      if (tx(f, EXTRA).includes('Soát bản dựng')) why.push(nm + ': lọc hq mà nhịp của việc planner vẫn hiện');
+      await o.page.close();
     }
   } else if (which === '5') {
     const o = await open(browser, { width: 1200 });
