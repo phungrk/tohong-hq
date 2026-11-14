@@ -14,10 +14,23 @@ Capu (2026-11-14, giao qua Chief of Staff): dashboard phản ánh đúng tình t
 Nếu node sơ đồ sinh từ roster và "đang làm" lấy theo việc đang giữ thì Capu nhìn sơ đồ thấy đủ 5 bộ phận và biết ai đang làm mà không cần nhịp live. Chỉ số bảo vệ: T-145 (DATA_URL, realtime) và các bất biến `hq/dashboard` không đỏ.
 
 ## Hành vi (người dùng thấy gì)
-1. **Node theo roster.** Sơ đồ luồng có đúng một node cho mỗi phần tử của `roster` trong dashboard.json (thêm bộ phận vào roster thì có node, không sửa trang). Không có node cho id ngoài roster, ngoại lệ duy nhất: node "Hoàn thành" (`done`) được giữ hoặc bỏ tùy cài đặt. Ở khung rộng (1200px) và hẹp (390px): các node không chồng nhau (tâm cách nhau ít nhất 40px), nằm trong khung sơ đồ, trang không cuộn ngang. Cách xếp vị trí do cài đặt quyết định.
-2. **Luồng đủ.** Mọi luồng có đầu nào là bộ phận trong roster đều hiện, kể cả luồng tới và đi từ `insight`, `spec-critic`, `adversary`: đường lịch sử (bàn giao, trả về) và đường đang chạy (`.run-edge`). Luồng có đầu là id ngoài roster (vd `vendor-ops`) thì không vẽ.
-3. **"Đang làm".** Chữ "Đang làm" nằm trong node của agent khi và chỉ khi agent đó giữ (`holder`) ít nhất một việc ở trạng thái `doing`, `review`, `spec` hoặc `rework` (việc `new`, `escalated`, `blocked`, `done` không tính), hoặc có nhịp hoạt động còn hạn. Khi có nhịp còn hạn (trong `ACT_TTL`), node hiện hành động của nhịp mới nhất theo trường `at` (không theo thứ tự trong danh sách) thay cho chữ "Đang làm". Nhịp quá hạn không hiện; agent giữ việc vẫn hiện "Đang làm". Khi không có nhịp nào (tohong-live im), agent giữ việc vẫn hiện "Đang làm".
-4. **Roster xuất ra.** `export_dashboard.py` chỉ đưa vào `roster` (trong `dashboard.json` và `roster.json`): `capu`, `chief-of-staff`, và các id có trong danh sách bộ phận của `CLAUDE.md` (các dòng dạng ``- `id` — mô tả``). Bỏ phần còn lại của `org/roster.json` (hiện: `vendor-ops`, `growth`, `finance`). `chatgpt` (bộ phận ngoài phiên, chỉ nêu trong đoạn văn của CLAUDE.md, không ở danh sách ``- `id` —``) không vào roster. Danh sách đọc lúc chạy từ CLAUDE.md, không viết cứng trong script.
+Bản v2 (sửa theo defect T-162-D1, Chief phân xử): đã sửa Hành vi 1 (node `done` giữ; "chồng nhau" đo bằng hộp bao), 2 (`done` là đích hợp lệ; đo bằng toạ độ màn hình), 3 (viết lại thành bảng, bỏ mâu thuẫn "khi và chỉ khi … hoặc nhịp" với "thay cho"), 4 (hai ca lỗi), vì bản v1 cho phép nhiều cách hiểu.
+
+1. **Node theo roster.** Sơ đồ luồng có đúng một node cho mỗi phần tử của `roster` trong dashboard.json (thêm bộ phận vào roster thì có node, không sửa trang) và đúng một node "Hoàn thành" (`done`). `done` không thuộc roster nhưng là ngoại lệ được giữ vì là đích của luồng. Không có node nào khác. Ở khung rộng (1200px) và hẹp (390px): hộp bao (`getBoundingClientRect`) của vòng tròn mỗi node, nới 4px mỗi phía, không giao hộp của node khác (nghĩa là cách nhau ít nhất 8px); mỗi node nằm trong khung sơ đồ; trang không cuộn ngang. Cách xếp vị trí do cài đặt quyết định.
+2. **Luồng đủ.** Mọi luồng mà cả hai đầu là bộ phận trong roster hoặc `done` đều hiện, gồm luồng tới và đi từ `insight`, `spec-critic`, `adversary`, và luồng tới `done`: đường lịch sử (bàn giao, trả về) và đường đang chạy. Luồng có đầu là id ngoài roster và khác `done` (vd `vendor-ops`) thì không vẽ. Đầu mút của đường được xác định bằng toạ độ màn hình: đầu mút nằm trong hộp bao vòng tròn của node, nới 10px.
+3. **Chữ và sprite trên node.** Mỗi node hiện tối đa một dòng trạng thái, theo thứ tự ưu tiên:
+
+| Tình huống của agent | Chữ trên node | Sprite |
+| --- | --- | --- |
+| Có nhịp tohong-live còn hạn (trong `ACT_TTL`; nhịp mới nhất theo `at`, không theo thứ tự trong danh sách) và việc của nhịp thuộc phạm vi bộ lọc sản phẩm | Hành động của nhịp đó. Không có chữ "Đang làm" | `working` |
+| Không có nhịp nào như trên, và giữ (`holder`) ít nhất một việc `doing`, `review`, `spec` hoặc `rework` thuộc phạm vi bộ lọc sản phẩm | "Đang làm" | `working` |
+| Còn lại (gồm: chỉ giữ việc `new`, `escalated`, `blocked`, `done`; nhịp quá hạn mà không giữ việc hợp lệ; nhịp hoặc việc nằm ngoài bộ lọc) | Không có chữ | không phải `working` |
+
+   Sprite đổi theo đúng bảng này, khớp với chữ (chỉ áp cho nhân vật trên sơ đồ luồng; hình #model không đổi). Việc `new` không còn làm sprite "working" trên sơ đồ luồng: đây là thay đổi có chủ ý. Cả hai luật (giữ việc và nhịp) áp bộ lọc sản phẩm như nhau: chọn lọc `hq` thì việc và nhịp của sản phẩm khác không tính.
+4. **Roster xuất ra.** `export_dashboard.py` chỉ đưa vào `roster` (trong `dashboard.json` và `roster.json`): `capu`, `chief-of-staff`, và các id có trong danh sách bộ phận của `CLAUDE.md` (các dòng khớp ``^- `id` — ``; đọc lúc chạy, không viết cứng). Bỏ phần còn lại của `org/roster.json` (hiện: `vendor-ops`, `growth`, `finance`).
+   - (a) Không có dòng bộ phận nào khớp mẫu: export in lỗi, thoát mã khác 0, không ghi đè `dashboard.json` đang có (workflow đỏ, dữ liệu cũ còn nguyên). `capu` và `chief-of-staff` không tính là dòng khớp.
+   - (b) Có id trong CLAUDE.md mà `org/roster.json` không có: tạo một phần tử roster tối thiểu (`id`, `name` = id) và in dòng `::warning::` (không lỗi).
+   - `chatgpt` không có node: bộ phận ngoài phiên, không ghi sổ cái (ADR-058, ADR-059), nên sẽ luôn rảnh và không có luồng nào; nó không nằm trong danh sách ``- `id` —`` của CLAUDE.md. Đổi ý thì thêm một dòng vào danh sách đó.
 5. **Không đổi.** `DATA_URL` vẫn là `https://raw.githubusercontent.com/phungrk/tohong-hq-dashboard/dashboard-data/dashboard.json` (INV-019); trang vẫn nối WebSocket `tohong-live` mặc định và `?live=` vẫn đổi host; `#live` hiện "Trực tiếp" khi kênh mở.
 
 ## Ràng buộc (vòi)
@@ -32,25 +45,24 @@ Nếu node sơ đồ sinh từ roster và "đang làm" lấy theo việc đang g
 Chạy từ gốc `tohong-hq`; trang đọc `${TOHONG_DASHBOARD_REPO:-/home/user/tohong-hq-dashboard}`, d3 qua biến `D3`.
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Mỗi phần tử roster (kể cả một id mới thêm trong fixture) có node, không node ngoài roster, không chồng nhau, trong khung, không cuộn ngang, ở 1200px và 390px | `bash eval/T-162/check_1.sh` |
-| 2 | Luồng lịch sử và đang chạy tới/đi từ insight, spec-critic, adversary hiện ở cả hai khung; luồng của agent cũ không vẽ | `bash eval/T-162/check_2.sh` |
-| 3 | Giữ việc doing/review/spec/rework thì node hiện "Đang làm" khi không có nhịp; giữ new/escalated hoặc không giữ thì không; có nhịp thì hiện hành động mới nhất; nhịp quá hạn không hiện | `bash eval/T-162/check_3.sh` |
-| 4 | Roster xuất ra = capu, chief-of-staff + bộ phận trong CLAUDE.md; bỏ vendor-ops, growth, finance; danh sách đọc từ CLAUDE.md | `python3 eval/T-162/check_4.py` |
+| 1 | Mỗi phần tử roster (kể cả một id mới thêm trong fixture) và `done` có node, không node khác; hộp bao vòng tròn không chồng/không sát hơn 8px; trong khung; không cuộn ngang; ở 1200px và 390px | `bash eval/T-162/check_1.sh` |
+| 2 | Luồng lịch sử và đang chạy tới/đi từ insight, spec-critic, adversary và tới `done` hiện ở cả hai khung (đo bằng toạ độ màn hình); luồng của agent cũ không vẽ | `bash eval/T-162/check_2.sh` |
+| 3 | Đúng bảng chữ/sprite ở Hành vi 3: có nhịp thì hành động mới nhất và KHÔNG có "Đang làm"; không nhịp + giữ việc thì "Đang làm"; còn lại không chữ; sprite khớp; nhịp quá hạn; bộ lọc hq/planner áp cho cả hai luật | `bash eval/T-162/check_3.sh` |
+| 4 | Roster xuất ra = capu, chief-of-staff + bộ phận trong CLAUDE.md (đọc lúc chạy); (a) không dòng nào khớp -> thoát khác 0, không ghi đè dashboard.json; (b) id vắng trong org/roster.json -> phần tử tối thiểu + `::warning::` | `python3 eval/T-162/check_4.py` |
 | 5 | `DATA_URL` đúng, banner lỗi ẩn, WebSocket `tohong-live` mở, `#live` = "Trực tiếp", `?live=` đổi host | `bash eval/T-162/check_5.sh` |
 
 Mỗi tiêu chí đúng một eval. Dạng 2 (script) vì kiểm được bằng trình duyệt giả lập. Tiêu chí 5 xanh sẵn: là eval giữ nguyên hành vi T-145, không phải tính năng mới.
 
 ## Bất biến đề xuất (tầng 2)
 - `hq/dashboard`: "Mọi phần tử roster có node trong sơ đồ luồng ở 1200px và 390px, không node ngoài roster" (= `check_1`, đổi fixture về roster 7 bộ phận).
-- `hq/dashboard`: "Agent giữ việc doing/review/spec/rework luôn hiện đang làm kể cả khi không có nhịp" (= phần không nhịp của `check_3`).
+- `hq/dashboard`: "Chữ và sprite của node theo bảng Hành vi 3" (= `check_3`).
 Spec Critic quyết rút vào bể hay không.
 
 ## Không làm
-- Không đổi hình #model (khối, đường, cổng), nhân vật, KPI, kanban.
+- Không đổi hình #model (khối, đường, cổng) và nhân vật trong #model, KPI, kanban.
 - Không đổi cách tohong-live phát nhịp hay hook ghi nhịp.
 - Không sửa `org/roster.json`; không đổi định dạng `dashboard.json` ngoài việc bớt phần tử roster.
 - Không thêm sprite mới cho bộ phận mới.
-- "Đang làm" theo việc giữ tính trên toàn công ty, không theo bộ lọc sản phẩm.
 
 ## Câu hỏi mở
-Không. (Giả định đã chọn: `chatgpt` không vào roster vì không phải node của luồng việc trong sổ cái; đổi ý thì thêm một dòng ``- `chatgpt` — …`` vào danh sách bộ phận của CLAUDE.md. Tự tin ~75%.)
+Không.
