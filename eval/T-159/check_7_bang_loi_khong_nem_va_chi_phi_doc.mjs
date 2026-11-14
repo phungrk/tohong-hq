@@ -22,6 +22,8 @@ const cost = [
   ["chat không ghép vendor", await chat(M, { profile: P, budgetDoc: D, message: "Chào em, hôm nay anh chị hơi mệt" }), 0, 0],
   ["tab /match", await tabMatch(M, "photography", { profile: P, overlay: ovTab, budgetDoc: D }), 1, 1],
   ["tab /categories", await tab(M, { url: `/api/vendors/categories?coupleId=${CID}`, profile: P, budgetDoc: D }), 0, 0],
+  ["tab /match không có quyền (không phải thành viên)", await tab(M, { url: `/api/vendors/match?coupleId=${CID}&category=photography`, profile: P, overlay: ovTab, budgetDoc: D, members: false }), 0, 0],
+  ["tab /match không có coupleId", await tab(M, { url: `/api/vendors/match?category=photography`, profile: P, overlay: ovTab, budgetDoc: D }), 0, 0],
   ["tab /:id", await tab(M, { url: `/api/vendors/${v.id}?coupleId=${CID}`, profile: P, overlay: ovTab, budgetDoc: D }), 1, 1],
 ];
 for (const [label, r, min, max] of cost) {
