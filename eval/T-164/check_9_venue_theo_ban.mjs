@@ -1,5 +1,6 @@
 // T-164 tiêu chí 9 (venue tính theo bàn; spec H7): với vendor venue có nguồn giá (pool gắn priceSource), giá là tr/BÀN và điểm ngân sách / lọc cứng chat so TỔNG = giá/bàn x số bàn với ngân sách hạng mục (vẫn là tổng).
 // Số bàn = ceil(số khách / 10) (journey.js GUESTS_PER_TABLE, venueCost của tab Ngân sách; không có trường "số bàn" nào được lưu). Số khách = `guests` trong data/couples/<id>/budget.json nếu số nguyên > 0, ngược lại guest_count của hồ sơ.
+// MỘT số khách hiệu lực cho mọi chỗ (hạng mục nào cũng vậy): budget.json.guests > 0, ngược lại guest_count hồ sơ; dùng cho số bàn, điểm sức chứa và chip "Đủ N khách", dòng "N khách" trong prompt và hash câu AI, và điều kiện missing_field của chat (có số khách hiệu lực thì chat không hỏi lại).
 // Không có số khách: điểm ngân sách venue = 0,5, không lọc cứng venue theo giá, câu danh sách bỏ "Với khoảng Xtr". Có số bàn: điểm dùng priceMax x bàn (như budgetScore dùng priceMax), lọc chat dùng priceMin x bàn, nới x1,2 áp lên tổng.
 // Chip (chỉ vendor có giá riêng, điểm ngân sách = 1): "≈ {priceMax}tr/bàn × {T} bàn"; vendor ước tính không chip. Câu danh sách: "Với khoảng {X}tr cho tiệc & nhà hàng (≈ {X/T làm tròn 0,1}tr/bàn × {T} bàn)".
 // Khối chat: dòng giá "Giá: a-btr/bàn (nhãn)" (số làm tròn như cũ); vendor giá riêng có thêm dòng "Theo số bàn: ≈ {priceMax}tr/bàn × {T} bàn"; vendor ước tính không có dòng đó. Pool KHÔNG có priceSource: venue y như cũ (so giá bàn với tổng).
@@ -12,6 +13,7 @@ const ids = {}; const OLD = {};
 const dir = stampedBack({ mut: (arr) => {
   const tw = arr.filter((v) => v.category === "venue" && v.isVerified && v.rating === 0 && v.styles.length === 0 && v.availability.length === 12 && v.city === "HCMC").slice(0, 4);
   [["R1", R(4, 4.6)], ["E1", E(4, 4.6)], ["R2", R(8, 9)]].forEach(([k, p], i) => { Object.assign(tw[i], p); ids[k] = tw[i].id; });
+  tw[0].capacity = { min: 200, max: 400 }; tw[1].capacity = { min: 50, max: 150 };   // R1 vừa 300 khách, E1 chỉ vừa 100 khách
   Object.assign(tw[3], { priceMin: 5, priceMax: 15 }); delete tw[3].priceSource; delete tw[3].priceAsOf; ids.OLD = tw[3].id;   // pool cũ: không nguồn giá
 } });
 const M = await loadModules(dir);
@@ -75,6 +77,44 @@ const msg = "Tìm nhà hàng tiệc cưới giúp anh chị";
   if (b.ids.includes(ids.R2)) bad("bảng dự toán 300 khách thắng hồ sơ 100: R2 (240tr) phải bị lọc"); }
 { // chat chưa có số khách: giữ hành vi hiện có (hỏi số khách, không ứng viên), không ném
   const r = await chat(M, { message: msg + " 150tr", profile: coupleProfile({ budget: 300 }), overlay: ov3 }); if (r.err) bad("chat venue chưa có số khách: không được ném"); if (r.ids.length) bad("chat venue chưa có số khách: không ứng viên (hỏi số khách trước như hôm nay)"); }
+/* h. số khách hiệu lực dùng cho cả sức chứa, chip "Đủ N khách", prompt, hash, missing_field */
+{ const r = await tabV({ profile: P(100, 150), budgetDoc: { ...doc({ venue: 0 }), guests: 300 } });
+  const rs = (id) => (r.body?.vendors?.find((v) => v.id === id)?.match?.reasons || []).map((x) => x.label); const cap = (id) => r.body?.vendors?.find((v) => v.id === id)?.match?.scoreBreakdown?.capacity;
+  if (!rs(ids.R1).includes("Đủ 300 khách") || !rs(ids.R1).includes("≈ 4.6tr/bàn × 30 bàn")) bad(`hồ sơ 100 khách, bảng 300: thẻ R1 mong cả "Đủ 300 khách" và "≈ 4.6tr/bàn × 30 bàn", thấy ${JSON.stringify(rs(ids.R1))}`);
+  if (rs(ids.R1).some((l) => /Đủ 100 khách/.test(l))) bad("thẻ venue ghi 'Đủ 100 khách' trong khi số khách hiệu lực là 300");
+  if (!(cap(ids.E1) < 1) || rs(ids.E1).some((l) => /^Đủ/.test(l))) bad(`E1 sức chứa 50-150: với 300 khách điểm sức chứa phải < 1 và không chip "Đủ", thấy ${cap(ids.E1)} ${JSON.stringify(rs(ids.E1))}`);
+  const r2 = await tabV({ profile: P(100, 150), budgetDoc: { ...doc({ venue: 0 }) } });  // bảng không có guests: dùng hồ sơ 100 khách = 10 bàn
+  const rs2 = (r2.body?.vendors?.find((v) => v.id === ids.R1)?.match?.reasons || []).map((x) => x.label);
+  if (!rs2.includes("≈ 4.6tr/bàn × 10 bàn")) bad(`bảng không có guests: dùng hồ sơ 100 khách => "≈ 4.6tr/bàn × 10 bàn", thấy ${JSON.stringify(rs2)}`);
+  const r3 = await tabV({ profile: P(100, 150) });  // không có bảng
+  if (!(r3.body?.vendors?.find((v) => v.id === ids.E1)?.match?.reasons || []).some((x) => x.label === "Đủ 100 khách")) bad("không có bảng: dùng hồ sơ, E1 (50-150) phải có chip 'Đủ 100 khách'"); }
+{ // prompt và hash câu AI theo số khách hiệu lực (venue và hạng mục khác)
+  const catV = (cat, keep) => Object.fromEntries(M.POOL.filter((v) => v.category === cat && v.id !== keep).map((v) => [v.id, { hidden: true, hidden_reason: "eval T-164" }]));
+  const photo = M.POOL.find((v) => v.category === "photography" && v.isVerified && v.rating === 0 && v.styles.length === 0 && v.availability.length === 12 && v.city === "HCMC");
+  for (const [id, ov] of [[ids.R1, ov3], [photo.id, catV("photography", photo.id)]]) {
+    const mkB = (guestCountProfile, docGuests, cache) => { const b = new M.MemoryBucket();
+      b.data.set(`data/couples/${CID}/profile.yaml`, JSON.stringify(coupleProfile({ budget: 300, ...(guestCountProfile ? { guest_count: guestCountProfile } : {}) })));
+      b.data.set(`data/couples/${CID}/members.json`, JSON.stringify([{ user_id: "u1", role: "owner" }])); b.data.set("data/admin/vendor_overrides.json", JSON.stringify({ seq: 1, vendors: ov }));
+      if (docGuests !== null) b.data.set(`data/couples/${CID}/budget.json`, JSON.stringify({ ...doc({}), guests: docGuests })); if (cache) b.data.set(`data/couples/${CID}/vendor_why_cache.json`, cache); return b; };
+    const open = async (b) => { const bodies = []; const orig = globalThis.fetch; globalThis.fetch = async (u, init) => { bodies.push(String(init?.body || "")); throw new Error("LLM giả (eval T-164)"); }; const lg = console.log, er = console.error; console.log = () => {}; console.error = () => {};
+      try { M.resetOverlayCache(); await M.handleVendors(new Request(`http://localhost/api/vendors/${id}?coupleId=${CID}`), { CHAT_DATA: b, CLAUDE_API_KEY: "fake-eval" }, { userId: "u1" }, [id]); } finally { globalThis.fetch = orig; console.log = lg; console.error = er; } return bodies; };
+    const tag = id === ids.R1 ? "venue" : "photography";
+    const b1 = mkB(100, 300, null); const c1 = await open(b1);
+    if (!c1.some((x) => /300 khách/.test(x)) || c1.some((x) => /100 khách/.test(x))) bad(`${tag}: prompt câu AI phải ghi "300 khách" (số hiệu lực), không "100 khách"`);
+    const cache = b1.data.get(`data/couples/${CID}/vendor_why_cache.json`);
+    if (!cache) { bad(`${tag}: không thấy cache câu AI để đo hash`); continue; }
+    const hit = await open(mkB(300, null, cache)); if (hit.length) bad(`${tag}: hash theo 300 khách: hồ sơ 300 không bảng phải dùng lại cache của (hồ sơ 100, bảng 300), thấy ${hit.length} lượt LLM`);
+    const miss = await open(mkB(100, 200, cache)); if (!miss.length) bad(`${tag}: đổi số khách hiệu lực 300 -> 200 phải sinh lại câu AI (hash đổi), thấy 0 lượt LLM`);
+    const same = await open(mkB(100, 300, cache)); if (same.length) bad(`${tag}: cùng số khách hiệu lực 300: dùng lại cache, thấy ${same.length} lượt LLM`);
+  } }
+{ // chat: bảng có khách thì không hỏi lại; hồ sơ và bảng đều không có thì hỏi như cũ
+  const p0 = coupleProfile({ budget: 300 });
+  const a = await chat(M, { message: msg + " 150tr", profile: p0, overlay: ov3, budgetDoc: { ...doc({ venue: 0 }), guests: 300 } });
+  if (a.err || a.md?.error || !a.ids.includes(ids.R1)) bad(`chat venue: hồ sơ không có khách nhưng bảng 300 khách phải ra ứng viên (không hỏi số khách), thấy ${a.md?.error || a.ids.length + " ứng viên"}`);
+  const b = await chat(M, { message: msg + " 150tr", profile: p0, overlay: ov3, budgetDoc: { ...doc({ venue: 0 }), guests: 0 } });
+  if (b.ids.length || (b.md && !b.md.error)) bad("chat venue: hồ sơ và bảng đều không có khách vẫn phải hỏi số khách (không ứng viên)");
+  const c = await chat(M, { message: msg + " 150tr", profile: coupleProfile({ budget: 300, guest_count: 300 }), overlay: ov3, budgetDoc: doc({ venue: 0 }) });
+  if (!c.ids.includes(ids.R1)) bad("chat venue: bảng không có guests thì dùng hồ sơ 300 khách, phải ra ứng viên"); }
 restoreNow();
 if (fails.length && process.env.T164_ALL) console.log(fails.map((f) => "  - " + f).join("\n"));
 if (fails.length) { console.log("FAIL " + fails[0] + (fails.length > 1 ? ` (+${fails.length - 1} lỗi nữa)` : "")); process.exit(1); }
