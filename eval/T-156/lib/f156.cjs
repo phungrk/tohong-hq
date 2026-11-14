@@ -89,6 +89,7 @@ function probeFn(args) {
   if (typeof onlyThumb === 'number') thumbs = thumbs.slice(onlyThumb, onlyThumb + 1);
   let best = { found: true, visible: false, near: false, why: 'chữ có nhưng không nhìn thấy được' };
   for (const el of leaf) {
+    try { el.scrollIntoView({ block: 'center', inline: 'nearest' }); } catch (e) { /* */ } // như người dùng: cuộn tới hàng rồi mới nhìn (khung cuộn auto/scroll không phải là cắt)
     const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
     let why = null;
     if (r.width < 1 || r.height < 1) why = 'kích thước 0';
@@ -101,7 +102,7 @@ function probeFn(args) {
       for (let a = el; a && a !== document.documentElement; a = a.parentElement) {
         const c = getComputedStyle(a); op *= parseFloat(c.opacity);
         if (a !== el && (c.display === 'none' || c.visibility === 'hidden')) { why = 'tổ tiên bị ẩn'; break; }
-        if (a !== el && (c.overflowX !== 'visible' || c.overflowY !== 'visible')) {
+        if (a !== el && ['hidden', 'clip'].some((k) => c.overflowX === k || c.overflowY === k)) { // chỉ hidden/clip mới che chữ; auto/scroll cuộn được thì đã cuộn tới ở trên
           const ar = a.getBoundingClientRect();
           if (r.left < ar.left - 1.5 || r.right > ar.right + 1.5 || r.top < ar.top - 1.5 || r.bottom > ar.bottom + 1.5) { why = 'bị cắt bởi khung cuộn/ẩn tràn'; break; }
         }
