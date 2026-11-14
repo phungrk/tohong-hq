@@ -1,5 +1,6 @@
 // T-159 tiêu chí 4 (tab Vendor): GET /api/vendors/match và GET /api/vendors/:id chấm điểm ngân sách theo allocated_tr > 0 của hạng mục; đổi phân bổ đổi điểm;
 // KHÔNG nới x1,2 (vendor vượt 10% chỉ được 0,5 điểm ngân sách, không phải 1); không loại vendor nào vì ngân sách; chưa phân bổ thì như cũ (tổng x tỷ lệ).
+// Thêm: hạng mục tự thêm có số lớn không ảnh hưởng; trường cũ budget_by_category (triệu) nằm dưới allocated_tr.
 // Hồ sơ tổng 300tr -> tổng x tỷ lệ ảnh cưới = 30tr. Vendor A priceMax 20, B priceMax 30, C priceMax 22.
 // Chưa phân bổ ảnh: A=1, B=1, C=1. allocated 20tr: A=1, B=0 (vượt 50%), C=0,5. allocated 30tr: tất cả 1.
 import { loadBack, tabMatch, tab, CID, eligible, overlayKeep, doc, coupleProfile, budgetScoreOf, done } from "./_lib.mjs";
@@ -19,6 +20,15 @@ want("allocated_tr = 0 (chưa phân bổ) -> tổng x tỷ lệ 30tr", await sco
 want("không có bảng -> tổng x tỷ lệ 30tr", await scores(undefined), [1, 1, 1]);
 want("bảng hỏng -> tổng x tỷ lệ, không ném", await scores("{hỏng"), [1, 1, 1]);
 want("chỉ reserve/hạng mục khác có số -> ảnh vẫn tổng x tỷ lệ", await scores(doc({ reserve: 900, venue: 5 })), [1, 1, 1]);
+want("hạng mục tự thêm c1700000 có số lớn, ảnh chưa phân bổ -> tổng x tỷ lệ", await scores(doc({ photography: 0 }, { extra: [{ id: "c1700000", name: "Nhiếp ảnh", allocated_tr: 5, items: [] }] })), [1, 1, 1]);
+want("hạng mục tự thêm c1700000 không phá allocated 20tr của ảnh", await scores(doc({ photography: 20 }, { extra: [{ id: "c1700000", name: "Nhiếp ảnh", allocated_tr: 500, items: [] }] })), [1, 0, 0.5]);
+{ // trường cũ budget_by_category (triệu): thắng tổng x tỷ lệ khi chưa phân bổ, thua allocated_tr
+  const PL = coupleProfile({ budget: 300, budget_by_category: { photography: 20 } });
+  const a = await tabMatch(M, "photography", { profile: PL, budgetDoc: doc({ photography: 0 }), overlay });
+  if (!near(budgetScoreOf(a, B.id), 0)) fails.push(`budget_by_category 20tr, chưa phân bổ: điểm B ${budgetScoreOf(a, B.id)}, mong 0`);
+  const b2 = await tabMatch(M, "photography", { profile: PL, budgetDoc: doc({ photography: 30 }), overlay });
+  if (!near(budgetScoreOf(b2, B.id), 1)) fails.push(`budget_by_category 20tr nhưng allocated 30tr: điểm B ${budgetScoreOf(b2, B.id)}, mong 1 (allocated thắng)`);
+}
 { // vendor vượt ngân sách vẫn nằm trong danh sách (tab không lọc cứng theo ngân sách)
   const r = await tabMatch(M, "photography", { profile: P, budgetDoc: doc({ photography: 20 }), overlay });
   if (![A, B, C].every((v) => r.body?.vendors?.some((x) => x.id === v.id))) fails.push("allocated 20tr: tab loại vendor vì ngân sách (không được)");

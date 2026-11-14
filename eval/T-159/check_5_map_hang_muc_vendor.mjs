@@ -1,36 +1,39 @@
-// T-159 tiêu chí 5: map id hạng mục bảng dự toán <-> category vendor đầy đủ, một-một; eval FAIL khi có hạng mục mới chưa map.
-// Tĩnh: mọi id trong BUDGET_TEMPLATE có dòng trong BUDGET_TO_VENDOR_CATEGORIES; chỉ "reserve" được không có vendor (danh sách NO_VENDOR_OK dưới đây; thêm id vào
-// danh sách này là quyết định sản phẩm, phải qua spec, không phải sửa cho khớp); mỗi hạng mục map tới tối đa 1 category; mỗi category vendor (CATEGORIES trừ "all", và mọi category có trong pool)
-// được đúng 1 hạng mục map tới.
-// Động: với MỖI category vendor, chỉ phân bổ cho đúng hạng mục map tới nó (các hạng mục khác để số khác) thì tab chấm điểm ngân sách theo số đó: phân bổ = priceMax -> 1; phân bổ nhỏ -> 0.
-import { loadBack, tabMatch, eligible, overlayKeep, doc, coupleProfile, budgetScoreOf, done } from "./_lib.mjs";
+// T-159 tiêu chí 5: map hạng mục bảng dự toán <-> category vendor đầy đủ, một-một; eval FAIL khi có hạng mục mới chưa map. ĐO BẰNG HÀNH VI:
+//  - danh sách hạng mục = những gì GET /api/couples/:id/budget trả khi chưa có bảng (máy chủ điền theo mẫu);
+//  - danh sách category vendor = GET /api/vendors/categories;
+//  - với mỗi (hạng mục b, category c): phân bổ CHỈ b = 50tr (hồ sơ không có tổng) rồi chấm một vendor của c có priceMax 50: điểm ngân sách 1 nghĩa là "b ăn vào c" (không phân bổ -> 0,5).
+// Yêu cầu: mỗi hạng mục ăn vào đúng 1 category, trừ NO_VENDOR_OK (chỉ reserve) ăn vào 0; mỗi category bị đúng 1 hạng mục ăn vào; hạng mục tự thêm ăn vào 0.
+// Category không có vendor đủ điều kiện trong pool không đo được -> FAIL (cần vendor trong pool để chứng minh map).
+// Danh sách NO_VENDOR_OK là quyết định sản phẩm: thêm id vào đây phải qua spec.
+import { loadBack, tabMatch, tab, getBudgetDoc, CID, eligible, overlayKeep, doc, coupleProfile, budgetScoreOf, done } from "./_lib.mjs";
 const M = await loadBack(); const fails = [];
 const NO_VENDOR_OK = ["reserve"];
-const T = M.BUDGET_TEMPLATE.map((t) => t.id), MAP = M.BUDGET_TO_VENDOR_CATEGORIES;
-const vendorCats = M.CATEGORIES.map((c) => c.id).filter((id) => id !== "all");
-for (const id of T) {
-  if (!(id in MAP)) { fails.push(`hạng mục '${id}' (BUDGET_TEMPLATE) chưa có dòng trong BUDGET_TO_VENDOR_CATEGORIES`); continue; }
-  if (!Array.isArray(MAP[id]) || MAP[id].some((x) => typeof x !== "string")) { fails.push(`map của '${id}' không phải mảng chuỗi`); continue; }
-  if (MAP[id].length === 0 && !NO_VENDOR_OK.includes(id)) fails.push(`hạng mục '${id}' không có category vendor và không nằm trong danh sách được phép không có vendor (${NO_VENDOR_OK})`);
-  if (MAP[id].length > 1) fails.push(`hạng mục '${id}' map một-nhiều (${MAP[id]}); một số allocated_tr không chia được cho nhiều category`);
-}
-for (const id of NO_VENDOR_OK) if ((MAP[id] || []).length) fails.push(`'${id}' đang có vendor (${MAP[id]}); bỏ khỏi NO_VENDOR_OK qua spec`);
-for (const id of Object.keys(MAP)) if (!T.includes(id)) fails.push(`map có khoá '${id}' không có trong BUDGET_TEMPLATE`);
-const poolCats = [...new Set(M.POOL.map((v) => v.category))];
-for (const c of new Set([...vendorCats, ...poolCats])) {
-  const owners = T.filter((id) => (MAP[id] || []).includes(c));
-  if (owners.length !== 1) fails.push(`category vendor '${c}' được map bởi ${owners.length} hạng mục (${owners}), mong đúng 1`);
-  if (!vendorCats.includes(c)) fails.push(`category '${c}' có trong pool nhưng không có trong CATEGORIES`);
-}
+const bdoc = await getBudgetDoc(M, { profile: coupleProfile({ budget: 300 }), budgetDoc: undefined });
+const budgetIds = (bdoc.categories || []).map((c) => c.id);
+const cr = await tab(M, { url: `/api/vendors/categories?coupleId=${CID}` });
+const vendorCats = (Array.isArray(cr.body) ? cr.body : []).map((c) => c.category);
+if (!budgetIds.length || !vendorCats.length) { fails.push(`không liệt kê được hạng mục (${budgetIds.length}) hoặc category (${vendorCats.length})`); done(fails); }
+const hits = Object.fromEntries(budgetIds.map((b) => [b, []])); const byCat = Object.fromEntries(vendorCats.map((c) => [c, []]));
 for (const c of vendorCats) {
-  const owner = T.find((id) => (MAP[id] || []).includes(c)); const v = eligible(M, c)[0];
-  if (!owner || !v) continue;
+  const v = eligible(M, c)[0];
+  if (!v) { fails.push(`category '${c}' không có vendor đủ điều kiện trong pool: không đo được map`); continue; }
   const ov = overlayKeep(M, c, [{ id: v.id, priceMin: 40, priceMax: 50 }]);
-  const others = Object.fromEntries(T.filter((id) => id !== owner).map((id) => [id, 20]));
-  for (const [own, want] of [[50, 1], [10, 0]]) {
-    const r = await tabMatch(M, c, { profile: coupleProfile(), budgetDoc: doc({ ...others, [owner]: own }), overlay: ov });
+  for (const b of budgetIds) {
+    const r = await tabMatch(M, c, { profile: coupleProfile(), budgetDoc: doc({ [b]: 50 }, { total_tr: 0 }), overlay: ov });
     const s = budgetScoreOf(r, v.id);
-    if (r.err || s !== want) fails.push(`category '${c}': phân bổ '${owner}' = ${own}tr (các hạng mục khác 20tr), điểm ngân sách ${s}, mong ${want}`);
+    if (r.err || (s !== 1 && s !== 0.5)) { fails.push(`(${b} -> ${c}): điểm ngân sách ${s}, mong 1 hoặc 0,5`); continue; }
+    if (s === 1) { hits[b].push(c); byCat[c].push(b); }
   }
+}
+for (const b of budgetIds) {
+  if (hits[b].length > 1) fails.push(`hạng mục '${b}' ăn vào nhiều category (${hits[b]}): một allocated_tr không chia được`);
+  if (hits[b].length === 0 && !NO_VENDOR_OK.includes(b)) fails.push(`hạng mục '${b}' không ăn vào category vendor nào và không nằm trong NO_VENDOR_OK (${NO_VENDOR_OK}): hạng mục mới chưa map?`);
+  if (hits[b].length && NO_VENDOR_OK.includes(b)) fails.push(`'${b}' nằm trong NO_VENDOR_OK nhưng đang ăn vào ${hits[b]}`);
+}
+for (const c of vendorCats) if (byCat[c].length !== 1) fails.push(`category '${c}' bị ${byCat[c].length} hạng mục ăn vào (${byCat[c]}), mong đúng 1`);
+{ // hạng mục tự thêm không ăn vào đâu
+  const c = vendorCats[0]; const v = eligible(M, c)[0];
+  if (v) { const r = await tabMatch(M, c, { profile: coupleProfile(), budgetDoc: doc({}, { total_tr: 0, extra: [{ id: "c1700000", name: "Tự thêm", allocated_tr: 50, items: [] }] }), overlay: overlayKeep(M, c, [{ id: v.id, priceMin: 40, priceMax: 50 }]) });
+    if (budgetScoreOf(r, v.id) !== 0.5) fails.push("hạng mục tự thêm c1700000 làm đổi điểm ngân sách"); }
 }
 done(fails);

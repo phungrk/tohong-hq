@@ -92,19 +92,25 @@ export async function chat(M, { message = MSG_PHOTO, profile = coupleProfile({ b
 }
 
 /** Một request HTTP vào api/vendors.js (tab Vendor). Trả { status, body, reads, err }. */
-export async function tab(M, { url, profile = coupleProfile(), budgetDoc, overlay = null, onGet = null }) {
-  const b = seed(M, { profile, budgetDoc, overlay, members: true });
+export async function tab(M, { url, profile = coupleProfile(), budgetDoc, overlay = null, onGet = null, members = true, bucket = null, env = {}, countFetch = null }) {
+  const b = bucket || seed(M, { profile, budgetDoc, overlay, members });
   if (onGet) { const g = b.get.bind(b); b.get = async (k, ...r) => { onGet(k); return g(k, ...r); }; }
   M.resetOverlayCache();
   const u = new URL("http://localhost" + url);
   const segs = u.pathname.replace(/^\/api\/vendors\/?/, "").split("/").filter(Boolean).map(decodeURIComponent);
-  return guard(async () => {
+  const origFetch = globalThis.fetch;
+  const origLog = console.log, origErr = console.error;
+  if (countFetch) { console.log = () => {}; console.error = () => {}; }
+  if (countFetch) globalThis.fetch = async () => { countFetch.n++; throw new Error("LLM giả: từ chối (eval T-159)"); };
+  const wrap = countFetch ? (f) => async () => { try { return await f(); } finally { globalThis.fetch = origFetch; console.log = origLog; console.error = origErr; } } : (f) => guard(f);
+  return wrap(async () => {
     try {
-      const res = await M.handleVendors(new Request(u, { method: "GET" }), { CHAT_DATA: b }, AUTH, segs);
+      const res = await M.handleVendors(new Request(u, { method: "GET" }), { CHAT_DATA: b, ...env }, AUTH, segs);
       return { status: res.status, body: await res.json(), reads: b.reads.filter((k) => k === BUDGET_KEY).length };
     } catch (err) { return { err, status: 0, body: null, reads: b.reads.filter((k) => k === BUDGET_KEY).length }; }
   })();
 }
+export const newBucket = (M, o) => seed(M, o);
 export const tabMatch = (M, category, o = {}) => tab(M, { url: `/api/vendors/match?coupleId=${CID}&category=${category}&limit=50`, ...o });
 export const budgetScoreOf = (r, id) => r.body?.vendors?.find((v) => v.id === id)?.match?.scoreBreakdown?.budget;
 
