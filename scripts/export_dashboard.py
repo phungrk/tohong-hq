@@ -14,6 +14,7 @@ Script chỉ đọc sổ cái, không ghi gì vào repo.
 """
 import argparse
 import json
+import os
 import re
 import sys
 import unicodedata
@@ -488,10 +489,45 @@ def export(out: Path, public: bool = False):
         events.sort(key=lambda e: (e["t"], e["seq"]))
 
     roster_src = json.loads((ROOT / "org" / "roster.json").read_text(encoding="utf-8"))
+    # T-162: roster xuất ra = capu + chief-of-staff + các bộ phận ở danh sách "- `id` — " của CLAUDE.md (đọc lúc chạy)
+    dept_ids = []
+    claude_md = ROOT / "CLAUDE.md"
+    has_md = claude_md.is_file()
+    fence = None   # loại fence đang mở ("```" hoặc "~~~"); khối chỉ đóng bằng đúng loại đã mở
+    for ln in (claude_md.read_text(encoding="utf-8").splitlines() if has_md else []):
+        fm = re.match(r"^\s*(```|~~~)", ln)
+        if fm:
+            if fence is None:
+                fence = fm.group(1)
+            elif fence == fm.group(1):
+                fence = None
+            continue
+        m = None if fence else re.match(r"^- `([^`]+)` — ", ln)
+        if m and m.group(1) not in dept_ids and m.group(1) not in ("capu", "chief-of-staff"):
+            dept_ids.append(m.group(1))
+    if not has_md:
+        # ngoại lệ chỉ cho sổ cái giả: TOHONG_ROOT trỏ tới thư mục KHÁC kho chứa script này (so bằng realpath)
+        env_root = os.environ.get("TOHONG_ROOT")
+        own_repo = os.path.realpath(Path(__file__).resolve().parent.parent)
+        if not env_root or os.path.realpath(env_root) == own_repo:
+            print("LỖI: không thấy CLAUDE.md; không ghi đè dữ liệu cũ.", file=sys.stderr)
+            sys.exit(1)
+        print("::warning::Không thấy CLAUDE.md (sổ cái giả, TOHONG_ROOT); roster giữ nguyên org/roster.json")
+        dept_ids = [r["id"] for r in roster_src["roles"] if r["id"] not in ("capu", "chief-of-staff")]
+    if not dept_ids:
+        print("LỖI: CLAUDE.md không có dòng bộ phận nào dạng \"- `id` — mô tả\"; giữ nguyên dữ liệu cũ.", file=sys.stderr)
+        sys.exit(1)
+    keep = {"capu", "chief-of-staff", *dept_ids}
+    src_ids = {r["id"] for r in roster_src["roles"]}
+    roles = [r for r in roster_src["roles"] if r["id"] in keep]
+    for i in dept_ids:
+        if i not in src_ids:
+            print(f"::warning::{i} có trong CLAUDE.md nhưng không có trong org/roster.json; dùng phần tử tối thiểu (id, name = id)")
+            roles.append({"id": i, "name": i, "role": "", "kind": "agent", "reports_to": "", "mission": "", "agent_file": "", "_minimal": True})
     roster = []
-    for r in roster_src["roles"]:
+    for r in roles:
         f = r.get("agent_file", "")
-        hired = r["kind"] == "human" or (f and (ROOT / f).exists())
+        hired = r["kind"] == "human" or r.get("_minimal") or (f and (ROOT / f).exists())
         roster.append({
             "id": r["id"], "name": r["name"], "role": r["role"], "kind": r["kind"],
             "reports_to": r.get("reports_to", ""), "mission": r.get("mission", ""),
