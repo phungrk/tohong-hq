@@ -89,7 +89,10 @@ function probeFn(args) {
   if (typeof onlyThumb === 'number') thumbs = thumbs.slice(onlyThumb, onlyThumb + 1);
   let best = { found: true, visible: false, near: false, why: 'chữ có nhưng không nhìn thấy được' };
   for (const el of leaf) {
-    try { el.scrollIntoView({ block: 'center', inline: 'nearest' }); } catch (e) { /* */ } // như người dùng: cuộn tới hàng rồi mới nhìn (khung cuộn auto/scroll không phải là cắt)
+    // như người dùng: cuộn tới hàng rồi mới nhìn, nhưng người dùng KHÔNG cuộn được khung hidden/clip: lưu và khôi phục vị trí cuộn của chúng
+    const hid = []; for (let a = el.parentElement; a; a = a.parentElement) { const c = getComputedStyle(a); if (['hidden', 'clip'].some((k) => c.overflowX === k || c.overflowY === k)) hid.push([a, a.scrollTop, a.scrollLeft]); }
+    try { el.scrollIntoView({ block: 'center', inline: 'nearest' }); } catch (e) { /* */ }
+    for (const [a, t, l] of hid) { a.scrollTop = t; a.scrollLeft = l; }
     const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
     let why = null;
     if (r.width < 1 || r.height < 1) why = 'kích thước 0';
