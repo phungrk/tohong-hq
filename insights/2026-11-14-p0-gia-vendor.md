@@ -4,16 +4,18 @@ task: T-160
 date: 2026-11-14
 by: insight
 adr: ADR-089
-confidence: medium (kết luận về N2) / low (kết luận về N1, vì N1 không chạy được)
+confidence: high (~85%) cho khuyến nghị chuyển N3+N4; 6/15 vendor N1 chưa đo (proxy chặn)
 ---
 # P0 đường ống giá vendor: 30 vendor, N1 và N2
 
 ## Tóm tắt (đọc phần này là đủ)
 
-1. **N1 (website vendor) không đo được trong phiên này.** Mạng phiên chặn mọi website vendor. Đây là lỗi môi trường, không phải số đo, nên **không được ghi N1 = 0%**. N1 ghi là "chưa đo được".
-2. **N2 (tìm kiếm + bài bên thứ ba) ra giá cho 0/30 vendor** sau cổng 5 kiểm. Cận trên 95% cho tỉ lệ thật khi quan sát 0/30 là 11,6% (Clopper-Pearson), tức N2 chỉ qua WebSearch gần như chắc chắn dưới 15%. Hạn chế: WebFetch bị chặn nên N2 không đọc được bài gốc, chỉ có bản tóm tắt của công cụ tìm kiếm.
-3. **Điều kiện dừng (N1+N2 < 15%) chưa kết luận được bằng số đo.** Nhưng có một giới hạn cấu trúc: chỉ **143/867 vendor (16,5%) có website thật**. Để N1 riêng nó đạt 15% pool, 92% vendor có website phải đăng giá. Đề xuất ở cuối.
-4. Cổng 5 kiểm hiện có hai lỗ hổng: **kiểm 3 (khung giá) vô hiệu** vì dữ liệu giá tham chiếu trong pool bị nhiễm (P95 decor = 4,4e11 VND), và **kiểm 1 không thể chạy khi chỉ có tóm tắt tìm kiếm**.
+**Cập nhật v2 (sau khi Capu mở mạng và chọn A): N1 đã chạy lại. N1 qua cổng = 0/15; thô (chưa qua cổng) = 1/15. Dưới ngưỡng 4/15, nên khuyến nghị chuyển sang N3+N4.** Xem mục "N1 chạy lại (v2)" bên dưới.
+
+1. (v1, giữ để truy vết) Lần chạy đầu N1 không đo được do mạng chặn. Mục này đã được thay bằng số đo ở v2.
+2. **N2 (tìm kiếm + bài bên thứ ba) ra giá cho 0/30 vendor** sau cổng 5 kiểm. Cận trên 95% khi quan sát 0/30 là 11,6%. Hạn chế: WebFetch bị chặn trong lần chạy v1 nên N2 chỉ có tóm tắt tìm kiếm.
+3. **N1 (website vendor) ra giá thô cho 1/15 vendor (aodaihanh.com), và 0/15 qua cổng** vì trang giá cập nhật lần cuối năm 2018/2019 (trượt kiểm 5). Thêm chốt cấu trúc: chỉ 143/867 vendor (16,5%) có website thật.
+4. Cổng 5 kiểm: kiểm 3 gần như vô hiệu ngay cả khi lọc giá rác (khung vẫn rộng hàng trăm lần), kiểm 1 chỉ chạy được khi tải trang, kiểm 5 là kiểm duy nhất loại giá thật của vendor ở N1.
 
 ## Cách chọn mẫu (chạy lại được)
 
@@ -37,7 +39,7 @@ confidence: medium (kết luận về N2) / low (kết luận về N1, vì N1 kh
 
 Số lượt: 36 truy vấn WebSearch (30 vendor × truy vấn 1, thêm truy vấn 2 cho 6 vendor có tín hiệu: Hoàng Long, Victory, Tân Sơn Nhất, Hidden Mansions, Jolie Holie, Lynh Thùy). 0 bài được đọc nguyên văn.
 
-### Vì sao N1 không chạy
+### Vì sao N1 không chạy ở v1 (đã thay bằng v2 bên dưới)
 
 - WebFetch `haydaymedia.vn`, `aodaihanh.com`, `quayphongsucuoi.vn`: `getaddrinfo ENOTFOUND` ("host nằm ngoài danh sách tên miền cho phép của phiên"). Theo hướng dẫn của công cụ tôi dừng sau 3 host, không thử thêm.
 - Kiểm tra robots.txt bằng Bash cho 15 host: 8 host bị cổng 403 `CONNECT` (policy denial, ghi ở `/__agentproxy/status`), 7 host không phân giải được tên. Không host nào tải được. Không thử đường vòng.
@@ -85,7 +87,68 @@ Website của vendor đến từ bước enrichment Google Maps với `confidenc
 - Chi phí token: hook tự ghi, số của hook là số đúng. Ước tính của tôi: khoảng 36 kết quả tìm kiếm × ~3k token đọc vào, tổng ngữ cảnh khoảng 150k token; cỡ **$1-3 token** (tự tin thấp). Mỗi vendor ≈ $0,04-0,10 token. Trần $2 áp dụng cho khoản ngoài token (ADR-089), nên không vượt.
 - Chi phí mỗi vendor cho N2-search: 1-2 truy vấn, không ra giá. Chi phí mỗi giá hợp lệ: không xác định (0 giá).
 
-## Bảng 30 vendor
+## N1 chạy lại (v2)
+
+Phương pháp: tải trang chủ rồi trang giá/bảng giá/thực đơn/dịch vụ (tối đa 1-9 trang mỗi vendor, cách nhau 1 giây, User-Agent mô tả rõ, đọc robots.txt trước). WebFetch vẫn trả `ENOTFOUND` cho cả 15 host (đã thử lại một lần sau khi mạng mở), nên N1 v2 dùng HTTP GET qua proxy của phiên (`urllib`, tôn trọng robots.txt). Trích dẫn kiểm bằng so khớp chuỗi trên văn bản trang đã tải. Không dùng Google, không liên hệ vendor.
+
+### Kết quả theo 15 vendor
+
+| # | Vendor | Host | Truy cập | Giá tìm thấy trên website |
+| --- | --- | --- | --- | --- |
+| 1 | IDY Shoes | idyatelier.vn | chặn bởi proxy (403 CONNECT, kể cả `www.idyatelier.vn`) | chưa đo được |
+| 2 | Áo dài Hạnh | aodaihanh.com | đọc được, robots OK | **có giá** (xem dưới) |
+| 3 | Lynh Thùy Wedding Team | lynhthuyplanner.com (apex; `www.` bị chặn) | đọc được, robots OK | không có giá (trang giới thiệu, khoá học, bộ sưu tập) |
+| 4 | Nệm Liên Á | liena.com.vn | chặn bởi proxy (403, redirect sang `www.liena.com.vn`) | chưa đo được |
+| 5 | TST Tourist | tsttourist.com | chặn (connection reset; `www.` bị 403) | chưa đo được |
+| 6 | Win Win Shop88 | winwinshop88.com | chặn bởi proxy (403, redirect sang `www.`) | chưa đo được |
+| 7 | TRUNG VO Studio | trungvostudios.com | chặn bởi proxy (403, redirect sang `www.`) | chưa đo được |
+| 8 | HayDay Media | haydaymedia.vn | đọc được, robots OK | không có giá (trang dịch vụ, phim, tin tức, không bảng giá) |
+| 9 | LYN Wedding | linwedding.com | đọc được, robots OK | không có giá, và **sai vendor**: đây là cửa hàng vest và giày cưới "LIN wedding suit", pool phân loại LYN là photography |
+| 10 | Thiệp cưới Forever | thiepcuoiforever.com | đọc được, robots OK | không có giá, trang sản phẩm ghi "Liên hệ" |
+| 11 | Khung Xinh - Nice Frames | khungxinh.art | đọc được, robots OK | không có giá (khung tranh/khung kỷ niệm, không phải quà cưới) |
+| 12 | Nam Khôi | thuexegiatot.vn | robots OK, nhưng trang trả 403 từ chính máy chủ (chặn bot) | chưa đo được; không dùng đường vòng |
+| 13 | Hoàng Long | nhahanghoanglong.com.vn | đọc được, robots OK | không có giá (thực đơn, ưu đãi, tiệc cưới không ghi giá dạng chữ, có thể là ảnh) |
+| 14 | Mai House Saigon | maihouse.com.vn | đọc được, robots OK | không có giá tiệc/bàn (trang meetings & events, offers) |
+| 15 | Hidden Mansions | hiddenmansions.com | đọc được, robots OK | không có giá (trang tiệc cưới chỉ có giới thiệu và liên hệ) |
+
+Tổng hợp truy cập: đọc được 9/15; chặn bởi proxy (host redirect sang `www.` hoặc không có trong danh sách) 5/15; chặn bởi chính máy chủ vendor 1/15. Không có tên miền chết trong nhóm đọc được. (Ở v1, 7 host báo "không phân giải" vì plain `http://`; qua `https://` đều phân giải được. Điều này xoá nghi ngờ `lynhthuyplanner.com` và `linwedding.com` là domain chết.)
+
+### Giá duy nhất tìm thấy (Áo dài Hạnh) và cổng 5 kiểm
+
+- Trích dẫn: "Áo dài cưới (áo dài cô dâu): 1.200.000 – 5.000.000đ/bộ" (chọn may trọn gói) và "Áo dài cưới: từ 800.000đ – 2.000.000đ" (công may). URL: https://aodaihanh.com/bang-gia-may-ao-dai-cua-hang-may-ao-dai-uy-tin-tai-tphcm . Ngày tải 2026-11-14. Thuê: "200.000 – 800.000đ/1 bộ" tại https://aodaihanh.com/bang-gia-cho-thue-ao-dai-tai-tphcm .
+- K1 trích dẫn khớp chuỗi trang tải: **qua** (cả ba chuỗi khớp nguyên văn trong văn bản trang).
+- K2 đúng vendor: **qua** (tên miền trùng website trong pool, "Áo dài Hạnh có 3 cửa hàng tại TPHCM").
+- K3 khung hạng mục: **qua** (1,2-5 triệu nằm trong mọi khung attire, kể cả khung đã lọc 153 nghìn .. 267 triệu).
+- K4 đơn vị: **qua** (đơn vị "bộ", đúng loại món/bộ).
+- K5 còn mới ≤ 180 ngày: **trượt**. Trang may ghi ngày đăng 2019-07-30 (meta), trang thuê ghi "last modified: Tháng 5 17th, 2018". Cũ hơn 7 năm.
+- Kết luận: 1 giá thô, 0 giá qua cổng. Nếu nới kiểm 5 (chỉ cảnh báo), kết quả cao nhất là 1/15 = 6,7%, vẫn dưới 4/15 (26,7%).
+
+### Số đo N1 (15 vendor có web)
+
+| Chỉ số | Giá trị |
+| --- | --- |
+| Ra giá thô (chưa qua cổng) | 1/15 = 6,7% (trên 9 vendor đọc được: 1/9 = 11,1%) |
+| Ra giá qua cổng 5 kiểm | **0/15 = 0%** (cận trên 95% 21,8%) |
+| Ra giá nếu bỏ kiểm 5 | 1/15 = 6,7% |
+| Chưa đo được (chặn) | 6/15 |
+| Trượt theo kiểm (trên 1 giá thô) | K1 0/1, K2 0/1, K3 0/1, K4 0/1, K5 1/1 |
+
+Biên của kết quả: qua cổng hiện có 0/15. Kịch bản tốt nhất, cả 6 vendor chưa đo đều ra giá hợp lệ, cho tối đa 6/15 (qua cổng) hoặc 7/15 (giá thô). Vậy **ngưỡng ≥ 8/15 không thể đạt** dù mở hết mạng. Nhưng để thoát khỏi nhóm < 4/15 cần ít nhất 4 trong 6 vendor chưa đo ra giá hợp lệ, trong khi 9 vendor đọc được cho 1 giá thô (11%): khả năng thấp, chưa loại trừ hẳn.
+
+### Khung giá đã lọc rác cho kiểm 3 (cách lọc)
+
+Lọc: loại giá tham chiếu có trung điểm `< 100.000 VND` hoặc `> 2.000.000.000 VND` trước khi tính P5/P95 theo `(hạng mục, đơn vị)`. Kết quả (n sau lọc): attire 19 [153.333 .. 267.000.000]; decor 28 [157.833 .. 2,29 tỉ]; photography 31 [333.333 .. 187,5 triệu]; venue per_table 53 [666.666 .. 300 triệu]; makeup 29 [1,37 triệu .. 1,08 tỉ]; stationery 12 [700.000 .. 1,5 tỉ]. Bộ lọc loại được giá rác cực lớn (decor P95 từ 4,4e11 còn 7,6e8; photography P95 từ 209 triệu còn 62,5 triệu), nhưng khung vẫn rộng 3 bậc độ lớn: nó chặn được giá vô lý, không chặn được giá sai trong khoảng hợp lệ. Cần mốc theo hạng mục do người đặt thay vì tính từ pool.
+
+### Quyết định theo ngưỡng
+
+- Ngưỡng: ≥ 8/15 đáng xây; < 4/15 chuyển N3+N4; 4-7 nêu khuyến nghị.
+- Số đo: **0/15 qua cổng (1/15 thô)** thuộc nhóm **< 4/15**. Khuyến nghị: **không xây crawler theo website vendor; chuyển N3+N4**.
+- Lý do: (1) thô 1/15 và giá duy nhất là trang giá bỏ quên từ 2018-2019; (2) trong 8 website đọc được còn lại không có bảng giá dạng chữ: website vendor cưới Việt Nam hiếm khi công khai giá, trang sản phẩm ghi "Liên hệ"; (3) trần cấu trúc 143/867 vendor có web; (4) 2/9 website đọc được là sai vendor hoặc sai ngành (LYN Wedding là shop vest; Khung Xinh là khung tranh), nên kiểm 2 loại thêm.
+- Phần chưa chắc: 6 vendor chưa đo (5 bị proxy chặn do redirect sang `www.`, 1 bị chủ máy chủ chặn bot). Mở `www.idyatelier.vn`, `www.liena.com.vn`, `www.tsttourist.com`, `www.winwinshop88.com`, `www.trungvostudios.com` có thể đo nốt; kỳ vọng thấp (1/9 thô ở nhóm đọc được). Ba nhóm hạng mục đã chạm: venue 0/3 giá thô, photography 0/2, attire 1/2 thô (và trượt K5).
+- Mức tự tin cho khuyến nghị chuyển N3+N4: **cao (~85%)**, tăng từ ~65% ở v1.
+- Gợi ý cho N3+N4 (đoán, chưa đo): giá thuê/may theo trang bảng giá riêng như `aodaihanh.com` là loại trang duy nhất có giá chữ; thường nằm ở URL chứa `bang-gia`. Dạng trang này xuất hiện ở tiệm may, thuê đồ, không ở venue, photography hoặc planner. Nên tìm trang `bang-gia` theo tiệm may/thuê trước khi đi tìm giá cho venue (venue hay dùng PDF hoặc ảnh thực đơn).
+
+## Bảng 30 vendor (v1; cột N1 "BLOCK" đã được thay bằng bảng N1 v2 ở trên)
 
 Ký hiệu: web = website thật (conf = confidence enrichment); "-" = không có. N1 "BLOCK" = host bị chặn, không đo được. N2 "0" = không có giá riêng của vendor (đã chạy 1 truy vấn trừ khi ghi 2). Kiểm trượt: K1..K5.
 
@@ -124,7 +187,7 @@ Ký hiệu: web = website thật (conf = confidence enrichment); "-" = không c�
 
 6 vendor có giá cũ (8, 10, 13, 22, 24, 29): N2 không xác nhận cũng không bác bỏ ở 5/6; Hoàng Long là duy nhất có khoảng giá chứa giá cũ, nhưng không qua cổng.
 
-## Kết luận theo điều kiện dừng
+## Kết luận theo điều kiện dừng (v1; xem mục N1 v2 cho kết luận cập nhật)
 
 - Quy tắc: N1+N2 ra giá cho < 15% vendor thử thì không xây crawler, chuyển N3+N4.
 - Số đo: N2 = 0/30. N1 = chưa đo. **Số đo hiện có không đủ để áp quy tắc dừng cho N1+N2.**
