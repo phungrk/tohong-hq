@@ -4,8 +4,9 @@
 INV-022 (hq/dashboard) · Roster mà export_dashboard.py xuất ra (roster.json) gồm đúng capu, chief-of-staff và các id ở dòng ``- `id` — `` của CLAUDE.md,
 đọc lúc chạy (đổi CLAUDE.md thì đổi roster, không sửa script). Không có dòng bộ phận nào khớp → thoát khác 0 và không ghi đè dashboard.json đang có.
 Cập nhật theo spec v3 (T-163-D1, 2026-11-14): dòng khớp mẫu nằm trong fenced code block (```) không tính, không ::warning:: cho nó (4d);
-thiếu file CLAUDE.md: sổ cái giả qua TOHONG_ROOT (thư mục tạm, khác kho chứa script) → giữ org/roster.json, ::warning::, thoát 0;
-chạy như workflow thật (không TOHONG_ROOT, script nằm trong chính sổ cái) → thoát khác 0, không ghi đè dashboard.json (4c).
+thiếu file CLAUDE.md: sổ cái giả qua TOHONG_ROOT (thư mục tạm, realpath khác kho chứa script) → giữ org/roster.json, ::warning::, thoát 0;
+chạy trên sổ cái thật (script nằm trong chính sổ cái; TOHONG_ROOT vắng, hoặc trỏ chính kho đó, so bằng realpath kể cả qua symlink)
+→ thoát khác 0, không ghi đè dashboard.json (4c, Chief chốt 2026-11-14). Fence: ``` và ~~~, khối chỉ đóng bằng cùng loại fence (khối ~~~ chứa ``` vẫn là khối).
 Chạy export THẬT trên sổ cái giả (TOHONG_ROOT tạm, hoặc bản chép scripts/ vào thư mục tạm), không ghi vào repo, không mạng.
 Gốc HQ: dò ngược tới scripts/gate.py. Chạy: python3 -I <file này>. Mã thoát 0 = đạt."""
 import json, os, pathlib, shutil, subprocess, sys, tempfile
@@ -50,15 +51,24 @@ rc, got, _, err = run(None, ids)
 if rc != 0: why.append(f"(c) sổ cái giả qua TOHONG_ROOT thiếu CLAUDE.md mà export thoát {rc}: {err}")
 elif got != sorted(ids): why.append(f"(c) sổ cái giả thiếu CLAUDE.md: roster = {got}, phải giữ nguyên org/roster.json {sorted(ids)}")
 elif "::warning::" not in OUT[-1]: why.append("(c) sổ cái giả thiếu CLAUDE.md mà không có ::warning::")
-# 4(c) như workflow thật: không TOHONG_ROOT, script trong chính sổ cái, thiếu CLAUDE.md -> thoát khác 0, giữ dashboard.json
-with tempfile.TemporaryDirectory() as t:
-    t = pathlib.Path(t); shutil.copytree(hq / "scripts", t / "scripts", ignore=shutil.ignore_patterns("__pycache__"))
-    for d in ("board", "org", "ledger", "out"): (t / d).mkdir()
-    (t / "ledger" / "events.jsonl").write_text("", encoding="utf-8")
-    (t / "org" / "roster.json").write_text(json.dumps({"roles": [role(i) for i in ids]}), encoding="utf-8")
-    (t / "out" / "dashboard.json").write_text("GIU-NGUYEN", encoding="utf-8")
-    r = subprocess.run([sys.executable, str(t / "scripts" / "export_dashboard.py"), "--public", "--out", str(t / "out")], capture_output=True, text=True, cwd=str(t),
-                       env={k: v for k, v in os.environ.items() if k != "TOHONG_ROOT"})
-    if r.returncode == 0: why.append("(c) sổ cái thật (không TOHONG_ROOT) thiếu CLAUDE.md mà export thoát 0")
-    elif (t / "out" / "dashboard.json").read_text(encoding="utf-8") != "GIU-NGUYEN": why.append("(c) sổ cái thật thiếu CLAUDE.md: export lỗi nhưng đã ghi đè dashboard.json")
+# 4(d) fence lồng: khối ~~~ chứa dòng ``` thì vẫn ở trong khối cho tới ~~~ đóng (CommonMark: fence đóng bằng cùng ký tự)
+nest = "# E\n\n- `product` — x\n\n~~~text\n```\n- `bot-long` — trong khối ~~~\n```\n~~~\n\n- `engineering` — y\n"
+rc, got, _, err = run(nest, ["capu", "chief-of-staff", "product", "engineering"])
+if rc != 0: why.append(f"(d) export thoát {rc} với fence ~~~ lồng ```: {err}")
+elif got != ["capu", "chief-of-staff", "engineering", "product"]: why.append(f"(d) fence ~~~ lồng ```: roster = {got}, phải là capu, chief-of-staff, engineering, product")
+# 4(c) sổ cái thật thiếu CLAUDE.md: script nằm trong chính sổ cái; TOHONG_ROOT vắng, trỏ chính kho đó, hoặc trỏ symlink tới kho đó (so realpath)
+# -> thoát khác 0, dashboard.json đang có còn nguyên
+for mode in ("khong-dat", "bang-kho", "symlink-toi-kho"):
+    with tempfile.TemporaryDirectory() as t:
+        t = pathlib.Path(t); kho = t / "kho"; shutil.copytree(hq / "scripts", kho / "scripts", ignore=shutil.ignore_patterns("__pycache__"))
+        for d in ("board", "org", "ledger", "out"): (kho / d).mkdir()
+        (kho / "ledger" / "events.jsonl").write_text("", encoding="utf-8")
+        (kho / "org" / "roster.json").write_text(json.dumps({"roles": [role(i) for i in ids]}), encoding="utf-8")
+        (kho / "out" / "dashboard.json").write_text("GIU-NGUYEN", encoding="utf-8")
+        env = {k: v for k, v in os.environ.items() if k != "TOHONG_ROOT"}
+        if mode == "bang-kho": env["TOHONG_ROOT"] = str(kho)
+        if mode == "symlink-toi-kho": (t / "lien-ket").symlink_to(kho, target_is_directory=True); env["TOHONG_ROOT"] = str(t / "lien-ket")
+        r = subprocess.run([sys.executable, str(kho / "scripts" / "export_dashboard.py"), "--public", "--out", str(kho / "out")], capture_output=True, text=True, cwd=str(kho), env=env)
+        if r.returncode == 0: why.append(f"(c) sổ cái thật thiếu CLAUDE.md ({mode}: TOHONG_ROOT {'vắng' if mode == 'khong-dat' else 'trỏ kho chứa script'}) mà export thoát 0")
+        elif (kho / "out" / "dashboard.json").read_text(encoding="utf-8") != "GIU-NGUYEN": why.append(f"(c) sổ cái thật thiếu CLAUDE.md ({mode}): export lỗi nhưng đã ghi đè dashboard.json")
 print("PASS roster xuất theo danh sách bộ phận CLAUDE.md (bỏ dòng trong code block); không khớp dòng nào, hoặc thiếu CLAUDE.md trên sổ cái thật, thì thoát khác 0, giữ dashboard.json; sổ cái giả thiếu CLAUDE.md giữ org/roster.json kèm ::warning::" if not why else "FAIL " + " | ".join(why)); sys.exit(1 if why else 0)
