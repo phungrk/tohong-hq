@@ -49,8 +49,8 @@ export const DEFAULTS = { photography: [15, 30], venue: [5, 15], decor: [10, 50]
 export const r1 = (x) => Math.round(x * 10) / 10;
 export function pct(arr, p) { const a = [...arr].sort((x, y) => x - y); const k = (a.length - 1) * p; const f = Math.floor(k); const c = Math.min(f + 1, a.length - 1); return a[f] + (a[c] - a[f]) * (k - f); }
 /** Bản ghi đầu vào giả cho một vendor có giá. */
-export const rec = (id, category, min_vnd, max_vnd, { unit, last = "2026-06-24T23:16:38.377477+00:00", noPrice = false } = {}) => ({
-  id, name: "V " + id, categories: [category], city: "HCMC", style_tags: [], description: "",
+export const rec = (id, category, min_vnd, max_vnd, { unit, last = "2026-06-24T23:16:38.377477+00:00", noPrice = false, name = null } = {}) => ({
+  id, name: name ?? "V " + id.replace(/\d/g, "x"), categories: [category], city: "HCMC", style_tags: [], description: "",
   price_range: noPrice ? null : { min_vnd, max_vnd, unit: unit === undefined ? UNIT[category] : unit }, last_scraped: last });
 
 /* ---------- back với pool đã đóng dấu giá ---------- */

@@ -1,7 +1,8 @@
 // T-164 tiêu chí 1: giá rác bị loại theo quy tắc rõ (ngưỡng theo hạng mục và đơn vị) tại lúc sinh pool; đếm đúng; nguồn không bị ghi.
 // Chạy generator của tohong trên fixtures/price-inputs.json (867 bản ghi giả: id, hạng mục, price_range, last_scraped) với --as-of 2026-11-14.
 // Quy tắc (spec mục H1): giá riêng chỉ hợp lệ khi (a) unit đúng đơn vị của hạng mục (venue = per_table, còn lại = package), (b) min_vnd > 0 và max_vnd >= min_vnd,
-// (c) CẢ HAI đầu nằm trong [thấp, cao] của hạng mục (triệu VND, đóng hai đầu), (d) có last_scraped đọc được. Không hợp lệ => priceSource khác legacy_marry (rơi về N4).
+// (c) CẢ HAI đầu nằm trong [thấp, cao] của hạng mục (triệu VND, đóng hai đầu; venue thấp = 2 vì < 2tr/bàn là giá giữ chỗ), (d) có last_scraped đọc được,
+// (e) không đầu nào (triệu VND, chính xác) bằng giá trị của một cụm chữ số trong tên vendor ("Shop 247" + 247tr, "Dịch vụ cưới 24h" + 24tr: số trong tên bị scrape nhầm thành giá). Không hợp lệ => priceSource khác legacy_marry (rơi về N4).
 import fs from "node:fs";
 import crypto from "node:crypto";
 import { EXPECTED, genFull, rec, BANDS, UNIT, near } from "./_lib.mjs";
@@ -40,6 +41,10 @@ const C = [
   ["venue per_table 20tr (trần)", rec("t_v20", "venue", 20000000, 20000000), true], ["venue per_table 20,1tr", rec("t_v21", "venue", 20100000, 20100000), false],
   ["photography unit per_table", rec("t_pt2", "photography", 8000000, 8000000, { unit: "per_table" }), false], ["thiếu unit", rec("t_nu", "photography", 8000000, 8000000, { unit: null }), false],
   ["stationery 15.000đ (giá một thiệp)", rec("t_st", "stationery", 15000, 15000), false], ["stationery 0,3tr (đáy)", rec("t_st2", "stationery", 300000, 300000), true],
+  ["venue 1,9tr/bàn (giá giữ chỗ)", rec("t_vf", "venue", 1900000, 1900000), false], ["venue 2,0tr/bàn (sàn)", rec("t_vf2", "venue", 2000000, 2000000), true], ["venue thiếu unit", rec("t_vnu", "venue", 4000000, 4000000, { unit: null }), false],
+  ["số trong tên = min (Shop 247, 247tr)", rec("t_n1", "decor", 247000000, 247000000, { name: "Shop hoa tươi 247" }), false], ["số trong tên = min (24h, 24tr)", rec("t_n2", "ceremony", 24000000, 24000000, { name: "Dịch vụ cưới 24h" }), false],
+  ["số trong tên = min của khoảng (Quốc Cường 2, 2-21tr)", rec("t_n3", "ceremony", 2000000, 21000000, { name: "Dịch vụ cưới hỏi Quốc Cường 2" }), false], ["số trong tên = max (Thuê xe 365, 5-365 bị loại cả vì vượt trần; dùng 5-60)", rec("t_n4", "transport", 5000000, 60000000, { name: "Thuê xe 60 ngày" }), false],
+  ["tên có số nhưng giá khác (Studio 247, 8tr)", rec("t_n5", "photography", 8000000, 8000000, { name: "Studio 247" }), true], ["số trong tên là phần thập phân (Studio 5, giá 5,5tr)", rec("t_n6", "photography", 5500000, 5500000, { name: "Studio 5" }), true],
   ["decor 1,75 triệu tỉ (lỗi nhập)", rec("t_dc", "decor", 1000000, 3500000000000), false], ["không có last_scraped", rec("t_nd", "photography", 8000000, 8000000, { last: null }), false],
 ];
 const g2 = genFull([...INPUTS, ...C.map((c) => c[1])]);

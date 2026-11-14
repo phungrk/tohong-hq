@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* T-164 tiêu chí 5, phần B (tohong-front, trang admin; dùng khung eval/T-152/lib/front152.cjs: vite build ra thư mục tạm, API giả, không Google):
- *  - Danh sách vendor ("Danh sách vendor"): cột Nhãn hiện price_label NGUYÊN VĂN của API cho từng hàng (thay chữ "Giá ước tính"/"Giá đã xác minh" cố định); ô chọn "Nhãn" có hai mục mới
+ *  - Danh sách vendor ("Danh sách vendor"; vendor venue ghi giá theo bàn "3.9–4.7tr/bàn"): cột Nhãn hiện price_label NGUYÊN VĂN của API cho từng hàng (thay chữ "Giá ước tính"/"Giá đã xác minh" cố định); ô chọn "Nhãn" có hai mục mới
  *    "Ước tính theo hạng mục" (gửi label=estimate_category) và "Giá marry.vn" (gửi label=legacy_marry); mục cũ vẫn gửi label=estimated / label=verified.
  *  - Drawer chi tiết (bảng enrich): trong "Kết quả trong pool" có dòng "Nhãn giá: <price_label>" lấy từ effective.price_label của GET /api/admin/vendors/<id> khi tải được,
  *    ngược lại từ pool.vendor.price_label của API chi tiết (lớp sửa lỗi vẫn có nhãn). Nhãn hiệu lực (sau overlay) thắng nhãn pool. */
@@ -31,6 +31,7 @@ E.run(async () => {
   for (const [n, l] of [['Hàng Legacy', L_LEG], ['Hàng Estimate', L_EST], ['Hàng Verified', L_VER]]) {
     const row = S.page.getByRole('row').filter({ hasText: n }).first(); const t = H.norm(await row.innerText());
     check(`danh sách: hàng "${n}" hiện nhãn "${l}"`, t.includes(l), t);
+    if (n !== 'Hàng Verified') check(`danh sách: vendor venue "${n}" ghi giá theo bàn "3.9–4.7tr/bàn"`, /3\.9\s*[–-]\s*4\.7tr\/bàn/.test(t), t); else check(`danh sách: hàng "${n}" (chụp ảnh) không ghi "/bàn"`, !/\/bàn/.test(t), t);
     check(`danh sách: hàng "${n}" không còn nhãn cố định kiểu cũ "Giá ước tính"`, !/Giá ước tính/.test(t), t);
   }
   const sel = S.page.getByRole('combobox', { name: 'Nhãn' });
