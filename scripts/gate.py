@@ -45,6 +45,8 @@ def classify(entry):
         return "py"
     if e.endswith(".sh"):
         return "sh"
+    if e.endswith((".mjs", ".cjs", ".js")):
+        return "node"
     return "cmd"
 
 
@@ -57,6 +59,8 @@ def run_one(entry, cwd, timeout):
         cmd = ["python3", "-I", str(path)]
     elif kind == "sh":
         cmd = ["bash", str(path)]
+    elif kind == "node":
+        cmd = ["node", str(path)]
     else:
         cmd = entry
     t0 = time.time()
@@ -99,7 +103,14 @@ def collect(meta):
     if adv_dir.exists():
         for f in sorted(adv_dir.glob("adv-*")):
             rel = str(f.relative_to(ROOT))
-            if rel not in meta["eval"]:
+            # Eval đối kháng đã đăng ký (evalplus) thường nằm trong một lệnh, vd "node eval/T-x/adv-01.mjs"
+            # hay "bash …adv-02.sh" bọc file .cjs cùng tên: so theo chuỗi con, không so khớp nguyên dòng,
+            # để không chạy lại trực tiếp file không có quyền thực thi (sự cố T-149, 2026-11-13).
+            stem = rel.rsplit(".", 1)[0]
+            # Có bản .sh cùng tên thì .sh là lối vào (thường bọc .mjs/.cjs cần tham số): bỏ bản kia.
+            if not rel.endswith(".sh") and (ROOT / (stem + ".sh")).exists():
+                continue
+            if not any(rel in e or stem in e for e in meta["eval"]):
                 tiers.append((3, rel))
     return tiers
 

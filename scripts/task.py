@@ -552,8 +552,11 @@ def cmd_respec(a):
     if not a.note:
         raise LedgerError("respec phải có --note: spec đã đổi gì.")
     meta, _ = read_task(a.task)
-    if a.eval:
+    if a.eval and getattr(a, "replace", False):
         meta_eval = list(a.eval)
+    elif a.eval:
+        # Mặc định NỐI THÊM (sự cố T-136, T-159: respec --eval thay mất eval cũ mà không ai biết).
+        meta_eval = list(meta["eval"]) + [e for e in a.eval if e not in meta["eval"]]
     else:
         meta_eval = meta["eval"]
     if meta["owner"] in NEEDS_EVAL and not meta_eval:
@@ -857,7 +860,8 @@ def main(argv=None):
 
     sp = sub.add_parser("respec", help="Spec + eval đã sửa: trả việc về người làm, vòng về 0")
     common(sp, by_default=SPEC_OWNER)
-    sp.add_argument("--eval", action="append", default=[], help="Thay toàn bộ eval của việc")
+    sp.add_argument("--eval", action="append", default=[], help="Thêm eval (mặc định nối vào danh sách cũ)")
+    sp.add_argument("--replace", action="store_true", help="Thay toàn bộ danh sách eval bằng các --eval")
     sp.add_argument("--by-gate", dest="by_gate", default="spec-critic", help="(không dùng, giữ tương thích)")
     sp.set_defaults(fn=cmd_respec)
 
