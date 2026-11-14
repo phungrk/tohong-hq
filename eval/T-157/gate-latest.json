@@ -1,6 +1,6 @@
 {
   "task": "T-157",
-  "at": "2026-11-14T00:03",
+  "at": "2026-11-14T00:11",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_1_sua_hop_le.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 198,
+      "ms": 177,
       "out": "PASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_2_hieu_luc_tab_vendor_va_chat.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 253,
+      "ms": 266,
       "out": "PASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_3_lich_su_va_etag.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 204,
+      "ms": 206,
       "out": "PASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_4_nguon_doi_khong_ghi_nguon.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 578,
+      "ms": 423,
       "out": "PASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_5_quyen_403.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 181,
+      "ms": 173,
       "out": "PASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_6_drawer_phu_khong_doi_layout.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 5840,
+      "ms": 5795,
       "out": "drawer không đổi vị trí/kích thước bảng (không đẩy)\n  ok  520px: mở drawer không đổi bề rộng trang, không cuộn ngang\n  ok  520px: drawer dính mép phải, cao hết khung nhìn\n  ok  520px: drawer nằm TRÊN bảng (điểm chạm ở mép trái drawer thuộc drawer)\n  ok  520px: đóng bằng nút \"Đóng\", bảng y nguyên\n  ok  520px: không request ra ngoài ngoài ảnh (không Google API)\n  ok  390px: mở drawer không đổi vị trí/kích thước bảng (không đẩy)\n  ok  390px: mở drawer không đổi bề rộng trang, không cuộn ngang\n  ok  390px: drawer dính mép phải, cao hết khung nhìn\n  ok  390px: drawer nằm TRÊN bảng (điểm chạm ở mép trái drawer thuộc drawer)\n  ok  390px: drawer rộng bằng khung nhìn, không tay cầm\n  ok  390px: đóng bằng nút \"Đóng\", bảng y nguyên\n  ok  390px: không request ra ngoài ngoài ảnh (không Google API)\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_7_drawer_pool_dau_va_anh.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 3058,
+      "ms": 3037,
       "out": "ok  thứ tự mục: pool, lớp admin, lịch sử sửa, rồi nguồn, rồi đầu vào ngoài\n  ok  3 ảnh có 3 liên kết \"Mở ảnh gốc\"\n  ok  liên kết ảnh gốc: đúng URL ảnh trong pool, mở tab mới, rel có noopener\n  ok  mỗi ảnh có thumbnail <img> trỏ đúng URL\n  ok  ảnh Google ghi công \"Ảnh: Tác giả Thử\", ảnh marry không có dòng ghi công\n  ok  ảnh hỏng: \"Ảnh không tải được\" đúng một lần, liên kết vẫn còn\n  ok  ảnh hỏng không phá drawer: các mục còn, nút \"Đóng\" bấm được\n  ok  drawer chỉ gọi API ảnh ở các URL của pool, không request nào khác ra ngoài\n  ok  không có nhãn \"admin sửa\" khi chưa sửa gì\n  ok  chưa có lịch sử: không có dòng lịch sử, có thể có tiêu đề \"Lịch sử sửa\" nhưng ghi \"Chưa có sửa\"\nPASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-152/check_8_drawer_admin_sua_pool.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 8459,
+      "ms": 8370,
       "out": "ưu xong: biểu mẫu đóng và lớp sửa được tải lại\n  ok  ô Ảnh điền sẵn đúng 3 URL, mỗi dòng một URL\n  ok  Lưu ảnh: 4 phần tử, ảnh Google gửi lại nguyên attribution, ảnh mới chỉ có url\n  ok  400: hiện \"Không lưu được: invalid_styles\", biểu mẫu còn để sửa tiếp\n  ok  409: hiện \"Dữ liệu đã đổi, hãy tải lại\" và tải lại lớp sửa\n  ok  vendor không phải venue: không có ô sức chứa\n  ok  ảnh Google đã đổi: drawer ghi \"Ảnh Google đã đổi — xem lại bản sửa ảnh\"\n  ok  thumbnail chỉ gồm ảnh hiệu lực (1 ảnh marry), không có URL Google đã bị bỏ\n  ok  ô Ảnh chỉ điền sẵn URL còn hợp lệ (effective.photos), không có URL Google đã bỏ\n  ok  API lớp sửa lỗi: hiện \"Không tải được lớp sửa\", vẫn có phần pool (từ API chi tiết) và nguồn\n  ok  API lớp sửa lỗi: không có nút \"Sửa dữ liệu pool\" (không đủ version để lưu)\nPASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "cd /home/user/tohong-hq && python3 -I eval/invariants/planner/vendor/images/inv-038-ung-vien-chat-dung-pool-overlay.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 141,
+      "ms": 178,
       "out": "PASS ứng viên chat đúng pool + overlay, không mạng, đúng ngân sách",
       "tier": 1
     },
@@ -84,15 +84,39 @@
       "eval": "cd /home/user/tohong-hq && bash eval/T-147/check_6_ui_drawer.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 9244,
+      "ms": 9194,
       "out": "  không request nào ra ngoài (Google) trong cả phiên\n  ok  520px: drawer rộng min(560, khung) = 520, dính mép phải\n  ok  520px: không có tay cầm kéo (min = max)\n  ok  520px: trang không cuộn ngang\n  ok  520px: chế độ PHỦ (bảng không bị đẩy, nằm dưới drawer)\n  ok  520px: đóng drawer rồi Approve bấm được và gửi PUT\n  ok  600px: drawer rộng min(560, khung) = 560, dính mép phải\n  ok  600px: không có tay cầm kéo (min = max)\n  ok  600px: trang không cuộn ngang\n  ok  600px: chế độ PHỦ (bảng không bị đẩy, nằm dưới drawer)\n  ok  600px: đóng drawer rồi Approve bấm được và gửi PUT\n  ok  390px: drawer rộng bằng khung nhìn, phủ kín chiều cao\n  ok  390px: không có tay cầm kéo giãn\n  ok  390px: trang không cuộn ngang\n  ok  390px: nút \"Đóng\" cao >= 40px (bấm được bằng ngón tay)\n  ok  390px: đóng được\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-157/adv-01-gia-bang-pool-khong-ghi.sh",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 185,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-157/adv-02-ten-vo-hinh-dao-chieu.sh",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 198,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "cd /home/user/tohong-hq && bash eval/T-157/adv-03-url-anh-hai-cach-doc.sh",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 214,
+      "out": "PASS",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 45,
+      "ms": 42,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -100,7 +124,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 153,
+      "ms": 170,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -116,7 +140,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 46,
+      "ms": 39,
       "out": "PASS selftest 3 ca; 35 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -124,7 +148,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1025,
+      "ms": 931,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -132,15 +156,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2455,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-9J1I8q/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2386,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-ZS8kp4/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1487,
+      "ms": 1291,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -148,15 +172,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 913,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-gZrsOg/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 930,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-SUaMsN/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2256,
+      "ms": 2158,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -164,7 +188,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 81,
+      "ms": 111,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -172,15 +196,15 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1406,
-      "out": "PASS (worker.js nén 773542 byte)",
+      "ms": 1486,
+      "out": "PASS (worker.js nén 773833 byte)",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-001-bao-cao-enrich-phan-hoach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 64,
+      "ms": 57,
       "out": "PASS 870 dòng, 9 nhóm cộng đúng, 366 approvable, ô đếm khớp nhóm",
       "tier": 2
     },
@@ -188,7 +212,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-002-maps-link-back-nhan-thi-tohong-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 354,
+      "ms": 373,
       "out": "PASS 20 link: mọi link back nhận thì tohong cũng nhận",
       "tier": 2
     },
@@ -196,7 +220,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-003-bao-cao-enrich-commit-bang-sinh-lai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 430,
+      "ms": 420,
       "out": "PASS 1 báo cáo enrich đã commit bằng đúng byte báo cáo sinh lại",
       "tier": 2
     },
@@ -204,7 +228,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-004-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 640,
+      "ms": 621,
       "out": "PASS 3 cú bấm của Capu: back ký, tohong nhận, bất biến kiểm được (kể cả mục link sau resolve); review của admin khác không vào",
       "tier": 2
     },
@@ -212,7 +236,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-005-workflow-du-lieu-di-kem-bao-cao.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 111,
+      "ms": 71,
       "out": "PASS mọi workflow thêm file dữ liệu đều sinh lại và đưa enrich-report.json vào cùng commit",
       "tier": 2
     },
@@ -220,7 +244,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-006-danh-muc-thuoc-tinh-pool.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 67388,
+      "ms": 62962,
       "out": "PASS",
       "tier": 2
     },
@@ -228,7 +252,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-007-bao-cao-khong-mang-lien-he-dia-chi.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 122,
+      "ms": 103,
       "out": "PASS",
       "tier": 2
     },
@@ -236,7 +260,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-008-nguoi-ngoai-khong-thay-khong-goi-api-vendor.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 2804,
+      "ms": 2781,
       "out": "ok  thấy \"Bạn không có quyền xem trang này\"\n  ok  không có thanh tab, không có bảng enrich\n  ok  không gọi /api/admin/vendor-enrich* hay /api/admin/vendors*\nPASS",
       "tier": 2
     },
@@ -244,7 +268,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-009-ban-sua-pool-khong-pha-hop-dong-anh-gu.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 569,
+      "ms": 469,
       "out": "PASS 22 vendor đã sửa, 867 vendor hiệu lực đều giữ hợp đồng ảnh/gu/độ dài",
       "tier": 2
     },
@@ -252,9 +276,17 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-010-drawer-doc-la-admin-ghi-ky-la-capu.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 209,
+      "ms": 203,
       "out": "PASS",
       "tier": 2
+    },
+    {
+      "eval": "eval/T-157/adv-04-bien-da-giu.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 176,
+      "out": "PASS",
+      "tier": 3
     }
   ],
   "hint": ""
