@@ -1,6 +1,6 @@
 {
   "task": "T-167",
-  "at": "2026-11-14T15:04",
+  "at": "2026-11-14T15:09",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,39 +12,39 @@
       "eval": "node eval/T-167/check_1_phep_so_theo_ban.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 251,
-      "out": "FAIL Alice & Capu (cưới 29.12.2027): 200 khách, tiệc cưới 90tr: thiếu match.budgetBasis; bảng ghi 300 khách thắng hồ sơ 200 (phải lộ số lệch): thiếu match.budgetBasis; bảng guests 0 => lấy hồ sơ 200: thiếu match.budgetBasis; tổng hồ sơ 100 lệch tổng bảng 200: phân bổ co giãn 90 -> 45: thiếu match.budgetBasis; không có bảng: ước theo tổng 200 x 48% = 96: thiếu match.budgetBasis; không có bảng, hồ sơ cũ budget_by_category.venue 70: thiếu match.budgetBasis",
+      "ms": 236,
+      "out": "FAIL Alice & Capu (cưới 29.12.2027): 200 khách, tiệc cưới 90tr: thiếu match.budgetBasis; bảng ghi 300 khách thắng hồ sơ 200 (phải lộ số lệch): thiếu match.budgetBasis; bảng guests 0 => lấy hồ sơ 200: thiếu match.budgetBasis; tổng hồ sơ 100 lệch tổng bảng 200: phân bổ co giãn 90 -> 45: thiếu match.budgetBasis; không có bảng: ước theo tổng 200 x 48% = 96: thiếu match.budgetBasis; không có bảng, hồ sơ cũ budget_by_category.venue 70: thiếu match.budgetBasis; làm tròn: tổng 123 x 48% = 59,04 (JSON giữ 59,04; text ghi 59tr; điểm tính trên 59,04): thiếu match.budgetBasis; số lớn: tổng 3000 x 48% = 1440 (không phân cách hàng nghìn): thiếu match.budgetBasis",
       "tier": 1
     },
     {
       "eval": "node eval/T-167/check_2_thieu_so_khong_theo_ban_uoc_tinh.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 235,
-      "out": "FAIL thiếu số khách: thiếu match.budgetBasis; thiếu ngân sách: thiếu match.budgetBasis; không theo bàn: thiếu match.budgetBasis; giá ước tính: thiếu match.budgetBasis; giá thật: thiếu match.budgetBasis",
+      "ms": 293,
+      "out": "FAIL thiếu số khách: thiếu match.budgetBasis; thiếu ngân sách: thiếu match.budgetBasis; thiếu cả hai: thiếu match.budgetBasis; honeymoon tỷ lệ 0%: thiếu match.budgetBasis; hạng mục cũ = 0: thiếu match.budgetBasis; không theo bàn: thiếu match.budgetBasis; giá ước tính: thiếu match.budgetBasis; giá thật: thiếu match.budgetBasis",
       "tier": 1
     },
     {
       "eval": "node eval/T-167/check_3_so_server_dung_khong_lo_cap_doi_khac.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 233,
-      "out": "FAIL guestCountSource mong \"budget_doc\", thấy undefined; budgetByCategory.venue mong 90, thấy undefined; budgetBasis và profileSnapshot phải cùng số: undefined vs {\"styles\":[],\"budgetTotal\":200,\"weddingDate\":\"2029-03-20\",\"city\":\"HCMC\",\"guestCount\":237}; không bảng: mong guestCount 200 nguồn \"profile\", thấy 200 / undefined; ngày cưới lệch: mong 2026-12-31 nguồn \"couple.wedding_date\", thấy 2026-12-31 / undefined; ngày cưới top-level: mong 2027-12-29 nguồn \"wedding_date\", thấy 2027-12-29 / undefined; số khách: mong 150 nguồn \"preferences.guest_count\", thấy 150 / undefined; tổng ngân sách: mong 200 nguồn \"budget\", thấy 200 / undefined; nguồn hạng mục venue: mong \"allocation\", thấy undefined; số khách từ bảng: mong nguồn \"budget_doc.guests\", thấy undefined",
+      "ms": 249,
+      "out": "ndefined; budgetBasis và profileSnapshot phải cùng số: undefined vs {\"styles\":[],\"budgetTotal\":200,\"weddingDate\":\"2029-03-20\",\"city\":\"HCMC\",\"guestCount\":237}; total_share: budgetBasis mong nguồn total_share, sharePct 48, categoryBudgetTr = budgetTotal x 48%, thấy undefined / budgetTotal 200; không bảng: mong guestCount 200 nguồn \"profile\", thấy 200 / undefined; ngày cưới lệch: mong 2026-12-31 nguồn \"couple.wedding_date\", thấy 2026-12-31 / undefined; ngày cưới top-level: mong 2027-12-29 nguồn \"wedding_date\", thấy 2027-12-29 / undefined; số khách: mong 150 nguồn \"preferences.guest_count\", thấy 150 / undefined; tổng ngân sách: mong 200 nguồn \"budget\", thấy 200 / undefined; nguồn hạng mục venue: mong \"allocation\", thấy undefined; số khách từ bảng: mong nguồn \"budget_doc.guests\", thấy undefined",
       "tier": 1
     },
     {
-      "eval": "eval/T-167/checklist.md",
-      "kind": "manual",
-      "status": "MANUAL",
-      "ms": 0,
-      "out": "checklist: người kiểm",
+      "eval": "node eval/T-167/check_4_dong_front.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 7479,
+      "out": "FAIL Alpha: dưới thanh Ngân sách phải là đúng nguyên văn \"≈ 3,9tr/bàn × 20 bàn = 78tr so với 90tr tiệc cưới\", thấy \"Ngân sách 100%\" (+7 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 53,
+      "ms": 39,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -52,7 +52,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 174,
+      "ms": 246,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 28,
+      "ms": 40,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 47,
+      "ms": 52,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1129,
+      "ms": 1263,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -84,15 +84,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2651,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-IUhLtW/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2458,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-Ecnvgk/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1786,
+      "ms": 1811,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -100,15 +100,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 982,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-6UCNBT/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1394,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-TSaer3/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 3118,
+      "ms": 2969,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 93,
+      "ms": 90,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1676,
+      "ms": 1641,
       "out": "PASS (worker.js nén 777913 byte)",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/vendor/inv-001-pool-gia-co-nguon-va-khung-nhat-quan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 41,
+      "ms": 40,
       "out": "PASS (867 vendor có nguồn giá, khung nhất quán)",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/vendor/inv-002-gia-hien-ra-luon-co-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 354,
+      "ms": 335,
       "out": "PASS",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/vendor/inv-003-uoc-tinh-khong-lam-bang-chung-khang-dinh-ngan-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1738,
+      "ms": 2243,
       "out": "PASS",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/vendor/inv-004-venue-so-gia-ban-voi-tong-theo-so-ban.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1333,
+      "ms": 1349,
       "out": "PASS",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/vendor/inv-005-mot-so-khach-hieu-luc-tab-chat-seed.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 509,
+      "ms": 516,
       "out": "PASS\nPASS",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/vendor/inv-005a-so-khach-ho-so-mot-so.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 277,
+      "ms": 234,
       "out": "PASS",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/vendor/inv-005b-so-khach-ho-so-khop-seed.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 247,
+      "ms": 337,
       "out": "PASS",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-001-gu-khong-day-vendor-vuot-ngan-sach-o-chat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 80,
+      "ms": 104,
       "out": "PASS boost không phụ thuộc gu (6 style) và top 5 chat không có vendor khớp gu vượt ngân sách",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-002-thieu-tag-khong-bi-phat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 410,
+      "ms": 387,
       "out": "PASS tag lệch = không tag (JS mọi hạng mục, Python), vendor khớp cao hơn",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-003-thu-tu-gu-theo-diem-r8.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 851,
+      "ms": 932,
       "out": "PASS R8: JS + Python stage 2 + chat (sinh đôi, ngược), fuzz 400 pool (tới 30 vendor, tag hoa/thường/khoảng trắng/không khoá, λ 0/0.3/0.9), bằng điểm ở mép top_k, chuẩn hoá R1",
       "tier": 2
     },
@@ -212,7 +212,7 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-004-nhan-cham-mu-toan-ven.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 42,
+      "ms": 26,
       "out": "PASS chưa có nhãn (eval/T-074/labels.json không tồn tại)",
       "tier": 2
     }

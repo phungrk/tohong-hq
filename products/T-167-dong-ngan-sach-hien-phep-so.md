@@ -1,6 +1,6 @@
 # Spec T-167: Dòng Ngân sách ghi phép so bằng đúng số server dùng + xem được số server dùng
 
-> v1 · Spec Writer (product) · 2026-11-14 · bậc B · vùng `planner/vendor/matching` · chạm `tohong-back` (chính) và `tohong-front` (hiển thị) · nối tiếp T-159, T-164 (H5, H7), ADR-094 (INV-005).
+> v2 (sau `handoffs/T-167-D1.md`: B1 ngân sách = 0, B2 eval front tự động, B3 H4 khi ước theo tổng, B4 thứ tự no_budget > no_guests, M1-M4) · v1 · Spec Writer (product) · 2026-11-14 · bậc B · vùng `planner/vendor/matching` · chạm `tohong-back` (chính) và `tohong-front` (hiển thị) · nối tiếp T-159, T-164 (H5, H7), ADR-094 (INV-005).
 > Phạm vi do Capu chốt 2026-11-14: "làm mục 2 và 3". Truy nguyên nhân điểm 0% KHÔNG thuộc spec này (xem "Ghi chú nghi vấn", không có eval sửa).
 
 ## Ý định
@@ -30,36 +30,40 @@ Nếu thẻ vendor ghi phép so bằng số server đã dùng thì khi điểm N
 ### H1 · Mỗi vendor trong kết quả `match` có `match.budgetBasis`
 Cả `GET /api/vendors/match` (mỗi phần tử của `vendors`) lẫn `GET /api/vendors/:id?coupleId=…` (trường `match`) mang một đối tượng `budgetBasis`. Hai nơi cho đối tượng giống hệt nhau (so bằng JSON) với cùng cặp đôi và cùng dữ liệu. Vendor ẩn (`match: null`) không có.
 
-Trường của `budgetBasis` (số đơn vị triệu đồng, làm tròn 1 chữ số thập phân bằng `Math.round(x*10)/10`, như hàm `fmtTr` hiện có):
-- `kind`: một trong `"per_table"` (venue có nguồn giá theo bàn, có số khách và có ngân sách hạng mục), `"total"` (mọi vendor khác có ngân sách hạng mục), `"no_guests"` (venue theo bàn, không có số khách), `"no_budget"` (không có ngân sách hạng mục nào; điểm 0,5).
+Trường của `budgetBasis` (số đơn vị triệu đồng). Các trường số trong JSON giữ SỐ ĐẦY ĐỦ, chưa làm tròn (vd `categoryBudgetTr` 59,04). Chỉ `text` làm tròn 1 chữ số thập phân bằng `Math.round(x*10)/10` (như `fmtTr` hiện có; 59,04 ghi `59`):
+- `kind`, chọn theo thứ tự ưu tiên, điều kiện đầu tiên đúng thì dừng: (1) `"no_budget"`: ngân sách hạng mục đem so không có HOẶC bằng 0 hoặc nhỏ hơn 0 (vd hạng mục `honeymoon` có tỷ lệ 0% trong mẫu, hay `budget_by_category` cũ ghi 0); điểm 0,5 như main; (2) `"no_guests"`: venue theo bàn, không có số khách hiệu lực; điểm 0,5; (3) `"per_table"`: venue có nguồn giá theo bàn; (4) `"total"`: mọi vendor còn lại. Thiếu cả ngân sách lẫn số khách => `no_budget` (không có ngân sách thì số khách không giúp được gì).
 - `pricePerTableTr` (chỉ `per_table`, `no_guests`): `priceMax` của vendor. `priceMaxTr` (chỉ `total`): `priceMax`.
 - `tables`, `guests` (chỉ `per_table`): đúng `tablesFor(guests)` và số khách hiệu lực mà điểm Ngân sách đã dùng.
 - `totalTr`: `per_table` = `priceMax × tables`; `total` = `priceMax`. Đây đúng là số được đem so, không làm tròn trước khi so.
 - `categoryBudgetTr`: số ngân sách hạng mục đã đem so.
-- `categoryBudgetSource`: `"allocation"` (phân bổ của bảng dự toán, sau co giãn), `"legacy_profile"` (`budget_by_category` của hồ sơ khi không có phân bổ), `"total_share"` (tổng ngân sách hồ sơ × tỷ lệ hạng mục).
+- `categoryBudgetSource`: `"allocation"` (phân bổ của bảng dự toán, sau co giãn), `"legacy_profile"` (`budget_by_category` của hồ sơ khi không có phân bổ), `"total_share"` (tổng ngân sách hồ sơ × tỷ lệ hạng mục). Khi là `total_share` có thêm `sharePct` (số nguyên %, vd 48 cho venue); các nguồn khác không có `sharePct`. `kind = no_budget` có `categoryBudgetTr` là `null` hoặc 0.
+- `categoryId`: hạng mục của vendor.
 - `estimated`: `true` khi `price_basis` thuộc nhóm ước tính (T-164 H5, `isEstimateBasis`), ngược lại `false`.
 - `text`: câu tiếng Việt một dòng, định dạng ở H2.
 
-Bất biến nội bộ bắt buộc: điểm `scoreBreakdown.budget` suy ra từ chính `totalTr` và `categoryBudgetTr` trong `budgetBasis` theo luật cũ (`totalTr ≤ categoryBudgetTr` → 1; vượt hơn 20% → 0; giữa hai mức giảm tuyến tính; `no_guests` và `no_budget` → 0,5). Không được tính điểm bằng một số rồi in một số khác.
+Bất biến nội bộ bắt buộc: điểm `scoreBreakdown.budget` suy ra từ chính `totalTr` và `categoryBudgetTr` (số chưa làm tròn) trong `budgetBasis` theo luật cũ (`totalTr ≤ categoryBudgetTr` → 1; vượt hơn 20% → 0; giữa hai mức giảm tuyến tính; `no_guests` và `no_budget` → 0,5). Điểm, thứ tự, tổng điểm không đổi so với main ở mọi tình huống, kể cả ngân sách hạng mục = 0 (vẫn 0,5). Không được tính điểm bằng một số rồi in một số khác.
 
 ### H2 · Câu `text` (mỗi dòng một khuôn, dùng dấu phẩy thập phân, "tr" liền số)
 - `per_table`: `≈ {giá}tr/bàn × {bàn} bàn = {tổng}tr so với {ngân sách}tr {nhãn}`. Ví dụ Capu: `≈ 3,9tr/bàn × 20 bàn = 78tr so với 90tr tiệc cưới`.
-- `categoryBudgetSource = "total_share"`: nối thêm ` (ước theo tổng ngân sách)` sau `{nhãn}`.
+- `categoryBudgetSource = "total_share"`: nối thêm ` (ước theo tổng × {sharePct}%)` sau `{nhãn}`, vd `… so với 96tr tiệc cưới (ước theo tổng × 48%)`.
 - `total`: `giá đến {priceMax}tr so với {ngân sách}tr {nhãn}` (cùng quy tắc nối `total_share`). Ví dụ: `giá đến 15tr so với 40tr chụp ảnh + quay phim`.
+- Định dạng số: dấu phẩy thập phân, bỏ phần thập phân nếu là `.0`, KHÔNG có dấu phân cách hàng nghìn và không đổi sang tỷ (1440tr ghi `1440tr`).
 - `no_guests`: câu chứa cụm `chưa có số khách` và giá theo bàn, KHÔNG có dấu `=` và không đoán tổng. Ví dụ: `Chưa có số khách nên chưa tính được tổng tiệc (giá ≈ 3,9tr/bàn)`.
-- `no_budget`: câu chứa cụm `chưa có ngân sách` kèm nhãn hạng mục, không có phép so. Ví dụ: `Chưa có ngân sách cho tiệc cưới nên chưa so được`.
+- `no_budget`: đúng khuôn `Chưa có ngân sách cho {nhãn} nên chưa so được`, không có phép so, không nhắc số khách. Ví dụ: `Chưa có ngân sách cho tiệc cưới nên chưa so được`, `Chưa có ngân sách cho tuần trăng mật nên chưa so được`.
 - Vendor `estimated = true`: câu bắt đầu bằng `Giá ước tính: ` rồi khuôn ở trên; câu không bao giờ chứa "trong ngân sách", "vừa ngân sách", "đủ ngân sách", "rẻ hơn" (T-164 H5). Phép so vẫn ghi đúng số.
 - `{nhãn}` theo `categoryId` (chữ thường, đúng chuỗi sau): venue `tiệc cưới`; ceremony `lễ ăn hỏi`; photography `chụp ảnh + quay phim`; jewelry `nhẫn cưới + trang sức`; attire `trang phục cô dâu chú rể`; decor `trang trí tiệc + hoa`; makeup `makeup + làm tóc`; transport `xe rước dâu + đưa đón`; stationery `thiệp + quà tặng khách`; honeymoon `tuần trăng mật`.
 
+Chip cũ giữ nguyên (spec không đổi chip): `≈ 3.9tr/bàn × 20 bàn` (dấu chấm, `lib/vendorMatcher.js:105`) nằm cùng thẻ với dòng mới `≈ 3,9tr/bàn` (dấu phẩy). Chấp nhận lệch dấu này trong T-167; không phải lỗi code. Thống nhất dấu là việc riêng.
+
 ### H3 · Front hiển thị
-Ở thẻ chi tiết vendor trong chat (khối "Phân tích AI", ngay dưới thanh "Ngân sách", `VendorChatCards.jsx`) hiện đúng `match.budgetBasis.text`, một dòng chữ nhỏ, xuống dòng khi hẹp, nguyên văn từ back (front không tự tính lại số). Thiếu `budgetBasis` (back cũ) thì không hiện gì và không lỗi. Đây là nơi duy nhất hiện thanh "Ngân sách" trong front hôm nay; tab Vendor chỉ có chip lý do, giữ nguyên.
+Ở thẻ chi tiết vendor trong chat (khối "Phân tích AI", ngay dưới thanh "Ngân sách", `VendorChatCards.jsx`) hiện đúng `match.budgetBasis.text`, một dòng chữ nhỏ, xuống dòng khi hẹp (không tràn ngang ở 360px), nguyên văn từ back (front không tự tính lại số, kể cả khi câu mâu thuẫn với thanh %). Thiếu `budgetBasis` (back cũ) thì không hiện gì: không chữ `undefined`, không phần tử dòng rỗng. Đây là nơi duy nhất hiện thanh "Ngân sách" trong front hôm nay; tab Vendor chỉ có chip lý do, giữ nguyên.
 
 ### H4 · `profileSnapshot` cho thấy số server dùng (mục 3 của Capu)
 `GET /api/vendors/match` có `profileSnapshot` (đã có `styles`, `budgetTotal`, `weddingDate`, `city`, `guestCount`) thêm:
 - `guestCountSource`: `"budget_doc"` khi số khách lấy từ `guests` của bảng dự toán (> 0), `"profile"` khi từ hồ sơ, `null` khi không có số khách.
-- `budgetByCategory`: bản đồ `categoryId → triệu` đúng như server đem vào chấm điểm (phân bổ của bảng đã co giãn, đè lên `budget_by_category` cũ của hồ sơ); `null` khi trống.
+- `budgetByCategory`: bản đồ `categoryId → triệu` chỉ gồm các hạng mục có số RIÊNG: phân bổ của bảng đã co giãn (nguồn `allocation`) đè lên `budget_by_category` cũ của hồ sơ (nguồn `legacy_profile`); `null` khi trống. Ngân sách ước theo tổng × tỷ lệ (`total_share`) KHÔNG nằm trong bản đồ này; số đem so của nó nằm ở `budgetBasis.categoryBudgetTr` cùng `sharePct`.
 - `sources`: tên trường hồ sơ server đã đọc cho từng số, để đối chiếu hồ sơ server dùng với hồ sơ người dùng thấy: `weddingDate` (`"couple.wedding_date"` | `"wedding_date"` | `null`), `guestCount` (`"budget_doc.guests"` | `"guest_count"` | `"preferences.guest_count"` | `"couple.guest_count"` | `null`), `budgetTotal` (`"budget"` | `null`), `budgetByCategory` (bản đồ `categoryId → "allocation" | "legacy_profile"`). `weddingDate`, `budgetTotal`, `city` của snapshot là đúng giá trị server dùng (đã có từ trước, nay có nguồn); `weddingDate` là ngày mà chip "Còn lịch dd.mm" in.
-`guestCount` và `budgetByCategory[venue]` bằng `budgetBasis.guests` và `budgetBasis.categoryBudgetTr` của venue trong cùng phản hồi.
+Khớp số trong cùng phản hồi: `guestCount` = `budgetBasis.guests` (khi có); khi `categoryBudgetSource` là `allocation` hoặc `legacy_profile` thì `budgetByCategory[categoryId]` = `budgetBasis.categoryBudgetTr`; khi là `total_share` thì `budgetByCategory[categoryId]` vắng và `budgetBasis.categoryBudgetTr` = `budgetTotal × sharePct / 100`; `sources.budgetByCategory` chỉ có các hạng mục có trong `budgetByCategory`.
 Ai xem được: đúng người đã qua `requireCoupleAccess(read)` cho `coupleId` đó (thành viên cặp đôi, trong đó có Capu khi mở tài khoản cặp thử). Không thêm đường admin mới đọc hồ sơ cặp đôi khác. Cách Capu xem: Network tab/response của `GET /api/vendors/match` hoặc chính dòng ở H3. Người không thuộc cặp đôi không nhận số nào của cặp đôi đó (hồ sơ rỗng như hôm nay). `profileSnapshot` và `budgetBasis` không chứa tên, email, điện thoại, `members`, ghi chú, danh sách khách.
 
 ## Ràng buộc (vòi)
@@ -75,13 +79,13 @@ Chạy từ gốc `tohong-hq` (biến `TOHONG_BACK_REPO` mặc định `../tohon
 
 | # | Tiêu chí (có/không) | Eval |
 | --- | --- | --- |
-| 1 | Venue theo bàn: `budgetBasis` ở match và ở chi tiết giống hệt nhau, có đúng `tables`, `totalTr`, `categoryBudgetTr`, `categoryBudgetSource`, `text` cho 6 tình huống (Bạch Kim 200 khách/90tr; bảng 300 khách thắng hồ sơ; bảng khách 0 lấy hồ sơ; tổng hồ sơ lệch tổng bảng co 90→45; không bảng ước theo tổng 96; hồ sơ cũ 70); điểm Ngân sách khớp phép so | `node eval/T-167/check_1_phep_so_theo_ban.mjs` |
-| 2 | Thiếu số khách, thiếu ngân sách, vendor không theo bàn, giá ước tính, giá thật: đúng `kind`, đúng khuôn câu (H2), điểm 0,5 khi thiếu, không khẳng định ngân sách với giá ước tính | `node eval/T-167/check_2_thieu_so_khong_theo_ban_uoc_tinh.mjs` |
+| 1 | Venue theo bàn: `budgetBasis` ở match và ở chi tiết giống hệt nhau, có đúng `tables`, `totalTr`, `categoryBudgetTr`, `categoryBudgetSource`, `sharePct`, `text` cho 8 tình huống (Bạch Kim 200 khách/90tr; bảng 300 khách thắng hồ sơ; bảng khách 0 lấy hồ sơ; tổng hồ sơ lệch tổng bảng co 90→45; không bảng ước theo tổng 96; hồ sơ cũ 70; làm tròn 59,04 -> `59`; số lớn 1440tr); điểm Ngân sách khớp phép so | `node eval/T-167/check_1_phep_so_theo_ban.mjs` |
+| 2 | Thiếu số khách, thiếu ngân sách (kể cả bằng 0: honeymoon 0%, hạng mục cũ 0; thiếu cả hai => no_budget), vendor không theo bàn, giá ước tính, giá thật: đúng `kind`, đúng khuôn câu (H2), điểm 0,5 khi thiếu, không khẳng định ngân sách với giá ước tính | `node eval/T-167/check_2_thieu_so_khong_theo_ban_uoc_tinh.mjs` |
 | 3 | `profileSnapshot` có `guestCountSource` + `budgetByCategory` khớp `budgetBasis`; không lộ trường cá nhân; người ngoài cặp đôi không nhận số nào | `node eval/T-167/check_3_so_server_dung_khong_lo_cap_doi_khac.mjs` |
-| 4 | Front hiện đúng `budgetBasis.text` dưới thanh Ngân sách; không lỗi khi thiếu trường | `eval/T-167/checklist.md` (không dựng được thẻ React trong repo front; ghi rõ ở đầu file) |
+| 4 | Front hiện đúng nguyên văn `budgetBasis.text` dưới thanh Ngân sách (đúng một dòng, không tính lại số), back cũ không `undefined`/dòng thừa, 360px không tràn | `node eval/T-167/check_4_dong_front.cjs` (Playwright + vite dev, khung của `eval/T-164/check_5a_nhan_app_cap_doi.cjs`; biến `TOHONG_FRONT_REPO`, `PLAYWRIGHT_PATH`) |
 
 ## Bất biến đề xuất (tầng 2)
-INV (vùng `planner/vendor/matching`): với mọi vendor có `match`, `match.budgetBasis` tồn tại và điểm `scoreBreakdown.budget` suy ra được từ `totalTr`/`categoryBudgetTr` của nó; số khách và ngân sách hạng mục in ra là số đã tính điểm (không có hai nguồn). Nội dung = phần "khớp điểm" của eval 1 và case (a) của eval 3. Spec-critic rút khi spec qua cổng.
+INV (vùng `planner/vendor/matching`): với mọi vendor có `match`, `match.budgetBasis` tồn tại và điểm `scoreBreakdown.budget` suy ra được từ `totalTr`/`categoryBudgetTr` của nó; số khách và ngân sách hạng mục in ra là số đã tính điểm (không có hai nguồn). Nội dung = phần "khớp điểm" của eval 1, case no_budget của eval 2 và case (a), (b) của eval 3. Spec-critic rút khi spec qua cổng.
 
 ## Không làm
 - Không truy nguyên hay sửa nguyên nhân 0% (đã nêu 4 nghi vấn, không có eval sửa).
@@ -93,4 +97,5 @@ INV (vùng `planner/vendor/matching`): với mọi vendor có `match`, `match.bu
 Không. (Giả định ghi rõ: "admin xem số server dùng" hiểu là Capu/cặp đôi mở thẻ hoặc phản hồi API của chính cặp đôi mình; nếu Capu cần admin xem hồ sơ ghép của cặp đôi bất kỳ thì đó là dữ liệu người dùng, bậc C, việc riêng.)
 
 ## Lịch sử sửa
+- v2 (2026-11-14, sau D1): H1 thêm `no_budget` cho ngân sách = 0 và thứ tự ưu tiên no_budget > no_guests (câu trước đó cho ba cách hiểu); H4 tách `total_share` khỏi `budgetByCategory` (câu "bằng categoryBudgetTr" sai khi ước theo tổng); số trong JSON không làm tròn, `text` làm tròn; định dạng số lớn; ghi chấp nhận lệch dấu chip cũ; tiêu chí 4 thành eval Playwright tự động (bỏ checklist tay, lý do cũ sai); eval 3 so trường cụ thể thay vì tìm chuỗi trong body.
 - v1 (2026-11-14): bản đầu, theo phạm vi Capu chốt "mục 2 và 3".

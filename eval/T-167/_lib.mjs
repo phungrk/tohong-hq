@@ -10,14 +10,15 @@ export const { tab, newBucket, coupleProfile, CID, AUTH, BUDGET_KEY, done } = T1
 export const NOW = "2026-11-14T08:00:00Z";
 export const ids = {};
 
-/** Nạp back với R1 (venue 3,9tr/bàn, legacy_marry) và P1 (photography, giá 10-15tr, không theo bàn, nguồn legacy_marry) và E1 (venue giá ước tính estimate_category 3,9tr/bàn). */
+/** Nạp back với R1 (venue 3,9tr/bàn, legacy_marry) và P1 (photography, giá 10-15tr, không theo bàn, nguồn legacy_marry) và E1 (venue giá ước tính estimate_category 3,9tr/bàn) và H1 (honeymoon giá 15tr; mẫu ngân sách có tỷ lệ 0%). */
 export async function setup() {
   const dir = stampedBack({ mut: (arr) => {
     const pick = (cat, n) => arr.filter((v) => v.category === cat && v.isVerified && v.rating === 0 && v.styles.length === 0 && v.availability.length === 12 && v.city === "HCMC").slice(0, n);
-    const [r1, e1] = pick("venue", 2); const [p1] = pick("photography", 1);
+    const [r1, e1] = pick("venue", 2); const [p1] = pick("photography", 1); const [h1] = pick("honeymoon", 1);
     Object.assign(r1, { priceMin: 3.9, priceMax: 3.9, priceSource: "legacy_marry", priceAsOf: "2026-06", capacity: { min: 1, max: 2e9 } }); ids.R1 = r1.id;
     Object.assign(e1, { priceMin: 3.9, priceMax: 3.9, priceSource: "estimate_category", priceAsOf: "2026-06", capacity: { min: 1, max: 2e9 } }); ids.E1 = e1.id;
     Object.assign(p1, { priceMin: 10, priceMax: 15, priceSource: "legacy_marry", priceAsOf: "2026-06" }); ids.P1 = p1.id;
+    Object.assign(h1, { priceMin: 15, priceMax: 15, priceSource: "legacy_marry", priceAsOf: "2026-06" }); ids.H1 = h1.id;
   } });
   const M = await loadModules(dir);
   const hide = (cat, keep) => Object.fromEntries(M.POOL.filter((v) => v.category === cat && !keep.includes(v.id)).map((v) => [v.id, { hidden: true, hidden_reason: "eval T-167" }]));
@@ -38,4 +39,6 @@ export async function detailOne(M, { id, profile, doc, overlay, category = "venu
   return { r, m: r.body?.match };
 }
 // Điểm Ngân sách phải khớp phép so ghi trong dòng (luật cũ: <= ngân sách => 1; vượt > 20% => 0).
+export const near = (x, y) => typeof x === "number" && Math.abs(x - y) < 1e-9;
+// Điểm suy ra từ số CHƯA làm tròn (trường JSON giữ số đầy đủ; chỉ `text` làm tròn).
 export const expectScore = (total, cat) => (total <= cat ? 1 : (total - cat) / cat > 0.2 ? 0 : null);
