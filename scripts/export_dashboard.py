@@ -14,6 +14,7 @@ Script chỉ đọc sổ cái, không ghi gì vào repo.
 """
 import argparse
 import json
+import os
 import re
 import sys
 import unicodedata
@@ -492,12 +493,19 @@ def export(out: Path, public: bool = False):
     dept_ids = []
     claude_md = ROOT / "CLAUDE.md"
     has_md = claude_md.is_file()
+    in_fence = False
     for ln in (claude_md.read_text(encoding="utf-8").splitlines() if has_md else []):
-        m = re.match(r"^- `([^`]+)` — ", ln)
+        if re.match(r"^\s*(```|~~~)", ln):   # dòng trong khối code (fenced) không phải danh sách bộ phận
+            in_fence = not in_fence
+            continue
+        m = None if in_fence else re.match(r"^- `([^`]+)` — ", ln)
         if m and m.group(1) not in dept_ids and m.group(1) not in ("capu", "chief-of-staff"):
             dept_ids.append(m.group(1))
-    if not has_md:   # sổ cái giả/thiếu CLAUDE.md: không có nguồn để lọc, giữ nguyên org/roster.json và cảnh báo
-        print("::warning::Không thấy CLAUDE.md; roster giữ nguyên org/roster.json")
+    if not has_md:
+        if not os.environ.get("TOHONG_ROOT"):   # sổ cái thật (workflow): thiếu CLAUDE.md là lỗi, không ghi đè dữ liệu cũ
+            print("LỖI: không thấy CLAUDE.md; không ghi đè dữ liệu cũ.", file=sys.stderr)
+            sys.exit(1)
+        print("::warning::Không thấy CLAUDE.md (sổ cái giả, TOHONG_ROOT); roster giữ nguyên org/roster.json")
         dept_ids = [r["id"] for r in roster_src["roles"] if r["id"] not in ("capu", "chief-of-staff")]
     if not dept_ids:
         print("LỖI: CLAUDE.md không có dòng bộ phận nào dạng \"- `id` — mô tả\"; giữ nguyên dữ liệu cũ.", file=sys.stderr)
