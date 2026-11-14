@@ -36,7 +36,7 @@ Trường của `budgetBasis` (số đơn vị triệu đồng). Các trường 
 - `tables`, `guests` (chỉ `per_table`): đúng `tablesFor(guests)` và số khách hiệu lực mà điểm Ngân sách đã dùng.
 - `totalTr`: `per_table` = `priceMax × tables`; `total` = `priceMax`. Đây đúng là số được đem so, không làm tròn trước khi so.
 - `categoryBudgetTr`: số ngân sách hạng mục đã đem so.
-- `categoryBudgetSource`: `"allocation"` (phân bổ của bảng dự toán, sau co giãn), `"legacy_profile"` (`budget_by_category` của hồ sơ khi không có phân bổ), `"total_share"` (tổng ngân sách hồ sơ × tỷ lệ hạng mục). Khi là `total_share` có thêm `sharePct` (số nguyên %, vd 48 cho venue); các nguồn khác không có `sharePct`. `kind = no_budget` có `categoryBudgetTr` là `null` hoặc 0.
+- `categoryBudgetSource`: `"allocation"` (phân bổ của bảng dự toán, sau co giãn), `"legacy_profile"` (`budget_by_category` của hồ sơ khi không có phân bổ), `"total_share"` (tổng ngân sách hồ sơ × tỷ lệ hạng mục). Khi là `total_share` có thêm `sharePct` (số nguyên %, vd 48 cho venue); các nguồn khác không có `sharePct`. Khi `kind = no_budget`: `categoryBudgetTr`, `categoryBudgetSource` và `sharePct` đều là `null` (kể cả khi hạng mục có tỷ lệ 0% như honeymoon hay hồ sơ cũ ghi 0); `totalTr` là `null`.
 - `categoryId`: hạng mục của vendor.
 - `estimated`: `true` khi `price_basis` thuộc nhóm ước tính (T-164 H5, `isEstimateBasis`), ngược lại `false`.
 - `text`: câu tiếng Việt một dòng, định dạng ở H2.
@@ -48,7 +48,7 @@ Bất biến nội bộ bắt buộc: điểm `scoreBreakdown.budget` suy ra t�
 - `categoryBudgetSource = "total_share"`: nối thêm ` (ước theo tổng × {sharePct}%)` sau `{nhãn}`, vd `… so với 96tr tiệc cưới (ước theo tổng × 48%)`.
 - `total`: `giá đến {priceMax}tr so với {ngân sách}tr {nhãn}` (cùng quy tắc nối `total_share`). Ví dụ: `giá đến 15tr so với 40tr chụp ảnh + quay phim`.
 - Định dạng số: dấu phẩy thập phân, bỏ phần thập phân nếu là `.0`, KHÔNG có dấu phân cách hàng nghìn và không đổi sang tỷ (1440tr ghi `1440tr`).
-- `no_guests`: câu chứa cụm `chưa có số khách` và giá theo bàn, KHÔNG có dấu `=` và không đoán tổng. Ví dụ: `Chưa có số khách nên chưa tính được tổng tiệc (giá ≈ 3,9tr/bàn)`.
+- `no_guests`: đúng khuôn `Chưa có số khách nên chưa tính được tổng tiệc (giá ≈ {giá}tr/bàn)`, KHÔNG có dấu `=`, không đoán tổng. Ví dụ: `Chưa có số khách nên chưa tính được tổng tiệc (giá ≈ 3,9tr/bàn)`. `kind = no_guests` giữ `categoryBudgetTr` và `categoryBudgetSource` thật, `tables`/`guests`/`totalTr` là `null`.
 - `no_budget`: đúng khuôn `Chưa có ngân sách cho {nhãn} nên chưa so được`, không có phép so, không nhắc số khách. Ví dụ: `Chưa có ngân sách cho tiệc cưới nên chưa so được`, `Chưa có ngân sách cho tuần trăng mật nên chưa so được`.
 - Vendor `estimated = true`: câu bắt đầu bằng `Giá ước tính: ` rồi khuôn ở trên; câu không bao giờ chứa "trong ngân sách", "vừa ngân sách", "đủ ngân sách", "rẻ hơn" (T-164 H5). Phép so vẫn ghi đúng số.
 - `{nhãn}` theo `categoryId` (chữ thường, đúng chuỗi sau): venue `tiệc cưới`; ceremony `lễ ăn hỏi`; photography `chụp ảnh + quay phim`; jewelry `nhẫn cưới + trang sức`; attire `trang phục cô dâu chú rể`; decor `trang trí tiệc + hoa`; makeup `makeup + làm tóc`; transport `xe rước dâu + đưa đón`; stationery `thiệp + quà tặng khách`; honeymoon `tuần trăng mật`.
@@ -97,5 +97,6 @@ INV (vùng `planner/vendor/matching`): với mọi vendor có `match`, `match.bu
 Không. (Giả định ghi rõ: "admin xem số server dùng" hiểu là Capu/cặp đôi mở thẻ hoặc phản hồi API của chính cặp đôi mình; nếu Capu cần admin xem hồ sơ ghép của cặp đôi bất kỳ thì đó là dữ liệu người dùng, bậc C, việc riêng.)
 
 ## Lịch sử sửa
+- v2.1 (sau D2): khuôn `no_guests` và `no_budget` ghi là chuỗi đúng nguyên văn (chữ hoa "Chưa"), eval 2 so nguyên văn thay regex chữ thường; `no_budget` có `categoryBudgetTr`, `categoryBudgetSource`, `sharePct`, `totalTr` đều `null`.
 - v2 (2026-11-14, sau D1): H1 thêm `no_budget` cho ngân sách = 0 và thứ tự ưu tiên no_budget > no_guests (câu trước đó cho ba cách hiểu); H4 tách `total_share` khỏi `budgetByCategory` (câu "bằng categoryBudgetTr" sai khi ước theo tổng); số trong JSON không làm tròn, `text` làm tròn; định dạng số lớn; ghi chấp nhận lệch dấu chip cũ; tiêu chí 4 thành eval Playwright tự động (bỏ checklist tay, lý do cũ sai); eval 3 so trường cụ thể thay vì tìm chuỗi trong body.
 - v1 (2026-11-14): bản đầu, theo phạm vi Capu chốt "mục 2 và 3".
