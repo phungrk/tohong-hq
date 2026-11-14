@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Nguồn: T-104 (spec tohong/specs/005-google-place-photos FR-002; PR phungrk/tohong #65 #69, phungrk/tohong-back #41 main d3dfa18,
-phungrk/tohong-front #64: PhotoCredit chỉ hiện khi ảnh có `attribution`); rút vào bể khi adversary đọc lại việc Capu làm ngoài HQ (Cowork 07–08/11).
+T-156: app chỉ hiện ghi công khi ảnh có `attribution`; #64 chưa merge tính tới 2026-11-14, xem ADR-096); rút vào bể khi adversary đọc lại việc Capu làm ngoài HQ (Cowork 07–08/11).
 INV-013 · Mọi ảnh Google trong pool vendor của tohong-back có `attribution` là chuỗi không rỗng sau khi bỏ khoảng trắng.
 "Ảnh Google" = phần tử có `source` == "google" (không phân biệt hoa thường, bỏ khoảng trắng) HOẶC có `url` trên host googleusercontent.com
-(ảnh Google gắn nhãn sai nguồn cũng phải ghi công). Lý do: Terms của Google bắt hiện tác giả; front (#64) không hiện gì khi thiếu attribution.
+(ảnh Google gắn nhãn sai nguồn cũng phải ghi công). Lý do: Terms của Google bắt hiện tác giả. Đây là điều kiện cần (dữ liệu); điều kiện đủ (app hiện tên ở mọi bề mặt) do bất biến planner/front/vendor-images ghi-cong-hien-o-moi-be-mat đo, hiệu lực sau khi T-156 merge.
 Cách đo: đọc lib/vendorPool.generated.js, giải mã JSON sau mọi `export const <TÊN> =`, duyệt đệ quy mọi object; đạt khi không ảnh Google nào
 thiếu attribution, attribution không phải chuỗi, hoặc attribution chỉ có khoảng trắng. In số ảnh Google đã kiểm.
 Repo tohong-back: TOHONG_BACK_REPO, rồi cwd, rồi ../tohong-back (repo có lib/vendorPool.generated.js). Không tìm thấy: PASS "chưa áp dụng".
