@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Nguồn: T-140 (spec products/T-140-chat-ghep-vendor-computematches.md v2, "Bất biến đề xuất" INV-B; Hành vi 1, 2, 3; bản thay inv-034 do Spec Gate soạn
+"""ADR-101 (2026-11-15): vế (iv) dòng giá admin đo không phụ thuộc nhãn (^7-9tr). Nguồn: T-140 (spec products/T-140-chat-ghep-vendor-computematches.md v2, "Bất biến đề xuất" INV-B; Hành vi 1, 2, 3; bản thay inv-034 do Spec Gate soạn
 ở handoffs/T-140-D1.md, Chief of Staff ghi ADR), qua Spec Gate 2026-11-13 (spec-critic). THAY planner/vendor/images/inv-034 (vế dương của inv-034 dùng matcher giả
 qua fetch, đường chat T-140 không còn gọi matcher). Nằm ở eval/T-140/bat-bien-cho-merge/ cho tới khi PR code bước 1 T-140 merge (ADR-028).
 INV-B · Mọi ứng viên chat lấy từ pool hiện hành + overlay admin (thay inv-034):
@@ -37,7 +37,7 @@ if (el.length >= 3) {
   for (const c of r.cands) if (hiddenNames.has(c.name) && !r.ids.some((id) => byId.get(id)?.name === c.name)) fails.push(`tên vendor ẩn lọt prompt: ${c.name}`);
   const iv = r.ids.indexOf(ver.id), m = r.md?.matches?.[iv];
   if (iv >= 0 && !(m?.price_range?.min_vnd === 7e6 && m?.price_range?.max_vnd === 9e6)) fails.push(`giá admin chưa vào price_range: ${JSON.stringify(m?.price_range)}`);
-  if (iv >= 0 && !/7-9tr \(giá đã xác minh\)/.test(r.cands[iv]?.price || "")) fails.push(`dòng giá admin: '${r.cands[iv]?.price}'`);
+  if (iv >= 0 && !/^7-9tr(?:\s|$)/.test(r.cands[iv]?.price || "")) fails.push(`dòng giá admin: '${r.cands[iv]?.price}'`);
 }
 // (v)
 const cases = [["Tìm photographer chụp ảnh cưới giúp anh chị 20tr", 20e6], ["Tìm photographer chụp ảnh cưới giúp anh chị 3tr", 3e6], ["Gợi ý makeup cô dâu 5tr", 5e6],
