@@ -1,6 +1,5 @@
 // T-172 tiêu chí 8: BẢN THAY THẾ đề nghị cho eval/T-164/check_9_venue_theo_ban.mjs (cái mà bất biến planner/vendor/inv-004 đang chạy). Chief ghi ADR rồi trỏ inv-004 sang file này khi T-172 merge; không ai sửa check_9 cũ.
-// Giữ nguyên MỌI nội dung của check_9 (venue theo bàn so với tổng, lọc cứng, nới x1,2, điểm 0,5 khi thiếu số khách, dòng "Theo số bàn", vendor ước tính không chip/không dòng "Theo số bàn"); chỉ đổi hai câu đo dòng "Giá:" của venue:
-// từ "Giá: a-btr/bàn (nhãn)" thành "Giá: a-btr/bàn" (ADR-100: không nhãn nguồn giá; đơn vị /bàn giữ). Đỏ trên main (còn nhãn), xanh sau T-172.
+// Giữ nguyên MỌI nội dung của check_9 (không phụ thuộc nhãn có hay không: XANH cả trên main lẫn sau T-172, đổi trỏ inv-004 được ngay; tính chất "không nhãn" giữ ở check_1) (venue theo bàn so với tổng, lọc cứng, nới x1,2, điểm 0,5 khi thiếu số khách, dòng "Theo số bàn", vendor ước tính không chip/không dòng "Theo số bàn"); chỉ đổi hai câu đo dòng "Giá:" của venue: từ "Giá: a-btr/bàn (nhãn)" thành "bắt đầu bằng Giá: a-btr/bàn" (cho phép ngoặc theo sau).
 import { stampedBack, loadModules, setNow, restoreNow } from "../T-164/_lib.mjs";
 import { tab, chat, tabMatch, coupleProfile, CID, doc } from "../T-159/_lib.mjs";
 const fails = []; const bad = (m) => { if (fails.length < 30) fails.push(m); };
@@ -57,9 +56,9 @@ const msg = "Tìm nhà hàng tiệc cưới giúp anh chị";
     if (r.ids.includes(ids.R2)) bad("chat venue 150tr, 30 bàn: R2 (8x30=240tr) phải bị lọc (kể cả khi nới x1,2 = 180tr)");
     const lines = (r.sp || "").split("\n"); const nameOf = (id) => M.POOL.find((v) => v.id === id).name;
     const at = (id) => lines.findIndex((l) => l.includes(nameOf(id)) && /^\d+\./.test(l.trim())); const i1 = at(ids.R1), i2 = at(ids.E1);
-    if (i1 < 0 || !/^\s+Giá: \d+-\d+tr\/bàn$/.test(lines[i1 + 1] || "")) bad(`dòng giá venue giá riêng mong "Giá: a-btr/bàn" (không nhãn), thấy "${(lines[i1 + 1] || "").trim()}"`);
+    if (i1 < 0 || !/^\s+Giá: \d+-\d+tr\/bàn(?!\S)/.test(lines[i1 + 1] || "")) bad(`dòng giá venue giá riêng mong dòng bắt đầu "Giá: a-btr/bàn", thấy "${(lines[i1 + 1] || "").trim()}"`);
     else if (!/Theo số bàn: ≈ 4\.6tr\/bàn × 30 bàn/.test(lines.slice(i1, i1 + 6).join("\n"))) bad("vendor giá riêng thiếu dòng 'Theo số bàn: ≈ 4.6tr/bàn × 30 bàn'");
-    if (i2 < 0 || !/^\s+Giá: \d+-\d+tr\/bàn$/.test(lines[i2 + 1] || "")) bad(`dòng giá venue ước tính mong "Giá: a-btr/bàn" (không nhãn), thấy "${(lines[i2 + 1] || "").trim()}"`);
+    if (i2 < 0 || !/^\s+Giá: \d+-\d+tr\/bàn(?!\S)/.test(lines[i2 + 1] || "")) bad(`dòng giá venue ước tính mong dòng bắt đầu "Giá: a-btr/bàn", thấy "${(lines[i2 + 1] || "").trim()}"`);
     else if (/Theo số bàn/.test(lines.slice(i2, i2 + 4).join("\n").split(/\n\d+\./)[0])) bad("vendor ước tính không được có dòng 'Theo số bàn'");
   } }
 { // 120tr: R1 (120tr) vừa đủ; E1 cùng; R2 bị loại
