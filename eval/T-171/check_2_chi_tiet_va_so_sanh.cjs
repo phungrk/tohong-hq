@@ -15,6 +15,7 @@ run(async ({ dev, br, bad, newServer, mount, open, goBudget, goChat, dragTo, car
   await pg.waitForSelector('[data-card="3"]'); await pg.waitForTimeout(500);
   const c0 = await cardText(pg, 3);
   if (!/100%/.test(c0 || '') || !/80%/.test(c0 || '')) bad('khởi điểm: bảng so sánh phải có Phù hợp 100% và 80%, thấy: ' + (c0 || '').slice(0, 200));
+  const dBefore = S.calls.detail;
   await goBudget(pg); await dragTo(pg, 40); const t0 = Date.now(); while (S.venue !== 40 && Date.now() - t0 < 6000) await sleep(100);
   await goChat(pg);
   const d1 = await waitText(pg, 1, /so với 40tr tiệc cưới/, 5000);
@@ -23,6 +24,8 @@ run(async ({ dev, br, bad, newServer, mount, open, goBudget, goChat, dragTo, car
   if (!/Ngân sách 0%/.test(d1 || '')) bad('(a) thanh Ngân sách trong chi tiết phải là 0% (78tr vượt 40tr hơn 20%)');
   let c1 = null; const t1 = Date.now(); while (Date.now() - t1 < 4000) { c1 = await cardText(pg, 3); if (c1 && !/100%/.test(c1)) break; await sleep(150); }
   if (/100%/.test(c1 || '') || !/70%/.test(c1 || '')) bad('(b) bảng so sánh đã tạo phải hiện Alpha 70% (không còn 100%), thấy: ' + (c1 || '').slice(0, 220));
+  await sleep(1200);
+  if (S.calls.detail - dBefore > 1) bad(`bảng so sánh không được gọi chi tiết từng vendor (mỗi lần gọi chi tiết sinh câu AI tốn LLM): sau một sự kiện chi tiết +${S.calls.detail - dBefore}, chỉ được +1 (thẻ chi tiết đang mở)`);
   await pg.locator('[data-card="0"]').getByText('Alpha Hall', { exact: false }).first().click();
   await pg.waitForSelector('[data-card="4"]'); const d2 = await waitText(pg, 4, /so với \d+tr tiệc cưới/, 4000);
   if (!/20 bàn = 78tr so với 40tr tiệc cưới/.test(d2 || '')) bad('(c) mở chi tiết Alpha lần nữa phải ghi "so với 40tr tiệc cưới", thấy: ' + (d2 || '').slice(0, 220));
