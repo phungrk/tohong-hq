@@ -14,6 +14,7 @@ S.run(async () => {
   try {
     await pg.waitForFunction(() => document.body.innerText.includes('Alpha Studio'), null, { timeout: 15000 }); await pg.waitForTimeout(1200);
     for (const n of names) { const v = ALL.find((x) => x.name.startsWith(n)); const t = await S.rowText(pg, '#root', n + ' Studio'); S.checkRow('danh sách đã lưu', v.name, t, n === 'Theta' ? { ...v, priceMin: 10 } : v); if (t && dangling.test(t)) S.bad(`danh sách đã lưu: ${n} còn dấu "·" treo: ${t.slice(0, 200)}`); }
+    await S.checkDangle('danh sách đã lưu', pg, '#root');
     const z = await S.rowText(pg, '#root', 'Theta Studio');
     if (!z || !z.includes('giá đã cập nhật') || !/12tr/.test(z)) S.bad('danh sách đã lưu: vendor lưu 10tr, giá hiện tại 12tr phải còn "giá đã cập nhật (12tr…)", thấy: ' + z);
   } catch (e) { S.bad('danh sách đã lưu: lỗi chạy ' + String(e.message).split('\n')[0]); }
@@ -25,7 +26,9 @@ S.run(async () => {
       await pg.waitForFunction(() => document.body.innerText.includes('Alpha Studio'), null, { timeout: 15000 }); await pg.waitForTimeout(1200);
       if (n === 'Alpha') for (const m of names) { const v = ALL.find((x) => x.name.startsWith(m)); const t = await S.rowText(pg, '#root', m + ' Studio'); S.checkRow('màn Ngân sách (hàng)', v.name, t, m === 'Theta' ? { ...v, priceMin: 10 } : v); if (t && dangling.test(t)) S.bad(`màn Ngân sách: hàng ${m} còn dấu "·" treo: ${t.slice(0, 200)}`); }
       if (n === 'Alpha') { const t = await S.rowText(pg, '#root', 'Theta Studio'); if (!t || !t.includes('giá đã cập nhật')) S.bad('màn Ngân sách: hàng Theta (lưu 10tr, nay 12tr) phải còn "giá đã cập nhật", thấy: ' + t); }
+      if (n === 'Alpha') await S.checkDangle('màn Ngân sách (hàng)', pg, '#root');
       await pg.getByText(n + ' Studio', { exact: false }).first().click({ timeout: 5000 }); await pg.waitForTimeout(800);
+      await S.checkDangle(`màn Ngân sách (sheet ${n})`, pg, 'body');
       const b = await S.bodyText(pg);
       const f = b.match(E.FORBID); if (f) S.bad(`màn Ngân sách (sheet ${n}): còn nhãn nguồn giá "${f[0]}"`);
       if (dangling.test(b)) S.bad(`màn Ngân sách (sheet ${n}): còn dấu "·" treo sau giá`);
@@ -40,6 +43,7 @@ S.run(async () => {
     pg = await S.page('__t170b.html', q, { seed: sv });
     try {
       await pg.waitForFunction(() => document.body.innerText.includes('Omega Hall'), null, { timeout: 15000 }); await pg.waitForTimeout(1200);
+      await S.checkDangle(`venue ${surf}`, pg, '#root');
       const t = await S.rowText(pg, '#root', 'Omega Hall');
       if (!t || !/4tr\/bàn|4tr\s*[–-]\s*[\d.]+tr\/bàn/.test(t)) S.bad(`venue ${surf}: giá phải còn ghi theo bàn ("4tr/bàn"), thấy: ${String(t).slice(0, 160)}`);
       if (t && E.FORBID.test(t)) S.bad(`venue ${surf}: còn nhãn nguồn giá: ${t.match(E.FORBID)[0]}`);
