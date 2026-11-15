@@ -125,23 +125,25 @@ export function dateAll(eq, tag, r, iso) {
   eq(`${tag} chat: couple.wedding_date trong khối hồ sơ`, d10(r.chatBlock?.couple?.wedding_date), iso);
   if (r.chatBlock && "wedding_date" in r.chatBlock) eq(`${tag} chat: wedding_date top-level trong khối hồ sơ`, d10(r.chatBlock.wedding_date), iso);
 }
-export function guestsAll(eq, tag, r, g) {
-  const n = g ?? 0;
+// g = số hiển thị (hồ sơ, Khách mời, summary, GET /budget); gm = số dùng để GHÉP (profileSnapshot, số bàn, khối hồ sơ chat), mặc định = g.
+export function guestsAll(eq, tag, r, g, gm = g) {
+  const n = g ?? 0, nm = gm ?? 0;
   eq(`${tag} hồ sơ guest_count`, r.profile?.guest_count ?? 0, n);
   eq(`${tag} màn Khách mời (GET /guests) capacity`, r.guestsDoc?.capacity ?? 0, n);
   eq(`${tag} màn hồ sơ (summary) guests.capacity`, r.summary?.guests?.capacity ?? 0, n);
   eq(`${tag} màn Ngân sách (GET /budget) guests`, r.budget?.guests ?? 0, n);
-  eq(`${tag} ghép vendor (profileSnapshot) guestCount`, r.snap?.guestCount ?? null, g ?? null);
-  eq(`${tag} chat: số bàn trong khối ứng viên`, r.tables, g ? Math.ceil(g / 10) : null);
-  eq(`${tag} chat: guest_count trong khối hồ sơ`, r.chatBlock?.guest_count ?? 0, n);
-  if (r.chatBlock?.preferences && "guest_count" in r.chatBlock.preferences) eq(`${tag} chat: preferences.guest_count trong khối hồ sơ`, r.chatBlock.preferences.guest_count ?? 0, n);
-  if (r.chatBlock?.couple && "guest_count" in r.chatBlock.couple) eq(`${tag} chat: couple.guest_count trong khối hồ sơ`, r.chatBlock.couple.guest_count ?? 0, n);
+  eq(`${tag} ghép vendor (profileSnapshot) guestCount`, r.snap?.guestCount ?? null, gm ?? null);
+  eq(`${tag} chat: số bàn trong khối ứng viên`, r.tables, gm ? Math.ceil(gm / 10) : null);
+  eq(`${tag} chat: guest_count trong khối hồ sơ`, r.chatBlock?.guest_count ?? 0, nm);
+  if (r.chatBlock?.preferences && "guest_count" in r.chatBlock.preferences) eq(`${tag} chat: preferences.guest_count trong khối hồ sơ`, r.chatBlock.preferences.guest_count ?? 0, nm);
+  if (r.chatBlock?.couple && "guest_count" in r.chatBlock.couple) eq(`${tag} chat: couple.guest_count trong khối hồ sơ`, r.chatBlock.couple.guest_count ?? 0, nm);
 }
-export function budgetAll(eq, tag, r, tr) {
-  const n = tr ?? 0;
+// tr = tổng hiển thị (hồ sơ, summary, GET /budget); trm = tổng dùng để GHÉP (profileSnapshot, khối hồ sơ chat), mặc định = tr. Bảng chỉ có total_tr: hiển thị theo bảng, ghép như cũ (không ngân sách).
+export function budgetAll(eq, tag, r, tr, trm = tr) {
+  const n = tr ?? 0, nm = trm ?? 0;
   eq(`${tag} hồ sơ budget`, r.profile?.budget ?? 0, n);
   eq(`${tag} màn hồ sơ (summary) budget.total_tr`, r.summary?.budget?.total_tr ?? 0, n);
   eq(`${tag} màn Ngân sách (GET /budget) total_tr`, r.budget?.total_tr ?? 0, n);
-  eq(`${tag} ghép vendor (profileSnapshot) budgetTotal`, r.snap?.budgetTotal ?? null, tr ?? null);
-  eq(`${tag} chat: budget trong khối hồ sơ`, r.chatBlock?.budget ?? 0, n);
+  eq(`${tag} ghép vendor (profileSnapshot) budgetTotal`, r.snap?.budgetTotal ?? null, trm ?? null);
+  eq(`${tag} chat: budget trong khối hồ sơ`, r.chatBlock?.budget ?? 0, nm);
 }
