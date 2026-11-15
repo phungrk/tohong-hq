@@ -61,8 +61,8 @@ function newServer() {
   return S;
 }
 
-async function mount(br, S, { width = 360 } = {}) {
-  const ctx = await br.newContext({ viewport: { width, height: 900 } });
+async function mount(br, S, { width = 360, ctx: c0 } = {}) {
+  const ctx = c0 || await br.newContext({ viewport: { width, height: 900 } });
   const pg = await ctx.newPage(); pg.setDefaultTimeout(8000);
   await pg.route(/marry\.vn/, (r) => r.abort());
   await pg.route('http://localhost:8787/**', async (r) => {
@@ -70,10 +70,10 @@ async function mount(br, S, { width = 360 } = {}) {
     if (m === 'OPTIONS') return r.fulfill({ status: 204, headers: CORS });
     const j = (o, status = 200) => r.fulfill({ status, headers: CORS, contentType: 'application/json', body: JSON.stringify(o) });
     const p = u.pathname;
-    if (p === '/api/vendors/match') { S.calls.match++; if (S.delayMatchMs) await sleep(S.delayMatchMs); const vs = S.vendors(); return j({ vendors: vs, total: vs.length, offset: 0, whyThoseVendors: null }); }
+    if (p === '/api/vendors/match') { const idx = S.calls.match++; const vs = S.vendors(); const dl = S.matchDelays ? (S.matchDelays[idx] || 0) : S.delayMatchMs; if (dl) await sleep(dl); if (S.matchFail) return j({ error: 'boom' }, 500); return j({ vendors: vs, total: vs.length, offset: 0, whyThoseVendors: null }); }
     if (p === '/api/vendors/status' && m === 'POST') return j({ vendors: {} });
     const x = p.match(/^\/api\/vendors\/([^/]+)$/);
-    if (x && m === 'GET' && !['match', 'categories', 'status'].includes(x[1])) { if (u.searchParams.get('coupleId')) S.calls.detail++; const q = S.vendors().find((e) => e.id === x[1]); return q ? j({ vendor: q, match: { ...q.match, whyThisVendor: 'x' } }) : j({}, 404); }
+    if (x && m === 'GET' && !['match', 'categories', 'status'].includes(x[1])) { let idx = -1; if (u.searchParams.get('coupleId')) idx = S.calls.detail++; const q = S.vendors().find((e) => e.id === x[1]); const dl = S.detailDelays && idx >= 0 ? (S.detailDelays[idx] || 0) : 0; if (dl) await sleep(dl); if (S.detailFail && idx >= 0 && S.detailFailFrom != null && idx >= S.detailFailFrom) return j({ error: 'boom' }, 500); return q ? j({ vendor: q, match: { ...q.match, whyThisVendor: 'x' } }) : j({}, 404); }
     if (p === '/api/couples/t171/budget') {
       if (m === 'GET') { S.calls.budgetGet++; return j(S.budgetDoc()); }
       if (m === 'PUT') {
@@ -85,6 +85,13 @@ async function mount(br, S, { width = 360 } = {}) {
         return j(S.budgetDoc());
       }
     }
+    if (p === '/api/me') return j({ couples: [{ couple_id: 't171', role: 'owner' }] });
+    if (p === '/api/couples/t171/conversations') return j({ conversations: [] });
+    if (p === '/api/couples/t171/chat' && m === 'POST') { // SSE: chat action update_profile thành công, server ghi số khách 300 (như actionExecutor ở back)
+      S.calls.chat = (S.calls.chat || 0) + 1; if (S.chatGuests) S.guests = S.chatGuests;
+      const ev = (n, d) => `event: ${n}\ndata: ${JSON.stringify(d)}\n\n`;
+      return r.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'text/event-stream' }, body: ev('conversation', { id: 'c1' }) + ev('chunk', { text: 'Đã ghi 300 khách.' }) + ev('action', { type: 'update_profile', success: true }) + ev('done', {}) });
+    }
     if (p === '/api/couples/t171' && m === 'PATCH') {
       S.calls.patch++; if (S.patchFail) return j({ error: 'boom' }, 500);
       const body = JSON.parse(r.request().postData() || '{}'); const g = body?.couple?.guest_count ?? body?.guest_count; if (typeof g === 'number') S.guests = g; return j({ id: 't171' });
@@ -93,6 +100,10 @@ async function mount(br, S, { width = 360 } = {}) {
   });
   return { ctx, pg };
 }
+const openApp = async (dev, br, S) => { // App thật (Root), hồ sơ cục bộ có sẵn để bỏ onboarding
+  const ctx = await br.newContext({ viewport: { width: 390, height: 800 } }); await ctx.addInitScript(() => { localStorage.setItem('th_user', '{}'); });
+  const { pg } = await mount(br, S, { ctx }); await pg.goto(`http://127.0.0.1:${dev.port}/#/ngan-sach/venue`); await pg.getByText('Tìm nhà hàng tiệc cưới').first().waitFor({ timeout: 15000 }); return { ctx, pg };
+};
 const open = async (dev, pg) => {
   await pg.goto(`http://127.0.0.1:${dev.port}/__t171.html`, { waitUntil: 'domcontentloaded' });
   await pg.waitForFunction(() => document.body.innerText.includes('Alpha Hall'), null, { timeout: 15000 });
@@ -125,8 +136,8 @@ async function run(scenario) {
   try {
     dev = await startViteDev({ repo: REPO, files: { '__t171.jsx': JSX, '__t171.html': HTML } });
     br = await chromium.launch();
-    await scenario({ dev, br, bad, newServer, mount, open, goBudget, goChat, dragTo, cardText, rowOf, waitText, openDetail, sleep, fmt });
-  } catch (e) { bad('lỗi chạy ' + String(e.message).split('\n')[0]); }
+    await scenario({ dev, br, bad, newServer, mount, open, openApp, goBudget, goChat, dragTo, cardText, rowOf, waitText, openDetail, sleep, fmt });
+  } catch (e) { bad('lỗi chạy ' + String(e.message).split('\n').slice(0, process.env.T171_ALL ? 4 : 1).join(' | ')); }
   try { br && await br.close(); } catch (e) { /* */ } try { dev && await dev.stop(); } catch (e) { /* */ }
   if (fails.length) { console.log('FAIL ' + fails[0] + (fails.length > 1 ? ` (+${fails.length - 1} lỗi nữa)` : '')); if (process.env.T171_ALL) console.log(fails.map((f) => '  - ' + f).join('\n')); process.exit(1); }
   console.log('PASS'); process.exit(0);
