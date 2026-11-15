@@ -35,7 +35,7 @@ runAdv(async ({ pg, D, bad, body, slider, dragTo, waitFor, venue, sleep }) => {
     await waitFor(async () => (venue().items || []).some((x) => x.id === 'vendor_t171_a'));
     await sleep(1500); D.doc.mung_tr = 7; // server khác đổi mung_tr
     const retry = pg.getByRole('button', { name: 'Thử lại' }).first();
-    if (!(await retry.isVisible().catch(() => false))) { bad(`[B] khung: sau ghi xen câu báo + "Thử lại" phải còn (thanh ${await slider()})`); return; }
+    if (!(await retry.isVisible().catch(() => false))) { bad(`[B] khung: sau ghi xen câu báo + "Thử lại" phải còn (thanh ${await slider()}; items server ${JSON.stringify((venue().items||[]).map((x)=>x.id))}; câu báo ${/Chưa lưu được/.test(await body())}; puts ${D.puts.length}, gets ${D.gets})`); return; }
     const seen = await body(); if (!/Giữ lại/.test(seen) || /Cọc cũ/.test(seen)) bad('[B] sau khi màn tải lại, màn phải còn giữ thay đổi chưa lưu (có "Giữ lại", không có "Cọc cũ")');
     await retry.click(); await sleep(2000);
     const v = venue(), ids = (v.items || []).map((x) => x.id), gl = (v.items || []).find((x) => x.id === 'i_giu');
