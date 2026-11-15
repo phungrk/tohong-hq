@@ -1,0 +1,449 @@
+{
+ "S1_vua_ngan_sach": {
+  "order": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "vendors": {
+   "A": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 3tr/bàn × 20 bàn",
+     "Đủ 200 khách"
+    ]
+   },
+   "B": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 3.9tr/bàn × 20 bàn",
+     "Đủ 200 khách"
+    ]
+   },
+   "C": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 4.3tr/bàn × 20 bàn",
+     "Đủ 200 khách"
+    ]
+   },
+   "D": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 4.6tr/bàn × 20 bàn",
+     "Đủ 200 khách"
+    ]
+   },
+   "E": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
+   }
+  }
+ },
+ "S2_vuot_mot_phan": {
+  "order": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "vendors": {
+   "A": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 3tr/bàn × 20 bàn",
+     "Đủ 200 khách"
+    ]
+   },
+   "B": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 3.9tr/bàn × 20 bàn",
+     "Đủ 200 khách"
+    ]
+   },
+   "C": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 4.3tr/bàn × 20 bàn",
+     "Đủ 200 khách"
+    ]
+   },
+   "D": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 4.6tr/bàn × 20 bàn",
+     "Đủ 200 khách"
+    ]
+   },
+   "E": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
+   }
+  }
+ },
+ "S3_khong_so_khach": {
+  "order": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "vendors": {
+   "A": {
+    "totalScore": 68,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.5,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "TP.HCM"
+    ]
+   },
+   "B": {
+    "totalScore": 68,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.5,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "TP.HCM"
+    ]
+   },
+   "C": {
+    "totalScore": 68,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.5,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "TP.HCM"
+    ]
+   },
+   "D": {
+    "totalScore": 68,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.5,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "TP.HCM"
+    ]
+   },
+   "E": {
+    "totalScore": 68,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.5,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "TP.HCM"
+    ]
+   }
+  }
+ },
+ "S4_nhieu_ban": {
+  "order": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "vendors": {
+   "A": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 3tr/bàn × 30 bàn",
+     "Đủ 300 khách"
+    ]
+   },
+   "B": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 3.9tr/bàn × 30 bàn",
+     "Đủ 300 khách"
+    ]
+   },
+   "C": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 4.3tr/bàn × 30 bàn",
+     "Đủ 300 khách"
+    ]
+   },
+   "D": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "≈ 4.6tr/bàn × 30 bàn",
+     "Đủ 300 khách"
+    ]
+   },
+   "E": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 300 khách",
+     "TP.HCM"
+    ]
+   }
+  }
+ },
+ "S5_khong_ngan_sach_venue": {
+  "order": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "vendors": {
+   "A": {
+    "totalScore": 68,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.5,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
+   },
+   "B": {
+    "totalScore": 68,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.5,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
+   },
+   "C": {
+    "totalScore": 68,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.5,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
+   },
+   "D": {
+    "totalScore": 68,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.5,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
+   },
+   "E": {
+    "totalScore": 68,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.5,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
+   }
+  }
+ },
+ "S6_photography": {
+  "order": [
+   "P"
+  ],
+  "vendors": {
+   "P": {
+    "totalScore": 78,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Trong ngân sách",
+     "TP.HCM"
+    ]
+   }
+  }
+ }
+}
