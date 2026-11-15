@@ -111,7 +111,7 @@ function setup(files) {
   /* Dấu "·" mồ côi: đo trên innerText THÔ (chưa gộp khoảng trắng), từng dòng: dòng kết thúc bằng "·", dòng chỉ có một "·" (không xét "· modern" đầu dòng: ở hàng flex chữ "· {spec}" là phần tử riêng và hợp lệ), hoặc hai "·" liền nhau (kể cả "·" sau đơn vị "gói"/"bàn" hay sau spec). */
   const checkDangle = async (surf, pg, scope) => {
     const raw = await pg.evaluate((s) => (document.querySelector(s) || document.body).innerText, scope || 'body');
-    const l = raw.split('\n').find((x) => /·\s*$/m.test(x) || /^\s*·/m.test(x) || /·\s*·/.test(x));
+    const l = raw.split('\n').find((x) => /·\s*$/m.test(x) || /^\s*·\s*$/.test(x) || /·\s*·/.test(x));
     if (l !== undefined) bad(`${surf}: còn dấu "·" mồ côi ở dòng "${l.trim().slice(0, 120)}"`);
   };
   const bodyText = (pg, scope) => pg.evaluate((s) => (document.querySelector(s) || document.body).innerText.replace(/\s+/g, ' '), scope || 'body');
