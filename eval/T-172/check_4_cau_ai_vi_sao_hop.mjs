@@ -1,6 +1,6 @@
 // T-172 tiêu chí 4: câu AI "vì sao hợp" ở chi tiết vendor (GET /api/vendors/:id?coupleId=…, whyThisVendor): prompt gửi LLM (system + user) và câu sinh ra không chứa chữ nguồn giá;
 // giá vẫn có trong prompt (vendor có nguồn giá vẫn "6–8tr"; venue có nguồn giá vẫn "4–4.6tr/bàn"; pool cũ không nguồn "6–8tr" không "/bàn");
-// giữ inv-003: vendor ước tính có đúng một dòng `Ngân sách: chưa đủ cơ sở để khẳng định vendor này hợp hoặc nằm trong ngân sách` trong prompt user và prompt (system hoặc user) có câu "không khẳng định vendor hợp hoặc nằm trong ngân sách"; vendor khác không có cả hai.
+// giữ inv-003: vendor ước tính có đúng một dòng `Ngân sách: chưa đủ cơ sở để khẳng định vendor này hợp hoặc nằm trong ngân sách` trong prompt user và prompt (system hoặc user) có câu "không khẳng định vendor hợp hoặc nằm trong ngân sách"; vendor khác không có dòng cờ (câu cấm có thể nằm ở prompt hệ thống chung).
 // Các câu mẫu không do AI (whyThisVendor/whyThoseVendors của danh sách tab) vẫn không có chữ nguồn giá. LLM giả "học trò ngoan" nhắc lại nguyên dòng "Nhà cung cấp:" của prompt. Không mạng.
 import { twinBack, openDetail, coupleProfile, CID, EST, REAL, NOSRC, leaks, WHY_FLAG, whyEcho, reporter, setNow } from "./_lib.mjs";
 import { tab as tabReq } from "../T-159/_lib.mjs";
@@ -31,7 +31,7 @@ for (const [i, [tag, , wantPrice, est]] of CASES.entries()) {
   const flagN = user.split("\n").filter((x) => x.trim() === WHY_FLAG).length;
   const banned = /không khẳng định vendor hợp hoặc nằm trong ngân sách/.test(both);
   if (est && (flagN !== 1 || !banned)) bad(`${tag}: vendor ước tính phải có đúng 1 dòng "${WHY_FLAG}" ở prompt user (thấy ${flagN}) và câu "không khẳng định vendor hợp hoặc nằm trong ngân sách" ở prompt (thấy ${banned})`);
-  if (!est && (flagN || banned)) bad(`${tag}: vendor không phải ước tính không được có cờ/câu cấm (cờ ${flagN}, câu cấm ${banned})`);
+  if (!est && flagN) bad(`${tag}: vendor không phải ước tính không được có dòng cờ "${WHY_FLAG}" (thấy ${flagN})`);
   if (/nằm trong ngân sách|hợp ngân sách|trong tầm ngân sách/.test(sentence) && est) bad(`${tag}: câu AI khẳng định ngân sách cho vendor ước tính`);
 }
 { // câu mẫu (không AI) của tab: pool toàn ước tính + giá riêng
