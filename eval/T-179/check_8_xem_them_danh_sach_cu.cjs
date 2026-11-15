@@ -14,6 +14,7 @@ run(async ({ alpha, dev, br, bad, newServer, openApp, dragTo, lists, body, press
   await more.nth(0).click(); await sleep(1500); L = await lists(pg); let t = await body(pg);
   if (L[0].rows !== 5 || alpha(L[0]) !== '100' || L[0].label !== 'Theo dự toán 90tr · 200 khách') bad(`danh sách cũ sau "Xem thêm" phải giữ 5 hàng, Alpha 100%, nhãn 90tr; thấy ${L[0].rows} hàng, ${alpha(L[0])}%, ${L[0].label}`);
   if (!t.includes(MSG)) bad('danh sách cũ bấm "Xem thêm" khi số đã đổi phải hiện: ' + MSG);
+  if ((await pg.getByRole('button', { name: /Xem thêm \d+ vendor/ }).count()) !== 1) bad('sau câu cố định, nút "Xem thêm" của danh sách cũ phải ẩn (chỉ còn nút của danh sách mới nhất)');
   const more2 = pg.getByRole('button', { name: /Xem thêm \d+ vendor/ }); await more2.last().click(); await sleep(1500); L = await lists(pg);
   if (L[1].rows !== 8 || alpha(L[1]) !== '70' || L[1].label !== 'Theo dự toán 40tr · 200 khách') bad(`danh sách mới nhất "Xem thêm" phải đủ 8 hàng, Alpha 70%, nhãn 40tr; thấy ${L[1].rows} hàng, ${alpha(L[1])}%, ${L[1].label}`);
   if (L[0].rows !== 5) bad('"Xem thêm" của danh sách mới làm danh sách cũ đổi số hàng');
