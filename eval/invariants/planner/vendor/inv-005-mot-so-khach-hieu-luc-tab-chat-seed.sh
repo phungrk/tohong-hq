@@ -3,5 +3,7 @@
 # Biến: TOHONG_BACK_REPO.
 set -u
 H="$(cd "$(dirname "$0")" && pwd)"
-node "$H/inv-005a-so-khach-ho-so-mot-so.mjs" "$@" || exit 1
-exec node "$H/inv-005b-so-khach-ho-so-khop-seed.mjs" "$@"
+# ADR-108: chạy bản thay của T-178 (chip theo bàn bỏ " = {tổng}tr" trước khi so); bản cũ inv-005a/b giữ trong thư mục, không chạy.
+HQ="$H"; while [ "$HQ" != "/" ] && [ ! -f "$HQ/scripts/gate.py" ]; do HQ="$(dirname "$HQ")"; done
+node "$HQ/eval/T-178/thay-the/inv-005a.mjs" "$@" || exit 1
+exec node "$HQ/eval/T-178/thay-the/inv-005b.mjs" "$@"

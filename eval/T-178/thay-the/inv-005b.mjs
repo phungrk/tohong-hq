@@ -43,7 +43,7 @@ for (const [label, extra] of cases) {
   const r = await tab(M, { url: `/api/vendors/match?coupleId=${CID}&category=venue&limit=50`, profile, overlay: ov });
   if (r.err || r.status !== 200) { bad(`${label}: tab lỗi ${r.err?.message || r.status}`); continue; }
   const v = r.body?.vendors?.find((x) => x.id === ids.R1);
-  const chip = (v?.match?.reasons || []).map((x) => x.label.replace(/ = \S+tr$/, "")).find((l) => /bàn$/.test(l)) || null;
+  const chip = (v?.match?.reasons || []).map((x) => x.label.replace(/^(≈ \S+tr\/bàn × \d+ bàn) = \S+tr$/, "$1")).find((l) => /bàn$/.test(l)) || null;
   const tabT = chip ? Number(/× (\S+) bàn/.exec(chip)[1]) : null;
   if (T === null) { if (v?.match?.scoreBreakdown?.budget !== 0.5 || chip) bad(`${label}: seed 0 => tab phải 0,5 không chip, thấy ${v?.match?.scoreBreakdown?.budget} / ${chip}`); }
   else if (T * 2 <= 2000 && tabT !== T) bad(`${label}: seed ${G} => tab mong × ${T} bàn, thấy ${chip}`);

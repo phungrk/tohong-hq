@@ -11,7 +11,7 @@ const { sleep } = base;
 const LISTS_JS = () => {
   const rows = [...document.querySelectorAll('a.vm-card-in')]; const parents = [...new Set(rows.map((r) => r.parentElement))];
   return parents.map((p) => {
-    let shell = p; while (shell && !/Gợi ý phù hợp/.test(shell.innerText || '')) shell = shell.parentElement;
+    let shell = p; while (shell && !/gợi ý phù hợp/i.test(shell.innerText || "")) shell = shell.parentElement;
     const text = (shell || p).innerText.replace(/\s+/g, ' ').trim();
     const mine = rows.filter((r) => r.parentElement === p);
     const names = mine.map((r) => (/([A-Z][a-z]+) Hall/.exec(r.innerText) || [])[1] || r.innerText.split('\n')[0]);
@@ -20,6 +20,7 @@ const LISTS_JS = () => {
     return { text, names, pcts, label, rows: mine.length };
   });
 };
+const alpha = (l) => (l && l.names.includes('Alpha') ? l.pcts[l.names.indexOf('Alpha')] : null); // % của Alpha trong một danh sách
 const lists = (pg) => pg.evaluate(LISTS_JS);
 const body = (pg) => pg.evaluate(() => document.body.innerText.replace(/\s+/g, ' '));
 const FIND = 'Tìm nhà hàng tiệc cưới';
@@ -47,5 +48,5 @@ async function manyVendors(pg, S) {
     return r.fulfill({ status: 200, headers: CORS, contentType: 'application/json', body: JSON.stringify({ vendors: all.slice(off, off + lim), total: all.length, offset: off, whyThoseVendors: null }) });
   });
 }
-const run = (scenario) => base.run(async (h) => scenario({ ...h, lists, body, pressFind, pressFindQuiet, closeChat, same, fixed, manyVendors }));
-module.exports = { run, sleep, lists, body, pressFind, pressFindQuiet, closeChat, same, fixed, manyVendors, FIND };
+const run = (scenario) => base.run(async (h) => scenario({ ...h, alpha, lists, body, pressFind, pressFindQuiet, closeChat, same, fixed, manyVendors }));
+module.exports = { alpha, run, sleep, lists, body, pressFind, pressFindQuiet, closeChat, same, fixed, manyVendors, FIND };

@@ -14,7 +14,7 @@ run(async ({ dev, br, bad, newServer, openApp, dragTo, lists, pressFind, closeCh
     const L = await pressFind(pg, want, 9000); await sleep(2500); const L2 = await lists(pg);
     if (L2.length !== want) bad(`${slow ? 'phản hồi lưu chậm' : 'bấm ngay'}: phải đúng ${want} danh sách (một danh sách mới), thấy ${L2.length}`);
     else if (L2[want - 1].label !== `Theo dự toán ${target}tr · 200 khách`) bad(`${slow ? 'phản hồi lưu chậm' : 'bấm ngay'}: danh sách mới phải ghi "Theo dự toán ${target}tr · 200 khách" (số vừa kéo), thấy ${L2[want - 1].label} (số cũ ${prev})`);
-    if (L2.length === want && !slow && L2[1].pcts[0] !== '70') bad(`danh sách theo 40tr phải Alpha 70%, thấy ${L2[1].pcts[0]}%`);
+    if (L2.length === want && !slow && L2[1].pcts[1] !== '70') bad(`danh sách theo 40tr phải Beta 80% rồi Alpha 70%, thấy ${L2[1].pcts}`);
     await closeChat(pg);
   }
   await ctx.close();
