@@ -59,12 +59,13 @@ export const guidance = (block) => { const i = block.indexOf("Hướng dẫn tr�
 /* ---------- LLM giả (Anthropic SSE) ---------- */
 const sse = (t) => `event: content_block_delta\ndata: ${JSON.stringify({ type: "content_block_delta", delta: { type: "text_delta", text: t } })}\n\n`;
 /** reply(system, user) -> chuỗi. Trả { calls: [{system,user}], restore }. Mọi URL khác đều bị chặn. */
-export function fakeLLM(reply) {
+export function fakeLLM(reply, { fail = false } = {}) {
   const orig = globalThis.fetch, ol = console.log, oe = console.error, ow = console.warn; const calls = [];
   globalThis.fetch = async (u, init) => {
     if (!/anthropic/.test(String(u))) throw new Error("không được gọi mạng: " + u);
     const b = JSON.parse(String(init?.body || "{}")); const system = String(b.system || ""); const user = (b.messages || []).map((m) => String(m.content)).join("\n");
     calls.push({ system, user });
+    if (fail) return new Response("LLM giả: lỗi", { status: 500 });
     return new Response(sse(reply(system, user)), { status: 200, headers: { "Content-Type": "text/event-stream" } });
   };
   console.log = () => {}; console.error = () => {}; console.warn = () => {};
@@ -92,7 +93,7 @@ export async function chatTurn(M, dirRef, { message, profile = coupleProfile({ b
 export const chatEcho = (system) => system.split("\n").filter((l) => /^\s+Giá:/.test(l) || (/^- /.test(l) && /giá/i.test(l))).join("\n");
 
 /** GET /api/vendors/:id?coupleId=c1 với LLM giả. */
-export async function openDetail(M, id, { overlay = null, profile = coupleProfile({ budget: 300 }), budgetDoc = null, bucket = null, reply }) {
+export async function openDetail(M, id, { overlay = null, profile = coupleProfile({ budget: 300 }), budgetDoc = null, bucket = null, reply, fail = false }) {
   const b = bucket || new M.MemoryBucket();
   if (!bucket) {
     b.data.set(`data/couples/${CID}/profile.yaml`, JSON.stringify(profile));
@@ -101,7 +102,7 @@ export async function openDetail(M, id, { overlay = null, profile = coupleProfil
     if (overlay) b.data.set("data/admin/vendor_overrides.json", JSON.stringify({ seq: 1, vendors: overlay }));
   }
   M.resetOverlayCache();
-  const llm = fakeLLM(reply);
+  const llm = fakeLLM(reply, { fail });
   try {
     const res = await M.handleVendors(new Request(`http://localhost/api/vendors/${id}?coupleId=${CID}`), { CHAT_DATA: b, ...ENV }, AUTH, [id]);
     const body = await res.json();
