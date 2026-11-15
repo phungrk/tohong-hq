@@ -13,9 +13,9 @@ run(async ({ dev, br, bad, newServer, mount, open, goBudget, goChat, dragTo, row
     S.matchDelays = { [m0]: 6000 }; S.detailDelays = { [d0]: 6000 };
     const seen = []; let stop = false; let sampler = null;
     await goBudget(pg); await dragTo(pg, 40); let t0 = Date.now(); while (S.venue !== 40 && Date.now() - t0 < 6000) await sleep(100);
-    // lấy mẫu từ lúc 40 đã lưu (textContent: thấy cả khi khung chat đang ẩn)
+    t0 = Date.now(); while (S.calls.match <= m0 && Date.now() - t0 < 5000) await sleep(20); // front đã nhận phản hồi lưu (đã gọi lấy lại)
+    // lấy mẫu từ lúc front biết 40 đã lưu (textContent: thấy cả khi khung chat đang ẩn)
     sampler = (async () => { while (!stop) { try { seen.push(await pg.evaluate(() => { const a = [...document.querySelectorAll('[data-card="0"] a')].find((x) => x.textContent.includes('Alpha Hall')); return a ? ((/(\d+)%/.exec(a.textContent) || [])[1] || null) : null; })); } catch (e) { /* */ } await sleep(100); } })();
-    t0 = Date.now(); while (S.calls.match <= m0 && Date.now() - t0 < 5000) await sleep(50);
     await sleep(1000); await dragTo(pg, 70); t0 = Date.now(); while (S.venue !== 70 && Date.now() - t0 < 6000) await sleep(100);
     await goChat(pg); await sleep(8000); stop = true; await sampler;
     const a = await rowOf(pg, 'Alpha Hall'), d = await cardText(pg, 1);
