@@ -1,7 +1,7 @@
 // T-169 tiêu chí 2. SỐ KHÁCH: hồ sơ lưu số khách ở nhiều chỗ (guest_count, preferences.guest_count, couple.guest_count; bảng ngân sách `guests`; `capacity` của danh sách khách)
 // thì MỌI bề mặt hiện/dùng cùng MỘT số: hồ sơ, màn Khách mời (sức chứa), màn hồ sơ (summary), màn Ngân sách (GET /budget), ghép vendor (profileSnapshot), chat (số bàn + khối hồ sơ).
 // Luật chọn (giữ ADR-094/INV-005): `guests` nguyên > 0 của bảng ngân sách; không thì số ĐẦU TIÊN khác 0 và không NaN (parseInt) trong guest_count, preferences.guest_count, couple.guest_count (âm = không có số khách, như INV-005);
-// rồi `capacity` đã lưu của danh sách khách (chỉ để HIỂN THỊ, khi không có số nào ở trên; ghép vendor và chat KHÔNG dùng); không có gì = 0/null.
+// rồi `capacity` đã lưu của danh sách khách (CHỈ hiển thị ở màn Khách mời và summary; KHÔNG vào GET /budget seed, GET /couples/:id guest_count, ghép vendor, chat); không có gì = 0/null.
 // Chạy từ gốc tohong-hq: node eval/T-169/check_2_so_khach_mot_gia_tri.mjs
 import { setup, bucket, readAll, checker, guestsAll, LECH, BANG, ids, done } from "./_lib.mjs";
 const { fails, eq } = checker(); const M = await setup();

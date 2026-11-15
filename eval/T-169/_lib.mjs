@@ -125,13 +125,13 @@ export function dateAll(eq, tag, r, iso) {
   eq(`${tag} chat: couple.wedding_date trong khối hồ sơ`, d10(r.chatBlock?.couple?.wedding_date), iso);
   if (r.chatBlock && "wedding_date" in r.chatBlock) eq(`${tag} chat: wedding_date top-level trong khối hồ sơ`, d10(r.chatBlock.wedding_date), iso);
 }
-// g = số hiển thị (hồ sơ, Khách mời, summary, GET /budget); gm = số dùng để GHÉP (profileSnapshot, số bàn, khối hồ sơ chat), mặc định = g.
+// g = số hiển thị của màn Khách mời và summary (có thể lấy `capacity` đã lưu); gm = số của mọi bề mặt còn lại: GET /couples/:id, GET /budget, profileSnapshot, số bàn, khối hồ sơ chat (KHÔNG có `capacity`; "không có" = 0 ở hồ sơ/GET /budget, null ở profileSnapshot), mặc định = g.
 export function guestsAll(eq, tag, r, g, gm = g) {
   const n = g ?? 0, nm = gm ?? 0;
-  eq(`${tag} hồ sơ guest_count`, r.profile?.guest_count ?? 0, n);
+  eq(`${tag} hồ sơ (GET /couples/:id) guest_count (không có capacity)`, r.profile?.guest_count ?? 0, nm);
   eq(`${tag} màn Khách mời (GET /guests) capacity`, r.guestsDoc?.capacity ?? 0, n);
   eq(`${tag} màn hồ sơ (summary) guests.capacity`, r.summary?.guests?.capacity ?? 0, n);
-  eq(`${tag} màn Ngân sách (GET /budget) guests`, r.budget?.guests ?? 0, n);
+  eq(`${tag} màn Ngân sách (GET /budget) guests (không có capacity)`, r.budget?.guests ?? 0, nm);
   eq(`${tag} ghép vendor (profileSnapshot) guestCount`, r.snap?.guestCount ?? null, gm ?? null);
   eq(`${tag} chat: số bàn trong khối ứng viên`, r.tables, gm ? Math.ceil(gm / 10) : null);
   eq(`${tag} chat: guest_count trong khối hồ sơ`, r.chatBlock?.guest_count ?? 0, nm);
