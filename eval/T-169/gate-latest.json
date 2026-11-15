@@ -1,6 +1,6 @@
 {
   "task": "T-169",
-  "at": "2026-11-15T04:37",
+  "at": "2026-11-15T04:46",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "node eval/T-169/check_1_ngay_cuoi_mot_gia_tri.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 242,
+      "ms": 308,
       "out": "e.wedding_date trong khối hồ sơ: mong \"2027-12-29\", thấy \"\"; D couple.wedding_date không phải ngày, top-level có hồ sơ (GET /couples/:id) couple.wedding_date: mong \"2027-12-29\", thấy \"sắp cưới\"; D couple.wedding_date không phải ngày, top-level có màn hồ sơ (summary) wedding_date: mong \"2027-12-29\", thấy \"sắp cưới\"; D couple.wedding_date không phải ngày, top-level có màn hồ sơ (summary) days_left: mong 410, thấy null; D couple.wedding_date không phải ngày, top-level có ghép vendor (profileSnapshot) weddingDate: mong \"2027-12-29\", thấy \"sắp cưới\"; D couple.wedding_date không phải ngày, top-level có chip \"Còn lịch\" của thẻ vendor: mong \"Còn lịch 29.12\", thấy null; D couple.wedding_date không phải ngày, top-level có chat: couple.wedding_date trong khối hồ sơ: mong \"2027-12-29\", thấy \"sắp cưới\"",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "node eval/T-169/check_2_so_khach_mot_gia_tri.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 267,
+      "ms": 343,
       "out": " guest_count rác 'abc' + preferences 150 chat: guest_count trong khối hồ sơ: mong 150, thấy \"abc\"; H guest_count rác 'abc' + preferences 150 chat: couple.guest_count trong khối hồ sơ: mong 150, thấy 100; J guest_count âm -50 + preferences 150: số đầu tiên khác 0 quyết định, âm = không có (INV-005) hồ sơ guest_count: mong 0, thấy -50; J guest_count âm -50 + preferences 150: số đầu tiên khác 0 quyết định, âm = không có (INV-005) chat: guest_count trong khối hồ sơ: mong 0, thấy -50; J guest_count âm -50 + preferences 150: số đầu tiên khác 0 quyết định, âm = không có (INV-005) chat: preferences.guest_count trong khối hồ sơ: mong 0, thấy 150; J guest_count âm -50 + preferences 150: số đầu tiên khác 0 quyết định, âm = không có (INV-005) chat: couple.guest_count trong khối hồ sơ: mong 0, thấy 100",
       "tier": 1
     },
@@ -28,15 +28,15 @@
       "eval": "node eval/T-169/check_3_ngan_sach_tong_mot_gia_tri.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 260,
-      "out": "FAIL A hồ sơ 300, bảng total_tr 500 màn hồ sơ (summary) budget.total_tr: mong 300, thấy 500; B hồ sơ không có budget, bảng total_tr 500 hồ sơ budget: mong 500, thấy 0; B hồ sơ không có budget, bảng total_tr 500 ghép vendor (profileSnapshot) budgetTotal: mong 500, thấy null; B hồ sơ không có budget, bảng total_tr 500 chat: budget trong khối hồ sơ: mong 500, thấy 0",
+      "ms": 303,
+      "out": "FAIL A hồ sơ 300, bảng total_tr 500 màn hồ sơ (summary) budget.total_tr: mong 300, thấy 500; B hồ sơ không có budget, bảng total_tr 500: hiển thị 500, ghép vẫn không có ngân sách (no_budget, 0,5 như main) hồ sơ budget: mong 500, thấy 0",
       "tier": 1
     },
     {
       "eval": "node eval/T-169/check_4_thanh_pho_va_gu_mot_gia_tri.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 278,
+      "ms": 379,
       "out": " chat: preferences.style_tags trong khối hồ sơ: mong [\"korean\",\"luxury\"], thấy [\"Korean\",\" luxury \",\"korean\"]; preferences thắng (chữ hoa/khoảng trắng chuẩn hoá): chat: style_tags top-level trong khối hồ sơ: mong [\"korean\",\"luxury\"], thấy [\"rustic\"]; preferences rỗng, top-level có: ghép vendor (profileSnapshot) styles: mong [\"rustic\"], thấy []; preferences rỗng, top-level có: hồ sơ preferences.style_tags: mong [\"rustic\"], thấy []; preferences rỗng, top-level có: chat: preferences.style_tags trong khối hồ sơ: mong [\"rustic\"], thấy []; chỉ preferences.theme: ghép vendor (profileSnapshot) styles: mong [\"modern\"], thấy []; chỉ preferences.theme: hồ sơ preferences.style_tags: mong [\"modern\"], thấy []; chỉ preferences.theme: chat: preferences.style_tags trong khối hồ sơ: mong [\"modern\"], thấy []",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "node eval/T-169/check_5_ghi_qua_moi_duong_doc_lai_dung.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 353,
+      "ms": 432,
       "out": "TCH lệch trong cùng payload (chuẩn thắng) màn Ngân sách (GET /budget) guests: mong 111, thấy 150; nối-tiếp →PATCH lệch trong cùng payload (chuẩn thắng) ghép vendor (profileSnapshot) guestCount: mong 111, thấy 150; nối-tiếp →PATCH lệch trong cùng payload (chuẩn thắng) chat: số bàn trong khối ứng viên: mong 12, thấy 15; nối-tiếp →PATCH lệch trong cùng payload (chuẩn thắng) chat: preferences.guest_count trong khối hồ sơ: mong 111, thấy 222; nối-tiếp →PATCH lệch trong cùng payload (chuẩn thắng) chat: couple.guest_count trong khối hồ sơ: mong 111, thấy 100; xoá-ngày ghép vendor (profileSnapshot) weddingDate: mong null, thấy \"2027-12-29\"; xoá-ngày chip \"Còn lịch\" của thẻ vendor: mong null, thấy \"Còn lịch 29.12\"; xoá-ngày chat: wedding_date top-level trong khối hồ sơ: mong null, thấy \"2027-12-29\"",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "node eval/T-169/check_6_khong_mat_du_lieu_doc_khong_ghi.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 257,
+      "ms": 243,
       "out": "PASS",
       "tier": 1
     },
@@ -60,7 +60,15 @@
       "eval": "bash eval/T-169/check_7_hoi_quy_bat_bien_va_test_back.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4697,
+      "ms": 11947,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-169/check_8_hang_muc_khong_nhay_khi_ghi_tong.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 440,
       "out": "PASS",
       "tier": 1
     },
@@ -68,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 44,
+      "ms": 55,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,7 +84,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 163,
+      "ms": 262,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,7 +92,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 27,
+      "ms": 41,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -92,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 36,
+      "ms": 63,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -100,7 +108,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1079,
+      "ms": 1147,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -108,15 +116,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2350,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-Gv76j0/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2700,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-qvMOWK/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1461,
+      "ms": 1823,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -124,15 +132,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 974,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-gldxHI/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1337,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-ecWEHK/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2406,
+      "ms": 2855,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -140,7 +148,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 84,
+      "ms": 134,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -148,7 +156,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1448,
+      "ms": 1846,
       "out": "PASS (worker.js nén 779243 byte)",
       "tier": 2
     }

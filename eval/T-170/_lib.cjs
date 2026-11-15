@@ -108,7 +108,7 @@ function setup(files) {
     while (el.parentElement && el.parentElement !== root && cnt(el.parentElement) === 1) el = el.parentElement;
     return el.innerText.replace(/\s+/g, ' ');
   }, [scope, name, ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Omega', 'Sigma']]);
-  /* Dấu "·" mồ côi: đo trên innerText THÔ (chưa gộp khoảng trắng), từng dòng: dòng kết thúc bằng "·", dòng bắt đầu bằng "·", hoặc hai "·" liền nhau (kể cả "·" sau đơn vị "gói"/"bàn" hay sau spec). */
+  /* Dấu "·" mồ côi: đo trên innerText THÔ (chưa gộp khoảng trắng), từng dòng: dòng kết thúc bằng "·", dòng chỉ có một "·" (không xét "· modern" đầu dòng: ở hàng flex chữ "· {spec}" là phần tử riêng và hợp lệ), hoặc hai "·" liền nhau (kể cả "·" sau đơn vị "gói"/"bàn" hay sau spec). */
   const checkDangle = async (surf, pg, scope) => {
     const raw = await pg.evaluate((s) => (document.querySelector(s) || document.body).innerText, scope || 'body');
     const l = raw.split('\n').find((x) => /·\s*$/m.test(x) || /^\s*·/m.test(x) || /·\s*·/.test(x));
