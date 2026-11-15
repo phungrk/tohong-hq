@@ -6,7 +6,7 @@ import { setup, match, budgetDoc, coupleProfile, restoreNow, done, ids, chipOf, 
 const fails = []; const bad = (m) => { if (fails.length < 25) fails.push(m); };
 const M = await setup();
 const role = Object.fromEntries(Object.entries(ids).map(([k, v]) => [v, k]));
-const P = (extra = {}) => coupleProfile({ budget: 300, ...extra });
+const P = (extra = {}) => coupleProfile({ budget: 200, ...extra });   // = total_tr của bảng: phân bổ không bị co giãn
 const V5 = () => ["A", "B", "C", "D", "E"].map((k) => ids[k]);
 const scenarios = {
   S1_vua_ngan_sach: { cat: "venue", keep: V5(), profile: P({ guest_count: 200 }), doc: budgetDoc(90, { guests: 200 }) },

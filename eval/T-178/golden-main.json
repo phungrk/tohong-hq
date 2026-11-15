@@ -4,8 +4,8 @@
    "A",
    "B",
    "C",
-   "D",
-   "E"
+   "E",
+   "D"
   ],
   "vendors": {
    "A": {
@@ -50,21 +50,6 @@
     "reasons": [
      "Còn lịch 20.3",
      "≈ 4.3tr/bàn × 20 bàn",
-     "Đủ 200 khách"
-    ]
-   },
-   "D": {
-    "totalScore": 78,
-    "scoreBreakdown": {
-     "style": 0.5,
-     "availability": 1,
-     "budget": 1,
-     "capacity": 1,
-     "quality": 0.5
-    },
-    "reasons": [
-     "Còn lịch 20.3",
-     "≈ 4.6tr/bàn × 20 bàn",
      "Đủ 200 khách"
     ]
    },
@@ -82,16 +67,31 @@
      "Đủ 200 khách",
      "TP.HCM"
     ]
+   },
+   "D": {
+    "totalScore": 75,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.8888888888888888,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
    }
   }
  },
  "S2_vuot_mot_phan": {
   "order": [
    "A",
+   "E",
    "B",
    "C",
-   "D",
-   "E"
+   "D"
   ],
   "vendors": {
    "A": {
@@ -109,57 +109,57 @@
      "Đủ 200 khách"
     ]
    },
-   "B": {
-    "totalScore": 78,
-    "scoreBreakdown": {
-     "style": 0.5,
-     "availability": 1,
-     "budget": 1,
-     "capacity": 1,
-     "quality": 0.5
-    },
-    "reasons": [
-     "Còn lịch 20.3",
-     "≈ 3.9tr/bàn × 20 bàn",
-     "Đủ 200 khách"
-    ]
-   },
-   "C": {
-    "totalScore": 78,
-    "scoreBreakdown": {
-     "style": 0.5,
-     "availability": 1,
-     "budget": 1,
-     "capacity": 1,
-     "quality": 0.5
-    },
-    "reasons": [
-     "Còn lịch 20.3",
-     "≈ 4.3tr/bàn × 20 bàn",
-     "Đủ 200 khách"
-    ]
-   },
-   "D": {
-    "totalScore": 78,
-    "scoreBreakdown": {
-     "style": 0.5,
-     "availability": 1,
-     "budget": 1,
-     "capacity": 1,
-     "quality": 0.5
-    },
-    "reasons": [
-     "Còn lịch 20.3",
-     "≈ 4.6tr/bàn × 20 bàn",
-     "Đủ 200 khách"
-    ]
-   },
    "E": {
     "totalScore": 78,
     "scoreBreakdown": {
      "style": 0.5,
      "availability": 1,
      "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
+   },
+   "B": {
+    "totalScore": 66,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.4285714285714286,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
+   },
+   "C": {
+    "totalScore": 58,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 200 khách",
+     "TP.HCM"
+    ]
+   },
+   "D": {
+    "totalScore": 58,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0,
      "capacity": 1,
      "quality": 0.5
     },
@@ -256,9 +256,9 @@
   "order": [
    "A",
    "B",
+   "E",
    "C",
-   "D",
-   "E"
+   "D"
   ],
   "vendors": {
    "A": {
@@ -291,42 +291,42 @@
      "Đủ 300 khách"
     ]
    },
-   "C": {
-    "totalScore": 78,
-    "scoreBreakdown": {
-     "style": 0.5,
-     "availability": 1,
-     "budget": 1,
-     "capacity": 1,
-     "quality": 0.5
-    },
-    "reasons": [
-     "Còn lịch 20.3",
-     "≈ 4.3tr/bàn × 30 bàn",
-     "Đủ 300 khách"
-    ]
-   },
-   "D": {
-    "totalScore": 78,
-    "scoreBreakdown": {
-     "style": 0.5,
-     "availability": 1,
-     "budget": 1,
-     "capacity": 1,
-     "quality": 0.5
-    },
-    "reasons": [
-     "Còn lịch 20.3",
-     "≈ 4.6tr/bàn × 30 bàn",
-     "Đủ 300 khách"
-    ]
-   },
    "E": {
     "totalScore": 78,
     "scoreBreakdown": {
      "style": 0.5,
      "availability": 1,
      "budget": 1,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 300 khách",
+     "TP.HCM"
+    ]
+   },
+   "C": {
+    "totalScore": 71,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.6875,
+     "capacity": 1,
+     "quality": 0.5
+    },
+    "reasons": [
+     "Còn lịch 20.3",
+     "Đủ 300 khách",
+     "TP.HCM"
+    ]
+   },
+   "D": {
+    "totalScore": 63,
+    "scoreBreakdown": {
+     "style": 0.5,
+     "availability": 1,
+     "budget": 0.2500000000000001,
      "capacity": 1,
      "quality": 0.5
     },
