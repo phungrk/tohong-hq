@@ -44,6 +44,11 @@ if (hid.status !== 200 || hidIds.join() !== T.id) bad(`(b) id ẩn và id không
 // (c)
 const hd = await get(`/api/vendors/${H.id}?coupleId=${CID}`, { overlay: { [H.id]: { hidden: true, hidden_reason: "eval T-171" } } });
 if (hd.body?.match !== null) bad("(c) vendor ẩn: chi tiết vẫn phải có match null");
+// ids rỗng -> 400; id trùng tính một (X,X trả một vendor; 50 id khác nhau + trùng vẫn được)
+const em = await get(`/api/vendors/match?coupleId=${CID}&ids=`);
+if (em.status !== 400) bad(`(b) ids rỗng phải 400, thấy ${em.status}`);
+const dup = await get(`/api/vendors/match?coupleId=${CID}&ids=${T.id},${T.id},${T.id}`);
+if ((dup.body?.vendors || []).length !== 1 || dup.body?.total !== 1) bad(`(b) id trùng tính một, thấy ${(dup.body?.vendors || []).length} vendor, total ${dup.body?.total}`);
 // quá 50 id
 const many = Array.from({ length: 51 }, (_, i) => `id${i}`).join(",");
 const mm = await get(`/api/vendors/match?coupleId=${CID}&ids=${many}`);
