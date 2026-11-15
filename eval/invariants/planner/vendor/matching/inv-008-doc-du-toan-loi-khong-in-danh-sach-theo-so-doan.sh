@@ -9,5 +9,8 @@
 # Chạy: bash <file> [--repo <tohong-front>]; biến TOHONG_FRONT_REPO, PLAYWRIGHT_PATH. Gốc HQ tìm bằng dò ngược tới scripts/gate.py (không đếm cấp).
 set -u
 D="$(cd "$(dirname "$0")" && pwd)"; R="$D"; while [ "$R" != "/" ] && [ ! -f "$R/scripts/gate.py" ]; do R="$(dirname "$R")"; done
-out="$(node "$R/eval/T-179/check_11_doc_du_toan_loi.cjs" "$@" 2>&1 | tail -1)"
-case "$out" in PASS) echo PASS; exit 0;; *) echo "FAIL check_11_doc_du_toan_loi: $out"; exit 1;; esac
+# ADR-112: thêm T-182 adv-01 (GET /budget 404 là lỗi đọc).
+for f in T-179/check_11_doc_du_toan_loi T-182/adv-01-doc-du-toan-404-la-loi-doc; do
+  out="$(node "$R/eval/$f.cjs" "$@" 2>&1 | tail -1)"; case "$out" in PASS) ;; *) echo "FAIL $f: $out"; exit 1;; esac
+done
+echo PASS
