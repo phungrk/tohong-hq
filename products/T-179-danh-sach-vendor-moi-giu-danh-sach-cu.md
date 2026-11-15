@@ -1,6 +1,6 @@
 # Spec T-179: Đổi dự toán thì "Tìm vendor" in danh sách MỚI, danh sách cũ giữ nguyên
 
-> v1 · Spec Writer (product) · 2026-11-15 · bậc B · vùng `planner/vendor/matching` · chỉ chạm `tohong-front` (back không đổi) · thay hướng "cập nhật tại chỗ" của T-174 (spec `products/T-171-the-vendor-theo-du-toan-hien-tai.md` v3.1 H1-H4) theo ADR-106; giữ H5-H8 của T-171.
+> v2 (sau `handoffs/T-179-D1.md`, Chief phân xử) · v1 · Spec Writer (product) · 2026-11-15 · bậc B · vùng `planner/vendor/matching` · chỉ chạm `tohong-front` (back không đổi) · thay hướng "cập nhật tại chỗ" của T-174 (spec `products/T-171-the-vendor-theo-du-toan-hien-tai.md` v3.1 H1-H4) theo ADR-106; giữ H5-H8 của T-171.
 
 ## Ý định
 Capu (ADR-106, trả lời câu mở của T-171): "mỗi lần số dự toán đổi so với lần trước, danh sách vendor mở bằng nút 'Tìm vendor' phải lấy lại danh sách mới, không cần tải lại trang, và danh sách mới sẽ được in lại chứ không phải thay đổi lại nội dung danh sách cũ. Nội dung danh sách cũ vẫn giữ nguyên." Cặp đôi giữ được cả hai: danh sách theo số cũ làm chứng, danh sách theo số mới để chọn.
@@ -17,31 +17,32 @@ Nếu mỗi lần bấm Tìm vendor sau khi đổi số in một danh sách mớ
 ## Định nghĩa (để mỗi câu chỉ có một cách hiểu)
 - **Danh sách vendor** = thẻ danh sách theo hạng mục trong khung chat vendor (có tiêu đề hạng mục, kicker "Gợi ý phù hợp" và các hàng vendor). Thẻ chi tiết và bảng so sánh KHÔNG phải danh sách.
 - **Cuộc trò chuyện vendor hiện tại** = chuỗi thẻ đang có trong luồng vendor kể từ lần luồng được dựng gần nhất. Giữ cách bắt đầu lại hiện có: mở luồng vendor cho HẠNG MỤC KHÁC, hoặc mở luồng vendor sau khi đã dùng chat thường, thì bắt đầu lại và chỉ còn một danh sách của hạng mục vừa mở (xem "Không làm").
-- **Số đã lưu của hạng mục c** = cặp (D, K): D = `allocated_tr` của hạng mục c, K = `guests`, trong bản dự toán ĐÃ LƯU trên server, front đọc bằng `GET /api/couples/<id>/budget` tại lúc cần (không suy luận, INV-005). D vắng hoặc <= 0 thì D = 0; K vắng hoặc <= 0 thì K = "chưa có". Đọc lỗi (không 2xx, mạng đứt) thì số đã lưu = "chưa biết".
+- **Số đã lưu của hạng mục c** = cặp (D, K): D = `allocated_tr` của hạng mục c, K = `guests`, trong bản dự toán ĐÃ LƯU trên server, front đọc bằng `GET /api/couples/<id>/budget` tại lúc cần (không suy luận, INV-005). D vắng hoặc <= 0 thì D = 0; K vắng hoặc <= 0 thì K = "chưa có". Đọc lỗi (không 2xx, mạng đứt) KHÔNG cho ra số: không có "số chưa biết", xem H1 bước 2.
 - **Số chấm của một danh sách** = số đã lưu của hạng mục đọc ngay trước khi danh sách đó được yêu cầu.
 - **Danh sách gần nhất của hạng mục c** = danh sách CUỐI CÙNG của hạng mục c trong cuộc trò chuyện vendor hiện tại.
-- **So với lần trước** = so số đã lưu hiện tại với số chấm của danh sách gần nhất của hạng mục đó. "Khác" = D khác hoặc K khác. "Chưa biết" bằng "chưa biết" và khác mọi số biết.
+- **So với lần trước** = so số đã lưu hiện tại với số chấm của danh sách gần nhất của hạng mục đó, bằng SỐ THÔ đã lưu (không làm tròn: 90 và 90,04 là khác nhau, hai danh sách cùng nhãn `90tr` là chấp nhận được). "Khác" = D khác hoặc K khác.
 - **Lần lưu đang chờ** = thay đổi dự toán trên màn Ngân sách chưa gửi (đang đợi gộp 800ms) hoặc đã gửi chưa có phản hồi.
 
 ## Hành vi (người dùng thấy gì)
 
 ### H1 · Khi nào in danh sách mới (mỗi lần bấm "Tìm <hạng mục>")
 "Tìm vendor" = nút `Tìm <tên hạng mục>` ở chi tiết hạng mục màn Ngân sách, và mọi lối khác mở luồng vendor kèm một hạng mục. (Lối mở thẻ chọn hạng mục `catId = null` không đổi, xem "Không làm".) Mỗi lần bấm:
-1. Nếu có lần lưu đang chờ: đợi nó xong rồi mới đọc số đã lưu. Lần lưu lỗi thì số đã lưu vẫn là số cũ (và câu báo `Chưa lưu được dự toán` ở màn Ngân sách giữ như T-171 H5). Đợi không quá thời gian của chính lần lưu đó; không thêm giới hạn riêng.
-2. Đọc số đã lưu của hạng mục (đúng một lần đọc dự toán, không gọi `/api/vendors/match`).
+1. Nếu có lần lưu đang chờ: đợi nó xong rồi mới đọc số đã lưu. Lần lưu lỗi thì số đã lưu vẫn là số cũ (và câu báo `Chưa lưu được dự toán` ở màn Ngân sách giữ như T-171 H5). Đợi không quá thời gian của chính lần lưu đó; không thêm giới hạn riêng. Trong lúc đợi và đọc, khung chat MỞ NGAY và cuối cuộc trò chuyện hiện đúng một dòng `Đang lấy dự toán…`, biến mất khi xong (KHÔNG có eval đo dòng này; yêu cầu không đo).
+2. Đọc số đã lưu của hạng mục: đúng một lần `GET /api/couples/<id>/budget`, không PUT/POST, không gọi `/api/vendors/match`. **Đọc lỗi (không 2xx, mạng đứt): KHÔNG in danh sách mới (kể cả khi hạng mục chưa có danh sách nào), không gọi match, hiện đúng một dòng `Chưa đọc được dự toán. Thử lại` kèm nút `Thử lại` ở cuối cuộc trò chuyện; danh sách đang có giữ nguyên. Bấm `Thử lại` đọc lại và đi tiếp từ bước 3. Không bao giờ in danh sách theo số đoán (0).** (T-179 sửa T-177 H5, vốn ghi bấm nút "không gọi API thêm": nay bấm được đọc dự toán một lần bằng GET, vẫn không PUT/POST thêm.)
 3. Hạng mục chưa có danh sách nào trong cuộc trò chuyện vendor hiện tại: in MỘT danh sách (như hôm nay), gọi match một lần.
 4. Có danh sách gần nhất và số đã lưu KHÁC số chấm của nó: in thêm MỘT danh sách mới ở CUỐI cuộc trò chuyện (một lần gọi match), cuộn tới nó. Không tải lại trang.
-5. Số đã lưu BẰNG số chấm của danh sách gần nhất: KHÔNG in, KHÔNG gọi match, chat mở như cũ. Đọc số lỗi ("chưa biết") khi danh sách gần nhất có số biết: coi như không đổi, không in.
+5. Số đã lưu BẰNG số chấm của danh sách gần nhất: KHÔNG in, KHÔNG gọi match, chat mở như cũ.
 - So sánh luôn chỉ với danh sách GẦN NHẤT, không với mọi danh sách cũ: 90 -> 40 -> 90 in danh sách thứ ba dù bằng danh sách thứ nhất.
 - KHÔNG tự in khi dự toán đổi: danh sách mới chỉ ra khi bấm Tìm vendor. Lý do: tránh gọi API cho cặp đôi không mở vendor, tránh in nhiều danh sách theo từng lần kéo thanh, và đúng câu Capu ("danh sách mở bằng nút Tìm vendor").
 - Số khách đổi cũng tính (K trong cặp). Chỉ dự toán hạng mục (D) và số khách trong dự toán (K) được so; đổi phong cách, thành phố, ngày cưới không tự in danh sách mới (xem "Không làm").
-- Danh sách tải lỗi (không có danh sách) giữ cách báo hiện có; lần bấm sau thử lại như hôm nay.
+- Danh sách tải lỗi (match không 2xx) giữ cách báo hiện có; lần bấm sau thử lại như hôm nay.
+- Lối thẻ chọn hạng mục (`catId = null`): chọn một hạng mục trên thẻ chọn áp CÙNG luật H1 (đọc số, so với danh sách gần nhất của hạng mục đó trong cuộc trò chuyện, in hoặc không in; đọc lỗi thì dòng báo). Mở `Tìm <hạng mục>` khi luồng đang ở thẻ chọn (hoặc ngược lại) vẫn BẮT ĐẦU LẠI như hôm nay (đổi `catId` của luồng).
 
 ### H2 · Danh sách cũ đóng băng
 Sau khi một danh sách đã hiện, nội dung của nó KHÔNG đổi nữa dù dự toán/số khách đổi: tên, ảnh, giá, thứ tự hàng, phần trăm và nhãn định tính, nhãn "Theo dự toán …", chip lý do, "PHÙ HỢP NHẤT". Không gọi match lại cho nó, không hiện `Đang cập nhật điểm…` hay `Chưa cập nhật được điểm` trên danh sách vì số đổi (phần T-174 H1, H2 cho thẻ danh sách bị bỏ). Thao tác của người dùng trên thẻ (Lưu/Kết nối, thu gọn/mở rộng) vẫn hoạt động. Thẻ chi tiết và bảng so sánh đã hiện cũng đóng băng (không lấy lại điểm khi số đổi): mọi thẻ chỉ ghi số tại lúc nó ra đời.
 
 ### H3 · Nhãn số đã dùng trên mỗi danh sách (chỉ thêm)
-Mỗi danh sách có đúng MỘT dòng chữ nhỏ ngay dưới tiêu đề của thẻ: `Theo dự toán {D}tr · {K} khách` (D, K = số chấm của danh sách đó; bỏ phần ` · {K} khách` khi K = "chưa có"); khi D = 0: `Chưa có dự toán cho hạng mục này`. Định dạng số: làm tròn một chữ số thập phân, dấu phẩy, bỏ phần `,0` (90 -> `90`, 39,5 -> `39,5`). Danh sách không biết số chấm (đọc lỗi lúc yêu cầu) không có nhãn. Nhãn là dòng THÊM; mọi chữ khác của danh sách giữ như hôm nay. Nhãn không đổi sau khi in. Đây cũng là chữ phân biệt các danh sách với nhau.
+Mỗi danh sách có đúng MỘT dòng chữ nhỏ ngay dưới tiêu đề của thẻ: `Theo dự toán {D}tr · {K} khách` (D, K = số chấm của danh sách đó; bỏ phần ` · {K} khách` khi K = "chưa có"); khi D = 0: `Chưa có dự toán cho hạng mục này`. Định dạng số: làm tròn một chữ số thập phân, dấu phẩy, bỏ phần `,0` (90 -> `90`, 39,5 -> `39,5`). Nhãn là dòng THÊM; mọi chữ khác của danh sách giữ như hôm nay. Nhãn không đổi sau khi in. Đây cũng là chữ phân biệt các danh sách với nhau.
 
 ### H4 · Chi tiết và so sánh mở từ danh sách (cũ hay mới): chấm theo số đã lưu tại lúc mở, rồi đóng băng
 Bấm hàng ở BẤT KỲ danh sách nào (kể cả danh sách cũ) mở một thẻ chi tiết MỚI chấm theo số đã lưu tại lúc mở, KHÔNG theo số của danh sách chứa hàng đó: khối "Phân tích AI" (phần trăm, ba thanh, chip, dòng phép so `… so với {D}tr tiệc cưới`) lấy từ phản hồi chi tiết (điểm theo bản đã lưu hiện tại, như T-171 H7). Trong lúc chờ điểm của thẻ chi tiết hiện đúng MỘT dòng `Đang cập nhật điểm…` thay cho khối đó, không hiện điểm của hàng đã bấm như điểm hiện hành (KHÔNG có eval đo dòng này; ghi là yêu cầu không đo). Lỗi lấy điểm (không 2xx, mạng đứt): `Chưa cập nhật được điểm. Thử lại` kèm nút `Thử lại` (như T-171 H2 cho lần lấy đầu). Phản hồi 2xx với `match: null`: một dòng `Chưa có điểm cho vendor này`, không `Thử lại` (T-171 H6, giữ nguyên). Bảng so sánh tạo từ thẻ chi tiết cũng chấm theo số đã lưu lúc tạo (một lần `ids`, T-171 H8), rồi đóng băng.
@@ -49,13 +50,13 @@ Bấm hàng ở BẤT KỲ danh sách nào (kể cả danh sách cũ) mở một
 - Hệ quả đã chấp nhận: điểm trên chi tiết có thể khác phần trăm của hàng đã bấm trong danh sách cũ. Nếu Capu muốn chi tiết từ danh sách cũ giữ điểm của hàng: xem "Câu hỏi mở".
 
 ### H5 · "Xem thêm" của danh sách không trộn hai số
-"Xem thêm N vendor" trong một danh sách chỉ thêm hàng khi số đã lưu hiện tại (đọc lại lúc bấm, như H1 bước 1-2) BẰNG số chấm của danh sách đó. Khác thì KHÔNG thêm hàng nào, danh sách giữ nguyên, và hiện đúng một dòng trong thẻ đó: `Dự toán đã đổi, không thêm được vendor vào danh sách này. Mở lại Tìm vendor để xem danh sách mới.` Đọc số lỗi thì cho thêm như hôm nay. Thu gọn/mở rộng các hàng đã có vẫn hoạt động. Danh sách mới in ra có nút "Xem thêm" riêng theo số của nó.
+"Xem thêm N vendor" trong một danh sách chỉ thêm hàng khi số đã lưu hiện tại (đọc lại lúc bấm, như H1 bước 1-2) BẰNG số chấm của danh sách đó. Khác thì KHÔNG thêm hàng nào, danh sách giữ nguyên, và hiện đúng một dòng trong thẻ đó: `Dự toán đã đổi, không thêm được vendor vào danh sách này. Mở lại Tìm vendor để xem danh sách mới.` Đọc số lỗi thì không thêm và hiện đúng một dòng `Chưa đọc được dự toán. Thử lại` kèm nút `Thử lại` trong thẻ đó (bấm thì bấm lại "Xem thêm"). Sau khi câu cố định về số đã đổi hiện, nút "Xem thêm" của danh sách đó ẨN (không còn nút). Thu gọn/mở rộng các hàng đã có vẫn hoạt động. Danh sách mới in ra có nút "Xem thêm" riêng theo số của nó.
 
 ### H6 · Giữ nguyên các phần T-174/T-171 về lưu dự toán (không đổi một chữ)
 T-171 H5 (lưu lỗi hiện `Chưa lưu được dự toán` + `Thử lại`, số vừa chỉnh không tự trả về số cũ, ghi lại sau lỗi chỉ đè trường người dùng đã đổi và KHÔNG xoá khoản do lần ghi khác đã lưu, màn tải lại ghép giá trị chưa lưu, ADR-104 lựa chọn A), H6 (vendor không có điểm), H7, H8 (back) giữ nguyên. Hệ quả cho bước đọc số của H1: khi lưu lỗi, số đã lưu vẫn là số cũ nên bấm Tìm vendor không in danh sách mới; thẻ chat theo bản đã lưu, như T-171 H5 đã viết.
 
 ### H7 · Văn bản cố định (đúng nguyên văn, chữ hoa/thường như ghi)
-`Theo dự toán {D}tr · {K} khách` · `Theo dự toán {D}tr` · `Chưa có dự toán cho hạng mục này` · `Dự toán đã đổi, không thêm được vendor vào danh sách này. Mở lại Tìm vendor để xem danh sách mới.` · giữ từ T-171: `Đang cập nhật điểm…` · `Chưa cập nhật được điểm. Thử lại` · `Chưa lưu được dự toán` · `Chưa có điểm cho vendor này` · nút `Thử lại`.
+`Theo dự toán {D}tr · {K} khách` · `Theo dự toán {D}tr` · `Chưa có dự toán cho hạng mục này` · `Đang lấy dự toán…` · `Chưa đọc được dự toán. Thử lại` (nút `Thử lại`) · `Dự toán đã đổi, không thêm được vendor vào danh sách này. Mở lại Tìm vendor để xem danh sách mới.` · giữ từ T-171: `Đang cập nhật điểm…` · `Chưa cập nhật được điểm. Thử lại` · `Chưa lưu được dự toán` · `Chưa có điểm cho vendor này` · nút `Thử lại`.
 
 ## Ràng buộc (vòi)
 - Repo: `phungrk/tohong-front` · Nhánh: `t-179-danh-sach-moi-giu-cu` · Vùng: `planner/vendor/matching` (đọc thêm `planner/front/budget`). Back không đổi (`GET /api/vendors/match`, `?ids=`, chi tiết có `match` đã có từ T-171/T-175).
@@ -81,15 +82,20 @@ Chạy từ gốc `tohong-hq` (thêm `--repo <đường dẫn>` để chạy tr�
 | 10 | Giữ T-171 H5: `Thử lại` sau khi vendor chốt ghi xen không đè khoản `vendor_t171_a`, server có 40 | `node eval/T-174/adv-03-thu-lai-khong-de-khoan-ghi-xen.cjs` |
 | 11 | Giữ T-171 H5 (ADR-104 A): khoản người dùng thêm/sửa/xoá lúc có câu báo được ghi cùng khi lưu lại, khoản do lần ghi khác lưu còn | `node eval/T-171/check_10_khoan_nguoi_dung_giu_khi_luu_loi.cjs` |
 | 12 | Giữ T-171 H5: lưu lỗi rồi chốt vendor ghi xen và màn tải lại: số 40 không mất im lặng | `node eval/T-174/adv-02-luu-loi-roi-chot-vendor-khong-mat-so.cjs` |
+| 13 | Nhãn đúng nguyên văn ba dạng: dự toán 0 -> `Chưa có dự toán cho hạng mục này` (không `0tr`); số khách 0 -> `Theo dự toán 90tr` (không `khách`); 39,5 -> `Theo dự toán 39,5tr · 200 khách`; so số thô (90 -> 90,04 in danh sách thứ hai) | `node eval/T-179/check_10_nhan_cac_dang_so.cjs` |
+| 14 | Đọc dự toán lỗi (GET 500) lúc bấm: không in, không gọi match, hiện `Chưa đọc được dự toán. Thử lại`; `Thử lại` rồi in theo số đúng; cả ca chưa có danh sách nào | `node eval/T-179/check_11_doc_du_toan_loi.cjs` |
+| 15 | T-177 (đối chiếu, M1): bấm nút Tìm mở đúng hạng mục một lần, không PUT/POST thêm | `node eval/T-177/check_4_bam_mo_tim_vendor.cjs` |
+| 16 | Bất biến `planner/front/budget` inv-006: số tiền trong chữ nút Tìm khớp thanh Dự toán | `bash eval/invariants/planner/front/budget/inv-006-nut-tim-so-khop-du-toan-doc-du.sh` |
+| 17 | Bất biến `planner/front/budget` inv-007: chữ nút Tìm tên dài không tràn ở 320-360px | `bash eval/invariants/planner/front/budget/inv-007-nut-tim-ten-dai-khong-tran-320-360.sh` |
 
-Eval 10-12 là eval có sẵn, không phụ thuộc thẻ chat, giữ nguyên. Back (T-171 check_9, adv-09, adv-11) không đổi, chạy lại không cần sửa.
+Eval 10-12 và 15-17 là eval có sẵn, không phụ thuộc thẻ chat, giữ nguyên (gate T-179 vùng `planner/vendor/matching` không tự chạy bể `planner/front/budget`, nên 16-17 được ghi tường minh vì T-179 chạm `useBudget.js` và luồng bấm). Back (T-171 check_9, adv-09, adv-11) không đổi, chạy lại không cần sửa.
 
-Tự kiểm bằng bản cài giả: bản sao front (`vendorSig.js` đọc số đã lưu và chờ lần lưu; `VendorThread` in thêm khi số khác danh sách gần nhất; nhãn; thẻ thôi lấy lại điểm; chi tiết luôn lấy điểm lúc mở; "Xem thêm" đọc lại số; `useBudget` báo lần lưu đang chờ): eval 1-9 PASS trên bản giả; trên front main `7d65d5e` eval 1-9 đều FAIL. Cách cài thật tuỳ Engineering, miễn hành vi như trên.
+Tự kiểm bằng bản cài giả: bản sao front (`vendorSig.js` đọc số đã lưu và chờ lần lưu; `VendorThread` in thêm khi số khác danh sách gần nhất; nhãn; thẻ thôi lấy lại điểm; chi tiết luôn lấy điểm lúc mở; "Xem thêm" đọc lại số; `useBudget` báo lần lưu đang chờ): eval 1-14 PASS trên bản giả; trên front main `7d65d5e` eval 1-9 đều FAIL; bản đột biến của Spec Gate (`vendorSig.js` nhãn thô `Theo dự toán ${d}tr · ${k} khách`, đọc lỗi trả 0,0) từng PASS 9/9 nay ĐỎ ở eval 13 và 14. Cách cài thật tuỳ Engineering, miễn hành vi như trên.
 
 ## Bất biến đề xuất (tầng 2)
 **Bản thay cho `planner/vendor/matching/inv-006-the-ghep-khong-hien-diem-cu.sh` (Chief quyết, ghi `decisions/`; spec-critic rút khi spec qua cổng).** inv-006 cũ ("thẻ ghép không hiện điểm hay dòng phép so tính trên dự toán/số khách cũ hơn bản đã lưu của cặp đôi trong cùng phiên") mâu thuẫn với ADR-106 cho danh sách cũ và sẽ ĐỎ ngay khi T-179 merge nếu không thay. Bản thay đề xuất, phát biểu:
 > Trong luồng vendor, danh sách vendor MỚI NHẤT của một hạng mục, sau mỗi lần bấm Tìm vendor, luôn theo dự toán hạng mục và số khách ĐÃ LƯU (không có điểm/phép so tính trên số cũ hơn bản đã lưu); mọi danh sách ghi rõ số nó đã dùng (`Theo dự toán {D}tr · {K} khách`) và KHÔNG đổi nội dung sau khi hiện; số không đổi so với danh sách gần nhất thì không in trùng và không gọi lại điểm.
-Nội dung chạy được = eval 1 + 2 + 3 của spec này; bản nháp đặt ở `eval/T-179/bat-bien-cho-merge/inv-006-danh-sach-moi-nhat-theo-du-toan-da-luu.sh` (chạy ba eval, in `PASS` hoặc `FAIL <eval>`). Điều kiện ADR-028: đỏ trên main tới khi PR front T-179 merge; sau đó Chief chép vào `eval/invariants/planner/vendor/matching/` thay inv-006 cũ (dùng lại `eval/T-179/_lib.cjs`, `eval/T-171/_lib.cjs`). Phần cũ còn đúng và được giữ trong bản thay: thẻ chi tiết/so sánh MỚI luôn theo số đã lưu tại lúc mở (eval 7). `lib/the_ghep_inv.cjs` và `the_ghep_khung.cjs` của inv-006 cũ không còn dùng sau khi thay.
+Nội dung chạy được = eval 1 + 2 + 3 + 5 + 7 + 10 của spec này (5: bấm ngay sau khi kéo, đọc số sau lần lưu; 7: chi tiết mở theo số đã lưu; 10: nhãn đúng các dạng số); bản nháp đặt ở `eval/T-179/bat-bien-cho-merge/inv-006-danh-sach-moi-nhat-theo-du-toan-da-luu.sh` (chạy sáu eval, in `PASS` hoặc `FAIL <eval>`). Điều kiện ADR-028: đỏ trên main tới khi PR front T-179 merge; sau đó Chief chép vào `eval/invariants/planner/vendor/matching/` thay inv-006 cũ (dùng lại `eval/T-179/_lib.cjs`, `eval/T-171/_lib.cjs`). Phần cũ còn đúng và được giữ trong bản thay: thẻ chi tiết/so sánh MỚI luôn theo số đã lưu tại lúc mở (eval 7). `lib/the_ghep_inv.cjs` và `the_ghep_khung.cjs` của inv-006 cũ không còn dùng sau khi thay.
 Không có bất biến mới khác (inv-005 của `planner/front/budget` giữ nguyên).
 
 ### Eval cũ sẽ lỗi thời khi T-179 merge
@@ -109,15 +115,18 @@ Còn đúng, giữ: T-171 check_6 (số khách đổi bằng action chat rồi m
 - Không đổi lối chọn hạng mục (thẻ chọn `catId = null`): chọn hạng mục ở đó in danh sách như hôm nay (có nhãn nếu đọc được số), không có logic "không in trùng".
 - Không coi đổi phong cách, thành phố, ngày cưới là "số đổi" (ADR-106 nói về dự toán; nếu cần thì việc riêng). Khi số khách chỉ nằm ở hồ sơ mà dự toán chưa có `guests` (K = "chưa có"), đổi số khách hồ sơ không in danh sách mới; rủi ro đã biết.
 - Không xử lý số đổi GIỮA lúc một danh sách đang tải: nó hiện theo điểm server trả, nhãn ghi số đọc lúc yêu cầu; lần bấm sau so với số đó và in mới nếu khác.
+- Không xử lý ca dự toán hạng mục = 0 mà back vẫn chấm theo tổng ngân sách × tỷ lệ (`total_share`, T-167): nhãn ghi `Chưa có dự toán cho hạng mục này` trong khi chi tiết ghi `so với 43tr`; đổi tổng ngân sách khi D = 0 không in danh sách mới. Rủi ro đã biết.
 - Không đổi thuật toán chấm, trọng số, thứ tự, chip, câu AI; không đổi back; không đổi dữ liệu ghi lên server.
 - Không thêm cách "tải lại danh sách cũ" hay nút cập nhật trên thẻ cũ.
 
 ## Còn trống (eval không phủ)
 - Dòng `Đang cập nhật điểm…` của thẻ chi tiết lúc chờ (H4) và bảng so sánh lúc tạo (chấm theo `ids` một lần): không có eval riêng mới (eval 7 đo kết quả cuối của chi tiết). Cuộn tới danh sách mới, vị trí cuộn giữ khi mở lại chat: không đo.
+- Dòng `Đang lấy dự toán…` (H1 bước 1) và dòng `Chưa đọc được dự toán. Thử lại` ở "Xem thêm" (H5): dòng đầu không đo; dòng sau không có eval riêng (cùng nhánh đọc lỗi với eval 14).
 - Đo bằng API giả; chưa chạy với back thật (back không đổi).
 
 ## Câu hỏi mở
 Một câu cho Capu (có mặc định, không chặn): chi tiết vendor mở từ một hàng của danh sách CŨ nên ghi điểm theo dự toán HIỆN TẠI (mặc định trong H4, vì phản hồi chi tiết của back chỉ chấm được theo bản đã lưu và để quyết định chốt theo số thật), hay giữ nguyên phần trăm của hàng đã bấm (cần front ghi nhớ điểm hàng và chỉ lấy câu AI; nếu chọn thế H4 và eval 7 đổi)?
 
 ## Lịch sử sửa
+- v2 (2026-11-15, theo `handoffs/T-179-D1.md` B1, B2, M1-M6): bỏ khái niệm "số chưa biết" (câu H1 bước 5 và Định nghĩa mâu thuẫn); đọc dự toán lỗi = không in + dòng `Chưa đọc được dự toán. Thử lại` (kể cả chưa có danh sách); thêm eval 13 (ba dạng nhãn + số thô) và 14 (đọc lỗi); bản thay inv-006 chạy thêm check_5 và check_7; ghi T-179 sửa T-177 H5 (thêm một GET), thêm eval T-177 check_4 và bất biến `planner/front/budget` inv-006, inv-007; M2 chat mở ngay + dòng `Đang lấy dự toán…`; M3 thẻ chọn hạng mục áp luật H1; M4 ẩn nút Xem thêm sau câu cố định; M5 so số thô; M6 ghi "Không làm".
 - v1 (2026-11-15): bản đầu, theo ADR-106 và brief của Chief (`board/T-179.md`).
