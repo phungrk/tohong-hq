@@ -1,7 +1,7 @@
 {
   "task": "T-176",
-  "at": "2026-11-15T05:17",
-  "verdict": "RED",
+  "at": "2026-11-15T05:19",
+  "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/vendor/matching",
@@ -12,7 +12,7 @@
       "eval": "node eval/T-172/check_1_khoi_ung_vien_khong_nhan.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 408,
+      "ms": 417,
       "out": "PASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "node eval/T-172/check_2_huong_dan_va_cau_chat.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 396,
+      "ms": 481,
       "out": "PASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "node eval/T-172/check_3_giu_inv003_trong_prompt_chat.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 470,
+      "ms": 568,
       "out": "PASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "node eval/T-172/check_4_cau_ai_vi_sao_hop.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 251,
+      "ms": 272,
       "out": "PASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "node eval/T-172/check_5_cache_cau_ai_cu.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 717,
+      "ms": 730,
       "out": "PASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "node eval/T-172/check_6_api_van_tra_nhan.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 610,
+      "ms": 520,
       "out": "PASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "node eval/T-172/check_7_inv003_ban_thay_the.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1226,
+      "ms": 1415,
       "out": "PASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "node eval/T-172/check_8_inv004_ban_thay_the.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1268,
+      "ms": 1305,
       "out": "PASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "python3 -I eval/T-172/check_9_inv038_ban_thay_the.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 170,
+      "ms": 180,
       "out": "PASS ứng viên chat đúng pool + overlay, không mạng, đúng ngân sách",
       "tier": 1
     },
@@ -84,7 +84,15 @@
       "eval": "node eval/T-172/check_10_lich_su_tom_tat_ghi_nho.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 188,
+      "ms": 294,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-176/adv-01-loc-chi-cat-cum-nguon-gia.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 235,
       "out": "PASS",
       "tier": 1
     },
@@ -92,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 48,
+      "ms": 57,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -100,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 197,
+      "ms": 171,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -108,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 46,
+      "ms": 33,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -116,7 +124,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 39,
+      "ms": 52,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -124,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 955,
+      "ms": 1001,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -132,15 +140,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2882,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-qG7Q9m/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2697,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-ttBf7k/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1903,
+      "ms": 1793,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -148,15 +156,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1013,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-kXPeAo/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1308,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-VJH5pO/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2490,
+      "ms": 2522,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -164,7 +172,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 83,
+      "ms": 84,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -172,15 +180,15 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1503,
-      "out": "PASS (worker.js nén 779701 byte)",
+      "ms": 1470,
+      "out": "PASS (worker.js nén 779774 byte)",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/vendor/inv-001-pool-gia-co-nguon-va-khung-nhat-quan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 39,
+      "ms": 35,
       "out": "PASS (867 vendor có nguồn giá, khung nhất quán)",
       "tier": 2
     },
@@ -188,7 +196,7 @@
       "eval": "eval/invariants/planner/vendor/inv-002-gia-hien-ra-luon-co-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 268,
+      "ms": 354,
       "out": "PASS",
       "tier": 2
     },
@@ -196,7 +204,7 @@
       "eval": "eval/invariants/planner/vendor/inv-003-uoc-tinh-khong-lam-bang-chung-khang-dinh-ngan-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1539,
+      "ms": 1522,
       "out": "PASS",
       "tier": 2
     },
@@ -204,7 +212,7 @@
       "eval": "eval/invariants/planner/vendor/inv-004-venue-so-gia-ban-voi-tong-theo-so-ban.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1381,
+      "ms": 1377,
       "out": "PASS",
       "tier": 2
     },
@@ -212,7 +220,7 @@
       "eval": "eval/invariants/planner/vendor/inv-005-mot-so-khach-hieu-luc-tab-chat-seed.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 519,
+      "ms": 526,
       "out": "PASS\nPASS",
       "tier": 2
     },
@@ -220,7 +228,7 @@
       "eval": "eval/invariants/planner/vendor/inv-005a-so-khach-ho-so-mot-so.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 264,
+      "ms": 229,
       "out": "PASS",
       "tier": 2
     },
@@ -228,7 +236,7 @@
       "eval": "eval/invariants/planner/vendor/inv-005b-so-khach-ho-so-khop-seed.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 331,
+      "ms": 333,
       "out": "PASS",
       "tier": 2
     },
@@ -236,7 +244,7 @@
       "eval": "eval/invariants/planner/vendor/inv-006-uoc-tinh-co-tin-hieu-rieng-trong-prompt-ai.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 450,
+      "ms": 334,
       "out": "PASS AI luôn nhận tín hiệu riêng cho vendor giá ước tính (chat + câu vì sao hợp)",
       "tier": 2
     },
@@ -244,7 +252,7 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-001-gu-khong-day-vendor-vuot-ngan-sach-o-chat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 80,
+      "ms": 69,
       "out": "PASS boost không phụ thuộc gu (6 style) và top 5 chat không có vendor khớp gu vượt ngân sách",
       "tier": 2
     },
@@ -252,7 +260,7 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-002-thieu-tag-khong-bi-phat.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 380,
+      "ms": 372,
       "out": "PASS tag lệch = không tag (JS mọi hạng mục, Python), vendor khớp cao hơn",
       "tier": 2
     },
@@ -260,7 +268,7 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-003-thu-tu-gu-theo-diem-r8.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1208,
+      "ms": 944,
       "out": "PASS R8: JS + Python stage 2 + chat (sinh đôi, ngược), fuzz 400 pool (tới 30 vendor, tag hoa/thường/khoảng trắng/không khoá, λ 0/0.3/0.9), bằng điểm ở mép top_k, chuẩn hoá R1",
       "tier": 2
     },
@@ -268,7 +276,7 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-004-nhan-cham-mu-toan-ven.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 49,
+      "ms": 22,
       "out": "PASS chưa có nhãn (eval/T-074/labels.json không tồn tại)",
       "tier": 2
     },
@@ -276,23 +284,15 @@
       "eval": "eval/invariants/planner/vendor/matching/inv-005-diem-ngan-sach-suy-ra-tu-budget-basis.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1188,
+      "ms": 772,
       "out": "PASS",
       "tier": 2
-    },
-    {
-      "eval": "eval/T-176/adv-01-loc-chi-cat-cum-nguon-gia.mjs",
-      "kind": "node",
-      "status": "FAIL",
-      "ms": 255,
-      "out": "FAIL tin AI cũ không có chữ nguồn giá bị sửa khi gửi LLM (thụt lề/khoảng trắng mất): \"Dạ, việc cần làm tháng này:\\n- Chốt ngày\\n - hỏi ý bố mẹ hai bên\\n - xem ngày tốt\\n- Đặt nhà hàng\\n\\n| Hạng mục | Dự toán |\\n| --- | --- |\\n| Ảnh | 20tr |\" (+3 lỗi nữa)",
-      "tier": 3
     },
     {
       "eval": "eval/T-176/adv-02-nhan-bien-the-va-chu-cap-doi.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 236,
+      "ms": 213,
       "out": "PASS",
       "tier": 3
     },
@@ -308,10 +308,10 @@
       "eval": "eval/T-176/adv-04-co-uoc-tinh-bien.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 430,
+      "ms": 381,
       "out": "PASS",
       "tier": 3
     }
   ],
-  "hint": "code"
+  "hint": ""
 }
