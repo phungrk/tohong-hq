@@ -15,6 +15,7 @@ const count = (t, s) => t.split("\n").filter((l) => l === s).length;
   const block = candBlock(r.sp); const ents = entries(block, Object.fromEntries(ids.map((id) => [id, nameOf(id)])));
   ids.forEach((id, i) => {
     const e = ents[id]; if (!e) return bad(`A ứng viên ${i + 1}: không vào khối`);
+    if (!/^   Giá:/.test(e[0] || "")) bad(`A ứng viên ${i + 1}: dòng ngay sau tên phải là dòng "Giá:", thấy "${(e[0] || "").trim()}"`);
     const est = i === 0; const flags = e.filter((l) => l === FLAG_LINE).length; const why = e.find((l) => /Phù hợp vì:/.test(l)) || "";
     if (est && flags !== 1) bad(`A ứng viên ước tính: mong đúng 1 dòng cờ "${FLAG_LINE.trim()}", thấy ${flags}`);
     if (!est && flags) bad(`A ứng viên ${i + 1} (không phải ước tính): không được có dòng cờ`);
