@@ -32,7 +32,7 @@ for (const [label, profile, budgetDoc] of CASES) for (const cat of CATS) {
   if (r.err || r.status !== 200) { bad(`${label}/${cat}: match lỗi ${r.err?.message || r.status}`); continue; }
   const s = r.body?.profileSnapshot || {}; const vs = r.body?.vendors || [];
   for (const v of vs) {
-    if (!v.match) continue; seen++;
+    if (!v.match || !(Number(v.priceMax) > 0)) continue; seen++; // ADR-098: vendor giá 0 (admin đặt) ngoài H1
     const bb = v.match.budgetBasis, sc = v.match.scoreBreakdown?.budget, tag = `${label}/${cat}/${v.id}`;
     if (!bb || !KINDS.has(bb.kind)) { bad(`${tag}: thiếu budgetBasis hoặc kind lạ (${bb?.kind})`); continue; }
     // (1) điểm suy ra từ chính số in ra
