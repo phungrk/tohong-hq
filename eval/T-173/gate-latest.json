@@ -1,7 +1,7 @@
 {
   "task": "T-173",
-  "at": "2026-11-15T05:11",
-  "verdict": "GREEN",
+  "at": "2026-11-15T05:12",
+  "verdict": "RED",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/profile",
@@ -20,7 +20,7 @@
       "eval": "node eval/T-169/check_2_so_khach_mot_gia_tri.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 557,
+      "ms": 414,
       "out": "PASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "node eval/T-169/check_3_ngan_sach_tong_mot_gia_tri.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 601,
+      "ms": 325,
       "out": "PASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "node eval/T-169/check_4_thanh_pho_va_gu_mot_gia_tri.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 636,
+      "ms": 431,
       "out": "PASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "node eval/T-169/check_5_ghi_qua_moi_duong_doc_lai_dung.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 762,
+      "ms": 460,
       "out": "PASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "node eval/T-169/check_6_khong_mat_du_lieu_doc_khong_ghi.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 372,
+      "ms": 352,
       "out": "PASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "bash eval/T-169/check_7_hoi_quy_bat_bien_va_test_back.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 12667,
+      "ms": 11854,
       "out": "PASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "node eval/T-169/check_8_hang_muc_khong_nhay_khi_ghi_tong.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 312,
+      "ms": 220,
       "out": "PASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "node eval/T-173/adv-01-rac-khong-xoa-so-that.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 397,
+      "ms": 425,
       "out": "PASS",
       "tier": 1
     },
@@ -84,7 +84,7 @@
       "eval": "node eval/T-173/adv-02-ngay-rac-khong-xoa-ngay-that.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 371,
+      "ms": 388,
       "out": "PASS",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "node eval/T-173/adv-06-ghi-chi-truong-cu-van-ghi.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 302,
+      "ms": 308,
       "out": "PASS",
       "tier": 1
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 45,
+      "ms": 53,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 191,
+      "ms": 180,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 32,
+      "ms": 29,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 54,
+      "ms": 42,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1149,
+      "ms": 1069,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -140,15 +140,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2791,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-JKZhms/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2709,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-yCgRRQ/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1867,
+      "ms": 1824,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -156,15 +156,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1011,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-eMpNf0/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 998,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-AW73Yg/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2602,
+      "ms": 2702,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 87,
+      "ms": 103,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1705,
+      "ms": 1652,
       "out": "PASS (worker.js nén 782009 byte)",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/T-173/adv-03-thanh-pho-tab-chat-cung-tap.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 402,
+      "ms": 368,
       "out": "PASS",
       "tier": 3
     },
@@ -196,7 +196,7 @@
       "eval": "eval/T-173/adv-04-du-lieu-la-loi-r2-doc-khong-sap-khong-ghi.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 367,
+      "ms": 397,
       "out": "PASS",
       "tier": 3
     },
@@ -204,10 +204,18 @@
       "eval": "eval/T-173/adv-05-loi-giua-chung-khi-ghi.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 371,
+      "ms": 316,
       "out": "PASS",
+      "tier": 3
+    },
+    {
+      "eval": "eval/T-173/adv-07-dau-phan-cach-khong-doi-so.mjs",
+      "kind": "node",
+      "status": "FAIL",
+      "ms": 365,
+      "out": "budget guests = 12, mong một trong [300]; PATCH guest_count=\"12,5\" (đang 300): profileSnapshot guestCount = 12, mong một trong [300]; PATCH guest_count=\"12,5\" (đang 300): budget.json guests = 12, mong một trong [300]; PATCH guest_count=0.5 (đang 300): GET /budget guests = 0, mong một trong [300]; PATCH guest_count=0.5 (đang 300): profileSnapshot guestCount = null, mong một trong [300]; PATCH guest_count=0.5 (đang 300): budget.json guests = 0, mong một trong [300]; PATCH guest_count=\"0,5\" (đang 300): GET /budget guests = 0, mong một trong [300]; PATCH guest_count=\"0,5\" (đang 300): profileSnapshot guestCount = null, mong một trong [300]; PATCH guest_count=\"0,5\" (đang 300): budget.json guests = 0, mong một trong [300]; PATCH phong cách [\" \"]: gu hiệu lực = [], mong [\"korean\"] (không phải xoá)",
       "tier": 3
     }
   ],
-  "hint": ""
+  "hint": "code"
 }
