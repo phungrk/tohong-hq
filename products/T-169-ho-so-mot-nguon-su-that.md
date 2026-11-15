@@ -1,0 +1,118 @@
+# Spec T-169: Hồ sơ cặp đôi, một thông tin một giá trị ở mọi bề mặt
+
+> v1 · Spec Writer (product) · 2026-11-15 · **bậc C** (ghi vào dữ liệu người dùng trong R2) · vùng `planner/profile` · chạm `tohong-back` (chính); `tohong-front` không bắt buộc đổi · đọc code thật `tohong-back` main `1519d44`, `tohong-front` main `0221a5c` · nối tiếp T-159, T-164 (H7), T-167/T-168, ADR-094 (INV-005), ADR-097.
+
+## Ý định
+
+Capu (brief board/T-169): mỗi thông tin hồ sơ (ngày cưới, số khách, ngân sách, thành phố, phong cách) chỉ có một nguồn sự thật; màn hình, ghép vendor, chat và GET /budget đọc cùng một số. Gốc việc: thẻ Bạch Kim của cặp Alice & Capu in "Còn lịch 31.12" trong khi Capu thấy 29.12.2027.
+
+## Bằng chứng
+
+Mọi dòng dưới đây là đọc mã thật (không phải ký ức); số dòng là của `main` nói ở đầu.
+
+**Mỗi thông tin hôm nay nằm ở bao nhiêu chỗ, ai ghi, ai đọc, thứ tự đọc**
+
+| Thông tin | Trường lưu | Ai GHI | Ai ĐỌC và thứ tự ưu tiên khi đọc |
+| --- | --- | --- | --- |
+| **Ngày cưới** | `couple.wedding_date`; `wedding_date` top-level (không đường ghi nào trong mã hiện tại, chỉ có ở dữ liệu cũ) | tạo cặp đôi `coupleStore.js:17-25`; onboarding PATCH `tohong-front App.jsx:271,290-291`; Dashboard sửa ngày `Dashboard.jsx:245` (UI cập nhật trước, không bắt lỗi, `:236-246`); chat `actionExecutor.js:305-308` | `couple.wedding_date` rồi `wedding_date`: ghép vendor `api/vendors.js:91,96`, hồ sơ chat `profileBuilder.js:80-86`. **Chỉ `couple.wedding_date`, không có dự phòng:** summary `api/summary.js:57,74` (Dashboard, Timeline, thẻ chat, đo hành trình `App.jsx:211`), timeline `api/timeline.js:79`, briefing `api/briefing.js:28,92`, đề xuất ngân sách `api/budget.js:146`. **Chat còn đưa nguyên JSON thô cho AI** (`contextBuilder.js:110`) nên AI thấy cả hai ngày khi lệch |
+| **Số khách** | `guest_count`; `preferences.guest_count`; `couple.guest_count`; `guests` trong `budget.json`; `capacity` trong `guests.json` | onboarding ghi hai chỗ `guest_count` + `preferences.guest_count` (`App.jsx:293,295`); chat chỉ `guest_count` (`actionExecutor.js:313-316`); tab Ngân sách PUT `guests` vào bảng (`api/budget.js:106`, front `useBudget.js:98-103`, `VendorCtx.jsx:88`); `capacity` chụp từ hồ sơ lúc thêm khách đầu tiên (`guestStore.js:49`), `updateCapacity` (`:100`) không ai gọi; `couple.guest_count` không đường ghi nào | tab Ngân sách seed/GET: bảng `guests` (có bảng: lấy nguyên, kể cả 0) `api/budget.js:58-61`; không bảng: `guest_count` → `preferences.guest_count` → `couple.guest_count` (`budget.js:31-36`). Ghép vendor + chat (T-164 H7, INV-005): bảng `guests` > 0, rồi cùng ba trường đó (`budgetAllocation.js:47-79`, `vendors.js:106-122`, `contextBuilder.js:58-67`). **Màn Khách mời** `api/guests.js:40` chỉ `guest_count` → `couple.guest_count` (bỏ `preferences.guest_count`, bỏ bảng) và nếu đã có danh sách thì lấy `capacity` chụp cũ (`guestStore.js:26,49`). **Summary** `capacity` = `guests.json.capacity` rồi `guest_count` → `couple.guest_count` (`summary.js:54`) |
+| **Ngân sách tổng (triệu)** | `budget` top-level; `total_tr` trong `budget.json` | onboarding `App.jsx:296`; chat `actionExecutor.js:309-312`; PUT bảng ghi `total_tr` theo thân gửi (`budget.js:105`, front gửi lại số vừa đọc: `useBudget.js:99`, `VendorCtx.jsx:88`) | GET /budget: **hồ sơ thắng bảng** và co các hạng mục theo tỷ lệ (`budget.js:66-79`); ghép vendor, chat: chỉ `budget` hồ sơ (`vendors.js:98-100`, `profileBuilder.js:99`). **Summary: bảng thắng hồ sơ** (`summary.js:29,33`), ngược GET /budget: hai màn cùng một cặp đôi hiện hai tổng khi hai trường lệch |
+| **Thành phố** | `couple.city`; `city` top-level; `location.city` (chỉ dự phòng đọc) | onboarding ghi **nhãn hiển thị** ("TP.HCM", "Hà Nội", `App.jsx:291`); chat ghi **mã** "HCMC"/"HN"/"DN" (`actionExecutor.js:301-304`, lời nhắc `:56`) | `couple.city` → `city` → mặc định "HCMC": tab `vendors.js:95`; chat `profileBuilder.js:70-76` rồi đổi qua **một bảng alias riêng** ("Hà Nội" thành "HAN") trong khi `chatMatcher.js:29,36` lại so qua `normaliseCity` của `vendorMatcher.js:280` ("Hà Nội" thành "HANOI"; "HN" giữ nguyên "HN"). Hệ quả đã dựng lại: cặp đôi "Hà Nội" thấy vendor Hà Nội ở tab nhưng chat ghép 0 vendor; cặp đôi "HN" thấy tab hiện cả vendor HCMC. Summary `summary.js:75` chỉ `couple.city` |
+| **Phong cách** | `preferences.style_tags`; `style_tags` top-level; `preferences.theme` (không đường ghi nào trong mã hiện tại) | onboarding `App.jsx:293`; chat `actionExecutor.js:317-322` (cả hai thay nguyên mảng) | tab `vendors.js:102`: `preferences.style_tags ?? style_tags` (mảng rỗng chặn dự phòng, không chuẩn hoá chữ hoa); chat `profileBuilder.js:88-100`: hợp của `style_tags` (hoặc top-level) và `theme`, chữ thường |
+
+**Truy nguyên Alice & Capu (nói thẳng độ chắc).** Trên `main`, cả Dashboard (qua summary) lẫn ghép vendor đều đọc `couple.wedding_date` trước, nên "server 31.12, màn 29.12" **không giải thích được bằng thứ tự đọc nếu cả hai ngày cùng nằm ở `couple.*`**. Hai khả năng còn lại, cả hai **chưa xác nhận bằng dữ liệu thật**: (1) `Dashboard.jsx:236-246` cập nhật màn trước rồi mới PATCH và không bắt lỗi; PATCH đòi quyền `admin` = owner (`couples.js:55`, `auth.js` bậc owner), nên một PATCH bị từ chối hoặc đứt mạng để màn hiện 29.12 trong khi R2 giữ 31.12 (tự tin ~40%); (2) hồ sơ thật có `wedding_date` top-level 29.12 và `couple.wedding_date` 31.12 (dữ liệu cũ, tự tin ~20%). Cách chốt rẻ nhất: mở lại thẻ Bạch Kim, đọc `profileSnapshot.sources.weddingDate` (T-168) và GET /api/couples/:id của cặp đó. Spec này làm đúng cho **cả hai** khả năng ở phía server; khả năng (1) còn một lỗi front (màn hiện giá trị chưa lưu) nằm ngoài spec, xem "Không làm".
+
+**Chi phí và tính khả thi.** Đã dựng một bản cài tối thiểu (~120 dòng, thư mục tạm của phiên, **không nằm trong repo nào**): một hàm đọc dùng chung + một hàm ghi dùng chung nối vào `PATCH /api/couples/:id`, hành động chat, `PUT /budget`, summary, GET /guests, GET /budget, ghép vendor, chat. Trên bản đó eval 1-7 **xanh**; trên `main` eval 1-5 **đỏ** (FAIL, không ERROR), eval 6-7 xanh sẵn (hàng rào chống hồi quy).
+
+## Giả thuyết
+
+Nếu mỗi thông tin chỉ có một giá trị hiệu lực do một hàm đọc chung quyết định và mọi đường ghi cập nhật cùng trường chuẩn, thì số phản hồi "hai màn hiện hai số khác nhau" và "vendor ghép sai lý do ngày/khách/ngân sách" về 0 trên mọi hồ sơ, kể cả hồ sơ cũ lệch chưa ai ghi lại. Chỉ số bảo vệ: điểm, thứ tự, chip của ghép vendor trên hồ sơ **không lệch** KHÔNG đổi so với `main` (INV-005, T-167 check_3, T-159 check_6 vẫn xanh); không khoá nào trong R2 biến mất.
+
+## Hành vi (người dùng thấy gì)
+
+Thuật ngữ: **giá trị hiệu lực** của một thông tin = kết quả của luật đọc H1 trên dữ liệu đang lưu (và bảng ngân sách, danh sách khách nếu H1 nêu). **Bề mặt** = mọi nơi dưới đây.
+
+**H1. Bảng trường chuẩn và luật đọc (một hàm dùng chung).** Mỗi thông tin có đúng một trường chuẩn. Giá trị hiệu lực lấy ở **ứng viên đầu tiên có giá trị hợp lệ** theo thứ tự ghi trong bảng; ứng viên không hợp lệ bị bỏ qua và xét ứng viên kế.
+
+| Thông tin | Trường chuẩn | Ứng viên theo thứ tự (đầu tiên hợp lệ thắng) | "Hợp lệ" nghĩa là |
+| --- | --- | --- | --- |
+| Ngày cưới | `couple.wedding_date` | `couple.wedding_date`, rồi `wedding_date` top-level | chuỗi không rỗng mà `new Date` đọc được; giá trị hiệu lực là chính chuỗi đó, không đổi định dạng. Không có ứng viên hợp lệ = không có ngày |
+| Số khách | `guest_count` top-level | (1) `guests` của `budget.json` là số nguyên > 0; (2) số **đầu tiên khác 0 và không NaN** (`parseInt`) trong `guest_count`, `preferences.guest_count`, `couple.guest_count`; số đó **âm thì không có số khách** (giữ INV-005, không rơi xuống ứng viên sau); (3) chỉ khi (2) không có số nào: `capacity` > 0 đã lưu trong `guests.json` | như bên trái. Không có = "không có số khách" (0 ở màn có số, `null` ở `profileSnapshot`) |
+| Ngân sách tổng (triệu) | `budget` top-level | `budget` > 0; rồi `total_tr` > 0 của `budget.json` | số > 0. Không có = không có ngân sách |
+| Thành phố | `couple.city` | `couple.city`, rồi `city` top-level | chuỗi không rỗng. Chữ hiển thị là chữ người dùng/AI đã nhập, không đổi |
+| Phong cách | `preferences.style_tags` | `preferences.style_tags`, rồi `style_tags` top-level, rồi `preferences.theme` | mảng có ít nhất một chuỗi không rỗng (mảng rỗng KHÔNG chặn ứng viên sau). Giá trị hiệu lực: chữ thường, bỏ khoảng trắng đầu cuối, bỏ trùng, giữ thứ tự |
+
+**Vì sao thứ tự này (quyết định sản phẩm, đề xuất).** (a) Là thứ tự `main` đang chạy cho ngày, số khách, thành phố, phong cách, và là trường mà màn hồ sơ/Dashboard (đọc `couple.wedding_date`) và mọi đường ghi hiện hành (onboarding, chat, Dashboard) cùng ghi; đổi thứ tự sẽ làm đổi kết quả ghép vendor của cặp đôi không lệch. (b) "Trường ghi gần nhất thắng" không dùng được: `profile.yaml` không có dấu thời gian theo trường. (c) Hai chỗ đổi hành vi có chủ đích: tổng ngân sách của summary (hôm nay bảng thắng, đổi thành hồ sơ thắng cho khớp GET /budget, ghép vendor, chat và dòng "Thiết lập trong hồ sơ" của màn Ngân sách); `capacity` đã lưu của danh sách khách bị hạ xuống cuối vì nó là bản chụp cũ, không có đường nào cho người dùng sửa.
+
+**H2. Mọi bề mặt dùng giá trị hiệu lực.** Với hồ sơ lệch, các bề mặt sau hiện/dùng **đúng cùng** giá trị hiệu lực:
+1. `GET /api/couples/:id`: trường chuẩn của mỗi thông tin = giá trị hiệu lực; khoá khác giữ nguyên văn; không thêm khoá cũ mới.
+2. `GET /api/couples/:id/summary` (màn hồ sơ/Dashboard, Timeline, thẻ chat, đo hành trình): `profile.wedding_date`, `days_left`, `profile.city`, `budget.total_tr`, `guests.capacity`.
+3. `GET /api/couples/:id/guests`: `capacity`. `GET /api/couples/:id/budget`: `total_tr` và `guests` (bảng có `guests` 0 mà hồ sơ có số khách thì hiện số hiệu lực, không hiện 0).
+4. `GET /api/vendors/match` và `GET /api/vendors/:id`: `profileSnapshot` (`weddingDate`, `guestCount`, `budgetTotal`, `city`, `styles`), điểm, chip ("Còn lịch d.m", "Đủ N khách", "× T bàn"), lọc thành phố.
+5. Chat: khối "## Hồ sơ cặp đôi" trong prompt hệ thống (mọi khoá của mục H1 có mặt trong khối đều bằng giá trị hiệu lực; không còn hai ngày/hai số khách mâu thuẫn cho AI), hồ sơ ghép chat (số bàn, thành phố, ngân sách).
+6. Mọi nơi đọc còn lại của back (timeline `daysLeft`, briefing, đề xuất ngân sách, `guestStore`) cũng gọi hàm chung; **không có eval tự động** vì gắn với LLM, Spec critic/adversary kiểm bằng đọc mã (không còn đọc trực tiếp `couple.wedding_date`, `guest_count`, `budget`, `city`, `style_tags` ở `api/` và `lib/` ngoài hàm chung và hàm ghi).
+
+`profileSnapshot.sources` (T-167 H4) **giữ nghĩa cũ**: tên trường **đã lưu** mà giá trị được đọc ra (để chẩn đoán dữ liệu thật). Chỉ thêm hai giá trị: `"budget_doc.total_tr"` (tổng lấy từ bảng khi hồ sơ không có) và `"guests.capacity"` (số khách lấy từ `capacity` đã lưu).
+
+**H3. Luật ghi.** Áp cho **mọi** đường ghi một thông tin hồ sơ: `PATCH /api/couples/:id` (onboarding, Dashboard sửa ngày; mọi PATCH khác), hành động chat `update_profile`, `PUT /api/couples/:id/budget`, `POST /api/couples`; và mọi đường ghi mới về sau. Một "lần ghi một thông tin" = payload có mặt **ít nhất một** trường (chuẩn hoặc cũ) của thông tin đó.
+- **H3.1** Trường chuẩn nhận giá trị mới.
+- **H3.2** Mọi trường cũ **cùng thông tin đang có sẵn trong dữ liệu đã lưu** (kể cả `guests` và `total_tr` của `budget.json` khi bảng đã tồn tại) được đặt bằng đúng giá trị mới. **Không xoá khoá. Không tạo khoá cũ chưa có. Không tạo bảng ngân sách.** `capacity` của `guests.json` KHÔNG bị ghi (nó chỉ là ứng viên cuối của H1).
+- **H3.3** Payload mang nhiều trường cùng thông tin với giá trị khác nhau: trường chuẩn thắng; không có trường chuẩn thì ứng viên đứng trước trong H1 thắng.
+- **H3.4** Giá trị rỗng tường minh (`null`, chuỗi rỗng, mảng rỗng, số 0 cho số khách/ngân sách) là "xoá giá trị": ghi vào trường chuẩn và vào mọi trường cũ theo H3.2; sau đó thông tin đó không có giá trị (trường cũ không hồi sinh). Ngoại lệ có chủ đích: `capacity` đã lưu (H1 mục 3) vẫn có thể hiện số khách khi mọi nơi khác trống.
+- **H3.5** Thông tin **không có mặt** trong lần ghi: không đổi khoá, không đổi giá trị (không "tự chữa" hồ sơ lệch của thông tin khác).
+- **H3.6** `PUT /budget`: (a) tổng: nếu hồ sơ có `budget` > 0 thì bảng lưu `total_tr` = `budget` hồ sơ và `total_tr` trong thân bị bỏ qua (màn Ngân sách không cho sửa tổng; tab mở cũ không được lùi tổng người dùng vừa đổi trong chat); nếu hồ sơ không có `budget` mà thân có `total_tr` > 0 thì ghi như một lần ghi ngân sách (H3.1-H3.2); (b) `guests`: số nguyên > 0 và khác số khách hiệu lực hiện tại thì ghi như một lần ghi số khách; `guests` 0, thiếu, hoặc bằng số hiệu lực thì không đổi hồ sơ; bảng luôn lưu `guests` đúng như thân gửi. Các phần khác của bảng (hạng mục, khoản chi, `mung_tr`) giữ cách ghi hiện tại.
+- **H3.7** Chấp nhận có chủ đích (không giải trong spec này): hai màn mở song song, màn mở cũ lưu sau vẫn ghi đè số khách (last-write-wins như hôm nay).
+
+**H4. Dữ liệu đã lưu: KHÔNG di trú hàng loạt.** Không viết script quét R2, không ghi lại hồ sơ nào khi chỉ đọc. Hồ sơ cũ lệch được **chuẩn hoá khi đọc** (H1-H2, trong bộ nhớ) và được chữa **tự nhiên theo từng thông tin** mỗi khi cặp đôi ghi thông tin đó (H3.2). Mọi `GET`, một lượt chat, và `GET /vendors/*` không ghi `profile.yaml`, `budget.json`, `guests.json`. Hệ quả nói thẳng: hồ sơ lệch nào chưa ai ghi lại vẫn lệch **trong R2**, nhưng mọi bề mặt hiện cùng một giá trị. Không có đường nào xoá khoá hoặc giá trị cũ: dữ liệu lệch cũ còn nguyên cho đến khi chính thông tin đó được ghi lại.
+
+**H5. Thành phố: một bộ chuẩn hoá.** Tab Vendor và chat so thành phố qua **cùng một** hàm; các cách viết sau là **một** thành phố: HCMC = "HCMC", "TP.HCM", "TPHCM", "TP HCM", "HCM", "SG", "Sài Gòn", "Hồ Chí Minh" (không phân biệt hoa thường, dấu chấm, khoảng trắng); Hà Nội = "Hà Nội", "Ha Noi", "Hanoi", "HN", "HAN"; Đà Nẵng = "Đà Nẵng", "Da Nang", "Danang", "DN", "DAN". Chuỗi khác giữ cách chuẩn hoá hiện tại (chữ hoa). Mã ngắn ("HN", "HAN", "DN", "DAN", "HCM", "SG") chỉ khớp **nguyên chuỗi**, không khớp một phần. Cặp đôi Hà Nội thấy cùng tập vendor Hà Nội ở tab và chat; quy tắc "không có vendor ở thành phố đó trong pool thì bỏ lọc thành phố" của tab giữ nguyên.
+
+**H6. Phong cách.** Tab và chat dùng cùng danh sách phong cách hiệu lực (H1), chữ thường. Hôm nay chat hợp thêm `preferences.theme` còn tab thì không: sau T-169 `theme` chỉ là ứng viên cuối, không hợp vào.
+
+**Không đổi:** công thức điểm, trọng số, thứ tự, chip, câu AI, nhãn giá, định dạng ngày hiển thị, tên và vị trí các trường lưu, `families`, `dealbreakers`, tên cô dâu chú rể, danh sách yêu thích/loại trừ vendor, schema của `budget.json` và `guests.json`.
+
+## Ràng buộc (vòi)
+
+- Repo: `phungrk/tohong-back` · nhánh `t-169-ho-so-mot-nguon` · Vùng (`area`): `planner/profile`. `tohong-front` **không bắt buộc đổi** (payload onboarding, Dashboard, PUT cũ vẫn đúng). Nếu Engineering muốn bỏ ghi trùng ở onboarding thì là PR front riêng, không thuộc nghiệm thu.
+- Bất biến đã đọc: `eval/invariants/_shared/` và `eval/invariants/planner/` (vùng `planner/profile` chưa có thư mục riêng). Quan trọng nhất: `planner/vendor/inv-005` (số khách hiệu lực: bảng > 0 thắng, seed 0 = không có, số đầu tiên khác 0 quyết định, âm = không có) và `planner/vendor/matching/inv-005`. Spec **không vi phạm** INV-005; H1 số khách chép đúng luật đó và eval 7 chạy lại nó. T-167 check_3 (couple.wedding_date thắng khi lệch; tên trường nguồn trong `profileSnapshot.sources`) cũng giữ: vì thế `GET /vendors/*` đọc hồ sơ **đã lưu** để ghi đúng tên trường nguồn, còn chỉ `GET /api/couples/:id` trả bản chuẩn hoá.
+- Không chạm: schema `budget.json`/`guests.json`, `members.json`, đường dẫn R2, đăng nhập/phân quyền (PATCH vẫn đòi quyền `admin`, PUT vẫn đòi `write`), thanh toán, gửi tin ra ngoài.
+- Bậc lưới lọc: **C** vì H3 ghi vào dữ liệu người dùng trong R2 (hồ sơ, bảng ngân sách) và sửa cách mọi cặp đôi đọc ngày cưới/số khách/ngân sách. Capu đọc diff hành vi và tự merge.
+- Phụ thuộc: không. Deploy tự động của back có sẵn; không bật migration, không chạy script dữ liệu.
+
+## Tiêu chí chấp nhận và eval
+
+Mọi eval chạy từ gốc `tohong-hq`, R2 giả trong bộ nhớ, **không mạng** (fetch bị chặn), chỉ gọi hành vi công khai (`routeCouples`, `handleVendors`, `buildChatContext`, `executeAction`); dữ liệu là tên giả và `@example.invalid`. Khung: `eval/T-169/_lib.mjs` (dùng lại khung T-164/T-159). Biến: `TOHONG_BACK_REPO` (mặc định `../tohong-back`).
+
+| # | Tiêu chí (có/không) | Eval |
+| --- | --- | --- |
+| 1 | Ngày cưới: hồ sơ có `couple.wedding_date` và `wedding_date` lệch (cả các ca chỉ top-level, rỗng, không phải ngày, không có) thì hồ sơ, summary (ngày + `days_left`), `profileSnapshot`, chip "Còn lịch", khối hồ sơ chat đều theo ngày hiệu lực H1 | `node eval/T-169/check_1_ngay_cuoi_mot_gia_tri.mjs` |
+| 2 | Số khách: ba trường hồ sơ + bảng `guests` + `capacity` lệch (9 ca, gồm bảng thắng, bảng 0, âm, rác, chỉ `capacity`) thì hồ sơ, Khách mời, summary, GET /budget, `profileSnapshot`, số bàn và khối hồ sơ chat cùng một số | `node eval/T-169/check_2_so_khach_mot_gia_tri.mjs` |
+| 3 | Ngân sách tổng: hồ sơ và bảng lệch (4 ca) thì hồ sơ, summary, GET /budget, `profileSnapshot`, khối hồ sơ chat cùng một số (hồ sơ thắng; chỉ bảng có thì dùng bảng) | `node eval/T-169/check_3_ngan_sach_tong_mot_gia_tri.mjs` |
+| 4 | Thành phố và phong cách: mọi cách viết của một thành phố cho cùng tập vendor ở tab và chat (6 ca, có vendor Hà Nội); phong cách hiệu lực chuẩn hoá giống nhau ở `profileSnapshot`, hồ sơ, khối chat (4 ca) | `node eval/T-169/check_4_thanh_pho_va_gu_mot_gia_tri.mjs` |
+| 5 | Ghi qua từng đường (onboarding đúng payload front, Dashboard sửa ngày, chat từng trường, PUT /budget, POST tạo cặp đôi, nối tiếp nhiều đường, payload lệch, xoá tường minh): đọc lại ở mọi bề mặt đúng giá trị vừa ghi; trường cũ đang có được đặt theo; không đẻ khoá cũ; PUT không đổi tổng khi hồ sơ có `budget` | `node eval/T-169/check_5_ghi_qua_moi_duong_doc_lai_dung.mjs` |
+| 6 | Không mất dữ liệu: mọi `GET`/chat/tab không ghi `profile.yaml`, `budget.json`, `guests.json`; sau mỗi đường ghi mọi khoá có trước vẫn còn và mọi giá trị ngoài thông tin vừa ghi (tên, vùng, shortlist, loại trừ, hạng mục + khoản chi, danh sách khách, khoá lạ) giữ nguyên | `node eval/T-169/check_6_khong_mat_du_lieu_doc_khong_ghi.mjs` |
+| 7 | Không hồi quy: INV-005, T-167 check_3, T-159 check_6 và `npm test` của tohong-back vẫn xanh | `bash eval/T-169/check_7_hoi_quy_bat_bien_va_test_back.sh` |
+
+Đã chạy thử (nói thẳng): trên `main` (back `1519d44`) eval 1-5 **FAIL**, 6-7 **PASS**; trên bản cài tối thiểu ở thư mục tạm của phiên, cả 7 **PASS**. Eval 6 đã thử bắt lỗi: bản cài cố ý xoá khoá cũ thì eval 6 FAIL "MẤT khoá". Không đo bằng eval (nói rõ): timeline/briefing/đề xuất ngân sách (phụ thuộc LLM, H2.6) và phần front hiển thị (front không đổi, chỉ đọc qua summary/GET /budget/GET /guests đã đo).
+
+## Bất biến đề xuất (tầng 2)
+
+Cho Spec critic rút vào bể khi spec qua cổng (vùng `planner/profile`, thư mục mới):
+- **INV-A · Một thông tin một giá trị ở mọi bề mặt** (nội dung eval 1-4, gộp một script): với hồ sơ lệch ở bất kỳ thông tin nào, summary, GET /budget, GET /guests, `profileSnapshot` và khối hồ sơ chat nói cùng một giá trị; mọi cách viết thành phố cho cùng tập vendor ở tab và chat. Sinh ra vì Alice & Capu thấy hai ngày và vì Hà Nội khác nhau giữa tab và chat; khoá để thêm trường hay màn mới không tách nguồn lần nữa.
+- **INV-B · Ghi không mất, đọc không ghi** (nội dung eval 6): mọi `GET`, chat và tab không ghi R2 hồ sơ; mọi đường ghi giữ mọi khoá có trước và mọi giá trị ngoài thông tin vừa ghi. Sinh ra vì việc chạm dữ liệu người dùng bậc C; khoá để không ai sau này "tiện tay" di trú hay dọn trường cũ lúc đọc.
+- Không đề xuất bất biến kiểu `grep` trên mã (dễ vỡ); H2.6 để adversary kiểm bằng đọc mã.
+
+## Không làm
+
+- Không chạy di trú hàng loạt, không quét R2, không script sửa dữ liệu đã lưu, không xoá hay đổi tên trường nào (đề xuất đã nêu ở H4; nếu Capu muốn chữa sạch hồ sơ hàng loạt thì là việc riêng, bậc C, có danh sách cặp đôi và bản sao lưu).
+- Không sửa `Dashboard.jsx:236-246` (màn hiện ngày chưa lưu và nuốt lỗi PATCH): đề xuất **việc front riêng** "màn chỉ hiện ngày sau khi lưu thành công, báo lỗi khi không lưu được"; đây là khả năng (1) của Alice & Capu.
+- Không đổi đơn vị ngân sách (triệu) và không tự đổi số ≥ 10.000 thành triệu (khác `toMillions` của đề xuất ngân sách); không đổi tên cô dâu chú rể, vùng, `dealbreakers`, danh sách yêu thích/loại trừ.
+- Không đổi công thức điểm, trọng số, MMR, nới ×1,2, chip, câu AI; không đổi schema `budget.json`/`guests.json`; không thêm trường dấu thời gian.
+- Không sửa INV-005, T-167 check_3, T-159 check_6.
+- Không giải race hai màn song song (H3.7).
+
+## Câu hỏi mở
+
+Một câu cần Capu quyết (bậc C): **Capu duyệt hướng "không di trú hàng loạt, chữa hồ sơ lệch theo từng thông tin khi cặp đôi ghi lại" (H4) chứ?** Đề xuất: duyệt; lý do: không đụng R2 của cặp đôi nào khi chỉ đọc, đảo ngược được bằng revert PR, và mọi bề mặt đã hiện một giá trị ngay khi ship. Nếu Capu muốn hồ sơ lệch được sửa trong R2 ngay thì là một việc di trú riêng cần Capu duyệt danh sách.
+
+Hai ghi chú không phải câu hỏi: (1) đổi thứ tự có chủ đích ở H1 chỉ hai chỗ (tổng ngân sách của summary, vị trí `capacity`), đã nêu lý do ở trên; (2) chốt nguyên nhân Alice & Capu bằng `profileSnapshot.sources.weddingDate` và `GET /api/couples/:id` của cặp đó sau khi T-168 đang chạy, không cần chờ spec này.
