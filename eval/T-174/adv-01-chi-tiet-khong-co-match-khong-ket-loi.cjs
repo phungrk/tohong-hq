@@ -17,6 +17,11 @@ run(async ({ dev, br, bad, newServer, mount, open, goBudget, goChat, dragTo, car
     S.calls.detail++; const q = S.vendors().find((e) => e.id === 't171_b');
     return r.fulfill({ status: 200, headers: CORS, contentType: 'application/json', body: JSON.stringify({ vendor: q, match: null }) });
   });
+  await pg.route(/localhost:8787\/api\/vendors\/match\?/, async (r) => { // back có tuỳ chọn ids (spec T-171 v3 H8): vendor không có điểm thì vắng trong kết quả
+    const u = new URL(r.request().url()); if (!nullBeta || !u.searchParams.get('ids')) return r.fallback();
+    S.calls.match++; const vs = S.vendors().filter((v) => v.id !== 't171_b' && u.searchParams.get('ids').split(',').includes(v.id));
+    return r.fulfill({ status: 200, headers: CORS, contentType: 'application/json', body: JSON.stringify({ vendors: vs, total: vs.length, offset: 0, whyThoseVendors: null }) });
+  });
   await openDetail(pg, 'Beta Hall', 1);
   await pg.locator('[data-card="1"]').getByText('So sánh', { exact: false }).first().click();
   await pg.waitForSelector('[data-card="2"]'); await pg.locator('[data-card="2"]').getByText('Alpha Hall', { exact: false }).first().waitFor();
