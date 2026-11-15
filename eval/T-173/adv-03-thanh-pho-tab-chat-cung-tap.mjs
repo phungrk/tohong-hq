@@ -1,5 +1,5 @@
 // T-173 · eval đối kháng 03 (adversary). THÀNH PHỐ: tab Vendor và chat cùng tập vendor cho mọi cách viết người thật/AI hay gõ (spec T-169 H5).
-// Ngoài các ca của check_4: viết hoa, dấu cách thừa, dấu chấm, "TP. Hồ Chí Minh", "Thành phố Hồ Chí Minh", "Sai Gon", "hcm", "H.N", "Ha Noi", "Da Nang", "dn"; cặp đôi HCMC hợp lệ không bao giờ thành 0 vendor; mã ngắn không khớp một phần ("Hưng Yên HN Mart" không phải Hà Nội).
+// Ngoài các ca của check_4: viết hoa, dấu cách thừa, dấu chấm, "TP. Hồ Chí Minh", "Thành phố Hồ Chí Minh", "Sai Gon", "hcm", "H.N", "Ha Noi", "HÀ NỘI", "han"; cặp đôi HCMC hợp lệ không bao giờ thành 0 vendor ở chat. (Pool eval chỉ có vendor HCMC và Hà Nội nên không đo Đà Nẵng.)
 // Không gồm "Hà Nội" dạng NFD: spec H5 để chuỗi lạ theo cách chuẩn hoá cũ, và không đường ghi hiện có nào (onboarding chọn nhãn, AI ghi mã) sinh NFD; ghi nhận minor.
 // Chạy từ gốc tohong-hq: node eval/T-173/adv-03-thanh-pho-tab-chat-cung-tap.mjs
 import { setup, bucket, readAll, ids, done } from "../T-169/_lib.mjs";
