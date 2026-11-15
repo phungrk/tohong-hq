@@ -1,0 +1,181 @@
+{
+  "task": "T-177",
+  "at": "2026-11-15T15:02",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/front/budget",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "node eval/T-177/check_1_nhan_theo_du_toan.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 4732,
+      "out": "FAIL [venue] nhãn nút phải là \"Tìm nhà hàng tiệc cưới trong khoảng 90tr\", thấy \"Tìm nhà hàng tiệc cưới\" (+5 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-177/check_2_keo_thanh_nhan_doi_ngay.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 5068,
+      "out": "FAIL khởi điểm phải là \"Tìm nhà hàng tiệc cưới trong khoảng 90tr\", thấy \"Tìm nhà hàng tiệc cưới\" (+4 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-177/check_3_du_toan_0_giu_nhan_cu.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 4869,
+      "out": "FAIL kéo thanh lên 5: nhãn phải là \"Tìm nhà hàng tiệc cưới trong khoảng 5tr\", thấy \"Tìm nhà hàng tiệc cưới\"",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-177/check_4_bam_mo_tim_vendor.cjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 7513,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-177/check_5_khong_tran_360px.cjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 3008,
+      "out": "FAIL [jewelry] nhãn phải là \"Tìm nhẫn cưới + trang sức + quà tặng hai họ rất dài trong khoảng 1440tr\" (tên giữ chữ thường, không cắt), thấy \"Tìm nhẫn cưới + trang sức + quà tặng hai họ rất dài\" (+1 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 271,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 234,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 31,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 46,
+      "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1317,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2493,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-4mQl5f/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1684,
+      "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 965,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-QmtZk3/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 3142,
+      "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 101,
+      "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1837,
+      "out": "PASS (worker.js nén 782753 byte)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/budget/inv-001-mot-con-so-cho-khoan-vendor.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 39,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/budget/inv-002-khong-doan-so-khi-thieu-dau-vao.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 51,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/budget/inv-003-mo-man-khong-dung-du-lieu-chung.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 43,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/budget/inv-004-lop-cach-hoat-dong-la-hop-thoai.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 43,
+      "out": "FAIL thiếu --repo trỏ tới tohong-front",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/front/budget/inv-005-ghi-lai-du-toan-khong-xoa-khoan-ghi-xen.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 12516,
+      "out": "PASS",
+      "tier": 2
+    }
+  ],
+  "hint": "spec"
+}
