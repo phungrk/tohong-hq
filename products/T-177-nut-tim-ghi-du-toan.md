@@ -1,6 +1,6 @@
 # Spec T-177: Nút "Tìm <hạng mục>" ghi kèm dự toán
 
-> v1 · Spec Writer (product) · 2026-11-15 · bậc A · vùng `planner/front/budget` · chỉ chạm `tohong-front` · nối T-171 (H5, thay đổi chưa lưu), T-167 (khuôn số tiền).
+> v2 (sau `handoffs/T-177-D1.md`: H6 "không cắt" v1 không có eval đo được ellipsis/line-clamp/overflow:hidden trên span con; sửa H6 và check_5, thêm ghi chú Không làm) · v1 · Spec Writer (product) · 2026-11-15 · bậc A · vùng `planner/front/budget` · chỉ chạm `tohong-front` · nối T-171 (H5, thay đổi chưa lưu), T-167 (khuôn số tiền).
 
 ## Ý định
 Capu (2026-11-15): ở màn chi tiết hạng mục, nút "Tìm <hạng mục>" đổi thành "Tìm <hạng mục> trong khoảng <số tiền dự toán của hạng mục>", để cặp đôi thấy ngay số dự toán sẽ dùng khi tìm vendor.
@@ -20,7 +20,7 @@ Chỉ nút "Tìm ..." ở màn chi tiết hạng mục (khối Vendor, hạng m�
 - **H3 · Dự toán 0 hoặc chưa phân bổ (`R = 0`, gồm thiếu trường, 0, 0,04).** Giữ đúng `Tìm {tên}`; không có chữ "trong khoảng", không có "0tr".
 - **H4 · Tên giữ cách viết hiện tại:** `{tên}` = tên hạng mục đang hiện, chuyển chữ thường (như `cat.name.toLowerCase()` hôm nay), không rút gọn, không đổi.
 - **H5 · Bấm không đổi:** bấm nút (mọi nhãn ở trên) mở tìm vendor của đúng hạng mục đang xem, đúng một lần; không ghi dự toán, không gọi API thêm.
-- **H6 · 360px:** nhãn dài (kể cả tên dài + `1440tr`) xuống dòng được, không tràn ngang: nút nằm trong khung 360px, chữ và biểu tượng không vượt hộp nút, trang không có cuộn ngang, chữ không bị cắt bằng "...".
+- **H6 · 360px, đọc đủ nhãn:** nhãn dài (kể cả tên dài + `1440tr`) phải hiện ĐỦ chữ trên màn: xuống dòng (tên dài thì trải từ 2 dòng) chứ không cắt. Cụ thể: nút nằm trong khung 360px, trang không có cuộn ngang; nút và mọi phần tử con có chữ không có nội dung rộng hoặc cao hơn hộp của nó (cấm `text-overflow: ellipsis`, `line-clamp`, `overflow: hidden` làm mất chữ, kể cả trên phần tử con); từng dòng chữ nằm trọn trong hộp hiện được của nút. Mất phần "trong khoảng <số>tr" vì bị cắt là lỗi.
 
 ## Ràng buộc (vòi)
 - Repo: `phungrk/tohong-front` · Nhánh: `t-177-nut-tim-ghi-du-toan` · Vùng: `planner/front/budget`.
@@ -38,12 +38,15 @@ Chạy từ gốc `tohong-hq` (biến `TOHONG_FRONT_REPO`, mặc định `../toh
 | 2 | H2: kéo thanh 90 -> 40 (lưu lỗi) nhãn 40tr ngay và sau khi lưu lỗi; kéo 65 -> 65tr; Reset đổi theo | `node eval/T-177/check_2_keo_thanh_nhan_doi_ngay.cjs` |
 | 3 | H3: dự toán 0, thiếu, 0,04, kéo về 0 giữ `Tìm nhà hàng tiệc cưới`; kéo lên 5 thành `... trong khoảng 5tr` | `node eval/T-177/check_3_du_toan_0_giu_nhan_cu.cjs` |
 | 4 | H5: bấm nút mở tìm vendor đúng id hạng mục một lần, không PUT/POST | `node eval/T-177/check_4_bam_mo_tim_vendor.cjs` |
-| 5 | H6: 360px, tên dài + 1440tr không tràn, không cắt | `node eval/T-177/check_5_khong_tran_360px.cjs` |
+| 5 | H6: 360px, tên dài + 1440tr xuống ≥ 2 dòng, đọc đủ chữ, không tràn, không bị cắt (ellipsis, line-clamp, overflow:hidden trên con đều đỏ) | `node eval/T-177/check_5_khong_tran_360px.cjs` |
 
 ## Bất biến đề xuất (tầng 2)
 Không. (Nhãn là chữ trình bày, không phải tính chất phải đúng mãi; tránh khoá chữ vào bể.)
 
 ## Không làm
+Không đổi số lớn "Dự toán" (đang hiện giá trị thô, vd 12,34 hiện `12.34tr`) cho khớp nhãn `12,3tr`: ngoài phạm vi, giá trị lẻ hiếm (thanh kéo bước 1 hoặc 5). Ghi để Capu biết nếu thấy lệch.
+Nhãn theo số ĐANG HIỆN (kể cả chưa lưu) đúng brief; tìm vendor phía back đọc số đã lưu (và có thể co giãn theo tổng hồ sơ, T-167), nên khi lưu lỗi nhãn có thể khác số back dùng để ghép. Chấp nhận, không sửa trong T-177.
+H5 "bấm không PUT": nếu T-179 đổi luồng bấm (lưu trước khi mở tìm), Spec Gate T-179 đối chiếu với check_4.
 Không đổi hành vi bấm, không đổi tên hạng mục, không đổi nhãn ở nơi khác (hàng hạng mục dòng 771 "Tìm vendor", chat, tab Vendor), không dùng đơn vị tỷ, không thêm dự toán của vendor đã lưu vào nhãn.
 
 ## Câu hỏi mở

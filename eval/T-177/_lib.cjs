@@ -57,9 +57,26 @@ async function openCat(br, dev, doc, cat, { putFail = false } = {}) {
 const findBtn = (pg) => pg.evaluate(() => {
   const bs = [...document.querySelectorAll('button')].filter((b) => /^\s*Tìm\s/.test(b.innerText));
   if (bs.length !== 1) return { n: bs.length };
-  const b = bs[0], r = b.getBoundingClientRect();
-  return { n: 1, text: b.innerText.replace(/\s+/g, ' ').trim(), scrollW: b.scrollWidth, clientW: b.clientWidth, left: r.left, right: r.right, docW: document.documentElement.scrollWidth,
-    clipped: [...b.querySelectorAll('*')].some((e) => { const q = e.getBoundingClientRect(); return q.width > 0 && (q.right > r.right + 0.5 || q.left < r.left - 0.5); }) };
+  const b = bs[0], r = b.getBoundingClientRect(), cut = [];
+  const clipsOf = (el) => { const o = []; for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (e === b || cs.overflowX !== 'visible' || cs.overflowY !== 'visible') o.push(e); if (e === b) break; } return o; };
+  // 1) phần tử có chữ (nút và mọi con) mà nội dung rộng/cao hơn hộp của nó và hộp đó không cho tràn thấy được (hidden/clip/auto/scroll) hoặc là nút
+  for (const e of [b, ...b.querySelectorAll('*')]) {
+    const cs = getComputedStyle(e); if (e !== b && !(e.innerText || '').trim()) continue;
+    const clips = e === b || cs.overflowX !== 'visible' || cs.overflowY !== 'visible' || cs.textOverflow === 'ellipsis' || /-webkit-box/.test(cs.display);
+    if (clips && (e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1)) cut.push(`${e.tagName.toLowerCase()} ${e.scrollWidth}x${e.scrollHeight} > ${e.clientWidth}x${e.clientHeight}`);
+  }
+  // 2) đo từng dòng chữ thật (Range): hộp dòng phải nằm trọn trong hộp hiện được của mọi tổ tiên cắt xén tới nút
+  const tops = new Set(); const w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT);
+  for (let n = w.nextNode(); n; n = w.nextNode()) {
+    if (!n.textContent.trim()) continue;
+    const rg = document.createRange(); rg.selectNodeContents(n);
+    const clips = clipsOf(n.parentElement);
+    for (const q of rg.getClientRects()) {
+      if (q.width < 1) continue; tops.add(Math.round(q.top));
+      for (const c of clips) { const k = c.getBoundingClientRect(); if (q.right > k.right + 1 || q.left < k.left - 1 || q.bottom > k.bottom + 1 || q.top < k.top - 1) cut.push(`dòng chữ vượt hộp <${c.tagName.toLowerCase()}>`); }
+    }
+  }
+  return { n: 1, text: b.innerText.replace(/\s+/g, ' ').trim(), left: r.left, right: r.right, docW: document.documentElement.scrollWidth, lines: tops.size, cut: [...new Set(cut)] };
 });
 const sliderVal = async (pg) => Number(await pg.getByRole('slider', { name: 'Dự toán' }).getAttribute('aria-valuenow'));
 async function dragTo(pg, to) {
