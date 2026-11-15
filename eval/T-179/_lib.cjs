@@ -34,10 +34,18 @@ async function pressFindQuiet(pg, ms = 1800) { await pg.getByText(FIND).first().
 const closeChat = async (pg) => { await pg.getByRole('button', { name: 'Đóng', exact: true }).first().click(); await sleep(500); };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const fixed = (L) => L.map((l) => [l.names, l.pcts, l.label, l.text]);  // ảnh chụp nội dung các danh sách để so "giữ nguyên"
-const openApp = (dev, br, S, ...r) => base_openApp(dev, br, S, ...r);
-let base_openApp; // gán trong run()
-
-async function run(scenario) {
-  return base.run(async (h) => { base_openApp = h.openApp; await scenario({ ...h, lists, body, pressFind, pressFindQuiet, closeChat, same, fixed, openApp }); });
+const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' };
+/* Ghi đè GET /api/vendors/match cho kiểm "Xem thêm": 8 vendor (Alpha theo trạng thái, Beta 80, Gamma..Theta 60..55), tôn trọng limit/offset; route đăng ký sau thắng route khung. */
+async function manyVendors(pg, S) {
+  const names = ['Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta'];
+  await pg.route(/localhost:8787\/api\/vendors\/match(\?|$)/, async (r) => {
+    const u = new URL(r.request().url()); if (u.searchParams.get('ids')) return r.fallback();
+    S.calls.match++; const [a, b] = S.vendors().sort((x, y) => (x.id < y.id ? -1 : 1)); // Alpha, Beta
+    const extra = names.map((n, i) => ({ ...a, id: 't179_' + n, name: n + ' Hall', match: { ...a.match, totalScore: 60 - i, scoreBreakdown: { budget: 0.5, style: 0.5, availability: 1 } } }));
+    const all = [a, b, ...extra].sort((x, y) => y.match.totalScore - x.match.totalScore);
+    const off = Number(u.searchParams.get('offset') || 0), lim = Number(u.searchParams.get('limit') || 5);
+    return r.fulfill({ status: 200, headers: CORS, contentType: 'application/json', body: JSON.stringify({ vendors: all.slice(off, off + lim), total: all.length, offset: off, whyThoseVendors: null }) });
+  });
 }
-module.exports = { run, sleep, lists, body, pressFind, pressFindQuiet, closeChat, same, fixed, FIND };
+const run = (scenario) => base.run(async (h) => scenario({ ...h, lists, body, pressFind, pressFindQuiet, closeChat, same, fixed, manyVendors }));
+module.exports = { run, sleep, lists, body, pressFind, pressFindQuiet, closeChat, same, fixed, manyVendors, FIND };
