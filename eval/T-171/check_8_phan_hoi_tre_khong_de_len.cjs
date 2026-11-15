@@ -15,7 +15,7 @@ run(async ({ dev, br, bad, newServer, mount, open, goBudget, goChat, dragTo, row
   await dragTo(pg, 70); t0 = Date.now(); while (S.venue !== 70 && Date.now() - t0 < 6000) await sleep(100);
   await goChat(pg); await sleep(5000); // đủ cho phản hồi chậm (2,5s) về sau cùng
   const a = await rowOf(pg, 'Alpha Hall'); const d = await cardText(pg, 1);
-  if (a.pct !== '83' || a.order.join() !== 'Alpha,Beta') bad(`thẻ danh sách cuối cùng phải theo 70tr (Alpha 83%, Alpha>Beta), thấy Alpha ${a.pct}% ${a.order.join('>')}: phản hồi trễ của lần 40tr đã ghi đè`);
+  if (a.pct !== '83' || a.order.join() !== 'Alpha,Beta') bad(`thẻ danh sách cuối cùng phải theo 70tr (Alpha 83%, Alpha>Beta), thấy Alpha ${a.pct}% ${a.order.join('>')}: thẻ không theo số lưu cuối (nếu đã lấy lại thì phản hồi trễ của lần 40tr đã ghi đè)`);
   if (!/so với 70tr tiệc cưới/.test(d || '')) bad('thẻ chi tiết cuối cùng phải ghi "so với 70tr tiệc cưới", thấy: ' + (d || '').slice(0, 220));
   if (S.calls.match - m0 < 2) bad('khung: phải có hai lần lấy lại (40 rồi 70), thấy ' + (S.calls.match - m0));
   await ctx.close();
