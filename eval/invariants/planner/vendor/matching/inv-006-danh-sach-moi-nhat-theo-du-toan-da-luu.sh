@@ -11,4 +11,6 @@ fail=0
 for c in check_1_doi_du_toan_in_danh_sach_moi check_2_danh_sach_cu_giu_nguyen check_3_khong_in_trung check_5_bam_ngay_sau_khi_keo check_7_chi_tiet_tu_danh_sach_cu check_10_nhan_cac_dang_so; do
   out="$(node "$R/eval/T-179/$c.cjs" "$@" 2>&1 | tail -1)"; case "$out" in PASS) ;; *) echo "FAIL $c: $out"; fail=1;; esac
 done
+# ADR-112: thêm T-182 adv-02 (bảng so sánh tạo từ chi tiết không trộn hai mức dự toán).
+out="$(node "$R/eval/T-182/adv-02-bang-so-sanh-khong-tron-hai-so.cjs" "$@" 2>&1 | tail -1)"; case "$out" in PASS) ;; *) echo "FAIL T-182 adv-02: $out"; fail=1;; esac
 [ "$fail" = 0 ] && echo PASS; exit "$fail"
