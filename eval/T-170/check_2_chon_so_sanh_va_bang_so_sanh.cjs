@@ -13,10 +13,12 @@ S.run(async () => {
     await pg.waitForSelector('[data-card="2"]', { timeout: 5000 });
     await pg.waitForFunction(() => (document.querySelector('[data-card="2"]') || {}).innerText && document.querySelector('[data-card="2"]').innerText.includes('Beta Studio'), null, { timeout: 8000 });
     for (const v of E.VENDORS.slice(1)) { const n = v.name.split(' ')[0]; const t = await S.rowText(pg, '[data-card="2"]', n + ' Studio'); S.checkRow('thẻ chọn so sánh', v.name, t, v); }
+    await S.checkDangle('thẻ chọn so sánh', pg, '[data-card="2"]');
     await pg.locator('[data-card="2"]').getByText('Beta Studio', { exact: false }).first().click({ timeout: 5000 });
     await pg.locator('[data-card="2"]').getByText('Zeta Studio', { exact: false }).first().click({ timeout: 5000 });
     await pg.locator('[data-card="2"]').getByRole('button', { name: /So sánh 3 vendor/ }).click({ timeout: 5000 });
     await pg.waitForSelector('[data-card="3"]', { timeout: 5000 }); await pg.waitForTimeout(600);
+    await S.checkDangle('bảng so sánh', pg, '[data-card="3"]');
     const t = await S.bodyText(pg, '[data-card="3"]');
     for (const p of [11, 12, 16]) if (!t.includes(`${p}tr`)) S.bad(`bảng so sánh: mất giá ${p}tr, thấy "${t.slice(0, 200)}"`);
     const f = t.match(E.FORBID); if (f) S.bad(`bảng so sánh: còn nhãn nguồn giá "${f[0]}", thấy "${t.slice(0, 240)}"`);

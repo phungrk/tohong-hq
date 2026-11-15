@@ -8,6 +8,7 @@ S.run(async () => {
   try {
     await pg.waitForFunction(() => document.body.innerText.includes('Alpha Studio'), null, { timeout: 15000 });
     for (const v of E.VENDORS) { const n = v.name.split(' ')[0]; const t = await S.rowText(pg, '[data-card="0"]', n + ' Studio'); S.checkRow('danh sách chat', v.name, t, v); if (t && /\/bàn/.test(t)) S.bad(`danh sách chat: hạng mục chụp ảnh không được ghi "/bàn" (${n})`); }
+    await S.checkDangle('danh sách chat', pg, '[data-card="0"]');
   } catch (e) { S.bad('danh sách chat: lỗi chạy ' + String(e.message).split('\n')[0]); }
   await pg.context().close();
   for (const v of E.VENDORS) {
@@ -18,6 +19,7 @@ S.run(async () => {
       await pg.waitForSelector('[data-card="1"]', { timeout: 5000 }); await pg.waitForTimeout(500);
       const d = await S.bodyText(pg, '[data-card="1"]');
       if (!d.includes(`${v.priceMin}tr`)) S.bad(`chi tiết ${n}: mất giá ${v.priceMin}tr`);
+      await S.checkDangle(`chi tiết ${n}`, pg, '[data-card="1"]');
       const f = d.match(E.FORBID); if (f) S.bad(`chi tiết ${n}: còn nhãn nguồn giá "${f[0]}"`);
     } catch (e) { S.bad(`chi tiết ${n}: lỗi chạy ` + String(e.message).split('\n')[0]); }
     await pg.context().close();
@@ -33,6 +35,7 @@ S.run(async () => {
     await pg.waitForSelector('[data-card="1"]', { timeout: 5000 }); await pg.waitForTimeout(500);
     const d = await S.bodyText(pg, '[data-card="1"]');
     if (!/4tr\s*[–-]\s*4\.6tr\/bàn/.test(d)) S.bad('venue chi tiết: giá phải còn ghi theo bàn "4tr–4.6tr/bàn", thấy: ' + d.slice(0, 160));
+    await S.checkDangle('venue chi tiết', pg, '[data-card="1"]'); await S.checkDangle('venue danh sách chat', pg, '[data-card="0"]');
     if (E.FORBID.test(d)) S.bad('venue chi tiết: còn nhãn nguồn giá: ' + d.match(E.FORBID)[0]);
   } catch (e) { S.bad('venue: lỗi chạy ' + String(e.message).split('\n')[0]); }
   await pg.context().close();

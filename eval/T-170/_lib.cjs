@@ -108,6 +108,12 @@ function setup(files) {
     while (el.parentElement && el.parentElement !== root && cnt(el.parentElement) === 1) el = el.parentElement;
     return el.innerText.replace(/\s+/g, ' ');
   }, [scope, name, ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Omega', 'Sigma']]);
+  /* Dấu "·" mồ côi: đo trên innerText THÔ (chưa gộp khoảng trắng), từng dòng: dòng kết thúc bằng "·", dòng bắt đầu bằng "·", hoặc hai "·" liền nhau (kể cả "·" sau đơn vị "gói"/"bàn" hay sau spec). */
+  const checkDangle = async (surf, pg, scope) => {
+    const raw = await pg.evaluate((s) => (document.querySelector(s) || document.body).innerText, scope || 'body');
+    const l = raw.split('\n').find((x) => /·\s*$/m.test(x) || /^\s*·/m.test(x) || /·\s*·/.test(x));
+    if (l !== undefined) bad(`${surf}: còn dấu "·" mồ côi ở dòng "${l.trim().slice(0, 120)}"`);
+  };
   const bodyText = (pg, scope) => pg.evaluate((s) => (document.querySelector(s) || document.body).innerText.replace(/\s+/g, ' '), scope || 'body');
   /* mỗi hàng: còn giá, không nhãn nguồn, không dấu "·" treo */
   const checkRow = (surf, name, t, v) => {
@@ -116,6 +122,6 @@ function setup(files) {
     const f = t.match(FORBID); if (f) bad(`${surf}: hàng ${name} còn nhãn nguồn giá "${f[0]}", thấy "${t.slice(0, 200)}"`);
     if (/·\s*·/.test(t)) bad(`${surf}: hàng ${name} còn dấu "·" thừa sau khi bỏ nhãn, thấy "${t.slice(0, 200)}"`);
   };
-  return { fails, bad, run, page, rowText, bodyText, checkRow, st };
+  return { fails, bad, run, page, rowText, bodyText, checkRow, checkDangle, st };
 }
 module.exports = { REPO, setup, L1, L2, L3, L4, L5, FORBID, VENDORS, NAMES, DELTA, EPSILON, THETA, OMEGA, SIGMA, V, mkSaved, savedDoc, norm };

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* T-170 tiêu chí 5 (app cặp đôi): sau khi bỏ nhãn nguồn giá, (a) dòng phép so T-167 vẫn in NGUYÊN VĂN dưới thanh "Ngân sách" của chi tiết, đúng một lần, kể cả tiền tố "Giá ước tính: " (ADR-099 giữ nguyên);
- * (b) vendor giá ước tính KHÔNG có chip khẳng định ngân sách ("Trong ngân sách", "Rẻ hơn …") ở danh sách chat và chi tiết dù điểm ngân sách = 1 (inv-003, T-164 H5);
+ * (b) hàng rào phía front: front không tự sinh chip khẳng định ngân sách ("Trong ngân sách", "Rẻ hơn …") cho vendor giá ước tính ở danh sách chat và chi tiết dù điểm ngân sách = 1. LƯU Ý: chip lấy từ match.reasons của back, API giả ở đây trả reasons [] nên vế này gần như luôn xanh; tính chất thật (back không sinh chip cho giá ước tính) do inv-003 tầng 2 giữ;
  * (c) ngoài dòng phép so, chi tiết không còn chữ nhãn nguồn giá nào (đây là chỗ nhãn từng nằm ngay đầu chi tiết, VendorChatCards.jsx:617, nên đỏ trên main).
  * Chạy: node eval/T-170/check_5_giu_dong_phep_so_va_khong_chip.cjs [--repo <tohong-front>] */
 const E = require('./_lib.cjs'); const S = E.setup();
@@ -20,6 +20,7 @@ S.run(async () => {
       if (E.FORBID.test(list)) S.bad(`${name}: danh sách còn nhãn nguồn giá: ${list.match(E.FORBID)[0]}`);
       await pg.locator('[data-card="0"]').getByText(name, { exact: false }).first().click({ timeout: 5000 });
       await pg.waitForSelector('[data-card="1"]', { timeout: 5000 }); await pg.waitForTimeout(700);
+      await S.checkDangle(`${name} chi tiết`, pg, '[data-card="1"]'); await S.checkDangle(`${name} danh sách`, pg, '[data-card="0"]');
       const d = await S.bodyText(pg, '[data-card="1"]');
       const n = d.split(text).length - 1;
       if (n !== 1) S.bad(`${name}: dòng phép so phải in nguyên văn đúng một lần ("${text}"), thấy ${n} lần`);
