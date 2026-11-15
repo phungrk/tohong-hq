@@ -14,3 +14,6 @@ T-178 (Capu): chip nhà hàng thành "≈ Xtr/bàn × N bàn = Ytr". Spec Gate s
 Bất biến mới gác tới merge: `eval/T-178/bat-bien-cho-merge/inv-tong-trong-chip-ban-bang-budget-basis.mjs` (tổng chip = budgetBasis.totalTr, ba số đúng khuôn; khép phần nới ở trên) → `planner/vendor/matching/` sau merge.
 Lỗi thời khi T-178 merge: T-164/check_9, T-165/adv-01, adv-02, adv-06.
 Ghi nhận: matching/inv-006 (Playwright) chập chờn khi chạy song song eval front khác — sẽ được thay theo T-179 (ADR-106); nếu đỏ ở Code Gate T-178 (không chạm front) thì không phân loại spec. Golden check_2 của T-178 ghim back c2445db — nếu việc khác đổi điểm trước, tạo lại golden bằng T178_GOLDEN=1 trên main mới (spec cho phép), không phân loại code.
+
+## Bổ sung (sửa sót của Chief)
+Gate quét mọi file trực tiếp trong thư mục vùng, nên `inv-005a-so-khach-ho-so-mot-so.mjs` và `inv-005b-so-khach-ho-so-khop-seed.mjs` cũ vẫn chạy như bất biến riêng và đỏ oan trên nhánh T-180. Chuyển cả hai sang `eval/invariants/planner/vendor/_luu-tru/` (không chạy, giữ lịch sử — như ADR-078). `inv-005-...sh` vẫn chạy bản thay của T-178.

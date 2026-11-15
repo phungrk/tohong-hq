@@ -11,7 +11,7 @@ run(async ({ dev, br, bad, newServer, openApp, dragTo, lists, body, pressFind, c
   await pg.waitForFunction(() => /\d+ bàn = [\d,]+tr so với \d+tr/.test(document.body.innerText), null, { timeout: 8000 }); await sleep(1000);
   const re = /\d+ bàn = [\d,]+tr so với \d+tr/g; let t = await body(pg); let m = t.match(re) || [];
   if (m.length !== 1 || !/20 bàn = 78tr so với 40tr/.test(m[0])) bad(`chi tiết mở từ danh sách cũ phải ghi "20 bàn = 78tr so với 40tr", thấy ${JSON.stringify(m)}`);
-  if (!/70% phù hợp/.test(t)) bad('chi tiết mở từ danh sách cũ phải "70% phù hợp" (số đã lưu hiện tại)');
+  if (!/70% phù hợp/i.test(t)) bad('chi tiết mở từ danh sách cũ phải "70% phù hợp" (số đã lưu hiện tại)');
   const L = await lists(pg); if (!same(fixed(L).slice(0, 1), s1)) bad('mở chi tiết từ danh sách cũ làm danh sách cũ đổi nội dung');
   await closeChat(pg); await dragTo(pg, 70, { settleMs: 2000 }); await pressFind(pg, 3);
   t = await body(pg); m = t.match(re) || [];
