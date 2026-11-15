@@ -35,7 +35,7 @@ if (!(G > 0)) bad(`GET /budget seed không có số khách: ${JSON.stringify(see
 
 // 2. Tab Vendor (match venue): chip "≈ 4.6tr/bàn × T bàn" và "Đủ G khách".
 const r = await tab(M, { url: `/api/vendors/match?coupleId=${CID}&category=venue&limit=50`, profile, overlay: ov });
-const labels = (r.body?.vendors?.find((v) => v.id === ids.R1)?.match?.reasons || []).map((x) => x.label.replace(/ = \S+tr$/, ""));
+const labels = (r.body?.vendors?.find((v) => v.id === ids.R1)?.match?.reasons || []).map((x) => x.label.replace(/^(≈ \S+tr\/bàn × \d+ bàn) = \S+tr$/, "$1"));
 if (!labels.includes(`≈ 4.6tr/bàn × ${T} bàn`)) bad(`tab: GET /budget seed ${G} khách => mong chip "≈ 4.6tr/bàn × ${T} bàn", thấy ${JSON.stringify(labels)}`);
 if (!labels.includes(`Đủ ${G} khách`)) bad(`tab: mong chip "Đủ ${G} khách" (số hiệu lực), thấy ${JSON.stringify(labels)}`);
 
