@@ -1,7 +1,9 @@
-// T-172 tiêu chí 7: BẢN THAY THẾ đề nghị cho eval/T-164/check_6_ghep_vendor.mjs (cái mà bất biến planner/vendor/inv-003 đang chạy). Chief ghi ADR rồi trỏ inv-003 sang file này khi T-172 merge; không ai sửa check_6 cũ.
-// Giữ nguyên NỘI DUNG của check_6 phần A (ước tính dùng như giá cũ cho lọc/điểm/thứ tự), B (không chip ngân sách cho giá ước tính, không đếm vào "tầm giá"/"giá dao động") và D (pool không priceSource giữ chip như cũ).
-// Bỏ phần C (prompt câu AI phải chứa nhãn giá) và phần E (chat: "Phù hợp vì" ghi "(giá ước tính theo hạng mục)", hướng dẫn "rõ giá (kèm nhãn giá)", dòng hướng dẫn 'Vendor có nhãn giá "ước tính theo hạng mục"'): đó là các câu ADR-100 đảo.
-// Phần thay cho C và E nằm ở check_3 (chat) và check_4 (câu AI) của T-172: cùng tính chất inv-003 (AI không khẳng định ngân sách cho giá ước tính), không dựa vào nhãn nguồn.
+// T-172 tiêu chí 7: BẢN THAY THẾ đề nghị cho eval/T-164/check_6_ghep_vendor.mjs (cái mà bất biến planner/vendor/inv-003 đang chạy). Chief ghi ADR rồi trỏ inv-003 sang file này; không ai sửa check_6 cũ.
+// Giữ A (ước tính dùng như giá cũ cho lọc/điểm/thứ tự), B (không chip ngân sách, không đếm vào "tầm giá"/"giá dao động"), D (pool không priceSource giữ chip).
+// Phần C và E của check_6 đo CHỮ NHÃN (prompt phải chứa nhãn; "(giá ước tính theo hạng mục)"; "rõ giá (kèm nhãn giá)"). Thay bằng phần F: cùng tính chất inv-003 phía AI nhưng KHÔNG phụ thuộc nhãn có hay không,
+// nên XANH cả trên main lẫn sau T-172, đổi trỏ được ngay: (F1) hướng dẫn chat có đúng một dòng chứa "không khẳng định" và "ngân sách" khi có ứng viên ước tính; (F2) "Phù hợp vì" của ứng viên ước tính không chứa "ngân sách"
+// (quét 5 hạng mục x 3 ngân sách), của twin giá riêng thì chứa; (F3) mục chat của ứng viên ước tính khác mục của twin giá riêng cùng số (ngoài tên); (F4) prompt câu "vì sao hợp" của vendor ước tính khác prompt của twin giá riêng cùng số (ngoài tên).
+import * as L from "./_lib.mjs";
 import { stampedBack, loadModules, setNow, restoreNow, EXPECTED, LABEL } from "../T-164/_lib.mjs";
 import { tab, chat, coupleProfile, CID, AUTH, MSG_BY_CAT } from "../T-159/_lib.mjs";
 const fails = []; const bad = (m) => { if (fails.length < 30) fails.push(m); };
@@ -72,6 +74,33 @@ const REAL = (a, b) => ({ priceMin: a, priceMax: b, priceSource: "legacy_marry",
   const M = await loadModules(dir); const ov = {}; for (const v of M.POOL) if (v.category === "photography" && v.id !== ids[0]) ov[v.id] = { hidden: true, hidden_reason: "eval T-164" };
   const r = await tab(M, { url: `/api/vendors/match?coupleId=${CID}&category=photography&limit=50`, profile: coupleProfile({ budget: 300, budget_by_category: { photography: 20 } }), overlay: ov });
   const v = r.body?.vendors?.[0]; if (!v || !(v.match.reasons || []).some((x) => /ngân sách|^Rẻ hơn/.test(x.label))) bad("pool không priceSource: chip ngân sách phải xuất hiện như cũ");
+}
+/* F. phía AI của inv-003, không phụ thuộc nhãn */
+{
+  const { M, ids, ov, nameOf } = await L.twinBack([{ cat: "photography", price: L.EST(6, 8) }, { cat: "photography", price: L.REAL(6, 8) }]);
+  const r = await chat(M, { message: MSG_BY_CAT.photography, profile: coupleProfile({ budget: 300 }), overlay: ov });
+  const block = L.candBlock(r.sp); const ents = L.entries(block, Object.fromEntries(ids.map((id) => [id, nameOf(id)])));
+  if (!ents[ids[0]] || !ents[ids[1]]) bad("F chat: thiếu ứng viên (eval không đo đủ)");
+  else {
+    const nG = L.guidance(block).split("\n").filter((l) => /không khẳng định/.test(l) && /ngân sách/.test(l)).length;
+    if (nG !== 1) bad(`F1: hướng dẫn chat có ứng viên ước tính phải có đúng 1 dòng chứa "không khẳng định" và "ngân sách", thấy ${nG}`);
+    const why = (id) => (ents[id].find((l) => /Phù hợp vì:/.test(l)) || "");
+    if (/ngân sách/.test(why(ids[0]))) bad(`F2: "Phù hợp vì" của vendor ước tính nói ngân sách: "${why(ids[0]).trim()}"`);
+    if (!/ngân sách/.test(why(ids[1]))) bad(`F2: "Phù hợp vì" của twin giá riêng phải giữ "ngân sách", thấy "${why(ids[1]).trim()}"`);
+    if (ents[ids[0]].join("\n") === ents[ids[1]].join("\n")) bad("F3: mục chat của vendor ước tính giống hệt twin giá riêng cùng số (LLM không có tín hiệu khác biệt)");
+  }
+  const dd = {}; for (const [i, id] of ids.entries()) { const o = await L.openDetail(M, id, { overlay: ov, reply: L.whyEcho }); dd[i] = (o.calls[0]?.system || "") + "\n" + (o.calls[0]?.user || ""); dd[i] = dd[i].split(nameOf(id)).join("X"); }
+  if (!dd[0] || !dd[1]) bad("F4: không thấy prompt câu AI (eval không đo đủ)"); else if (dd[0] === dd[1]) bad("F4: prompt câu 'vì sao hợp' của vendor ước tính giống hệt twin giá riêng cùng số");
+  // quét 5 hạng mục x 3 ngân sách trên pool đóng dấu đầy đủ
+  let nEst = 0; const dirA = stampedBack(); const A = await loadModules(dirA);
+  for (const cat of ["photography", "attire", "makeup", "decor", "transport"]) for (const bc of [3, 10, 30]) {
+    const rr = await chat(A, { message: `${MSG_BY_CAT[cat]} ${bc}tr`, profile: coupleProfile({ budget: 300 }) }); const blk = L.candBlock(rr.sp); const ms = rr.md?.matches || [];
+    const es = L.entries(blk, Object.fromEntries(ms.map((m) => [m.vendor_id, A.POOL.find((v) => v.id === m.vendor_id).name])));
+    let any = false;
+    for (const m of ms) if (/^estimate_/.test(String(m.price_basis))) { nEst++; any = true; const w = (es[m.vendor_id] || []).find((l) => /Phù hợp vì:/.test(l)) || ""; if (/ngân sách/.test(w)) bad(`F2 quét ${cat} ${bc}tr: ${m.vendor_id} (ước tính) "Phù hợp vì" nói ngân sách`); }
+    if (any && L.guidance(blk).split("\n").filter((l) => /không khẳng định/.test(l) && /ngân sách/.test(l)).length !== 1) bad(`F1 quét ${cat} ${bc}tr: thiếu đúng 1 dòng cấm khẳng định ngân sách`);
+  }
+  if (nEst < 10) bad(`F quét: chỉ ${nEst} ứng viên ước tính (eval không đo đủ)`);
 }
 restoreNow();
 if (fails.length && process.env.T164_ALL) console.log(fails.map((f) => "  - " + f).join("\n"));

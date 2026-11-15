@@ -64,7 +64,7 @@ export function fakeLLM(reply, { fail = false } = {}) {
   globalThis.fetch = async (u, init) => {
     if (!/anthropic/.test(String(u))) throw new Error("không được gọi mạng: " + u);
     const b = JSON.parse(String(init?.body || "{}")); const system = String(b.system || ""); const user = (b.messages || []).map((m) => String(m.content)).join("\n");
-    calls.push({ system, user });
+    calls.push({ system, user, messages: b.messages || [] });
     if (fail) return new Response("LLM giả: lỗi", { status: 500 });
     return new Response(sse(reply(system, user)), { status: 200, headers: { "Content-Type": "text/event-stream" } });
   };
@@ -74,16 +74,16 @@ export function fakeLLM(reply, { fail = false } = {}) {
 export const ENV = { CLAUDE_API_KEY: "fake-eval" };
 
 /** Một lượt chat thật (handleCoupleChat, SSE) với LLM giả. Trả { text (lời AI), system (prompt gửi AI), calls }. */
-export async function chatTurn(M, dirRef, { message, profile = coupleProfile({ budget: 300 }), overlay = null, reply }) {
+export async function chatTurn(M, dirRef, { message, profile = coupleProfile({ budget: 300 }), overlay = null, reply, bucket = null, conversationId = undefined }) {
   const cc = await imp(dirRef, "api/coupleChat.js");
-  const b = new M.MemoryBucket();
+  const b = bucket || new M.MemoryBucket();
   b.data.set(`data/couples/${CID}/profile.yaml`, JSON.stringify(profile));
   b.data.set(`data/couples/${CID}/members.json`, JSON.stringify([{ user_id: AUTH.userId, role: "owner" }]));
   if (overlay) b.data.set("data/admin/vendor_overrides.json", JSON.stringify({ seq: 1, vendors: overlay }));
   M.resetOverlayCache();
   const llm = fakeLLM(reply);
   try {
-    const res = await cc.handleCoupleChat(new Request("http://localhost/api/couples/c1/chat", { method: "POST", body: JSON.stringify({ message }) }), { CHAT_DATA: b, ...ENV }, AUTH, CID, { waitUntil: () => {} });
+    const res = await cc.handleCoupleChat(new Request("http://localhost/api/couples/c1/chat", { method: "POST", body: JSON.stringify({ message, ...(conversationId ? { conversationId } : {}) }) }), { CHAT_DATA: b, ...ENV }, AUTH, CID, { waitUntil: () => {} });
     const raw = await res.text(); let text = "";
     for (const m of raw.matchAll(/event: chunk\ndata: (.*)\n/g)) text += JSON.parse(m[1]).text;
     return { status: res.status, text, system: llm.calls[0]?.system || "", calls: llm.calls };
