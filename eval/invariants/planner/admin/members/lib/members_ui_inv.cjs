@@ -55,7 +55,7 @@ if (!DIST) {
   try {
     execSync(`npx vite build --outDir ${JSON.stringify(DIST)} --emptyOutDir`, {
       cwd: REPO, stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, VITE_CLERK_PUBLISHABLE_KEY: '', VITE_ADMIN_DEV_TOKEN: 'dev:admin', VITE_API_BASE: 'http://api.test' },
+      env: { ...process.env, VITE_CLERK_PUBLISHABLE_KEY: '', VITE_ADMIN_OPEN: '', VITE_ADMIN_DEV_TOKEN: 'dev:admin', VITE_API_BASE: 'http://api.test' },
     });
   } catch (e) { console.log('FAIL build lỗi: ' + String(e.stderr || e.message).split('\n').filter(Boolean).slice(-2).join(' | ')); process.exit(1); }
 }
