@@ -3,7 +3,7 @@
 // không đặt biến thật, không ghi gì vào repo. Dùng: node check_back.mjs --repo <tohong-back> --case 1|2|3|4   (in dòng cuối PASS hoặc FAIL <lý do>; thoát 0/1, 2 = không chạy được)
 //  case 1 (tiêu chí 1): cờ bật = đúng chuỗi "1": mọi GET/POST đọc của /api/admin/* chạy KHÔNG token / token rác / token guest / token của chính một admin thật -> 200 (không 401/403);
 //         GET /api/admin/me trả admin:true và user_id đúng "admin-khong-dang-nhap" trong mọi trường hợp trên (kể cả khi ADMIN_USER_IDS thiếu, rỗng hay chứa người khác).
-//  case 2 (tiêu chí 2): cờ bật, mọi thao tác GHI admin (sửa/xoá lớp sửa vendor, duyệt/rút duyệt enrich, đổi trạng thái yêu cầu kết nối, từ chối yêu cầu nâng cấp) thành công không token;
+//  case 2 (tiêu chí 2): cờ bật, mọi thao tác GHI admin (sửa/xoá lớp sửa vendor, duyệt/rút duyệt enrich, đổi trạng thái yêu cầu kết nối, từ chối và kích hoạt yêu cầu nâng cấp, giữ và thu hồi gói tự kích hoạt) thành công không token;
 //         mọi dòng nhật ký GET /api/admin/audit sinh ra có admin_id đúng "admin-khong-dang-nhap" (không có giá trị nào khác, không rỗng); lịch sử lớp sửa vendor (GET /api/admin/vendors/<id>.history) ghi người sửa đúng danh tính đó;
 //         bản duyệt enrich mang reviewed_by đúng danh tính đó và by_capu=false, KỂ CẢ khi ADMIN_USER_IDS và CAPU_USER_IDS đều liệt kê chính chuỗi đó (danh tính cố định không bao giờ là Capu).
 //  case 3 (tiêu chí 3): cờ tắt = thiếu, "", "0", "true", "yes", "on", " 1", "1 ", "01": mọi route /api/admin/* (kể cả đường không tồn tại) không token/token rác/guest/người không trong ADMIN_USER_IDS -> 403 thân đúng {"error":"forbidden"},
@@ -129,10 +129,26 @@ if (CASE === "2") {
     bucket.seedJson("data/admin/upgrade/couple_up1.json", { couple_id: "couple_up1", created_by: "user_owner", plan: "m3", price_k: 249, status: "pending", contact: null, admin_note: "", created_at: new Date().toISOString() });
     const rj = await call(e, "POST", "/api/admin/upgrade-requests/couple_up1/reject", { body: { note: "T188 thu" } });
     check(`[${tag}] từ chối yêu cầu nâng cấp không token -> 200`, rj.status === 200, [rj.status, rj.text.slice(0, 100)]);
+    // 4b) kích hoạt gói, giữ và thu hồi gói tự kích hoạt
+    const sub = (x = {}) => ({ plan: null, status: "trial", trial_messages_used: 0, trial_messages_total: 3, trial_extended: false, started_at: null, expires_at: null, ...x });
+    const future = new Date(Date.now() + 40 * 864e5).toISOString();
+    bucket.seedJson("data/couples/couple_up2/members.json", [{ user_id: "user_owner", role: "owner" }]);
+    bucket.seedJson("data/couples/couple_up2/subscription.json", sub());
+    bucket.seedJson("data/admin/upgrade/couple_up2.json", { couple_id: "couple_up2", created_by: "user_owner", plan: "m3", price_k: 249, status: "pending", contact: null, admin_note: "", created_at: new Date().toISOString() });
+    const ac = await call(e, "POST", "/api/admin/upgrade-requests/couple_up2/activate", { body: { note: "T188 thu" } });
+    check(`[${tag}] kích hoạt gói không token -> 200`, ac.status === 200, [ac.status, ac.text.slice(0, 100)]);
+    for (const [cid, act] of [["couple_leg1", "keep"], ["couple_leg2", "revoke"]]) {
+      bucket.seedJson(`data/couples/${cid}/members.json`, [{ user_id: "user_owner", role: "owner" }]);
+      bucket.seedJson(`data/couples/${cid}/subscription.json`, sub({ plan: "m3", status: "active", started_at: new Date().toISOString(), expires_at: future }));
+      const r = await call(e, "POST", `/api/admin/couples/${cid}/subscription/${act}`, { body: { note: "" } });
+      check(`[${tag}] ${act} gói tự kích hoạt không token -> 200`, r.status === 200, [r.status, r.text.slice(0, 100)]);
+    }
+    const subDocs = ["couple_up2", "couple_leg1", "couple_leg2"].map((c) => bucket.data.get(`data/couples/${c}/subscription.json`) || "").join("");
+    check(`[${tag}] hồ sơ gói không ghi mã admin thật / guest`, !subDocs.includes(REAL) && !subDocs.includes("guest_"));
     // 5) nhật ký
     const au = await call(e, "GET", "/api/admin/audit?limit=200");
     const ents = au.json?.entries || [];
-    check(`[${tag}] nhật ký có đủ các thao tác vừa làm (>= 6 dòng)`, ents.length >= 6, ents.map((x) => x.action));
+    check(`[${tag}] nhật ký có đủ các thao tác vừa làm (>= 9 dòng)`, ents.length >= 9, ents.map((x) => x.action));
     check(`[${tag}] MỌI dòng nhật ký có admin_id đúng "${ID}"`, ents.length > 0 && ents.every((x) => x.admin_id === ID), ents.map((x) => x.admin_id));
     check(`[${tag}] nhật ký không chứa mã admin thật / guest`, !au.text.includes(REAL) && !au.text.includes("guest_"));
   }
