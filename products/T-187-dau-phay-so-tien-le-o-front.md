@@ -81,10 +81,10 @@ Mỗi tiêu chí đúng một eval. Cả sáu là tầng 1.
 ## Eval và bất biến cũ lỗi thời sau khi ship
 Không bất biến nào lỗi thời (không bất biến nào khoá dấu chấm ở front: xem "Bằng chứng"), nên KHÔNG có bản thay cho Chief. Các eval tầng 1 của việc cũ khoá dấu chấm ở front và sẽ đỏ nếu chạy lại (đã đo trên bản cài giả; không nằm trong bể, không chạy ở Code Gate T-187):
 - `eval/T-164/check_5a_nhan_app_cap_doi.cjs:111,115` ("4tr–4.6tr/bàn").
-- `eval/T-170/check_1_chat_danh_sach_va_chi_tiet.cjs:32,37` ("4tr–4.6tr/bàn"); `check_5_giu_dong_phep_so_va_khong_chip.cjs:14` (giá "3.9tr" của Sigma); `check_3_da_luu_va_man_ngan_sach.cjs:48` (regex `[\d.]+tr/bàn` không nhận dấu phẩy).
+- `eval/T-170/check_1_chat_danh_sach_va_chi_tiet.cjs:32,37` ("4tr–4.6tr/bàn"); `check_5_giu_dong_phep_so_va_khong_chip.cjs:14` (giá "3.9tr" của Sigma ở chi tiết).
 - `eval/T-175/adv-03-venue-thieu-nguon-thieu-khach.cjs:20,40,41` ("4.2tr/bàn", "Bạn đã lưu lúc 3.5tr. Giá hiện tại trên Tơ Hồng: 4.2tr/bàn").
 - Test đơn vị trong repo front: `scripts/test-price-text.mjs:7,13` (`'4tr–4.6tr'`, `'4tr–4.6tr/bàn'`; lệnh `npm run test:price-text`). Engineering sửa cùng PR; thêm ca "hai đầu cùng chữ một số" và chuỗi "12.34".
-Xanh và phải còn xanh: T-164 check_5b (admin dấu chấm), T-170 check_2, check_3 (phần số nguyên), T-175 adv-01, adv-02, adv-04, T-178 check_4 (chữ back nguyên văn có dấu chấm), T-179, T-182, T-185.
+Đo trên bản cài giả: xanh và phải còn xanh: T-164 check_5b (admin dấu chấm), T-170 check_2, check_3, T-175 adv-01, adv-02, T-178 check_4 (chữ back nguyên văn có dấu chấm), T-179, T-182, T-185, T-167 check_4. (T-175 adv-04 là kiểm build, không đo chữ.)
 
 ## Bất biến đề xuất (tầng 2)
 INV (vùng `planner/front/budget`): mọi số tiền (triệu đồng) lẻ mà app cặp đôi tự định dạng dùng dấu phẩy, tối đa 1 chữ số thập phân, không ",0", không "d.dtr", không số thập phân dài, không phân cách nghìn. Nội dung = phần "không dấu chấm / không số thập phân dài" của eval 1, 2, 3 (`S.noDot`). Spec-critic rút khi spec qua cổng. Không đề nghị đổi hay xoá bất biến hiện có.
