@@ -55,7 +55,7 @@ const ALL = [...VENDORS, ...HALLS];
 const mkSaved = (v, p) => ({ id: v.id, name: v.name, priceTotal: p, priceUnit: v.category === 'venue' ? 'bàn' : 'gói', grad: 'linear-gradient(#ccc,#ddd)', gallery: ['linear-gradient(#ccc,#ddd)'], spec: 'x', rating: 4, rv: 1, match: 80, location: 'HCMC' });
 const S425 = mkSaved(VENDORS[3], 4.25), S796 = mkSaved(VENDORS[4], 7.96), S804 = { ...mkSaved(VENDORS[1], 8.04) }, S46 = mkSaved(VENDORS[0], 4.6);
 const SEED = JSON.stringify({ photography: { shortlisted: [S425, S796, S804, S46], confirmed: S46 }, jewelry: { shortlisted: [S46], confirmed: null } });
-const BUDGET = { total_tr: 120.5, guests: 100, mung_tr: 3.55, categories: [['photography', 'Chụp ảnh', 8], ['jewelry', 'Nhẫn cưới & trang sức', 3.4], ['venue', 'Tiệc & nhà hàng', '60.25'], ['reserve', 'Dự phòng', 12.34], ['attire', 'Trang phục', 1.15]].map(([id, name, a]) => ({ id, name, allocated_tr: a, pct: 10, items: [] })) };
+const BUDGET = { total_tr: 120.5, guests: 100, mung_tr: 3.55, categories: [['photography', 'Chụp ảnh', 8], ['jewelry', 'Nhẫn cưới & trang sức', 3.4], ['venue', 'Tiệc & nhà hàng', 60.25], ['reserve', 'Dự phòng', 12.34], ['attire', 'Trang phục', 1.15]].map(([id, name, a]) => ({ id, name, allocated_tr: a, pct: 10, items: [] })) };
 const SUMMARY = { profile: { bride_name: 'A', groom_name: 'B' }, budget: { total_tr: 120.5, spent_tr: 125.74, over: true } };
 
 /* Luật: áp cho mọi đoạn chữ nhìn thấy có số tiền. */
@@ -96,7 +96,7 @@ const check = (surf, t) => { const s = String(t || ''); for (const [re, why] of 
       return pg;
     };
     const text = (pg) => pg.evaluate(() => document.body.innerText.replace(/\s+/g, ' ') + ' ' + [...document.querySelectorAll('[aria-valuetext]')].map((e) => e.getAttribute('aria-valuetext')).join(' '));
-    const until = (pg, s) => pg.waitForFunction((s) => document.body.innerText.includes(s), s, { timeout: 15000 });
+    const until = (pg, s) => pg.waitForFunction((s) => document.body.innerText.toLowerCase().includes(s.toLowerCase()), s, { timeout: 15000 });
     const surface = async (name, file, query, wait, after) => {
       const pg = await page(file, query);
       try {
@@ -110,6 +110,7 @@ const check = (surf, t) => { const s = String(t || ''); for (const [re, why] of 
         await pg.getByText(n, { exact: false }).first().click({ timeout: 5000 }); await pg.waitForTimeout(800);
         check(`${label} (${n})`, await text(pg));
         await pg.keyboard.press('Escape'); await pg.waitForTimeout(400);
+        if (/Dự toán: /.test(await text(pg))) { await pg.mouse.click(5, 5).catch(() => {}); await pg.waitForTimeout(400); }
       }
     };
     await surface('chat danh sách ảnh', '__inv8a.html', '', 'Kappa Studio', openEach(['Lambda Studio'], 'chat chi tiết'));
