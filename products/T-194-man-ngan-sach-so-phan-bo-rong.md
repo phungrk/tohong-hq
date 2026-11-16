@@ -1,6 +1,6 @@
 # Spec T-194: Màn Ngân sách đọc số phân bổ rỗng/không phải số như 0
 
-> v1 · Spec Writer (product) · 2026-11-16 · bậc A · vùng `planner/front/budget` · chỉ `tohong-front` (main `6b9ad94`) · khuôn số theo INV-008.
+> v2 (spec rework lần 1: sửa H0, H3, H5 theo defect T-194-D1 và phân xử của Chief) · Spec Writer (product) · 2026-11-16 · bậc A · vùng `planner/front/budget` · chỉ `tohong-front` (main `6b9ad94`) · khuôn số theo INV-008.
 
 ## Ý định
 Màn Ngân sách không bao giờ ghi "ĐÃ PHÂN BỔ tr", "Còn tr" hay một hàng chỉ "tr"; hai nơi (màn Ngân sách, thẻ ngân sách chat) cùng một số. Nguồn: brief `board/T-194.md` (adversary T-193).
@@ -15,16 +15,16 @@ Màn Ngân sách không bao giờ ghi "ĐÃ PHÂN BỔ tr", "Còn tr" hay một 
 GIẢ ĐỊNH, tự tin ~85%: dữ liệu lệch như vậy hiếm nhưng khi có thì màn hỏng cả trang; sửa không đổi gì với dữ liệu hợp lệ. Chỉ số bảo vệ: chữ của dữ liệu hợp lệ không đổi (eval 5).
 
 ## Hành vi (người dùng thấy gì)
-H0. Quy tắc một số: số phân bổ (allocated_tr) của một hạng mục là số của nó nếu là số hữu hạn hoặc chuỗi số ("20", "3.4"); rỗng ("", null, bỏ khuyết) hoặc không phải số ("abc") thì là 0. Giống thẻ ngân sách chat.
+H0. Quy tắc một số, chỉ để HIỂN THỊ và TÍNH TỔNG trên màn: số của một hạng mục = `Number(x) || 0`, đúng y cách thẻ ngân sách chat đọc (`cards.jsx:331`), để hai nơi cùng số. Nên "20" -> 20, "3.4" -> 3,4, " 7 " -> 7; rỗng, null, bỏ khuyết, "abc", "20,5" (dấu phẩy), "20tr" -> 0. Ngoài phạm vi, không đo: giá trị Infinity.
 H1. Tổng quan: "Đã phân bổ" = tổng số theo H0 của mọi hạng mục (phép cộng số, không nối chuỗi); câu trạng thái "Còn X" / "Vượt X" / "Cân đối" theo tổng đó và mục tiêu. Mọi số theo khuôn INV-008 (dấu phẩy, tối đa 1 chữ số lẻ).
 H2. Hàng hạng mục ở tổng quan ghi số theo H0 ("0tr" cho hạng mục rỗng/lạ). Trang chi tiết hạng mục: thẻ "Dự toán" ghi số theo H0, thanh trượt "Dự toán" có giá trị 0 (aria-valuenow = 0), phần phần trăm và chữ đọc của thanh trượt không "NaN".
-H3. Không chỗ nào trên màn Ngân sách (tổng quan, trang hạng mục) còn "tr" đứng riêng (không có số đi trước), "abc", "undefined", "NaN", "null".
+H3. Khi allocated_tr rỗng hoặc lạ (mục con hợp lệ), không chỗ nào trên màn Ngân sách (tổng quan, trang hạng mục) còn "tr" đứng riêng (không có số đi trước), "abc", "undefined", "NaN", "null".
 H4. Cùng số với thẻ ngân sách chat: với cùng một dự toán, số mỗi hạng mục ở màn Ngân sách bằng số ở thẻ chat, và "Đã phân bổ" bằng tổng các hàng của thẻ chat.
-H5. Chỗ ghi lại dự toán: khi người dùng chỉnh một hạng mục, bản gửi lên server có allocated_tr của MỌI hạng mục là số JSON hữu hạn: hạng mục rỗng/lạ gửi 0 (không "", "abc", null, bỏ khuyết), chuỗi số gửi dạng số, hạng mục vừa chỉnh gửi số mới. Chỉ mở màn, không chỉnh gì: vẫn không ghi (INV-003).
+H5 (đã thu hẹp). Dữ liệu đã lưu KHÔNG bị ép: H0 chỉ áp cho hiển thị và tổng. Khi ghi, chỉ hạng mục người dùng vừa chỉnh gửi số mới (số JSON); MỌI hạng mục khác ghi đúng như đã lưu (kể cả "abc", "20", "", bỏ khuyết), ở mọi lối ghi: (i) chỉnh tay; (ii) lần ghi tự động khi nhà hàng đã chốt và số khách đổi (INV-003 cho phép đổi amt khoản vendor trùng id đang chốt; Budget.jsx:595-602), ngoài amt đó không trường nào đổi; (iii) ghi lại sau lỗi (INV-005): hạng mục chưa chỉnh không được coi là đã đổi chỉ vì màn đọc nó thành số, nên giá trị server đã đổi bởi lần ghi khác (vd thẻ chat sửa Tiệc thành 50) được giữ. Chỉ mở màn, không chỉnh gì, chưa chốt nhà hàng: 0 lần ghi (INV-003). Không sửa INV-003/INV-005, không cần ADR.
 
 ## Ràng buộc (vòi)
-- Repo: `phungrk/tohong-front` · Nhánh: `t-194-so-phan-bo-rong` · Vùng: `planner/front/budget`. Chỉ đổi cách màn đọc và ghi số; không đổi API, back, mục con (`items[].amt`), admin.
-- Bất biến đã đọc: `_shared/`, `planner/front/` (budget inv-001..010). Không vi phạm; H5 giữ INV-003, INV-005.
+- Repo: `phungrk/tohong-front` · Nhánh: `t-194-so-phan-bo-rong` · Vùng: `planner/front/budget`. Chỉ đổi cách màn đọc số để hiển thị; ghi không ép dữ liệu đã lưu (H5); không đổi API, back, mục con (`items[].amt`), admin.
+- Bất biến đã đọc: `_shared/`, `planner/front/` (budget inv-001..010). Không vi phạm; H5 giữ INV-003, INV-005 nguyên văn.
 - Không chạm payment, auth, schema, dữ liệu người dùng. Bậc A: chữ hiển thị, eval tự động phủ hết tiêu chí.
 
 ## Tiêu chí chấp nhận và eval
@@ -34,17 +34,22 @@ Chạy từ gốc `tohong-hq` (`--repo <tohong-front>` hoặc `TOHONG_FRONT_REPO
 | --- | --- | --- |
 | 1 | "Đã phân bổ 50tr / 100tr", "Còn 50tr"; mục tiêu 40 -> "Vượt 10tr"; mục tiêu 50 -> "Cân đối"; không "tr" trơ, "abc", NaN | `node eval/T-194/check_1_tong_phan_bo_con_lai_vuot.cjs` |
 | 2 | Hàng tổng quan "0tr","0tr","30tr","20tr","0tr"; trang hạng mục "abc": "DỰ TOÁN 0tr", thanh trượt 0, không NaN/"tr" trơ | `node eval/T-194/check_2_hang_hang_muc_va_trang_hang_muc.cjs` |
-| 3 | Mỗi hạng mục cùng số ở màn Ngân sách và thẻ chat; "Đã phân bổ" = tổng hàng thẻ chat | `node eval/T-194/check_3_cung_so_voi_the_chat.cjs` |
-| 4 | Bản gửi lên sau khi chỉnh: mọi allocated_tr là số hữu hạn (0,0,31,20,0); chỉ xem thì 0 lần ghi | `node eval/T-194/check_4_ghi_lai_du_toan_khong_ghi_abc.cjs` |
+| 3 | Mỗi hạng mục cùng số ở màn Ngân sách và thẻ chat; "Đã phân bổ" = tổng hàng thẻ chat; thêm ca cách đọc số "20,5", " 7 ", "20tr", "3.4", "" -> 0, 7, 0, 3,4, 0 ở cả hai nơi | `node eval/T-194/check_3_cung_so_voi_the_chat.cjs` |
+| 4 | Ghi không ép dữ liệu đã lưu: (a) chỉ xem 0 lần ghi; (b) chỉnh tay jewelry 31 (số), hạng mục khác nguyên "", "abc", "20", bỏ khuyết; (c) nhà hàng đã chốt + số khách đổi: có lần ghi tự động, vẫn "abc", "", "20", 30, bỏ khuyết; (d) ghi lại sau lỗi: Tiệc "abc" giữ, photography 50 do lần ghi khác không bị đè | `node eval/T-194/check_4_ghi_lai_du_toan_khong_ghi_abc.cjs` |
 | 5 | Dữ liệu hợp lệ không đổi chữ: 20, 60, 3.4, 12.34, 0 -> "Đã phân bổ 95,7tr / 120,5tr", "Còn 24,8tr", hàng "3,4tr", "12,3tr", "0tr" | `node eval/T-194/check_5_du_lieu_hop_le_khong_doi.cjs` |
 
-Trên main `6b9ad94`: eval 1-4 ĐỎ đúng chỗ lỗi; eval 5 XANH (chỉ số bảo vệ). Đã thử xanh: bản vá giả ở worktree tạm (ép allocated_tr thành số ngay khi nhận dữ liệu) cho cả 5 PASS; worktree đã gỡ.
+Trên main `6b9ad94`: eval 1-3 ĐỎ đúng chỗ lỗi; eval 4 và 5 XANH (chỉ số bảo vệ). Đã thử: bản vá giả ép allocated_tr thành số ở lối ghi (clone tạm) làm eval 4 ĐỎ ở ca b, c, d; clone đã gỡ. Bản v1 của bản vá giả (ép ngay khi nhận dữ liệu) qua cả 5 eval v1 chính là lỗ hổng defect D1 chỉ ra; eval 4 v2 bịt nó.
 
 ## Bất biến đề xuất (tầng 2)
 Vùng `planner/front/budget`: màn Ngân sách với allocated_tr rỗng/không phải số không có "tr" trơ/NaN và tổng là phép cộng số (phần tổng quan của eval 1, hàng của eval 2). Dùng lại lib T-194 khi Spec critic rút.
 
 ## Không làm
-Không đổi API/back, không đổi `items[].amt` (mục con), không đổi Dashboard hay Vendors, không sửa nhập số ở ô sửa.
+Không đổi API/back, không đổi `items[].amt` (mục con; amt "abc" ở trang hạng mục là việc riêng Chief sẽ mở nếu cần; ngoài phạm vi, không đo), không đổi Dashboard hay Vendors, không sửa nhập số ở ô sửa.
 
 ## Câu hỏi mở
-Không. Giả định ghi rõ: chuỗi số hợp lệ ("20") coi là số, và H5 yêu cầu gửi dạng số JSON (kể cả chuỗi số), tự tin ~80%.
+Không. Giả định ghi rõ: chuỗi số hợp lệ ("20") coi là số, chuỗi số theo `Number(x) || 0` như thẻ chat (ADR-120), tự tin cao. Ghi: chỉ hạng mục vừa chỉnh gửi số mới.
+
+## Đã sửa gì ở v2 (spec rework lần 1)
+- H5: câu "MỌI hạng mục là số JSON" cho phép ba cách cài khác nhau (D1, `against` INV-003 + H5); nay chỉ hạng mục vừa chỉnh gửi số mới, còn lại ghi nguyên như đã lưu, ở ba lối ghi. Câu cũ "mở màn vẫn không ghi" sửa: chỉ đúng khi chưa chốt nhà hàng.
+- H0: bỏ "hữu hạn", chốt `Number(x) || 0` như thẻ chat; thêm ca "20,5", " 7 ", "20tr" vào eval 3.
+- H3: viết hẹp "khi allocated_tr rỗng hoặc lạ (mục con hợp lệ)".
