@@ -1,6 +1,6 @@
 # Spec T-187: Mọi số tiền lẻ cặp đôi thấy ở front dùng dấu phẩy
 
-> v1 · Spec Writer (product) · 2026-11-16 · bậc A · vùng `planner/front/budget` · chỉ `tohong-front` (main `26c5758`) · nối tiếp T-167 (khuôn số), T-183/T-184 (ADR-113, ADR-114: chip và câu tư vấn của back đã dấu phẩy).
+> v2 (spec rework lần 1, sửa H1 số âm/nửa đúng: xem "Đã sửa ở v2") · Spec Writer (product) · 2026-11-16 · bậc A · vùng `planner/front/budget` · chỉ `tohong-front` (main `26c5758`) · nối tiếp T-167 (khuôn số), T-183/T-184 (ADR-113, ADR-114: chip và câu tư vấn của back đã dấu phẩy).
 
 ## Ý định
 Capu 2026-11-16, trả lời câu mở của ADR-113/114: "có, đổi sang dấu phẩy luôn". Chip và dòng phép so (back) đã ghi "3,9tr/bàn"; thẻ vendor ngay bên cạnh vẫn ghi "4tr–4.6tr/bàn" và "Bạn đã lưu lúc 3.5tr". Cặp đôi thấy hai dấu thập phân trên cùng một màn. Sau việc này: một dấu duy nhất, dấu phẩy, ở mọi số tiền lẻ app cặp đôi tự định dạng.
@@ -19,11 +19,11 @@ Nếu mọi số tiền lẻ ở app cặp đôi dùng cùng một khuôn dấu 
 
 ### H1 · Khuôn một số tiền (triệu đồng)
 Với giá trị `x` là số hoặc chuỗi thập phân API trả ("12.34"):
-- Chữ hiện ra = `Math.round(Number(x) × 10) / 10`, phần thập phân bằng dấu phẩy, bỏ ",0" khi nguyên: 4.6 -> `4,6`; 3.96 -> `4`; 4.25 -> `4,3` (đúng như back làm tròn ở chip); "12.34" -> `12,3`; 12 -> `12`; "14.0" -> `14`.
-- Không phân cách hàng nghìn, không đổi sang tỷ: 1440 -> `1440tr`, 1404 -> `1404tr`.
-- Số âm giữ dấu trừ như từng chỗ đang in (dấu "-" hoặc "−" của thanh trượt) rồi tới số đã làm tròn: -7,74 -> `-7,7tr`. Kết quả làm tròn bằng 0 thì ghi `0`, không `-0`.
+- Chữ hiện ra: lấy trị tuyệt đối, làm tròn một lần `r = Math.round(|Number(x)| × 10) / 10` (nửa đúng làm tròn LÊN, ra xa 0; không `toFixed`, không `Intl`), rồi đặt dấu. Phần thập phân bằng dấu phẩy, bỏ ",0" khi nguyên: 4.6 -> `4,6`; 3.96 -> `4`; 4.25 -> `4,3`; 1.15 -> `1,2` (khớp chip của back: `lib/vendorMatcher.js:71` `Math.round(x*10)/10`, T-184); "12.34" -> `12,3`; 12 -> `12`; "14.0" -> `14`.
+- Dấu: `x < 0` và `r > 0` thì đặt dấu trừ của chỗ đó (ASCII "-" hoặc "−" của thanh trượt, giữ như từng chỗ đang in) TRƯỚC `r`; chỗ nào có dấu "+" cho số dương (chênh lệch dương ở sheet, thanh trượt, tiền mừng) thì đặt "+" khi `x > 0` và `r > 0`. Hễ `r = 0` thì chỉ ghi `0`, KHÔNG dấu nào ("0tr"; không "-0tr", không "+0tr", không "−0tr"), kể cả khi x thật là -0,04 hay +0,04. Ví dụ: -7,74 -> `-7,7tr`; -3,75 -> `-3,8tr` (KHÔNG `-3,7tr`: không làm tròn số có dấu); -0,04 -> `0tr`; +0,04 -> `0tr`; +1,15 -> `+1,2tr`.
+- Cùng một khoản chênh lệch ở hai chỗ cùng màn phải ra cùng một số, chỉ khác dấu/lời: dự toán 8, vendor lưu lúc 4,25 (chênh -3,75): sheet `Dự toán: 8tr · -3,8tr`, hàng hạng mục `Còn dư 3,8tr`. Chỗ chọn lời ("Vượt"/"Còn dư"/"Khớp dự toán", màu, "+") vẫn quyết theo số thật như hôm nay (`diff > 0`, `diff < 0`, `diff = 0`), không theo chữ: chênh -0,04 hiện `Còn dư 0tr`, +0,04 hiện `Vượt 0tr so với dự toán`; sheet cả hai ghi `· 0tr`.
 - Giá trị thiếu (không có) hiện đúng như hôm nay (không thêm chữ "undefined", "NaN", "null" nào).
-- Số thật không đổi: chữ chỉ là cách viết. Mọi điều kiện (giá đã cập nhật khi giá lúc lưu khác giá hiện tại; "Vượt"/"Còn dư"; vendor rẻ nhất; trạng thái Cân đối) vẫn tính trên số thật, không trên chữ đã làm tròn. Hệ quả chấp nhận: "giá đã cập nhật" vẫn hiện khi hai giá khác nhau chưa tới 0,05 dù chữ giống nhau; chênh lệch dưới 0,05 ghi `0tr`.
+- Số thật không đổi: chữ chỉ là cách viết. Mọi điều kiện (giá đã cập nhật khi giá lúc lưu khác giá hiện tại; "Vượt"/"Còn dư"; vendor rẻ nhất; trạng thái Cân đối) vẫn tính trên số thật, không trên chữ đã làm tròn. Hệ quả chấp nhận: "giá đã cập nhật" vẫn hiện khi hai giá khác nhau chưa tới 0,05 dù chữ giống nhau; chênh lệch dưới 0,05 ghi `0tr` (một khuôn ở mọi chỗ, theo dòng "Dấu" ở trên).
 
 ### H2 · Khoảng giá
 - `priceText` (giá niêm yết ở thẻ danh sách, chi tiết, so sánh, đã lưu, Ngân sách): `{a}tr–{b}tr`, thêm `/bàn` cho nhà hàng có nguồn giá: "4tr–4,6tr", "4tr–4,6tr/bàn", "12tr–14tr".
@@ -71,10 +71,12 @@ Chạy từ gốc `tohong-hq` (biến `TOHONG_FRONT_REPO`, mặc định `../toh
 | --- | --- | --- |
 | 1 | Giá niêm yết ở khung chat vendor theo khuôn H1-H2: danh sách ("4tr–4,6tr", "3,5tr", "12tr–14tr", "4tr–4,3tr" từ 3,96–4,25), nhà hàng ("4tr–4,6tr/bàn", "3,9tr/bàn", "4,2tr/bàn"), chi tiết, thẻ chọn và bảng so sánh, câu "… (3,5tr) đáng cân nhắc nhất", "Budget ~12,3tr"; không còn "d.dtr" | `node eval/T-187/check_1_gia_niem_yet_o_chat.cjs` |
 | 2 | Vendor đã lưu: "giá đã cập nhật (4,3tr–4,8tr)", hàng Ngân sách, câu "Bạn đã lưu lúc 3,5tr. Giá hiện tại trên Tơ Hồng: 4,2tr/bàn" (hai đầu cùng chữ một số), "4,3–4,8tr", "25–27tr"; không "·" treo | `node eval/T-187/check_2_da_luu_va_cau_ban_da_luu.cjs` |
-| 3 | Số tiền ở màn Ngân sách (tổng quan, hạng mục, sheet), "Vendor đã lưu", thẻ ngân sách chat, trang chủ, thanh trượt (chữ nổi và `aria-valuetext`): dấu phẩy, 1 chữ số, không sai số dấu phẩy động ("Vượt 1,2tr so với dự toán", "Còn 14,8tr", "Đã chốt vendor 4,3tr", "+2,3tr") | `node eval/T-187/check_3_so_tien_du_toan_chenh_lech_tong.cjs` |
+| 3 | Số tiền ở màn Ngân sách (tổng quan, hạng mục, sheet), "Vendor đã lưu", thẻ ngân sách chat, trang chủ, thanh trượt (chữ nổi và `aria-valuetext`): dấu phẩy, 1 chữ số, không sai số dấu phẩy động ("Vượt 1,2tr so với dự toán", "Còn 14,8tr", "Đã chốt vendor 4,3tr", "+2,3tr"); nửa đúng và số âm: dự toán 8 + vendor 4,25 => "Dự toán: 8tr · -3,8tr" và "Còn dư 3,8tr"; vendor 7,96 / 8,04 => "· 0tr" (không "-0tr", không "+0tr"); dự toán 1,15 => "1,2tr"; 2,25 => "2,3tr") | `node eval/T-187/check_3_so_tien_du_toan_chenh_lech_tong.cjs` |
 | 4 | Đầu vào là chuỗi "12.34", "3.5", "4.24", "14.0" (API/Postgres numeric) đọc đúng như số: "12,3tr", "3,5tr", "14tr"; không "NaN"/"undefined"/nối chuỗi | `node eval/T-187/check_4_dau_vao_chuoi_tu_api.cjs` |
 | 5 | Số nguyên không ",0"; số lớn không phân cách nghìn ("1440tr", "1404tr" nhà hàng chốt 3,9 x 360 bàn); trang admin GIỮ dấu chấm (T-164 check_5b PASS cùng repo) | `node eval/T-187/check_5_so_nguyen_so_lon_va_admin_giu_nguyen.cjs` |
 | 6 | Không phá hành vi cũ: mọi eval front của T-179 (check_1..11), T-182 (adv-01..06), T-185 (check_1..8), cộng T-167 check_4 và T-178 check_4 (chữ back in nguyên văn) vẫn PASS | `bash eval/T-187/check_6_hoi_quy_t179_t182_t185.sh` |
+
+Ca nửa đúng và số âm nằm trong eval 3 (mục G của `check_3`), đã thử ĐỎ trên ba cách cài sai (xem "Đã sửa ở v2").
 
 Mỗi tiêu chí đúng một eval. Cả sáu là tầng 1.
 
@@ -98,3 +100,8 @@ INV (vùng `planner/front/budget`): mọi số tiền (triệu đồng) lẻ mà
 
 ## Câu hỏi mở
 Không. (Giả định ghi rõ: "cặp đôi không thấy thì ngoài phạm vi" áp cho trang admin; nếu Capu muốn admin dấu phẩy, đó là việc riêng, bậc A.)
+
+## Đã sửa ở v2 (spec rework lần 1, defect `handoffs/T-187-D1.md`, blocker)
+- Câu cũ ở H1 ("giữ dấu trừ ... rồi tới số đã làm tròn ... làm tròn bằng 0 thì ghi 0, không -0") không nói làm tròn số có dấu hay trị tuyệt đối, và không nói nhánh `+` dưới 0,05 ở `Budget.jsx:254`. Cách 1 (`Math.round(-37.5)/10` = -3,7) cho sheet "-3,7tr" cạnh hàng "Còn dư 3,8tr". Nay H1 chốt: làm tròn |x| rồi đặt dấu; r = 0 thì "0" không dấu (cả "-0" lẫn "+0"); đúng khuôn số dương của back (`Math.round(x*10)/10`, vendorMatcher.js:71).
+- Eval 3 thêm mục G (ca nửa đúng, số âm, làm tròn ra 0): dự toán 8 với vendor 4,25 / 7,96 / 8,04; dự toán 1,15 và 2,25.
+- Thử ba cách cài sai trên bản cài giả (tách từ main `26c5758`, chỉ vá chỗ cần cho mục G): xem kết quả trong `handoffs/T-187-v2.md`.

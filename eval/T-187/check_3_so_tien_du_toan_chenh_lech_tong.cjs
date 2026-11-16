@@ -5,6 +5,7 @@
  * Hạng mục ảnh (12.34): "Dự toán 12,3tr", "Ngân sách cưới 120,5tr", tooltip thanh trượt "+2,3tr" (so với Ban đầu 10tr), "Tìm … trong khoảng 12,3tr", vendor Nu 4.6 => "Còn dư 7,7tr", Alpha 4.1 => "Còn dư 8,2tr", sheet "Dự toán: 12,3tr · -7,7tr".
  * Hạng mục trang sức (3.4, vendor 4.6): "Vượt 1,2tr so với dự toán" (hôm nay in "1.1999999999999997tr"), sheet "Dự toán: 3,4tr · +1,2tr".
  * "Vendor đã lưu": "4,3tr / 75,7tr đã chốt" (tổng dự toán các hạng mục vendor 60 + 12.34 + 3.4); thẻ chat "Phân bổ 120,5tr", "+3,5tr"; trang chủ "120,5tr" và "Vượt 5,2tr" (tổng 120.5, đã chi 125.74).
+ * Ca nửa đúng và số âm (H1: làm tròn TRỊ TUYỆT ĐỐI |x| tới 1 chữ số, rồi đặt dấu; kết quả 0 thì "0" không dấu): dự toán 8, vendor lưu lúc 4.25 => sheet "Dự toán: 8tr · -3,8tr" VÀ hàng cùng màn "Còn dư 3,8tr" (cùng một chênh lệch, cùng một số); vendor 7.96 => sheet "Dự toán: 8tr · 0tr" (không "-0tr"), hàng "Còn dư 0tr"; vendor 8.04 => sheet "Dự toán: 8tr · 0tr" (không "+0tr"), hàng "Vượt 0tr so với dự toán"; dự toán 1.15 => "1,2tr" (không "1,1" của toFixed); dự toán 2.25 => "2,3tr" (không "2,2" của Intl nửa-chẵn).
  * Số thật không đổi: mọi số hiện ra bằng số mong đợi tính từ giá trị gốc (ref), không lệch quá 0,05.
  * Chạy: node eval/T-187/check_3_so_tien_du_toan_chenh_lech_tong.cjs [--repo <tohong-front>] */
 const E = require('./_lib.cjs'); const S = E.setup(); const { tr, ref } = E;
@@ -69,5 +70,39 @@ S.run(async () => {
     await waitText(pg, 'Ngân sách'); await pg.waitForTimeout(1000);
     const b = dash(await S.bodyText(pg)); S.has('trang chủ', b, ['120,5tr', 'Vượt 5,2tr']); S.noDot('trang chủ', b);
   } catch (e) { S.bad('trang chủ: lỗi chạy ' + String(e.message).split('\n')[0]); }
+  await pg.context().close();
+  /* G. nửa đúng, số âm, kết quả làm tròn bằng 0 (H1). Dự toán nguyên 8: chênh lệch -3,75 / -0,04 / +0,04 đều đúng nhị phân hoặc gần 0. */
+  const GCATS = [['photography', 'Chụp ảnh', 8], ['jewelry', 'Nhẫn cưới & trang sức', 1.15], ['reserve', 'Dự phòng', 2.25]];
+  const GDOC = E.budgetDoc(GCATS);
+  const mk = (id, name, price) => E.mkSaved(E.V(id, name, price, price), price);
+  const P425 = mk('t187_g1', 'Pho Bon Hai', 4.25), P796 = mk('t187_g2', 'Pho Bay Chin', 7.96), P804 = mk('t187_g3', 'Pho Tam Linh', 8.04);
+  const GSEED = E.savedDocs({ photography: { shortlisted: [P425, P796, P804], confirmed: null } });
+  pg = await S.page('__t187b.html', '?v=budget&cat=photography', { budget: GDOC, seed: GSEED });
+  try {
+    await waitText(pg, 'Pho Bon Hai'); await pg.waitForTimeout(1200);
+    let b = dash(await S.bodyText(pg));
+    S.has('nửa đúng: hàng cùng màn', b, ['DỰ TOÁN 8tr', 'Còn dư 3,8tr', 'Còn dư 0tr', 'Vượt 0tr so với dự toán']); S.noDot('nửa đúng: hạng mục ảnh', b);
+    if (/-0tr|\+0tr|−0tr|Còn dư -|Còn dư 3,7tr/.test(b)) S.bad(`nửa đúng: hàng có "-0tr"/"+0tr"/"Còn dư 3,7tr", thấy "${b.slice(0, 300)}"`);
+    for (const [name, want, deny] of [['Pho Bon Hai', 'Dự toán: 8tr · -3,8tr', /3,7tr|-3\.\d/], ['Pho Bay Chin', 'Dự toán: 8tr · 0tr', /-0tr|−0tr|\+0tr/], ['Pho Tam Linh', 'Dự toán: 8tr · 0tr', /-0tr|−0tr|\+0tr/]]) {
+      await pg.getByText(name, { exact: false }).first().click({ timeout: 5000 }); await pg.waitForTimeout(800);
+      b = dash(await S.bodyText(pg)); S.has('sheet ' + name, b, [want]); S.noDot('sheet ' + name, b);
+      const d = b.match(deny); if (d) S.bad(`sheet ${name}: sai dấu hoặc làm tròn "${d[0]}" (mong "${want}"), thấy "${b.slice(0, 300)}"`);
+      await pg.keyboard.press('Escape'); await pg.waitForTimeout(500);
+      if (/Dự toán: 8tr/.test(dash(await S.bodyText(pg)))) { await pg.mouse.click(5, 5).catch(() => {}); await pg.waitForTimeout(500); }
+    }
+  } catch (e) { S.bad('nửa đúng: lỗi chạy ' + String(e.message).split('\n')[0]); }
+  await pg.context().close();
+  pg = await S.page('__t187b.html', '?v=budget', { budget: GDOC });
+  try {
+    await waitText(pg, 'Đã phân bổ'); await pg.waitForTimeout(1200);
+    const b = dash(await S.bodyText(pg)); S.has('nửa đúng: tổng quan', b, ['1,2tr', '2,3tr', '8tr']); S.noDot('nửa đúng: tổng quan', b);
+    if (/1,1tr|2,2tr/.test(b)) S.bad(`nửa đúng: làm tròn nửa sai ("1,1tr" của toFixed hoặc "2,2tr" của nửa-chẵn), thấy "${b.slice(0, 300)}"`);
+  } catch (e) { S.bad('nửa đúng tổng quan: lỗi chạy ' + String(e.message).split('\n')[0]); }
+  await pg.context().close();
+  pg = await S.page('__t187b.html', '?v=budget&cat=jewelry', { budget: GDOC });
+  try {
+    await waitText(pg, 'DỰ TOÁN'); await pg.waitForTimeout(1000);
+    const b = dash(await S.bodyText(pg)); S.has('nửa đúng: hạng mục 1.15', b, ['DỰ TOÁN 1,2tr']); S.noDot('nửa đúng: hạng mục 1.15', b);
+  } catch (e) { S.bad('nửa đúng 1.15: lỗi chạy ' + String(e.message).split('\n')[0]); }
   await pg.context().close();
 });
