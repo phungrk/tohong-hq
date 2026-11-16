@@ -26,7 +26,7 @@ Nếu mỗi lần bấm Tìm vendor sau khi đổi số in một danh sách mớ
 ## Hành vi (người dùng thấy gì)
 
 ### H1 · Khi nào in danh sách mới (mỗi lần bấm "Tìm <hạng mục>")
-"Tìm vendor" = nút `Tìm <tên hạng mục>` ở chi tiết hạng mục màn Ngân sách, và mọi lối khác mở luồng vendor kèm một hạng mục. (Lối mở thẻ chọn hạng mục `catId = null` không đổi, xem "Không làm".) Mỗi lần bấm:
+"Tìm vendor" = nút `Tìm <tên hạng mục>` ở chi tiết hạng mục màn Ngân sách, và mọi lối khác mở luồng vendor kèm một hạng mục. (Lối mở thẻ chọn hạng mục `catId = null` cũng theo luật H1 này, xem bullet "Lối thẻ chọn hạng mục" bên dưới; chỉ cách bắt đầu lại luồng khi đổi `catId` giữ nguyên.) Mỗi lần bấm:
 1. Nếu có lần lưu đang chờ: đợi nó xong rồi mới đọc số đã lưu. Lần lưu lỗi thì số đã lưu vẫn là số cũ (và câu báo `Chưa lưu được dự toán` ở màn Ngân sách giữ như T-171 H5). Đợi không quá thời gian của chính lần lưu đó; không thêm giới hạn riêng. Trong lúc đợi và đọc, khung chat MỞ NGAY và cuối cuộc trò chuyện hiện đúng một dòng `Đang lấy dự toán…`, biến mất khi xong (KHÔNG có eval đo dòng này; yêu cầu không đo).
 2. Đọc số đã lưu của hạng mục: đúng một lần `GET /api/couples/<id>/budget`, không PUT/POST, không gọi `/api/vendors/match`. **Đọc lỗi (không 2xx, mạng đứt): KHÔNG in danh sách mới (kể cả khi hạng mục chưa có danh sách nào), không gọi match, hiện đúng một dòng `Chưa đọc được dự toán. Thử lại` kèm nút `Thử lại` ở cuối cuộc trò chuyện; danh sách đang có giữ nguyên. Bấm `Thử lại` đọc lại và đi tiếp từ bước 3. Không bao giờ in danh sách theo số đoán (0).** (T-179 sửa T-177 H5, vốn ghi bấm nút "không gọi API thêm": nay bấm được đọc dự toán một lần bằng GET, vẫn không PUT/POST thêm.)
 3. Hạng mục chưa có danh sách nào trong cuộc trò chuyện vendor hiện tại: in MỘT danh sách (như hôm nay), gọi match một lần.
@@ -112,7 +112,7 @@ Còn đúng, giữ: T-171 check_6 (số khách đổi bằng action chat rồi m
 ## Không làm
 - Không tự in danh sách khi dự toán đổi; không polling, không làm mới định kỳ.
 - Không lưu cuộc trò chuyện vendor qua tải lại trang và không giữ danh sách khi luồng bắt đầu lại (đổi hạng mục, dùng chat thường): đúng như hôm nay, lúc đó chỉ còn danh sách mới theo số hiện tại. Tức "danh sách cũ giữ nguyên" áp cho các danh sách đang có trong cuộc trò chuyện vendor hiện tại.
-- Không đổi lối chọn hạng mục (thẻ chọn `catId = null`): chọn hạng mục ở đó in danh sách như hôm nay (có nhãn nếu đọc được số), không có logic "không in trùng".
+- Không thêm lối mở thẻ chọn hạng mục mới và không đổi cách thẻ chọn bắt đầu lại luồng (đổi `catId`). Chọn một hạng mục trên thẻ chọn theo CÙNG luật H1 (đọc số, so với danh sách gần nhất, in hoặc không in, đọc lỗi thì dòng báo), không có luật riêng. (Ghi chú ADR-112: hiện front không có lối nào mở thẻ chọn, nên luật này chưa có chỗ chạy.)
 - Không coi đổi phong cách, thành phố, ngày cưới là "số đổi" (ADR-106 nói về dự toán; nếu cần thì việc riêng). Khi số khách chỉ nằm ở hồ sơ mà dự toán chưa có `guests` (K = "chưa có"), đổi số khách hồ sơ không in danh sách mới; rủi ro đã biết.
 - Không xử lý số đổi GIỮA lúc một danh sách đang tải: nó hiện theo điểm server trả, nhãn ghi số đọc lúc yêu cầu; lần bấm sau so với số đó và in mới nếu khác.
 - Không xử lý ca dự toán hạng mục = 0 mà back vẫn chấm theo tổng ngân sách × tỷ lệ (`total_share`, T-167): nhãn ghi `Chưa có dự toán cho hạng mục này` trong khi chi tiết ghi `so với 43tr`; đổi tổng ngân sách khi D = 0 không in danh sách mới. Rủi ro đã biết.
@@ -128,5 +128,6 @@ Còn đúng, giữ: T-171 check_6 (số khách đổi bằng action chat rồi m
 Một câu cho Capu (có mặc định, không chặn): chi tiết vendor mở từ một hàng của danh sách CŨ nên ghi điểm theo dự toán HIỆN TẠI (mặc định trong H4, vì phản hồi chi tiết của back chỉ chấm được theo bản đã lưu và để quyết định chốt theo số thật), hay giữ nguyên phần trăm của hàng đã bấm (cần front ghi nhớ điểm hàng và chỉ lấy câu AI; nếu chọn thế H4 và eval 7 đổi)?
 
 ## Lịch sử sửa
+- v2.1 (2026-11-16, việc T-183, chỉ sửa chữ, không đổi hành vi): câu mở đầu H1 và bullet "Không làm" về thẻ chọn hạng mục nói "không đổi / như hôm nay / không logic không in trùng", mâu thuẫn với H1 M3 (thẻ chọn áp cùng luật H1; code đã theo H1, ADR-112). Hai câu sửa cho khớp M3; không đổi eval.
 - v2 (2026-11-15, theo `handoffs/T-179-D1.md` B1, B2, M1-M6): bỏ khái niệm "số chưa biết" (câu H1 bước 5 và Định nghĩa mâu thuẫn); đọc dự toán lỗi = không in + dòng `Chưa đọc được dự toán. Thử lại` (kể cả chưa có danh sách); thêm eval 13 (ba dạng nhãn + số thô) và 14 (đọc lỗi); bản thay inv-006 chạy thêm check_5 và check_7; ghi T-179 sửa T-177 H5 (thêm một GET), thêm eval T-177 check_4 và bất biến `planner/front/budget` inv-006, inv-007; M2 chat mở ngay + dòng `Đang lấy dự toán…`; M3 thẻ chọn hạng mục áp luật H1; M4 ẩn nút Xem thêm sau câu cố định; M5 so số thô; M6 ghi "Không làm".
 - v1 (2026-11-15): bản đầu, theo ADR-106 và brief của Chief (`board/T-179.md`).
