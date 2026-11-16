@@ -1,6 +1,6 @@
 {
   "task": "T-188",
-  "at": "2026-11-16T14:40",
+  "at": "2026-11-16T14:44",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "bash eval/T-188/check_1_co_bat_doc_khong_token.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 290,
+      "ms": 366,
       "out": "dden\\\"}\"]\n  XX  cờ bật · {} · token người thường · GET /api/admin/vendors -> không bị chặn  :: [403,\"{\\\"error\\\":\\\"forbidden\\\"}\"]\n  XX  cờ bật · {} · token người thường · GET /api/admin/vendor-enrich -> không bị chặn  :: [403,\"{\\\"error\\\":\\\"forbidden\\\"}\"]\n  XX  cờ bật · {} · token người thường · GET /api/admin/vendor-enrich/export -> không bị chặn  :: [403,\"{\\\"error\\\":\\\"forbidden\\\"}\"]\n  XX  cờ bật · {} · token người thường · /me: admin:true, user_id = danh tính cố định  :: {\"error\":\"forbidden\"}\n  XX  cờ bật · đường lạ dưới /api/admin không 403 (bình thường, không mở thêm gì)  :: [403,\"{\\\"error\\\":\\\"forbidden\\\"}\"]\n  ok  không gọi mạng ra ngoài\nFAIL cờ bật · {\"ADMIN_USER_IDS\":\"user_that_admin\"} · không token · GET /api/admin/me -> không bị chặn [[403,\"{\\\"error\\\":\\\"forbidden\\\"}\"]] (+210 lỗi nữa)",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "bash eval/T-188/check_2_co_bat_ghi_danh_tinh_co_dinh.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 186,
+      "ms": 299,
       "out": "XX  [cấu hình thường] có vendor để sửa  :: {\"error\":\"forbidden\"}\n  XX  [cấu hình thường] PUT override không token -> 200  :: [403,\"{\\\"error\\\":\\\"forbidden\\\"}\"]\n  XX  [cấu hình thường] lịch sử lớp sửa vendor: có bản ghi mới và người sửa chỉ là danh tính cố định  :: []\nFAIL ngoại lệ khi chạy (hành vi chưa đúng?): Cannot read properties of undefined (reading 'slice')",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "bash eval/T-188/check_3_co_tat_nhu_cu.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 318,
+      "ms": 418,
       "out": " 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"0\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"true\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"yes\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"on\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\" 1\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"1 \" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"01\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"TRUE\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"false\" · admin thật: /me 200 và user_id là của chính họ\n  ok  cấu hình trong repo back (wrangler*.toml, .dev.vars*, .env*) không bật ADMIN_OPEN\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "bash eval/T-188/check_4_khong_mo_route_ngoai_admin.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 221,
+      "ms": 298,
       "out": "min thật: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token admin thật: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  token người thường: mọi route ngoài /api/admin/* trả giống hệt (mã + thân) khi bật và khi tắt cờ\n  ok  token người thường: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token người thường: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  cờ bật: /api/administrator không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/administrator/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/adminx/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/admin-members không bị coi là trang admin (không trả user_id/admin:true)\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "bash eval/T-188/check_5_front_co_bat_khong_dang_nhap.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 10969,
+      "ms": 11907,
       "out": "XX (a) cờ bật, không Clerk, không token dev: có thanh tab \"Các mục admin\"  :: Tơ Hồng · Admin\nTơ Hồng · Admin\n\nChưa cấu hình đăng nhập (thiếu VITE_CLERK_PUBLISHABLE_KEY).\n  XX (a) đủ sáu tab\n  ok (a) không có nút \"Đăng nhập\"\n  XX (a) không có chữ \"Chưa cấu hình đăng nhập\" và không có \"không có quyền\"  :: Tơ Hồng · Admin\nTơ Hồng · Admin\n\nChưa cấu hình đăng nhập (thiếu VITE_CLERK_PUBLISHABLE_KEY).\n  XX (a) trang gọi GET /api/admin/me\nFAIL không đạt hoặc ngoại lệ khi chạy: locator.click: Timeout 4000ms exceeded.",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "bash eval/T-188/check_6_front_co_tat_nhu_cu.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 21170,
+      "ms": 23023,
       "out": "oken dev: \"Chưa cấu hình đăng nhập\", không thanh tab, không gọi /api/admin/*\n  ok VITE_ADMIN_OPEN=\"\" (a): thấy \"Chưa cấu hình đăng nhập\", không thanh tab, không gọi /api/admin/*\n  ok VITE_ADMIN_OPEN=\"0\" (a): thấy \"Chưa cấu hình đăng nhập\", không thanh tab, không gọi /api/admin/*\n  ok VITE_ADMIN_OPEN=\"true\" (a): thấy \"Chưa cấu hình đăng nhập\", không thanh tab, không gọi /api/admin/*\n  ok VITE_ADMIN_OPEN=\"yes\" (a): thấy \"Chưa cấu hình đăng nhập\", không thanh tab, không gọi /api/admin/*\n  ok VITE_ADMIN_OPEN=\" 1\" (a): thấy \"Chưa cấu hình đăng nhập\", không thanh tab, không gọi /api/admin/*\n  ok (b) cờ không đặt + token dev: thấy thanh tab và gọi /api/admin/me (hành vi cũ)\n  ok (c0) cờ VẮNG khỏi môi trường build + có khoá Clerk (Clerk không tải được): không thanh tab, không gọi /api/admin/*\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "bash eval/T-188/check_7_bat_bien_admin_hien_co.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4311,
+      "ms": 5799,
       "out": "ok inv-002-khong-admin-403-truoc-du-lieu.sh\n  ok inv-008-nguoi-ngoai-khong-thay-khong-goi-api-vendor.sh\n  ok inv-010-drawer-doc-la-admin-ghi-ky-la-capu.py\nPASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 64,
+      "ms": 169,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 270,
+      "ms": 388,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 39,
+      "ms": 48,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 68,
+      "ms": 85,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1326,
+      "ms": 1632,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -108,15 +108,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 3092,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-CEgOZr/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2731,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-nu3fFQ/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1752,
+      "ms": 1756,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -124,15 +124,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 983,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-RvLiTO/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1253,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-gpYk2t/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 3226,
+      "ms": 6171,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 103,
+      "ms": 114,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -148,40 +148,8 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1899,
+      "ms": 2078,
       "out": "PASS (worker.js nén 782764 byte)",
-      "tier": 2
-    },
-    {
-      "eval": "eval/invariants/planner/admin/inv-001-co-admin-open-chi-mo-voi-dung-1.sh",
-      "kind": "sh",
-      "status": "PASS",
-      "ms": 287,
-      "out": "d · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"0\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"true\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"yes\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"on\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\" 1\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"1 \" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"01\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"TRUE\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"false\" · admin thật: /me 200 và user_id là của chính họ\n  ok  không gọi mạng ra ngoài\nPASS",
-      "tier": 2
-    },
-    {
-      "eval": "eval/invariants/planner/admin/inv-002-danh-tinh-co-dinh-khong-bao-gio-la-capu.sh",
-      "kind": "sh",
-      "status": "PASS",
-      "ms": 271,
-      "out": "· danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (không token) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (khong-phai-token) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (dev:user_that_admin) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export ký 200\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export ký không có mục của danh tính cố định (không chuỗi \"admin-khong-dang-nhap\", không mục nào của các bản duyệt vừa làm)\n  ok  đối chứng: Capu thật duyệt (cờ tắt) thì export có mục của họ\n  ok  không gọi mạng ra ngoài\nPASS",
-      "tier": 2
-    },
-    {
-      "eval": "eval/invariants/planner/admin/inv-003-co-admin-open-khong-mo-route-ngoai-admin.sh",
-      "kind": "sh",
-      "status": "PASS",
-      "ms": 317,
-      "out": "min thật: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token admin thật: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  token người thường: mọi route ngoài /api/admin/* trả giống hệt (mã + thân) khi bật và khi tắt cờ\n  ok  token người thường: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token người thường: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  cờ bật: /api/administrator không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/administrator/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/adminx/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/admin-members không bị coi là trang admin (không trả user_id/admin:true)\n  ok  không gọi mạng ra ngoài\nPASS",
-      "tier": 2
-    },
-    {
-      "eval": "eval/invariants/planner/admin/inv-004-khong-file-cau-hinh-bat-co-admin-open.py",
-      "kind": "py",
-      "status": "PASS",
-      "ms": 48,
-      "out": "PASS",
       "tier": 2
     }
   ],
