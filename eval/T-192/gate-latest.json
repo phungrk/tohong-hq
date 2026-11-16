@@ -1,6 +1,6 @@
 {
   "task": "T-192",
-  "at": "2026-11-16T15:56",
+  "at": "2026-11-16T16:10",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "node eval/T-192/check_1_moi_hang_muc_co_so_tien.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 3471,
+      "ms": 3664,
       "out": "FAIL hàng \"Chụp ảnh\": số tiền trống hoặc lỗi, hàng ghi \"Chụp ảnh tr\" (mong \"Chụp ảnh 20tr\") (+3 lỗi nữa)",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "node eval/T-192/check_2_so_hang_muc_theo_khuon_t187.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 2606,
+      "ms": 2668,
       "out": "FAIL hàng \"Chụp ảnh\" (API 12.34): mong số tiền \"12,3tr\", thấy \"tr\" (hàng: \"Chụp ảnh tr\") (+11 lỗi nữa)",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "node eval/T-192/check_3_khoang_gia_dau_rong.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 8628,
+      "ms": 9116,
       "out": "FAIL danh sách chat (Alpha): mong đúng chữ \"Đến 5tr\", thấy \"#1 PHÙ HỢP NHẤT Alpha Studio 90% Rất phù hợp 4.5 (3) HCMC · modern tr–5tr\" (+14 lỗi nữa)",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "node eval/T-192/check_4_cham_so_mo_o_sua_dung_so.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 5782,
+      "ms": 6297,
       "out": "FAIL ô sửa của \"Chụp ảnh\": mong giá trị \"20\", thấy \"undefined\" (+5 lỗi nữa)",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "node eval/T-192/check_5_thanh_ty_le_theo_so_phan_bo.cjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 3843,
+      "ms": 4243,
       "out": "FAIL (số) thanh tỷ lệ hạng mục thứ 1: mong ~20% rãnh, thấy 100.0% (+5 lỗi nữa)",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 64,
+      "ms": 79,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 227,
+      "ms": 249,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 34,
+      "ms": 52,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 70,
+      "ms": 76,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1465,
+      "ms": 1952,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -92,15 +92,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2782,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-xynMJU/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 3425,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-GXRTkd/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1660,
+      "ms": 1987,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -108,15 +108,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1241,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-KL1yP1/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1322,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-FFfyAz/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2826,
+      "ms": 3550,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 108,
+      "ms": 142,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1761,
+      "ms": 2135,
       "out": "PASS (worker.js nén 782845 byte)",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-001-mot-con-so-cho-khoan-vendor.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9902,
+      "ms": 10152,
       "out": "ok  [TC1] photography: có khoản vendor lưu ở máy chủ với số hữu hạn\n  ok  [TC1] photography: số ở dòng khoản vendor trong Mục con = số lưu 12\n  ok  [TC1] photography: dòng hạng mục ở danh sách chỉ hiện đúng số lưu 12 làm tiền chi\n  ok  [TC1] venue: có khoản vendor lưu ở máy chủ với số hữu hạn\n  ok  [TC1] venue: số ở dòng khoản vendor trong Mục con = số lưu 126\n  ok  [TC1] venue: dòng hạng mục ở danh sách chỉ hiện đúng số lưu 126 làm tiền chi\n  ok  [TC1] tổng \"Đã chốt\" = tổng số lưu của các khoản vendor (138)\nPASS",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-002-khong-doan-so-khi-thieu-dau-vao.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 9232,
+      "ms": 9376,
       "out": "ok  [TC2] thiếu số khách: số lưu của khoản vendor là 0 hoặc không có\n  ok  [TC2] thiếu số khách: màn chi tiết không có NaN/undefined/Infinity\n  ok  [TC2] thiếu số khách: dòng hạng mục không hiện số tiền chi nào\n  ok  [TC2] thiếu số khách: danh sách Ngân sách không có NaN/undefined/Infinity\n  ok  [TC2] vendor chưa có giá: số lưu của khoản vendor là 0 hoặc không có\n  ok  [TC2] vendor chưa có giá: màn chi tiết không có NaN/undefined/Infinity\n  ok  [TC2] vendor chưa có giá: dòng hạng mục không hiện số tiền chi nào\n  ok  [TC2] vendor chưa có giá: danh sách Ngân sách không có NaN/undefined/Infinity\nPASS",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-003-mo-man-khong-dung-du-lieu-chung.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 28698,
+      "ms": 28949,
       "out": "] máy chốt Y, máy chủ chỉ có khoản X của vendor khác: app đã tải xong (dòng \"Nhà hàng X của máy kia\" hiện trong Mục con)\n  ok  [TC3] máy chốt Y, máy chủ chỉ có khoản X của vendor khác: không thêm/xoá khoản, không đổi gì ngoài amt của khoản trùng vendor đang chốt\n  ok  [TC3] máy chốt Y, máy chủ chỉ có khoản X của vendor khác: sau khi về danh sách vẫn không thêm/xoá/đổi khoản\n  ok  [TC3] máy chốt Y, máy chủ có khoản Y cũ: app đã tải xong (dòng \"Nhà hàng Hoa Sen\" hiện trong Mục con)\n  ok  [TC3] máy chốt Y, máy chủ có khoản Y cũ: không thêm/xoá khoản, không đổi gì ngoài amt của khoản trùng vendor đang chốt\n  ok  [TC3] máy chốt Y, máy chủ có khoản Y cũ: sau khi về danh sách vẫn không thêm/xoá/đổi khoản\n  ok  [TC3] chụp ảnh: mở màn không thêm/xoá khoản, chỉ có thể đổi amt khoản vendor trùng\nPASS",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-004-lop-cach-hoat-dong-la-hop-thoai.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 36660,
+      "ms": 37481,
       "out": "k  photography: mở lớp không đổi địa chỉ\n  ok  photography: Back đóng lớp, vẫn ở hạng mục\n  ok  photography: đóng bằng Escape: lớp đóng, không còn role=dialog, vẫn ở hạng mục\n  ok  photography: sau khi đóng bằng Escape, Back MỘT lần rời hạng mục về #/ngan-sach (không có bước chết)\n  ok  photography: đóng bằng chạm vùng tối: lớp đóng, không còn role=dialog, vẫn ở hạng mục\n  ok  photography: sau khi đóng bằng chạm vùng tối, Back MỘT lần rời hạng mục về #/ngan-sach (không có bước chết)\n  ok  photography: đóng bằng Đóng: lớp đóng, không còn role=dialog, vẫn ở hạng mục\n  ok  photography: sau khi đóng bằng Đóng, Back MỘT lần rời hạng mục về #/ngan-sach (không có bước chết)\n  ok  1280px: chạm ngoài khung app đóng lớp\n  ok  không có PUT/POST nào ra API trong lúc mở và đóng lớp (mọi cách đóng)\nPASS",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-005-ghi-lai-du-toan-khong-xoa-khoan-ghi-xen.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 12920,
+      "ms": 14441,
       "out": "PASS",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-006-nut-tim-so-khop-du-toan-doc-du.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 11081,
+      "ms": 12569,
       "out": "PASS",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-007-nut-tim-ten-dai-khong-tran-320-360.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 11162,
+      "ms": 12192,
       "out": "PASS",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/front/budget/inv-008-so-tien-le-dau-phay-khong-dau-0.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 23803,
+      "ms": 25126,
       "out": "PASS",
       "tier": 2
     }
