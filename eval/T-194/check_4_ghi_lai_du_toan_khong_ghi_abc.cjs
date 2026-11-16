@@ -7,8 +7,9 @@
  *     và trong bản gửi: venue.allocated_tr vẫn "abc", photography "", attire "20", jewelry 30 (kiểu số), reserve bỏ khuyết; chỉ amt khoản vendor đổi.
  *  d. ghi lại sau lỗi (INV-005): chỉnh jewelry 30 -> 31 lúc ghi lỗi (hiện "Chưa lưu được dự toán"); trong lúc đó một lần ghi khác (thẻ chat) đổi photography "" -> 50 trên server;
  *     bấm "Thử lại": bản ghi cuối giữ photography = 50 (không bị đè thành 0 hay ""), jewelry 31, venue "abc", attire "20".
+ *  e. ngoại lệ Tuần trăng mật rút từ Dự phòng (useBudget setAmt): Dự phòng 50 / "20" / "abc", chỉnh Tuần trăng mật +1 -> gửi 49 / 19 / 0 (số JSON); hạng mục khác nguyên. Đỏ trên main ở "abc" (main gửi null) và với cách cài giữ Dự phòng nguyên (50).
  * Ngoài phạm vi, không đo: Infinity, items[].amt. Chỉ đo thân PUT và chữ nhìn thấy.
- * Trên main 6b9ad94: XANH (main ghi đúng như đã lưu); đây là chỉ số bảo vệ, ĐỎ với bản vá ép allocated_tr thành số ở lối ghi (đã thử: ca b, c, d đều đỏ). Đo ghi, không đo hiển thị.
+ * Trên main 6b9ad94: ca a-d XANH (main ghi đúng như đã lưu), ca e ĐỎ ở "abc"; đây là chỉ số bảo vệ, ĐỎ với bản vá ép allocated_tr thành số ở lối ghi (đã thử: ca b, c, d đều đỏ). Đo ghi, không đo hiển thị.
  * Chạy: node eval/T-194/check_4_ghi_lai_du_toan_khong_ghi_abc.cjs [--repo <tohong-front>] */
 const { E, waitText, MIX } = require('./_b.cjs'); const S = E.setup();
 const same = (v, w) => (w === undefined ? v === undefined : (typeof v === typeof w && v === w));
@@ -85,4 +86,19 @@ S.run(async () => {
     else checkCats(lastOf(ok).b, { photography: 50, venue: 'abc', attire: '20', jewelry: 31 }, 'd. ghi lại sau lỗi');
   } catch (e) { S.bad('d. ghi lại sau lỗi: lỗi chạy ' + String(e.message).split('\n')[0]); }
   await pg.context().close();
+  /* e. ngoại lệ có sẵn: chỉnh Tuần trăng mật 0 -> 1 rút phần chênh từ Dự phòng. Dự phòng = hạng mục vừa đổi do luật này: đọc theo H0 rồi rút, gửi SỐ JSON (50 -> 49, "20" -> 19, "abc" -> 0), không âm. Hạng mục khác nguyên như đã lưu. */
+  for (const [stored, mong] of [[50, 49], ['20', 19], ['abc', 0]]) {
+    puts = []; const doc = baseDoc();
+    doc.categories = doc.categories.filter((c) => c.id !== 'reserve');
+    doc.categories.push({ id: 'honeymoon', name: 'Tuần trăng mật', pct: 0, allocated_tr: 0, items: [] }, { id: 'reserve', name: 'Dự phòng', pct: 10, allocated_tr: stored, items: [] });
+    pg = await S.page('__t187b.html', '?v=budget&cat=honeymoon', { budget: doc }); watch(pg, puts);
+    const tag = `e. chỉnh Tuần trăng mật, Dự phòng đã lưu ${show(stored)}`;
+    try {
+      const sl = pg.getByRole('slider', { name: 'Dự toán' }); await sl.waitFor({ timeout: 15000 }); await pg.waitForTimeout(800);
+      await sl.focus(); await pg.keyboard.press('ArrowRight'); await pg.waitForTimeout(2500);
+      if (!puts.length) S.bad(`${tag}: không thấy lần ghi nào`);
+      else checkCats(lastOf(puts), { honeymoon: 1, reserve: mong, photography: '', venue: 'abc', jewelry: 30, attire: '20' }, tag);
+    } catch (e) { S.bad(tag + ': lỗi chạy ' + String(e.message).split('\n')[0]); }
+    await pg.context().close();
+  }
 });
