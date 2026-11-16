@@ -1,9 +1,11 @@
+// BẢN THAY ĐỀ NGHỊ của T-183 cho eval/invariants/planner/vendor/matching/inv-007-... (Chief quyết, ghi decisions/, không ai tự sửa file gốc). Khác bản gốc đúng một điều: số trong chip dùng dấu phẩy.
+// ĐỎ trên back main 2d1a76c tới khi PR back T-183 merge (ADR-028).
 // Nguồn: T-178 (spec products/T-178-chip-nha-hang-ghi-tong-tien.md v1, H1 "Khuôn chip" và "Bất biến đề xuất"), rút bởi spec-critic khi spec qua Spec Gate 2026-11-15.
 // Nằm ở eval/T-178/bat-bien-cho-merge/ tới khi PR back T-178 merge (ADR-028: ĐỎ trên main c2445db vì chip chưa ghi tổng); Chief of Staff chuyển vào
 // eval/invariants/planner/vendor/matching/ và đặt số (mở rộng matching/inv-005 "một nguồn số" sang chip).
 // INV (planner/vendor/matching) · Chip theo bàn của nhà hàng luôn có đúng khuôn "≈ {giá}tr/bàn × {N} bàn = {tổng}tr", và ba số trong chip là đúng ba số
 //   của match.budgetBasis cùng vendor: {giá} = pricePerTableTr, {N} = tables, {tổng} = totalTr (tổng tính từ giá CHƯA làm tròn), mỗi số làm tròn 1 chữ số,
-//   dấu chấm thập phân, bỏ ".0", không phân cách hàng nghìn. Chip chỉ có ở vendor budgetBasis per_table, giá không ước tính, điểm Ngân sách >= 1;
+//   dấu PHẨY thập phân (T-183, khuôn T-167), bỏ ",0", không phân cách hàng nghìn. Chip chỉ có ở vendor budgetBasis per_table, giá không ước tính, điểm Ngân sách >= 1;
 //   không hạng mục nào khác có chip "/bàn". Chi tiết vendor (GET /api/vendors/:id) cho đúng chip như danh sách.
 // Đo qua hành vi công khai GET /api/vendors/match và GET /api/vendors/:id; pool THẬT (thêm hai venue đặt giá 4,25 và 3,9 để thử làm tròn), R2 giả, không mạng.
 // Chạy: node <file>. Repo: TOHONG_BACK_REPO hoặc ../tohong-back.
@@ -13,7 +15,7 @@ const L = (t) => import(u(p.join(hq, "eval", t, "_lib.mjs")).href);
 const { stampedBack, loadModules, setNow, restoreNow } = await L("T-164");
 const { tab, coupleProfile, CID, done } = await L("T-159");
 const fails = []; const bad = (m) => { if (fails.length < 12) fails.push(m); };
-const r1 = (x) => String(Math.round(x * 10) / 10);   // khuôn chip, viết độc lập với mã
+const r1 = (x) => String(Math.round(x * 10) / 10).replace(".", ",");   // khuôn chip (T-183: dấu phẩy như budgetBasis.text), viết độc lập với mã
 const odd = [];
 const M = await loadModules(stampedBack({ stamp: () => {}, mut: (arr) => {
   const vs = arr.filter((v) => v.category === "venue" && v.city === "HCMC").slice(0, 2);
@@ -45,7 +47,7 @@ for (const [label, profile, budgetDoc] of CASES) for (const cat of CATS) {
     if (cat !== "venue") { bad(`${tag}: hạng mục ${cat} có chip theo bàn "${c}"`); continue; }
     if (!bb || bb.kind !== "per_table" || bb.estimated !== false || !(v.match.scoreBreakdown?.budget >= 1)) { bad(`${tag}: chip "${c}" mà budgetBasis ${bb?.kind}/ước tính ${bb?.estimated}/điểm ${v.match.scoreBreakdown?.budget}`); continue; }
     const want = `≈ ${r1(bb.pricePerTableTr)}tr/bàn × ${bb.tables} bàn = ${r1(bb.totalTr)}tr`;
-    if (c !== want && c !== want.replace(/(\d)\.(\d)/g, "$1,$2") /* ADR-113: chuyển tiếp, nhận cả dấu phẩy */) bad(`${tag}: chip "${c}", mong "${want}" (budgetBasis giá ${bb.pricePerTableTr}, ${bb.tables} bàn, tổng ${bb.totalTr})`);
+    if (c !== want) bad(`${tag}: chip "${c}", mong "${want}" (budgetBasis giá ${bb.pricePerTableTr}, ${bb.tables} bàn, tổng ${bb.totalTr})`);
     if (detailed < 3) {
       detailed++;
       const d = await tab(M, { url: `/api/vendors/${v.id}?coupleId=${CID}`, profile, budgetDoc, countFetch: { n: 0 } });
