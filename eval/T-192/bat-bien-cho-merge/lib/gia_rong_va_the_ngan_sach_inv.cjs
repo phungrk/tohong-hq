@@ -1,6 +1,6 @@
 /* Bất biến INV-009 và INV-010 (planner/front/budget, front) · Nguồn: T-192 (spec products/T-192-the-ngan-sach-chat-so-tien-hang-muc.md v2, qua Spec Gate 2026-11-16, spec-critic).
  * --which mini  (INV-009): mỗi hàng hạng mục của thẻ ngân sách trong chat ghi số tiền đã phân bổ của CHÍNH hạng mục đó (cùng khuôn INV-008), kể cả 0 ("0tr")
- *               và khi API trả số dạng chuỗi; không hàng nào còn "tr" đứng riêng, "undefined", "NaN".
+ *               và khi API trả số dạng chuỗi (kể cả chuỗi rỗng "" -> "0tr", thêm bởi adversary T-193 adv-01); không hàng nào còn "tr" đứng riêng, "undefined", "NaN".
  * --which price (INV-010): giá vendor có một hoặc cả hai đầu rỗng ("", null, bỏ khuyết) không bao giờ hiện "tr" đứng riêng, "tr–", "–tr",
  *               hay "0tr" bịa cho đầu rỗng, ở chat (danh sách, chi tiết, thẻ chọn so sánh) và màn Vendor đã lưu. Không khoá chữ thay thế ("Đến…", "Chưa có giá"…).
  * Chỉ đo chữ nhìn thấy (innerText), không đọc mã nguồn. Khung tự đủ: vite dev qua eval/_lib/vite_dev.cjs, Playwright, API giả (không mạng ngoài). Gốc HQ: dò ngược tới scripts/gate.py.
@@ -57,8 +57,8 @@ const ALL = [...PH, ...PH2, ...HALLS];
 const mkSaved = (v, p) => ({ id: v.id, name: v.name, priceTotal: p, priceUnit: v.category === 'venue' ? 'bàn' : 'gói', grad: 'linear-gradient(#ccc,#ddd)', gallery: ['linear-gradient(#ccc,#ddd)'], spec: 'x', rating: 4, rv: 1, match: 80, location: 'HCMC' });
 /* Lưu lúc có giá 4, nay đầu dưới rỗng (Kappa) / cả hai rỗng (Tau); lưu không giá (Lambda ""), Ups (nhà hàng) lưu 4 nay đầu trên rỗng. */
 const SEED = JSON.stringify({ photography: { shortlisted: [mkSaved(PH[0], 4), mkSaved(PH[3], 4), mkSaved(PH[1], '')], confirmed: null }, venue: { shortlisted: [mkSaved(HALLS[2], 4), mkSaved(HALLS[1], '')], confirmed: null } });
-/* Dự toán: số nguyên, 0, và chuỗi từ API. */
-const CATS = [['photography', 'Chụp ảnh', 20], ['venue', 'Tiệc & nhà hàng', '60'], ['jewelry', 'Nhẫn cưới & trang sức', 0], ['attire', 'Trang phục', '3.4'], ['reserve', 'Dự phòng', 12.34]];
+/* Dự toán: số nguyên, 0, chuỗi từ API, và chuỗi rỗng "" (T-193 adv-01: rỗng ghi "0tr" như màn Ngân sách, không "tr" trơ). Cột 4 = số mong đợi khi khác số gửi. */
+const CATS = [['photography', 'Chụp ảnh', 20], ['venue', 'Tiệc & nhà hàng', '60'], ['jewelry', 'Nhẫn cưới & trang sức', 0], ['attire', 'Trang phục', '3.4'], ['reserve', 'Dự phòng', 12.34], ['makeup', 'Trang điểm & làm tóc', '', 0]];
 const BUDGET = { total_tr: 100, guests: 100, mung_tr: 5, categories: CATS.map(([id, name, a]) => ({ id, name, allocated_tr: a, pct: 10, items: [] })) };
 
 const fails = []; const bad = (m) => { if (!fails.includes(m)) fails.push(m); };
@@ -116,7 +116,8 @@ const checkPrice = (surf, t) => { const s = String(t || '').replace(/\s+/g, ' ')
           }
           return out;
         }, CATS.map((c) => c[1]));
-        for (const [, name, a] of CATS) {
+        for (const [, name, a0, exp] of CATS) {
+          const a = exp !== undefined ? exp : a0;
           const t = r[name], want = `${name} ${ref(a)}tr`;
           if (!t) { bad(`thẻ ngân sách chat: không thấy hàng "${name}"`); continue; }
           if (BARE_TR.test(t) || /undefined|NaN|null/.test(t) || !new RegExp('^' + esc(name) + '\\s*' + esc(ref(a)) + '\\s?tr$').test(t)) bad(`thẻ ngân sách chat, hàng "${name}": mong "${want}", thấy "${t}"`);
