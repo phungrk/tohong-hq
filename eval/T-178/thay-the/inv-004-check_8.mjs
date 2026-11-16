@@ -18,7 +18,7 @@ const hide = (keep) => Object.fromEntries(M.POOL.filter((v) => v.category === "v
 const KEEP3 = [ids.R1, ids.E1, ids.R2]; const ov3 = hide(KEEP3); const ovOld = hide([ids.OLD]);
 const tabV = (o) => tabMatch(M, "venue", { overlay: ov3, ...o });
 const bs = (r, id) => r.body?.vendors?.find((v) => v.id === id)?.match?.scoreBreakdown?.budget;
-const reasons = (r, id) => (r.body?.vendors?.find((v) => v.id === id)?.match?.reasons || []).map((x) => x.label.replace(/^(≈ \S+tr\/bàn × \d+ bàn) = \S+tr$/, "$1"));
+const reasons = (r, id) => (r.body?.vendors?.find((v) => v.id === id)?.match?.reasons || []).map((x) => x.label.replace(/^(≈ \S+tr\/bàn × \d+ bàn) = \S+tr$/, "$1").replace(/(\d),(\d)/g, "$1.$2") /* ADR-113: chuyển tiếp, nhận cả dấu phẩy */);
 setNow("2026-11-14T08:00:00Z");
 const P = (g, bc) => coupleProfile({ budget: 300, ...(g ? { guest_count: g } : {}), budget_by_category: { venue: bc } });
 /* a. 300 khách = 30 bàn, ngân sách venue 120tr (4tr/bàn) */
@@ -76,12 +76,12 @@ const msg = "Tìm nhà hàng tiệc cưới giúp anh chị";
   const r = await chat(M, { message: msg + " 150tr", profile: coupleProfile({ budget: 300 }), overlay: ov3 }); if (r.err) bad("chat venue chưa có số khách: không được ném"); if (r.ids.length) bad("chat venue chưa có số khách: không ứng viên (hỏi số khách trước như hôm nay)"); }
 /* h. số khách hiệu lực dùng cho cả sức chứa, chip "Đủ N khách", prompt, hash, missing_field */
 { const r = await tabV({ profile: P(100, 150), budgetDoc: { ...doc({ venue: 0 }), guests: 300 } });
-  const rs = (id) => (r.body?.vendors?.find((v) => v.id === id)?.match?.reasons || []).map((x) => x.label.replace(/^(≈ \S+tr\/bàn × \d+ bàn) = \S+tr$/, "$1")); const cap = (id) => r.body?.vendors?.find((v) => v.id === id)?.match?.scoreBreakdown?.capacity;
+  const rs = (id) => (r.body?.vendors?.find((v) => v.id === id)?.match?.reasons || []).map((x) => x.label.replace(/^(≈ \S+tr\/bàn × \d+ bàn) = \S+tr$/, "$1").replace(/(\d),(\d)/g, "$1.$2") /* ADR-113: chuyển tiếp, nhận cả dấu phẩy */); const cap = (id) => r.body?.vendors?.find((v) => v.id === id)?.match?.scoreBreakdown?.capacity;
   if (!rs(ids.R1).includes("Đủ 300 khách") || !rs(ids.R1).includes("≈ 4.6tr/bàn × 30 bàn")) bad(`hồ sơ 100 khách, bảng 300: thẻ R1 mong cả "Đủ 300 khách" và "≈ 4.6tr/bàn × 30 bàn", thấy ${JSON.stringify(rs(ids.R1))}`);
   if (rs(ids.R1).some((l) => /Đủ 100 khách/.test(l))) bad("thẻ venue ghi 'Đủ 100 khách' trong khi số khách hiệu lực là 300");
   if (!(cap(ids.E1) < 1) || rs(ids.E1).some((l) => /^Đủ/.test(l))) bad(`E1 sức chứa 50-150: với 300 khách điểm sức chứa phải < 1 và không chip "Đủ", thấy ${cap(ids.E1)} ${JSON.stringify(rs(ids.E1))}`);
   const r2 = await tabV({ profile: P(100, 150), budgetDoc: { ...doc({ venue: 0 }) } });  // bảng không có guests: dùng hồ sơ 100 khách = 10 bàn
-  const rs2 = (r2.body?.vendors?.find((v) => v.id === ids.R1)?.match?.reasons || []).map((x) => x.label.replace(/^(≈ \S+tr\/bàn × \d+ bàn) = \S+tr$/, "$1"));
+  const rs2 = (r2.body?.vendors?.find((v) => v.id === ids.R1)?.match?.reasons || []).map((x) => x.label.replace(/^(≈ \S+tr\/bàn × \d+ bàn) = \S+tr$/, "$1").replace(/(\d),(\d)/g, "$1.$2") /* ADR-113: chuyển tiếp, nhận cả dấu phẩy */);
   if (!rs2.includes("≈ 4.6tr/bàn × 10 bàn")) bad(`bảng không có guests: dùng hồ sơ 100 khách => "≈ 4.6tr/bàn × 10 bàn", thấy ${JSON.stringify(rs2)}`);
   const r3 = await tabV({ profile: P(100, 150) });  // không có bảng
   if (!(r3.body?.vendors?.find((v) => v.id === ids.E1)?.match?.reasons || []).some((x) => x.label === "Đủ 100 khách")) bad("không có bảng: dùng hồ sơ, E1 (50-150) phải có chip 'Đủ 100 khách'"); }

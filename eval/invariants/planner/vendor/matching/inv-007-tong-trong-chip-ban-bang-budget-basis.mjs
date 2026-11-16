@@ -45,7 +45,7 @@ for (const [label, profile, budgetDoc] of CASES) for (const cat of CATS) {
     if (cat !== "venue") { bad(`${tag}: hạng mục ${cat} có chip theo bàn "${c}"`); continue; }
     if (!bb || bb.kind !== "per_table" || bb.estimated !== false || !(v.match.scoreBreakdown?.budget >= 1)) { bad(`${tag}: chip "${c}" mà budgetBasis ${bb?.kind}/ước tính ${bb?.estimated}/điểm ${v.match.scoreBreakdown?.budget}`); continue; }
     const want = `≈ ${r1(bb.pricePerTableTr)}tr/bàn × ${bb.tables} bàn = ${r1(bb.totalTr)}tr`;
-    if (c !== want) bad(`${tag}: chip "${c}", mong "${want}" (budgetBasis giá ${bb.pricePerTableTr}, ${bb.tables} bàn, tổng ${bb.totalTr})`);
+    if (c !== want && c !== want.replace(/(\d)\.(\d)/g, "$1,$2") /* ADR-113: chuyển tiếp, nhận cả dấu phẩy */) bad(`${tag}: chip "${c}", mong "${want}" (budgetBasis giá ${bb.pricePerTableTr}, ${bb.tables} bàn, tổng ${bb.totalTr})`);
     if (detailed < 3) {
       detailed++;
       const d = await tab(M, { url: `/api/vendors/${v.id}?coupleId=${CID}`, profile, budgetDoc, countFetch: { n: 0 } });
