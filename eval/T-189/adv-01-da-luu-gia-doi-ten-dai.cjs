@@ -28,7 +28,7 @@ let A;
       await pg.waitForFunction((n) => document.body.innerText.includes(n), c.v.name, { timeout: 20000 }); await pg.waitForTimeout(2000);
       const txt = await L.textIn(pg, '#root');
       if (c.changed && !/cập nhật/.test(txt)) R.bad(`${c.label}: ca thử không dựng được dòng "giá đã cập nhật" (eval cần sửa)`);
-      await F.assertSurface(A, pg, '#root', [F.expectOf(c.v)], `đã lưu, giá đổi, ${c.label}`, R.bad, {});
+      await F.assertSurface(A, pg, '#root', [F.expectOf(c.v)], `đã lưu (hàng Vendors), ${c.label}`, R.bad, {});
       if (process.env.T189_DEBUG) { const e = F.expectOf(c.v); console.log('DBG', c.label, JSON.stringify(await A.probe(pg, { scopeSel: '#root', needle: e.author, thumbStem: e.stem }))); }
     } catch (e) { R.bad(`${c.label}: lỗi chạy ` + String(e.message).split('\n')[0]); }
     await pg.context().close();
