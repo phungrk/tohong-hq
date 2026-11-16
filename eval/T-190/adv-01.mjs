@@ -56,7 +56,7 @@ for (const [wn, val] of WEIRD) {
 
 // (b)
 {
-  const TOK = "adv-xuat-thu";
+  const TOK = "adv-t190-may-xuat-thu-dai";
   const { privateKey } = crypto.generateKeyPairSync("ed25519");
   const SIGN = { ENRICH_EXPORT_TOKEN: TOK, ENRICH_SIGNING_KEY: privateKey.export({ type: "pkcs8", format: "der" }).toString("base64"), ENRICH_SIGNING_KEY_ID: "kadv" };
   const CAPU = "user_capu_that";
