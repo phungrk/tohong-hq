@@ -9,7 +9,10 @@
  *     (b) CÓ khoá Clerk (giả): vẫn không có nút "Đăng nhập", thấy thanh tab, và trình duyệt không gửi request nào tới máy chủ Clerk;
  *     (c) API trả 403 cho /me (Worker chưa bật cờ): trang vẫn chỉ nói "Bạn không có quyền xem trang này", không thanh tab, không gọi /api/admin/vendor-enrich* hay /api/admin/vendors*;
  *     (d) trang không phải admin (không có ?admin) không đổi: không có thanh tab "Các mục admin" và không gọi /api/admin/*.
- *  case 6 (tiêu chí 6): cờ không đặt hoặc khác "1" ("", "0", "true", "yes", " 1") thì y như hôm nay:
+ *  case 6 (tiêu chí 6): cờ VẮNG HẲN khỏi môi trường build (giống Vercel; biến bị gỡ khỏi env, không gán rỗng) hoặc khác "1" ("", "0", "true", "yes", " 1") thì y như hôm nay:
+ *     (0) quét cấu hình repo front: không file .env*, vercel.json, vite.config.*, package.json nào đặt VITE_ADMIN_OPEN thành 1 (vite.config.* không được nhắc tới cờ này);
+ *     (a0) cờ vắng + không khoá Clerk + không token dev: như (a) bên dưới (bắt mặc định `?? '1'` và file .env.production bật cờ);
+ *     (c0) cờ vắng + có khoá Clerk: như (c) bên dưới (cùng lượt build như Vercel);
  *     (a) không khoá Clerk, không token dev: thấy "Chưa cấu hình đăng nhập", không thanh tab, không gọi /api/admin/*;
  *     (b) có token dev (VITE_ADMIN_DEV_TOKEN) như cấu hình chạy local hôm nay: thấy thanh tab và gọi /api/admin/me (hành vi cũ giữ nguyên);
  *     (c) có khoá Clerk (giả) mà Clerk không tải được: KHÔNG thấy thanh tab "Các mục admin" và không gọi /api/admin/* (cổng đăng nhập vẫn chặn trước khi gọi API).
@@ -45,8 +48,11 @@ const ROW = { n: 1, id: 'vd1', name: 'Alpha Hall', category: 'venue', catLabel: 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.json': 'application/json' };
 
 function build(env) {
+  // env.VITE_ADMIN_OPEN === undefined nghĩa là biến KHÔNG có trong môi trường build (không phải chuỗi rỗng).
   const dist = fs.mkdtempSync(path.join(os.tmpdir(), 't188-dist-'));
-  const e = { ...process.env, VITE_API_BASE: 'http://api.test', VITE_CLERK_PUBLISHABLE_KEY: '', VITE_ADMIN_DEV_TOKEN: '', VITE_ADMIN_OPEN: '', ...env };
+  const e = { ...process.env, VITE_API_BASE: 'http://api.test', VITE_CLERK_PUBLISHABLE_KEY: '', VITE_ADMIN_DEV_TOKEN: '', ...env };
+  // Biến cờ chỉ có mặt khi case tự đặt. Mặc định VẮNG HẲN khỏi môi trường build (giống Vercel), để Vite còn đọc file .env* của repo và để mặc định trong code lộ ra.
+  if (env.VITE_ADMIN_OPEN === undefined) delete e.VITE_ADMIN_OPEN;
   try { execSync(`npx vite build --outDir ${JSON.stringify(dist)} --emptyOutDir`, { cwd: REPO, stdio: ['ignore', 'pipe', 'pipe'], env: e }); }
   catch (err) { console.log('FAIL build lỗi: ' + String(err.stderr || err.message).split('\n').filter(Boolean).slice(-2).join(' | ')); process.exit(1); }
   return dist;
@@ -148,6 +154,28 @@ const TAB_NAMES = ['Dữ liệu vendor', 'Thành viên', 'Hộp kết nối', 'N
       server.close();
     }
     if (CASE === '6') {
+      {
+        const hits = [];
+        const flagOn = (txt) => /VITE_ADMIN_OPEN["']?\s*[=:]\s*["']?1(?![0-9A-Za-z])/.test(txt) || /["']VITE_ADMIN_OPEN["']\s*[:,]\s*["']?1(?![0-9A-Za-z])/.test(txt);
+        for (const f of fs.readdirSync(REPO)) {
+          const full = path.join(REPO, f);
+          if (!fs.statSync(full).isFile()) continue;
+          const isEnv = /^\.env(\..*)?$/.test(f), isVercel = f === 'vercel.json', isVite = /^vite\.config\./.test(f), isPkg = f === 'package.json';
+          if (!(isEnv || isVercel || isVite || isPkg)) continue;
+          const t = fs.readFileSync(full, 'utf8');
+          if (isEnv) { for (const line of t.split('\n')) { const m = /^\s*(?:export\s+)?VITE_ADMIN_OPEN\s*=\s*(.*)$/.exec(line); if (m && m[1].replace(/#.*/, '').trim().replace(/^["']|["']$/g, '') === '1') hits.push(f + ': ' + line.trim()); } }
+          else if (isVite) { if (t.includes('VITE_ADMIN_OPEN')) hits.push(f + ': nhắc tới VITE_ADMIN_OPEN'); }
+          else if (flagOn(t)) hits.push(f + ': đặt VITE_ADMIN_OPEN=1');
+        }
+        check('(0) cấu hình repo front (.env*, vercel.json, vite.config.*, package.json) không bật VITE_ADMIN_OPEN', hits.length === 0, hits.join(' | '));
+      }
+      {
+        const dist = build({}); const server = await serve(dist);
+        const S = await open(server); await settle(S.page);
+        const txt = await body(S.page);
+        check('(a0) cờ VẮNG khỏi môi trường build, không Clerk, không token dev: "Chưa cấu hình đăng nhập", không thanh tab, không gọi /api/admin/*', txt.includes('Chưa cấu hình đăng nhập') && (await NAV(S.page).count()) === 0 && S.n(/\/api\/admin/) === 0, txt.slice(0, 120) + ' | ' + S.calls.join(', '));
+        await S.page.context().close(); server.close();
+      }
       for (const val of ['', '0', 'true', 'yes', ' 1']) {
         const dist = build({ VITE_ADMIN_OPEN: val }); const server = await serve(dist);
         const tag = `VITE_ADMIN_OPEN=${JSON.stringify(val)}`;
@@ -165,7 +193,7 @@ const TAB_NAMES = ['Dữ liệu vendor', 'Thành viên', 'Hộp kết nối', 'N
       {
         const dist = build({ VITE_CLERK_PUBLISHABLE_KEY: FAKE_CLERK_KEY }); const server = await serve(dist);
         const S = await open(server); await settle(S.page);
-        check('(c) cờ không đặt + có khoá Clerk (Clerk không tải được): không thanh tab, không gọi /api/admin/*', (await NAV(S.page).count()) === 0 && S.n(/\/api\/admin/) === 0, S.calls.join(', '));
+        check('(c0) cờ VẮNG khỏi môi trường build + có khoá Clerk (Clerk không tải được): không thanh tab, không gọi /api/admin/*', (await NAV(S.page).count()) === 0 && S.n(/\/api\/admin/) === 0, S.calls.join(', '));
         await S.page.context().close(); server.close();
       }
     }

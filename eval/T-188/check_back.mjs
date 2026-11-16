@@ -5,12 +5,15 @@
 //         GET /api/admin/me trả admin:true và user_id đúng "admin-khong-dang-nhap" trong mọi trường hợp trên (kể cả khi ADMIN_USER_IDS thiếu, rỗng hay chứa người khác).
 //  case 2 (tiêu chí 2): cờ bật, mọi thao tác GHI admin (sửa/xoá lớp sửa vendor, duyệt/rút duyệt enrich, đổi trạng thái yêu cầu kết nối, từ chối và kích hoạt yêu cầu nâng cấp, giữ và thu hồi gói tự kích hoạt) thành công không token;
 //         mọi dòng nhật ký GET /api/admin/audit sinh ra có admin_id đúng "admin-khong-dang-nhap" (không có giá trị nào khác, không rỗng); lịch sử lớp sửa vendor (GET /api/admin/vendors/<id>.history) ghi người sửa đúng danh tính đó;
-//         bản duyệt enrich mang reviewed_by đúng danh tính đó và by_capu=false, KỂ CẢ khi ADMIN_USER_IDS và CAPU_USER_IDS đều liệt kê chính chuỗi đó (danh tính cố định không bao giờ là Capu).
+//         bản duyệt enrich mang reviewed_by đúng danh tính đó và by_capu=false, KỂ CẢ khi ADMIN_USER_IDS và CAPU_USER_IDS đều liệt kê chính chuỗi đó (danh tính cố định không bao giờ là Capu);
+//         và GỌI export ký (/api/internal/vendor-enrich/export, khoá Ed25519 sinh tạm) sau khi duyệt (cả Approve lẫn Sửa thủ công): 200, không có mục nào của các bản duyệt đó, không mục nào mang danh tính cố định;
+//         đối chứng: một Capu thật (cờ tắt, bucket riêng) duyệt thì export CÓ mục của họ (để phép đo không rỗng).
 //  case 3 (tiêu chí 3): cờ tắt = thiếu, "", "0", "true", "yes", "on", " 1", "1 ", "01": mọi route /api/admin/* (kể cả đường không tồn tại) không token/token rác/guest/người không trong ADMIN_USER_IDS -> 403 thân đúng {"error":"forbidden"},
 //         không ghi R2; phản hồi (mã + thân) giống HỆT từng byte giữa "thiếu cờ" và mỗi giá trị khác "1"; admin thật (trong ADMIN_USER_IDS) vẫn thấy user_id của chính họ ở /me, không phải danh tính cố định;
 //         cấu hình nằm trong repo (wrangler*.toml, .dev.vars*, .env*) không bật cờ (không có dòng ADMIN_OPEN nào có giá trị "1").
 //  case 4 (tiêu chí 4): cờ bật: mọi route ngoài /api/admin/* (couples, vendors, claim, internal/vendor-enrich/export, đường lạ, "/api/administrator", "/api/adminx/me") trả mã + thân GIỐNG HỆT cờ tắt cho cùng request không token / token rác / guest;
 //         và đường /api/admin chỉ khớp đúng tiền tố "/api/admin" hoặc "/api/admin/" (không mở "/api/administrator"); người ngoài vẫn không đọc được dữ liệu cặp đôi.
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -91,7 +94,10 @@ if (CASE === "1") {
 if (CASE === "2") {
   for (const extra of [{}, { ADMIN_USER_IDS: ID + "," + REAL, CAPU_USER_IDS: ID }]) {
     const bucket = new MemoryBucket();
-    const e = mkEnv(bucket, { ADMIN_OPEN: "1", ...extra });
+    const TOK = "t188-may-xuat-thu";
+    const { privateKey } = crypto.generateKeyPairSync("ed25519");
+    const SIGN = { ENRICH_EXPORT_TOKEN: TOK, ENRICH_SIGNING_KEY: privateKey.export({ type: "pkcs8", format: "der" }).toString("base64"), ENRICH_SIGNING_KEY_ID: "kt188" };
+    const e = mkEnv(bucket, { ADMIN_OPEN: "1", ...SIGN, ...extra });
     const tag = Object.keys(extra).length ? "ADMIN_USER_IDS/CAPU_USER_IDS có chính danh tính cố định" : "cấu hình thường";
     // 1) vendor override PUT/DELETE
     const list = await call(e, "GET", "/api/admin/vendors");
@@ -114,6 +120,26 @@ if (CASE === "2") {
     const det = await call(e, "GET", `/api/admin/vendor-enrich/${eid}/detail`);
     const review = det.json?.review || rv.json?.review;
     check(`[${tag}] bản duyệt: reviewed_by = danh tính cố định, by_capu = false`, review?.reviewed_by === ID && review?.by_capu !== true, JSON.stringify(review).slice(0, 200));
+    // 2b) export ký: không mục nào của danh tính cố định (cả Approve lẫn Sửa thủ công)
+    const rows = (await call(e, "GET", "/api/admin/vendor-enrich")).json?.rows || [];
+    const aprow = rows.find((x) => x.approvable && !x.override && x.id !== eid);
+    check(`[${tag}] có dòng approvable để thử Approve`, !!aprow);
+    const ap = aprow ? await call(e, "PUT", `/api/admin/vendor-enrich/${aprow.id}/review`, { body: { decision: "approve" } }) : { status: 0, text: "" };
+    check(`[${tag}] PUT Approve không token -> 200, by_capu = false`, ap.status === 200 && ap.json?.review?.by_capu === false && ap.json?.review?.reviewed_by === ID, [ap.status, ap.text.slice(0, 120)]);
+    const ex = await call(e, "GET", "/api/internal/vendor-enrich/export", { token: TOK });
+    const xe = ex.json?.entries;
+    check(`[${tag}] gọi export ký -> 200 và có mảng entries`, ex.status === 200 && Array.isArray(xe), [ex.status, ex.text.slice(0, 100)]);
+    check(`[${tag}] export ký không có mục của bản duyệt nào vừa làm (Approve ${aprow?.id}, Sửa thủ công ${eid})`, Array.isArray(xe) && !xe.some((x) => x.vendor_id === eid || x.vendor_id === aprow?.id), (xe || []).map((x) => x.vendor_id));
+    check(`[${tag}] export ký không mục nào mang danh tính cố định hay by_capu=false`, Array.isArray(xe) && !ex.text.includes(ID) && xe.every((x) => x.by_capu === true), ex.text.slice(0, 160));
+    {
+      // đối chứng: Capu thật (cờ tắt, bucket riêng để không lẫn nhật ký) duyệt một dòng khác -> export CÓ mục của họ
+      const other = rows.find((x) => x.approvable && !x.override && x.id !== eid && x.id !== aprow?.id);
+      const eC = mkEnv(new MemoryBucket(), { ...SIGN, ADMIN_USER_IDS: "user_capu_that", CAPU_USER_IDS: "user_capu_that" });
+      const pc = other ? await call(eC, "PUT", `/api/admin/vendor-enrich/${other.id}/review`, { token: "dev:user_capu_that", body: { decision: "approve" } }) : { status: 0, text: "" };
+      const ex2 = await call(eC, "GET", "/api/internal/vendor-enrich/export", { token: TOK });
+      check(`[${tag}] đối chứng: Capu thật duyệt (cờ tắt) thì export có mục của họ`, pc.status === 200 && (ex2.json?.entries || []).some((x) => x.vendor_id === other?.id && x.by_capu === true), [pc.status, (ex2.json?.entries || []).map((x) => x.vendor_id)]);
+    }
+    if (aprow) await call(e, "DELETE", `/api/admin/vendor-enrich/${aprow.id}/review`);
     const wd = await call(e, "DELETE", `/api/admin/vendor-enrich/${eid}/review`);
     check(`[${tag}] DELETE review enrich không token -> 200`, wd.status === 200, [wd.status, wd.text.slice(0, 100)]);
     // 3) yêu cầu kết nối
