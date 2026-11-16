@@ -53,7 +53,7 @@ Mọi eval chạy từ gốc `tohong-hq`; repo lấy từ `TOHONG_BACK_REPO` / `
 Tự kiểm bằng bản cài giả (cờ đọc ở `requirePlatformAdmin` + `isCapu` loại danh tính cố định; front đọc `VITE_ADMIN_OPEN === '1'` ở `AdminApp`): 1-7 đều PASS. Trên mã hiện tại: 1, 2, 5 đỏ (đúng, là hành vi mới); 3, 4, 6, 7 xanh (đúng, là hành vi phải giữ). Đột biến thử: cờ hiểu "truthy" làm 3 và 6 đỏ; bỏ loại trừ Capu làm 2 đỏ (nay bắt ở cả mục export ký); danh tính khác làm 1 đỏ; **M1** front `VITE_ADMIN_OPEN ?? '1'` (vắng = mở) làm 6 đỏ ở (a0) và (c0); **M2** front kiểm cờ đúng `=== '1'` nhưng commit `.env.production` có `VITE_ADMIN_OPEN=1` làm 6 đỏ ở (0), (a0), (c0). Sửa ở v2: v1 ép `VITE_ADMIN_OPEN=''` vào mọi build front nên hai đột biến này lọt (defect T-188-D1).
 
 ## Bất biến đề xuất (tầng 2)
-Đã đặt thẳng ở `eval/invariants/planner/admin/` (gate tầng 2 không chạy thư mục con của vùng khác); helper `lib/admin_open_back.mjs`. Spec critic xác nhận, Chief đánh số lại nếu cần. Cả bốn xanh trên main hiện tại và xanh trên bản cài giả đúng:
+Đặt ở `eval/T-188/bat-bien-cho-merge/` (ADR-028: chưa vào bể, đợi merge mới thăng lên `eval/invariants/planner/admin/`); helper `lib/admin_open_back.mjs`. Spec critic xác nhận, Chief đánh số lại khi thăng. Cả bốn xanh trên main hiện tại và xanh trên bản cài giả đúng:
 - **INV-A** `inv-001-co-admin-open-chi-mo-voi-dung-1.sh`: mọi giá trị `ADMIN_OPEN` khác đúng `1` cho 403 `{"error":"forbidden"}` giống hệt cờ thiếu, không ghi R2 (không gồm quét cấu hình).
 - **INV-B** `inv-002-danh-tinh-co-dinh-khong-bao-gio-la-capu.sh`: danh tính cố định không bao giờ là Capu, không bao giờ có mục trong export ký, cờ bật hay tắt (đối chứng: Capu thật vẫn ký được khi cờ tắt).
 - **INV-C** `inv-003-co-admin-open-khong-mo-route-ngoai-admin.sh`: copy `check_4`.
