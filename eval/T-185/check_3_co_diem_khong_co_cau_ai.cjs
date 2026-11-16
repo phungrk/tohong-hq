@@ -9,7 +9,7 @@ run(async (h) => {
   await openBeta(pg); await sleep(1700); const a = await snap(pg); await sleep(1000); const b = await snap(pg);
   if (!a) bad('không thấy khối "Phân tích AI"');
   else {
-    if (a.busy) bad('có điểm mà không có câu AI: không được còn skeleton ở đâu cả');
+    if (a.skel || a.busy) bad('có điểm mà không có câu AI: không được còn skeleton ở đâu cả');
     if (!/80% phù hợp/i.test(a.text)) bad('phải hiện "Phân tích AI · 80% phù hợp"');
     if (!/Ngân sách\s*100%/.test(a.text) || !/Phong cách\s*50%/.test(a.text) || !/Lịch trống\s*100%/.test(a.text)) bad('ba thanh phải hiện số thật: Ngân sách 100%, Phong cách 50%, Lịch trống 100%');
     if (!/so với 90tr/.test(a.text)) bad('dòng phép so phải hiện ("… so với 90tr tiệc cưới")');

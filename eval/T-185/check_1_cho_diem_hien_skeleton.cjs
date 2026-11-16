@@ -12,7 +12,8 @@ run(async (h) => {
   const s = await snap(pg);
   if (!s) bad('bấm vendor mà không thấy khối "Phân tích AI" của thẻ chi tiết');
   else {
-    if (!s.busy) bad('trong lúc chờ điểm, khối phải là vùng chờ (aria-busy) hiện skeleton');
+    if (!s.skel) bad('trong lúc chờ điểm, khối phải hiện skeleton');
+    if (!s.busy) bad('khi skeleton hiện, vùng chờ phải đặt aria-busy="true"');
     if (!s.status) bad('vùng chờ phải có role=status với tên "Đang tải…"');
     const z = zones(s); if (!zonesOk(z)) bad('skeleton thiếu phần: ' + zonesMsg(z));
     if (dynText(s.text)) bad('khối chỉ được còn tiêu đề + ba nhãn tĩnh lúc chờ, đang thấy thêm: "' + dynText(s.text) + '"');
@@ -22,7 +23,7 @@ run(async (h) => {
   const dirty = pre.find((x) => dynText(x.s.text)); if (dirty) bad('có lúc trước khi có điểm khối hiện thêm chữ/số: "' + dynText(dirty.s.text) + '"');
   if (!same(before, (await lists(pg)).map((l) => l.text))) bad('danh sách vendor phía trên đổi chữ khi thẻ chi tiết chờ điểm (phải giữ nguyên)');
   await sleep(600); const f = await snap(pg);
-  if (!f || f.busy) bad('điểm đã về thì skeleton phải biến mất');
+  if (!f || f.skel || f.busy) bad('điểm đã về thì skeleton phải biến mất');
   else if (!/80% phù hợp/i.test(f.text)) bad('điểm về phải hiện "Phân tích AI · 80% phù hợp"');
   await ctx.close();
 });

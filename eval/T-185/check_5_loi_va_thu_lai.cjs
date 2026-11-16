@@ -9,11 +9,11 @@ run(async (h) => {
   await openBeta(pg); await sleep(1500); const e = await snap(pg);
   if (!e) bad('không thấy khối "Phân tích AI"');
   else {
-    if (e.busy) bad('lỗi thì không được còn skeleton');
+    if (e.skel || e.busy) bad('lỗi thì không được còn skeleton');
     if (dynText(e.text) !== 'Chưa cập nhật được điểm. Thử lại') bad('lỗi phải hiện đúng "Chưa cập nhật được điểm. Thử lại", đang thấy: "' + dynText(e.text) + '"');
   }
   await pg.getByRole('button', { name: 'Thử lại' }).first().click(); await sleep(600); const w = await snap(pg);
-  if (!w || !w.busy) bad('bấm Thử lại: sau ~600ms phải hiện skeleton');
+  if (!w || !w.skel) bad('bấm Thử lại: sau ~600ms phải hiện skeleton');
   else { if (!zonesOk(zones(w))) bad('skeleton sau Thử lại thiếu phần: ' + zonesMsg(zones(w))); if (dynText(w.text)) bad('sau Thử lại lúc chờ còn chữ: "' + dynText(w.text) + '"'); }
   await sleep(1500); const f = await snap(pg);
   if (!f || f.busy || !/80% phù hợp/i.test(f.text)) bad('Thử lại thành công phải hiện 80% phù hợp và hết skeleton');
