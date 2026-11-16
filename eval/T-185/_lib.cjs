@@ -1,7 +1,7 @@
 /* T-185 khung dùng chung: App THẬT qua Root (khung của eval/T-179/_lib.cjs: vite dev + Playwright + API giả có trạng thái).
  * Thêm: (1) detailRoute: ghi đè GET /api/vendors/:id?coupleId=… với độ trễ / câu AI / lỗi / không điểm tuỳ ý; (2) watch: ghi lại, theo thời gian, ẢNH CHỤP khối "Phân tích AI" của thẻ chi tiết (chữ nhìn thấy, vùng chờ,
  * các khối skeleton và vị trí nhãn) để đo "không nháy" và "không số tạm" ở MỌI thời điểm, không chỉ lúc dừng. Eval chỉ đo chữ/hình người dùng thấy, không đọc tên hàm/state/class của front.
- * "Khối Phân tích AI" = phần tử bao dòng tiêu đề có chữ "Phân tích AI" (hiển thị hoa/thường tuỳ CSS) và các thanh/câu của nó; nếu tiêu đề nằm trong vùng aria-busy thì khối là vùng đó. "Skeleton nhìn thấy" = trong khối có vùng aria-busy="true" nhìn thấy (quy ước T-061).
+ * "Khối Phân tích AI" = tổ tiên nhỏ nhất (có hộp thật) của dòng chữ "Phân tích AI" chứa đủ ba nhãn Ngân sách/Phong cách/Lịch trống, hoặc (lỗi/không điểm) chứa câu báo; không dựa vào cha trực tiếp của tiêu đề, nên mọi cách bọc <span>/<div> ra cùng hình đều cho cùng kết quả. "Skeleton nhìn thấy" = trong khối có khối rỗng có nền đúng màu token --line-100 (đo hình, không phụ thuộc cấu trúc); aria-busy/role=status chỉ được kiểm ở check_1 (lúc skeleton hiện) và check_2 (không có trước mốc).
  * Biến: TOHONG_FRONT_REPO, PLAYWRIGHT_PATH (xem eval/T-171/_lib.cjs). */
 const path = require('path');
 const base = require(path.join(__dirname, '..', 'T-179', '_lib.cjs'));
@@ -31,17 +31,34 @@ async function detailRoute(pg, S, opts = {}) {
 /* Ảnh chụp khối Phân tích AI trong trình duyệt (hàm chạy trong trang; trả null nếu chưa có khối). */
 const SNAP_SRC = `(() => {
   const norm = (s) => (s || '').replace(/\\s+/g, ' ').trim();
-  const vis = (e) => { const r = e.getBoundingClientRect(); const cs = getComputedStyle(e); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
-  const cands = [...document.querySelectorAll('div,span,p,h3,h4')].filter((e) => e.firstChild && e.firstChild.nodeType === 3 && /^\\s*phân tích ai/i.test(e.firstChild.nodeValue || ''));
+  const rect = (e) => e.getBoundingClientRect();
+  const vis = (e) => { const r = rect(e); const cs = getComputedStyle(e); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
+  const LABELS = ${JSON.stringify(LABELS)}, MSGS = ['Chưa cập nhật được điểm', 'Chưa có điểm cho vendor này'];
+  const cands = [...document.querySelectorAll('div,span,p,h3,h4')].filter((e) => [...e.childNodes].some((n) => n.nodeType === 3 && /^\\s*phân tích ai/i.test(n.nodeValue || '')));
   const title = cands[cands.length - 1]; if (!title) return null;
-  const own = title.closest('[aria-busy="true"]'); const block = own || title.parentElement; const br = block.getBoundingClientRect();
-  const busy = own && vis(own) ? own : [...block.querySelectorAll('[aria-busy="true"]')].filter(vis)[0] || null;
-  const leaves = busy ? [...busy.querySelectorAll('*')].filter((e) => e.children.length === 0 && !norm(e.textContent) && e.getAttribute('role') !== 'status' && vis(e)
-    && (() => { const c = getComputedStyle(e).backgroundColor; const m = /rgba?\\(([^)]+)\\)/.exec(c); if (!m) return false; const p = m[1].split(',').map(Number); return p.length < 4 || p[3] > 0; })())
-    .map((e) => { const r = e.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, w: r.width, h: r.height, bg: getComputedStyle(e).backgroundColor }; }) : [];
-  const lab = {}; for (const n of ${JSON.stringify(LABELS)}) { const e = [...block.querySelectorAll('span,div')].find((x) => x.children.length === 0 && norm(x.textContent) === n); if (e) { const r = e.getBoundingClientRect(); lab[n] = { top: r.top, bottom: r.bottom }; } }
-  const status = !!block.querySelector('[role="status"][aria-label^="Đang tải"]');
-  return { text: norm(block.innerText), busy: !!busy, status, leaves, lab, h: br.height, left: br.left, right: br.right, scrollW: block.scrollWidth, clientW: block.clientWidth, blockBg: getComputedStyle(block).backgroundColor };
+  const labelEl = (root, n) => [...root.querySelectorAll('span,div')].find((x) => x.children.length === 0 && norm(x.textContent) === n);
+  // Khối = tổ tiên nhỏ nhất (có hộp thật, không phải display:contents) của tiêu đề chứa đủ ba nhãn; không có nhãn (lỗi / không điểm) thì chứa câu báo. Không dựa vào cha trực tiếp của tiêu đề.
+  let block = null;
+  for (let a = title.parentElement; a && a !== document.body; a = a.parentElement) {
+    if (!(rect(a).width > 0 && rect(a).height > 0)) continue;
+    if (LABELS.every((n) => labelEl(a, n))) { block = a; break; }
+  }
+  if (!block) for (let a = title.parentElement; a && a !== document.body; a = a.parentElement) {
+    if (!(rect(a).width > 0 && rect(a).height > 0)) continue;
+    if (MSGS.some((m) => norm(a.innerText).includes(m))) { block = a; break; }
+  }
+  if (!block) block = title.parentElement; // không nhận ra khối (thiếu nhãn và câu báo): lùi về cha để eval báo lỗi cụ thể thay vì im
+  const br = rect(block);
+  const busyEl = title.closest('[aria-busy="true"]') || [...block.querySelectorAll('[aria-busy="true"]')][0] || null;
+  const busy = !!busyEl;
+  const line = (() => { const p = document.createElement('i'); p.style.cssText = 'position:absolute;visibility:hidden;background:var(--line-100)'; document.body.appendChild(p); const c = getComputedStyle(p).backgroundColor; p.remove(); return c; })();
+  // skeleton nhìn thấy = lá rỗng nằm trong khối, có nền đúng màu token --line-100 (thanh thật có con hoặc nền màu riêng nên không lẫn)
+  const leaves = [...block.querySelectorAll('*')].filter((e) => e.children.length === 0 && !norm(e.textContent) && e.getAttribute('role') !== 'status' && vis(e) && getComputedStyle(e).backgroundColor === line)
+    .map((e) => { const r = rect(e); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, w: r.width, h: r.height, bg: getComputedStyle(e).backgroundColor }; });
+  const lab = {}; for (const n of LABELS) { const e = labelEl(block, n); if (e) { const r = rect(e); lab[n] = { top: r.top, bottom: r.bottom }; } }
+  const status = !!block.querySelector('[role="status"][aria-label^="Đang tải"]') || !!(busyEl && busyEl.querySelector('[role="status"][aria-label^="Đang tải"]'));
+  let bgEl = block, blockBg = getComputedStyle(bgEl).backgroundColor; while (/rgba\\(.*, 0\\)|transparent/.test(blockBg) && bgEl.parentElement) { bgEl = bgEl.parentElement; blockBg = getComputedStyle(bgEl).backgroundColor; }
+  return { text: norm(block.innerText), busy, skel: leaves.length > 0, status, leaves, lab, h: br.height, left: br.left, right: br.right, scrollW: block.scrollWidth, clientW: block.clientWidth, blockBg };
 })()`;
 const snap = (pg) => pg.evaluate(SNAP_SRC);
 /* ghi lại ảnh chụp mỗi ~16ms vào window.__s (kèm mốc thời gian performance.now); dừng bằng stopWatch. */

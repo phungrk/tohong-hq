@@ -9,10 +9,10 @@ run(async (h) => {
   if (alpha((await lists(pg))[0]) !== '100') bad('tiền đề: danh sách phải in Alpha 100% (dự toán 90)');
   S.venue = 40;
   await pg.getByText('Alpha Hall', { exact: false }).first().click(); await sleep(700); const w = await snap(pg);
-  if (!w || !w.busy) bad('lúc chờ phải hiện skeleton'); else if (dynText(w.text)) bad('lúc chờ khối hiện số/chữ ngoài chữ tĩnh: "' + dynText(w.text) + '"');
+  if (!w || !w.skel) bad('lúc chờ phải hiện skeleton'); else if (dynText(w.text)) bad('lúc chờ khối hiện số/chữ ngoài chữ tĩnh: "' + dynText(w.text) + '"');
   if (alpha((await lists(pg))[0]) !== '100') bad('lúc chờ, danh sách cũ phải giữ Alpha 100%');
   await sleep(1400); const f = await snap(pg);
-  if (!f || f.busy || !/70% phù hợp/i.test(f.text)) bad('chi tiết về phải hiện "70% phù hợp" theo dự toán 40 hiện tại');
+  if (!f || f.skel || f.busy || !/70% phù hợp/i.test(f.text)) bad('chi tiết về phải hiện "70% phù hợp" theo dự toán 40 hiện tại');
   else if (!/so với 40tr/.test(f.text)) bad('dòng phép so phải là "so với 40tr"');
   if (alpha((await lists(pg))[0]) !== '100') bad('sau khi chi tiết về, danh sách cũ vẫn phải là Alpha 100%');
   await ctx.close();

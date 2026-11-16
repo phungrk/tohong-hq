@@ -6,11 +6,11 @@ run(async (h) => {
   const { bad, setup, snap, dynText, openBeta } = h;
   const { ctx, pg } = await setup({ delay: 900, none: true });
   await openBeta(pg); await sleep(550); const w = await snap(pg);
-  if (!w || !w.busy) bad('lúc chờ phải hiện skeleton');
+  if (!w || !w.skel) bad('lúc chờ phải hiện skeleton');
   await sleep(1200); const f = await snap(pg);
   if (!f) bad('không thấy khối "Phân tích AI"');
   else {
-    if (f.busy) bad('không điểm thì hết skeleton');
+    if (f.skel || f.busy) bad('không điểm thì hết skeleton');
     if (dynText(f.text) !== 'Chưa có điểm cho vendor này') bad('phải hiện đúng "Chưa có điểm cho vendor này", đang thấy: "' + dynText(f.text) + '"');
     if (/\d+%/.test(f.text)) bad('không điểm thì không hiện phần trăm');
   }

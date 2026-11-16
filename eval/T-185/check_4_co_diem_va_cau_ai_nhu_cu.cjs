@@ -16,7 +16,7 @@ run(async (h) => {
     if (!last.text.includes(AI)) bad('kết thúc phải hiện đủ câu AI');
     const head = AI.slice(0, 12);
     if (!S.some((x) => x.s.text.includes(head) && !x.s.text.includes(AI))) bad('câu AI phải được gõ dần (có lúc chỉ hiện một phần đầu câu)');
-    if (S.some((x) => /80% phù hợp/i.test(x.s.text) && x.s.busy)) bad('đã có điểm thì không được còn skeleton');
+    if (S.some((x) => /80% phù hợp/i.test(x.s.text) && (x.s.skel || x.s.busy))) bad('đã có điểm thì không được còn skeleton');
   }
   await ctx.close();
 });
