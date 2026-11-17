@@ -1,0 +1,61 @@
+{
+  "task": "T-196",
+  "at": "2026-11-17T13:56",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng hq/quy-trinh",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 3336,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 201,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 40,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 43,
+      "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-001-lenh-merged-khong-doi-trang-thai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1150,
+      "out": "_state': '\"\"'}\nPASS T-944 (escalated): merged không đổi state/holder/owner/tier/rounds/version/prev_state; {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'} -> {'state': 'escalated', 'holder': 'chief-of-staff', 'owner': 'product', 'rounds': '0', 'version': '2', 'tier': 'B', 'prev_state': '\"\"'}\nPASS mỗi PR tối đa một sự kiện merged sau khi ghi lặp: {'https://github.com/phungrk/tohong-front/pull/901': 1, 'https://github.com/phungrk/tohong-back/pull/911': 1, 'https://github.com/phungrk/tohong-back/pull/912': 1, 'https://github.com/phungrk/tohong-back/pull/913': 1, 'https://github.com/phungrk/tohong-back/pull/914': 1}\nPASS lệnh merged chỉ ghi sự kiện merged, không ghi sự kiện chuyển trạng thái: ['merged']\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/hq/inv-002-workflow-context-hop-le.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 67,
+      "out": "PASS 6 workflow: không secrets/env sai chỗ trong if, inputs đều khai, không in env khi có secret cấp job",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
