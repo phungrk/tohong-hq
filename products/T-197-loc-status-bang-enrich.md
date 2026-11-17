@@ -105,6 +105,7 @@ Mỗi tiêu chí đúng một eval. Mọi eval đo chữ nhìn thấy (ô "Statu
 **Đã thử (2026-11-17, bản cài thử ở thư mục tạm, hai lần liên tiếp):**
 - Bản cài thử theo đúng chữ spec (diff ở `eval/T-197/refs/ok-front.patch`, `ok-back.patch`; chỉ để tự kiểm eval, Engineering không bắt buộc theo): cả 6 eval xanh, hai lần liên tiếp.
 - Trên main hiện tại (`front 4b2197e`, `back 1f7455c`): cả 6 đỏ.
+- v2: thêm 5 bản sai (3 của Spec critic: đổi Status xoá Hạng mục + ô tìm, đổi Status áp chữ gõ dở, trang trống về trang 1, lưu Status qua localStorage; cùng thiếu nhãn "Status" nhìn thấy): cả 5 đỏ (đỏ 3; 3; 6; 1; 1). Bản cài thử v2: 6/6 xanh hai lượt; main 6/6 đỏ.
 - Bản sai nhưng giống (đột biến), mỗi bản làm ít nhất một eval đỏ: front: không về trang 1 khi đổi Status (đỏ 2, 3); không tải lại sau ghi (đỏ 6); chip "Tất cả" đặt lại Status (đỏ 3); chọn Status xoá chip (đỏ 3); thiếu "Chờ áp dụng" hoặc mất dấu phẩy (đỏ 1, 2); không bỏ trang trống (đỏ 6); không gửi `status` (đỏ 2, 3, 6); sai thứ tự lựa chọn (đỏ 1). Back: lọc nhóm lẫn hàng đang chờ (đỏ 4, 5); override rời nhóm (đỏ 4, 5); dùng `by_capu` thô (đỏ 4); Status OR với chip (đỏ 4, 5); review tồn đọng của hàng override tính là chờ (đỏ 4); bỏ qua giá trị lạ (đỏ 4); chấp nhận `FULL` (đỏ 4); lấy `status` cuối (đỏ 4); `summary` đổi theo lọc (đỏ 4); `total` sai (đỏ 4, 5); ghi R2 khi đọc (đỏ 5).
 
 ## Bất biến đề xuất (tầng 2)
