@@ -6,6 +6,7 @@
 //  case 1: ô chọn có đúng 13 lựa chọn, mặc định "Tất cả" như hôm nay (tiêu chí 1)
 //  case 2: mỗi giá trị Status: mọi hàng ở mọi trang có đúng Status đó, số tổng khớp, đúng thứ tự (tiêu chí 2)
 //  case 3: kết hợp AND với chip / Hạng mục / ô tìm; về trang 1 khi đổi; số đếm chip và dòng đầu không đổi (tiêu chí 3)
+//  (case 3 gồm cả: đổi Status giữ Hạng mục + từ khoá đã áp, chữ gõ dở không được áp; case 1 gồm: nhãn "Status" nhìn thấy, tải lại trang -> "Tất cả"; case 4 gồm: ghi ở trang 3 -> về trang 2)
 //  case 4: sau Approve / Rút lại / Sửa thủ công khi đang lọc: bảng khớp lại; không trang trống (tiêu chí 6)
 import { REPO, CASE, scenario, readRows, pagerText, hien, settle, pickStatus, readAllPages, chipNames, act, closeAll, PAGE, CHIPS, STATUS, LABEL, shown } from "./lib/ui.mjs";
 import { ROWS, expected, reporter, outbound, fold } from "./lib/common.mjs";
@@ -22,6 +23,8 @@ try {
   if (CASE === "1") {
     const S = await scenario();
     R.check('có đúng một ô chọn (combobox) tên "Status"', (await S.select.count()) === 1, await S.select.count());
+    const labels = await S.select.evaluate((el) => [...el.labels].filter((l) => l.offsetParent !== null).map((l) => l.textContent.replace(/\s+/g, " ").trim().split(" ")[0]));
+    R.check('ô chọn có nhãn "Status" nhìn thấy được, gắn với ô (không chỉ aria-label)', labels.includes("Status"), labels);
     const opts = (await S.select.locator("option").allInnerTexts()).map((x) => x.trim());
     R.check("13 lựa chọn đúng chữ, đúng thứ tự: Tất cả, 9 nhóm, Chờ Capu, Chờ áp dụng, Đã duyệt tay", JSON.stringify(opts) === JSON.stringify(OPTIONS), opts);
     R.check("lựa chọn nhóm khớp từng chữ với chữ cột Status (bao gồm dấu phẩy)", STATUS.slice(0, 9).every(([g, l], i) => opts[1 + i] === l && LABEL[g] === l));
@@ -36,6 +39,11 @@ try {
     await act(S, () => pickStatus(S, "Tất cả"));
     await settle(S, hien(0, total));
     R.check('chọn rồi quay lại "Tất cả": bảng giống hệt mặc định (từng hàng, từng chữ Status, tổng)', sameRows(await readRows(S), exactRows(ROWS, S.st)));
+    await act(S, () => pickStatus(S, "Chờ Capu"));
+    await settle(S, hien(0, expected(S.st, { status: "pending_capu" }).length));
+    await S.open(false);
+    await settle(S, hien(0, total));
+    R.check('chọn "Chờ Capu" rồi TẢI LẠI trang (cùng phiên): ô Status về "Tất cả", bảng "Hiển thị 1–50 / 870" như mặc định', (await S.select.locator("option:checked").innerText()).trim() === "Tất cả" && sameRows(await readRows(S), exactRows(ROWS, S.st)));
     R.check("không request ra ngoài", S.external.length === 0 && outbound.length === 0, S.external);
   }
 
@@ -116,6 +124,21 @@ try {
     await settle(S, hien(0, w2.length));
     R.check('đang ở trang 2, đổi chip: về trang 1 và ô Status vẫn "Tên hơi giống"', (await S.select.locator("option:checked").innerText()).trim() === "Tên hơi giống" && (w2.length === 0 || (await readRows(S))[0]?.n === 1));
     await view(w2, 'chip "Chưa có ảnh Google" + Status "Tên hơi giống"');
+    // e2. đổi Status giữ Hạng mục và từ khoá ĐÃ ÁP; chữ gõ dở (chưa Enter) không được áp, vẫn hiện nguyên trong ô
+    await click(CHIPS.all);
+    await act(S, () => pickStatus(S, "Không thấy trên Maps"));
+    const cnt2 = {}; for (const r of expected(S.st, { status: "name_similar", q: "a" })) cnt2[r.category] = (cnt2[r.category] || 0) + 1;
+    const cat2 = Object.entries(cnt2).sort((a, b) => b[1] - a[1])[0][0];
+    await act(S, () => S.page.getByRole("combobox", { name: "Hạng mục" }).selectOption(cat2));
+    const sb2 = S.page.getByRole("searchbox", { name: "Tìm vendor" });
+    await act(S, async () => { await sb2.fill("a"); await sb2.press("Enter"); });
+    await sb2.fill("zzqx");
+    const n2 = S.lists.length;
+    await act(S, () => pickStatus(S, "Tên hơi giống"));
+    const w3 = expected(S.st, { status: "name_similar", category: cat2, q: "a" });
+    await view(w3, `Hạng mục ${cat2} + tìm đã áp "a" + gõ dở "zzqx", đổi Status sang "Tên hơi giống": bảng = Status AND Hạng mục AND "a" (chữ gõ dở không được áp)`);
+    R.check('... ô Hạng mục vẫn giữ giá trị, ô tìm vẫn hiện chữ gõ dở "zzqx"', (await S.page.getByRole("combobox", { name: "Hạng mục" }).inputValue()) === cat2 && (await sb2.inputValue()) === "zzqx" && w3.length > 0, [await sb2.inputValue(), w3.length]);
+    R.check("... và lần gọi API đó không mang chữ gõ dở", !S.lists.slice(n2).some((q) => /zzqx/.test(q)), S.lists.slice(n2));
     // f. số đếm chip và dòng đầu bảng không đổi theo Status
     R.check("số trên 5 chip không đổi theo Status", JSON.stringify(await chipNames(S)) === JSON.stringify(chips0), [await chipNames(S), chips0]);
     R.check('dòng "<N> vendor · enrich lần cuối …" không đổi theo Status', (await S.page.locator("body").innerText()).includes(summary0), summary0);
@@ -210,6 +233,23 @@ try {
     const gotB = await readRows(B);
     R.check('Rút lại hàng cuối: về trang còn hàng, "Hiển thị 1–50 / 50", 50 hàng đều "Chờ Capu", không có bảng trống', gotB.length === 50 && gotB.every((g) => g.status === "Chờ Capu") && !(await bodyHas(B, "Không có vendor nào khớp bộ lọc.")), [gotB.length, await pagerText(B)]);
     await B.ctx.close();
+
+    // f. từ 3 trang trở lên: đang ở trang cuối (1 hàng), Rút lại -> về trang cuối còn hàng (trang 2), KHÔNG về trang 1
+    const C = await scenario("big3");
+    await settle(C, hien(0, ROWS.length));
+    await act(C, () => pickStatus(C, "Chờ Capu"));
+    await settle(C, hien(0, 101));
+    await act(C, () => C.page.getByRole("button", { name: "Trang sau" }).click());
+    await settle(C, hien(PAGE, 101));
+    await act(C, () => C.page.getByRole("button", { name: "Trang sau" }).click());
+    await settle(C, hien(2 * PAGE, 101));
+    const r101 = await readRows(C);
+    R.check('trang 3 của "Chờ Capu": đúng 1 hàng, STT 101', r101.length === 1 && r101[0].n === 101, r101);
+    await act(C, () => C.table.locator("tbody tr").first().getByRole("button", { name: "Rút lại" }).click());
+    await settle(C, hien(PAGE, 100));
+    const g100 = await readRows(C);
+    R.check('Rút lại hàng 101: về trang 2 ("Hiển thị 51–100 / 100", STT 51..100), không về trang 1, không bảng trống', g100.length === 50 && g100[0].n === 51 && g100[49].n === 100 && g100.every((g) => g.status === "Chờ Capu"), [g100.length, g100[0]?.n, await pagerText(C)]);
+    await C.ctx.close();
   }
 } catch (e) {
   R.check("thao tác không thực hiện được (thiếu phần tử mà spec yêu cầu, hoặc bảng không đổi như spec)", false, String(e.message).split("\n")[0]);

@@ -20,6 +20,7 @@ function loadPlaywright() {
 }
 const { chromium } = loadPlaywright();
 
+const OWN_DIST = !arg("--dist");
 let DIST = arg("--dist");
 if (!DIST) {
   DIST = fs.mkdtempSync(path.join(os.tmpdir(), "t197-dist-"));
@@ -36,7 +37,7 @@ const server = http.createServer((rq, res) => {
 });
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 export const browser = await chromium.launch();
-export const closeAll = async () => { await browser.close(); server.close(); };
+export const closeAll = async () => { await browser.close(); server.close(); if (OWN_DIST) fs.rmSync(DIST, { recursive: true, force: true }); };
 const CORS = { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "*" };
 
 export const PAGE = 50;
@@ -68,12 +69,15 @@ export async function scenario(profile = "small", viewport = { width: 1280, heig
     return route.fulfill({ status: res.status, contentType: "application/json", headers: CORS, body: text });
   });
   S.base = `http://127.0.0.1:${server.address().port}`;
-  await page.goto(`${S.base}/?admin`);
-  await page.getByRole("button", { name: "Dữ liệu vendor" }).first().click();
-  const table = page.getByRole("table", { name: "Bảng enrich vendor" });
-  if ((await table.count()) === 0) await page.getByRole("button", { name: "Enrich Google Maps" }).click();
-  S.table = table;
-  await table.waitFor();
+  S.open = async (first = true) => {
+    if (first) await page.goto(`${S.base}/?admin`); else await page.reload();
+    await page.getByRole("button", { name: "Dữ liệu vendor" }).first().click();
+    const table = page.getByRole("table", { name: "Bảng enrich vendor" });
+    if ((await table.count()) === 0) await page.getByRole("button", { name: "Enrich Google Maps" }).click();
+    await table.waitFor();
+  };
+  await S.open(true);
+  S.table = page.getByRole("table", { name: "Bảng enrich vendor" });
   S.select = page.getByRole("combobox", { name: "Status", exact: true });
   S.pager = () => page.getByText(/^Hiển thị \d+–\d+ \/ \d+$/);
   S.chip = (key) => page.getByRole("button", { name: new RegExp("^" + CHIPS[key].replace(/[%]/g, "\\$&") + " · \\d+$") });

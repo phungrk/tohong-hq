@@ -53,6 +53,7 @@ export const as = (who) => (env, method, p, body) => call(env, method, p, { toke
 // Hồ sơ "lớn": 51 'Chờ Capu' trên 51 hàng not_found đầu (để trang cuối còn đúng 1 hàng).
 export function pickSeeds(profile) {
   const free = (g) => ROWS.filter((r) => r.group === g && !r.override);
+  if (profile === "big3") return free("not_found").slice(0, 101).map((r) => ({ id: r.id, who: ADMIN, kind: "manual" }));
   if (profile === "big") return free("not_found").slice(0, 51).map((r) => ({ id: r.id, who: ADMIN, kind: "manual" }));
   const ns = ROWS.filter((r) => r.group === "name_similar" && r.approvable && !r.override);
   return [
