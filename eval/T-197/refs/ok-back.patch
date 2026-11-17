@@ -1,0 +1,34 @@
+--- a/lib/vendorEnrich.js
++++ b/lib/vendorEnrich.js
+@@ -26,6 +26,7 @@
+   addr_diff: (r) => r.group === "addr_diff_accepted" || r.group === "name_same_addr_diff",
+ };
+ const FILTERS = new Set([...Object.keys(CHIP_PRED), ...GROUPS]);
++const STATUSES = new Set(["all", ...GROUPS, "pending_capu", "pending_apply", "override"]);
+ const ACTIONS = ["accept_place", "remove", "temporarily_closed", "reject_match"];
+ const SHARE_HOSTS = ["share.google", "goo.gl", "maps.app.goo.gl"];
+ const PLACE_ID_RE = /^[A-Za-z0-9_-]{8,200}$/;
+@@ -98,12 +99,22 @@
+   const filter = q.get("filter") || "all";
+   if (!FILTERS.has(filter)) throw httpErr(400, "invalid_filter");
+   const pred = CHIP_PRED[filter] || ((r) => r.group === filter);
++  const status = q.get("status") || "all";
++  if (!STATUSES.has(status)) throw httpErr(400, "invalid_status");
+   const category = q.get("category") || "";
+   const needle = fold(q.get("q") || "").trim();
+   const offset = Math.max(0, parseInt(q.get("offset") || "0", 10) || 0);
+   const limit = Math.min(100, Math.max(1, parseInt(q.get("limit") || "50", 10) || 50));
+-  const rows = ROWS.filter((r) => pred(r) && (!category || r.category === category) && (!needle || fold(r.name).includes(needle)));
+   const reviews = await readReviews(env);
++  const statusOk = (r) => {
++    if (status === "all") return true;
++    if (status === "override") return !!r.override;
++    const pend = pendingFor(env, r, reviews);
++    if (status === "pending_capu") return !!pend && pend.by_capu !== true;
++    if (status === "pending_apply") return !!pend && pend.by_capu === true;
++    return !pend && r.group === status;
++  };
++  const rows = ROWS.filter((r) => pred(r) && statusOk(r) && (!category || r.category === category) && (!needle || fold(r.name).includes(needle)));
+   const { total, groups, chips, approvable } = VENDOR_ENRICH_REPORT.summary;
+   return {
+     data_as_of: VENDOR_ENRICH_REPORT.data_as_of,
