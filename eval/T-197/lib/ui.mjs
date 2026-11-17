@@ -81,10 +81,10 @@ export async function scenario(profile = "small", viewport = { width: 1280, heig
 }
 // Đọc bảng: [{ n, name, status }] theo chữ người dùng thấy ở cột có tiêu đề "Status".
 export async function readRows(S) {
-  const heads = await S.table.getByRole("columnheader").allInnerTexts();
+  const heads = await S.table.getByRole("columnheader").allTextContents();
   const si = heads.map((h) => h.trim()).indexOf("Status");
   return S.table.locator("tbody tr").evaluateAll((trs, si) => trs.map((tr) => { const td = tr.querySelectorAll("td"); if (td.length < 5) return { empty: tr.innerText.replace(/\s+/g, " ").trim() };
-    return { n: Number(td[0].innerText.trim()), name: td[1].innerText.split("\n")[0].trim(), status: td[si].innerText.replace(/\s+/g, " ").trim() }; }), si);
+    return { n: Number(td[0].innerText.trim()), name: td[1].innerText.split("\n")[0].replace(/\s+/g, " ").trim(), status: td[si].innerText.replace(/\s+/g, " ").trim() }; }), si);
 }
 export const pagerText = async (S) => (await S.pager().innerText()).trim();
 export const hien = (off, total) => `Hiển thị ${total === 0 ? 0 : off + 1}–${Math.min(off + PAGE, total)} / ${total}`;

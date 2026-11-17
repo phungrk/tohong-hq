@@ -13,7 +13,8 @@ import { ROWS, expected, reporter, outbound, fold } from "./lib/common.mjs";
 const R = reporter();
 const GROUP_KEYS = new Set(STATUS.slice(0, 9).map(([k]) => k));
 const OPTIONS = ["Tất cả", ...STATUS.map(([, l]) => l)];
-const exactRows = (want, st, off = 0) => want.slice(off, off + PAGE).map((r, i) => ({ n: off + i + 1, name: r.name, status: shown(r, st) }));
+const sp = (x) => String(x).replace(/\s+/g, " ").trim(); // người dùng thấy khoảng trắng đã gộp
+const exactRows = (want, st, off = 0) => want.slice(off, off + PAGE).map((r, i) => ({ n: off + i + 1, name: sp(r.name), status: shown(r, st) }));
 const sameRows = (got, want) => got.length === want.length && got.every((g, i) => g.n === want[i].n && g.name === want[i].name && g.status === want[i].status);
 const brief = (rows) => JSON.stringify(rows.slice(0, 2));
 const bodyHas = async (S, s) => (await S.page.locator("body").innerText()).includes(s);
@@ -124,19 +125,20 @@ try {
   if (CASE === "4") {
     const S = await scenario();
     await settle(S, hien(0, ROWS.length));
-    const rowBy = (name) => S.table.locator("tbody tr").filter({ hasText: name }).first();
+    const rowBy = async (name) => S.table.locator("tbody tr").nth((await readRows(S)).findIndex((g) => g.name === name));
     const total = async () => Number((await pagerText(S)).match(/\/ (\d+)$/)[1]);
     // a. đang lọc "Tên hơi giống": Approve -> hàng biến mất, tổng -1; sang "Chờ Capu" thì thấy nó
     await act(S, () => pickStatus(S, "Tên hơi giống"));
     const w0 = expected(S.st, { status: "name_similar" });
     await settle(S, hien(0, w0.length));
-    const first = (await readRows(S))[0];
-    await act(S, () => S.table.locator("tbody tr").first().getByRole("button", { name: "Approve", exact: true }).click());
-    S.st.set(w0[0].id, { byCapu: false });
+    const ai = w0.findIndex((r) => r.approvable && !r.override); // hàng đầu có nút Approve
+    const first = (await readRows(S))[ai];
+    await act(S, () => S.table.locator("tbody tr").nth(ai).getByRole("button", { name: "Approve", exact: true }).click());
+    S.st.set(w0[ai].id, { byCapu: false });
     const w1 = expected(S.st, { status: "name_similar" });
     await settle(S, hien(0, w1.length));
     const got1 = await readRows(S);
-    R.check(`đang lọc "Tên hơi giống": Approve xong hàng "${first.name}" biến khỏi bảng và tổng giảm 1 (${w0.length} -> ${w1.length})`, sameRows(got1, exactRows(w1, S.st)) && !got1.some((g) => g.name === first.name && g.n === 1 && g.status !== "Tên hơi giống"), brief(got1));
+    R.check(`đang lọc "Tên hơi giống": Approve xong hàng "${first.name}" biến khỏi bảng và tổng giảm 1 (${w0.length} -> ${w1.length})`, sameRows(got1, exactRows(w1, S.st)) && !got1.some((g) => g.name === first.name), brief(got1));
     R.check('mọi hàng còn hiện vẫn có chữ Status "Tên hơi giống" (không hàng "Chờ Capu" nằm lại)', got1.every((g) => g.status === "Tên hơi giống"), got1.find((g) => g.status !== "Tên hơi giống"));
     await act(S, () => pickStatus(S, "Chờ Capu"));
     const w2 = expected(S.st, { status: "pending_capu" });
@@ -144,15 +146,16 @@ try {
     const got2 = await readAllPages(S, w2.length);
     R.check(`"Chờ Capu": có hàng vừa Approve, tổng ${w2.length}, mọi hàng "Chờ Capu"`, sameRows(got2, exactRows(w2, S.st)) && got2.some((g) => g.name === first.name), brief(got2));
     // b. đang lọc "Chờ Capu": Rút lại -> hàng biến mất
-    await act(S, () => rowBy(first.name).getByRole("button", { name: "Rút lại" }).click());
-    S.st.delete(w0[0].id);
+    const rb = await rowBy(first.name);
+    await act(S, () => rb.getByRole("button", { name: "Rút lại" }).click());
+    S.st.delete(w0[ai].id);
     const w3 = expected(S.st, { status: "pending_capu" });
     await settle(S, hien(0, w3.length));
     const got3 = await readRows(S);
     R.check(`đang lọc "Chờ Capu": Rút lại xong hàng biến khỏi bảng, tổng ${w2.length} -> ${w3.length}`, sameRows(got3, exactRows(w3, S.st)) && !got3.some((g) => g.name === first.name), brief(got3));
     await act(S, () => pickStatus(S, "Tên hơi giống"));
     await settle(S, hien(0, w0.length));
-    R.check('quay lại "Tên hơi giống": hàng đó về chỗ cũ (STT 1), tổng như ban đầu', sameRows(await readRows(S), exactRows(w0, S.st)));
+    R.check('quay lại "Tên hơi giống": hàng đó về chỗ cũ, tổng như ban đầu', sameRows(await readRows(S), exactRows(w0, S.st)));
     // c. Sửa thủ công khi đang lọc "Enrich 100%": hàng thành Chờ Capu nên rời bảng
     await act(S, () => pickStatus(S, "Enrich 100%"));
     const f0 = expected(S.st, { status: "full" });
@@ -167,12 +170,24 @@ try {
     const f1 = expected(S.st, { status: "full" });
     await settle(S, hien(0, f1.length));
     const gotF = await readRows(S);
-    R.check(`đang lọc "Enrich 100%": Sửa thủ công xong hàng "${f0[fi].name}" biến khỏi bảng, tổng ${f0.length} -> ${f1.length}`, sameRows(gotF, exactRows(f1, S.st)) && !gotF.some((g) => g.name === f0[fi].name), brief(gotF));
+    R.check(`đang lọc "Enrich 100%": Sửa thủ công xong hàng "${sp(f0[fi].name)}" biến khỏi bảng, tổng ${f0.length} -> ${f1.length}`, sameRows(gotF, exactRows(f1, S.st)) && !gotF.some((g) => g.name === sp(f0[fi].name)), brief(gotF));
+    // c2. đang ở trang 2 của "Tên hơi giống": Approve một hàng -> vẫn ở trang 2 (giữ trang), tổng giảm 1
+    await act(S, () => pickStatus(S, "Tên hơi giống"));
+    const n0 = expected(S.st, { status: "name_similar" });
+    await settle(S, hien(0, n0.length));
+    await act(S, () => S.page.getByRole("button", { name: "Trang sau" }).click());
+    await settle(S, hien(PAGE, n0.length));
+    const pi = n0.findIndex((r, k) => k >= PAGE && k < 2 * PAGE && r.approvable && !r.override);
+    await act(S, () => S.table.locator("tbody tr").nth(pi - PAGE).getByRole("button", { name: "Approve", exact: true }).click());
+    S.st.set(n0[pi].id, { byCapu: false });
+    const n1 = expected(S.st, { status: "name_similar" });
+    await settle(S, hien(PAGE, n1.length));
+    R.check(`đang ở trang 2 của "Tên hơi giống": Approve một hàng -> vẫn ở trang 2 ("${hien(PAGE, n1.length)}"), đúng hàng, hàng vừa Approve đã rời`, sameRows(await readRows(S), exactRows(n1, S.st, PAGE)));
     // d. Status "Tất cả": như hôm nay, hàng ở lại và đổi chữ tại chỗ
     await act(S, () => pickStatus(S, "Tất cả"));
     await settle(S, hien(0, ROWS.length));
     const all0 = await readRows(S);
-    const i = all0.findIndex((g) => g.status === "Tên hơi giống");
+    const i = all0.findIndex((g) => ROWS[g.n - 1].approvable && !ROWS[g.n - 1].override && g.status === LABEL[ROWS[g.n - 1].group]); // hàng đầu có nút Approve, chưa chờ
     const nm = all0[i].name;
     await S.table.locator("tbody tr").nth(i).getByRole("button", { name: "Approve", exact: true }).click();
     await S.page.waitForFunction(([k, n]) => document.querySelectorAll("tbody tr")[k].innerText.includes("Chờ Capu") && document.querySelectorAll("tbody tr")[k].innerText.includes(n), [i, nm]);

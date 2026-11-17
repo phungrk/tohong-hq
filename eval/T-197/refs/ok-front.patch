@@ -1,0 +1,87 @@
+--- a/src/admin/EnrichTable.jsx
++++ b/src/admin/EnrichTable.jsx
+@@ -34,6 +34,10 @@
+   ['name_similar', 'Tên hơi giống', (s) => s.chips.name_similar],
+   ['addr_diff', 'Địa chỉ khác marry', (s) => s.chips.addr_diff],
+ ];
++const STATUS_OPTIONS = [
++  ...Object.entries(GROUP).map(([k, [label]]) => [k, label]),
++  ['pending_capu', 'Chờ Capu'], ['pending_apply', 'Chờ áp dụng'], ['override', 'Đã duyệt tay'],
++];
+ const DECISIONS = [
+   ['accept_place', 'Gắn đúng nơi trên Google Maps'],
+   ['remove', 'Không có trên Maps → gỡ vendor'],
+@@ -56,6 +60,7 @@
+ 
+ export function EnrichTable() {
+   const [filter, setFilter] = useState('all');
++  const [status, setStatus] = useState('all');
+   const [category, setCategory] = useState('');
+   const [qInput, setQInput] = useState('');
+   const [q, setQ] = useState('');
+@@ -67,10 +72,13 @@
+   const [open, setOpen] = useState(null);
+ 
+   const fetchList = useCallback(
+-    () => api.adminEnrichList({ filter, category, q, offset, limit: PAGE }),
+-    [filter, category, q, offset],
++    () => api.adminEnrichList({ filter, status, category, q, offset, limit: PAGE }),
++    [filter, status, category, q, offset],
+   );
+   const { data, error, reload } = useLoad(fetchList);
++  useEffect(() => {
++    if (data && data.rows.length === 0 && data.total > 0 && offset > 0) setOffset(Math.floor((data.total - 1) / PAGE) * PAGE);
++  }, [data, offset]);
+ 
+   const reviewOf = (r) => (r.override ? null : r.id in local ? local[r.id] : r.review);
+ 
+@@ -80,6 +88,7 @@
+     try {
+       const res = await api.adminEnrichReview(r.id, { decision: 'approve' });
+       setLocal((l) => ({ ...l, [r.id]: res.review }));
++      if (status !== 'all') reload();
+     } catch (err) {
+       setRowError(adminErrMsg(err));
+     } finally {
+@@ -92,6 +101,7 @@
+     try {
+       await api.adminEnrichWithdraw(r.id);
+       setLocal((l) => ({ ...l, [r.id]: null }));
++      if (status !== 'all') reload();
+     } catch (err) {
+       setRowError(adminErrMsg(err));
+     } finally {
+@@ -120,6 +130,10 @@
+       </div>
+       <form className="adm-toolbar" onSubmit={(e) => { e.preventDefault(); setOffset(0); setQ(qInput.trim()); }}>
+         <input className="adm-input" type="search" aria-label="Tìm vendor" placeholder="Tìm vendor" value={qInput} onChange={(e) => setQInput(e.target.value)} />
++        <select className="adm-select" aria-label="Status" value={status} onChange={(e) => { setOffset(0); setStatus(e.target.value); }}>
++          <option value="all">Tất cả</option>
++          {STATUS_OPTIONS.map(([k, label]) => <option key={k} value={k}>{label}</option>)}
++        </select>
+         <select className="adm-select" aria-label="Hạng mục" value={category} onChange={(e) => { setOffset(0); setCategory(e.target.value); }}>
+           <option value="">Mọi hạng mục</option>
+           {VENDOR_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+@@ -152,7 +166,7 @@
+         </>
+       )}
+       {open && <EnrichDrawer id={open.id} name={open.name} trigger={open.trigger} onClose={() => setOpen(null)} />}
+-      {edit && <ManualDialog r={edit} onClose={() => setEdit(null)} onSaved={(review) => { setLocal((l) => ({ ...l, [edit.id]: review })); setEdit(null); }} />}
++      {edit && <ManualDialog r={edit} onClose={() => setEdit(null)} onSaved={(review) => { setLocal((l) => ({ ...l, [edit.id]: review })); setEdit(null); if (status !== 'all') reload(); }} />}
+     </section>
+   );
+ }
+--- a/src/api.js
++++ b/src/api.js
+@@ -230,9 +230,10 @@
+     return req('GET', `/api/admin/vendors?${p}`);
+   },
+   // Bảng enrich vendor (T-124): Approve / Sửa thủ công chỉ ghi review chờ áp dụng.
+-  adminEnrichList: ({ filter, category, q, offset, limit } = {}) => {
++  adminEnrichList: ({ filter, status, category, q, offset, limit } = {}) => {
+     const p = new URLSearchParams();
+     if (filter && filter !== 'all') p.set('filter', filter);
++    if (status && status !== 'all') p.set('status', status);
+     if (category) p.set('category', category);
+     if (q) p.set('q', q);
+     if (offset) p.set('offset', offset);
