@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Bất biến đề xuất (vùng planner/admin/vendor-enrich) · nguồn: T-197 (spec products/T-197-loc-status-bang-enrich.md, Hành vi 2 và "Bất biến đề xuất"); chờ Spec Gate (spec-critic) rồi Chief of Staff đặt số.
+// Bất biến đề xuất (vùng planner/admin/vendor-enrich) · nguồn: T-197 (spec products/T-197-loc-status-bang-enrich.md, Hành vi 2 và "Bất biến đề xuất"); qua Spec Gate lần 3 2026-11-17 (spec-critic: chạy trên bản cài thử PASS, trên main FAIL); Chief of Staff đặt số khi đưa vào eval/invariants/planner/admin/vendor-enrich/, nhớ giữ eval/T-197/lib/common.mjs.
 // Nằm ở eval/T-197/bat-bien-cho-merge/ cho tới khi PR T-197 merge (ADR-028). Bất biến chỉ thăng vào bể SAU khi PR T-197 merge, nên không có lối "chưa áp dụng": trên main script này ĐỎ.
 // INV-??? · Bộ lọc Status của bảng enrich luôn KHỚP chữ cột Status: với mọi khoá status hợp lệ, hàng trả về là đúng các hàng mà chữ cột Status mang giá trị đó
 //   (nhóm | "Chờ Capu" | "Chờ áp dụng" | nhãn nhóm + "Đã duyệt tay"), tính từ chính các trường của bản không lọc (group, override, review.by_capu);
