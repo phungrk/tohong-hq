@@ -122,3 +122,18 @@ Mẫu ngẫu nhiên lấy với seed 200, chia theo tầng. "Nghi ngờ" nghĩa 
 
 - **SĐT trong báo cáo:** `insights/2026-11-17-T-200-cap-nhat-vendor-theo-maps.md` có 3 hàng mà địa chỉ marry dính SĐT và website (rác khi cào dữ liệu). Báo cáo ghi "không chép SĐT", nên điều này trái với chính báo cáo (eval G). Đây là số máy doanh nghiệp, không phải dữ liệu người dùng, nhưng phải xoá đi.
 - Heuristic tên có hai lỗi gốc: bỏ dấu làm trùng các tên khác nhau (Thiên/Thiền, Đất/Đạt, Thủy/Thùy), và so tập từ nên không xét thứ tự từ (Anh Thủy ↔ Thùy Anh, Giang Nguyễn ↔ Nguyễn Giang). STOP còn chứa "cong", nên "Ngọc Huy" khớp "Công Huy".
+
+## v3 (2026-11-17, sau handoff T-200-v3)
+
+- Máy: adv-01 A-G PASS 7/7, adv-02 H-P PASS 9/9 (T200_ENRICH_DIR = scratchpad enrich, exit 0 cả hai). File eval không đổi.
+- Diff allowlist v2 → v3: 160 → 133; -28 (13 cờ cứng: 8 hàng sai + 5 plus code, đều đã ra; 9 loại Maps ngoài lĩnh vực; 6 nghi vấn sang Capu), +1 (marry_34c9ef1ab79c Angel: cùng 300/27 Đội Cung, Maps "Studio nhiếp ảnh", đúng). Không hàng nào đổi place_id; không trùng place_id.
+- 7 hàng "hơi giống" tự ghi (34c9ef1ab79c, 307ad7997ec3, 8ae5897ca010, bea9ab3d1195, 64c75b8f7958, 95d8ba0d9af5, a7faac51a257): cả 7 cùng số nhà và đường, loại Maps thuộc lĩnh vực cưới. Đúng 7/7.
+- Mẫu mới: 25 hàng tự ghi ngẫu nhiên (seed 3317), loại trừ mọi id đã kiểm ở v1/v2 (`scratchpad/adv_sample.json` và các id ghi trong file này). Mở Maps chỉ đọc (Playwright, nghỉ 3-4,5 giây) cho 21 hàng nghi ngờ hoặc không có loại Maps. Kết quả: 22 đúng, 0 sai, 3 nghi ngờ:
+  - marry_64d17055f76e La Petite Epicerie Saigon: trang Maps không có loại, không có website, không có đánh giá; Bình Thạnh → Long Bình (Thủ Đức cũ). Tên giống hệt và riêng biệt nhưng không xác nhận được là cùng cơ sở.
+  - marry_2fbaeb858da9 MyMy Makeup: Q2 → Bàu Cát 7, Tân Bình; tên riêng nhưng phổ biến.
+  - marry_6ea9dccba2f8 CuuLong Jewelry: quầy Vincom → cửa hàng 25 Trần Bình Trọng (cùng thương hiệu, khác điểm bán; không phải venue).
+- 9 hàng tự ghi không có loại Maps: 5 khách sạn/venue (Bình Quới 2, Mai House, MerPerle, Silver Creek, cùng địa chỉ hoặc đường đổi tên; trang khách sạn không hiện nút loại), Pepi (cùng 15 Thống Nhất), HayDay Media (có website riêng), Áo Dài Duly, Chi Bridal: đúng hoặc chấp nhận được; La Petite Epicerie là nghi ngờ ở trên.
+- Rà giấy 34 hàng có loại Maps lạ (Văn phòng công ty, sô cô la, tráng miệng, du lịch, bán buôn...): không thấy lớp sai có hệ thống; "stationery" của marry gồm cả quà cưới (sô cô la, tráng miệng), nên các loại này khớp.
+- apply.cjs: chỉ dry-run (offline, exit 0, "sẽ PUT 133 hàng"); applied.jsonl, allowlist.json, decisions.json không đổi (md5). Thử 5 input phá trên bản sao: id Capu chèn tay, đổi place_id, trùng id/place_id, allowlist rỗng, dòng 200 có err trong applied.jsonl. Cả 5 bị chặn hoặc xử lý đúng.
+- Không có SĐT/email trong allowlist.json, capu_quyet.json, báo cáo insight, handoff v3.
+- Ước tính sai trong 133: 0 sai rõ; tối đa khoảng 1-3 hàng nghi ngờ (≤ 2,3%), không thành lớp có hệ thống. **Chấp nhận.**
