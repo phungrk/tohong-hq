@@ -23,8 +23,31 @@ try {
   if (CASE === "1") {
     const S = await scenario();
     R.check('có đúng một ô chọn (combobox) tên "Status"', (await S.select.count()) === 1, await S.select.count());
-    const labels = await S.select.evaluate((el) => [...el.labels].filter((l) => l.offsetParent !== null).map((l) => l.textContent.replace(/\s+/g, " ").trim().split(" ")[0]));
-    R.check('ô chọn có nhãn "Status" nhìn thấy được, gắn với ô (không chỉ aria-label)', labels.includes("Status"), labels);
+    // Nhãn "Status" phải NHÌN THẤY được: đo hình học của đúng chữ "Status" trong <label> gắn với ô (không tin DOM/offsetParent).
+    const g = await S.select.evaluate((el) => {
+      const sel = el.getBoundingClientRect();
+      for (const l of el.labels) {
+        const w = document.createTreeWalker(l, NodeFilter.SHOW_TEXT);
+        for (let n = w.nextNode(); n; n = w.nextNode()) {
+          const k = n.data.indexOf("Status"); if (k < 0) continue;
+          const r = document.createRange(); r.setStart(n, k); r.setEnd(n, k + 6);
+          const b = r.getBoundingClientRect(); const pe = n.parentElement; const cs = getComputedStyle(pe);
+          let op = 1; for (let e = pe; e; e = e.parentElement) op *= Number(getComputedStyle(e).opacity);
+          const m = /rgba?\(([^)]*)\)/.exec(cs.color); const alpha = m && m[1].split(",").length === 4 ? Number(m[1].split(",")[3]) : 1;
+          const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+          return { w: b.width, h: b.height, left: b.left, right: b.right, top: b.top, bottom: b.bottom, op, alpha, vis: cs.visibility, inView: b.right > 0 && b.bottom > 0 && b.left < innerWidth && b.top < innerHeight,
+            hitOk: !!hit && (pe.contains(hit) || hit.contains(pe)) && hit !== document.body && hit !== document.documentElement, sel: { left: sel.left, top: sel.top, bottom: sel.bottom } };
+        }
+      }
+      return null;
+    });
+    R.check('có nhãn "Status" (chữ nằm trong <label> gắn với ô, không chỉ aria-label)', !!g, g);
+    if (g) {
+      R.check(`nhãn "Status" đủ lớn để thấy: hộp chữ rộng >= 20px, cao >= 8px (đo được ${Math.round(g.w)}x${Math.round(g.h)})`, g.w >= 20 && g.h >= 8, [g.w, g.h]);
+      R.check("nhãn không trong suốt: opacity > 0, màu chữ không trong suốt, không visibility:hidden", g.op > 0 && g.alpha > 0 && g.vis === "visible", [g.op, g.alpha, g.vis]);
+      R.check("nhãn không bị che hay cắt: nằm trong khung nhìn và phần tử tại tâm hộp chữ chính là nhãn", g.inView && g.hitOk, [g.inView, g.hitOk]);
+      R.check("nhãn đặt NGAY TRƯỚC ô: cùng hàng (chồng dọc với ô) và mép phải chữ <= mép trái ô", g.right <= g.sel.left + 1 && g.top < g.sel.bottom && g.bottom > g.sel.top, [g.right, g.sel.left, g.top, g.bottom, g.sel.top, g.sel.bottom]);
+    }
     const opts = (await S.select.locator("option").allInnerTexts()).map((x) => x.trim());
     R.check("13 lựa chọn đúng chữ, đúng thứ tự: Tất cả, 9 nhóm, Chờ Capu, Chờ áp dụng, Đã duyệt tay", JSON.stringify(opts) === JSON.stringify(OPTIONS), opts);
     R.check("lựa chọn nhóm khớp từng chữ với chữ cột Status (bao gồm dấu phẩy)", STATUS.slice(0, 9).every(([g, l], i) => opts[1 + i] === l && LABEL[g] === l));
