@@ -1,7 +1,7 @@
 {
   "task": "T-199",
-  "at": "2026-11-17T15:23",
-  "verdict": "RED",
+  "at": "2026-11-17T15:26",
+  "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
     "2": "bất biến vùng planner/admin/vendor-enrich",
@@ -12,7 +12,7 @@
       "eval": "bash eval/T-197/check_1_o_chon_status.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4226,
+      "ms": 4201,
       "out": "m hộp chữ chính là nhãn\n  ok  nhãn đặt NGAY TRƯỚC ô: cùng hàng (chồng dọc với ô) và mép phải chữ <= mép trái ô\n  ok  13 lựa chọn đúng chữ, đúng thứ tự: Tất cả, 9 nhóm, Chờ Capu, Chờ áp dụng, Đã duyệt tay\n  ok  lựa chọn nhóm khớp từng chữ với chữ cột Status (bao gồm dấu phẩy)\n  ok  mặc định đang chọn \"Tất cả\"\n  ok  mặc định: \"Hiển thị 1–50 / 870\", 50 hàng, từng hàng đúng như danh sách đầy đủ (như hôm nay)\n  ok  mặc định: lần gọi danh sách đầu không lọc Status (không có 'status=' khác all)\n  ok  5 chip và số đếm như hôm nay (Tất cả · N, Enrich 100% · …)\n  ok  chọn rồi quay lại \"Tất cả\": bảng giống hệt mặc định (từng hàng, từng chữ Status, tổng)\n  ok  chọn \"Chờ Capu\" rồi TẢI LẠI trang (cùng phiên): ô Status về \"Tất cả\", bảng \"Hiển thị 1–50 / 870\" như mặc định\n  ok  không request ra ngoài\nPASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "bash eval/T-197/check_2_moi_hang_dung_status.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 5847,
+      "ms": 5416,
       "out": "ái chờ\n  ok  Chưa enrich: không hàng nào -> \"Không có vendor nào khớp bộ lọc.\" và \"Hiển thị 0–0 / 0\", hai nút trang bị khoá\n  ok  Chờ Capu: 4 hàng qua 1 trang, mọi hàng có đúng chữ Status \"Chờ Capu\", đúng hàng, đúng thứ tự\n  ok  Chờ Capu: chữ cột Status của mọi hàng hiện ra là \"Chờ Capu\"\n  ok  Chờ áp dụng: 3 hàng qua 1 trang, mọi hàng có đúng chữ Status \"Chờ áp dụng\", đúng hàng, đúng thứ tự\n  ok  Chờ áp dụng: chữ cột Status của mọi hàng hiện ra là \"Chờ áp dụng\"\n  ok  Đã duyệt tay: 3 hàng qua 1 trang, mọi hàng có đúng chữ Status \"Đã duyệt tay\" (kèm nhãn nhóm), đúng hàng, đúng thứ tự\n  ok  Đã duyệt tay: chữ cột Status của mọi hàng hiện ra là \"<nhãn nhóm> Đã duyệt tay\"\n  ok  tổng số của 9 nhóm + Chờ Capu + Chờ áp dụng = toàn bộ danh sách (một hàng đúng một ô)\n  ok  không request ra ngoài\nPASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "bash eval/T-197/check_3_ket_hop_va_ve_trang_1.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4735,
+      "ms": 4725,
       "out": "ok  chip \"Tất cả\" + Status \"Enrich 100%\"\n  ok  Status \"Không thấy trên Maps\" + Hạng mục decor\n  ok  + ô tìm \"degree\"\n  ok  \"Không thấy trên Maps\": trang 2 hiện hàng STT 51\n  ok  đang ở trang 2, đổi Status: về trang 1 (hàng đầu STT 1, \"Hiển thị 1–50 / …\")\n  ok  đang ở trang 2, đổi chip: về trang 1 và ô Status vẫn \"Tên hơi giống\"\n  ok  chip \"Chưa có ảnh Google\" + Status \"Tên hơi giống\"\n  ok  Hạng mục stationery + tìm đã áp \"a\" + gõ dở \"zzqx\", đổi Status sang \"Tên hơi giống\": bảng = Status AND Hạng mục AND \"a\" (chữ gõ dở không được áp)\n  ok  ... ô Hạng mục vẫn giữ giá trị, ô tìm vẫn hiện chữ gõ dở \"zzqx\"\n  ok  ... và lần gọi API đó không mang chữ gõ dở\n  ok  số trên 5 chip không đổi theo Status\n  ok  dòng \"<N> vendor · enrich lần cuối …\" không đổi theo Status\n  ok  không request ra ngoài\nPASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "node eval/T-197/check_4_api_loc_status.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 271,
+      "ms": 261,
       "out": " filter=full + status=full: giao đúng (93 hàng)\n  ok  filter=addr_diff + status=name_similar: giao đúng (0 hàng)\n  ok  filter=no_google_photo + status=not_found: giao đúng (353 hàng)\n  ok  filter=addr_diff + status=override: giao đúng (1 hàng)\n  ok  filter=full + status=pending_apply: giao đúng (0 hàng)\n  ok  status=not_found + category=decor: 72 hàng\n  ok  + q=degree (không dấu, không phân biệt hoa/thường): 1 hàng\n  ok  status=not_found&offset=50&limit=10: 10 hàng, n từ 51, đúng hàng thứ 51 của danh sách lọc\n  ok  offset quá cuối: 200, rows rỗng, total vẫn đúng\n  ok  status=not_enriched (không hàng nào): 200, total 0, rows rỗng\n  ok  sau Approve của admin: hàng rời name_similar và vào pending_capu\n  ok  sau Rút lại: hàng về name_similar, rời pending_capu\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "node eval/T-197/check_5_quyen_va_khong_ghi.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 233,
+      "ms": 274,
       "out": "àng cùng id ở bản không lọc (không đổi dữ liệu)\n  ok  admin, status=override: 200 và Cache-Control no-store\n  ok  admin, status=override: lọc có hiệu lực (total 3), nên các kiểm dưới đo hàng đã lọc chứ không phải cả danh sách\n  ok  admin, status=override: mỗi hàng giống hệt hàng cùng id ở bản không lọc (không đổi dữ liệu)\n  ok  đọc với mọi status không ghi R2\n  ok  (đã đọc kho review, không đọc nơi khác ngoài kho admin)\n  ok  POST trên đường dẫn danh sách kèm status: 405, giống không có status\n  ok  PUT trên đường dẫn danh sách kèm status: 405, giống không có status\n  ok  DELETE trên đường dẫn danh sách kèm status: 405, giống không có status\n  ok  PATCH trên đường dẫn danh sách kèm status: 405, giống không có status\n  ok  không ghi R2 sau mọi lời gọi trên\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "bash eval/T-197/check_6_ghi_khi_dang_loc.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 7108,
+      "ms": 6929,
       "out": " 5 -> 4\n  ok  quay lại \"Tên hơi giống\": hàng đó về chỗ cũ, tổng như ban đầu\n  ok  đang lọc \"Enrich 100%\": Sửa thủ công xong hàng \"Capella Gallery Hall\" biến khỏi bảng, tổng 93 -> 92\n  ok  đang ở trang 2 của \"Tên hơi giống\": Approve một hàng -> vẫn ở trang 2 (\"Hiển thị 51–100 / 246\"), đúng hàng, hàng vừa Approve đã rời\n  ok  Status \"Tất cả\": Approve xong hàng ở nguyên chỗ, chữ Status đổi thành \"Chờ Capu\", tổng không đổi\n  ok  không request ra ngoài\n  ok  trang 2 của \"Chờ Capu\": đúng 1 hàng, STT 51, \"Hiển thị 51–51 / 51\"\n  ok  Rút lại hàng cuối: về trang còn hàng, \"Hiển thị 1–50 / 50\", 50 hàng đều \"Chờ Capu\", không có bảng trống\n  ok  trang 3 của \"Chờ Capu\": đúng 1 hàng, STT 101\n  ok  Rút lại hàng 101: về trang 2 (\"Hiển thị 51–100 / 100\", STT 51..100), không về trang 1, không bảng trống\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "bash eval/T-199/adv-04-loc-sau-ghi-cua-nguoi-khac.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4004,
+      "ms": 3855,
       "out": "ok  Capu Approve X ở nơi khác: 200\n  ok  lọc \"Chờ áp dụng\" sau khi Capu ghi ở nơi khác: có hàng \"Dich vụ lá đỏ\" và MỌI hàng ghi \"Chờ áp dụng\"\n  ok  người khác Rút lại Y ở nơi khác: 200\n  ok  lọc \"Tên hơi giống\" lại: hàng \"Trung Tâm Hội Nghị Tiệc Cưới Eden Plaza Quận 12\" có mặt và MỌI hàng ghi \"Tên hơi giống\" (không \"Chờ Capu\" cũ)\n  ok  không request ra ngoài\nPASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "node eval/T-199/adv-01-api-bien-va-co-admin-open.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 478,
+      "ms": 469,
       "out": "error\":\"forbidden\"} giống từng byte với mọi status\n  ok  e. ADMIN_OPEN=\"1 \": người ngoài 403 {\"error\":\"forbidden\"} giống từng byte với mọi status\n  ok  e. ADMIN_OPEN=\"01\": người ngoài 403 {\"error\":\"forbidden\"} giống từng byte với mọi status\n  ok  e. ADMIN_OPEN=\"on\": người ngoài 403 {\"error\":\"forbidden\"} giống từng byte với mọi status\n  ok  e. các lời gọi bị chặn không ghi R2\n  ok  e. ADMIN_OPEN=1, không token: mọi status ra đúng tập hàng như admin thật\n  ok  e. ADMIN_OPEN=1: status lạ vẫn 400 invalid_status\n  ok  e. ADMIN_OPEN=1: GET lọc không ghi R2\n  ok  e. ADMIN_OPEN=1: Approve của danh tính mở nằm ở 'Chờ Capu', không ở 'Chờ áp dụng' (inv-002 planner/admin)\n  ok  e. dù danh tính mở bị liệt kê trong CAPU_USER_IDS: review của nó KHÔNG thành 'Chờ áp dụng'\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "bash eval/T-199/adv-02-nhan-status-ve-ra-pixel.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4121,
+      "ms": 4423,
       "out": "ok  [1280] có chữ \"Status\" trong <label> gắn với ô\n  ok  [1280] chữ \"Status\" được VẼ thật: ẩn chữ đi thì ảnh vùng nhãn đổi ở >= 20 điểm ảnh (đổi 258) — không bị clip-path, lớp phủ hay cùng màu nền giấu\n  ok  [1024] có chữ \"Status\" trong <label> gắn với ô\n  ok  [1024] chữ \"Status\" được VẼ thật: ẩn chữ đi thì ảnh vùng nhãn đổi ở >= 20 điểm ảnh (đổi 258) — không bị clip-path, lớp phủ hay cùng màu nền giấu\nPASS",
       "tier": 1
     },
@@ -84,8 +84,16 @@
       "eval": "bash eval/T-199/adv-03-ghi-khi-loc-khong-chop-bang-trong.sh",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4688,
+      "ms": 5214,
       "out": "(biết) [big3] trạng thái trống chỉ thoáng qua trong DOM, không được vẽ: DOM: Hiển thị 101–100 / 100 + bảng trống\n  ok  [big3] Rút lại hàng 101 ở trang cuối: về \"Hiển thị 51–100 / 100\" mà không lúc nào vẽ bảng trống / \"Hiển thị a–b\" với a > b\n  (biết) [big] trạng thái trống chỉ thoáng qua trong DOM, không được vẽ: DOM: Hiển thị 51–50 / 50 + bảng trống\n  ok  [big] Rút lại hàng 51 ở trang cuối: về \"Hiển thị 1–50 / 50\" mà không lúc nào vẽ bảng trống / \"Hiển thị a–b\" với a > b\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "bash eval/T-199/adv-05-thao-tac-do-dang-khi-tai-lai.sh",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 11319,
+      "out": "ok  a. Approve \"Chloe Gallery\" còn chạy khi đổi sang Status \"Địa chỉ khác marry\" (nhóm của nó): khi lặng, \"Hiển thị 1–50 / 56\", mọi hàng ghi \"Địa chỉ khác marry\", không có hàng vừa Approve\n  ok  b. Approve \"Chloe Gallery\" xong trong lúc trang 1 đang tải lại (Status \"Tất cả\"): khi lặng hàng đó ghi \"Chờ Capu\" như kho, không quay về nhãn nhóm cũ\n  ok  c. \"Tên hơi giống\": Approve rồi Rút lại ngay \"Trung Tâm Hội Nghị Tiệc Cưới Eden Plaza Quận 12\" khi bảng đang tải: khi lặng \"Hiển thị 1–50 / 247\", hàng đó ghi \"Tên hơi giống\", mọi hàng \"Tên hơi giống\"\n  ok  không request ra ngoài\nPASS",
       "tier": 1
     },
     {
@@ -100,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 178,
+      "ms": 215,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -108,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 32,
+      "ms": 37,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -116,7 +124,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 46,
+      "ms": 37,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -124,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1023,
+      "ms": 1099,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -132,15 +140,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 3010,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-whw3IQ/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 3041,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-fi5YfA/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1806,
+      "ms": 1627,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -148,15 +156,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1210,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-R7SnTd/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1225,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-wP6764/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2480,
+      "ms": 2524,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -164,7 +172,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 89,
+      "ms": 98,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -172,7 +180,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1510,
+      "ms": 1547,
       "out": "PASS (worker.js nén 782984 byte)",
       "tier": 2
     },
@@ -180,7 +188,7 @@
       "eval": "eval/invariants/planner/admin/inv-001-co-admin-open-chi-mo-voi-dung-1.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 235,
+      "ms": 303,
       "out": "d · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"0\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"true\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"yes\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"on\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\" 1\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"1 \" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"01\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"TRUE\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"false\" · admin thật: /me 200 và user_id là của chính họ\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -188,7 +196,7 @@
       "eval": "eval/invariants/planner/admin/inv-002-danh-tinh-co-dinh-khong-bao-gio-la-capu.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 261,
+      "ms": 242,
       "out": "· danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (không token) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (khong-phai-token) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (dev:user_that_admin) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export ký 200\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export ký không có mục của danh tính cố định (không chuỗi \"admin-khong-dang-nhap\", không mục nào của các bản duyệt vừa làm)\n  ok  đối chứng: Capu thật duyệt (cờ tắt) thì export có mục của họ\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -196,7 +204,7 @@
       "eval": "eval/invariants/planner/admin/inv-003-co-admin-open-khong-mo-route-ngoai-admin.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 174,
+      "ms": 188,
       "out": "min thật: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token admin thật: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  token người thường: mọi route ngoài /api/admin/* trả giống hệt (mã + thân) khi bật và khi tắt cờ\n  ok  token người thường: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token người thường: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  cờ bật: /api/administrator không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/administrator/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/adminx/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/admin-members không bị coi là trang admin (không trả user_id/admin:true)\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -212,7 +220,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-001-bao-cao-enrich-phan-hoach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 82,
+      "ms": 71,
       "out": "PASS 870 dòng, 9 nhóm cộng đúng, 366 approvable, ô đếm khớp nhóm",
       "tier": 2
     },
@@ -220,7 +228,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-002-maps-link-back-nhan-thi-tohong-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 352,
+      "ms": 329,
       "out": "PASS 20 link: mọi link back nhận thì tohong cũng nhận",
       "tier": 2
     },
@@ -228,7 +236,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-003-bao-cao-enrich-commit-bang-sinh-lai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 433,
+      "ms": 463,
       "out": "PASS 1 báo cáo enrich đã commit bằng đúng byte báo cáo sinh lại",
       "tier": 2
     },
@@ -236,7 +244,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-004-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 639,
+      "ms": 708,
       "out": "PASS 3 cú bấm của Capu: back ký, tohong nhận, bất biến kiểm được (kể cả mục link sau resolve); review của admin khác không vào",
       "tier": 2
     },
@@ -244,7 +252,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-005-workflow-du-lieu-di-kem-bao-cao.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 79,
+      "ms": 87,
       "out": "PASS mọi workflow thêm file dữ liệu đều sinh lại và đưa enrich-report.json vào cùng commit",
       "tier": 2
     },
@@ -252,7 +260,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-006-danh-muc-thuoc-tinh-pool.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 70898,
+      "ms": 72081,
       "out": "PASS",
       "tier": 2
     },
@@ -260,7 +268,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-007-bao-cao-khong-mang-lien-he-dia-chi.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 110,
+      "ms": 115,
       "out": "PASS",
       "tier": 2
     },
@@ -268,7 +276,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-008-nguoi-ngoai-khong-thay-khong-goi-api-vendor.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 3532,
+      "ms": 2768,
       "out": "ok  thấy \"Bạn không có quyền xem trang này\"\n  ok  không có thanh tab, không có bảng enrich\n  ok  không gọi /api/admin/vendor-enrich* hay /api/admin/vendors*\nPASS",
       "tier": 2
     },
@@ -276,7 +284,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-009-ban-sua-pool-khong-pha-hop-dong-anh-gu.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 674,
+      "ms": 603,
       "out": "PASS 22 vendor đã sửa, 867 vendor hiệu lực đều giữ hợp đồng ảnh/gu/độ dài",
       "tier": 2
     },
@@ -284,7 +292,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-010-drawer-doc-la-admin-ghi-ky-la-capu.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 299,
+      "ms": 276,
       "out": "PASS",
       "tier": 2
     },
@@ -292,7 +300,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-011-ten-sua-khong-ky-tu-an-dao-chieu.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 197,
+      "ms": 239,
       "out": "PASS",
       "tier": 2
     },
@@ -300,7 +308,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-012-url-anh-sua-chi-mot-cach-doc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 207,
+      "ms": 212,
       "out": "PASS",
       "tier": 2
     },
@@ -308,7 +316,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-013-bien-the-vo-hinh-va-host-anh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 246,
+      "ms": 217,
       "out": "PASS",
       "tier": 2
     },
@@ -316,18 +324,10 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-014-cot-pool-danh-muc-du-truong-bi-anh-huong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 10032,
+      "ms": 10609,
       "out": "PASS",
       "tier": 2
-    },
-    {
-      "eval": "eval/T-199/adv-05-thao-tac-do-dang-khi-tai-lai.mjs",
-      "kind": "node",
-      "status": "FAIL",
-      "ms": 195,
-      "out": "FAIL thiếu --repo trỏ tới tohong-front",
-      "tier": 3
     }
   ],
-  "hint": "code"
+  "hint": ""
 }
