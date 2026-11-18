@@ -1,0 +1,205 @@
+{
+  "task": "T-205",
+  "at": "2026-11-18T14:06",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/admin",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "node eval/T-204/check_1_cu_hieu_luc_khi_co_bat.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 223,
+      "out": "ok  liệt kê pending_apply 200\n  ok  4 review cũ của danh tính cố định nằm ở 'Chờ áp dụng' (review.by_capu=true)\n  ok  Capu thật vẫn ở 'Chờ áp dụng'\n  ok  không review cũ nào của danh tính cố định còn ở 'Chờ Capu'\n  ok  admin thật không phải Capu vẫn 'Chờ Capu' (luật cũ không đổi)\n  ok  export ký 200\n  ok  export có đúng 5 mục: 4 cũ của danh tính cố định + Capu thật\n  ok  export: mọi mục by_capu=true; waiting_capu=1 (admin thật không phải Capu)\n  ok  đọc/xuất không ghi lại R2 (bản ghi cũ giữ nguyên từng byte: tính lúc đọc, không lưu lúc ghi)\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-204/check_2_review_moi_khi_co_bat.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 245,
+      "out": "ok  PUT approve/- (token không): 200, reviewed_by cố định, by_capu=true\n  ok  PUT manual/accept_place (token khong-phai-token): 200, reviewed_by cố định, by_capu=true\n  ok  PUT manual/remove (token dev:user_admin_that): 200, reviewed_by cố định, by_capu=true\n  ok  3 review mới nằm ở 'Chờ áp dụng', không ở 'Chờ Capu'\n  ok  export có đúng 3 mục, by_capu=true\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-204/check_3_co_tat_khong_tinh.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 249,
+      "out": " export chỉ có Capu thật\n  ok  ADMIN_OPEN=\"TRUE\": waiting_capu=4\n  ok  ADMIN_OPEN=\"TRUE\": 3 bản ghi của danh tính cố định ở 'Chờ Capu' với review.by_capu=false\n  ok  ADMIN_OPEN=\"TRUE\" + danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export chỉ có Capu thật\n  ok  ADMIN_OPEN=\"TRUE\" + danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: waiting_capu=4\n  ok  ADMIN_OPEN=\"TRUE\" + danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: 3 bản ghi của danh tính cố định ở 'Chờ Capu' với review.by_capu=false\n  ok  cờ tắt: Capu thật duyệt -> by_capu=true và có trong export\n  ok  bật: bản ghi mới + bản ghi cũ đều trong export\n  ok  tắt: cả hai ngừng tính (export rỗng)\n  ok  tắt: cả hai về 'Chờ Capu'\n  ok  bật lại: cả hai tính lại; đảo cờ không ghi R2\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-204/check_4_nhan_va_nguon_goc.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 220,
+      "out": "ok  ghi mới 200 và export có đủ 3 mục\n  ok  nhãn cố định tính độc lập = admin:2ddfc6ef\n  ok  mục của danh tính cố định (cũ): reviewer_label = admin:2ddfc6ef và via = \"admin_open\"\n  ok  mục của danh tính cố định (mới): reviewer_label = admin:2ddfc6ef và via = \"admin_open\"\n  ok  mục của Capu thật: nhãn riêng, KHÔNG có via\n  ok  mọi nhãn khớp /^admin:[0-9a-f]{8}$/; không reviewed_by; không Clerk id thô; không chuỗi danh tính cố định\n  ok  mọi chữ ký kiểm được bằng định nghĩa chuẩn (nhãn nằm trong phần ký)\n  ok  đối chứng: đổi nhãn sang của Capu thật thì chữ ký hỏng (nguồn gốc không thể giả)\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-204/check_5_apply_nhan_entry_co_mo.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 604,
+      "out": "PASS export khi cờ mở admin (cũ + mới) qua apply_admin_reviews.py thật, nhãn admin:2ddfc6ef",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-204/check_6_chan_409_theo_co.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 236,
+      "out": "_capu (như cũ)\n  ok  ADMIN_OPEN=\"true\": Capu thật đè bản của mình -> 200, by_capu=true (như cũ)\n  ok  ADMIN_OPEN=\"true\": admin thường đè bản lưu lúc cờ bật (by_capu=true của danh tính cố định) -> 200, by_capu=false, không 409\n  ok  ADMIN_OPEN=\"true\": admin thường rút bản cũ của danh tính cố định -> 200\n  ok  ADMIN_OPEN=\" 1\": admin thường đè bản của Capu thật -> 409 decided_by_capu (như cũ)\n  ok  ADMIN_OPEN=\" 1\": admin thường rút bản của Capu thật -> 409 decided_by_capu (như cũ)\n  ok  ADMIN_OPEN=\" 1\": Capu thật đè bản của mình -> 200, by_capu=true (như cũ)\n  ok  ADMIN_OPEN=\" 1\": admin thường đè bản lưu lúc cờ bật (by_capu=true của danh tính cố định) -> 200, by_capu=false, không 409\n  ok  ADMIN_OPEN=\" 1\": admin thường rút bản cũ của danh tính cố định -> 200\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-204/check_7_nhat_ky_nguon_goc.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 183,
+      "out": "ok  2 lần ghi cờ bật thành công\n  ok  2 dòng vendor_enrich.review: admin_id cố định, after.by_capu=true, after.via=admin_open\n  ok  dòng rút: admin_id cố định\n  ok  cờ tắt, Capu thật ghi: dòng nhật ký có admin_id của Capu, by_capu=true, KHÔNG có via\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 44,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 220,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 31,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 53,
+      "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1342,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 3052,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-xIQD08/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1668,
+      "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1309,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-IFElUs/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2572,
+      "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 103,
+      "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1633,
+      "out": "PASS (worker.js nén 783060 byte)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-001-co-admin-open-chi-mo-voi-dung-1.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 227,
+      "out": "d · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"0\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"true\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"yes\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"on\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\" 1\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"1 \" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"01\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"TRUE\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"false\" · admin thật: /me 200 và user_id là của chính họ\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-002-danh-tinh-co-dinh-khong-bao-gio-la-capu.sh",
+      "kind": "sh",
+      "status": "FAIL",
+      "ms": 219,
+      "out": "ng bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (dev:user_that_admin) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export ký 200\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export ký không có mục của danh tính cố định (không chuỗi \"admin-khong-dang-nhap\", không mục nào của các bản duyệt vừa làm)\n  ok  đối chứng: Capu thật duyệt (cờ tắt) thì export có mục của họ\n  ok  không gọi mạng ra ngoài\nFAIL ADMIN_OPEN=1 · cấu hình thường: Approve (không token) không bao giờ ra by_capu=true [[200,\"{\\\"review\\\":{\\\"state\\\":\\\"pending\\\",\\\"decision\\\":\\\"approve\\\",\\\"action\\\":\\\"accept_place\\\",\\\"place_id\\\":\\\"ChIJNx6XKbsvdT\"]] (+7 lỗi nữa)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-003-co-admin-open-khong-mo-route-ngoai-admin.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 208,
+      "out": "min thật: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token admin thật: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  token người thường: mọi route ngoài /api/admin/* trả giống hệt (mã + thân) khi bật và khi tắt cờ\n  ok  token người thường: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token người thường: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  cờ bật: /api/administrator không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/administrator/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/adminx/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/admin-members không bị coi là trang admin (không trả user_id/admin:true)\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-004-khong-file-cau-hinh-bat-co-admin-open.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 22,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-005-deploy-khong-ghi-de-admin-open.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 61,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-006-deploy-that-giu-bien-dashboard.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2064,
+      "out": "PASS upload metadata keep_bindings=['plain_text', 'json', 'secret_text', 'secret_key'], 13 binding, không có ADMIN_OPEN",
+      "tier": 2
+    }
+  ],
+  "hint": "spec"
+}
