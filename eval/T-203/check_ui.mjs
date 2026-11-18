@@ -3,9 +3,10 @@
 // Chạy: cd /home/user/tohong-front && node /home/user/tohong-hq/eval/T-203/check_ui.mjs --repo . --case 1|2 [--dist DIR]
 // Đo CHỮ người dùng thấy (tên nút, ô nhập, chữ trên màn), không đọc mã nguồn, không bám class.
 //  case 1 (tiêu chí 1): Xoá cần lý do + bước xác nhận; không gọi API trước khi xác nhận; Thôi không xoá.
+//  case 3 (tiêu chí 10, phần giao diện): vendor đã xoá rồi rời pool: chỉ ở "Đã xoá", ghi chú "không còn trong pool", khôi phục được.
 //  case 2 (tiêu chí 8): danh sách "Đã xoá" (nhãn), lý do hiện ra, nút Khôi phục, vendor đã xoá không sửa được, Nhật ký có hai thao tác.
 import { REPO, CASE, scenario, uniqueVendor, closeAll, outbound } from "./lib/ui.mjs";
-import { reporter } from "./lib/common.mjs";
+import { reporter, asAdmin, DEL, VENDOR_POOL, loadOverlay } from "./lib/common.mjs";
 const R = reporter();
 const S = await scenario();
 const { page } = S;
@@ -14,8 +15,10 @@ const POST_DEL = /^POST \/api\/admin\/vendors\/[^/]+\/delete$/, POST_RES = /^POS
 const REASON = "Trùng với vendor khác (eval)";
 const mustFail = async (fn) => { try { await fn(); } catch (e) { R.check("bước giao diện chạy được: " + String(e.message).split("\n")[0].slice(0, 110), false); await closeAll(); R.done(); } };
 
+if (CASE !== "3") {
 await mustFail(async () => { await S.openList(); await S.search(V.name); await S.rowOf(V.name).click(); await page.getByText("phiên bản ghi đè").waitFor(); });
 R.check("tiền điều kiện: chọn vendor thấy nút 'Xoá vendor' trong khung sửa", await S.btn("Xoá vendor").count() === 1);
+}
 
 if (CASE === "1") {
   await S.btn("Xoá vendor").click();
@@ -86,6 +89,29 @@ if (CASE === "2") {
   await page.waitForTimeout(500);
   const at2 = await S.bodyText();
   R.check("Nhật ký: có dòng 'Khôi phục vendor'", at2.includes("Khôi phục vendor"), at2.slice(0, 200));
+}
+
+if (CASE === "3") {
+  // Vendor đã xoá rồi rời pool (pipeline gỡ): chỉ ở nhãn "Đã xoá", có ghi chú không còn trong pool; khôi phục được.
+  const A = asAdmin(S.env);
+  const dd = await A("POST", DEL(V.id), { expected_version: 0, reason: REASON });
+  R.check("tiền điều kiện: xoá vendor qua API 200", dd.status === 200, [dd.status, dd.text.slice(0, 60)]);
+  VENDOR_POOL.splice(VENDOR_POOL.findIndex((v) => v.id === V.id), 1);
+  await loadOverlay(S.env, { force: true });
+  await mustFail(async () => { await S.openList(); await S.pickLabel("Đã xoá"); await S.search(V.id); });
+  const row = S.rowOf(V.id);
+  R.check("nhãn 'Đã xoá': hàng của vendor đã rời pool có mặt", await row.count() === 1);
+  const rt = (await row.innerText()).replace(/\s+/g, " ");
+  R.check("hàng hiện 'Đã xoá', lý do, ghi chú 'không còn trong pool'; KHÔNG hiện 'Mồ côi' hay 'Đang ẩn'", /Đã xoá/.test(rt) && rt.includes(REASON) && /không còn trong pool/i.test(rt) && !/Mồ côi/.test(rt) && !/Đang ẩn/.test(rt), rt);
+  await S.pickLabel("Mồ côi (không còn trong pool)"); await S.search(V.id);
+  R.check("nhãn 'Mồ côi': không có vendor đã xoá này", await S.rowOf(V.id).count() === 0);
+  await S.pickLabel("Đã xoá"); await S.search(V.id);
+  await mustFail(async () => { await S.rowOf(V.id).click(); await S.btn("Khôi phục vendor").waitFor(); });
+  R.check("khung bên phải: có 'Khôi phục vendor', không có 'Lưu ghi đè', 'Xoá vendor'", await S.btn("Lưu ghi đè").count() === 0 && await S.btn("Xoá vendor").count() === 0);
+  await S.btn("Khôi phục vendor").click();
+  await page.waitForTimeout(800);
+  R.check("bấm 'Khôi phục vendor': đúng MỘT lần gọi khôi phục, thành công (vendor rời nhãn 'Đã xoá')", S.writes(POST_RES).length === 1 && await S.rowOf(V.id).count() === 0, S.calls);
+  R.check("sau khôi phục: không thấy thông báo lỗi 404 / 'không tìm thấy' trên màn", !/không tìm thấy|not found|vendor_not_found/i.test(await S.bodyText()), (await S.bodyText()).slice(0, 160));
 }
 R.check("không request ra ngoài", S.external.length === 0 && outbound.length === 0, [S.external, outbound]);
 await closeAll();
