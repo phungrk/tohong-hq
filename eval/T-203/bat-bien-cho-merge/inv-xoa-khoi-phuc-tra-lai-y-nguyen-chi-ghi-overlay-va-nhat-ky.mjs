@@ -39,7 +39,7 @@ async function world(c, { remove, leave }) {
   const write = async (label, fn) => {
     const s0 = snapshot(bucket); const r = await fn(); const d = diff(s0, snapshot(bucket));
     R.check(`${c.name}: ${label}: 200`, r.status === 200, [r.status, r.text.slice(0, 60)]);
-    R.check(`${c.name}: ${label}: không khoá R2 nào mất; chỉ tài liệu overlay đổi; chỉ thêm dòng Nhật ký`, d.removed.length === 0 && d.changed.every((k) => k === OVERLAY_KEY) && d.added.every((k) => k.startsWith(AUDIT_PREFIX)), d);
+    R.check(`${c.name}: ${label}: không khoá R2 nào mất; chỉ tài liệu overlay đổi (hoặc được tạo lần đầu); chỉ thêm dòng Nhật ký`, d.removed.length === 0 && d.changed.every((k) => k === OVERLAY_KEY) && d.added.every((k) => k.startsWith(AUDIT_PREFIX) || k === OVERLAY_KEY), d);
   };
   for (const [i, e] of c.edits.entries()) await write(`sửa ${i + 1}`, async () => A("PUT", ov(id), { ...e, expected_version: await ver() }));
   if (remove) await write("xoá", async () => A("POST", DEL(id), { expected_version: await ver(), reason: "bất biến" }));
