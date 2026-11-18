@@ -1,0 +1,349 @@
+{
+  "task": "T-210",
+  "at": "2026-11-18T15:35",
+  "verdict": "GREEN",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/admin/vendor-enrich",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "python3 -I eval/T-208/check_1_resolve_overrides_co_actions_read.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 44,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-208/check_2_moi_workflow_goi_actions_api_co_actions_read.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 70,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-208/check_3_khong_mo_quyen_ghi_moi.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 76,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-208/check_4_giu_quyen_ghi_job_mo_pr.py",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 70,
+      "out": "PASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 53,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 196,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 25,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 45,
+      "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1103,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2921,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-4SOleA/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1970,
+      "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 936,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-XiyTKw/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2366,
+      "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 83,
+      "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1375,
+      "out": "PASS (worker.js nén 784427 byte)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-001-co-admin-open-chi-mo-voi-dung-1.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 273,
+      "out": "d · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"0\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"true\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"yes\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"on\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\" 1\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"1 \" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"01\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"TRUE\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"false\" · admin thật: /me 200 và user_id là của chính họ\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-002-danh-tinh-co-dinh-la-capu-khi-va-chi-khi-co-mo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 224,
+      "out": "ính cố định\n  ok  ADMIN_OPEN=\" 1\": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\" 1\" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"1 \": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"1 \" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"01\": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"01\" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"TRUE\": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"TRUE\" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  cờ tắt: Capu thật ký được\n  ok  đảo cờ bật/tắt/bật: tính lại đúng, không ghi R2\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-003-co-admin-open-khong-mo-route-ngoai-admin.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 194,
+      "out": "min thật: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token admin thật: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  token người thường: mọi route ngoài /api/admin/* trả giống hệt (mã + thân) khi bật và khi tắt cờ\n  ok  token người thường: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token người thường: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  cờ bật: /api/administrator không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/administrator/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/adminx/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/admin-members không bị coi là trang admin (không trả user_id/admin:true)\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-004-khong-file-cau-hinh-bat-co-admin-open.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 23,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-005-deploy-khong-ghi-de-admin-open.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 58,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-006-deploy-that-giu-bien-dashboard.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2147,
+      "out": "PASS upload metadata keep_bindings=['plain_text', 'json', 'secret_text', 'secret_key'], 13 binding, không có ADMIN_OPEN",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-007-entry-co-mo-admin-qua-apply.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 552,
+      "out": "PASS export khi cờ mở admin (cũ + mới) qua apply_admin_reviews.py thật, nhãn admin:2ddfc6ef",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-008-co-bat-danh-sach-trong-va-gia-tri-co-la.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 281,
+      "out": "h tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  ADMIN_OPEN=\"１\": tắt -> export chỉ có Capu thật\n  ok  ADMIN_OPEN=\"１\": tắt -> không token bị 403\n  ok  ADMIN_OPEN=\"１\": tắt -> token mang đúng chuỗi danh tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  ADMIN_OPEN=1: tắt -> export chỉ có Capu thật\n  ok  ADMIN_OPEN=1: tắt -> không token bị 403\n  ok  ADMIN_OPEN=1: tắt -> token mang đúng chuỗi danh tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  ADMIN_OPEN=true: tắt -> export chỉ có Capu thật\n  ok  ADMIN_OPEN=true: tắt -> không token bị 403\n  ok  ADMIN_OPEN=true: tắt -> token mang đúng chuỗi danh tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-009-co-bat-khong-mo-export-noi-bo.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 184,
+      "out": "ok  cờ \"1\", không Bearer: 403, không entries, không ghi R2\n  ok  cờ \"1\", Bearer sai: 403, không entries, không ghi R2\n  ok  cờ \"1\", Bearer dev:danh tính cố định: 403, không entries, không ghi R2\n  ok  cờ \"1\", Bearer danh tính cố định: 403, không entries, không ghi R2\n  ok  cờ \"1\", ENRICH_EXPORT_TOKEN thiếu: 403, không entries, không ghi R2\n  ok  cờ \"1\", ENRICH_EXPORT_TOKEN rỗng, Bearer rỗng: 403, không entries, không ghi R2\n  ok  cờ \"1\", ENRICH_EXPORT_TOKEN ngắn: 403, không entries, không ghi R2\n  ok  cờ \"1\", token đúng: 200 và có mục của danh tính cố định (đối chứng)\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-010-vendor-da-xoa-chi-o-nhan-da-xoa-khong-ket.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 376,
+      "out": "ng kẹt)\n  ok  marry_e289aa1b8147 (rời pool, không bản sửa, không ẩn): khôi phục 200 (không kẹt)\n  ok  marry_c66ac5426d4c (trong pool, có bản sửa, không ẩn): khôi phục 200 (không kẹt)\n  ok  marry_a03513f147ba (rời pool, có bản sửa, không ẩn): khôi phục 200 (không kẹt)\n  ok  marry_0fff143d81d1 (trong pool, không bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  marry_805844a937e2 (rời pool, không bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  marry_946e3434221d (trong pool, có bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  marry_e88965816275 (rời pool, có bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  sau khôi phục: không vendor nào còn ở \"Đã xoá\"\n  ok  vendor đã xoá quay lại pool: cặp đôi thấy hidden:true, admin vẫn thấy ở \"Đã xoá\" (in_pool:true), không ở mặc định\n  ok  không request ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-011-xoa-khoi-phuc-tra-lai-y-nguyen-chi-ghi-overlay-va-nhat-ky.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 493,
+      "out": "ong lúc đang xoá): detailStatus y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): override y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): effective y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): edited y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): history y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): row y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): orphanRow y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): status y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): chat y hệt bản chưa từng bị xoá\n  ok  không request ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-012-co-admin-open-voi-route-xoa-khoi-phuc.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 178,
+      "out": "te/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" không token: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" token rác: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" người thường: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" cặp đôi: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=1, không token: xoá 200\n  ok  ADMIN_OPEN=1: deleted_info.by là danh tính cố định\n  ok  ADMIN_OPEN=1, không token: khôi phục 200\n  ok  ADMIN_OPEN=1: hai dòng Nhật ký vendor.delete/restore, admin_id là danh tính cố định\n  ok  ADMIN_OPEN=1, admin thật đăng nhập: deleted_by vẫn là danh tính đã dùng (không rỗng)\n  ok  không request ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-001-bao-cao-enrich-phan-hoach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 55,
+      "out": "PASS 870 dòng, 9 nhóm cộng đúng, 260 approvable, ô đếm khớp nhóm",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-002-maps-link-back-nhan-thi-tohong-nhan.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 317,
+      "out": "PASS 20 link: mọi link back nhận thì tohong cũng nhận",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-003-bao-cao-enrich-commit-bang-sinh-lai.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 393,
+      "out": "PASS 1 báo cáo enrich đã commit bằng đúng byte báo cáo sinh lại",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-004-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 733,
+      "out": "PASS 3 cú bấm của Capu: back ký, tohong nhận, bất biến kiểm được (kể cả mục link sau resolve); review của admin khác không vào",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-005-workflow-du-lieu-di-kem-bao-cao.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 71,
+      "out": "PASS mọi workflow thêm file dữ liệu đều sinh lại và đưa enrich-report.json vào cùng commit",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-006-danh-muc-thuoc-tinh-pool.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 69302,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-007-bao-cao-khong-mang-lien-he-dia-chi.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 108,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-008-nguoi-ngoai-khong-thay-khong-goi-api-vendor.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 3119,
+      "out": "ok  thấy \"Bạn không có quyền xem trang này\"\n  ok  không có thanh tab, không có bảng enrich\n  ok  không gọi /api/admin/vendor-enrich* hay /api/admin/vendors*\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-009-ban-sua-pool-khong-pha-hop-dong-anh-gu.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 565,
+      "out": "PASS 22 vendor đã sửa, 867 vendor hiệu lực đều giữ hợp đồng ảnh/gu/độ dài",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-010-drawer-doc-la-admin-ghi-ky-la-capu.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 258,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-011-ten-sua-khong-ky-tu-an-dao-chieu.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 209,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-012-url-anh-sua-chi-mot-cach-doc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 195,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-013-bien-the-vo-hinh-va-host-anh.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 229,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-014-cot-pool-danh-muc-du-truong-bi-anh-huong.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 8788,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/vendor-enrich/inv-015-loc-status-khop-chu-hien-thi.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 235,
+      "out": "ang giá trị đó (57)\n  ok  status=unverified: đúng các hàng mà chữ cột Status mang giá trị đó (59)\n  ok  status=name_same_addr_diff: đúng các hàng mà chữ cột Status mang giá trị đó (50)\n  ok  status=name_similar: đúng các hàng mà chữ cột Status mang giá trị đó (247)\n  ok  status=not_found: đúng các hàng mà chữ cột Status mang giá trị đó (353)\n  ok  status=temp_closed: đúng các hàng mà chữ cột Status mang giá trị đó (3)\n  ok  status=not_enriched: đúng các hàng mà chữ cột Status mang giá trị đó (0)\n  ok  status=pending_capu: đúng các hàng mà chữ cột Status mang giá trị đó (4)\n  ok  status=pending_apply: đúng các hàng mà chữ cột Status mang giá trị đó (3)\n  ok  status=override: đúng các hàng mà chữ cột Status mang giá trị đó (3)\n  ok  9 nhóm + Chờ Capu + Chờ áp dụng chia toàn bộ danh sách\nPASS",
+      "tier": 2
+    }
+  ],
+  "hint": ""
+}
