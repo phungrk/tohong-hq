@@ -1,6 +1,6 @@
 {
   "task": "T-203",
-  "at": "2026-11-18T13:55",
+  "at": "2026-11-18T13:59",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "bash eval/T-203/check_1_xoa_can_ly_do_xac_nhan.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 11104,
+      "ms": 11111,
       "out": "XX  tiền điều kiện: chọn vendor thấy nút 'Xoá vendor' trong khung sửa\nFAIL ngoại lệ khi chạy (hành vi chưa đúng?): locator.click: Timeout 8000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Xoá vendor', exact: true })\u001b[22m",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "node eval/T-203/check_2_cap_doi_khong_thay.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 247,
+      "ms": 296,
       "out": "vendor\n  XX  trạng thái vendor đã lưu (/api/vendors/status): có mục, hidden:true (KHÔNG null như id không tồn tại)  :: [200,{\"hidden\":false,\"price_source\":\"estimated\",\"priceMin\":4,\"priceMax\":15.3,\"price_basis\":\"estimate_category\",\"price_as_of\":\"2026-06\",\"price_label\":\"Ước tính theo hạng mục\"},null]\n  ok  trạng thái vendor đã xoá vẫn có giá hiện hành (số), để thẻ đã lưu không vỡ\n  XX  GET /api/vendors/:id: 200, vendor.hidden:true, match:null, vẫn có tên (không 404)  :: [200,false,null]\n  XX  khôi phục thành công (200)  :: [404,\"{\\\"error\\\":\\\"not found\\\"}\"]\n  ok  sau khôi phục: hiện lại ở ghép theo id, ứng viên chat, đếm hạng mục\n  ok  sau khôi phục: trạng thái đã lưu hidden không phải true\n  ok  không request ra ngoài\nFAIL xoá thành công (200) [[404,\"{\\\"error\\\":\\\"not found\\\"}\"]] (+7 lỗi nữa)",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "node eval/T-203/check_3_admin_danh_sach.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 258,
+      "ms": 239,
       "out": "XX  nhãn deleted: 200, đúng 2 hàng, total 2  :: [400,null]\n  XX  hàng đã xoá: deleted:true, tên + hạng mục còn đủ, kèm lý do, thời điểm (ISO), người xoá = admin  :: {}\n  XX  nhãn deleted + Hạng mục: chỉ vendor đúng hạng mục (AND)  :: [400,null]\n  XX  nhãn deleted + ô tìm: chỉ vendor khớp tên (AND)  :: [400,null]\n  XX  nhãn deleted + hạng mục không có vendor xoá: rỗng, total 0  :: [400,null]\n  ok  nhãn viết sai hoa/thường vẫn 400 invalid_label (không đổi)\n  XX  chi tiết admin của vendor đã xoá vẫn mở được: deleted:true, deleted_info {reason, at, by}  :: [200,null,null]\n  ok  không request ra ngoài\nFAIL mọi hàng hiện tại có deleted:false [[{\"id\":\"marry_c56fc38821ee\",\"name\":\"Ami Wedding\",\"category\":\"attire\",\"catLabel\":\"Trang phục\",\"city\":\"HCMC\",\"priceMin\":3,\"priceMax\":3,\"base_p] (+13 lỗi nữa)",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "node eval/T-203/check_4_khoi_phuc_dung_trang_thai.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 289,
+      "ms": 257,
       "out": ")\n  ok  C(không có bản sửa): không còn trong nhãn Đã xoá\n  XX  C(không có bản sửa): khôi phục khi không ở trạng thái xoá -> 409 not_deleted  :: [404,\"{\\\"error\\\":\\\"not found\\\"}\"]\n  XX  C: sau khôi phục override null, overridden:false  :: [{\"priceMin\":1},true]\n  XX  xoá/khôi phục id không có trong pool -> 404 vendor_not_found  :: [404,\"{\\\"error\\\":\\\"not found\\\"}\",404]\n  XX  vendor mồ côi (có ghi đè, không còn trong pool): xoá -> 404 vendor_not_found (không xoá được thứ cặp đôi vốn không thấy)  :: [200,404,\"{\\\"error\\\":\\\"not found\\\"}\"]\n  XX  sai phương thức (GET delete, PUT restore) -> 405  :: [404,404]\n  XX  không đăng nhập / không phải admin: 401|403, và không xoá được  :: [403,403,null]\n  ok  không request ra ngoài\nFAIL A(có bản sửa): xoá 200 [[404,\"{\\\"error\\\":\\\"not found\\\"}\"]] (+48 lỗi nữa)",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "node eval/T-203/check_5_nhat_ky.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 153,
+      "ms": 232,
       "out": "target_id đúng, admin_id là người xoá, có thời điểm\n  XX  dòng xoá: before.deleted không phải true; after.deleted === true, after.deleted_reason đúng lý do (đã cắt khoảng trắng)  :: [null,null]\n  XX  khôi phục 200  :: [404,\"{\\\"error\\\":\\\"not found\\\"}\"]\n  XX  lọc action=vendor.restore: đúng 1 dòng  :: 0\n  XX  dòng khôi phục: target_type vendor, target_id đúng, admin_id đúng; before.deleted === true kèm lý do cũ; after.deleted không phải true\n  XX  tổng nhật ký tăng đúng 2 dòng, khôi phục nằm trên xoá (mới nhất trước)  :: []\n  XX  nhật ký chỉ-thêm: hai dòng là hai khoá R2 riêng, dòng xoá còn nguyên sau khi khôi phục  :: 0\n  ok  không request ra ngoài\nFAIL xoá thiếu lý do / lý do trắng / quá 300 ký tự -> 400; id lạ -> 404; khôi phục khi chưa xoá -> 409 [[404,404,404,404,404,404]] (+10 lỗi nữa)",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "node eval/T-203/check_6_khong_xoa_vinh_vien.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 225,
+      "ms": 158,
       "out": ",\"{\\\"error\\\":\\\"not found\\\"}\"]\n  ok  sau xoá: không khoá R2 nào bị mất\n  XX  sau xoá: chỉ tài liệu bản sửa vendor đổi, chỉ thêm dòng nhật ký  :: {\"added\":[],\"removed\":[],\"changed\":[]}\n  ok  sau xoá: hồ sơ / ngân sách / hội thoại của cặp đôi (có nhắc vendor) y nguyên từng byte\n  ok  vendor vẫn nằm trong pool (không bị gỡ khỏi dữ liệu nguồn)\n  ok  sau xoá: chi tiết admin vẫn trả đủ vendor gốc + bản sửa + lịch sử không mất dòng nào\n  XX  khôi phục 200  :: [404,\"{\\\"error\\\":\\\"not found\\\"}\"]\n  ok  sau khôi phục: không khoá nào bị mất; chỉ bản sửa vendor đổi + thêm nhật ký\n  ok  sau khôi phục: dữ liệu cặp đôi vẫn y nguyên từng byte\n  ok  sau khôi phục: bản sửa giá + liên hệ còn đủ; lịch sử không mất dòng nào\n  ok  không request ra ngoài\nFAIL xoá 200 [[404,\"{\\\"error\\\":\\\"not found\\\"}\"]] (+2 lỗi nữa)",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "node eval/T-203/check_7_khac_an_va_enrich_remove.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 282,
+      "ms": 342,
       "out": "rice_source\":\"\n  ok  enrich remove: KHÔNG ở nhãn Đã xoá\n  ok  enrich remove: cặp đôi vẫn thấy (hidden không phải true)\n  ok  enrich remove: chi tiết enrich báo pool.visible true\n  XX  xoá vendor đang có review enrich 'remove': 200  :: [404,\"{\\\"error\\\":\\\"not found\\\"}\"]\n  XX  chi tiết enrich của vendor đã xoá: pool.in_pool true, pool.visible false, reasons có code overlay_deleted kèm chữ giải thích  :: [200,true,[]]\n  ok  chi tiết enrich của vendor chỉ Ẩn (hành vi cũ): visible false, reasons có overlay_hidden và KHÔNG có overlay_deleted\n  ok  không request ra ngoài\nFAIL Ẩn: vendor VẪN ở danh sách admin mặc định, hidden:true, deleted:false [{\"id\":\"marry_57790d6f6f08\",\"name\":\"Capella Gallery Hall\",\"category\":\"venue\",\"catLabel\":\"Tiệc & nhà hàng\",\"city\":\"HCMC\",\"priceMin\":3.2,\"price] (+4 lỗi nữa)",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "bash eval/T-203/check_8_giao_dien_da_xoa_khoi_phuc_nhat_ky.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 10990,
+      "ms": 11058,
       "out": "XX  tiền điều kiện: chọn vendor thấy nút 'Xoá vendor' trong khung sửa\nFAIL ngoại lệ khi chạy (hành vi chưa đúng?): locator.click: Timeout 8000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Xoá vendor', exact: true })\u001b[22m",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 4622,
+      "ms": 68,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 220,
+      "ms": 184,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 30,
+      "ms": 24,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 40,
+      "ms": 39,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1181,
+      "ms": 1208,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -116,15 +116,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2445,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-1XJgIK/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2429,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-J5MCPP/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1478,
+      "ms": 1629,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -132,15 +132,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 926,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-EYL7tL/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 959,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-HRdJR7/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2745,
+      "ms": 2533,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 93,
+      "ms": 92,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1505,
+      "ms": 1579,
       "out": "PASS (worker.js nén 782984 byte)",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/admin/inv-001-co-admin-open-chi-mo-voi-dung-1.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 245,
+      "ms": 272,
       "out": "d · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"0\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"true\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"yes\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"on\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\" 1\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"1 \" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"01\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"TRUE\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"false\" · admin thật: /me 200 và user_id là của chính họ\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/admin/inv-002-danh-tinh-co-dinh-khong-bao-gio-la-capu.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 216,
+      "ms": 190,
       "out": "· danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (không token) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (khong-phai-token) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (dev:user_that_admin) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export ký 200\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export ký không có mục của danh tính cố định (không chuỗi \"admin-khong-dang-nhap\", không mục nào của các bản duyệt vừa làm)\n  ok  đối chứng: Capu thật duyệt (cờ tắt) thì export có mục của họ\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/admin/inv-003-co-admin-open-khong-mo-route-ngoai-admin.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 200,
+      "ms": 193,
       "out": "min thật: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token admin thật: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  token người thường: mọi route ngoài /api/admin/* trả giống hệt (mã + thân) khi bật và khi tắt cờ\n  ok  token người thường: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token người thường: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  cờ bật: /api/administrator không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/administrator/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/adminx/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/admin-members không bị coi là trang admin (không trả user_id/admin:true)\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/admin/inv-004-khong-file-cau-hinh-bat-co-admin-open.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 26,
+      "ms": 23,
       "out": "PASS",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/admin/inv-005-deploy-khong-ghi-de-admin-open.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 54,
+      "ms": 35,
       "out": "PASS",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/planner/admin/inv-006-deploy-that-giu-bien-dashboard.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2101,
+      "ms": 2203,
       "out": "PASS upload metadata keep_bindings=['plain_text', 'json', 'secret_text', 'secret_key'], 13 binding, không có ADMIN_OPEN",
       "tier": 2
     }
