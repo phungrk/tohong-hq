@@ -7,7 +7,8 @@ INV-??? · Cú bấm của Capu đi trọn một vòng mà không mất chữ k�
       ghi place_id + resolved (resolve_overrides.py, T-110).
 Lý do: chữ ký có ba nơi đọc (back ký, tohong kiểm trên đường thật, HQ kiểm offline). Nếu một nơi đổi định dạng (thứ tự trường, mã hoá, trường nào được ký)
   thì hoặc PR dữ liệu bị từ chối, hoặc bể tầng 2 đỏ vĩnh viễn sau merge (D2 của T-129). Bất biến khoá ba nơi vào một định nghĩa.
-Tự chứa: worker thật của back + R2 giả (test/helpers/memoryBucket.js), khoá Ed25519 sinh tạm, fetch toàn cục bị chặn; apply chạy trên bản sao tạm của tools/scraper.
+Tự chứa: worker thật của back + R2 giả (test/helpers/memoryBucket.js), khoá Ed25519 sinh tạm, fetch toàn cục bị chặn; apply chạy trên bản sao tạm của tools/scraper,
+  manual_overrides.json của bản sao bỏ mục sẵn có của các id đang thử (ADR-131) để kết quả không phụ thuộc override đã duyệt trong tohong.
 Chưa áp dụng (PASS) khi back chưa có đường /api/internal/vendor-enrich/export. Repo: TOHONG_REPO, TOHONG_BACK_REPO hoặc ../tohong, ../tohong-back.
 Chạy: python3 -I <file>. Thoát 0 = đạt, 1 = vi phạm. Không gọi Google."""
 import base64, importlib.util, json, os, re, shutil, subprocess, sys, tempfile
@@ -118,8 +119,13 @@ try:
     sc = os.path.join(tmp, "tools", "scraper")
     shutil.copytree(os.path.join(TOHONG, "tools", "scraper"), sc, ignore=shutil.ignore_patterns("__pycache__", "run-logs"))
     mo = os.path.join(sc, "output", "HCMC", "manual_overrides.json")
+    # ADR-131: bản sao tạm trung tính với các id đang thử (bỏ mục sẵn có của chúng, giữ mọi mục khác để validate vẫn chạy trên dữ liệu thật),
+    # để kết quả không phụ thuộc vào override nào đã được duyệt vào repo tohong.
     before = json.load(open(mo, encoding="utf-8"))
-    n0 = len(before.get("overrides") or [])
+    tried = set(ids.values())
+    before["overrides"] = [x for x in (before.get("overrides") or []) if x.get("vendor_id") not in tried]
+    open(mo, "w", encoding="utf-8").write(json.dumps(before, ensure_ascii=False, indent=2) + "\n")
+    n0 = len(before["overrides"])
     exf = os.path.join(tmp, "export.json"); open(exf, "w", encoding="utf-8").write(r["text"])
     kf = os.path.join(tmp, "keys.json"); json.dump({"schema_version": 1, "keys": {"k1": pub}}, open(kf, "w"))
     a = subprocess.run([sys.executable, "apply_admin_reviews.py", "--state", "HCMC", "--reviews", exf, "--keys", kf, "--output-dir", os.path.join(sc, "output")],

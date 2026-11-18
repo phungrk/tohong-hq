@@ -9,6 +9,7 @@ luôn được tools/scraper/apply_admin_reviews.py THẬT của tohong nhận �
 Lý do: back và tohong là hai repo; ai đổi dạng nhãn (khác LABEL_RE), thêm trường bị apply từ chối (Clerk id thô, reviewed_by), hay đổi phần được ký ở một phía
 thì 132 review của Capu qua cờ mở admin không còn vào pool mà không ai thấy.
 Repo: TOHONG_REPO, TOHONG_BACK_REPO hoặc ../tohong, ../tohong-back cạnh gốc HQ. apply chạy trên bản sao tạm; không sửa repo nào; mạng bị chặn ở worker.
+Bản sao tạm bỏ mục sẵn có của các id đang thử trong manual_overrides.json (ADR-131), nên kết quả không phụ thuộc override đã duyệt trong tohong.
 Chạy: python3 -I <file>. Thoát 0 = đạt, 1 = vi phạm, 2 = thiếu repo."""
 import importlib.util, json, os, shutil, subprocess, sys, tempfile
 sys.dont_write_bytecode = True
@@ -41,7 +42,12 @@ try:
     sc = os.path.join(tmp, "tools", "scraper")
     shutil.copytree(os.path.join(TOHONG, "tools", "scraper"), sc, ignore=shutil.ignore_patterns("__pycache__", "run-logs"))
     mo = os.path.join(sc, "output", "HCMC", "manual_overrides.json")
-    n0 = len(json.load(open(mo, encoding="utf-8")).get("overrides") or [])
+    # ADR-131: bản sao tạm trung tính với các id đang thử (bỏ mục sẵn có của chúng, giữ mọi mục khác để validate vẫn chạy trên dữ liệu thật),
+    # để kết quả không phụ thuộc vào override nào đã được duyệt vào repo tohong.
+    doc0 = json.load(open(mo, encoding="utf-8"))
+    doc0["overrides"] = [x for x in (doc0.get("overrides") or []) if x.get("vendor_id") not in set(want)]
+    open(mo, "w", encoding="utf-8").write(json.dumps(doc0, ensure_ascii=False, indent=2) + "\n")
+    n0 = len(doc0["overrides"])
     exf = os.path.join(tmp, "export.json"); open(exf, "w", encoding="utf-8").write(r["export"])
     kf = os.path.join(tmp, "keys.json"); json.dump({"schema_version": 1, "keys": {"k204": r["pub"]}}, open(kf, "w"))
     a = subprocess.run([sys.executable, "apply_admin_reviews.py", "--state", "HCMC", "--reviews", exf, "--keys", kf, "--output-dir", os.path.join(sc, "output")],
