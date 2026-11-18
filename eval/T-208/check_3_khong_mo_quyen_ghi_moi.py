@@ -12,22 +12,9 @@ while d != os.path.dirname(d) and not os.path.isfile(os.path.join(d, "scripts", 
 repo = next((c for c in (os.environ.get("TOHONG_REPO"), os.path.join(d, "..", "tohong")) if c and os.path.isdir(os.path.join(c, ".github", "workflows"))), None)
 if not repo:
     print("PASS chưa áp dụng (không thấy tohong/.github/workflows)"); sys.exit(0)
-CALL = re.compile(r"\bgh\s+run\b|\bgh\s+api\b[^\n]*?/?actions/|check_runs\.py")
 def load():
     for p in sorted(glob.glob(os.path.join(repo, ".github", "workflows", "*.y*ml"))):
         yield os.path.basename(p), (yaml.safe_load(open(p, encoding="utf-8")) or {})
-def perms(wf, job):
-    """Quyền hiệu lực của job: permissions cấp job thay hẳn cấp workflow; không khai = None."""
-    p = job["permissions"] if "permissions" in job else wf.get("permissions")
-    if p is None: return None
-    if isinstance(p, str): return {"*": p}
-    return {str(k): str(v) for k, v in p.items()}
-def has_actions_read(p):
-    if p is None: return False
-    if "*" in p: return p["*"] in ("read-all", "write-all")
-    return p.get("actions") in ("read", "write")
-def calls_actions_api(job):
-    return any(CALL.search(str(s.get("run", ""))) for s in (job.get("steps") or []))
 ALLOWED = {"contents", "pull-requests"}
 bad = []
 def scan(where, p):
