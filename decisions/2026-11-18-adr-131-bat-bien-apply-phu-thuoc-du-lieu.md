@@ -13,3 +13,12 @@ Lỗi in ra: "apply sinh mục [..], mong [.., marry_c6f3c54184ac]". Hai bất b
 - Sửa phần dựng tình huống, không đổi điều kiện kiểm. Có hai cách được chấp nhận: chạy apply trên một bản sao tạm có `manual_overrides.json` rỗng, hoặc chọn những id chưa có mục trong đó. Cả hai đều không sửa repo tohong.
 - Đây là sửa bất biến qua Chief theo CLAUDE.md, có ghi quyết định này. Không phải sửa bất biến cho khớp code: code không đổi.
 - Phải sửa xong trước Code Gate của T-207 và T-208, vì cả hai việc chạy tầng 2 có các bất biến này.
+
+## Đã sửa (2026-11-18)
+Adversary sửa phần dựng tình huống của cả hai bất biến. Trong bản sao tạm, mục của các id đang kiểm được bỏ khỏi `manual_overrides.json`, mọi mục thật khác giữ nguyên. Không đổi điều kiện kiểm nào.
+
+Kết quả:
+- Trên main (back 241166c, tohong e9cc05f) cả hai PASS.
+- Ba cách phá đều làm cả hai FAIL như mong đợi: đổi chữ ký ở apply, ép apply coi mọi id là đã có, đổi chữ ký ở back.
+
+Eval cấp việc đã đóng có cùng lỗi, không sửa vì việc đã xong: T-204 check_5 và T-205 adv-02 (3 ca chấp nhận). Chạy lại trên main sau tohong#93 thì chúng đỏ vì lý do này.

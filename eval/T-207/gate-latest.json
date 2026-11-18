@@ -1,6 +1,6 @@
 {
   "task": "T-207",
-  "at": "2026-11-18T15:21",
+  "at": "2026-11-18T15:25",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,15 +12,15 @@
       "eval": "python3 -I eval/T-207/check_1_ung_vien_enrich_khong_goi_google.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 410,
-      "out": "FAIL 6 vi phạm, vd: resolve gọi Google 2 lần (['details']) cho mục khớp ứng viên enrich | exit 1, kỳ vọng 0: lace Details lỗi mạng: eval T-110: không cho phép gọi get https://places.googleapis.com/v1/places/PB (kind=details)\nMục cần resolve: 2; lỗi: 2\nGOOGLE_USAGE text_search=0 photo_details=2 photo_media=0\n | GOOGLE_USAGE {'text_search': 0, 'photo_details': 2, 'photo_media': 0}, kỳ vọng toàn 0 | a: resolved={}, kỳ vọng {'place_id': 'PA', 'name': 'Nhà hàng Alpha (Google)', 'formatted_address': '12 Nguyễn Huệ, Bến Nghé, Quận 1, Hồ Chí Minh', 'business_status': 'OPERATIONAL', 'resolved_at': '2026-11-16T15:19:19Z', 'resolved_from': 'enrich_report'}",
+      "ms": 406,
+      "out": "FAIL 6 vi phạm, vd: resolve gọi Google 2 lần (['details']) cho mục khớp ứng viên enrich | exit 1, kỳ vọng 0: lace Details lỗi mạng: eval T-110: không cho phép gọi get https://places.googleapis.com/v1/places/PB (kind=details)\nMục cần resolve: 2; lỗi: 2\nGOOGLE_USAGE text_search=0 photo_details=2 photo_media=0\n | GOOGLE_USAGE {'text_search': 0, 'photo_details': 2, 'photo_media': 0}, kỳ vọng toàn 0 | a: resolved={}, kỳ vọng {'place_id': 'PA', 'name': 'Nhà hàng Alpha (Google)', 'formatted_address': '12 Nguyễn Huệ, Bến Nghé, Quận 1, Hồ Chí Minh', 'business_status': 'OPERATIONAL', 'resolved_at': '2026-11-16T15:23:14Z', 'resolved_from': 'enrich_report'}",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-207/check_2_kiem_dong_cua_tinh_trung_van_chay.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 552,
+      "ms": 606,
       "out": "FAIL 9 vi phạm, vd: resolve gọi Google 6 lần | resolve không điền resolved cho đủ 6 mục (nó không được tự lọc đóng cửa/tỉnh/trùng): es/P_DUP (kind=details)\nGOOGLE_REQUEST run=local kind=details\nRESOLVE_ERROR c2 place_not_found: Place Details lỗi mạng: eval T-110: không cho phép gọi get https://places.googleapis.com/v1/places/P_DUP (kind=details)\nMục cần resolve: 6; lỗi: 6\nGOOGLE_USAGE text_search=0 photo_details=6 photo_media=0\n | perm: OVERRIDE_ERROR ['unresolved'], kỳ vọng ['place_closed_permanently'] | temp: OVERRIDE_ERROR ['unresolved'], kỳ vọng ['place_temporarily_closed']",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 -I eval/T-207/check_3_muc_khong_phu_ung_vien_van_goi_google.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 238,
+      "ms": 232,
       "out": "FAIL 4 vi phạm, vd: request Google details=3 search=1, kỳ vọng details=2 search=1 (chỉ mục không được phủ) | có request nhắc place_id PC của mục đã được phủ | GOOGLE_USAGE {'text_search': 1, 'photo_details': 3, 'photo_media': 0}, kỳ vọng text_search=1 photo_details=2 | C: place_id='PC' resolved={}, kỳ vọng PC/enrich_report",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "python3 -I eval/T-207/check_4_du_lieu_cu_hoac_thieu_van_goi_google.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 266,
+      "ms": 233,
       "out": "FAIL 2 vi phạm, vd: request Google ['P_BTS', 'P_F29', 'P_NAD', 'P_NBS', 'P_NNM', 'P_NTS', 'P_S31'] (tổng 7), kỳ vọng đúng 6 Place Details cho ['P_BTS', 'P_NAD', 'P_NBS', 'P_NNM', 'P_NTS', 'P_S31'] | F29: resolved_from='place_id', kỳ vọng enrich_report",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "python3 -I eval/T-207/check_5_uoc_tinh_va_dry_run_bo_muc_da_phu.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 666,
+      "ms": 791,
       "out": "phủ: 'SẼ RESOLVE a: Place Details cho PA\\nSẼ RESOLVE b: Place Details cho PB\\nDRY RUN: 2 mục, tối đa 2 lượt Places (không tải ảnh). Không gọi Google.\\n' (kỳ vọng tối đa 0 lượt Places, 0 Google) | plan_batch lô toàn mục phủ: 'BATCH_ESTIMATE details=10 search=4 requests=12 net_usd=0.0000 month_net_before=0.0000 month_net_after=0.0000 resolve=4 enrich=2 refresh=6\\nQUOTA_ALLOWED resolve=4 enrich=2 refresh=6\\nQUOTA_OK\\n' (kỳ vọng resolve=0, không QUOTA_EXCEEDED) | dry-run lô 2 phủ + 1 không phủ: 'SẼ RESOLVE a: Place Details cho PA\\nSẼ RESOLVE b: Place Details cho PB\\nSẼ RESOLVE z: Place Details cho PZ\\nDRY RUN: 3 mục, tối đa 3 lượt Places (không tải ảnh). Không gọi Google.\\n' (kỳ vọng tối đa 1 lượt Places) | dry-run vẫn nói sẽ gọi Place Details cho mục đã phủ: SẼ RESOLVE a: Place Details cho PA",
       "tier": 1
     },
@@ -52,23 +52,23 @@
       "eval": "python3 -I eval/T-207/check_6_enrich_ghi_trang_thai_va_bao_cao_mang.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 772,
+      "ms": 832,
       "out": "FAIL 7 vi phạm, vd: m: google.business_status=None, kỳ vọng 'OPERATIONAL' | m: checked_at=None sai dạng YYYY-MM-DDTHH:MM:SSZ | c: google.business_status=None, kỳ vọng 'OPERATIONAL' | c: checked_at=None sai dạng YYYY-MM-DDTHH:MM:SSZ",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-207/check_7_chu_ky_export_khong_doi.py",
       "kind": "cmd",
-      "status": "FAIL",
-      "ms": 985,
-      "out": "FAIL 1 vi phạm, vd: INV-004 không PASS: FAIL apply sinh mục ['marry_57790d6f6f08', 'marry_bf43aee36047'], mong ['marry_57790d6f6f08', 'marry_bf43aee36047', 'marry_c6f3c54184ac']",
+      "status": "PASS",
+      "ms": 697,
+      "out": "PASS chữ ký export vẫn kiểm được; export có `resolved` hoặc chữ ký sai bị từ chối, file không đổi",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-207/check_8_han_muc_khong_tang.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 500,
+      "ms": 506,
       "out": "FAIL 2 vi phạm, vd: (a) lô toàn phủ + --max-requests 0: exit 1, 0 request, 'RESOLVE_ERROR a budget_stop: max_requests=0 reached\\nRESOLVE_ERROR b budget_stop: max_requests=0 reached\\nMục cần resolve: 2; lỗi: 2\\nGOOGLE_USAGE text_search=0 photo_details=0 photo_media=0\\n' | (b) mục không phủ + --max-requests 0: 0 request, 'RESOLVE_ERROR a budget_stop: max_requests=0 reached\\nRESOLVE_ERROR z budget_stop: max_requests=0 reached\\nMục cần resolve: 2; lỗi: 2\\nGOOGLE_USAGE text_search=0 photo_details=0 photo_media=0\\n'",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 41,
+      "ms": 42,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 156,
+      "ms": 185,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 28,
+      "ms": 30,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 36,
+      "ms": 41,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1134,
+      "ms": 1244,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -116,15 +116,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2378,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-hIiAcB/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2377,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-LBsqek/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1685,
+      "ms": 1551,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -132,15 +132,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 966,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-ht4eBd/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 922,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-1uVhf4/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2549,
+      "ms": 2312,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 69,
+      "ms": 71,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1426,
+      "ms": 1344,
       "out": "PASS (worker.js nén 784427 byte)",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/admin/inv-001-co-admin-open-chi-mo-voi-dung-1.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 235,
+      "ms": 262,
       "out": "d · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"0\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"true\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"yes\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"on\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\" 1\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"1 \" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"01\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"TRUE\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"false\" · admin thật: /me 200 và user_id là của chính họ\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/admin/inv-002-danh-tinh-co-dinh-la-capu-khi-va-chi-khi-co-mo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 247,
+      "ms": 208,
       "out": "ính cố định\n  ok  ADMIN_OPEN=\" 1\": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\" 1\" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"1 \": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"1 \" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"01\": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"01\" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"TRUE\": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"TRUE\" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  cờ tắt: Capu thật ký được\n  ok  đảo cờ bật/tắt/bật: tính lại đúng, không ghi R2\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/admin/inv-003-co-admin-open-khong-mo-route-ngoai-admin.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 199,
+      "ms": 225,
       "out": "min thật: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token admin thật: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  token người thường: mọi route ngoài /api/admin/* trả giống hệt (mã + thân) khi bật và khi tắt cờ\n  ok  token người thường: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token người thường: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  cờ bật: /api/administrator không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/administrator/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/adminx/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/admin-members không bị coi là trang admin (không trả user_id/admin:true)\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/admin/inv-004-khong-file-cau-hinh-bat-co-admin-open.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 17,
+      "ms": 19,
       "out": "PASS",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/admin/inv-005-deploy-khong-ghi-de-admin-open.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 97,
+      "ms": 54,
       "out": "PASS",
       "tier": 2
     },
@@ -204,23 +204,23 @@
       "eval": "eval/invariants/planner/admin/inv-006-deploy-that-giu-bien-dashboard.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2223,
+      "ms": 1994,
       "out": "PASS upload metadata keep_bindings=['plain_text', 'json', 'secret_text', 'secret_key'], 13 binding, không có ADMIN_OPEN",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/admin/inv-007-entry-co-mo-admin-qua-apply.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 433,
-      "out": "FAIL apply sinh mục ['marry_b25635d69270'], mong ['marry_b25635d69270', 'marry_b92e8a86175d', 'marry_c6f3c54184ac']",
+      "status": "PASS",
+      "ms": 483,
+      "out": "PASS export khi cờ mở admin (cũ + mới) qua apply_admin_reviews.py thật, nhãn admin:2ddfc6ef",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/admin/inv-008-co-bat-danh-sach-trong-va-gia-tri-co-la.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 220,
+      "ms": 231,
       "out": "h tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  ADMIN_OPEN=\"１\": tắt -> export chỉ có Capu thật\n  ok  ADMIN_OPEN=\"１\": tắt -> không token bị 403\n  ok  ADMIN_OPEN=\"１\": tắt -> token mang đúng chuỗi danh tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  ADMIN_OPEN=1: tắt -> export chỉ có Capu thật\n  ok  ADMIN_OPEN=1: tắt -> không token bị 403\n  ok  ADMIN_OPEN=1: tắt -> token mang đúng chuỗi danh tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  ADMIN_OPEN=true: tắt -> export chỉ có Capu thật\n  ok  ADMIN_OPEN=true: tắt -> không token bị 403\n  ok  ADMIN_OPEN=true: tắt -> token mang đúng chuỗi danh tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -228,7 +228,7 @@
       "eval": "eval/invariants/planner/admin/inv-009-co-bat-khong-mo-export-noi-bo.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 211,
+      "ms": 196,
       "out": "ok  cờ \"1\", không Bearer: 403, không entries, không ghi R2\n  ok  cờ \"1\", Bearer sai: 403, không entries, không ghi R2\n  ok  cờ \"1\", Bearer dev:danh tính cố định: 403, không entries, không ghi R2\n  ok  cờ \"1\", Bearer danh tính cố định: 403, không entries, không ghi R2\n  ok  cờ \"1\", ENRICH_EXPORT_TOKEN thiếu: 403, không entries, không ghi R2\n  ok  cờ \"1\", ENRICH_EXPORT_TOKEN rỗng, Bearer rỗng: 403, không entries, không ghi R2\n  ok  cờ \"1\", ENRICH_EXPORT_TOKEN ngắn: 403, không entries, không ghi R2\n  ok  cờ \"1\", token đúng: 200 và có mục của danh tính cố định (đối chứng)\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -236,7 +236,7 @@
       "eval": "eval/invariants/planner/admin/inv-010-vendor-da-xoa-chi-o-nhan-da-xoa-khong-ket.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 347,
+      "ms": 295,
       "out": "ng kẹt)\n  ok  marry_e289aa1b8147 (rời pool, không bản sửa, không ẩn): khôi phục 200 (không kẹt)\n  ok  marry_c66ac5426d4c (trong pool, có bản sửa, không ẩn): khôi phục 200 (không kẹt)\n  ok  marry_a03513f147ba (rời pool, có bản sửa, không ẩn): khôi phục 200 (không kẹt)\n  ok  marry_0fff143d81d1 (trong pool, không bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  marry_805844a937e2 (rời pool, không bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  marry_946e3434221d (trong pool, có bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  marry_e88965816275 (rời pool, có bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  sau khôi phục: không vendor nào còn ở \"Đã xoá\"\n  ok  vendor đã xoá quay lại pool: cặp đôi thấy hidden:true, admin vẫn thấy ở \"Đã xoá\" (in_pool:true), không ở mặc định\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     },
@@ -244,7 +244,7 @@
       "eval": "eval/invariants/planner/admin/inv-011-xoa-khoi-phuc-tra-lai-y-nguyen-chi-ghi-overlay-va-nhat-ky.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 622,
+      "ms": 522,
       "out": "ong lúc đang xoá): detailStatus y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): override y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): effective y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): edited y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): history y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): row y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): orphanRow y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): status y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): chat y hệt bản chưa từng bị xoá\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     },
@@ -252,7 +252,7 @@
       "eval": "eval/invariants/planner/admin/inv-012-co-admin-open-voi-route-xoa-khoi-phuc.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 227,
+      "ms": 237,
       "out": "te/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" không token: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" token rác: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" người thường: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" cặp đôi: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=1, không token: xoá 200\n  ok  ADMIN_OPEN=1: deleted_info.by là danh tính cố định\n  ok  ADMIN_OPEN=1, không token: khôi phục 200\n  ok  ADMIN_OPEN=1: hai dòng Nhật ký vendor.delete/restore, admin_id là danh tính cố định\n  ok  ADMIN_OPEN=1, admin thật đăng nhập: deleted_by vẫn là danh tính đã dùng (không rỗng)\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     },
@@ -260,7 +260,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-001-bao-cao-enrich-phan-hoach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 60,
+      "ms": 89,
       "out": "PASS 870 dòng, 9 nhóm cộng đúng, 260 approvable, ô đếm khớp nhóm",
       "tier": 2
     },
@@ -268,7 +268,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-002-maps-link-back-nhan-thi-tohong-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 337,
+      "ms": 315,
       "out": "PASS 20 link: mọi link back nhận thì tohong cũng nhận",
       "tier": 2
     },
@@ -276,23 +276,23 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-003-bao-cao-enrich-commit-bang-sinh-lai.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 451,
+      "ms": 474,
       "out": "PASS 1 báo cáo enrich đã commit bằng đúng byte báo cáo sinh lại",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-004-chu-ky-back-tohong-hq-cung-mot-dinh-nghia.py",
       "kind": "py",
-      "status": "FAIL",
-      "ms": 798,
-      "out": "FAIL apply sinh mục ['marry_57790d6f6f08', 'marry_bf43aee36047'], mong ['marry_57790d6f6f08', 'marry_bf43aee36047', 'marry_c6f3c54184ac']",
+      "status": "PASS",
+      "ms": 685,
+      "out": "PASS 3 cú bấm của Capu: back ký, tohong nhận, bất biến kiểm được (kể cả mục link sau resolve); review của admin khác không vào",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-005-workflow-du-lieu-di-kem-bao-cao.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 103,
+      "ms": 90,
       "out": "PASS mọi workflow thêm file dữ liệu đều sinh lại và đưa enrich-report.json vào cùng commit",
       "tier": 2
     },
@@ -300,7 +300,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-006-danh-muc-thuoc-tinh-pool.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 67402,
+      "ms": 71316,
       "out": "PASS",
       "tier": 2
     },
@@ -308,7 +308,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-007-bao-cao-khong-mang-lien-he-dia-chi.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 97,
+      "ms": 117,
       "out": "PASS",
       "tier": 2
     },
@@ -316,7 +316,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-008-nguoi-ngoai-khong-thay-khong-goi-api-vendor.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 2407,
+      "ms": 3093,
       "out": "ok  thấy \"Bạn không có quyền xem trang này\"\n  ok  không có thanh tab, không có bảng enrich\n  ok  không gọi /api/admin/vendor-enrich* hay /api/admin/vendors*\nPASS",
       "tier": 2
     },
@@ -324,7 +324,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-009-ban-sua-pool-khong-pha-hop-dong-anh-gu.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 622,
+      "ms": 638,
       "out": "PASS 22 vendor đã sửa, 867 vendor hiệu lực đều giữ hợp đồng ảnh/gu/độ dài",
       "tier": 2
     },
@@ -332,7 +332,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-010-drawer-doc-la-admin-ghi-ky-la-capu.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 268,
+      "ms": 219,
       "out": "PASS",
       "tier": 2
     },
@@ -340,7 +340,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-011-ten-sua-khong-ky-tu-an-dao-chieu.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 222,
+      "ms": 236,
       "out": "PASS",
       "tier": 2
     },
@@ -348,7 +348,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-012-url-anh-sua-chi-mot-cach-doc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 172,
+      "ms": 248,
       "out": "PASS",
       "tier": 2
     },
@@ -356,7 +356,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-013-bien-the-vo-hinh-va-host-anh.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 176,
+      "ms": 246,
       "out": "PASS",
       "tier": 2
     },
@@ -364,7 +364,7 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-014-cot-pool-danh-muc-du-truong-bi-anh-huong.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 9222,
+      "ms": 9519,
       "out": "PASS",
       "tier": 2
     },
@@ -372,10 +372,10 @@
       "eval": "eval/invariants/planner/admin/vendor-enrich/inv-015-loc-status-khop-chu-hien-thi.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 237,
+      "ms": 210,
       "out": "ang giá trị đó (57)\n  ok  status=unverified: đúng các hàng mà chữ cột Status mang giá trị đó (59)\n  ok  status=name_same_addr_diff: đúng các hàng mà chữ cột Status mang giá trị đó (50)\n  ok  status=name_similar: đúng các hàng mà chữ cột Status mang giá trị đó (247)\n  ok  status=not_found: đúng các hàng mà chữ cột Status mang giá trị đó (353)\n  ok  status=temp_closed: đúng các hàng mà chữ cột Status mang giá trị đó (3)\n  ok  status=not_enriched: đúng các hàng mà chữ cột Status mang giá trị đó (0)\n  ok  status=pending_capu: đúng các hàng mà chữ cột Status mang giá trị đó (4)\n  ok  status=pending_apply: đúng các hàng mà chữ cột Status mang giá trị đó (3)\n  ok  status=override: đúng các hàng mà chữ cột Status mang giá trị đó (3)\n  ok  9 nhóm + Chờ Capu + Chờ áp dụng chia toàn bộ danh sách\nPASS",
       "tier": 2
     }
   ],
-  "hint": "spec"
+  "hint": "code"
 }
