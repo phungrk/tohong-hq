@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+// T-203 tiêu chí 6 (repo tohong-back): xoá KHÔNG xoá vĩnh viễn dữ liệu nào và KHÔNG đụng dữ liệu người dùng.
+// Sau xoá và sau khôi phục: R2 chỉ khác ở (a) tài liệu bản sửa vendor, (b) dòng nhật ký mới; không khoá nào bị mất; hồ sơ/ngân sách/hội thoại của cặp đôi (có nhắc vendor đã xoá) y nguyên từng byte; vendor vẫn nằm trong pool; lịch sử sửa còn đủ.
+// Chạy từ gốc tohong-hq: node eval/T-203/check_6_khong_xoa_vinh_vien.mjs
+import { fresh, pickTarget, asAdmin, DEL, RES, OVERLAY_KEY, AUDIT_PREFIX, snapshot, diff, reporter, outbound, VENDOR_POOL } from "./lib/common.mjs";
+const R = reporter();
+const { env, bucket, guard } = fresh();
+const A = asAdmin(env);
+const T = await pickTarget(env);
+for (const [k, v] of Object.entries(guard)) bucket.data.set(k, v.replaceAll("VENDOR_ID", T.id));
+const guardKeys = Object.keys(guard);
+const put = await A("PUT", `/api/admin/vendors/${T.id}/override`, { priceMin: 8, priceMax: 9, contact: { phone: "0900000002" }, expected_version: 0 });
+R.check("chuẩn bị: có bản sửa trước khi xoá", put.status === 200, [put.status, put.text.slice(0, 60)]);
+const hist0 = (await A("GET", `/api/admin/vendors/${T.id}`)).json;
+const S0 = snapshot(bucket);
+
+const del = await A("POST", DEL(T.id), { expected_version: hist0.version, reason: "eval T-203" });
+R.check("xoá 200", del.status === 200, [del.status, del.text.slice(0, 60)]);
+const S1 = snapshot(bucket), d1 = diff(S0, S1);
+R.check("sau xoá: không khoá R2 nào bị mất", d1.removed.length === 0, d1.removed);
+R.check("sau xoá: chỉ tài liệu bản sửa vendor đổi, chỉ thêm dòng nhật ký", d1.changed.every((k) => k === OVERLAY_KEY) && d1.added.length >= 1 && d1.added.every((k) => k.startsWith(AUDIT_PREFIX)), d1);
+R.check("sau xoá: hồ sơ / ngân sách / hội thoại của cặp đôi (có nhắc vendor) y nguyên từng byte", guardKeys.every((k) => S1.get(k) === S0.get(k)));
+R.check("vendor vẫn nằm trong pool (không bị gỡ khỏi dữ liệu nguồn)", VENDOR_POOL.some((v) => v.id === T.id));
+const mid = (await A("GET", `/api/admin/vendors/${T.id}`)).json;
+R.check("sau xoá: chi tiết admin vẫn trả đủ vendor gốc + bản sửa + lịch sử không mất dòng nào", mid?.vendor?.id === T.id && mid?.override?.priceMin === 8 && mid?.override?.contact?.phone === "0900000002" && (mid?.history || []).length >= (hist0.history || []).length && (hist0.history || []).every((h) => (mid.history || []).some((x) => x.seq === h.seq)), [mid?.vendor?.id, mid?.override, mid?.history?.length, hist0.history?.length]);
+
+const res = await A("POST", RES(T.id), { expected_version: mid.version });
+R.check("khôi phục 200", res.status === 200, [res.status, res.text.slice(0, 60)]);
+const S2 = snapshot(bucket), d2 = diff(S1, S2);
+R.check("sau khôi phục: không khoá nào bị mất; chỉ bản sửa vendor đổi + thêm nhật ký", d2.removed.length === 0 && d2.changed.every((k) => k === OVERLAY_KEY) && d2.added.every((k) => k.startsWith(AUDIT_PREFIX)), d2);
+R.check("sau khôi phục: dữ liệu cặp đôi vẫn y nguyên từng byte", guardKeys.every((k) => S2.get(k) === S0.get(k)));
+const fin = (await A("GET", `/api/admin/vendors/${T.id}`)).json;
+R.check("sau khôi phục: bản sửa giá + liên hệ còn đủ; lịch sử không mất dòng nào", fin?.override?.priceMin === 8 && fin?.override?.contact?.phone === "0900000002" && (hist0.history || []).every((h) => (fin.history || []).some((x) => x.seq === h.seq)), [fin?.override, fin?.history?.length]);
+R.check("không request ra ngoài", outbound.length === 0, outbound);
+R.done();
