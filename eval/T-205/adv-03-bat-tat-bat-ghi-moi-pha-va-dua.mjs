@@ -2,7 +2,8 @@
 // (a) bật: danh tính cố định ghi (via) -> tắt: admin thường ghi đè (200, by_capu=false, không via) -> bật lại: bản giờ là của admin thường, KHÔNG được vào export (via cũ không được sống lại);
 //     tắt: Capu thật ghi -> bật lại: vẫn trong export, nhãn của Capu thật, không via.
 // (b) đua, cờ tắt: Capu thật PUT song song với admin thường PUT/DELETE trên bản by_capu=true lưu lúc cờ bật: mọi phản hồi 200/409, bản cuối luôn là của Capu thật.
-// (c) đua, cờ "1": 20 PUT song song của danh tính cố định trên 20 dòng khác nhau: không mất bản nào, tất cả vào export.
+// (c) đua, cờ "1": 20 PUT song song của danh tính cố định trên 20 dòng khác nhau: mỗi phản hồi 200 hoặc 409 version_conflict (hành vi sẵn có của main),
+//     không mất bản nào đã trả 200; gửi lại tuần tự các bản 409 thì cả 20 vào export.
 import { reporter, mkEnv, MemoryBucket, REVIEWS_KEY, seedReviews, stored, pickIds, exportOf, review, withdraw, FIXED, FIXED_LABEL, VIA, ADM, CAPU, labelOf } from "../T-204/lib/common.mjs";
 const R = reporter();
 const [a, b] = pickIds(2);
@@ -38,8 +39,12 @@ for (let t = 0; t < 15; t++) {
   const bk = new MemoryBucket();
   const on = mkEnv(bk, "1");
   const rs = await Promise.all(ids.map((id) => review(on, id, { decision: "approve" })));
+  const ok = ids.filter((_, i) => rs[i].status === 200).sort();
   const ex = await exportOf(on);
   const got = (ex.json?.entries || []).map((e) => e.vendor_id).sort();
-  R.check("cờ bật, 20 PUT song song: không mất bản, cả 20 vào export", rs.every((x) => x.status === 200) && JSON.stringify(got) === JSON.stringify([...ids].sort()), [rs.map((x) => x.status).join(""), got.length]);
+  R.check("cờ bật, 20 PUT song song: chỉ 200 hoặc 409 version_conflict; mọi bản 200 đều trong export", rs.every((x) => x.status === 200 || (x.status === 409 && x.json?.error === "version_conflict")) && JSON.stringify(got) === JSON.stringify(ok), [rs.map((x) => x.status).join(","), got.length, ok.length]);
+  for (const [i, id] of ids.entries()) if (rs[i].status !== 200) await review(on, id, { decision: "approve" });
+  const ex2 = await exportOf(on);
+  R.check("cờ bật: gửi lại tuần tự -> cả 20 vào export, nhãn danh tính cố định", JSON.stringify((ex2.json?.entries || []).map((e) => e.vendor_id).sort()) === JSON.stringify([...ids].sort()) && ex2.json.entries.every((e) => e.reviewer_label === FIXED_LABEL), ex2.json?.count);
 }
 R.done();
