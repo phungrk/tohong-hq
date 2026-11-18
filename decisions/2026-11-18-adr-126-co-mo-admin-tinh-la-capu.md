@@ -19,3 +19,9 @@ Capu chọn: "cách 2, merge luôn khi xong".
 
 ## Rủi ro đã nêu với Capu
 Ai mở được trang admin khi cờ bật thì được tính là Capu. Trước khi mở web app cho người khác, phải tắt cờ.
+
+## Bổ sung (Chief, 2026-11-18): inv-002 ở Code Gate
+inv-002 cũ đo đúng hành vi mà Capu đã quyết bỏ. Vì vậy ở Code Gate của T-204, inv-002 đỏ là đỏ có chủ đích, không phải lý do spec rework. Cách làm:
+- Adversary chạy gate như thường và ghi nhận đỏ của inv-002 cùng case B của `lib/admin_open_back.mjs`, kèm ADR này. Mọi bất biến khác phải xanh.
+- Trước khi merge, Chief chạy lại gate với bể đã đổi trên bản làm việc cục bộ: gỡ inv-002 cũ, thêm inv-002 mới và inv-007 từ `eval/T-204/bat-bien-cho-merge/`. Gate phải GREEN thì mới merge.
+- Ngay sau merge, Chief commit việc đổi bể cùng ghi chú "superseded by ADR-126" cho các eval đã đóng: T-188 check_2 và check_back case 2, T-190 adv-01 (b), T-199 adv-01 (e). Các eval đó không bị sửa.
