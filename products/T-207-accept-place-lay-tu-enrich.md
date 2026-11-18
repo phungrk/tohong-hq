@@ -53,10 +53,10 @@ Chạy từ gốc HQ: `python3 -I eval/T-207/<file>` (cần `TOHONG_REPO`; check
 | 4 | Ngưỡng 30 ngày: 29 ngày dùng báo cáo; 31 ngày, thiếu `business_status`/`checked_at`/`name`/`address`, `checked_at` sai dạng: gọi Google | `python3 -I eval/T-207/check_4_du_lieu_cu_hoac_thieu_van_goi_google.py` |
 | 5 | `--dry-run` và `plan_batch.py` chỉ đếm mục không được phủ; lô toàn mục phủ `resolve=0`, không `QUOTA_EXCEEDED` | `python3 -I eval/T-207/check_5_uoc_tinh_va_dry_run_bo_muc_da_phu.py` |
 | 6 | Enrich mới ghi `business_status` + thời điểm (đã nhận, bị từ chối, tạm đóng); báo cáo có `google.business_status`/`checked_at`; dữ liệu cũ là `null`, không bịa; tất định | `python3 -I eval/T-207/check_6_enrich_ghi_trang_thai_va_bao_cao_mang.py` |
-| 7 | Chữ ký export kiểm được (INV-004 xanh); export có `resolved` vẫn bị từ chối | `python3 -I eval/T-207/check_7_chu_ky_export_khong_doi.py` |
+| 7 | Chữ ký export kiểm được (ký đúng được nhận, đổi nội dung sau khi ký bị `bad_signature`); export có `resolved` vẫn bị `bad_entry` | `python3 -I eval/T-207/check_7_chu_ky_export_khong_doi.py` |
 | 8 | Chi Google không tăng: `--max-requests 0` resolve trọn lô toàn phủ; mục không phủ vẫn `budget_stop`; `--max-requests 1` đúng 1 request có `GOOGLE_REQUEST` in trước, `GOOGLE_USAGE` khớp | `python3 -I eval/T-207/check_8_han_muc_khong_tang.py` |
 
-Trạng thái trên `main` hiện tại (đã chạy): check_1..6 và 8 ĐỎ (đúng lý do: resolve vẫn gọi Google cho mục phủ; ước tính đếm cả mục phủ; enrich/báo cáo chưa có `business_status`/`checked_at`); check_7 XANH (rào hồi quy, "chữ ký không đổi" nên xanh từ đầu là đúng). Không eval nào ERROR.
+Trạng thái trên `main` hiện tại (đã chạy): check_1..6 và 8 ĐỎ (đúng lý do: resolve vẫn gọi Google cho mục phủ; ước tính đếm cả mục phủ; enrich/báo cáo chưa có `business_status`/`checked_at`); check_7 XANH (rào hồi quy độc lập với INV-004, "chữ ký không đổi" nên xanh từ đầu là đúng). Không eval nào ERROR.
 Ghi chú eval: tiêu chí "mỗi mục báo cáo/dữ liệu hợp đồng" của eval 1-5 giả định tên trường `google.business_status`, `google.checked_at`, `google.name`, `google.address` trong `enrich-report.json` (hợp đồng dữ liệu đã nêu ở Hành vi 5). Eval 6 dùng đường enrich thường; đường `--budget-usd` (batch.py) không có eval riêng: Engineering phải ghi cùng trường ở cả hai đường, adversary nên thêm eval tầng 3 cho đường đó.
 
 ## Bất biến đề xuất (tầng 2)
