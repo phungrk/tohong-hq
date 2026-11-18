@@ -1128,3 +1128,18 @@ Ghi chú Shopnem (marry_1a493f7eb9fa): vạch trạng thái Maps ghi "Đã đón
 | marry_1b49d575e656 | Vinasun | VINASUN TAXI | 30 Thủ Khoa Huân, Quận 1, Thành phố Hồ Chí Minh | 648 Nguyễn Trãi, Chợ Lớn, Hồ Chí Minh 700000 | mở | CẬP NHẬT (tên giống; địa chỉ lệch; đã qua luật tỉnh trước sáp nhập, place_id không trùng) | chưa ghi (đang chờ Capu bật cờ) |
 | marry_acddd3e62709 | VN TRAVELUX | Travel X | 23 Đường số 2, Phường Trường Thọ, Quận Thủ Đức, Quận Thủ Đức, Thành phố Hồ Chí Minh | 54B Trương Vĩnh Ký, P, Tân Sơn Nhì, Hồ Chí Minh 700000 | mở | TÊN KHÁC HẲN - KHÔNG GHI (tên Maps khác hẳn) | — |
 | marry_e16f388c194a | Văn Kỳ Tourism | Vietnam Tourist | 32 Đường số 1A, P. Bình Trị Đông B, Quận Bình Tân, Thành phố Hồ Chí Minh | 54 Đường D9, Tây Thạnh, Hồ Chí Minh 70000 | mở | TÊN KHÁC HẲN - KHÔNG GHI (tên Maps khác hẳn) | — |
+
+## Đã ghi lên production (2026-11-18, Chief of Staff)
+
+Capu bật lại cờ ADMIN_OPEN lúc khoảng 00:08 UTC (admin/me trả 200). Chief chạy `apply.cjs --write` theo allowlist 132 hàng: 132 vendor được bỏ thêm marry_64d17055f76e vì adversary v3 còn nghi.
+
+- Ghi thử 4 hàng đầu bằng `--max 4`, đọc lại từng hàng: place_id khớp allowlist, action accept_place, state pending, reviewed_by admin-khong-dang-nhap, note sạch ký tự icon.
+- Ghi tiếp phần còn lại: 131 hàng có status 200 và đọc lại thấy "Chờ Capu (accept_place)".
+- Lần chạy đầu dừng giữa chừng sau 125 hàng, do một lỗi mạng xảy ra sau một PUT. Lần chạy lại thấy hàng marry_dd239a87eae1 (Gotadi) đã có review, nên bỏ qua đúng như thiết kế. Đọc lại hàng này thì thấy chính là review của T-200: place_id khớp, ghi lúc 00:17 UTC.
+- **Kết quả: 132/132 review đã ghi, tất cả ở "Chờ Capu". 0 lỗi.**
+
+Còn lại cho Capu:
+1. Tắt cờ ADMIN_OPEN, ký export, rồi dựng lại pool theo Google.
+2. Duyệt 106 vendor "tên hơi giống" (danh sách ở trên). Chief đề xuất loại thẳng 3 vendor có loại cơ sở ngoài ngành.
+3. Quyết 3 vendor Maps báo đóng cửa.
+4. Mỗi lần deploy back qua `wrangler deploy` sẽ xoá biến ADMIN_OPEN đặt trên dashboard (nghi là lý do cờ tự tắt sau khi merge T-199). Đề xuất thêm `keep_vars = true` vào `wrangler.toml`.
