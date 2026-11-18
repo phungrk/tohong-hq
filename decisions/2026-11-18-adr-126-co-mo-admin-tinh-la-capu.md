@@ -28,3 +28,13 @@ inv-002 cũ đo đúng hành vi mà Capu đã quyết bỏ. Vì vậy ở Code G
 
 ## Xác nhận (2026-11-18)
 Capu: "merge 205 luôn khi xong". Đây là việc engineering của T-204. Chief merge PR phungrk/tohong-back#69 khi: adversary accept, gate GREEN sau khi đổi bể theo bổ sung ở trên, PR không xung đột.
+
+## Đã merge (2026-11-18)
+- PR phungrk/tohong-back#69 squash 92aaa13. Adversary accept T-205, 4 eval tầng 3.
+- Chief chạy lại gate với bể đã đổi: GREEN, `eval/T-205/gate-latest.json`.
+- Bể planner/admin:
+  - Gỡ `inv-002-danh-tinh-co-dinh-khong-bao-gio-la-capu.sh`.
+  - Thêm `inv-002-danh-tinh-co-dinh-la-capu-khi-va-chi-khi-co-mo.sh`, `inv-007-entry-co-mo-admin-qua-apply.py`, cùng lib `admin_open_capu.mjs`, `open_admin_common.mjs`, `open_admin_export.mjs`.
+  - Thêm `inv-008-co-bat-danh-sach-trong-va-gia-tri-co-la.mjs` (từ T-205 adv-01) và `inv-009-co-bat-khong-mo-export-noi-bo.mjs` (từ T-205 adv-04). Khi chuyển vào bể chỉ đổi đường import sang `lib/t204_common.mjs`, là bản chép của `eval/T-204/lib/common.mjs`. Không đổi điều kiện kiểm nào.
+- inv-001 đến inv-009 đều PASS trên main 92aaa13, chạy bằng `env -i` từ /tmp.
+- Ghi chú superseded: `eval/T-188|T-190|T-199/SUPERSEDED-ADR-126.md`.
