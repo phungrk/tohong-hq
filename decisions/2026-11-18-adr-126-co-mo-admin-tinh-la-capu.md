@@ -25,3 +25,6 @@ inv-002 cũ đo đúng hành vi mà Capu đã quyết bỏ. Vì vậy ở Code G
 - Adversary chạy gate như thường và ghi nhận đỏ của inv-002 cùng case B của `lib/admin_open_back.mjs`, kèm ADR này. Mọi bất biến khác phải xanh.
 - Trước khi merge, Chief chạy lại gate với bể đã đổi trên bản làm việc cục bộ: gỡ inv-002 cũ, thêm inv-002 mới và inv-007 từ `eval/T-204/bat-bien-cho-merge/`. Gate phải GREEN thì mới merge.
 - Ngay sau merge, Chief commit việc đổi bể cùng ghi chú "superseded by ADR-126" cho các eval đã đóng: T-188 check_2 và check_back case 2, T-190 adv-01 (b), T-199 adv-01 (e). Các eval đó không bị sửa.
+
+## Xác nhận (2026-11-18)
+Capu: "merge 205 luôn khi xong". Đây là việc engineering của T-204. Chief merge PR phungrk/tohong-back#69 khi: adversary accept, gate GREEN sau khi đổi bể theo bổ sung ở trên, PR không xung đột.
