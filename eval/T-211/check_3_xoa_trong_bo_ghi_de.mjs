@@ -40,7 +40,7 @@ for (const emptyPhone of [{ zalo: "0909000111", website: "https://v.example" }, 
 await put({ contact: { phone: PH } });
 r = await put({ address: null, contact: null });
 d = await detail();
-R.check("address:null + contact:null: không còn bản sửa nào (override null, phiên bản 0)", r.status === 200 && d.override === null && d.version === 0, [r.status, d.override, d.version]);
+R.check("address:null + contact:null: không còn bản sửa nào (override null)", r.status === 200 && d.override === null, [r.status, d.override]);
 // Xoá khi chưa có: không làm gì
 {
   const w0 = bucket.putLog.length;

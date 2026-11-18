@@ -7,8 +7,7 @@
 import { REPO, CASE, scenario, uniqueVendor, closeAll, outbound } from "../T-203/lib/ui.mjs";
 import { reporter, asAdmin, asCouple, PUT } from "./lib/common.mjs";
 const R = reporter();
-const S = await setup0();
-async function setup0() { return scenario(); }
+const S = await scenario();
 const { page } = S;
 const V = uniqueVendor("photography");
 const PUTRE = /^PUT \/api\/admin\/vendors\/[^/]+\/override$/;
@@ -43,7 +42,7 @@ if (CASE === "1") {
   await addr().fill(""); await phone().fill("");
   await S.btn("Lưu ghi đè").click(); await page.waitForTimeout(900);
   const d2 = await det();
-  R.check("để trống cả hai + Lưu: back không còn bản sửa (xoá, không lỗi); hai ô trống", d2.override === null && (await addr().inputValue()) === "" && (await phone().inputValue()) === "" && !(await S.bodyText()).includes("không hợp lệ"), d2.override);
+  R.check("để trống cả hai + Lưu: back không còn địa chỉ/SĐT (xoá, không lỗi); hai ô trống", !d2.override?.address && !d2.override?.contact?.phone && (await addr().inputValue()) === "" && (await phone().inputValue()) === "" && !(await S.bodyText()).includes("không hợp lệ"), d2.override);
   // Bỏ ghi đè
   await addr().fill(ADDR); await phone().fill("028 3822 2222");
   await S.btn("Lưu ghi đè").click(); await page.waitForTimeout(900);

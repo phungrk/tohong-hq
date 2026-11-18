@@ -43,6 +43,6 @@ const chg = await S2.put({ contact: { phone: "0909 000 11" } });
 R.check("đổi số cũ sang giá trị sai: 400 invalid_phone", chg.status === 400 && chg.json?.error === "invalid_phone", [chg.status, chg.json?.error]);
 const chg2 = await S2.put({ contact: { phone: "0909 000 222" } });
 R.check("đổi số cũ sang giá trị đúng: 200, lưu dạng chuẩn", chg2.status === 200 && (await S2.detail()).override?.contact?.phone === "0909000222", [chg2.status, chg2.json?.error]);
-R.check("tiền điều kiện: pool gốc không có trường phone/address (không có "giá trị gốc" để điền sẵn)", base.vendor?.phone === undefined && base.vendor?.address === undefined, Object.keys(base.vendor || {}));
+R.check("tiền điều kiện: pool gốc không có trường phone/address (không có giá trị gốc để điền sẵn)", base.vendor?.phone === undefined && base.vendor?.address === undefined, Object.keys(base.vendor || {}));
 R.check("không request ra ngoài", outbound.length === 0, outbound);
 R.done();

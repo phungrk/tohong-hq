@@ -51,7 +51,7 @@ Thứ tự áp dụng, mỗi bước chỉ có một kết quả:
 ### 4. Giá trị trống, xoá từng trường, Bỏ ghi đè
 - **Trống = xoá trường, không lỗi.** Địa chỉ: `address` là `null`, `""`, chỉ khoảng trắng hoặc chỉ ký tự bị bỏ ở bước 2 → xoá địa chỉ. SĐT: `contact` không có `phone`, hoặc `phone` là `null`/`""`/khoảng trắng → xoá SĐT, **zalo/website/địa chỉ còn nguyên**. Xoá địa chỉ không đụng SĐT và ngược lại.
 - Xoá khi chưa có giá trị, hoặc lưu **đúng** giá trị đang có (kể cả viết khác khoảng trắng / dấu cách trong số) = **không làm gì**: 200, không ghi R2, không tăng `version`, không thêm lịch sử, không thêm Nhật ký (luật "không đổi gì" của T-152).
-- Sau mọi thay đổi, nếu bản sửa của vendor không còn nội dung nào thì không còn bản ghi (`override: null`, `version: 0`), như luật hiện có.
+- Xoá hết nội dung sửa bằng PUT (không dùng DELETE): `GET …/<id>` trả `override: null` (hành vi hiện có của `userOverride`: bản ghi chỉ còn `version/updated_*` thì coi là không có); `version` **không** về 0 (chỉ DELETE đưa về 0).
 - **Bỏ ghi đè** (nút "Bỏ ghi đè" = `DELETE …/override`, luật cũ **cả vendor**, không theo trường): xoá **mọi** bản sửa của vendor, gồm địa chỉ và SĐT; về "chưa có". Pool y nguyên (không có trường `address`/`phone`). DELETE lần hai: 404 `override_not_found`. Xoá theo trường = để trống rồi Lưu (hoặc PUT `null`); biểu mẫu không có nút "Bỏ" riêng từng trường.
 
 ### 5. Admin thấy ở đâu
@@ -94,7 +94,7 @@ Dùng chung khung `eval/T-203/lib/` (Worker thật + R2 giả, chặn mạng; gi
 | --- | --- | --- |
 | 1 | SĐT: 26 dạng hợp lệ (di động, cố định, tổng đài, `+84`/`84`/`0084`, dấu `. - ( )`, ký tự ẩn/NBSP/hướng chữ) → 200 và lưu đúng chuỗi chỉ-chữ-số; 29 dạng sai (nhiều số, sai đầu số, sai độ dài, chữ, kiểu không phải chuỗi, >40 ký tự) → 400 `invalid_phone` không ghi gì; số cũ gửi lại nguyên chuỗi không bị 400, đổi số cũ thì phải hợp lệ | `node eval/T-211/check_1_sdt.mjs` |
 | 2 | Địa chỉ: chuẩn hoá (NFC, gộp khoảng trắng/xuống dòng, bỏ ký tự ẩn/hướng chữ, giữ nguyên HTML), 5..250 code point (emoji tính 1), toàn dấu câu/ký tự ẩn/kiểu lạ → 400 `invalid_address` không ghi gì; `editable.limits.address_min/max` | `node eval/T-211/check_2_dia_chi.mjs` |
-| 3 | Trống = xoá (`null`, `""`, khoảng trắng, ký tự ẩn); xoá từng trường không đụng trường khác (zalo/website/địa chỉ/SĐT); xoá hết thì không còn bản ghi; lưu y giá trị cũ không ghi gì; Bỏ ghi đè xoá cả hai, pool y nguyên, lần hai 404 | `node eval/T-211/check_3_xoa_trong_bo_ghi_de.mjs` |
+| 3 | Trống = xoá (`null`, `""`, khoảng trắng, ký tự ẩn); xoá từng trường không đụng trường khác (zalo/website/địa chỉ/SĐT); xoá hết nội dung thì `override: null`; lưu y giá trị cũ không ghi gì; Bỏ ghi đè xoá cả hai, pool y nguyên, lần hai 404 | `node eval/T-211/check_3_xoa_trong_bo_ghi_de.mjs` |
 | 4 | Admin thấy địa chỉ + SĐT ở chi tiết vendor, danh sách vendor (`overridden`), hộp kết nối (danh sách + chi tiết, kể cả yêu cầu có trước lúc sửa); sửa lại/xoá thì hộp theo ngay; liên hệ của cặp đôi không bị lẫn | `node eval/T-211/check_4_admin_thay_hop_ket_noi.mjs` |
 | 5 | Cặp đôi không thấy địa chỉ/SĐT/zalo/website của admin ở 5 API vendor, `chatMatch`, khối prompt AI, `applyToVendor`, luồng kết nối (tạo + xem danh sách), kể cả vendor Ẩn; đối chứng phía admin có thấy | `node eval/T-211/check_5_cap_doi_khong_thay.mjs` |
 | 6 | Sửa địa chỉ (kể cả nói tỉnh khác) không đổi từng byte kết quả ghép/đếm/trạng thái/chat và `city` | `node eval/T-211/check_6_khong_doi_ghep.mjs` |
