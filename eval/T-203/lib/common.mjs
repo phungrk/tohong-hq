@@ -95,4 +95,5 @@ export async function listAll(A, qs = "") { // đọc hết mọi trang (limit 2
   }
   return { status: 200, rows, total };
 }
-export const meta = (o) => { if (!o) return o; const { version, updated_at, updated_by, deleted, deleted_reason, deleted_at, deleted_by, ...rest } = o; return rest; };
+// Bản sửa của vendor bỏ metadata (version, updated_*) và mọi khoá deleted* (cờ xoá không thuộc "trạng thái trước").
+export const meta = (o) => { if (!o) return o; const out = {}; for (const [k, v] of Object.entries(o)) if (!["version", "updated_at", "updated_by"].includes(k) && !k.startsWith("deleted")) out[k] = v; return out; };
