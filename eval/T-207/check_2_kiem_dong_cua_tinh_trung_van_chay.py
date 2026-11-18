@@ -14,10 +14,11 @@ import _t207 as k
 VS = ["ok", "perm", "temp", "far", "c1", "c2"]
 r = k.mk_root(VS)
 # hai vendor trùng place_id phải có địa chỉ gốc khác nhau
-for v in r.vendors():
+vv = r.vendors()
+for v in vv:
     if v["id"] == "c2":
         v["contact"]["address"] = v["contact"]["address_source"] = "500 Lê Văn Việt, Quận 9, Thành phố Hồ Chí Minh"
-r.write("venue/vendors.json", {"vendors": r.vendors()})
+r.write("venue/vendors.json", {"vendors": vv})
 HN = "5 Tràng Tiền, Hoàn Kiếm, Hà Nội"
 k.write_report(r, [k.row("ok", "P_OK"), k.row("perm", "P_PERM", status="CLOSED_PERMANENTLY"), k.row("temp", "P_TMP", status="CLOSED_TEMPORARILY"),
                    k.row("far", "P_FAR", address=HN), k.row("c1", "P_DUP"), k.row("c2", "P_DUP")])

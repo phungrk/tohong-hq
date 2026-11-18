@@ -18,10 +18,11 @@ vs = [k.t.vendor("m", "Nhà hàng Hoa Sen Vàng", A), k.t.vendor("c", "Cơ sở 
       k.t.vendor("old", "Nhà hàng Dữ Liệu Cũ", "8 Pasteur, Quận 1, Thành phố Hồ Chí Minh")]
 r = k.t.Root({"venue": vs})
 # dữ liệu cũ: vendor `old` đã nhận từ trước, bản ghi không có business_status
-old = [v for v in r.vendors() if v["id"] == "old"][0]
+VV = r.vendors()
+old = [v for v in VV if v["id"] == "old"][0]
 old["enrichment_log"] = [{"source": "google_maps", "timestamp": "2026-10-01T08:00:00.123456", "matched_name": "Nhà hàng Dữ Liệu Cũ", "confidence": 1.0, "place_id": "P_OLD",
                           "formatted_address": "8 Pasteur, Bến Nghé, Hồ Chí Minh", "address_match": True, "changes": {}}]
-r.write("venue/vendors.json", {"vendors": r.vendors()})
+r.write("venue/vendors.json", {"vendors": VV})
 PL = {"P_M": k.t.place("Nhà hàng Hoa Sen Vàng", "12 Nguyễn Huệ, Bến Nghé, Quận 1, Hồ Chí Minh", pid="P_M"),
       "P_C": k.t.place("Quán nhậu Bình Dân", "1 Hai Bà Trưng, Quận 3, Hồ Chí Minh", pid="P_C"),
       "P_T": k.t.place("Nhà hàng Cẩm Tú Cầu", "3 Lê Lợi, Bến Nghé, Quận 1, Hồ Chí Minh", status="CLOSED_TEMPORARILY", pid="P_T")}
