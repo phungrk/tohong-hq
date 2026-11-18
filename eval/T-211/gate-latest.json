@@ -1,6 +1,6 @@
 {
   "task": "T-211",
-  "at": "2026-11-18T22:37",
+  "at": "2026-11-18T22:39",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,15 +12,15 @@
       "eval": "node eval/T-211/check_1_sdt.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 259,
-      "out": "  :: [200,null]\n  XX  không hợp lệ true -> 400 invalid_phone  :: [200,null]\n  XX  các lần bị từ chối không ghi gì (không đổi R2, không đổi phiên bản, số cũ còn nguyên)  :: {\"added\":[\"data/admin/audit/20261118T223639227_4dmzz0.json\",\"data/admin/audit/20261118T223639228_bojbwg.json\",\"data/admin/audit/20261118T223639229_4rr7sn.json\",\"data/admin/audit/20261118T223639230_bzg\n  ok  số cũ giữ nguyên chuỗi + đổi zalo: 200, số cũ không bị ép chuẩn hoá\n  XX  đổi số cũ sang giá trị sai: 400 invalid_phone  :: [200,null]\n  XX  đổi số cũ sang giá trị đúng: 200, lưu dạng chuẩn  :: [200,null]\n  ok  tiền điều kiện: pool gốc không có trường phone/address (không có giá trị gốc để điền sẵn)\n  ok  không request ra ngoài\nFAIL hợp lệ \"0912 345 678\" -> 200, lưu 0912345678 [[200,null,\"0912 345 678\"]] (+49 lỗi nữa)",
+      "ms": 288,
+      "out": "  :: [200,null]\n  XX  không hợp lệ true -> 400 invalid_phone  :: [200,null]\n  XX  các lần bị từ chối không ghi gì (không đổi R2, không đổi phiên bản, số cũ còn nguyên)  :: {\"added\":[\"data/admin/audit/20261118T223827052_72l6ac.json\",\"data/admin/audit/20261118T223827054_lq1y4r.json\",\"data/admin/audit/20261118T223827055_5fzvoh.json\",\"data/admin/audit/20261118T223827056_krk\n  ok  số cũ giữ nguyên chuỗi + đổi zalo: 200, số cũ không bị ép chuẩn hoá\n  XX  đổi số cũ sang giá trị sai: 400 invalid_phone  :: [200,null]\n  XX  đổi số cũ sang giá trị đúng: 200, lưu dạng chuẩn  :: [200,null]\n  ok  tiền điều kiện: pool gốc không có trường phone/address (không có giá trị gốc để điền sẵn)\n  ok  không request ra ngoài\nFAIL hợp lệ \"0912 345 678\" -> 200, lưu 0912345678 [[200,null,\"0912 345 678\"]] (+49 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "node eval/T-211/check_2_dia_chi.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 231,
+      "ms": 242,
       "out": "ditable\"]\n  XX  không hợp lệ [\"12 Lê Lợi\"] -> 400 invalid_address  :: [400,\"field_not_editable\"]\n  XX  không hợp lệ {\"a\":\"12 Lê Lợi\"} -> 400 invalid_address  :: [400,\"field_not_editable\"]\n  XX  không hợp lệ true -> 400 invalid_address  :: [400,\"field_not_editable\"]\n  XX  các lần bị từ chối không ghi gì, địa chỉ cũ còn nguyên  :: {\"added\":[],\"removed\":[],\"changed\":[]}\n  XX  editable.limits công bố address_min = 5, address_max = 250  :: {\"name_max\":120,\"description_max\":300,\"styles_max\":5,\"photos_min\":1,\"photos_max\":4,\"photo_url_max\":500,\"photo_host\":\"www.marry.vn\",\"capacity_min\":1,\"capacity_max\":5000,\"capacity_category\":\"venue\"}\n  ok  không request ra ngoài\nFAIL hợp lệ \"12 Nguyễn Huệ, Quận 1, TP.HCM\" -> 200, lưu \"12 Nguyễn Huệ, Quận 1, TP.HCM\" [[400,\"field_not_editable\",null]] (+25 lỗi nữa)",
       "tier": 1
     },
@@ -29,14 +29,14 @@
       "kind": "cmd",
       "status": "FAIL",
       "ms": 234,
-      "out": "s://v.example\"},\"version\":9,\"updated_at\":\"2026-11-18T22:36:39.708Z\",\"updated_by\":\"admin\"}]\n  XX  address:null + contact:null: không còn bản sửa nào (override null)  :: [400,{\"contact\":{\"phone\":\"0912345678\"},\"version\":10,\"updated_at\":\"2026-11-18T22:36:39.709Z\",\"updated_by\":\"admin\"}]\n  XX  xoá địa chỉ khi chưa có địa chỉ: 200, không ghi gì  :: [400,400,0]\n  ok  Bỏ ghi đè (DELETE): 200; override null; phiên bản 0; không còn địa chỉ/SĐT\n  ok  giá trị gốc: vendor pool y nguyên (không trường address/phone; không đổi byte nào)\n  ok  DELETE lần hai: 404 override_not_found\n  ok  Bỏ ghi đè xoá cả hai trường cùng lúc, chỉ một dòng Nhật ký vendor.override_clear cho lần đó\n  ok  không request ra ngoài\nFAIL tiền điều kiện: lưu địa chỉ + SĐT + zalo + website 200 [[400,\"field_not_editable\"]] (+12 lỗi nữa)",
+      "out": "s://v.example\"},\"version\":9,\"updated_at\":\"2026-11-18T22:38:27.553Z\",\"updated_by\":\"admin\"}]\n  XX  address:null + contact:null: không còn bản sửa nào (override null)  :: [400,{\"contact\":{\"phone\":\"0912345678\"},\"version\":10,\"updated_at\":\"2026-11-18T22:38:27.554Z\",\"updated_by\":\"admin\"}]\n  XX  xoá địa chỉ khi chưa có địa chỉ: 200, không ghi gì  :: [400,400,0]\n  ok  Bỏ ghi đè (DELETE): 200; override null; phiên bản 0; không còn địa chỉ/SĐT\n  ok  giá trị gốc: vendor pool y nguyên (không trường address/phone; không đổi byte nào)\n  ok  DELETE lần hai: 404 override_not_found\n  ok  Bỏ ghi đè xoá cả hai trường cùng lúc, chỉ một dòng Nhật ký vendor.override_clear cho lần đó\n  ok  không request ra ngoài\nFAIL tiền điều kiện: lưu địa chỉ + SĐT + zalo + website 200 [[400,\"field_not_editable\"]] (+12 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "node eval/T-211/check_4_admin_thay_hop_ket_noi.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 236,
+      "ms": 229,
       "out": "8d5a5ec4d7df\",\"name\":\"Juva Media\",\"category\":\"photography\",\"catLabel\":\"Chụp ảnh\",\"photo\":\"https://lh3.googleusercontent.com/grass-cs/AABkmLcaPZuNakDgB8CsQGrDZy_DbQE2UnQ3otxnBFDfc6m6LshPT5\n  XX  chỉ còn địa chỉ: hàng vendor vẫn overridden:true; SĐT trống ở hộp, địa chỉ còn  :: {\"id\":\"marry_8d5a5ec4d7df\",\"name\":\"Juva Media\",\"category\":\"photography\",\"catLabel\":\"Chụp ảnh\",\"city\":\"HCMC\",\"priceMin\":4,\"priceMax\":15.3,\"base_price\":{\"min\":4,\"max\":15.3},\"price_source\":\"estimated\",\"p\n  ok  Bỏ ghi đè: hộp về address null, contact null\n  ok  không request ra ngoài\nFAIL chưa sửa: hộp có khoá vendor.address = null (luôn có khoá) và vendor.contact null [{\"id\":\"marry_8d5a5ec4d7df\",\"name\":\"Juva Media\",\"category\":\"photography\",\"catLabel\":\"Chụp ảnh\",\"photo\":\"https://lh3.googleusercontent.com/gra] (+7 lỗi nữa)",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "node eval/T-211/check_5_cap_doi_khong_thay.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 262,
+      "ms": 269,
       "out": "dmin\n  ok  GET /api/vendors/categories: 200 và không chứa địa chỉ/SĐT/zalo/website của admin\n  ok  ứng viên chat (chatMatch): không chứa địa chỉ/SĐT/zalo/website\n  ok  khối [VENDOR CANDIDATES] đưa vào prompt AI: không chứa địa chỉ/SĐT/zalo/website\n  ok  applyToVendor(vendor pool) (đầu vào của mọi bề mặt cặp đôi): không mang address/contact/phone\n  ok  cặp đôi gửi yêu cầu kết nối: 2xx, phản hồi không chứa địa chỉ/SĐT vendor\n  ok  cặp đôi xem danh sách yêu cầu của mình: không chứa địa chỉ/SĐT vendor\n  XX  đối chứng: cùng giá trị CÓ ở phản hồi của admin (hộp kết nối)  :: null\n  ok  vendor đang ẩn (kế hoạch đã lưu): /status và /:id vẫn không lộ địa chỉ/SĐT\n  ok  không request ra ngoài\nFAIL tiền điều kiện: lưu địa chỉ + SĐT 200 và admin thấy lại giá trị [[400,\"field_not_editable\"]] (+1 lỗi nữa)",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "node eval/T-211/check_6_khong_doi_ghep.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 287,
+      "ms": 372,
       "out": "s: byte-for-byte như trước khi sửa địa chỉ\n  ok    st: byte-for-byte như trước khi sửa địa chỉ\n  ok    chat: byte-for-byte như trước khi sửa địa chỉ\n  ok    city của vendor trong pool/hiệu lực vẫn là city cũ\n  XX  lưu địa chỉ \"Số 1, đường không có quận nào cả\" 200  :: [400,\"field_not_editable\"]\n  ok    one: byte-for-byte như trước khi sửa địa chỉ\n  ok    ids: byte-for-byte như trước khi sửa địa chỉ\n  ok    cat: byte-for-byte như trước khi sửa địa chỉ\n  ok    cats: byte-for-byte như trước khi sửa địa chỉ\n  ok    st: byte-for-byte như trước khi sửa địa chỉ\n  ok    chat: byte-for-byte như trước khi sửa địa chỉ\n  ok    city của vendor trong pool/hiệu lực vẫn là city cũ\n  ok  không request ra ngoài\nFAIL lưu địa chỉ \"12 Phố Huế, Hai Bà Trưng, Hà Nội\" 200 [[400,\"field_not_editable\"]] (+2 lỗi nữa)",
       "tier": 1
     },
@@ -60,15 +60,15 @@
       "eval": "node eval/T-211/check_7_lich_su_nhat_ky.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 219,
-      "out": " (A2, 02838222222)  :: [{\"contact\":{\"phone\":\"02838222222\",\"zalo\":\"ZALOSENTINEL211\",\"website\":\"https://sentinel211.example\"},\"version\":2,\"updated_at\":\"2026-11-18T22:36:40.714Z\",\"updated_by\":\"admin\"},{\"contact\":{\"phone\":\"0283\n  XX  Bỏ ghi đè: dòng vendor.override_clear có before.address, before.contact.phone; after null  :: [200,{\"contact\":{\"phone\":\"123\"},\"version\":4,\"updated_at\":\"2026-11-18T22:36:40.722Z\",\"updated_by\":\"admin\"},null]\n  XX  Bỏ ghi đè: history có thêm mục action clear liệt kê address và phone về null; các mục cũ còn nguyên  :: {\"seq\":5,\"at\":\"2026-11-18T22:36:40.725Z\",\"by\":\"admin\",\"action\":\"clear\",\"changes\":{\"contact\":{\"changed\":true}}}\n  ok  không request ra ngoài\nFAIL lần 1 (đặt địa chỉ): history[0] action edit, changes.address {before:null, after}, có seq/at/by (+10 lỗi nữa)",
+      "ms": 235,
+      "out": " (A2, 02838222222)  :: [{\"contact\":{\"phone\":\"02838222222\",\"zalo\":\"ZALOSENTINEL211\",\"website\":\"https://sentinel211.example\"},\"version\":2,\"updated_at\":\"2026-11-18T22:38:28.652Z\",\"updated_by\":\"admin\"},{\"contact\":{\"phone\":\"0283\n  XX  Bỏ ghi đè: dòng vendor.override_clear có before.address, before.contact.phone; after null  :: [200,{\"contact\":{\"phone\":\"123\"},\"version\":4,\"updated_at\":\"2026-11-18T22:38:28.660Z\",\"updated_by\":\"admin\"},null]\n  XX  Bỏ ghi đè: history có thêm mục action clear liệt kê address và phone về null; các mục cũ còn nguyên  :: {\"seq\":5,\"at\":\"2026-11-18T22:38:28.663Z\",\"by\":\"admin\",\"action\":\"clear\",\"changes\":{\"contact\":{\"changed\":true}}}\n  ok  không request ra ngoài\nFAIL lần 1 (đặt địa chỉ): history[0] action edit, changes.address {before:null, after}, có seq/at/by (+10 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "node eval/T-211/check_8_song_sot_dong_bo_pool.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 205,
+      "ms": 217,
       "out": " 200  :: [400,\"field_not_editable\"]\n  XX  (a) isolate mới (cache sạch, đọc lại R2): địa chỉ + SĐT còn, phiên bản giữ  :: null\n  XX  (b1) pool sinh lại, vendor đổi tên/mô tả/ảnh ở nguồn: địa chỉ + SĐT sửa tay còn nguyên, không phiên bản mới  :: [null,0]\n  XX  (b2) danh sách admin vẫn đánh dấu vendor overridden  :: 1\n  XX  (b3) vendor rời pool: chi tiết admin 200, in_pool:false, địa chỉ + SĐT vẫn còn  :: [null,null]\n  XX  (b4) vendor quay lại pool: bản sửa đúng như cũ\n  XX  (c1) hai admin ghi đồng thời hai vendor khác nhau: cả hai 200, cả hai bản sửa còn  :: [400,400]\n  XX  (c2) expected_version cũ: 409 version_conflict, không ghi, bản của người kia còn  :: [400,400,\"invalid_expected_version\"]\n  ok  không request ra ngoài\nFAIL tiền điều kiện: lưu 200 [[400,\"field_not_editable\"]] (+7 lỗi nữa)",
       "tier": 1
     },
@@ -76,15 +76,15 @@
       "eval": "node eval/T-211/check_9_giao_thoa_an_xoa.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 226,
-      "out": "CsQGrDZy_DbQE2UnQ3otxnBFDfc6m6LshPT5\n  XX  chi tiết vendor đã xoá: override vẫn có địa chỉ + SĐT (xoá chỉ thêm khoá deleted*)  :: {\"hidden\":true,\"hidden_reason\":\"đóng cửa tạm\",\"version\":2,\"updated_at\":\"2026-11-18T22:36:41.136Z\",\"updated_by\":\"admin\"}\n  XX  khôi phục: 200; địa chỉ + SĐT + cờ ẩn y nguyên; lịch sử sửa y nguyên (xoá/khôi phục không thêm dòng)  :: [200,{\"hidden\":true,\"hidden_reason\":\"đóng cửa tạm\",\"version\":3,\"updated_at\":\"2026-11-18T22:36:41.136Z\",\"updated_by\":\"admin\"}]\n  XX  sau khôi phục lại sửa được (200)  :: [400,\"field_not_editable\"]\n  ok  không request ra ngoài\nFAIL vendor đang ẩn: sửa địa chỉ + SĐT 200; cờ ẩn và lý do còn nguyên [[200,400,{\"hidden\":true,\"hidden_reason\":\"đóng cửa tạm\",\"version\":1,\"updated_at\":\"2026-11-18T22:36:41.136Z\",\"updated_by\":\"admin\"}]] (+4 lỗi nữa)",
+      "ms": 234,
+      "out": "CsQGrDZy_DbQE2UnQ3otxnBFDfc6m6LshPT5\n  XX  chi tiết vendor đã xoá: override vẫn có địa chỉ + SĐT (xoá chỉ thêm khoá deleted*)  :: {\"hidden\":true,\"hidden_reason\":\"đóng cửa tạm\",\"version\":2,\"updated_at\":\"2026-11-18T22:38:29.096Z\",\"updated_by\":\"admin\"}\n  XX  khôi phục: 200; địa chỉ + SĐT + cờ ẩn y nguyên; lịch sử sửa y nguyên (xoá/khôi phục không thêm dòng)  :: [200,{\"hidden\":true,\"hidden_reason\":\"đóng cửa tạm\",\"version\":3,\"updated_at\":\"2026-11-18T22:38:29.096Z\",\"updated_by\":\"admin\"}]\n  XX  sau khôi phục lại sửa được (200)  :: [400,\"field_not_editable\"]\n  ok  không request ra ngoài\nFAIL vendor đang ẩn: sửa địa chỉ + SĐT 200; cờ ẩn và lý do còn nguyên [[200,400,{\"hidden\":true,\"hidden_reason\":\"đóng cửa tạm\",\"version\":1,\"updated_at\":\"2026-11-18T22:38:29.096Z\",\"updated_by\":\"admin\"}]] (+4 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "node eval/T-211/check_10_quyen.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 201,
+      "ms": 268,
       "out": "ok  không token: PUT / GET / DELETE đều 403 forbidden\n  ok  token rác: PUT / GET / DELETE đều 403 forbidden\n  ok  user thường (couple_1): PUT / GET / DELETE đều 403 forbidden\n  ok  ADMIN_USER_IDS rỗng: 403\n  ok  token dev: khi DEV_AUTH_BYPASS tắt: 403 hoặc 401, không ghi\n  ok  mọi lần bị từ chối không ghi gì vào R2 (không bản ghi, không Nhật ký)\n  ok  người chỉ có trong CAPU_USER_IDS (không phải admin): 403\n  XX  admin thường (không phải Capu): 200 và lưu được  :: [400,\"field_not_editable\"]\n  ok  không request ra ngoài\nFAIL admin thường (không phải Capu): 200 và lưu được [[400,\"field_not_editable\"]]",
       "tier": 1
     },
@@ -92,7 +92,7 @@
       "eval": "bash eval/T-211/check_11_giao_dien_sua.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 11172,
+      "ms": 11751,
       "out": "XX  tiền điều kiện: khung sửa có ô 'Địa chỉ' và ô 'Số điện thoại'\n  ok  khung sửa nói rõ liên hệ/địa chỉ chỉ admin thấy (chữ 'chỉ admin thấy')\n  XX  bước giao diện chạy được: locator.fill: Timeout 8000ms exceeded.\nFAIL tiền điều kiện: khung sửa có ô 'Địa chỉ' và ô 'Số điện thoại' (+1 lỗi nữa)",
       "tier": 1
     },
@@ -100,7 +100,7 @@
       "eval": "node eval/T-211/check_12_pham_vi_ghi_va_khong_goi_ngoai.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 218,
+      "ms": 295,
       "out": "XX  tiền điều kiện: sửa 200  :: [400,\"field_not_editable\"]\n  ok  chỉ khoá bản ghi sửa vendor và dòng Nhật ký thay đổi (không khoá nào khác, kể cả hồ sơ/ngân sách/hội thoại cặp đôi)\n  ok  dữ liệu cặp đôi gieo sẵn còn nguyên từng byte\n  ok  không request ra ngoài (Google Maps/Places hay nơi nào khác)\nFAIL tiền điều kiện: sửa 200 [[400,\"field_not_editable\"]]",
       "tier": 1
     },
@@ -108,15 +108,15 @@
       "eval": "bash eval/T-211/check_13_giao_dien_hop_ket_noi.sh",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 4301,
-      "out": " — Nguồn vendor — Gửi lúc 22:36 18/11/26 · chờ dưới 1 giờ\"\n  XX  chi tiết yêu cầu: 'Liên hệ vendor' hiện 'ĐT 0912345678'  :: \"Cặp đôi couple_1 Email — Liên hệ đã gửi ĐT 0901234567 Ghi chú của họ eval T-211 Nguồn Thẻ trong chat Hạng mục Chụp ảnh Liên hệ vendor — Nguồn vendor — Gửi lúc 22:36 18/11/26 · chờ dưới 1 giờ\"\n  ok  liên hệ của cặp đôi (0901234567) vẫn hiện ở 'Liên hệ đã gửi', không lẫn với vendor\n  XX  sau khi admin xoá: 'Địa chỉ vendor' và 'Liên hệ vendor' hiện '—'  :: \"Cặp đôi couple_1 Email — Liên hệ đã gửi ĐT 0901234567 Ghi chú của họ eval T-211 Nguồn Thẻ trong chat Hạng mục Chụp ảnh Liên hệ vendor — Nguồn vendor — Gửi lúc 22:36 18/11/26 · chờ dưới 1 giờ\"\n  ok  không request ra ngoài\nFAIL tiền điều kiện: admin lưu địa chỉ + SĐT (API) 200 [[400,\"field_not_editable\"]] (+3 lỗi nữa)",
+      "ms": 3987,
+      "out": " — Nguồn vendor — Gửi lúc 22:38 18/11/26 · chờ dưới 1 giờ\"\n  XX  chi tiết yêu cầu: 'Liên hệ vendor' hiện 'ĐT 0912345678'  :: \"Cặp đôi couple_1 Email — Liên hệ đã gửi ĐT 0901234567 Ghi chú của họ eval T-211 Nguồn Thẻ trong chat Hạng mục Chụp ảnh Liên hệ vendor — Nguồn vendor — Gửi lúc 22:38 18/11/26 · chờ dưới 1 giờ\"\n  ok  liên hệ của cặp đôi (0901234567) vẫn hiện ở 'Liên hệ đã gửi', không lẫn với vendor\n  XX  sau khi admin xoá: 'Địa chỉ vendor' và 'Liên hệ vendor' hiện '—'  :: \"Cặp đôi couple_1 Email — Liên hệ đã gửi ĐT 0901234567 Ghi chú của họ eval T-211 Nguồn Thẻ trong chat Hạng mục Chụp ảnh Liên hệ vendor — Nguồn vendor — Gửi lúc 22:38 18/11/26 · chờ dưới 1 giờ\"\n  ok  không request ra ngoài\nFAIL tiền điều kiện: admin lưu địa chỉ + SĐT (API) 200 [[400,\"field_not_editable\"]] (+3 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 63,
+      "ms": 61,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 218,
+      "ms": 246,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 45,
+      "ms": 34,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 51,
+      "ms": 50,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1453,
+      "ms": 1530,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -156,15 +156,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2663,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-aFpwBG/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2562,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-9Aeh7G/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1709,
+      "ms": 1763,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -172,15 +172,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 936,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-cm7Vb9/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1216,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-7eP0c2/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2551,
+      "ms": 2651,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 98,
+      "ms": 96,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1617,
+      "ms": 1705,
       "out": "PASS (worker.js nén 784427 byte)",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/planner/admin/inv-001-co-admin-open-chi-mo-voi-dung-1.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 265,
+      "ms": 261,
       "out": "d · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"0\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"true\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"yes\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"on\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\" 1\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"1 \" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"01\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"TRUE\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"false\" · admin thật: /me 200 và user_id là của chính họ\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -212,7 +212,7 @@
       "eval": "eval/invariants/planner/admin/inv-002-danh-tinh-co-dinh-la-capu-khi-va-chi-khi-co-mo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 246,
+      "ms": 249,
       "out": "ính cố định\n  ok  ADMIN_OPEN=\" 1\": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\" 1\" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"1 \": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"1 \" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"01\": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"01\" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"TRUE\": export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  ADMIN_OPEN=\"TRUE\" + liệt kê: export chỉ có Capu thật, không chuỗi danh tính cố định\n  ok  cờ tắt: Capu thật ký được\n  ok  đảo cờ bật/tắt/bật: tính lại đúng, không ghi R2\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -220,7 +220,7 @@
       "eval": "eval/invariants/planner/admin/inv-003-co-admin-open-khong-mo-route-ngoai-admin.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 212,
+      "ms": 214,
       "out": "min thật: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token admin thật: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  token người thường: mọi route ngoài /api/admin/* trả giống hệt (mã + thân) khi bật và khi tắt cờ\n  ok  token người thường: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token người thường: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  cờ bật: /api/administrator không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/administrator/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/adminx/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/admin-members không bị coi là trang admin (không trả user_id/admin:true)\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -228,7 +228,7 @@
       "eval": "eval/invariants/planner/admin/inv-004-khong-file-cau-hinh-bat-co-admin-open.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 24,
+      "ms": 22,
       "out": "PASS",
       "tier": 2
     },
@@ -236,7 +236,7 @@
       "eval": "eval/invariants/planner/admin/inv-005-deploy-khong-ghi-de-admin-open.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 43,
+      "ms": 49,
       "out": "PASS",
       "tier": 2
     },
@@ -244,7 +244,7 @@
       "eval": "eval/invariants/planner/admin/inv-006-deploy-that-giu-bien-dashboard.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2105,
+      "ms": 2251,
       "out": "PASS upload metadata keep_bindings=['plain_text', 'json', 'secret_text', 'secret_key'], 13 binding, không có ADMIN_OPEN",
       "tier": 2
     },
@@ -252,7 +252,7 @@
       "eval": "eval/invariants/planner/admin/inv-007-entry-co-mo-admin-qua-apply.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 573,
+      "ms": 581,
       "out": "PASS export khi cờ mở admin (cũ + mới) qua apply_admin_reviews.py thật, nhãn admin:2ddfc6ef",
       "tier": 2
     },
@@ -260,7 +260,7 @@
       "eval": "eval/invariants/planner/admin/inv-008-co-bat-danh-sach-trong-va-gia-tri-co-la.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 241,
+      "ms": 256,
       "out": "h tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  ADMIN_OPEN=\"１\": tắt -> export chỉ có Capu thật\n  ok  ADMIN_OPEN=\"１\": tắt -> không token bị 403\n  ok  ADMIN_OPEN=\"１\": tắt -> token mang đúng chuỗi danh tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  ADMIN_OPEN=1: tắt -> export chỉ có Capu thật\n  ok  ADMIN_OPEN=1: tắt -> không token bị 403\n  ok  ADMIN_OPEN=1: tắt -> token mang đúng chuỗi danh tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  ADMIN_OPEN=true: tắt -> export chỉ có Capu thật\n  ok  ADMIN_OPEN=true: tắt -> không token bị 403\n  ok  ADMIN_OPEN=true: tắt -> token mang đúng chuỗi danh tính cố định (có trong cả hai danh sách) không ra by_capu=true, không via\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -268,7 +268,7 @@
       "eval": "eval/invariants/planner/admin/inv-009-co-bat-khong-mo-export-noi-bo.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 213,
+      "ms": 232,
       "out": "ok  cờ \"1\", không Bearer: 403, không entries, không ghi R2\n  ok  cờ \"1\", Bearer sai: 403, không entries, không ghi R2\n  ok  cờ \"1\", Bearer dev:danh tính cố định: 403, không entries, không ghi R2\n  ok  cờ \"1\", Bearer danh tính cố định: 403, không entries, không ghi R2\n  ok  cờ \"1\", ENRICH_EXPORT_TOKEN thiếu: 403, không entries, không ghi R2\n  ok  cờ \"1\", ENRICH_EXPORT_TOKEN rỗng, Bearer rỗng: 403, không entries, không ghi R2\n  ok  cờ \"1\", ENRICH_EXPORT_TOKEN ngắn: 403, không entries, không ghi R2\n  ok  cờ \"1\", token đúng: 200 và có mục của danh tính cố định (đối chứng)\n  ok  không gọi mạng ra ngoài\nPASS",
       "tier": 2
     },
@@ -276,7 +276,7 @@
       "eval": "eval/invariants/planner/admin/inv-010-vendor-da-xoa-chi-o-nhan-da-xoa-khong-ket.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 356,
+      "ms": 392,
       "out": "ng kẹt)\n  ok  marry_e289aa1b8147 (rời pool, không bản sửa, không ẩn): khôi phục 200 (không kẹt)\n  ok  marry_c66ac5426d4c (trong pool, có bản sửa, không ẩn): khôi phục 200 (không kẹt)\n  ok  marry_a03513f147ba (rời pool, có bản sửa, không ẩn): khôi phục 200 (không kẹt)\n  ok  marry_0fff143d81d1 (trong pool, không bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  marry_805844a937e2 (rời pool, không bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  marry_946e3434221d (trong pool, có bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  marry_e88965816275 (rời pool, có bản sửa, ẩn): khôi phục 200 (không kẹt)\n  ok  sau khôi phục: không vendor nào còn ở \"Đã xoá\"\n  ok  vendor đã xoá quay lại pool: cặp đôi thấy hidden:true, admin vẫn thấy ở \"Đã xoá\" (in_pool:true), không ở mặc định\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     },
@@ -284,7 +284,7 @@
       "eval": "eval/invariants/planner/admin/inv-011-xoa-khoi-phuc-tra-lai-y-nguyen-chi-ghi-overlay-va-nhat-ky.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 585,
+      "ms": 570,
       "out": "ong lúc đang xoá): detailStatus y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): override y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): effective y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): edited y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): history y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): row y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): orphanRow y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): status y hệt bản chưa từng bị xoá\n  ok  không có bản sửa (rời pool trong lúc đang xoá): chat y hệt bản chưa từng bị xoá\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     },
@@ -292,7 +292,7 @@
       "eval": "eval/invariants/planner/admin/inv-012-co-admin-open-voi-route-xoa-khoi-phuc.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 222,
+      "ms": 221,
       "out": "te/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" không token: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" token rác: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" người thường: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=\"01\" cặp đôi: delete/restore 403 forbidden như route admin cũ, R2 không đổi\n  ok  ADMIN_OPEN=1, không token: xoá 200\n  ok  ADMIN_OPEN=1: deleted_info.by là danh tính cố định\n  ok  ADMIN_OPEN=1, không token: khôi phục 200\n  ok  ADMIN_OPEN=1: hai dòng Nhật ký vendor.delete/restore, admin_id là danh tính cố định\n  ok  ADMIN_OPEN=1, admin thật đăng nhập: deleted_by vẫn là danh tính đã dùng (không rỗng)\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     }
