@@ -60,7 +60,7 @@ if (CASE === "2") {
   R.check("tiền điều kiện: admin lưu địa chỉ + SĐT (API) 200", pu.status === 200, [pu.status, pu.json?.error]);
   const mk = await C("POST", "/api/couples/couple_1/connect-requests", { vendor_id: V.id, contact: { phone: "0901234567" }, note: "eval T-211", source: "chat", client_request_id: "u1" });
   R.check("tiền điều kiện: cặp đôi gửi yêu cầu kết nối 2xx", mk.status >= 200 && mk.status < 300, [mk.status, mk.text.slice(0, 80)]);
-  await mustFail(async () => { await page.goto(`${S.base}/?admin`); await page.getByRole("button", { name: "Hộp kết nối" }).first().click(); await page.getByText(V.name).first().click(); await page.getByText("Liên hệ vendor").waitFor(); });
+  await mustFail(async () => { await page.goto(`${S.base}/?admin`); await page.getByRole("button", { name: "Hộp kết nối" }).first().click(); await page.getByText(V.name).first().click(); await page.getByText("Liên hệ vendor", { exact: true }).waitFor(); });
   await page.waitForTimeout(500);
   const dd = await page.locator("dl").filter({ hasText: "Liên hệ vendor" }).first().innerText();
   const flat = dd.replace(/\s+/g, " ");
@@ -68,7 +68,7 @@ if (CASE === "2") {
   R.check("chi tiết yêu cầu: 'Liên hệ vendor' hiện 'ĐT 0912345678'", /Liên hệ vendor\s*ĐT 0912345678/.test(flat), flat.slice(0, 300));
   R.check("liên hệ của cặp đôi (0901234567) vẫn hiện ở 'Liên hệ đã gửi', không lẫn với vendor", /Liên hệ đã gửi\s*ĐT 0901234567/.test(flat), flat.slice(0, 300));
   const A2 = await A("PUT", PUT(V.id), { expected_version: (await det()).version, address: null, contact: null });
-  await page.reload(); await page.getByRole("button", { name: "Hộp kết nối" }).first().click(); await page.getByText(V.name).first().click(); await page.getByText("Liên hệ vendor").waitFor();
+  await page.reload(); await page.getByRole("button", { name: "Hộp kết nối" }).first().click(); await page.getByText(V.name).first().click(); await page.getByText("Liên hệ vendor", { exact: true }).waitFor();
   const flat2 = (await page.locator("dl").filter({ hasText: "Liên hệ vendor" }).first().innerText()).replace(/\s+/g, " ");
   R.check("sau khi admin xoá: 'Địa chỉ vendor' và 'Liên hệ vendor' hiện '—'", A2.status === 200 && /Địa chỉ vendor\s*—/.test(flat2) && /Liên hệ vendor\s*—/.test(flat2), flat2.slice(0, 300));
 }
