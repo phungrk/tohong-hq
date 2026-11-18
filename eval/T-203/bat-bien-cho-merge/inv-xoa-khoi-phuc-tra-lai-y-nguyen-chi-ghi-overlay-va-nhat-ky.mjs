@@ -52,7 +52,8 @@ async function world(c, { remove, leave }) {
   const st = await Cp("POST", "/api/vendors/status", { ids: [id] });
   const out = {
     detailStatus: d.status,
-    override: meta(d.json?.override ?? null), effective: d.json?.effective ?? null, edited: d.json?.edited_fields ?? null, history: (d.json?.history ?? null) && d.json.history.map(({ at, ...h }) => h), // bỏ thời điểm (hai thế giới chạy ở hai lúc) deleted: d.json?.deleted === true,
+    override: meta(d.json?.override ?? null), effective: d.json?.effective ?? null, edited: d.json?.edited_fields ?? null, history: (d.json?.history ?? null) && d.json.history.map(({ at, ...h }) => h), // history: bỏ thời điểm (hai thế giới chạy ở hai lúc)
+    deleted: d.json?.deleted === true,
     row: noVer(all.rows.find((r) => r.id === id) || null), orphanRow: noVer(orphan.rows.find((r) => r.id === id) || null),
     status: st.json?.vendors?.[id] ?? null, chat: (await chatIds(env, c.T.mp)).includes(id),
   };
