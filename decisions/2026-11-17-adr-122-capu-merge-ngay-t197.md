@@ -11,3 +11,6 @@ Capu: "merge 197 luôn khi xong". T-197 (bậc B, bộ lọc Status ở bảng E
 
 ## Phụ lục (2026-11-17)
 Áp cho việc cài đặt T-199 (engineering, cùng ý định T-197).
+
+## Bổ sung (2026-11-18): T-203
+Capu: "merge 203 luôn khi xong". Việc bậc B, Capu bỏ cửa sổ 48 giờ. Chief merge khi việc engineering của T-203 qua Code Gate (adversary accept, gate GREEN, PR không xung đột, PR chỉ chứa thay đổi của việc).
