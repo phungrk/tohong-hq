@@ -1,0 +1,165 @@
+{
+  "task": "T-201",
+  "at": "2026-11-18T02:09",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/admin",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "python3 -I eval/T-201/check_1_keep_vars_cap_goc.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 24,
+      "out": "FAIL keep_vars ở cấp gốc là None, cần true",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-201/check_2_khong_dat_admin_open.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 29,
+      "out": "FAIL chưa có keep_vars = true (eval này chỉ có nghĩa khi thay đổi đã làm)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-201/check_3_vars_giu_nguyen.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 25,
+      "out": "FAIL chưa có keep_vars = true (eval này chỉ có nghĩa khi thay đổi đã làm)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 -I eval/T-201/check_4_dry_run.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 33,
+      "out": "FAIL chưa có keep_vars = true ở cấp gốc",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 4644,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 164,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 42,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 36,
+      "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 981,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 7803,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-VsID7w/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1270,
+      "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 975,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-OqmCDj/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 2011,
+      "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 111,
+      "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1208,
+      "out": "PASS (worker.js nén 782984 byte)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-001-co-admin-open-chi-mo-voi-dung-1.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 194,
+      "out": "d · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"0\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"true\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"yes\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"on\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\" 1\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"1 \" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"01\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"TRUE\" · admin thật: /me 200 và user_id là của chính họ\n  ok  ADMIN_OPEN=\"false\" · admin thật: /me 200 và user_id là của chính họ\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-002-danh-tinh-co-dinh-khong-bao-gio-la-capu.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 153,
+      "out": "· danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (không token) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (khong-phai-token) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: Approve (dev:user_that_admin) không bao giờ ra by_capu=true\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export ký 200\n  ok  ADMIN_OPEN=thiếu · danh tính cố định nằm trong ADMIN_USER_IDS/CAPU_USER_IDS: export ký không có mục của danh tính cố định (không chuỗi \"admin-khong-dang-nhap\", không mục nào của các bản duyệt vừa làm)\n  ok  đối chứng: Capu thật duyệt (cờ tắt) thì export có mục của họ\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-003-co-admin-open-khong-mo-route-ngoai-admin.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 158,
+      "out": "min thật: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token admin thật: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  token người thường: mọi route ngoài /api/admin/* trả giống hệt (mã + thân) khi bật và khi tắt cờ\n  ok  token người thường: cờ bật không ghi thêm R2 qua route ngoài /api/admin/*\n  ok  token người thường: cờ bật, người ngoài không đọc được dữ liệu cặp đôi\n  ok  cờ bật: /api/administrator không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/administrator/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/adminx/me không bị coi là trang admin (không trả user_id/admin:true)\n  ok  cờ bật: /api/admin-members không bị coi là trang admin (không trả user_id/admin:true)\n  ok  không gọi mạng ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/admin/inv-004-khong-file-cau-hinh-bat-co-admin-open.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 18,
+      "out": "PASS",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
