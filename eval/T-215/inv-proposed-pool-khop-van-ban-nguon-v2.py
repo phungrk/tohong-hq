@@ -11,9 +11,12 @@ Bất biến (planner/vendor/pool): mọi tag phong cách cặp đôi thấy tr�
   Tag không còn bằng chứng (luật extractor đổi mà không tạo lại pool, hoặc tag cũ nằm lại) và tag thiếu đều làm bất biến đỏ.
   Ghi chú: nếu sau này dữ liệu nguồn giữ lại tín hiệu tên gói thô (style_tags không phải tag chuẩn) thì (b) phải cập nhật qua Chief of Staff.
 Chạy: python3 -I <file>. Repo: TOHONG_REPO (mặc định ../tohong cạnh tohong-hq), TOHONG_BACK_REPO (mặc định ../tohong-back).
-Thiếu repo hoặc dữ liệu: PASS 'chưa áp dụng'."""
+Thiếu repo hoặc dữ liệu: PASS 'chưa áp dụng'.
+LƯU Ý THỨ TỰ (ADR-137, phần bổ sung): v2 đo pool ĐÃ COMMIT trong back, nên chỉ xanh sau khi PR Sync ở back (chạy bằng SHA merge của T-215) đã merge; trước đó đỏ vì pool cũ. Chief thay inv-001 bằng v2 sau bước đó."""
 import glob, json, os, sys
-HQ = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), *[".."] * 5))
+HQ = os.path.dirname(os.path.abspath(__file__))   # dò ngược tới scripts/gate.py (ADR-070), không đếm cấp thư mục
+while HQ != os.path.dirname(HQ) and not os.path.isfile(os.path.join(HQ, "scripts", "gate.py")):
+    HQ = os.path.dirname(HQ)
 def find(env, marker, sib):
     for c in (os.environ.get(env), os.path.join(HQ, "..", sib)):
         if c and os.path.isfile(os.path.join(c, marker)): return os.path.abspath(c)

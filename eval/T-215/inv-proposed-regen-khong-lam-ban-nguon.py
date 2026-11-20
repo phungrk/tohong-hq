@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Nguồn: T-215 (spec products/T-215-regen-giu-tag-co-bang-chung.md, tiêu chí 3). ĐỀ XUẤT bất biến, chờ Spec Gate rồi Chief of Staff đặt số trong eval/invariants/planner/vendor/pool/.
-Bất biến (planner/vendor/pool): chạy tools/regen-pool-styles.sh KHÔNG làm bẩn cây git của tohong (git status --porcelain rỗng; file ignore như output/pool-vendors.json không tính).
+Bất biến (planner/vendor/pool): chạy tools/regen-pool-styles.sh KHÔNG làm bẩn cây git của tohong (git status --porcelain rỗng, không tính thư mục back `edge`; file ignore như output/pool-vendors.json không tính).
 Mở rộng ý (2) của pool/inv-004 (regen làm bẩn cây) từ một file trung gian sang MỌI file được theo dõi: bước 'Kiểm báo cáo tươi' của sync-vendor-pool.yml (back) so báo cáo của tohong với báo cáo sinh lại từ dữ liệu SAU regen, nên regen đổi dữ liệu nguồn là Sync đỏ.
 Tĩnh với mạng, không chạm repo thật (~2 giây). Dùng eval/lib/regen_fixture.py. Thiếu repo: PASS 'chưa áp dụng'. Chạy: python3 -I <file>."""
 import os, sys
@@ -21,7 +21,7 @@ def guarded(fn):
     print("PASS " + msg); sys.exit(0)
 
 def run():
-    fx = R.build()
+    fx = R.build(back_rel="edge")   # back nằm trong cây như cấu hình thật (submodule edge); thư mục back bị loại khỏi phép kiểm
     try:
         fx.regen()
         st = fx.git_status()
