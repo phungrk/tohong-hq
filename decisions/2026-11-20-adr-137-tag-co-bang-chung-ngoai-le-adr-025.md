@@ -23,3 +23,9 @@ Ngày: 2026-11-20 · Người quyết: Capu (chọn giữ tag của PR tohong#10
   - Gate không đặt `T215_REF`.
   - Loại thư mục back (`edge`) khỏi phép kiểm "không làm bẩn cây".
   - Diff hành vi phải nêu: 29/77 vendor mang tag không có bằng chứng riêng.
+
+## Merged (2026-11-20)
+- PR phungrk/tohong#109 (T-216), squash d74ede9. Chief merge theo lời Capu "merge luôn khi xong". Adversary accept vòng 2, gate GREEN 26/26.
+- Đã thêm vào bể planner/vendor/pool: inv-005 tag-co-bang-chung-song-qua-regen, inv-006 regen-khong-lam-ban-nguon, inv-007 dong-ai-mode-sau-khong-co-style-tags (từ T-216 adv-01). Cả ba PASS trên main d74ede9 (env -i).
+- Sync run 44772198336 (tohong_ref d74ede9) xanh. PR phungrk/tohong-back#74 đang chờ merge.
+- Còn lại: sau khi #74 merge, thay pool/inv-001 bằng `eval/T-215/bat-bien-cho-merge/thay-inv-001-pool-khop-van-ban-nguon-v2.py`, kiểm xanh trên main mới. PR back#73 (Sync cũ từ venue-enrich/fix-binh-quoi-verification) đã cũ và nên đóng.
