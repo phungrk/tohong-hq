@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """ĐỀ XUẤT bất biến (vùng planner/vendor/pool) từ T-217: vendor có verification_status="verified" trong HCMC/venue/vendors.json mà pool xếp vào hạng mục venue
 thì pool (tohong-back lib/vendorPool.generated.js) mang đúng mô tả và sức chứa của nguồn: description == nguồn.description cắt 220 đơn vị UTF-16;
-capacity: có capacity_min hoặc capacity_max thì {min: capacity_min hoặc 100, max: capacity_max hoặc 300}; không có cả hai thì không ràng buộc.
+capacity: có capacity_min hoặc capacity_max thì {min: capacity_min hoặc 100, max: capacity_max hoặc 300}; không có cả hai thì không ràng buộc;
+giá: price_range.price_source == "verified" thì priceMin = min_vnd/1e6, priceMax = max_vnd/1e6, priceSource "verified", không có priceAsOf (ADR-138).
 Lý do: "verified" là hợp đồng "nguồn được người duyệt thì pool phải theo nguồn" (tools/generate-vendor-pool.js --verified-only); pool cũ hơn nguồn (quên Sync) là dữ liệu sai mà cặp đôi thấy.
 Chỉ đọc. Repo: TOHONG_REPO, TOHONG_BACK_REPO. Thiếu repo hoặc không có vendor verified thì PASS 'chưa áp dụng'. Chạy: python3 -I <file>."""
 import json, os, sys
@@ -30,9 +31,15 @@ def run():
             want = {"min": 100 if v.get("capacity_min") is None else v["capacity_min"], "max": 300 if v.get("capacity_max") is None else v["capacity_max"]}
             if p.get("capacity") != want:
                 bad.append(f"{v['id']}: capacity pool {p.get('capacity')}, cần {want}")
+        pr = v.get("price_range")
+        if isinstance(pr, dict) and pr.get("price_source") == "verified":
+            got = {k: p.get(k) for k in ("priceMin", "priceMax", "priceSource")}
+            want = {"priceMin": pr["min_vnd"] / 1e6, "priceMax": pr["max_vnd"] / 1e6, "priceSource": "verified"}
+            if got != want or "priceAsOf" in p:
+                bad.append(f"{v['id']}: giá pool {got}, cần {want}")
     if bad:
         raise T.Fail(f"{len(bad)} vendor verified có pool lệch nguồn, vd {bad[0]}")
-    return f"{n} vendor verified có pool khớp nguồn (mô tả, sức chứa)"
+    return f"{n} vendor verified có pool khớp nguồn (mô tả, sức chứa, giá)"
 
 
 try:

@@ -17,3 +17,6 @@ Capu chọn cách 3: "Đổi nguồn giá thành verified".
 - Với các venue trong tập S của T-217 có `price_range` từ AI Mode, đổi `price_source` từ `google_ai_mode` thành `verified`.
 - Giữ nguyên `note`. Nguồn gốc AI Mode vẫn còn trong `enrichment_log` và `verification_notes`. Chief đề nghị Product ghi thêm vào `note` một dòng "nguồn: Google AI Mode" để lần ngược được.
 - Đây là quyết định về dữ liệu, không đổi pipeline.
+
+## Bổ sung (2026-11-20)
+Capu: "merge luôn khi xong" cho T-217, gồm việc engineering và PR dữ liệu tohong (bậc C). Capu cho phép rõ ràng. Chief merge PR dữ liệu khi đủ cả ba điều kiện: qua Spec Gate, qua Code Gate (adversary accept, gate GREEN), PR không xung đột. Sau đó Chief chạy Sync. Merge PR Sync ở tohong-back cũng nằm trong phạm vi cho phép này, vì nó là bước cuối để dữ liệu tới cặp đôi.

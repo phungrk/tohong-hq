@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """T-217 tiêu chí 1: đúng tập S được đặt verification_status="verified"; không có gì khác đổi trong nguồn.
 Đo trên cây làm việc của TOHONG_REPO (thứ Engineering đang sửa), so với nền = merge-base của HEAD với origin/main (hoặc main; T217_BASE_REF ghi đè).
+ADR-138: với bản ghi S mà price_range nền thoả T.convertible, price_range phải bằng đúng T.converted(nền) (price_source verified, note + hậu tố " (nguồn: Google AI Mode)"); bản ghi còn lại price_range y nguyên.
 Chạy: python3 -I <file>."""
 import json, os, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -41,13 +42,16 @@ def run():
         if k != "vendors" and cur.get(k) != old.get(k):
             raise T.Fail(f"trường gốc của file '{k}' bị đổi so với nền")
     changed = []
+    nconv = 0
     for v in cur["vendors"]:
         o = ovs[v["id"]]
         a = {k: x for k, x in v.items() if k != "verification_status"}
         b = {k: x for k, x in o.items() if k != "verification_status"}
+        if v["id"] in sset and T.convertible(o.get("price_range")):
+            b["price_range"] = T.converted(o["price_range"]); nconv += 1
         if a != b:
             diff = sorted(k for k in set(a) | set(b) if a.get(k) != b.get(k))
-            raise T.Fail(f"{v['id']}: đổi trường ngoài verification_status: {diff[:4]}")
+            raise T.Fail(f"{v['id']}: đổi trường ngoài verification_status (và price_range theo ADR-138): {diff[:4]}")
         if v.get("verification_status") != o.get("verification_status"):
             changed.append(v["id"])
     if not changed and base:
@@ -57,8 +61,9 @@ def run():
         raise T.Fail(f"đổi trạng thái vendor ngoài S: {sorted(set(changed) - sset)[:3]}")
     # không đổi byte ngoài đúng một dòng mỗi bản ghi; không file nào khác ngoài vendors.json và enrich-report.json
     ns = subprocess.run(["git", "-C", root, "diff", "--numstat", base, "--", T.VENUE], capture_output=True, text=True).stdout.split()
-    if changed and (len(ns) < 2 or int(ns[0]) != len(changed) or int(ns[1]) != len(changed)):
-        raise T.Fail(f"vendors.json đổi {ns[:2]} dòng (thêm/xoá), cần đúng {len(changed)}/{len(changed)} (một dòng verification_status mỗi bản ghi; không định dạng lại file)")
+    if changed and (len(ns) < 2 or int(ns[0]) != len(changed) + 2 * nconv or int(ns[1]) != len(changed) + 2 * nconv):
+        want = len(changed) + 2 * nconv
+        raise T.Fail(f"vendors.json đổi {ns[:2]} dòng (thêm/xoá), cần đúng {want}/{want} (một dòng verification_status mỗi bản ghi + hai dòng price_source/note mỗi bản ghi giá đổi; không định dạng lại file)")
     files = subprocess.run(["git", "-C", root, "diff", "--name-only", base], capture_output=True, text=True).stdout.split()
     st = subprocess.run(["git", "-C", root, "status", "--porcelain"], capture_output=True, text=True).stdout.splitlines()
     files += [l[3:].strip() for l in st]
@@ -66,7 +71,7 @@ def run():
     extra = sorted({f for f in files if f not in ok})
     if extra:
         raise T.Fail(f"file ngoài vendors.json / enrich-report.json bị đổi: {extra[:3]}")
-    return f"{len(S)} vendor thuộc S đã verified, Bình Quới 2 giữ nguyên, {len(vs) - len(S) - 1} vendor khác giữ auto_scraped; không trường nào khác đổi"
+    return f"{len(S)} vendor thuộc S đã verified, Bình Quới 2 giữ nguyên, {len(vs) - len(S) - 1} vendor khác giữ auto_scraped; {nconv} bản ghi đổi giá sang verified kèm nguồn; không trường nào khác đổi"
 
 
 T.R.main_guard(run)
