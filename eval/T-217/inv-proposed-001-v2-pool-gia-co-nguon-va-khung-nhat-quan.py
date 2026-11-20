@@ -12,7 +12,14 @@ INV-A · Mọi vendor trong pool (tohong-back/lib/vendorPool.generated.js) mang 
 Chưa vendor nào có priceSource (main trước T-164): PASS "chưa áp dụng". Có vendor có mà không phải tất cả: FAIL (áp dụng dở dang).
 Đổi bảng ngưỡng/n tối thiểu = đổi spec và bất biến này (qua Chief of Staff, decisions/). Chạy: python3 -I <file>. Repo: TOHONG_BACK_REPO hoặc ../tohong-back."""
 import json, math, os, re, sys
-HQ = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+def _find_hq(start):
+    """ADR-070: dò ngược tới thư mục có scripts/gate.py, không đếm cấp (file chạy ở eval/T-217/ lúc đề xuất và ở eval/invariants/planner/vendor/ sau khi vào bể)."""
+    d = os.path.dirname(os.path.realpath(start))
+    while d != os.path.dirname(d) and not os.path.isfile(os.path.join(d, "scripts", "gate.py")):
+        d = os.path.dirname(d)
+    return d if os.path.isfile(os.path.join(d, "scripts", "gate.py")) else None
+HQ = _find_hq(__file__)
+if not HQ: print("FAIL không dò được gốc tohong-hq (scripts/gate.py) từ vị trí file"); sys.exit(1)
 B = next((os.path.abspath(p) for p in (os.environ.get("TOHONG_BACK_REPO"), os.path.join(HQ, "..", "tohong-back")) if p and os.path.isfile(os.path.join(p, "lib", "vendorPool.generated.js"))), None)
 if not B: print("PASS chưa áp dụng (không thấy tohong-back)"); sys.exit(0)
 BANDS = {"attire": (0.3, 60), "ceremony": (0.5, 100), "decor": (0.5, 300), "honeymoon": (1, 200), "jewelry": (0.5, 150), "makeup": (1, 100), "photography": (0.5, 150), "stationery": (0.3, 50), "transport": (0.5, 60), "venue": (2, 20)}

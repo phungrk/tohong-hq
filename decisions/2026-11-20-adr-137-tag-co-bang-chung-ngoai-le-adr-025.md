@@ -29,3 +29,6 @@ Ngày: 2026-11-20 · Người quyết: Capu (chọn giữ tag của PR tohong#10
 - Đã thêm vào bể planner/vendor/pool: inv-005 tag-co-bang-chung-song-qua-regen, inv-006 regen-khong-lam-ban-nguon, inv-007 dong-ai-mode-sau-khong-co-style-tags (từ T-216 adv-01). Cả ba PASS trên main d74ede9 (env -i).
 - Sync run 44772198336 (tohong_ref d74ede9) xanh. PR phungrk/tohong-back#74 đang chờ merge.
 - Còn lại: sau khi #74 merge, thay pool/inv-001 bằng `eval/T-215/bat-bien-cho-merge/thay-inv-001-pool-khop-van-ban-nguon-v2.py`, kiểm xanh trên main mới. PR back#73 (Sync cũ từ venue-enrich/fix-binh-quoi-verification) đã cũ và nên đóng.
+
+## Đã thay pool/inv-001 (2026-11-20)
+PR back#74 (Sync #108 + T-216) đã merge, back 0f69f10. Chief thay `pool/inv-001-pool-khop-van-ban-nguon.py` bằng bản v2 có ngoại lệ tag có bằng chứng. Chạy `env -i` từ /tmp: PASS.

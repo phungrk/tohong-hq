@@ -5,7 +5,16 @@ INV-B v2 · Không bề mặt API cặp đôi nào trả giá của vendor mà t
   với bốn trạng thái overlay: không có, giá chưa xác minh, giá đã xác minh, chỉ xác minh; và mọi vendor pool có priceSource "verified" (không overlay) trả price_basis "source_verified",
   price_label "Giá đã xác minh", price_as_of null. Pool chưa có priceSource: PASS "chưa áp dụng". Chạy: python3 -I <file>. Repo: TOHONG_BACK_REPO hoặc ../tohong-back. Cần node."""
 import os, subprocess, sys
-HERE = os.path.dirname(os.path.abspath(__file__))
-r = subprocess.run(["node", os.path.join(HERE, "gia_nhan_v2.mjs")], capture_output=True, text=True, timeout=300)
+
+def _find_hq(start):
+    """ADR-070: dò ngược tới thư mục có scripts/gate.py, không đếm cấp (file này chạy ở eval/T-217/ lúc đề xuất và ở eval/invariants/<vùng>/ sau khi vào bể)."""
+    d = os.path.dirname(os.path.realpath(start))
+    while d != os.path.dirname(d) and not os.path.isfile(os.path.join(d, "scripts", "gate.py")):
+        d = os.path.dirname(d)
+    return d if os.path.isfile(os.path.join(d, "scripts", "gate.py")) else None
+HQ = _find_hq(__file__)
+if not HQ:
+    print("FAIL không dò được gốc tohong-hq (scripts/gate.py) từ vị trí file"); sys.exit(1)
+r = subprocess.run(["node", os.path.join(HQ, "eval", "T-217", "gia_nhan_v2.mjs")], capture_output=True, text=True, timeout=300)
 last = (r.stdout.strip().splitlines() or [r.stderr.strip()[-200:]])[-1]
 print(last); sys.exit(0 if last.startswith("PASS") else 1)

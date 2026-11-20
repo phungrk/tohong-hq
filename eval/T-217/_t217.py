@@ -1,7 +1,7 @@
 """T-217: phần dùng chung cho check_*.py. Ngoại tuyến (python bị chặn socket ở các bước chạy công cụ), không ghi .pyc, không sửa repo thật.
 Repo: TOHONG_REPO / TOHONG_BACK_REPO (ADR-070: dò ngược tới scripts/gate.py, không đếm cấp thư mục). Nền dựng bản sao tạm bằng eval/lib/regen_fixture.py.
 Tập S (spec T-217, mục Định nghĩa) được tính ở đây từ chính dữ liệu nguồn, KHÔNG đọc verification_status, nên cùng một phép đo đúng cả trước lẫn sau thay đổi."""
-import json, os, subprocess, sys
+import json, os, subprocess, sys, unicodedata
 
 sys.dont_write_bytecode = True
 _d = os.path.dirname(os.path.abspath(__file__))
@@ -27,9 +27,32 @@ def load(path):
     return d, (d["vendors"] if isinstance(d, dict) else d)
 
 
-def last_ai(rec):
-    rows = [e for e in rec.get("enrichment_log") or [] if isinstance(e, dict) and e.get("source") == "google_ai_mode"]
-    return rows[-1] if rows else None
+def ai_rows(rec):
+    return [e for e in rec.get("enrichment_log") or [] if isinstance(e, dict) and e.get("source") == "google_ai_mode"]
+
+
+# Luật "giá chưa đủ tin cậy" (spec T-217, Hành vi 1b; ADR-139 phần phân xử D1). Không phụ thuộc thứ tự dòng log: xét MỌI dòng google_ai_mode.
+UNRELIABLE_PHRASES = ("chưa đủ tin cậy", "không đủ tin cậy")
+
+
+def _fold(s):
+    return unicodedata.normalize("NFC", s).casefold()
+
+
+def price_unreliable(rec):
+    """True nếu BẤT KỲ chuỗi nào trong: price_range.note, verification_notes của bản ghi, changes.verification_notes của MỌI dòng google_ai_mode
+    chứa (không phân biệt hoa thường, sau chuẩn hoá NFC) một trong UNRELIABLE_PHRASES."""
+    texts = []
+    pr = rec.get("price_range")
+    if isinstance(pr, dict) and isinstance(pr.get("note"), str):
+        texts.append(pr["note"])
+    if isinstance(rec.get("verification_notes"), str):
+        texts.append(rec["verification_notes"])
+    for e in ai_rows(rec):
+        ch = e.get("changes")
+        if isinstance(ch, dict) and isinstance(ch.get("verification_notes"), str):
+            texts.append(ch["verification_notes"])
+    return any(ph in _fold(t) for t in texts for ph in UNRELIABLE_PHRASES)
 
 
 def temp_closed_ids(audit_path):
@@ -44,12 +67,17 @@ def temp_closed_ids(audit_path):
             or (r.get("status") == "temporarily_closed" and r.get("retry") is True)}
 
 
-def carries(row):
+def carries_row(row):
     ch = row.get("changes") if isinstance(row, dict) else None
     if not isinstance(ch, dict):
         return False
     d = ch.get("description")
     return (isinstance(d, str) and d.strip() != "") or "capacity_min" in ch or "capacity_max" in ch
+
+
+def carries(rec):
+    """Điều 1 của S: CÓ ÍT NHẤT MỘT dòng google_ai_mode mang description không rỗng hoặc khoá capacity_min/capacity_max (không phụ thuộc thứ tự dòng)."""
+    return any(carries_row(r) for r in ai_rows(rec))
 
 
 def pool_venue_ids(root):
@@ -75,12 +103,12 @@ def pool_venue_ids(root):
 
 
 def target_ids(root):
-    """S: bản ghi trong HCMC/venue/vendors.json thoả CẢ BỐN: (1) có dòng google_ai_mode CUỐI mang description không rỗng hoặc khoá capacity_min/capacity_max;
+    """S: bản ghi trong HCMC/venue/vendors.json thoả CẢ BỐN: (1) có ÍT NHẤT MỘT dòng google_ai_mode mang description không rỗng hoặc khoá capacity_min/capacity_max;
     (2) id không thuộc vendor tạm đóng cửa (audit); (3) id khác Bình Quới 2; (4) pool xếp id đó vào hạng mục venue (xem pool_venue_ids).
     Trả (S theo thứ tự nguồn, mọi bản ghi)."""
     _, vs = load(os.path.join(root, VENUE))
     closed = temp_closed_ids(os.path.join(root, AUDIT))
-    cand = [v["id"] for v in vs if v["id"] != BINH_QUOI_2 and v["id"] not in closed and carries(last_ai(v))]
+    cand = [v["id"] for v in vs if v["id"] != BINH_QUOI_2 and v["id"] not in closed and carries(v)]
     pv = pool_venue_ids(root)
     return [i for i in cand if i in pv], vs
 
@@ -124,6 +152,11 @@ def convertible(pr):
     if isinstance(lo, bool) or isinstance(hi, bool) or not isinstance(lo, (int, float)) or not isinstance(hi, (int, float)):
         return False
     return 0 < lo <= hi and lo >= VENUE_BAND[0] and hi <= VENUE_BAND[1]
+
+
+def price_convertible(rec):
+    """Bản ghi (thuộc S) có giá được đổi sang verified: price_range thoả convertible VÀ không bị price_unreliable."""
+    return convertible(rec.get("price_range")) and not price_unreliable(rec)
 
 
 def converted(pr):
