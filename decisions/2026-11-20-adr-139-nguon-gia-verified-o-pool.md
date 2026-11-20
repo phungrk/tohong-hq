@@ -57,3 +57,26 @@ Adversary sửa phần dựng tình huống (2026-11-20), theo điểm 6 ở tr�
 - Trên pool trước T-216 (`d2c6fa8~1`), bản gốc và bản sửa cho cùng kết quả ở cả 5 trạng thái (sạch và 4 lần phá), cùng dòng FAIL và cùng số lỗi. Phần dựng mới không nới bất biến.
 
 **Cùng kiểu, chưa đỏ, không sửa.** inv-003 chạy `eval/T-172/check_7_inv003_ban_thay_the.mjs`, cũng lọc twin `rating === 0 && styles.length === 0`, ở hạng mục photography. Hiện còn 14 vendor photography thoả, nên nó sẽ đỏ theo cùng cách nếu một lần Sync làm giàu styles cho ảnh. `eval/T-159/_lib.mjs` `twins()` có cùng bộ lọc, nhưng không bất biến nào của planner/vendor gọi nó.
+
+## Đã merge (2026-11-21)
+Thứ tự đúng: back → dữ liệu → Sync. Chief merge theo ADR-138 bổ sung (Capu "merge luôn khi xong").
+- phungrk/tohong-back#75 → ac1586f (T-218, back hiểu nguồn giá verified).
+- phungrk/tohong#111 → 1a14632 (85 venue verified, 64 giá verified).
+- Sync run 44838396035 (xanh) → phungrk/tohong-back#76 → 2f2321e.
+
+Gate T-218 trước merge: GREEN, sau khi đổi bể bất biến (bỏ planner/vendor inv-001/002 v1, thay bằng v2).
+
+Bể bất biến sau merge (chạy `env -i` từ /tmp trên main, đều PASS):
+- planner/vendor inv-001 v2, inv-002 v2.
+- inv-008-nguon-gia-cap-doi-khop-nhan-xac-minh (mới).
+- pool/inv-009-pool-verified-khop-nguon (mới).
+- pool inv-001..008.
+
+Kiểm thực tế: Bạch Kim (marry_5ec257b82f96) trong pool có giá 3.4–3.4 verified, sức chứa 100–3000, mô tả AI Mode.
+
+Nợ còn lại:
+- admin/vendor-enrich inv-006 cần thêm 4 mục catalog: capacity_min, capacity_max, capacity_unit, verification_status.
+- admin/vendor-enrich inv-014 đỏ từ #108.
+- images inv-014: Garden Plaza có ảnh Google mà không có place_id.
+- Silver Creek và Villa Sông Sài Gòn bị pool xếp vào hạng mục honeymoon.
+- PR back#73 (Sync cũ) nên đóng.
