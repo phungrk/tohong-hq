@@ -108,3 +108,27 @@ def base_dir_for_diff(root):
         if p.returncode == 0 and p.stdout.strip():
             return p.stdout.strip()
     return None
+
+
+# ADR-138: giá google_ai_mode của S đổi thành verified; ghi nguồn vào note bằng đúng hậu tố này (nối vào cuối note, cách một dấu cách)
+NOTE_SUFFIX = " (nguồn: Google AI Mode)"
+VENUE_BAND = (2_000_000, 20_000_000)   # PRICE_BANDS.venue của generator, đồng VND, đóng hai đầu
+
+
+def convertible(pr):
+    """price_range đủ điều kiện đổi sang verified (spec T-217, Hành vi 1b): price_source == google_ai_mode, unit == per_table,
+    min_vnd/max_vnd là số, 0 < min <= max, nằm trong [2tr, 20tr] mỗi bàn. Ngoài điều kiện thì generator --verified-only ném lỗi (Sync đỏ), nên KHÔNG đổi."""
+    if not isinstance(pr, dict) or pr.get("price_source") != "google_ai_mode" or pr.get("unit") != "per_table":
+        return False
+    lo, hi = pr.get("min_vnd"), pr.get("max_vnd")
+    if isinstance(lo, bool) or isinstance(hi, bool) or not isinstance(lo, (int, float)) or not isinstance(hi, (int, float)):
+        return False
+    return 0 < lo <= hi and lo >= VENUE_BAND[0] and hi <= VENUE_BAND[1]
+
+
+def converted(pr):
+    """Dạng price_range sau đổi: cùng trường, price_source = verified, note có hậu tố."""
+    out = dict(pr)
+    out["price_source"] = "verified"
+    out["note"] = (pr.get("note") or "") + NOTE_SUFFIX
+    return out
