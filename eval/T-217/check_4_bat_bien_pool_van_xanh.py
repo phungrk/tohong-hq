@@ -12,7 +12,8 @@ def run():
     try:
         files = [os.path.join(T.HQ, "eval/T-215/bat-bien-cho-merge/thay-inv-001-pool-khop-van-ban-nguon-v2.py")]
         files += sorted(glob.glob(os.path.join(T.HQ, "eval/invariants/planner/vendor/pool/inv-00[2-7]*.py")))
-        files += sorted(glob.glob(os.path.join(T.HQ, "eval/invariants/planner/vendor/inv-00[1-4]*.py")))
+        files += [os.path.join(T.HQ, "eval/T-217/inv-proposed-001-v2-pool-gia-co-nguon-va-khung-nhat-quan.py")]
+        files += sorted(glob.glob(os.path.join(T.HQ, "eval/invariants/planner/vendor/inv-00[2-4]*.py")))
         files = [f for f in files if os.path.isfile(f)]
         if len(files) < 11:
             raise T.Fail(f"chỉ thấy {len(files)} bất biến để chạy (cần v2 + pool inv-002..007 + vendor inv-001..004 dạng .py)")
