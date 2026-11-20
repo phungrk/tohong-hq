@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """T-215 tiêu chí 1: vendor có tag gán kèm bằng chứng (enrichment_log, Google AI Mode: tohong#108) giữ NGUYÊN style_tags sau regen.
-Chạy regen-pool-styles.sh --back <bản sao back> --photos-for all trên bản sao tạm của tohong (mặc định cây làm việc; T215_REF ghim commit, vd eadf6d75259578e6feab2c190033a0916ff52a29).
+Chạy regen-pool-styles.sh --back <bản sao back> --photos-for all trên bản sao tạm của tohong (cây làm việc của TOHONG_REPO, phải đã có dữ liệu #108; không ghim commit cũ).
 Mọi vendor có bản ghi được bảo vệ và CÒN trong pool: pool.styles == pool.tags == style_tags của nguồn (đúng thứ tự). Chạy: python3 -I <file>. Không mạng, không chạm repo thật."""
 import os, sys
 sys.dont_write_bytecode = True

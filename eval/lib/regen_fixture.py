@@ -3,7 +3,7 @@ Dùng chung cho eval/T-215/check_*.py và các bất biến đề xuất của T
 
 Repo: TOHONG_REPO (mặc định ../tohong cạnh tohong-hq), TOHONG_BACK_REPO (mặc định ../tohong-back); dò ngược tới scripts/gate.py (ADR-070), không đếm cấp thư mục.
 Bản sao tohong = cây làm việc hiện tại (file được git theo dõi + file chưa theo dõi không bị ignore), để eval đo đúng thứ Engineering đang sửa.
-  T215_REF=<commit>  ghim bản sao tohong về đúng commit đó (git archive), vd eadf6d75259578e6feab2c190033a0916ff52a29 (tohong#108 đã merge).
+Không có biến ghim commit (ADR-137, phần bổ sung): ghim cũ sẽ ghim cả công cụ về trước T-215. Cây tohong phải đã có dữ liệu tohong#108 (main hiện hành hoặc worktree của Engineering); thiếu thì FAIL kèm lý do rõ.
 Bản sao tohong được `git init` + commit trong thư mục tạm để `git status --porcelain` nói đúng "cây sạch hay bẩn" (có .gitignore của repo).
 Pool nền = tohong-back lib/vendorPool.generated.js ở HEAD (không lấy bản đang bẩn trên đĩa).
 """
@@ -55,11 +55,12 @@ def _is_git(d):
 
 
 def _copy_tree(src, dst, ref=None, skip=("node_modules",)):
+    """ref chỉ dùng cho back (HEAD đã commit); cây tohong luôn là cây làm việc."""
     os.makedirs(dst, exist_ok=True)
     if ref:
         p = subprocess.run(f"git -C '{src}' archive '{ref}' | tar -x -C '{dst}'", shell=True, capture_output=True, text=True)
         if p.returncode != 0:
-            raise Fail(f"git archive {ref} trong {src} lỗi: {p.stderr[-200:]} (git fetch origin main?)")
+            raise Fail(f"git archive {ref} trong {src} lỗi: {p.stderr[-200:]}")
         return
     if _is_git(src):
         files = _run(["git", "-C", src, "ls-files", "-z", "-co", "--exclude-standard"]).stdout.split("\0")
@@ -83,6 +84,7 @@ class Fx:
         self.tohong = os.path.join(self.tmp, "tohong")
         self.back = os.path.join(self.tmp, "back")
         self.env = None
+        self.back_rel = None   # đường dẫn tương đối của back trong cây tohong (mặc định của regen là "edge"), None nếu back nằm ngoài
 
     def close(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
@@ -108,7 +110,16 @@ class Fx:
         return p
 
     def git_status(self):
-        return [l for l in _run(["git", "-C", self.tohong, "status", "--porcelain"]).stdout.splitlines() if l]
+        """git status --porcelain của cây tohong, LOẠI thư mục back (nếu nằm trong cây, vd submodule `edge`): ghi pool vào back là việc đúng của regen."""
+        out = []
+        for l in _run(["git", "-C", self.tohong, "status", "--porcelain"]).stdout.splitlines():
+            if not l:
+                continue
+            path = l[3:].strip().strip('"').rstrip("/")
+            if self.back_rel and (path == self.back_rel or path.startswith(self.back_rel + "/")):
+                continue
+            out.append(l)
+        return out
 
     def pool(self):
         s = open(self.pool_file(), encoding="utf-8").read()
@@ -172,12 +183,15 @@ def is_protected(rec):
     return any(isinstance(x, dict) and x.get("tag") in ALLOWED and isinstance(x.get("evidence"), str) and x["evidence"].strip() for x in last)
 
 
-def build(prepare=None, full_back=False):
+def build(prepare=None, full_back=False, back_rel=None):
     """Dựng Fx. prepare(fx) được gọi sau khi chép, TRƯỚC khi commit nền (mọi sửa dữ liệu thử nghiệm nằm trong lần commit nền)."""
     t, b = repos(need_back=True)
     fx = Fx()
     try:
-        _copy_tree(t, fx.tohong, ref=os.environ.get("T215_REF") or None)
+        if back_rel:   # back nằm TRONG cây tohong như cấu hình thật (submodule `edge`)
+            fx.back_rel = back_rel
+            fx.back = os.path.join(fx.tohong, back_rel)
+        _copy_tree(t, fx.tohong)
         for need in ("tools/regen-pool-styles.sh", "tools/scraper/output/HCMC/venue/vendors.json"):
             if not os.path.isfile(os.path.join(fx.tohong, need)):
                 raise Fail(f"bản sao tohong thiếu {need}")
@@ -197,7 +211,7 @@ def build(prepare=None, full_back=False):
         open(os.path.join(nd, "sitecustomize.py"), "w").write(NONET)
         fx.env = dict(os.environ, PYTHONPATH=nd, PYTHONDONTWRITEBYTECODE="1", GOOGLE_MAPS_API_KEY="")
         if not any(is_protected(v) for _, v in fx.records()):
-            raise Fail("dữ liệu tohong không có vendor nào có bằng chứng style_tags (google_ai_mode): chưa có tohong#108 (git pull origin main hoặc đặt T215_REF)")
+            raise Fail("dữ liệu tohong không có vendor nào có bằng chứng style_tags (google_ai_mode): chưa có dữ liệu tohong#108 trong cây TOHONG_REPO (cần main đã có #108, hoặc worktree của Engineering dựng trên đó; không ghim commit cũ)")
         if prepare:
             prepare(fx)
         r = _run(["git", "init", "-q"], cwd=fx.tohong)

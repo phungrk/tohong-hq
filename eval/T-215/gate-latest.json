@@ -1,6 +1,6 @@
 {
   "task": "T-215",
-  "at": "2026-11-20T15:13",
+  "at": "2026-11-20T15:29",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 -I eval/T-215/check_1_tag_co_bang_chung_duoc_giu.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 2235,
+      "ms": 1692,
       "out": "FAIL 76/76 vendor có bằng chứng bị đổi tag sau regen, vd marry_14b4d1b1b7f0 (PARKROYAL Saigon): nguồn ['natural', 'luxury', 'modern'], pool styles ['natural'] tags ['natural']",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 -I eval/T-215/check_2_vendor_con_lai_hanh_vi_cu.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 7398,
+      "ms": 6224,
       "out": "FAIL 1 lỗi: chỉ 0 vendor còn được bảo vệ giữ nguyên style_tags (cần >= 10)",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 -I eval/T-215/check_3_regen_khong_lam_ban_nguon.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 2429,
+      "ms": 1890,
       "out": "FAIL regen làm bẩn cây tohong (2 file), vd:  M tools/scraper/output/HCMC/photography/vendors.json;  M tools/scraper/output/HCMC/venue/vendors.json",
       "tier": 1
     },
@@ -36,23 +36,23 @@
       "eval": "python3 -I eval/T-215/check_4_mo_phong_sync_qua_bao_cao_tuoi.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 3343,
+      "ms": 2890,
       "out": "FAIL Kiểm báo cáo tươi ĐỎ: báo cáo sinh lại từ dữ liệu SAU regen khác enrich-report.json của tohong (regen đã đổi dữ liệu nguồn)",
       "tier": 1
     },
     {
       "eval": "python3 -I eval/T-215/check_5_danh_muc_truong_nguon_con_khop.py",
       "kind": "cmd",
-      "status": "FAIL",
-      "ms": 85640,
-      "out": "FAIL inv-006-danh-muc-thuoc-tinh-pool.py: FAIL bước sinh pool đọc `(tệp)` của manual_overrides.json mà danh mục không có (+16) | inv-014-cot-pool-danh-muc-du-truong-bi-anh-huong.py: ổi pool ['priceAsOf', 'priceMax', 'priceMin'] mà cột pool chỉ ghi ['priceSource']\nFAIL mục `price_range.price_source` đổi pool ['priceAsOf', 'priceMax', 'priceMin'] mà cột pool chỉ ghi ['priceSource']",
+      "status": "PASS",
+      "ms": 51,
+      "out": "PASS ứng viên trùng commit nền eadf6d75 (không thêm lệch nào)",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 62,
+      "ms": 52,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 241,
+      "ms": 229,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 39,
+      "ms": 30,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 54,
+      "ms": 41,
       "out": "PASS selftest 3 ca; 39 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1477,
+      "ms": 1354,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -92,15 +92,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2481,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-qvqagU/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2434,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-wIh91C/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1589,
+      "ms": 1569,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -108,15 +108,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 960,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-ohmegZ/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 933,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-rbAqXX/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2808,
+      "ms": 2550,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 111,
+      "ms": 91,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1537,
+      "ms": 1472,
       "out": "PASS (worker.js nén 784427 byte)",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/vendor/inv-001-pool-gia-co-nguon-va-khung-nhat-quan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 49,
+      "ms": 39,
       "out": "PASS (867 vendor có nguồn giá, khung nhất quán)",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/vendor/inv-002-gia-hien-ra-luon-co-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 335,
+      "ms": 342,
       "out": "PASS",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/vendor/inv-003-uoc-tinh-khong-lam-bang-chung-khang-dinh-ngan-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1206,
+      "ms": 1403,
       "out": "PASS",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/vendor/inv-004-venue-so-gia-ban-voi-tong-theo-so-ban.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1320,
+      "ms": 1353,
       "out": "PASS",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/vendor/inv-005-mot-so-khach-hieu-luc-tab-chat-seed.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 528,
+      "ms": 535,
       "out": "PASS\nPASS",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/vendor/inv-006-uoc-tinh-co-tin-hieu-rieng-trong-prompt-ai.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 337,
+      "ms": 322,
       "out": "PASS AI luôn nhận tín hiệu riêng cho vendor giá ước tính (chat + câu vì sao hợp)",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/vendor/inv-007-vendor-bi-go-khong-ra-phia-cap-doi.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 430,
+      "ms": 355,
       "out": "ục giảm đúng 1\n  ok  decor/Ẩn: /status có mục hidden:true (không null)\n  ok  decor/Ẩn: /:id 200, hidden:true, match:null, còn tên\n  ok  decor/Xoá: thao tác admin 200\n  ok  decor/Xoá: không ở ghép theo id, ghép theo hạng mục, ứng viên chat\n  ok  decor/Xoá: đếm hạng mục giảm đúng 1\n  ok  decor/Xoá: /status có mục hidden:true (không null)\n  ok  decor/Xoá: /:id 200, hidden:true, match:null, còn tên\n  ok  decor/Ẩn rồi Xoá: thao tác admin 200\n  ok  decor/Ẩn rồi Xoá: không ở ghép theo id, ghép theo hạng mục, ứng viên chat\n  ok  decor/Ẩn rồi Xoá: đếm hạng mục giảm đúng 1\n  ok  decor/Ẩn rồi Xoá: /status có mục hidden:true (không null)\n  ok  decor/Ẩn rồi Xoá: /:id 200, hidden:true, match:null, còn tên\n  ok  decor: ba cách gỡ cho cùng một kết quả ở mọi bề mặt cặp đôi\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     }
