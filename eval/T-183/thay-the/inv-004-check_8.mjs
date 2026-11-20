@@ -4,12 +4,13 @@
 // Giữ nguyên MỌI nội dung của check_9 (không phụ thuộc nhãn có hay không: XANH cả trên main lẫn sau T-172, đổi trỏ inv-004 được ngay; tính chất "không nhãn" giữ ở check_1) (venue theo bàn so với tổng, lọc cứng, nới x1,2, điểm 0,5 khi thiếu số khách, dòng "Theo số bàn", vendor ước tính không chip/không dòng "Theo số bàn"); chỉ đổi hai câu đo dòng "Giá:" của venue: từ "Giá: a-btr/bàn (nhãn)" thành "bắt đầu bằng Giá: a-btr/bàn" (cho phép ngoặc theo sau).
 import { stampedBack, loadModules, setNow, restoreNow } from "../../T-164/_lib.mjs";
 import { tab, chat, tabMatch, coupleProfile, CID, doc } from "../../T-159/_lib.mjs";
+import { makeTwins } from "../../invariants/planner/vendor/_twin.mjs"; // ADR-139 bổ sung 6: twin dựng từ vendor thật, không đòi pool có venue styles rỗng
 const fails = []; const bad = (m) => { if (fails.length < 30) fails.push(m); };
 const near = (x, y) => typeof x === "number" && Math.abs(x - y) < 0.011;
 const R = (a, b) => ({ priceMin: a, priceMax: b, priceSource: "legacy_marry", priceAsOf: "2026-06" }); const E = (a, b) => ({ priceMin: a, priceMax: b, priceSource: "estimate_category", priceAsOf: "2026-06" });
 const ids = {}; const OLD = {};
 const dir = stampedBack({ mut: (arr) => {
-  const tw = arr.filter((v) => v.category === "venue" && v.isVerified && v.rating === 0 && v.styles.length === 0 && v.availability.length === 12 && v.city === "HCMC").slice(0, 4);
+  const tw = makeTwins(arr, "venue", 4);
   [["R1", R(4, 4.6)], ["E1", E(4, 4.6)], ["R2", R(8, 9)]].forEach(([k, p], i) => { Object.assign(tw[i], p); ids[k] = tw[i].id; });
   tw[0].capacity = { min: 200, max: 400 }; tw[1].capacity = { min: 50, max: 150 };   // R1 vừa 300 khách, E1 chỉ vừa 100 khách
   Object.assign(tw[3], { priceMin: 5, priceMax: 15 }); delete tw[3].priceSource; delete tw[3].priceAsOf; ids.OLD = tw[3].id;   // pool cũ: không nguồn giá

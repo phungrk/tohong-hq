@@ -6,7 +6,17 @@ giá: price_range.price_source == "verified" thì priceMin = min_vnd/1e6, priceM
 Lý do: "verified" là hợp đồng "nguồn được người duyệt thì pool phải theo nguồn" (tools/generate-vendor-pool.js --verified-only); pool cũ hơn nguồn (quên Sync) là dữ liệu sai mà cặp đôi thấy.
 Chỉ đọc. Repo: TOHONG_REPO, TOHONG_BACK_REPO. Thiếu repo hoặc không có vendor verified thì PASS 'chưa áp dụng'. Chạy: python3 -I <file>."""
 import json, os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+def _find_hq(start):
+    """ADR-070: dò ngược tới thư mục có scripts/gate.py, không đếm cấp (file này chạy ở eval/T-217/ lúc đề xuất và ở eval/invariants/<vùng>/ sau khi vào bể)."""
+    d = os.path.dirname(os.path.realpath(start))
+    while d != os.path.dirname(d) and not os.path.isfile(os.path.join(d, "scripts", "gate.py")):
+        d = os.path.dirname(d)
+    return d if os.path.isfile(os.path.join(d, "scripts", "gate.py")) else None
+_HQ = _find_hq(__file__)
+if not _HQ:
+    print("FAIL không dò được gốc tohong-hq (scripts/gate.py) từ vị trí file"); sys.exit(1)
+sys.path.insert(0, os.path.join(_HQ, "eval", "T-217"))   # helper nằm ở eval/T-217/ tính từ gốc HQ, không phải thư mục của file này
 import _t217 as T
 
 

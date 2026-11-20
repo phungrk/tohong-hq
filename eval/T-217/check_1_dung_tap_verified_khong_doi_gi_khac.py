@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """T-217 tiêu chí 1: đúng tập S được đặt verification_status="verified"; không có gì khác đổi trong nguồn.
 Đo trên cây làm việc của TOHONG_REPO (thứ Engineering đang sửa), so với nền = merge-base của HEAD với origin/main (hoặc main; T217_BASE_REF ghi đè).
-ADR-138: với bản ghi S mà price_range nền thoả T.convertible, price_range phải bằng đúng T.converted(nền) (price_source verified, note + hậu tố " (nguồn: Google AI Mode)"); bản ghi còn lại price_range y nguyên.
+ADR-138 + ADR-139 (phân xử D1): với bản ghi S mà nền thoả T.price_convertible (price_range đủ điều kiện VÀ không có tín hiệu "giá chưa đủ tin cậy", T.price_unreliable), price_range phải bằng đúng T.converted(nền) (price_source verified, note + hậu tố " (nguồn: Google AI Mode)"); bản ghi còn lại price_range y nguyên.
 Chạy: python3 -I <file>."""
 import json, os, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -25,6 +25,13 @@ def run():
             bad.append("Bình Quới 2 phải giữ verified")
     if bad:
         raise T.Fail(f"{len(bad)} lệch, vd: {bad[0]}")
+    # ca chốt (Thiskyhall Sala): thuộc S (mô tả/sức chứa vào pool) nhưng giá KHÔNG đổi vì nguồn tự nhận "chưa đủ tin cậy"
+    TK = "marry_f8b40ba4ddef"
+    ctk = next((v for v in vs if v["id"] == TK), None)
+    if TK not in sset:
+        raise T.Fail("Thiskyhall Sala (marry_f8b40ba4ddef) phải thuộc S (có dòng AI Mode mang mô tả/sức chứa, bất kể thứ tự dòng)")
+    if not ctk or ctk["price_range"].get("price_source") != "google_ai_mode" or ctk["price_range"].get("note", "").endswith(T.NOTE_SUFFIX):
+        raise T.Fail("Thiskyhall Sala phải giữ price_range google_ai_mode nguyên văn (nguồn tự nhận giá chưa đủ tin cậy)")
     # không đổi gì khác: so với nền
     base = T.base_dir_for_diff(root)
     if not base:
@@ -47,7 +54,7 @@ def run():
         o = ovs[v["id"]]
         a = {k: x for k, x in v.items() if k != "verification_status"}
         b = {k: x for k, x in o.items() if k != "verification_status"}
-        if v["id"] in sset and T.convertible(o.get("price_range")):
+        if v["id"] in sset and T.price_convertible(o):
             b["price_range"] = T.converted(o["price_range"]); nconv += 1
         if a != b:
             diff = sorted(k for k in set(a) | set(b) if a.get(k) != b.get(k))

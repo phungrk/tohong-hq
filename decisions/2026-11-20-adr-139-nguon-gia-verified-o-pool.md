@@ -37,3 +37,23 @@ Bình Quới 2 đang bị như vậy trên production. planner/vendor inv-001 (I
 4. **Diff hành vi.** Phải nêu tác dụng phụ khi cào lại (`merge.py` vẫn ghi đè `price_range` và `description` của vendor verified khi lần cào có dữ liệu).
 5. **Bất biến đề xuất.** Cả ba phải dò ngược tới `scripts/gate.py` theo ADR-070.
 6. **planner/vendor inv-004/005/006 đỏ trên main.** Fixture của chúng chọn venue có styles rỗng, mà từ Sync T-216 pool không còn venue nào như vậy. Đây là sự cố bể, sửa phần dựng tình huống giống ADR-131, tách khỏi T-217.
+
+## Đã sửa inv-004/005/006
+Adversary sửa phần dựng tình huống (2026-11-20), theo điểm 6 ở trên và cách làm ADR-131. Không đổi câu kiểm nào, không sửa repo sản phẩm.
+
+**Thay đổi.**
+- Thêm `eval/invariants/planner/vendor/_twin.mjs` (không bắt đầu bằng `inv-` nên gate không chạy nó như bất biến). Hàm `makeTwins(arr, cat, n, used)` lấy n vendor thật của hạng mục theo thứ tự id, giữ id và tên thật, chép mọi trường khác từ vendor có id nhỏ nhất của hạng mục, rồi đặt đúng các trường bộ lọc cũ đòi: `rating 0`, `reviewCount 0`, `styles []`, `tags []`, `isVerified`, `HCMC`, đủ 12 tháng; venue có sức chứa 100–300 như twin cũ. Chỉ sửa mảng pool trong bản sao tạm (`stampedBack.mut`).
+- Ba thân bất biến đổi đúng một dòng chọn twin (bộ lọc `rating === 0 && styles.length === 0 …` thành `makeTwins(arr, "venue", n)`) và thêm một dòng import: `eval/T-183/thay-the/inv-004-check_8.mjs` (inv-004), `eval/T-183/thay-the/inv-005a.mjs` và `eval/T-178/thay-the/inv-005b.mjs` (inv-005).
+- `inv-006-…mjs`: không gọi `L.twinBack` của khung T-172 nữa, dùng hàm `twinBack` cục bộ giống hệt trừ cách chọn (dùng `makeTwins`). Khung `eval/T-172/_lib.mjs` không sửa.
+
+**Bằng chứng** (`env -i` từ /tmp; back main 0f69f10):
+- Trên main: trước khi sửa cả ba ném TypeError trong phần dựng; sau khi sửa cả ba PASS.
+- Phá trong bản sao tạm của back, sau khi sửa:
+  - `vendorBudgetScore` bỏ `× tables`: inv-004 FAIL ("điểm R1 mong 0,25, thấy 1", +7).
+  - Tab Vendor đọc `preferences.guest_count` trước: inv-005 FAIL (005a chip "× 15 bàn", 005b chạy riêng cũng FAIL).
+  - Bỏ dòng cờ ngân sách trong khối chat: inv-006 FAIL ở phần chat.
+  - `estimated = false` trong câu AI ở `api/vendors.js`: inv-006 FAIL ở phần câu AI.
+  - Mỗi lần phá chỉ làm đỏ đúng bất biến nó nhắm.
+- Trên pool trước T-216 (`d2c6fa8~1`), bản gốc và bản sửa cho cùng kết quả ở cả 5 trạng thái (sạch và 4 lần phá), cùng dòng FAIL và cùng số lỗi. Phần dựng mới không nới bất biến.
+
+**Cùng kiểu, chưa đỏ, không sửa.** inv-003 chạy `eval/T-172/check_7_inv003_ban_thay_the.mjs`, cũng lọc twin `rating === 0 && styles.length === 0`, ở hạng mục photography. Hiện còn 14 vendor photography thoả, nên nó sẽ đỏ theo cùng cách nếu một lần Sync làm giàu styles cho ảnh. `eval/T-159/_lib.mjs` `twins()` có cùng bộ lọc, nhưng không bất biến nào của planner/vendor gọi nó.

@@ -13,12 +13,31 @@ let __hq = __p.dirname(__f(import.meta.url)); while (!__ex(__p.join(__hq, "scrip
 const back = process.env.TOHONG_BACK_REPO || __p.join(__hq, "..", "tohong-back");
 if (!__ex(__p.join(back, "lib", "vendorPrice.js")) || !__ex(__p.join(__hq, "eval", "T-172", "_lib.mjs"))) { console.log("PASS chưa áp dụng (back chưa có nguồn giá hoặc thiếu khung eval)"); process.exit(0); }
 const L = await import(__u(__p.join(__hq, "eval", "T-172", "_lib.mjs")).href);
+// ADR-139 bổ sung 6: phần dựng twin không đòi pool thật có vendor rating 0 + styles rỗng (pool sau T-216 không còn venue như vậy).
+// Giống hệt L.twinBack của khung T-172 trừ cách chọn: twin dựng bằng _twin.mjs (vendor thật theo id, mọi trường trừ id/tên chép từ một gốc).
+const { makeTwins } = await import(__u(__p.join(__hq, "eval", "invariants", "planner", "vendor", "_twin.mjs")).href);
+async function twinBack(specs) {
+  const ids = []; const used = {};
+  const dir = L.stampedBack({ mut: (arr) => {
+    for (const s of specs) {
+      const [v] = makeTwins(arr, s.cat, 1, used); ids.push(v.id);
+      const { __noSource, ...p } = s.price; Object.assign(v, p);
+      if (__noSource) { delete v.priceSource; delete v.priceAsOf; }
+      if (s.cat === "venue") v.capacity = { min: 50, max: 500 };
+    }
+  } });
+  const M = await L.loadModules(dir);
+  const ov = {};
+  for (const cat of new Set(specs.map((s) => s.cat))) for (const v of M.POOL) if (v.category === cat && !ids.includes(v.id)) ov[v.id] = { hidden: true, hidden_reason: "eval T-172" };
+  specs.forEach((s, i) => { if (s.ov) ov[ids[i]] = s.ov; });
+  return { M, dir, ids, ov, nameOf: (id) => M.POOL.find((v) => v.id === id).name };
+}
 const fails = []; const bad = (m) => fails.push(m);
 L.setNow("2026-11-14T08:00:00Z");
 const DROP = /^\s*(Phù hợp vì:|Lý do khớp:|Theo số bàn:)/;
 const norm = (text, name) => text.split(name).join("X").split("\n").filter((l) => !DROP.test(l)).join("\n");
 for (const [cat, a, b, profile] of [["photography", 6, 8, L.coupleProfile({ budget: 300 })], ["venue", 4, 4.6, L.coupleProfile({ budget: 300, guest_count: 200 })]]) {
-  const { M, ids, ov, nameOf } = await L.twinBack([{ cat, price: L.EST(a, b) }, { cat, price: L.REAL(a, b) }]);
+  const { M, ids, ov, nameOf } = await twinBack([{ cat, price: L.EST(a, b) }, { cat, price: L.REAL(a, b) }]);
   const r = await L.chat(M, { message: L.MSG_BY_CAT[cat], profile, overlay: ov });
   const ents = L.entries(L.candBlock(r.sp || ""), { e: nameOf(ids[0]), g: nameOf(ids[1]) });
   if (!ents.e || !ents.g) bad(`${cat} chat: thiếu ứng viên sinh đôi trong khối (không đo được)`);

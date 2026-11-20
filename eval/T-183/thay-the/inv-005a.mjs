@@ -13,11 +13,12 @@ let __hq = __p.dirname(__f(import.meta.url)); while (!__ex(__p.join(__hq, "scrip
 const __L = (t) => import(__u(__p.join(__hq, "eval", t, "_lib.mjs")).href);
 const { stampedBack, loadModules, setNow, restoreNow, imp } = await __L("T-164");
 const { tab, chat, coupleProfile, CID, AUTH } = await __L("T-159");
+import { makeTwins } from "../../invariants/planner/vendor/_twin.mjs"; // ADR-139 bổ sung 6: twin dựng từ vendor thật, không đòi pool có venue styles rỗng
 const fails = []; const bad = (m) => fails.push(m);
 const R = (a, b) => ({ priceMin: a, priceMax: b, priceSource: "legacy_marry", priceAsOf: "2026-06" });
 const ids = {};
 const dir = stampedBack({ mut: (arr) => {
-  const tw = arr.filter((v) => v.category === "venue" && v.isVerified && v.rating === 0 && v.styles.length === 0 && v.availability.length === 12 && v.city === "HCMC").slice(0, 1);
+  const tw = makeTwins(arr, "venue", 1);
   Object.assign(tw[0], R(4, 4.6), { capacity: { min: 50, max: 500 } }); ids.R1 = tw[0].id;
 } });
 const M = await loadModules(dir);
