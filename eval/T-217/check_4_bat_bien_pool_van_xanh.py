@@ -10,7 +10,7 @@ import _t217 as T, _sim
 def run():
     A, B, S, _ = _sim.simulate()
     try:
-        files = [os.path.join(T.HQ, "eval/T-215/bat-bien-cho-merge/thay-inv-001-pool-khop-van-ban-nguon-v2.py")]
+        files = [os.path.join(T.HQ, "eval/invariants/planner/vendor/pool/inv-001-pool-khop-van-ban-nguon.py")]
         files += sorted(glob.glob(os.path.join(T.HQ, "eval/invariants/planner/vendor/pool/inv-00[2-7]*.py")))
         files += [os.path.join(T.HQ, "eval/T-217/inv-proposed-001-v2-pool-gia-co-nguon-va-khung-nhat-quan.py")]
         files += sorted(glob.glob(os.path.join(T.HQ, "eval/invariants/planner/vendor/inv-00[2-4]*.py")))
