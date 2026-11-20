@@ -1,6 +1,6 @@
 {
   "task": "T-217",
-  "at": "2026-11-20T22:49",
+  "at": "2026-11-20T22:51",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 -I eval/T-217/check_1_dung_tap_verified_khong_doi_gi_khac.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 436,
+      "ms": 509,
       "out": "FAIL 85 lệch, vd: marry_14b4d1b1b7f0 thuộc S nhưng verification_status='auto_scraped'",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 -I eval/T-217/check_2_bao_cao_enrich_tuoi.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 431,
+      "ms": 408,
       "out": "FAIL điều kiện đầu: 85/85 vendor thuộc S chưa verified, chưa có gì để kiểm báo cáo",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 -I eval/T-217/check_3_mo_phong_sync_pool_theo_nguon.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 444,
+      "ms": 442,
       "out": "FAIL điều kiện đầu: 85/85 vendor thuộc S chưa verified, chưa có gì để mô phỏng",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "python3 -I eval/T-217/check_4_bat_bien_pool_van_xanh.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 413,
+      "ms": 404,
       "out": "FAIL điều kiện đầu: 85/85 vendor thuộc S chưa verified, chưa có gì để mô phỏng",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "node eval/T-217/check_5_nhan_va_nguon_gia_verified_cac_be_mat_cap_doi.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 270,
+      "ms": 258,
       "out": "FAIL status[không overlay] marry_5ec257b82f96: price_basis mong \"source_verified\", thấy undefined (+29 lỗi nữa)",
       "tier": 1
     },
@@ -52,15 +52,31 @@
       "eval": "node eval/T-217/check_6_ghep_venue_gia_verified_theo_ban.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 219,
+      "ms": 221,
       "out": "FAIL VA 30 bàn x 3,4 = 102tr so 90tr: điểm mong 0,333, thấy 1 (so giá bàn với tổng thì ra 1) (+11 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-217/check_7_admin_dong_vendor_hien_dung_nguon_pool.mjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 350,
+      "out": "FAIL dòng admin[không overlay] marry_b92e8a86175d: price_basis mong \"source_verified\", thấy undefined (+29 lỗi nữa)",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-217/check_8_su_kien_vendor_viewed_price_verified.mjs",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 259,
+      "out": "FAIL status[không overlay] marry_5ec257b82f96: price_source mong \"verified\", thấy \"estimated\" (+9 lỗi nữa)",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 58,
+      "ms": 56,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -68,7 +84,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 231,
+      "ms": 202,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -76,7 +92,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 33,
+      "ms": 30,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -92,7 +108,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1313,
+      "ms": 1291,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -100,15 +116,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2721,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-Du3NJR/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2732,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-WbCSwA/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1985,
+      "ms": 1595,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -116,15 +132,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1255,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-Vxzx8c/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1231,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-9d50qm/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2749,
+      "ms": 2709,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -132,7 +148,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 98,
+      "ms": 89,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -140,7 +156,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1700,
+      "ms": 1661,
       "out": "PASS (worker.js nén 815804 byte)",
       "tier": 2
     },
@@ -148,7 +164,7 @@
       "eval": "eval/invariants/planner/vendor/inv-001-pool-gia-co-nguon-va-khung-nhat-quan.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 48,
+      "ms": 43,
       "out": "FAIL marry_b92e8a86175d: priceSource 'verified' (+1 lỗi nữa)",
       "tier": 2
     },
@@ -156,7 +172,7 @@
       "eval": "eval/invariants/planner/vendor/inv-002-gia-hien-ra-luon-co-nhan.py",
       "kind": "py",
       "status": "FAIL",
-      "ms": 392,
+      "ms": 377,
       "out": "FAIL status[none] marry_b92e8a86175d: có giá mà thiếu price_label/price_basis hợp lệ (undefined) (+3 lỗi nữa)",
       "tier": 2
     },
@@ -164,7 +180,7 @@
       "eval": "eval/invariants/planner/vendor/inv-003-uoc-tinh-khong-lam-bang-chung-khang-dinh-ngan-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1788,
+      "ms": 1674,
       "out": "PASS",
       "tier": 2
     },
@@ -172,7 +188,7 @@
       "eval": "eval/invariants/planner/vendor/inv-004-venue-so-gia-ban-voi-tong-theo-so-ban.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1373,
+      "ms": 1444,
       "out": "PASS",
       "tier": 2
     },
@@ -180,7 +196,7 @@
       "eval": "eval/invariants/planner/vendor/inv-005-mot-so-khach-hieu-luc-tab-chat-seed.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 672,
+      "ms": 776,
       "out": "PASS\nPASS",
       "tier": 2
     },
@@ -188,7 +204,7 @@
       "eval": "eval/invariants/planner/vendor/inv-006-uoc-tinh-co-tin-hieu-rieng-trong-prompt-ai.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 481,
+      "ms": 523,
       "out": "PASS AI luôn nhận tín hiệu riêng cho vendor giá ước tính (chat + câu vì sao hợp)",
       "tier": 2
     },
@@ -196,7 +212,7 @@
       "eval": "eval/invariants/planner/vendor/inv-007-vendor-bi-go-khong-ra-phia-cap-doi.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 446,
+      "ms": 437,
       "out": "ục giảm đúng 1\n  ok  decor/Ẩn: /status có mục hidden:true (không null)\n  ok  decor/Ẩn: /:id 200, hidden:true, match:null, còn tên\n  ok  decor/Xoá: thao tác admin 200\n  ok  decor/Xoá: không ở ghép theo id, ghép theo hạng mục, ứng viên chat\n  ok  decor/Xoá: đếm hạng mục giảm đúng 1\n  ok  decor/Xoá: /status có mục hidden:true (không null)\n  ok  decor/Xoá: /:id 200, hidden:true, match:null, còn tên\n  ok  decor/Ẩn rồi Xoá: thao tác admin 200\n  ok  decor/Ẩn rồi Xoá: không ở ghép theo id, ghép theo hạng mục, ứng viên chat\n  ok  decor/Ẩn rồi Xoá: đếm hạng mục giảm đúng 1\n  ok  decor/Ẩn rồi Xoá: /status có mục hidden:true (không null)\n  ok  decor/Ẩn rồi Xoá: /:id 200, hidden:true, match:null, còn tên\n  ok  decor: ba cách gỡ cho cùng một kết quả ở mọi bề mặt cặp đôi\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     }
