@@ -14,3 +14,6 @@ Capu: "merge 197 luôn khi xong". T-197 (bậc B, bộ lọc Status ở bảng E
 
 ## Bổ sung (2026-11-18): T-203
 Capu: "merge 203 luôn khi xong". Việc bậc B, Capu bỏ cửa sổ 48 giờ. Chief merge khi việc engineering của T-203 qua Code Gate (adversary accept, gate GREEN, PR không xung đột, PR chỉ chứa thay đổi của việc).
+
+## Bổ sung (2026-11-20)
+Capu: "cách 1, merge luôn khi xong" cho việc sửa pipeline giữ style_tags của PR tohong#108 (T-215 và việc engineering kế tiếp). Bậc B. Chief merge khi qua Spec Gate và Code Gate, gate GREEN, PR không xung đột.
