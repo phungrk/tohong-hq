@@ -1,0 +1,11 @@
+Tìm thông tin công khai về nhà cung cấp dịch vụ cưới sau:
+tên: {name} · địa chỉ: {address} · website: {website} · hạng mục: {category}
+Chỉ dùng nguồn chính thức của vendor (website, fanpage) cho giá. Giá từ bên thứ ba, giá cũ, giá của dịch vụ khác: bỏ, ghi lý do vào notes.
+Nếu không chắc đây là cùng một vendor (tên trùng nhiều đơn vị, địa chỉ lệch): đặt same_vendor=false và để trống các trường khác.
+Trả về JSON:
+{"same_vendor": bool, "still_operating": true|false|"unknown", "category_correct": bool,
+ "description": "≤ 220 ký tự, tiếng Việt, không quảng cáo",
+ "price": {"min_vnd": số|null, "max_vnd": số|null, "unit": "package"|"per_table", "source_url": "...", "quote": "câu nguyên văn chứa giá"},
+ "capacity": {"min": số|null, "max": số|null},
+ "style_tags": [{"tag": "<1 trong 10 tag chuẩn>", "evidence": "câu nguyên văn", "source_url": "..."}],
+ "phone": "...|null", "website": "...|null", "notes": "..."}

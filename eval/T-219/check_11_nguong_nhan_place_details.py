@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""T-219 tiêu chí 11 (offline): ngưỡng nhận. Mỗi ứng viên yes đúng 1 lượt Place Details, field mask CHÍNH XÁC {id,displayName,businessStatus,formattedAddress,types,rating,userRatingCount}
+"""T-219 tiêu chí 11 (offline): ngưỡng nhận. Mỗi ứng viên true/transport đúng 1 lượt Place Details, field mask CHÍNH XÁC {id,displayName,businessStatus,formattedAddress,types,rating,userRatingCount}
 (Google giả trả 400 nếu mask có website/điện thoại/review/ảnh/vị trí). qualified = OPERATIONAL + địa chỉ TP.HCM + >= 10 đánh giá + >= 4,0 sao. Ca biên của thế giới chuẩn:
 P001, P002 (9 đánh giá), P003 (3,9 sao), P004 (CLOSED_PERMANENTLY), P005 (địa chỉ Hà Nội) không đạt; P006 (đủ) đạt; P010 bị 404 ở Details -> details_status=error, không đạt.
-Đạt = 31 (32 chuẩn trừ P010). rating/user_rating_count điền cho dòng details_status=ok; ứng viên no/unsure: details_status rỗng, qualified=false."""
+Đạt = 31 (32 chuẩn trừ P010). rating/user_rating_count điền cho dòng details_status=ok; ứng viên không phải true/transport (false, unsure, hạng mục khác như photography): details_status rỗng, qualified=false."""
 import os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _t219 as k

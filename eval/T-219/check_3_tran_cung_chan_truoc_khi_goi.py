@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """T-219 tiêu chí 3 (offline): trần cứng chặn TRƯỚC lượt trả tiền. Google/Gemini giả đếm số request THẬT SỰ tới nơi.
- A --max-text-search 48: đúng 48 Text Search, cả 48 là trang 1 (trang 1 của mọi truy vấn trước trang 2), P0_STOP text_search, thoát 0, báo cáo stopped_by.
+ A --max-text-search 96: đúng 96 Text Search, cả 96 là trang 1 (trang 1 của mọi truy vấn trước trang 2), P0_STOP text_search, thoát 0, báo cáo stopped_by.
  B --max-details 5: đúng 5 Place Details, P0_STOP details, các ứng viên yes còn lại details_status=skipped, không ai trong số đó qualified.
  C --max-gemini 5: đúng 5 request Gemini (sinh lưới, phân loại, 3 enrich nhóm new), P0_STOP gemini, 0 lượt enrich venue.
- D --max-usd 0.05: không request nào làm chi net vượt 0.05 (báo cáo usd_net <= 0.05), P0_STOP usd, thoát 0.
+ D --max-usd 0.05: không request nào làm chi net luỹ kế tháng vượt 0.05 (báo cáo usd_net_month <= 0.05), P0_STOP usd, thoát 0.
  E Gemini trả 401 ở lượt đầu: đúng 1 request Gemini, 0 Text Search, 0 Details, P0_STOP gemini_auth, thoát 1, vẫn in hai dòng usage cuối."""
 import os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -20,10 +20,10 @@ def go(extra, patch=None):
     return r, rc, out, calls, meta
 
 
-r, rc, out, calls, meta = go(["--max-text-search", "48"])
+r, rc, out, calls, meta = go(["--max-text-search", "96"])
 ss = [c for c in calls if c["kind"] == "search"]
-if len(ss) != 48 or any(c["page_token"] for c in ss):
-    bad.append("A: kỳ vọng đúng 48 Text Search toàn trang 1, thấy %d (trang sau: %d)" % (len(ss), sum(1 for c in ss if c["page_token"])))
+if len(ss) != 96 or any(c["page_token"] for c in ss):
+    bad.append("A: kỳ vọng đúng 96 Text Search toàn trang 1, thấy %d (trang sau: %d)" % (len(ss), sum(1 for c in ss if c["page_token"])))
 if rc != 0 or "P0_STOP text_search" not in out:
     bad.append("A: rc=%d, thiếu P0_STOP text_search" % rc)
 rep = k.read_report(r) or {}
@@ -49,9 +49,9 @@ if any("Gold" in c["text"] for c in gg if c["role"] == "enrich"):
 
 r, rc, out, calls, meta = go(["--max-usd", "0.05"])
 rep = k.read_report(r) or {}
-un = ((rep.get("cost") or {}).get("usd_net"))
+un = ((rep.get("cost") or {}).get("usd_net_month"))
 if rc != 0 or "P0_STOP usd" not in out or not isinstance(un, (int, float)) or un > 0.05 + 1e-6:
-    bad.append("D: rc=%d P0_STOP usd=%s usd_net=%r (kỳ vọng rc 0, có P0_STOP usd, usd_net <= 0.05)" % (rc, "P0_STOP usd" in out, un))
+    bad.append("D: rc=%d P0_STOP usd=%s usd_net_month=%r (kỳ vọng rc 0, có P0_STOP usd, usd_net_month <= 0.05)" % (rc, "P0_STOP usd" in out, un))
 if k.n_kind(calls, "gemini") >= 62:
     bad.append("D: không được chạy đủ 62 lượt Gemini dưới trần 0.05")
 

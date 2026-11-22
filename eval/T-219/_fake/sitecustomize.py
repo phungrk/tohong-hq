@@ -1,14 +1,14 @@
 """Google Places + Gemini GIẢ cho eval T-219 (không bao giờ gọi mạng thật). Tự nạp khi PYTHONPATH trỏ tới thư mục này và FAKE_P0_FIXTURE được đặt.
 Vá requests.sessions.Session.request (mọi requests.get/post và Session.get/post đi qua đây). Mỗi lượt gọi ghi một dòng JSON vào FAKE_P0_LOG:
-{"kind": search|details|gemini|other, "role": grid|classify|enrich|"" (chỉ gemini), "url", "method", "key_in_url": bool, "key_header": str|None,
+{"kind": search|details|gemini|other, "role": grid|classify|enrich|"" (chỉ gemini; grid = lượt không tools và không có place_id trong văn bản), "url", "method", "key_in_url": bool, "key_header": str|None,
  "mask": str (X-Goog-FieldMask), "tools": bool (body có google_search), "model": str, "text": str (toàn bộ văn bản prompt), "q": textQuery, "page_token": str}
 Mode {"deny": true}: mọi lượt gọi bị ghi rồi ném lỗi. Host khác googleapis.com -> kind other, luôn ném lỗi.
 Fixture: {"places": {pid: {name,address,status,reviews,rating,types}},
           "search": [{"match": "<chuỗi con của textQuery đã bỏ dấu, chữ thường>", "pages": [[pid,...],[pid,...]]}],
-          "gemini": {"grid": {"phrasings": [...]}, "grid_status": 200, "status": 200,
-                     "classify": {pid: {"label": str|None, "reason": str}},
-                     "enrich": [{"match": "<chuỗi con của prompt đã bỏ dấu>", "resp": {...}, "queries": [...], "chunks": [{"uri","title"}], "raw": "<văn bản thô thay resp>"}],
-                     "tokens_in": 10000, "tokens_out": 1000},
+          "gemini": {"grid": {"photography": [...], ..., "transport": [...]}  (lược đồ prompt 1a), "grid_status": 200, "status": 200,
+                     "classify": {pid: {"is_wedding_vendor": true|false|"unsure"|<giá trị lạ>, "category": str|null, "reason": str, "omit": true (không trả dòng này)}}  (lược đồ prompt 1c, khoá id = place_id),
+                     "enrich": [{"match": "<chuỗi con của prompt đã bỏ dấu>", "resp": {...lược đồ prompt 2...}, "queries": [...], "chunks": [{"uri","title"}], "raw": "<văn bản thô thay resp>"}],
+                     "fence": ["grid","classify","enrich"] (các vai trò mà văn bản trả về bị bọc trong rào ```json ... ```), "tokens_in": 10000, "tokens_out": 1000},
           "deny": bool}
 Fake cố ý trả THỪA trường (location, số điện thoại, website, review) bất kể field mask, để eval kiểm CLI không lưu thứ nó không cần.
 Fake từ chối (HTTP 400) Text Search có mask chứa trường bậc Enterprise (rating, userRatingCount, websiteUri, internationalPhoneNumber, reviews, photos,
@@ -106,9 +106,10 @@ if _fx:
         if rec["role"] == "grid":
             payload = gm.get("grid") or {}
         elif rec["role"] == "classify":
-            payload = [{"place_id": p, "label": gm["classify"][p]["label"], "reason": gm["classify"][p].get("reason", "")} for p in pids if gm["classify"][p].get("label") is not None]
+            payload = [{"id": p, "is_wedding_vendor": gm["classify"][p].get("is_wedding_vendor"), "category": gm["classify"][p].get("category"), "reason": gm["classify"][p].get("reason", "")}
+                       for p in pids if not gm["classify"][p].get("omit")]
         else:
-            payload = {"price": None, "description": None, "capacity": None, "contact": None}
+            payload = {"same_vendor": False, "still_operating": "unknown", "category_correct": False, "description": None, "price": None, "capacity": None, "style_tags": [], "phone": None, "website": None, "notes": "fake: không có luật"}
             t = _fold(rec["text"])
             for rule in gm.get("enrich") or []:
                 if _fold(rule["match"]) in t:
@@ -116,6 +117,8 @@ if _fx:
                     meta = {"webSearchQueries": rule.get("queries", []), "groundingChunks": [{"web": c} for c in rule.get("chunks", [])]}
                     break
         text = payload if isinstance(payload, str) else json.dumps(payload, ensure_ascii=False)
+        if rec["role"] in (gm.get("fence") or []):
+            text = "```json\n" + text + "\n```"
         cand = {"content": {"role": "model", "parts": [{"text": text}]}}
         if rec["tools"]:
             cand["groundingMetadata"] = meta

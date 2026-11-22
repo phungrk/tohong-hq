@@ -16,7 +16,7 @@ on = wf.get("on") if "on" in wf else wf.get(True)
 if not isinstance(on, dict) or set(on) != {"workflow_dispatch"}:
     bad.append("trigger phải CHỈ là workflow_dispatch, thấy %r" % (sorted(on) if isinstance(on, dict) else on))
 ins = ((on or {}).get("workflow_dispatch") or {}).get("inputs") or {}
-for name, dv in (("dry_run", "true"), ("max_text_search", "150"), ("max_details", "120"), ("max_gemini", "80"), ("max_usd", "3.00"), ("cap_basis", "net"), ("stage", "measure")):
+for name, dv in (("dry_run", "true"), ("max_text_search", "288"), ("max_details", "120"), ("max_gemini", "100"), ("max_usd", "3.00"), ("cap_basis", "net"), ("stage", "measure")):
     if str((ins.get(name) or {}).get("default")) not in (dv, dv.rstrip("0").rstrip(".") if "." in dv else dv):
         bad.append("input %s mặc định phải là %s, thấy %r" % (name, dv, (ins.get(name) or {}).get("default")))
 for name in ("gemini_model", "source_run_id", "labels_path"):
@@ -61,8 +61,13 @@ for jn, j in jobs.items():
                     bad.append("bước '%s' không truyền tường minh %s" % (nm, c))
             if re.search(r"set\s+-\w*x|printenv|^\s*env\s*(\||$)|--api-key|echo[^\n]*(API_KEY|\$GEMINI|\$GOOGLE)", run, re.M):
                 bad.append("bước '%s' có lệnh có thể lộ khoá (set -x/printenv/env/--api-key/echo khoá)" % nm)
-            if "pipefail" not in run and "tee" in run:
-                bad.append("bước '%s' dùng tee mà không pipefail (planner inv-006)" % nm)
+            if "pipefail" not in run:
+                bad.append("bước '%s' phải `set -o pipefail` (planner inv-006: lệnh qua tee)" % nm)
+            # log chạy = stdout của CLI qua tee (CLI không tự ghi file log: ghi hai nơi thì sổ đếm đôi), vào run-logs/T-219 NGAY trong lúc chạy (planner inv-024)
+            if not (re.search(r"\btee\b", run) and "run-logs/T-219" in run and ".part" in run and re.search(r"-run-(\$\{\{\s*github\.run_id\s*\}\}|\$\{?GITHUB_RUN_ID\}?)-discover\.log", run)):
+                bad.append("bước '%s': stdout của CLI phải qua `tee run-logs/T-219/<…>-run-<run_id>-discover.log.part` (cùng cách enrich-vendors)" % nm)
+            if re.search(r"--log-dir|--log-file", run):
+                bad.append("bước '%s' không được truyền cờ log cho CLI (CLI không tự ghi log)" % nm)
         if "--dry-run" in run and ("secrets." in str(env) ):
             bad.append("bước dry-run '%s' không được mang khoá" % nm)
         if "check_runs.py" in run:
@@ -85,6 +90,8 @@ for jn, j in jobs.items():
                     bad.append("add-paths chứa %r (dữ liệu/nội dung Maps không được vào PR)" % pat)
             if "run-logs/T-219" not in ap or "p0-reports/T-219" not in ap:
                 bad.append("add-paths phải có run-logs/T-219 và p0-reports/T-219")
+if not any("always()" in str(s.get("if")) and ".log.part" in str(s.get("run")) for j in jobs.values() for s in (j.get("steps") or [])):
+    bad.append("thiếu bước always() đổi *.log.part còn sót (lần bị huỷ) về *.log để add-paths và check_runs thấy")
 if n_google == 0:
     bad.append("không có bước 'Google:' nào mang khoá")
 k.done(bad, "workflow chỉ chạy tay, dry-run mặc định, khoá chỉ qua secrets ở bước 'Google:', PR chỉ log + báo cáo tổng hợp")
