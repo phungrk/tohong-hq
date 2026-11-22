@@ -20,3 +20,9 @@ Kỳ vọng khoảng 1 USD net (đoán, tự tin ~50%). Chi thật ghi theo `GOO
 Sau lần chạy:
 - Merge sớm PR `discover-p0/run-<id>`. Khi PR này còn mở, `OPEN_DATA_PR` chặn các workflow Google khác.
 - Capu soát 30 mẫu trong 14 ngày. Chỉ commit 3 cột nhãn lên main.
+
+## Bổ sung (2026-11-22): lần chạy đầu bị chặn trước Google, Capu chọn cách 1 để gỡ
+- Run 45080523172 bị cổng sổ đăng ký chặn: MISSING_RUN_LOG 44412131387 và OPEN_DATA_PR 104. Chưa có lượt gọi Google hay Gemini nào, chi 0.
+- Capu chọn cách 1. Chief mở phungrk/tohong#115: chỉ thêm 4 log của run 44412131387, chép nguyên văn từ nhánh của #104.
+- Capu merge #115 và đóng #104, sau đó Chief chạy lại P0, vẫn trong phạm vi duyệt chi này.
+- Dữ liệu 131 vendor của #104 sẽ dựng lại sau từ nhánh `resolve-overrides/run-44412131387`, không gọi Google.
