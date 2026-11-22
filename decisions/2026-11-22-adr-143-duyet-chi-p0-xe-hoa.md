@@ -26,3 +26,14 @@ Sau lần chạy:
 - Capu chọn cách 1. Chief mở phungrk/tohong#115: chỉ thêm 4 log của run 44412131387, chép nguyên văn từ nhánh của #104.
 - Capu merge #115 và đóng #104, sau đó Chief chạy lại P0, vẫn trong phạm vi duyệt chi này.
 - Dữ liệu 131 vendor của #104 sẽ dựng lại sau từ nhánh `resolve-overrides/run-44412131387`, không gọi Google.
+
+## Bổ sung (2026-11-22): lần chạy thứ hai dừng ở lượt Gemini đầu (HTTP 402)
+- Run 45082743113 qua cổng sổ đăng ký (CHECK_RUNS_OK). Lượt gọi Gemini đầu tiên (sinh lưới truy vấn, cũng là lần kiểm khoá) bị trả `HTTP 402 Payment Required`, nên workflow dừng (`P0_STOP http_402`).
+- Lần chạy không gọi Maps lượt nào. Gemini được tính 1 lượt, 0 token. Chi phí: 0.
+- Workflow đã mở PR phungrk/tohong#116 (`discover-p0/run-45082743113`), chỉ chứa log và báo cáo. PR này phải merge, nếu không OPEN_DATA_PR sẽ chặn mọi lần chạy Google sau.
+- Nguyên nhân có khả năng cao (đoán, tự tin ~80
+## Bổ sung (2026-11-22): lần chạy thứ hai dừng ở lượt Gemini đầu (HTTP 402)
+- Run 45082743113 qua cổng sổ đăng ký (CHECK_RUNS_OK). Lượt gọi Gemini đầu tiên trả `HTTP 402 Payment Required`, nên workflow dừng (`P0_STOP http_402`). Lượt này dùng để sinh lưới truy vấn và cũng là lần kiểm khoá.
+- Không gọi Maps lượt nào. Gemini ghi 1 lượt, 0 token. Chi phí: 0.
+- Workflow đã mở PR phungrk/tohong#116 (`discover-p0/run-45082743113`), chỉ chứa log và báo cáo. Phải merge PR này, nếu không OPEN_DATA_PR sẽ chặn mọi lần chạy Google sau.
+- Nguyên nhân có khả năng cao (đoán, tự tin ~80%): project Google của `GEMINI_API_KEY` chưa bật thanh toán hoặc chưa nạp tín dụng trả trước. Grounding không dùng được ở bậc miễn phí. Bật thanh toán là việc của Capu.
