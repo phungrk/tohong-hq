@@ -1,0 +1,5 @@
+Dưới đây là danh sách địa điểm từ Google Maps (id, tên, loại hình, địa chỉ).
+Với mỗi địa điểm, xác định nó có phải nhà cung cấp dịch vụ cho đám cưới không, và thuộc hạng mục nào trong:
+photography, venue, decor, attire, makeup, ceremony, jewelry, transport, stationery, honeymoon.
+Chỉ dựa vào dữ liệu được đưa. Không chắc thì trả "unsure", không đoán.
+Trả về JSON: [{"id": "...", "is_wedding_vendor": true|false|"unsure", "category": "...|null", "reason": "một câu"}].

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""BẤT BIẾN ĐỀ XUẤT (T-219, vùng planner/vendor/images; số do Chief đặt khi Spec Gate qua). Đo khe hở T-137: workflow Google mà sổ đăng ký không thấy.
+"""BẤT BIẾN ĐỀ XUẤT (T-219, vùng planner/vendor (ADR-142: không vào planner/vendor/images, vì việc area planner/vendor không chạy vùng con; số do Chief đặt khi Spec Gate qua)). Đo khe hở T-137: workflow Google mà sổ đăng ký không thấy.
 Mọi workflow của repo tohong có bước nhận GOOGLE_MAPS_API_KEY hoặc GEMINI_API_KEY (trừ scrape-vendors.yml, không gọi API trả tiền) thì:
  (1) tên file của nó nằm trong vòng `for wf in …` của MỌI bước chạy check_runs.py ở mọi workflow;
  (2) mọi tiền tố nhánh (`branch:`) của bước mở PR trong workflow đó nằm trong DATA_PR_PREFIXES của tools/scraper/check_runs.py.

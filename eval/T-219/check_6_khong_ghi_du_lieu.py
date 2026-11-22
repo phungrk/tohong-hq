@@ -37,9 +37,9 @@ else:
     lp = os.path.join(r.base, "labels.csv")
     with open(lp, "w", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["place_id", "capu_label"])
+        w.writerow(["place_id", "capu_is_wedding_vendor", "capu_category"])
         for x in rows:
-            w.writerow([x["place_id"], x["ai_label"]])
+            w.writerow([x["place_id"], x["ai_is_wedding_vendor"], x["ai_category"]])
     rc, out, calls = r.run(["--state", "HCMC", "--category", "transport", "--stage", "report", "--run-dir", "p0-out/real", "--labels", lp, "--out", "p0-out/real"], dict(fx, deny=True), maps=False, gemini=False)
     if rc != 0 or calls:
         bad.append("stage=report phải thoát 0, 0 lượt gọi, không cần khoá (rc=%d, calls=%d): %s" % (rc, len(calls), out.strip()[-120:]))

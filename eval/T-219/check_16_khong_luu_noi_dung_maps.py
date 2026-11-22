@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """T-219 tiêu chí 16 (offline): không lưu nội dung Maps ngoài trường cần đo. Google giả cố ý trả THỪA mọi phản hồi (vị trí 10.123456/106.654321, điện thoại +84 909 000 111,
 website sentinel-site.example, review REVIEWTEXT-SENTINEL).
- - không file nào CLI tạo (kể cả log, private/, public/) chứa các chuỗi đó, ở stdout cũng không;
+ - không file nào CLI tạo (kể cả log = stdout qua tee, private/, public/) chứa các chuỗi đó, ở stdout cũng không;
  - public/ chỉ gồm p0-report.json, p0-report.md; private/ chỉ gồm queries.json, duplicates.csv, candidates.csv, samples.csv, enrich.jsonl, compare.json;
  - public/ và log KHÔNG chứa tên, địa chỉ hay place_id của place/vendor nào (chỉ số tổng hợp);
  - header candidates.csv/duplicates.csv đúng danh sách cột cho phép (place_id, name, address, business_status, types, rating, user_rating_count … không thêm trường Maps khác)."""
@@ -29,12 +29,12 @@ ID = re.compile(r"(?<![A-Za-z0-9])P\d{3}(?![A-Za-z0-9])|PE1|PV1|PR1|PD2|PR2")
 for f, t in text.items():
     fn = f.replace(os.sep, "/")
     if "/public/" in fn or fn.startswith("run-logs/"):
-        for pat in ("Xe hoa Mẫu", "Garage sửa xe", "Đường Mẫu", "Xe Cưới Hoàng Gia", "Nhà hàng Gold", "Đường Tiệc", "Thuê xe hoa An Phát", "Đã Gỡ", "Minh Tâm"):
+        for pat in ("Xe hoa Mẫu", "Garage sửa xe", "Studio Ảnh", "Địa điểm Mẫu", "Đường Mẫu", "Xe Cưới Hoàng Gia", "Nhà hàng Gold", "Đường Tiệc", "Thuê xe hoa An Phát", "Đã Gỡ", "Minh Tâm"):
             if pat in t:
                 bad.append("%s chứa tên/địa chỉ vendor (%r): chỉ số tổng hợp thôi" % (fn, pat))
         if ID.search(t):
             bad.append("%s chứa place_id/vendor id" % fn)
-HEAD = {"candidates.csv": ["place_id", "name", "address", "business_status", "types", "ai_label", "ai_reason", "details_status", "rating", "user_rating_count", "qualified"],
+HEAD = {"candidates.csv": ["place_id", "name", "address", "business_status", "types", "ai_is_wedding_vendor", "ai_category", "ai_reason", "details_status", "rating", "user_rating_count", "qualified"],
         "duplicates.csv": ["place_id", "name", "address", "reason"]}
 for fn, want in HEAD.items():
     p = os.path.join(r.path, "p0-out/t/private", fn)

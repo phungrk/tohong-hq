@@ -1,0 +1,4 @@
+Bạn giúp tìm nhà cung cấp dịch vụ cưới ở TP.HCM trên Google Maps.
+Với mỗi hạng mục sau: photography, venue, decor, attire, makeup, ceremony, jewelry, transport, stationery, honeymoon,
+hãy viết 4 cách người Việt thường gõ để tìm loại dịch vụ đó (ví dụ "studio chụp ảnh cưới", "phóng sự cưới").
+Không thêm địa danh. Trả về JSON: {"<hạng mục>": ["từ khoá", ...]}.

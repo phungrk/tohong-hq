@@ -3,7 +3,7 @@
 tìm gốc tohong-hq bằng cách đi lên tới scripts/gate.py). Không eval nào gọi mạng. Mỗi eval in PASS hoặc FAIL <lý do>; thoát 0/1.
 Hợp đồng (spec products/T-219-p0-xe-hoa-kham-pha-vendor.md): CLI, tên cờ, tên dòng in, tên file ra, khoá JSON của báo cáo; mọi quy tắc chọn mẫu / chấm điểm ở đây là bản
 viết lại ĐỘC LẬP của quy tắc trong spec (không import code của repo sản phẩm)."""
-import atexit, copy, csv, glob, hashlib, json, math, os, re, shutil, subprocess, sys, tempfile, unicodedata
+import atexit, copy, csv, datetime, glob, hashlib, json, math, os, re, shutil, subprocess, sys, tempfile, unicodedata
 from urllib.parse import urlparse
 
 sys.dont_write_bytecode = True
@@ -13,12 +13,17 @@ while d != os.path.dirname(d) and not os.path.isfile(os.path.join(d, "scripts", 
     d = os.path.dirname(d)
 HQ = d
 FAKE = os.path.join(HERE, "_fake")
+PROMPT1A, PROMPT1C, PROMPT2 = [open(os.path.join(HERE, "prompts", n + ".txt"), encoding="utf-8", newline="").read() for n in ("1a", "1c", "2")]
 MAPS_KEY = "AIzaSyP0MAPSFAKEKEY0000000000000000000"[:39]
 GEM_KEY = "AIzaSyP0GEMINIFAKEKEY00000000000000000"[:39]
 SENTINELS = ["10.123456", "106.654321", "REVIEWTEXT-SENTINEL", "+84 909 000 111", "sentinel-site.example"]
-AREAS = ["Quận 1", "Quận 3", "Quận 5", "Quận 7", "Quận 10", "Quận 11", "Tân Bình", "Bình Thạnh", "Phú Nhuận", "Gò Vấp", "Thủ Đức", "Bình Tân"]
+AREAS = ["Quận 1", "Quận 2", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8", "Quận 9", "Quận 10", "Quận 11", "Quận 12", "Tân Bình", "Bình Thạnh", "Phú Nhuận", "Gò Vấp",
+         "Tân Phú", "Bình Tân", "Thủ Đức", "Bình Chánh", "Hóc Môn", "Củ Chi", "Nhà Bè", "Cần Giờ"]
 PHRASINGS = ["thuê xe hoa", "xe cưới", "cho thuê xe cưới", "dịch vụ xe hoa"]
-CAT_NEW, CAT_VENUE = "xe hoa (thuê xe cưới)", "nhà hàng/trung tâm tiệc cưới"
+CATS10 = ["photography", "venue", "decor", "attire", "makeup", "ceremony", "jewelry", "transport", "stationery", "honeymoon"]
+CAT_NEW, CAT_VENUE = "transport", "venue"      # giá trị {category} của prompt 2 cho nhóm new / venue
+NQ = len(PHRASINGS) * len(AREAS)                # 96 truy vấn
+SEARCH_STD = (NQ, 4, 4)                          # (trang 1, trang 2, trang 3) của thế giới chuẩn: 4 truy vấn chứa 'Quận 7' có 3 trang => 104 lượt
 ADDR = "%d Đường Mẫu, Quận 7, Thành phố Hồ Chí Minh"
 
 
@@ -96,8 +101,16 @@ class Root:
                 out[os.path.relpath(fp, self.path)] = hashlib.sha1(open(fp, "rb").read()).hexdigest()
         return out
 
-    def run(self, argv, fx, maps=True, gemini=True, run_id="777", env_extra=None, timeout=300):
-        """Chạy `python discover_p0.py <argv>` trong thư mục scraper. Trả (rc, stdout+stderr, calls mới)."""
+    def tee(self, out, run_id):
+        """Giả lập bước workflow `... 2>&1 | tee run-logs/T-219/<ngày>-run-<id>-discover.log`: stdout+stderr của CLI LÀ log chạy (CLI không tự ghi file log)."""
+        d = os.path.join(self.path, "run-logs", "T-219")
+        os.makedirs(d, exist_ok=True)
+        p = os.path.join(d, "%s-run-%s-discover.log" % (datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d"), run_id))
+        open(p, "w", encoding="utf-8").write(out)
+        return p
+
+    def run(self, argv, fx, maps=True, gemini=True, run_id="777", env_extra=None, timeout=300, tee=None):
+        """Chạy `python discover_p0.py <argv>` trong thư mục scraper. Trả (rc, stdout+stderr, calls mới). tee (mặc định: khi --stage measure và không --dry-run) ghi stdout thành log chạy như workflow."""
         need_cli()
         self.n += 1
         fxp, lg = os.path.join(self.base, "fx%d.json" % self.n), os.path.join(self.base, "calls%d.jsonl" % self.n)
@@ -117,6 +130,11 @@ class Root:
             fail("discover_p0.py chạy quá %ds" % timeout)
         calls = [json.loads(l) for l in open(lg, encoding="utf-8")] if os.path.exists(lg) else []
         self.calls += calls
+        self.cli_wrote_logs = self.log_files()
+        if tee is None:
+            tee = "--dry-run" not in argv and "report" not in argv
+        if tee:
+            self.tee(out, run_id)
         return rc, out, calls
 
     def read(self, rel, default=None):
@@ -140,32 +158,69 @@ def n_kind(calls, kind, role=None):
 
 
 # ---------------------------------------------------------------- thế giới giả
-def v_old(vid, name, addr, cats=("wedding_car",), log=None):
+def v_old(vid, name, addr, cats=("wedding_car",), log=None, website=None):
+    c = {"address": addr, "address_source": addr}
+    if website:
+        c["website"] = website
     return {"id": vid, "name": name, "categories": list(cats), "city": "HCMC", "latitude": 10.77, "longitude": 106.7, "geo_confidence": "city_level",
-            "contact": {"address": addr, "address_source": addr}, "enrichment_log": log or [], "reviews": []}
+            "contact": c, "enrichment_log": log or [], "reviews": []}
 
 
 def n_pid(i):
     return "P%03d" % i
 
 
+def cls(v, cat=None, reason=""):
+    return {"is_wedding_vendor": v, "category": cat, "reason": reason}
+
+
+def money(n):
+    return "{:,}".format(n).replace(",", ".")
+
+
+def PR(mn, mx, unit, url, quote=None):
+    """Khối giá theo lược đồ prompt 2; quote mặc định chứa đúng số tiền (dạng 5.500.000đ)."""
+    q = quote if quote is not None else ("Giá %sđ" % money(mn) if mx in (None, mn) else "Giá từ %sđ đến %sđ" % (money(mn), money(mx)))
+    return {"min_vnd": mn, "max_vnd": mx, "unit": unit, "source_url": url, "quote": q}
+
+
+def base(**kw):
+    r = {"same_vendor": True, "still_operating": True, "category_correct": True, "description": None, "price": None, "capacity": None, "style_tags": [], "phone": None, "website": None, "notes": ""}
+    r.update(kw)
+    return r
+
+
+def grid_reply(transport):
+    """Phản hồi của prompt 1a: 10 hạng mục, mỗi hạng mục 4 từ khoá; transport do người gọi đưa."""
+    g = {c: ["%s %d" % (c, i) for i in range(1, 5)] for c in CATS10}
+    g["transport"] = transport
+    return g
+
+
 def world(nvenue=40, extra=0):
-    """(files, removed, fixture, meta). Thế giới: 12 khu vực x 4 cách gọi = 48 truy vấn; chỉ truy vấn chứa 'Quận 7' có kết quả (3 trang) => đúng 56 lượt Text Search.
+    """(files, removed, fixture, meta). Thế giới: 24 khu vực x 4 cách gọi = 96 truy vấn; chỉ truy vấn chứa 'Quận 7' có kết quả (3 trang) => đúng 96+4+4 = 104 lượt Text Search.
     Place mới P001..P049 (49), trùng: PE1 (place_id vendor xe hoa), PV1 (place_id của một venue: loại trùng mọi category), PR1 (place_id vendor đã gỡ),
     PD2 (tên + địa chỉ giống vendor E2), PR2 (tên + địa chỉ giống vendor đã gỡ); P049 trùng TÊN với E2 nhưng khác địa chỉ => KHÔNG trùng.
-    Nhãn AI: P001..P036 và P049 = yes; P037..P042 = no; P043..P048 = unsure. Sau Details: P001,P002 (9 đánh giá), P003 (3,9 sao), P004 (CLOSED_PERMANENTLY),
-    P005 (địa chỉ Hà Nội) không đạt => 32 đạt ngưỡng."""
+    Phân loại (prompt 1c): P001..P036 và P049 = true/transport (37); P037..P042 = false (6); P043..P045 = true/photography (3, studio ảnh do truy vấn xe cưới trả về);
+    P046..P048 = "unsure" (3). Details chỉ cho true/transport (37): P001,P002 (9 đánh giá), P003 (3,9 sao), P004 (CLOSED_PERMANENTLY), P005 (địa chỉ Hà Nội) không đạt => 32 đạt ngưỡng."""
     E2A = "45 Lê Văn Sỹ, Phường 14, Quận 3, Thành phố Hồ Chí Minh"
     R2A = "9 Nguyễn Thị Minh Khai, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh"
     places, classify, enrich = {}, {}, []
     allp = []
     for i in range(1, 50):
         pid = n_pid(i)
-        lab = "yes" if (i <= 36 or i == 49) else ("no" if i <= 42 else "unsure")
-        name = "Xe hoa Mẫu %02d" % i if lab != "no" else "Garage sửa xe Mẫu %02d" % i
+        types = ["car_rental"]
+        if i <= 36 or i == 49:
+            c, name = cls(True, "transport", "xe hoa %s" % pid), "Xe hoa Mẫu %02d" % i
+        elif i <= 42:
+            c, name, types = cls(False, None, "gara %s" % pid), "Garage sửa xe Mẫu %02d" % i, ["car_repair"]
+        elif i <= 45:
+            c, name, types = cls(True, "photography", "studio ảnh %s" % pid), "Studio Ảnh Mẫu %02d" % i, ["photographer"]
+        else:
+            c, name, types = cls("unsure", None, "không rõ %s" % pid), "Địa điểm Mẫu %02d" % i, ["point_of_interest"]
         if i == 49:
             name = "Xe Cưới Hoàng Gia"
-        pl = {"name": name, "address": (ADDR % i), "status": "OPERATIONAL", "reviews": 20 + i, "rating": 4.5, "types": ["car_rental"]}
+        pl = {"name": name, "address": (ADDR % i), "status": "OPERATIONAL", "reviews": 20 + i, "rating": 4.5, "types": types}
         if i in (1, 2):
             pl["reviews"] = 9
         if i == 3:
@@ -175,7 +230,7 @@ def world(nvenue=40, extra=0):
         if i == 5:
             pl["address"] = "5 Phố Mẫu, Quận Hoàn Kiếm, Hà Nội"
         places[pid] = pl
-        classify[pid] = {"label": lab, "reason": "lý do %s" % pid}
+        classify[pid] = c
         allp.append(pid)
     places["PE1"] = {"name": "Thuê xe hoa An Phát", "address": "12 Nguyễn Văn Cừ, Phường 4, Quận 5, Thành phố Hồ Chí Minh", "reviews": 50}
     places["PV1"] = {"name": "Nhà hàng Cổ Điển", "address": "1 Đường Venue, Quận 1, Thành phố Hồ Chí Minh", "reviews": 50}
@@ -185,67 +240,87 @@ def world(nvenue=40, extra=0):
     for j in range(extra):
         pid = "P%03d" % (100 + j)
         places[pid] = {"name": "Xe hoa Phụ %d" % j, "address": "%d Đường Phụ, Quận 7, Thành phố Hồ Chí Minh" % j, "status": "OPERATIONAL", "reviews": 30, "rating": 4.5, "types": ["car_rental"]}
-        classify[pid] = {"label": (None if j == 0 else "maybe" if j == 1 else "yes"), "reason": "phụ %d" % j}
+        classify[pid] = {"omit": True} if j == 0 else cls("maybe", "transport", "phụ") if j == 1 else cls(True, "hoa", "phụ") if j == 2 else cls(True, "transport", "phụ %d" % j)
         allp.append(pid)
     dups = ["PE1", "PV1", "PR1", "PD2", "PR2"]
     for p in dups:
-        classify[p] = {"label": "yes", "reason": "không được tới đây"}
+        classify[p] = cls(True, "transport", "không được tới đây")
     order = dups + allp          # 54 place, 20 / 20 / 14 chia 3 trang
     pages = [order[0:20], order[20:40], order[40:60]]
-    # venue + vàng AI Mode
+    # venue + vàng AI Mode. Vendor ở vị trí k=2 và k=7 của mẫu sha1: AI Mode KHÔNG có contact.website (website do marry cho, nằm ở contact.website của vendor).
+    ids = ["V%02d" % i for i in range(1, nvenue + 1)]
+    sample_ids = venue_sample(ids)
+    pos = {v: k for k, v in enumerate(sample_ids)}
     venues, gold = [], {}
     for i in range(1, nvenue + 1):
         vid = "V%02d" % i
+        k = pos.get(vid)
         ch = {"description": "Nhà hàng tiệc cưới sang trọng sảnh lớn trang trí hoa tươi số %d" % i, "capacity_min": 100, "capacity_max": 300 + i * 10, "capacity_unit": "guests",
               "contact.website": "https://gold%d.example/" % i, "contact.phone": "090000%04d" % i}
         if i % 4 != 0:
             ch["price_range"] = {"min_vnd": 5500000 + i * 100000, "max_vnd": 5500000 + i * 100000, "unit": "per_table", "price_source": "google_ai_mode", "note": "x"}
+        marry = k in (2, 7)
+        site = ch["contact.website"]
+        if marry:
+            ch.pop("contact.website")
+            site = "https://marry-site-%s.example/" % vid
         log = [{"source": "rescrape_marry", "timestamp": "2026-06-24T00:00:00+00:00", "changes": {"description": "cũ"}},
                {"source": "google_ai_mode", "timestamp": "2026-11-20T12:39:55Z", "changes": ch}]
         if i == 1:
             log.append({"source": "google_maps", "timestamp": "2026-11-09T00:00:00Z", "place_id": "PV1", "address_match": True})
-        venues.append(v_old(vid, "Nhà hàng Gold %02d" % i, "%d Đường Tiệc, Quận 1, Thành phố Hồ Chí Minh" % i, ("venue",), log))
+        venues.append(v_old(vid, "Nhà hàng Gold %02d" % i, "%d Đường Tiệc, Quận 1, Thành phố Hồ Chí Minh" % i, ("venue",), log, website=site))
         gold[vid] = ch
     car = [v_old("E1", "Thuê xe hoa An Phát", "12 Nguyễn Văn Cừ, Phường 4, Quận 5, Thành phố Hồ Chí Minh", log=[{"source": "google_maps", "timestamp": "2026-11-09T00:00:00Z", "place_id": "PE1", "address_match": True}]),
            v_old("E2", "Xe cưới Hoàng Gia", E2A)]
     removed = {"wedding_car": [{"removed_at": "2026-11-09T14:34:06Z", "reason": "no_match", "vendor": v_old("R1", "Xe cưới Đã Gỡ Một", "3 Đường Gỡ, Quận 7, Thành phố Hồ Chí Minh", log=[{"source": "google_maps", "place_id": "PR1"}])},
                                   {"removed_at": "2026-11-09T14:34:06Z", "reason": "no_match", "vendor": v_old("R2", "Dịch vụ xe Minh Tâm", R2A)}]}
-    sample_ids = venue_sample([v["id"] for v in venues])
     gem_new = {}
     for i in list(range(6, 37)) + [49]:
         pid = n_pid(i)
-        resp = {"price": None, "description": "Dịch vụ xe hoa cưới số %d" % i, "capacity": None, "contact": {"phone": "09100%05d" % i, "website": None, "facebook": None}}
+        resp = base(description="Dịch vụ xe hoa cưới số %d" % i, phone="09100%05d" % i)
         if i % 2 == 0:
-            resp["price"] = {"min_vnd": 1500000 + i * 1000, "max_vnd": 2500000, "unit": "per_trip" if i % 4 else "per_day", "note": "n", "source_url": ("https://other.net/gia" if i % 6 == 0 else "https://example.org/gia")}
+            q = "Liên hệ để biết giá chi tiết" if i % 10 == 0 else None
+            resp["price"] = PR(1500000 + i * 1000, 2500000, "per_trip" if i % 14 == 0 else "package", "https://other.net/gia" if i % 6 == 0 else "https://example.org/gia", q)
+        if i == 16:
+            resp["same_vendor"] = False
+        if i == 20:
+            resp["still_operating"] = "unknown"
+        if i == 22:
+            resp["category_correct"] = False
         gem_new[pid] = resp
         enrich.append({"match": places[pid]["name"], "resp": resp, "queries": ["q1 %d" % i, "q2 %d" % i, "q3 %d" % i], "chunks": [{"uri": "https://vertex.example/r/%d" % i, "title": "example.org"}]})
     gem_ven = {}
     for k, vid in enumerate(sample_ids):
         g = gold[vid]
         gp = g.get("price_range")
-        r = {"price": None, "description": None, "capacity": None, "contact": None}
+        r = base()
         m = k % 5
         if m == 0:
-            r.update(price=dict(gp, source_url="https://example.org/a", unit=("per_person" if k == 25 else gp["unit"])) if gp else {"min_vnd": 6000000, "max_vnd": 6000000, "unit": "per_table", "note": "", "source_url": "https://example.org/a"},
-                     description=g["description"], capacity={"min": 100, "max": g["capacity_max"], "unit": "guests"},
-                     contact={"phone": "+84" + g["contact.phone"][1:], "website": "https://www.gold%s.example/menu" % vid[1:].lstrip("0"), "facebook": None})
+            r.update(price=PR(gp["min_vnd"], gp["max_vnd"], "per_person" if k == 25 else gp["unit"], "https://example.org/a") if gp else PR(6000000, 6000000, "per_table", "https://example.org/a"),
+                     description=g["description"], capacity={"min": 100, "max": g["capacity_max"]}, phone="+84" + g["contact.phone"][1:], website="https://www.gold%s.example/menu" % vid[1:].lstrip("0"))
         elif m == 1:
-            r.update(price={"min_vnd": int(gp["min_vnd"] * 1.08), "max_vnd": int(gp["max_vnd"] * (1.3 if k >= 5 else 1.08)), "unit": "per_table", "note": "", "source_url": "https://example.org/b"} if gp else None,
-                     description=g["description"] + " thêm ý", capacity={"min": 100, "max": int(g["capacity_max"] * 1.05), "unit": "guests"},
-                     contact={"phone": g["contact.phone"], "website": "https://khac.example/", "facebook": None})
+            r.update(price=PR(int(gp["min_vnd"] * 1.08), int(gp["max_vnd"] * (1.3 if k >= 5 else 1.08)), "per_table", "https://example.org/b") if gp else None,
+                     description=g["description"] + " thêm ý", capacity={"min": 100, "max": int(g["capacity_max"] * 1.05)}, phone=g["contact.phone"], website="https://khac.example/")
         elif m == 2:
-            r.update(price={"min_vnd": int(gp["min_vnd"] * (0.7 if k >= 5 else 1.3)), "max_vnd": int(gp["max_vnd"] * (1.08 if k >= 5 else 1.3)), "unit": "per_table", "note": "", "source_url": "https://example.org/c"} if gp else None,
-                     description="Địa điểm khác hẳn không liên quan tới mô tả vàng", capacity={"min": 100, "max": int(g["capacity_max"] * 1.5), "unit": "guests"}, contact={"phone": None, "website": None, "facebook": "https://facebook.com/x"})
+            r.update(price=PR(int(gp["min_vnd"] * (0.7 if k >= 5 else 1.3)), int(gp["max_vnd"] * (1.08 if k >= 5 else 1.3)), "per_table", "https://example.org/c") if gp else None,
+                     description="Địa điểm khác hẳn không liên quan tới mô tả vàng", capacity={"min": 100, "max": int(g["capacity_max"] * 1.5)}, website="https://khac.example/")
         elif m == 3:
-            r.update(price={"min_vnd": 7000000, "max_vnd": 7000000, "unit": "per_table", "note": "", "source_url": "https://other.net/d"}, contact={"phone": g["contact.phone"], "website": None, "facebook": None})
+            r.update(price=PR(7000000, 7000000, "per_table", "https://other.net/d"), phone=g["contact.phone"])
         else:
-            r.update(price={"min_vnd": 4000000, "max_vnd": None, "unit": "per_table", "note": "", "source_url": "https://example.org/e"}, description="Sảnh tiệc cưới sang trọng trang trí hoa tươi", capacity={"min": 100, "max": None, "unit": "guests"})
+            r.update(price=PR(4000000, None, "per_table", "https://example.org/e"), description="Sảnh tiệc cưới sang trọng trang trí hoa tươi", capacity={"min": 100, "max": None})
+        if k == 13:
+            r["same_vendor"] = False
+        if k == 8:
+            r["still_operating"] = False
+        if k == 9:
+            r["category_correct"] = False
         gem_ven[vid] = r
         enrich.append({"match": "Nhà hàng Gold %s" % vid[1:], "resp": r, "queries": ["a %s" % vid, "b %s" % vid, "c %s" % vid], "chunks": [{"uri": "https://vertex.example/v/%s" % vid, "title": "example.org"}]})
     fx = {"places": places, "search": [{"match": "quan 7", "pages": pages}],
-          "gemini": {"grid": {"phrasings": PHRASINGS}, "classify": classify, "enrich": enrich, "tokens_in": 10000, "tokens_out": 1000}}
+          "gemini": {"grid": grid_reply(PHRASINGS), "classify": classify, "enrich": enrich, "tokens_in": 10000, "tokens_out": 1000}}
     meta = {"places": places, "classify": classify, "gold": gold, "sample_ids": sample_ids, "gem_new": gem_new, "gem_ven": gem_ven, "dups": dups,
-            "new_ids": allp, "qualified": [p for p in allp if p < "P100" and classify[p]["label"] == "yes" and places[p]["reviews"] >= 10 and places[p]["rating"] >= 4.0 and places[p]["status"] == "OPERATIONAL" and "Hà Nội" not in places[p]["address"]]}
+            "new_ids": allp, "qualified": [p for p in allp if classify[p].get("is_wedding_vendor") is True and classify[p].get("category") == "transport" and places[p]["reviews"] >= 10
+                                           and places[p]["rating"] >= 4.0 and places[p]["status"] == "OPERATIONAL" and "Hà Nội" not in places[p]["address"]]}
     return {"wedding_car": car, "venue": venues}, removed, fx, meta
 
 
@@ -255,33 +330,86 @@ def venue_sample(ids, n=30):
 
 
 def pick_new(meta, n=30):
-    q = meta["qualified"]
-    return sorted(q, key=lambda p: (-meta["places"][p]["reviews"], p))[:n]
+    """Nhóm new (B5): trong số ứng viên đạt ngưỡng, sha1(place_id) tăng dần (hoà theo place_id), lấy n đầu."""
+    return sorted(meta["qualified"], key=lambda p: (sha(p), p))[:n]
 
 
-def samples_ref(labels, n=30):
-    """labels: {pid: label}. 15 yes + 10 no + 5 unsure (băm sha1 tăng dần trong từng nhóm); thiếu thì bù từ phần còn lại theo băm tăng dần."""
-    pick, rest = [], []
-    for lab, k in (("yes", 15), ("no", 10), ("unsure", 5)):
-        g = sorted((p for p, l in labels.items() if l == lab), key=lambda p: (sha(p), p))
-        pick += g[:k]
-        rest += g[k:]
-    pick += sorted(rest, key=lambda p: (sha(p), p))[: max(0, n - len(pick))]
-    return pick[:n]
+def samples_ref(ids, n=30):
+    """Mẫu cho Capu (B4): đều theo sha1(place_id) trên MỌI ứng viên đã phân loại, tăng dần (hoà theo place_id), lấy n đầu."""
+    return sorted(ids, key=lambda p: (sha(p), p))[:n]
 
 
-def gate_price(pr, chunks):
-    """Cổng nguồn của giá Gemini (spec Hành vi 6)."""
-    if not isinstance(pr, dict):
-        return None
-    mn, mx, unit, url = pr.get("min_vnd"), pr.get("max_vnd"), pr.get("unit"), pr.get("source_url")
-    if not (isinstance(mn, int) and 50000 <= mn <= 200000000 and unit in ("per_table", "per_person", "per_trip", "per_day", "per_hour", "per_vehicle", "per_package")):
-        return None
-    if mx is not None and not (isinstance(mx, int) and mn <= mx <= 200000000):
-        return None
+def norm_class(c):
+    """Chuẩn hoá một dòng phân loại của mô hình theo prompt 1c -> (is_wedding_vendor 'true'|'false'|'unsure', category|None, reason). c=None/omit: không trả."""
+    if not c or c.get("omit"):
+        return "unsure", None, "model_invalid"
+    v, cat, rs = c.get("is_wedding_vendor"), c.get("category"), c.get("reason")
+    rs = rs if isinstance(rs, str) else ""
+    if v is True and cat in CATS10:
+        return "true", cat, rs
+    if v is False:
+        return "false", None, rs
+    if v == "unsure":
+        return "unsure", None, rs
+    return "unsure", None, "model_invalid"
+
+
+def prompt2(name, address, website, category):
+    return PROMPT2.replace("{name}", name).replace("{address}", address).replace("{website}", website).replace("{category}", category)
+
+
+def prompt1c_text(items):
+    """items: [(id, tên, [types], địa chỉ)] đã sắp theo place_id. Văn bản gửi = prompt 1c nguyên văn + dòng trống + mỗi place một dòng 'id | tên | types | địa chỉ'."""
+    return PROMPT1C + "\n\n" + "\n".join(" | ".join([i, n, ", ".join(t), a]) for i, n, t, a in items)
+
+
+def venue_website(v):
+    """{website} của nhóm venue: contact.website của vendor TRỪ khi một dòng google_ai_mode trong enrichment_log có khoá contact.website (khi đó rỗng)."""
+    for e in v.get("enrichment_log") or []:
+        if e.get("source") == "google_ai_mode" and "contact.website" in (e.get("changes") or {}):
+            return ""
+    return (v.get("contact") or {}).get("website") or ""
+
+
+def quote_has(quote, amount):
+    """Quote có chứa số tiền (spec Hành vi 7): xét từng token số `\\d[\\d.,]*`: (a) bỏ hết '.' ',' thì bằng amount; (b) theo sau (cho phép khoảng trắng) là triệu|trieu|tr|m
+    thì token đọc như số thập phân (',' thành '.'; không hợp lệ thì bỏ qua) x 1.000.000; là nghìn|nghin|ngàn|ngan|k thì x 1.000; làm tròn số nguyên bằng amount."""
+    for m in re.finditer(r"(\d[\d.,]*)(?:\s*(triệu|trieu|tr|m|nghìn|nghin|ngàn|ngan|k)(?![^\W\d_]))?", quote or "", re.I):
+        tkn, unit = m.group(1).rstrip(".,"), (m.group(2) or "").lower()
+        if re.sub(r"[.,]", "", tkn) == str(amount):
+            return True
+        if unit:
+            try:
+                x = float(tkn.replace(",", "."))
+            except ValueError:
+                continue
+            mult = 1000000 if unit in ("triệu", "trieu", "tr", "m") else 1000
+            if int(round(x * mult)) == amount:
+                return True
+    return False
+
+
+UNITS2 = ("package", "per_table")
+
+
+def gate_price(pr, chunks, same_vendor=True):
+    """Cổng nguồn của giá Gemini (spec Hành vi 7). Trả (giá chuẩn hoá | None, lý do rớt | None). Thứ tự kiểm: same_vendor_false, invalid_value, source_not_in_grounding, quote_missing_amount.
+    pr None hoặc min_vnd null: không có giá, không phải rớt (lý do None)."""
+    if not isinstance(pr, dict) or pr.get("min_vnd") is None:
+        return None, None
+    if same_vendor is False:
+        return None, "same_vendor_false"
+    mn, mx, unit, url, quote = pr.get("min_vnd"), pr.get("max_vnd"), pr.get("unit"), pr.get("source_url"), pr.get("quote")
+    if not (isinstance(mn, int) and not isinstance(mn, bool) and 50000 <= mn <= 200000000 and unit in UNITS2):
+        return None, "invalid_value"
+    if mx is not None and not (isinstance(mx, int) and not isinstance(mx, bool) and mn <= mx <= 200000000):
+        return None, "invalid_value"
     host = (urlparse(url or "").hostname or "").lower().removeprefix("www.")
-    ok = any(url == c.get("uri") or (host and host == (c.get("title") or "").lower().removeprefix("www.")) for c in chunks)
-    return {"min_vnd": mn, "max_vnd": mx if mx is not None else mn, "unit": unit} if ok else None
+    if not any(url == c.get("uri") or (host and host == (c.get("title") or "").lower().removeprefix("www.")) for c in chunks):
+        return None, "source_not_in_grounding"
+    if not (quote_has(quote, mn) and (mx is None or mx == mn or quote_has(quote, mx))):
+        return None, "quote_missing_amount"
+    return {"min_vnd": mn, "max_vnd": mx if mx is not None else mn, "unit": unit}, None
 
 
 def _rel(a, b):
@@ -301,14 +429,13 @@ def host_n(u):
     return (urlparse(u if "//" in (u or "") else "//" + (u or "")).hostname or "").lower().removeprefix("www.")
 
 
-def fb_n(u):
-    return re.sub(r"^https?://(www\.)?", "", (u or "").lower()).rstrip("/")
-
-
 def score(gem, ai, chunks):
-    """gem: phản hồi Gemini thô; ai: vàng AI Mode (khoá phẳng như enrichment_log). Trả {trường: hạng mục}."""
+    """gem: phản hồi Gemini thô (lược đồ prompt 2); ai: vàng AI Mode (khoá phẳng như enrichment_log). same_vendor=false: mọi trường Gemini coi như rỗng. Trả {trường: hạng mục}."""
     out = {}
-    gp, ap = gate_price(gem.get("price"), chunks), ai.get("price_range")
+    if gem.get("same_vendor") is False:
+        gem = {"same_vendor": False}
+    gp, _ = gate_price(gem.get("price"), chunks)
+    ap = ai.get("price_range")
     ap = ap if ap and isinstance(ap.get("min_vnd"), int) and ap.get("unit") else None
     if gp and ap:
         out["price"] = "agree" if gp["unit"] == ap["unit"] and _rel(gp["min_vnd"], ap["min_vnd"]) and _rel(gp["max_vnd"], ap.get("max_vnd") or ap["min_vnd"]) else "disagree"
@@ -323,13 +450,12 @@ def score(gem, ai, chunks):
         out["capacity"] = "agree" if k and _rel(gcap[k], acap[k]) else "disagree"
     else:
         out["capacity"] = "gemini_only" if gh else ("ai_mode_only" if ah else "both_missing")
-    gct = gem.get("contact") or {}
-    g3 = {"phone": phone_n(gct.get("phone")) or None, "website": host_n(gct.get("website")) or None, "facebook": fb_n(gct.get("facebook")) or None}
-    a3 = {"phone": phone_n(ai.get("contact.phone")) or None, "website": host_n(ai.get("contact.website")) or None, "facebook": fb_n(ai.get("contact.facebook")) or None}
-    gh, ah = any(g3.values()), any(a3.values())
+    g2 = {"phone": phone_n(gem.get("phone")) or None, "website": host_n(gem.get("website")) or None}
+    a2 = {"phone": phone_n(ai.get("contact.phone")) or None, "website": host_n(ai.get("contact.website")) or None}
+    gh, ah = any(g2.values()), any(a2.values())
     if gh and ah:
-        both = [f for f in g3 if g3[f] and a3[f]]
-        out["contact"] = "disjoint" if not both else ("agree" if all(g3[f] == a3[f] for f in both) else "disagree")
+        both = [f for f in g2 if g2[f] and a2[f]]
+        out["contact"] = "disjoint" if not both else ("agree" if all(g2[f] == a2[f] for f in both) else "disagree")
     else:
         out["contact"] = "gemini_only" if gh else ("ai_mode_only" if ah else "both_missing")
     gd, ad = (gem.get("description") or ""), (ai.get("description") or "")
