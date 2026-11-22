@@ -1,0 +1,301 @@
+{
+  "task": "T-219",
+  "at": "2026-11-22T15:30",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/vendor",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "python3 eval/T-219/check_1_workflow_hinh_dang.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 75,
+      "out": "FAIL thiếu .github/workflows/discover-vendors-p0.yml",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_2_dry_run_uoc_tinh_khong_goi.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 68,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_3_tran_cung_chan_truoc_khi_goi.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 65,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_4_so_chay_va_so_chi_thang.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 59,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_5_check_runs_thay_p0.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 114,
+      "out": "FAIL 3 vi phạm, vd: enrich-vendors.yml/enrich-vendors: vòng for wf thiếu discover-vendors-p0.yml (chi của P0 vô hình với sổ) | resolve-overrides.yml/resolve-overrides: vòng for wf thiếu discover-vendors-p0.yml (chi của P0 vô hình với sổ) | thiếu tools/scraper/discover_p0.py (CLI)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_6_khong_ghi_du_lieu.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 66,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_7_loai_trung.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 50,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_8_luoi_truy_van_text_search.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 53,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_9_phan_loai_theo_lo.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 57,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_10_mau_cho_capu_soat.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 53,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_11_nguong_nhan_place_details.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 54,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_12_enrich_gemini_grounding.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 53,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_13_so_sanh_voi_ai_mode.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 92,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_14_bao_cao_p0.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 48,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_15_khoa_khong_lo.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 69,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "python3 eval/T-219/check_16_khong_luu_noi_dung_maps.py",
+      "kind": "cmd",
+      "status": "FAIL",
+      "ms": 43,
+      "out": "FAIL thiếu tools/scraper/discover_p0.py (CLI mà spec T-219 yêu cầu)",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 44,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 221,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 25,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 45,
+      "out": "PASS selftest 3 ca; 36 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1652,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 3075,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-rotezH/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1699,
+      "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1238,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-5MqHid/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 3464,
+      "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 91,
+      "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1878,
+      "out": "PASS (worker.js nén 816890 byte)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/inv-001-pool-gia-co-nguon-va-khung-nhat-quan.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 43,
+      "out": "PASS (867 vendor có nguồn giá, khung nhất quán)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/inv-002-gia-hien-ra-luon-co-nhan.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 528,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/inv-003-uoc-tinh-khong-lam-bang-chung-khang-dinh-ngan-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1246,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/inv-004-venue-so-gia-ban-voi-tong-theo-so-ban.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1430,
+      "out": "PASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/inv-005-mot-so-khach-hieu-luc-tab-chat-seed.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 574,
+      "out": "PASS\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/inv-006-uoc-tinh-co-tin-hieu-rieng-trong-prompt-ai.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 375,
+      "out": "PASS AI luôn nhận tín hiệu riêng cho vendor giá ước tính (chat + câu vì sao hợp)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/inv-007-vendor-bi-go-khong-ra-phia-cap-doi.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 585,
+      "out": "ục giảm đúng 1\n  ok  decor/Ẩn: /status có mục hidden:true (không null)\n  ok  decor/Ẩn: /:id 200, hidden:true, match:null, còn tên\n  ok  decor/Xoá: thao tác admin 200\n  ok  decor/Xoá: không ở ghép theo id, ghép theo hạng mục, ứng viên chat\n  ok  decor/Xoá: đếm hạng mục giảm đúng 1\n  ok  decor/Xoá: /status có mục hidden:true (không null)\n  ok  decor/Xoá: /:id 200, hidden:true, match:null, còn tên\n  ok  decor/Ẩn rồi Xoá: thao tác admin 200\n  ok  decor/Ẩn rồi Xoá: không ở ghép theo id, ghép theo hạng mục, ứng viên chat\n  ok  decor/Ẩn rồi Xoá: đếm hạng mục giảm đúng 1\n  ok  decor/Ẩn rồi Xoá: /status có mục hidden:true (không null)\n  ok  decor/Ẩn rồi Xoá: /:id 200, hidden:true, match:null, còn tên\n  ok  decor: ba cách gỡ cho cùng một kết quả ở mọi bề mặt cặp đôi\n  ok  không request ra ngoài\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/inv-008-nguon-gia-cap-doi-khop-nhan-xac-minh.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 390,
+      "out": "PASS 80 vendor x 5 trạng thái overlay: cờ xác minh của cặp đôi khớp nhãn (65 vendor pool verified)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/vendor/inv-009-lien-he-dia-chi-vendor-khong-doi-mot-byte-phia-cap-doi.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 446,
+      "out": "  ok  lần sửa 2: admin lưu 200 và đọc lại đúng địa chỉ (đối chứng)\n  ok  sau lần sửa 2 · GET /api/vendors/:id: y hệt từng byte\n  ok  sau lần sửa 2 · GET /api/vendors/match?ids: y hệt từng byte\n  ok  sau lần sửa 2 · GET /api/vendors/match?category: y hệt từng byte\n  ok  sau lần sửa 2 · POST /api/vendors/status: y hệt từng byte\n  ok  sau lần sửa 2 · GET /api/vendors/categories: y hệt từng byte\n  ok  sau lần sửa 2 · ứng viên chat: y hệt từng byte\n  ok  sau lần sửa 2 · khối ứng viên trong prompt AI: y hệt từng byte\n  ok  vendor đang Ẩn: sửa 200; /status, /:id, ứng viên chat y hệt trước khi nhập liên hệ/địa chỉ\n  ok  cặp đôi gửi yêu cầu kết nối: 2xx, phản hồi không chứa địa chỉ/liên hệ vendor\n  ok  cặp đôi xem yêu cầu của mình: không chứa địa chỉ/liên hệ vendor\n  ok  không request ra ngoài\nPASS",
+      "tier": 2
+    }
+  ],
+  "hint": "code"
+}
