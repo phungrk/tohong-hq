@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """T-221 tiêu chí 1 (offline), che khoá: thân lỗi (Gemini 402, Text Search 403, Details 429) chứa khoá giả
- - dạng AIza + 35 ký tự (khác khoá môi trường), khoá môi trường thật của lần chạy, `key=<giá trị>` (cả trong URL), `Bearer <token>`, có xuống dòng và tab;
+ - dạng AIza + 35 ký tự (khác khoá môi trường), khoá môi trường thật của lần chạy, `key=<giá trị>` (cả trong URL), `Bearer <token>` (kể cả `Bearer` + xuống dòng/tab/nhiều dấu cách + token), có xuống dòng và tab;
  thì stdout, log tee và mọi file CLI tạo ra KHÔNG chứa khoá (đủ hay 12 ký tự đầu) và không chứa giá trị sau `key=` / `Bearer `; dòng P0_HTTP_ERROR vẫn đúng một dòng (không xuống dòng giữa),
  message còn phần chữ lành, có dấu che `[REDACTED]`. Khoá nằm sát vị trí 300 vẫn không để lại mảnh (che trước, cắt sau)."""
 import os, sys
@@ -38,6 +38,13 @@ body = {"error": {"code": 402, "status": "S", "message": pre + E.KEY_X + " tail"
 rc, out, calls, r = E.run({}, {"gemini": {"status": 402, "body": body}}, run_id="32")
 if E.leaked(out) or E.KEY_X[4:16] in out:
     bad.append("khoá nằm ngay vị trí 300 để lại mảnh (phải che trước rồi mới cắt)")
+# `Bearer` theo sau bởi MỌI loại ký tự trắng (xuống dòng, tab, nhiều dấu cách), không chỉ một dấu cách
+for sep in ("\n", "\r\n", "\t", "  ", " \n\t "):
+    tok = "tok_BEARERSEP-1a2b3c4d5e6f"
+    body = {"error": {"code": 402, "status": "S", "message": "Auth failed: Bearer%s%s and bearer%s%s done" % (sep, tok, sep, tok)}}
+    rc, out, calls, r = E.run({}, {"gemini": {"status": 402, "body": body}}, run_id="34")
+    if tok in out or len(E.errs(out)) != 1 or "Auth failed:" not in out:
+        bad.append("Bearer + %r + token: lộ token hoặc không đúng một dòng" % sep)
 # thân thô (không JSON) có khoá cũng bị che
 rc, out, calls, r = E.run({}, {"search": {"status": 403, "body": "oops key=%s Bearer %s %s" % (SECRET_KV, SECRET_TOK, E.KEY_X)}}, run_id="33")
 if E.leaked(out) or SECRET_KV in out or SECRET_TOK in out or len(E.errs(out)) != 1:

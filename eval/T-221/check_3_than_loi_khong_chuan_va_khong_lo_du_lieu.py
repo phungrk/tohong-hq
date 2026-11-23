@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """T-221 tiêu chí 1 (offline), thân lỗi không chuẩn và không lộ dữ liệu vendor:
  - thân KHÔNG phải JSON (HTML 502, nhiều dòng) -> reason= rỗng, message = 300 ký tự đầu của thân thô sau khi gộp xuống dòng/tab/nhiều khoảng trắng thành một dấu cách;
- - thân JSON không có error.message (vd {"detail":"x"}) -> reason rỗng (hoặc error.status nếu có), message = thân thô (cắt 300); thân rỗng -> message rỗng, dòng vẫn in và vẫn khớp mẫu;
- - error.message không phải chuỗi (số/đối tượng) không làm CLI sập: vẫn có dòng, vẫn P0_STOP như cũ;
+ - thân JSON KHÔNG có đối tượng `error` (vd {"detail":"x"}) -> reason rỗng, message = thân thô (cắt 300, đã che); thân rỗng -> message rỗng, dòng vẫn in và vẫn khớp mẫu;
+ - thân JSON CÓ đối tượng `error` mà message thiếu/không phải chuỗi -> message RỖNG, không bao giờ thân thô (chi tiết ở check_6); không làm CLI sập: vẫn có dòng, vẫn P0_STOP như cũ;
  - thân lỗi mang kèm tên/địa chỉ vendor ở trường khác (error.details, places) -> dòng KHÔNG chứa chúng khi có error.message; stdout không chứa tên/địa chỉ/place_id bao giờ;
  - lần chạy bình thường (mọi 200) KHÔNG in dòng P0_HTTP_ERROR nào."""
 import os, re, sys
