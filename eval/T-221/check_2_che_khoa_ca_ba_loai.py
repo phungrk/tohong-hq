@@ -2,7 +2,7 @@
 """T-221 tiêu chí 1 (offline), che khoá: thân lỗi (Gemini 402, Text Search 403, Details 429) chứa khoá giả
  - dạng AIza + 35 ký tự (khác khoá môi trường), khoá môi trường thật của lần chạy, `key=<giá trị>` (cả trong URL), `Bearer <token>` (kể cả `Bearer` + xuống dòng/tab/nhiều dấu cách + token), có xuống dòng và tab;
  thì stdout, log tee và mọi file CLI tạo ra KHÔNG chứa khoá (đủ hay 12 ký tự đầu) và không chứa giá trị sau `key=` / `Bearer `; dòng P0_HTTP_ERROR vẫn đúng một dòng (không xuống dòng giữa),
- message còn phần chữ lành, có dấu che `[REDACTED]`. Khoá nằm sát vị trí 300 vẫn không để lại mảnh (che trước, cắt sau)."""
+ message còn phần chữ lành, có dấu che `[REDACTED]`. Khoá nằm sát vị trí 300 vẫn không để lại mảnh (che trước, cắt sau). Thân không phải JSON hay JSON không error không in nội dung; khoá trong Content-Type vẫn bị che."""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _e as E
@@ -45,8 +45,19 @@ for sep in ("\n", "\r\n", "\t", "  ", " \n\t "):
     rc, out, calls, r = E.run({}, {"gemini": {"status": 402, "body": body}}, run_id="34")
     if tok in out or len(E.errs(out)) != 1 or "Auth failed:" not in out:
         bad.append("Bearer + %r + token: lộ token hoặc không đúng một dòng" % sep)
-# thân thô (không JSON) có khoá cũng bị che
-rc, out, calls, r = E.run({}, {"search": {"status": 403, "body": "oops key=%s Bearer %s %s" % (SECRET_KV, SECRET_TOK, E.KEY_X)}}, run_id="33")
-if E.leaked(out) or SECRET_KV in out or SECRET_TOK in out or len(E.errs(out)) != 1:
-    bad.append("thân thô có khoá: lộ hoặc không đúng một dòng")
-T.done(bad, "khoá AIza…/key=…/Bearer… bị che ở cả ba loại lời gọi, kể cả khoá giả lạ, thân thô và sát vị trí cắt; dòng vẫn một dòng")
+# thân không phải JSON có khoá: nội dung không bao giờ được in (chỉ bytes + content_type); Content-Type mang khoá thì khoá bị che
+raw = "oops key=%s Bearer %s %s" % (SECRET_KV, SECRET_TOK, E.KEY_X)
+rc, out, calls, r = E.run({}, {"search": {"status": 403, "body": raw}}, run_id="33")
+if E.leaked(out) or SECRET_KV in out or SECRET_TOK in out or E.errs(out) != ["P0_HTTP_ERROR kind=text_search status=403 reason= message=non_json_body bytes=%d content_type=text/html" % len(raw.encode("utf-8"))]:
+    bad.append("thân không phải JSON có khoá: phải là non_json_body bytes=%d content_type=text/html, không khoá nào: %r" % (len(raw), E.errs(out)[:1]))
+ct = "text/html; key=%s; note=Bearer %s; k=%s" % (SECRET_KV, SECRET_TOK, E.KEY_X)
+rc, out, calls, r = E.run({}, {"gemini": {"status": 502, "body": "<p>x</p>", "ctype": ct}}, run_id="35")
+e = E.errs(out)
+if E.leaked(out) or SECRET_KV in out or SECRET_TOK in out or len(e) != 1 or "content_type=text/html; [REDACTED]" not in e[0] or "bytes=8 " not in e[0]:
+    bad.append("Content-Type mang khoá: khoá phải bị che trong content_type, bytes=8: %r" % (e[:1],))
+# thân JSON không có `error` mà có khoá: message rỗng (không thân thô), khoá không lộ
+rc, out, calls, r = E.run({}, {"details": {"status": 404, "body": {"detail": "key=%s Bearer %s %s" % (SECRET_KV, SECRET_TOK, E.KEY_X)}}}, run_id="36")
+if E.leaked(out) or SECRET_KV in out or SECRET_TOK in out or E.errs(out)[:1] != ["P0_HTTP_ERROR kind=details status=404 reason= message="]:
+    bad.append("JSON không error có khoá: phải reason= message= rỗng, không khoá: %r" % (E.errs(out)[:1],))
+# dấu che do CLI chèn không bị quét lại bởi che dữ liệu đã gửi: đã kiểm ở check_6 (giá trị đã gửi trùng chữ trong [REDACTED])
+T.done(bad, "khoá AIza…/key=…/Bearer… bị che ở cả ba loại lời gọi, kể cả khoá giả lạ, trong Content-Type của thân không phải JSON, và sát vị trí cắt; dòng vẫn một dòng")

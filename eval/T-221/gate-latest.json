@@ -1,6 +1,6 @@
 {
   "task": "T-221",
-  "at": "2026-11-23T06:40",
+  "at": "2026-11-23T06:55",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 eval/T-221/check_1_gemini_402_dong_chan_doan.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 796,
+      "ms": 722,
       "out": "FAIL 3 vi phạm, vd: dòng chẩn đoán: có [], kỳ vọng đúng 'P0_HTTP_ERROR kind=gemini status=402 reason=PAYMENT_REQUIRED message=Billing account required: enable billing for this project.' | message 500 ký tự phải bị cắt đúng 300 ký tự đầu (có không khớp mẫu dòng) | 401 lượt đầu: thiếu dòng chẩn đoán trước P0_STOP gemini_auth",
       "tier": 1
     },
@@ -20,23 +20,23 @@
       "eval": "python3 eval/T-221/check_2_che_khoa_ca_ba_loai.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 2395,
-      "out": "FAIL 9 vi phạm, vd: gemini: không có đúng dòng P0_HTTP_ERROR kind=gemini status=402 (có []) | text_search: không có đúng dòng P0_HTTP_ERROR kind=text_search status=403 (có []) | details: không có đúng dòng P0_HTTP_ERROR kind=details status=429 (có []) | Bearer + '\\n' + token: lộ token hoặc không đúng một dòng",
+      "ms": 2683,
+      "out": "FAIL 11 vi phạm, vd: gemini: không có đúng dòng P0_HTTP_ERROR kind=gemini status=402 (có []) | text_search: không có đúng dòng P0_HTTP_ERROR kind=text_search status=403 (có []) | details: không có đúng dòng P0_HTTP_ERROR kind=details status=429 (có []) | Bearer + '\\n' + token: lộ token hoặc không đúng một dòng",
       "tier": 1
     },
     {
       "eval": "python3 eval/T-221/check_3_than_loi_khong_chuan_va_khong_lo_du_lieu.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 2397,
-      "out": "FAIL 9 vi phạm, vd: thân HTML: dòng sai [] | JSON thiếu error.message: dòng sai [] | thân rỗng: vẫn phải có đúng một dòng khớp mẫu và P0_STOP http_503 ([]) | thân lạ {'error': {'code': 400, 'status': 'X', 'message': 12345}} làm hỏng: ' qualified=0 enriched=0\\nGOOGLE_USAGE run=221 text_search=0 photo_details=0 photo_media=0 text_search_pro=0 details_count=0\\nGEMINI_USAGE run=221 calls=1 search_queries=0 input_tokens=0 output_tokens=0\\n'",
+      "ms": 3332,
+      "out": "FAIL 14 vi phạm, vd: thân HTML: dòng sai [] (cần non_json_body bytes=471 content_type=text/html; charset=utf-8) | JSON thiếu error: phải là reason= message= rỗng, có [] | thân rỗng: cần `non_json_body bytes=0 content_type=text/html` và P0_STOP http_503 ([]) | JSON hỏng, không có header Content-Type: cần `non_json_body bytes=19 content_type=` (rỗng), không lộ thân ([])",
       "tier": 1
     },
     {
       "eval": "python3 eval/T-221/check_4_details_tiep_tuc_va_dung_giu_nguyen.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 4360,
+      "ms": 3692,
       "out": "FAIL 6 vi phạm, vd: Details 404: cần 37 dòng chẩn đoán đúng 'P0_HTTP_ERROR kind=details status=404 reason=NOT_FOUND message=Place not found: gone', có 0 | d429: cần đúng một 'P0_HTTP_ERROR kind=details status=429 reason=RESOURCE_EXHAUSTED message=msg-d429' trước P0_STOP http_429 | d403: cần đúng một 'P0_HTTP_ERROR kind=details status=403 reason=PERMISSION_DENIED message=msg-d403' trước P0_STOP http_403 | s403: cần đúng một 'P0_HTTP_ERROR kind=text_search status=403 reason=PERMISSION_DENIED message=msg-s403' trước P0_STOP http_403",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "python3 eval/T-221/check_5_eval_T219_T220_van_xanh.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 53911,
+      "ms": 50929,
       "out": "PASS 24 eval T-219/T-220 vẫn xanh",
       "tier": 1
     },
@@ -52,15 +52,15 @@
       "eval": "python3 eval/T-221/check_6_khong_lo_du_lieu_vendor_khi_google_nhac_lai.py",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 7035,
-      "out": "FAIL 16 vi phạm, vd: details-404: cần 37 dòng P0_HTTP_ERROR hợp lệ (mỗi lượt lỗi một dòng), có 0 / 37 lượt lỗi | gemini-classify-400: cần 1 dòng P0_HTTP_ERROR hợp lệ (mỗi lượt lỗi một dòng), có 0 / 1 lượt lỗi | gemini-enrich-400: cần 1 dòng P0_HTTP_ERROR hợp lệ (mỗi lượt lỗi một dòng), có 0 / 1 lượt lỗi | search-403: cần 1 dòng P0_HTTP_ERROR hợp lệ (mỗi lượt lỗi một dòng), có 0 / 1 lượt lỗi",
+      "ms": 8756,
+      "out": "FAIL 27 vi phạm, vd: details-404: cần 37 dòng P0_HTTP_ERROR hợp lệ (mỗi lượt lỗi một dòng), có 0 / 37 lượt lỗi | gemini-classify-400-first: cần 1 dòng P0_HTTP_ERROR hợp lệ (mỗi lượt lỗi một dòng), có 0 / 1 lượt lỗi | gemini-classify-400-middle-end: cần 1 dòng P0_HTTP_ERROR hợp lệ (mỗi lượt lỗi một dòng), có 0 / 1 lượt lỗi | gemini-classify-400-case: cần 1 dòng P0_HTTP_ERROR hợp lệ (mỗi lượt lỗi một dòng), có 0 / 1 lượt lỗi",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 51,
+      "ms": 46,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 179,
+      "ms": 207,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 26,
+      "ms": 31,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 38,
+      "ms": 36,
       "out": "PASS selftest 3 ca; 36 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1260,
+      "ms": 1134,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -100,15 +100,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2544,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-6B9SWE/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2334,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-dsAFrM/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1885,
+      "ms": 1594,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -116,15 +116,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1272,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-fwWF3v/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1178,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-janoaj/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 3132,
+      "ms": 2311,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 88,
+      "ms": 112,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1486,
+      "ms": 1465,
       "out": "PASS (worker.js nén 816890 byte)",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/vendor/inv-001-pool-gia-co-nguon-va-khung-nhat-quan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 35,
+      "ms": 54,
       "out": "PASS (867 vendor có nguồn giá, khung nhất quán)",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/vendor/inv-002-gia-hien-ra-luon-co-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 336,
+      "ms": 374,
       "out": "PASS",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/vendor/inv-003-uoc-tinh-khong-lam-bang-chung-khang-dinh-ngan-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1669,
+      "ms": 1472,
       "out": "PASS",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/vendor/inv-005-mot-so-khach-hieu-luc-tab-chat-seed.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 717,
+      "ms": 640,
       "out": "PASS\nPASS",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/vendor/inv-006-uoc-tinh-co-tin-hieu-rieng-trong-prompt-ai.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 394,
+      "ms": 419,
       "out": "PASS AI luôn nhận tín hiệu riêng cho vendor giá ước tính (chat + câu vì sao hợp)",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/vendor/inv-007-vendor-bi-go-khong-ra-phia-cap-doi.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 451,
+      "ms": 431,
       "out": "ục giảm đúng 1\n  ok  decor/Ẩn: /status có mục hidden:true (không null)\n  ok  decor/Ẩn: /:id 200, hidden:true, match:null, còn tên\n  ok  decor/Xoá: thao tác admin 200\n  ok  decor/Xoá: không ở ghép theo id, ghép theo hạng mục, ứng viên chat\n  ok  decor/Xoá: đếm hạng mục giảm đúng 1\n  ok  decor/Xoá: /status có mục hidden:true (không null)\n  ok  decor/Xoá: /:id 200, hidden:true, match:null, còn tên\n  ok  decor/Ẩn rồi Xoá: thao tác admin 200\n  ok  decor/Ẩn rồi Xoá: không ở ghép theo id, ghép theo hạng mục, ứng viên chat\n  ok  decor/Ẩn rồi Xoá: đếm hạng mục giảm đúng 1\n  ok  decor/Ẩn rồi Xoá: /status có mục hidden:true (không null)\n  ok  decor/Ẩn rồi Xoá: /:id 200, hidden:true, match:null, còn tên\n  ok  decor: ba cách gỡ cho cùng một kết quả ở mọi bề mặt cặp đôi\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/planner/vendor/inv-008-nguon-gia-cap-doi-khop-nhan-xac-minh.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 214,
+      "ms": 227,
       "out": "PASS 80 vendor x 5 trạng thái overlay: cờ xác minh của cặp đôi khớp nhãn (65 vendor pool verified)",
       "tier": 2
     },
@@ -212,7 +212,7 @@
       "eval": "eval/invariants/planner/vendor/inv-009-lien-he-dia-chi-vendor-khong-doi-mot-byte-phia-cap-doi.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 309,
+      "ms": 274,
       "out": "  ok  lần sửa 2: admin lưu 200 và đọc lại đúng địa chỉ (đối chứng)\n  ok  sau lần sửa 2 · GET /api/vendors/:id: y hệt từng byte\n  ok  sau lần sửa 2 · GET /api/vendors/match?ids: y hệt từng byte\n  ok  sau lần sửa 2 · GET /api/vendors/match?category: y hệt từng byte\n  ok  sau lần sửa 2 · POST /api/vendors/status: y hệt từng byte\n  ok  sau lần sửa 2 · GET /api/vendors/categories: y hệt từng byte\n  ok  sau lần sửa 2 · ứng viên chat: y hệt từng byte\n  ok  sau lần sửa 2 · khối ứng viên trong prompt AI: y hệt từng byte\n  ok  vendor đang Ẩn: sửa 200; /status, /:id, ứng viên chat y hệt trước khi nhập liên hệ/địa chỉ\n  ok  cặp đôi gửi yêu cầu kết nối: 2xx, phản hồi không chứa địa chỉ/liên hệ vendor\n  ok  cặp đôi xem yêu cầu của mình: không chứa địa chỉ/liên hệ vendor\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     },
@@ -220,7 +220,7 @@
       "eval": "eval/invariants/planner/vendor/inv-010-workflow-google-trong-so-dang-ky.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 123,
+      "ms": 84,
       "out": "PASS (5 workflow trả tiền đều trong sổ đăng ký)",
       "tier": 2
     },
@@ -228,7 +228,7 @@
       "eval": "eval/invariants/planner/vendor/inv-011-khoa-api-chi-qua-env-secrets.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 118,
+      "ms": 117,
       "out": "PASS khoá chỉ qua env/secrets, không key= trong URL",
       "tier": 2
     }
