@@ -42,3 +42,19 @@ Sau lần chạy:
 - Capu báo đã bật thanh toán và đã merge #116. Run 45103764727 vẫn trả HTTP 402 ở lượt Gemini đầu tiên. Không gọi Maps lượt nào, chi 0. PR log: phungrk/tohong#117.
 - `discover_p0.py` không ghi nội dung lỗi của Gemini khi gặp mã khác 200, nên chưa biết chính xác nguyên nhân. Có thể là: (a) khoá thuộc một project khác với project vừa bật thanh toán; (b) tài khoản trả trước chưa có số dư; (c) thanh toán vừa bật nhưng chưa có hiệu lực. Chief không đoán tiếp.
 - Đề xuất: (1) Capu kiểm khoá trong Google AI Studio; (2) mở một việc nhỏ để CLI ghi thông điệp lỗi của Gemini (đã che khoá) vào log khi gặp mã khác 200, nhờ vậy lần sau có căn cứ chẩn đoán.
+
+## T-221: Chief phân xử D2 để không có lần trả thứ ba (2026-11-23)
+- **Thân lỗi là JSON** (đọc được bằng json.loads): không bao giờ in thô. Có đối tượng `error` thì in `error.status` và `error.message`; trường nào không phải chuỗi thì để rỗng. Không có đối tượng `error` thì để `reason` và `message` đều rỗng.
+- **Thân lỗi không phải JSON** (HTML, chữ thường): không in nội dung. Chỉ in `message=non_json_body bytes=<độ dài> content_type=<content-type đã che>`. Như vậy không còn đường lọt qua `\uXXXX`, qua thực thể HTML, hay qua bước cắt.
+- **Che dữ liệu đã gửi (2e)**:
+  - Che trên `error.message` sau khi giải mã JSON.
+  - Chỉ chạy một lượt regex hợp nhất, giá trị dài đứng trước, không phân biệt hoa thường. Dấu che đã chèn không bị quét lại.
+  - Ngưỡng tối thiểu hạ xuống 2 ký tự.
+- **Eval** phải có các ca:
+  - chữ viết hoa khác bản gốc;
+  - vendor giữa và cuối lô;
+  - thân JSON không có `error` mà có dữ liệu thoát;
+  - HTML có thực thể số.
+
+  Thêm vào đó, check_6 phải giải mã dòng log trước khi tìm.
+- Nếu spec bị trả lần ba vì cùng câu ý định này thì tự động leo thang lên Capu.
