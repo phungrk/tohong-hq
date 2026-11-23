@@ -18,7 +18,9 @@ def run(fx, err, argv=None, run_id="221", world=None, **kw):
     files, removed, fx0, meta = world or T.world()
     f = dict(fx0, **fx) if fx else fx0
     r = T.Root(files, removed)
-    rc, out, calls = r.run(argv or T.std_args(), f, run_id=run_id, env_extra={"PYTHONPATH": FAKE_ERR, "FAKE_ERR": json.dumps(err)}, **kw)
+    sp = os.path.join(r.base, "err_sent.jsonl")
+    rc, out, calls = r.run(argv or T.std_args(), f, run_id=run_id, env_extra={"PYTHONPATH": FAKE_ERR, "FAKE_ERR": json.dumps(err), "FAKE_ERR_SENT": sp}, **kw)
+    r.err_sent = [json.loads(l) for l in open(sp, encoding="utf-8")] if os.path.exists(sp) else []   # giá trị đã gửi ở mỗi lượt bị thay bằng lỗi
     return rc, out, calls, r
 
 
