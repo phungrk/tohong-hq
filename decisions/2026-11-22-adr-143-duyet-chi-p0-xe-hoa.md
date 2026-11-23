@@ -58,3 +58,11 @@ Sau lần chạy:
 
   Thêm vào đó, check_6 phải giải mã dòng log trước khi tìm.
 - Nếu spec bị trả lần ba vì cùng câu ý định này thì tự động leo thang lên Capu.
+
+## Phụ lục 2026-11-23: chạy lại sau T-222
+
+- Chief chạy `discover-vendors-p0.yml` (dry_run=false, stage=measure) trên main 3088cdd, theo khoản duyệt chi của ADR này: run https://github.com/phungrk/tohong/actions/runs/45131576443, kết quả success, không dừng (stopped_by=none). Không còn 402, nên không có dòng P0_HTTP_ERROR.
+- Lượt gọi: Text Search Pro 128, Place Details 34, Gemini 58 (604 truy vấn grounding).
+- Chi (theo báo cáo máy): net 0,813 USD (chỉ token Gemini; dưới trần 3,00 net). Gross niêm yết 14,045 USD: Text Search 4,096, Place Details 0,680, grounding 8,456, token 0,813. Net giả định hạn mức miễn phí của Maps và grounding còn đủ; hoá đơn thật cần Capu xem ở Google Cloud Billing.
+- Kết quả: 382 ứng viên mới, 16 đạt ngưỡng (≥10 đánh giá, ≥4,0 sao), unsure 19,9%. Tỉ lệ có giá: Gemini venue 20% vs AI Mode venue 70%. Máy đề xuất Gemini so với AI Mode: "kém".
+- PR log + báo cáo: https://github.com/phungrk/tohong/pull/119 (Capu merge; không merge thì lần chạy Google kế tiếp bị chặn). Mẫu 30 dòng cho Capu soát độ đúng phân loại ở artifact `p0-private-45131576443` (14 ngày, hết hạn khoảng 2026-12-07).
