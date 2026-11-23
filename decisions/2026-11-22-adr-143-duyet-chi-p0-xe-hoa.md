@@ -37,3 +37,8 @@ Sau lần chạy:
 - Không gọi Maps lượt nào. Gemini ghi 1 lượt, 0 token. Chi phí: 0.
 - Workflow đã mở PR phungrk/tohong#116 (`discover-p0/run-45082743113`), chỉ chứa log và báo cáo. Phải merge PR này, nếu không OPEN_DATA_PR sẽ chặn mọi lần chạy Google sau.
 - Nguyên nhân có khả năng cao (đoán, tự tin ~80%): project Google của `GEMINI_API_KEY` chưa bật thanh toán hoặc chưa nạp tín dụng trả trước. Grounding không dùng được ở bậc miễn phí. Bật thanh toán là việc của Capu.
+
+## Bổ sung (2026-11-23): lần chạy thứ ba vẫn HTTP 402
+- Capu báo đã bật thanh toán và đã merge #116. Run 45103764727 vẫn trả HTTP 402 ở lượt Gemini đầu tiên. Không gọi Maps lượt nào, chi 0. PR log: phungrk/tohong#117.
+- `discover_p0.py` không ghi nội dung lỗi của Gemini khi gặp mã khác 200, nên chưa biết chính xác nguyên nhân. Có thể là: (a) khoá thuộc một project khác với project vừa bật thanh toán; (b) tài khoản trả trước chưa có số dư; (c) thanh toán vừa bật nhưng chưa có hiệu lực. Chief không đoán tiếp.
+- Đề xuất: (1) Capu kiểm khoá trong Google AI Studio; (2) mở một việc nhỏ để CLI ghi thông điệp lỗi của Gemini (đã che khoá) vào log khi gặp mã khác 200, nhờ vậy lần sau có căn cứ chẩn đoán.
