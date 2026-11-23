@@ -66,3 +66,9 @@ Sau lần chạy:
 - Chi (theo báo cáo máy): net 0,813 USD (chỉ token Gemini; dưới trần 3,00 net). Gross niêm yết 14,045 USD: Text Search 4,096, Place Details 0,680, grounding 8,456, token 0,813. Net giả định hạn mức miễn phí của Maps và grounding còn đủ; hoá đơn thật cần Capu xem ở Google Cloud Billing.
 - Kết quả: 382 ứng viên mới, 16 đạt ngưỡng (≥10 đánh giá, ≥4,0 sao), unsure 19,9%. Tỉ lệ có giá: Gemini venue 20% vs AI Mode venue 70%. Máy đề xuất Gemini so với AI Mode: "kém".
 - PR log + báo cáo: https://github.com/phungrk/tohong/pull/119 (Capu merge; không merge thì lần chạy Google kế tiếp bị chặn). Mẫu 30 dòng cho Capu soát độ đúng phân loại ở artifact `p0-private-45131576443` (14 ngày, hết hạn khoảng 2026-12-07).
+
+## Phụ lục 2026-11-23 (2): chi thật
+
+- Capu báo Gemini thực tế 1,10 USD cho run 45131576443. Máy ước net 0,813 USD, lệch +0,287 USD (+35%). Đã ghi `task.py cost T-219 --cost 1.10`.
+- Giá token trong `tools/scraper/enrichment/usage.py` (0,50/3,00 USD mỗi triệu vào/ra) vốn là GIẢ ĐỊNH (spec T-219, tự tin ~50%). Hệ quả: trần "USD luỹ kế tháng, net" của P0 đang đếm thấp khoảng 1/3. Với trần 3,00 USD net, chi thật có thể tới khoảng 4 USD.
+- Chưa rõ phần lệch là giá token cao hơn giả định hay grounding vượt hạn mức miễn phí; cần bảng Billing theo SKU để phân biệt. Trước lần chạy Google kế tiếp: hiệu chỉnh giá (cờ `--gemini-in-usd-per-m/--gemini-out-usd-per-m` hoặc sửa hằng số qua một việc có spec), hoặc hạ trần tương ứng.
