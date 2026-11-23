@@ -1,6 +1,6 @@
 {
   "task": "T-224",
-  "at": "2026-11-23T13:26",
+  "at": "2026-11-23T13:44",
   "verdict": "RED",
   "tiers": {
     "1": "hành vi",
@@ -12,47 +12,47 @@
       "eval": "node eval/T-224/check_1.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 2065,
-      "out": "u có provider \"gemini\", model, category là chuỗi không rỗng\n  ok Gemini=429: http_status = 429 (số, hoặc null khi không có phản hồi HTTP)\n  ok Gemini=429: trường attempt đếm 1..n theo thứ tự\n  XX Gemini=throw: 0 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau)\n  ok Gemini=throw: mỗi tín hiệu có provider \"gemini\", model, category là chuỗi không rỗng\n  ok Gemini=throw: http_status = null (số, hoặc null khi không có phản hồi HTTP)\n  ok Gemini=throw: trường attempt đếm 1..n theo thứ tự\n  ok chat thành công: 0 tín hiệu llm_provider_error\nFAIL Gemini=402: 0 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau); Gemini=500: 0 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau); Gemini=429: 0 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau); Gemini=throw: 0 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau)",
+      "ms": 1795,
+      "out": "u có provider \"gemini\", model, category là chuỗi không rỗng\n  ok Gemini=429: http_status = 429 (số, hoặc null khi không có phản hồi HTTP)\n  ok Gemini=429: trường attempt đếm 1..n theo thứ tự\n  XX Gemini=throw: 0 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau)\n  ok Gemini=throw: mỗi tín hiệu có provider \"gemini\", model, category là chuỗi không rỗng\n  ok Gemini=throw: http_status = null (số, hoặc null khi không có phản hồi HTTP)\n  ok Gemini=throw: trường attempt đếm 1..n theo thứ tự\n  ok chat thành công: 0 tín hiệu llm_provider_error\nFAIL Gemini=402: 0 tín hiệu cho 1 lần gọi thất bại (phải bằng nhau); Gemini=500: 0 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau); Gemini=429: 0 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau); Gemini=throw: 0 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau)",
       "tier": 1
     },
     {
       "eval": "node eval/T-224/check_2.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 1017,
-      "out": "XX tin nhắn lỗi: đúng 1 chat_llm_result (nhận 0)\n  XX ok=false, error_category = nhãn lỗi cuối, http_status=402\n  XX attempts = số lần gọi provider (2)\n  XX tin nhắn thành công: 1 chat_llm_result ok=true, provider gemini, attempts=1\n  ok thành công: error_category và http_status là null/vắng\n  XX không KV: vẫn đúng 1 chat_llm_result\nFAIL tin nhắn lỗi: đúng 1 chat_llm_result (nhận 0); ok=false, error_category = nhãn lỗi cuối, http_status=402; attempts = số lần gọi provider (2); tin nhắn thành công: 1 chat_llm_result ok=true, provider gemini, attempts=1; không KV: vẫn đúng 1 chat_llm_result",
+      "ms": 718,
+      "out": "XX tin nhắn lỗi: đúng 1 chat_llm_result (nhận 0)\n  XX ok=false, error_category = nhãn lỗi cuối, http_status=402\n  XX attempts = số lần gọi provider (1)\n  XX tin nhắn thành công: 1 chat_llm_result ok=true, provider gemini, attempts=1\n  ok thành công: error_category và http_status là null/vắng\n  XX không KV: vẫn đúng 1 chat_llm_result\nFAIL tin nhắn lỗi: đúng 1 chat_llm_result (nhận 0); ok=false, error_category = nhãn lỗi cuối, http_status=402; attempts = số lần gọi provider (1); tin nhắn thành công: 1 chat_llm_result ok=true, provider gemini, attempts=1; không KV: vẫn đúng 1 chat_llm_result",
       "tier": 1
     },
     {
       "eval": "node eval/T-224/check_3.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 1645,
-      "out": "XX có khoá: 0 sự kiện llm_provider_error cho 2 lần gọi lỗi\n  XX có khoá: đúng 1 chat_llm_result ok=false\n  ok mọi sự kiện mang đúng khoá dự án đã cấu hình\n  ok thuộc tính: provider, http_status, category\n  ok ẩn danh: distinct_id không phải user/couple id, $process_person_profile=false\n  XX thành công có khoá: 1 chat_llm_result ok=true, không có llm_provider_error\n  ok không có POSTHOG_KEY: 0 request tới PostHog\n  XX POSTHOG_HOST đặt thì gửi tới đúng host đó\nFAIL có khoá: 0 sự kiện llm_provider_error cho 2 lần gọi lỗi; có khoá: đúng 1 chat_llm_result ok=false; thành công có khoá: 1 chat_llm_result ok=true, không có llm_provider_error; POSTHOG_HOST đặt thì gửi tới đúng host đó",
+      "ms": 885,
+      "out": "XX có khoá: 0 sự kiện llm_provider_error cho 1 lần gọi lỗi\n  XX có khoá: đúng 1 chat_llm_result ok=false\n  ok mọi sự kiện mang đúng khoá dự án đã cấu hình\n  ok thuộc tính: provider, http_status, category\n  ok ẩn danh: distinct_id không phải user/couple id, $process_person_profile=false\n  XX thành công có khoá: 1 chat_llm_result ok=true, không có llm_provider_error\n  ok không có POSTHOG_KEY: 0 request tới PostHog\n  XX POSTHOG_HOST đặt thì gửi tới đúng host đó\nFAIL có khoá: 0 sự kiện llm_provider_error cho 1 lần gọi lỗi; có khoá: đúng 1 chat_llm_result ok=false; thành công có khoá: 1 chat_llm_result ok=true, không có llm_provider_error; POSTHOG_HOST đặt thì gửi tới đúng host đó",
       "tier": 1
     },
     {
       "eval": "node eval/T-224/check_4.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 13119,
-      "out": "ok A: 4 tin lỗi đầu: 0 cảnh báo (dưới 5 tin)\n  XX A: tin lỗi thứ 5 (5/5 lỗi): đúng 1 cảnh báo (nhận 0)\n  XX A: cảnh báo là POST JSON {text} có provider, \"5/5\", mã 402 (text=\"\")\n  ok B: 5/11 lỗi (45%) chưa cảnh báo (nhận 0,0,0,0,0)\n  XX B: 6/12 lỗi (50%) cảnh báo (nhận 0)\n  ok C: 8 tin thành công: 0 cảnh báo\n  ok D: 5 lỗi cách nhau 6 phút (tối đa 3 tin trong 15 phút): 0 cảnh báo (nhận 0)\nFAIL A: tin lỗi thứ 5 (5/5 lỗi): đúng 1 cảnh báo (nhận 0); A: cảnh báo là POST JSON {text} có provider, \"5/5\", mã 402 (text=\"\"); B: 6/12 lỗi (50%) cảnh báo (nhận 0)",
+      "ms": 11266,
+      "out": "0)\n  ok D: 5 lỗi cách nhau 20 phút: 0 cảnh báo (nhận 0)\n  ok E: 4 lỗi cũ (2 khung trước) + 1 lỗi mới: 0 cảnh báo (nhận 0)\n  XX F: HTTP 500 (10 lần gọi cho 5 tin): chưa cảnh báo ở 4 tin, cảnh báo ở tin thứ 5 (nhận 0,0,0,0,0)\n  XX F: HTTP 429 (10 lần gọi cho 5 tin): chưa cảnh báo ở 4 tin, cảnh báo ở tin thứ 5 (nhận 0,0,0,0,0)\nFAIL A: 4 lỗi: 0 cảnh báo; lỗi thứ 5: đúng 1 (nhận 0,0,0,0,0); A: cảnh báo POST JSON {text} có provider, số lỗi 5, mã 402 (text=\"\"); B: 6 tin tốt rồi 5 lỗi: cảnh báo đúng ở lỗi thứ 5 (nhận 0,0,0,0,0); C: 3 lỗi 03:14 + 3 lỗi 03:16: đúng 1 cảnh báo, ở lỗi thứ 5 (nhận 0,0,0,0,0,0); F: HTTP 500 (10 lần gọi cho 5 tin): chưa cảnh báo ở 4 tin, cảnh báo ở tin thứ 5 (nhận 0,0,0,0,0); F: HTTP 429 (10 lần gọi cho 5 tin): chưa cảnh báo ở 4 tin, cảnh báo ở tin thứ 5 (nhận 0,0,0,0,0)",
       "tier": 1
     },
     {
       "eval": "node eval/T-224/check_5.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 17380,
-      "out": "XX 5 lỗi đầu: 1 cảnh báo (nhận 0)\n  XX 20 lỗi tiếp trong cùng khung: vẫn 1 cảnh báo (nhận 0)\n  XX khung mới (+20 phút) vẫn lỗi 100% nhưng còn trong 60 phút chờ: vẫn 1 cảnh báo (nhận 0)\n  XX +75 phút vẫn lỗi: nhắc lại đúng 1 lần, tổng 2 (nhận 0)\nFAIL 5 lỗi đầu: 1 cảnh báo (nhận 0); 20 lỗi tiếp trong cùng khung: vẫn 1 cảnh báo (nhận 0); khung mới (+20 phút) vẫn lỗi 100% nhưng còn trong 60 phút chờ: vẫn 1 cảnh báo (nhận 0); +75 phút vẫn lỗi: nhắc lại đúng 1 lần, tổng 2 (nhận 0)",
+      "ms": 17229,
+      "out": "XX 5 tin lỗi đầu: 1 cảnh báo (nhận 0)\n  XX 20 tin lỗi tiếp trong cùng khung: vẫn 1 cảnh báo (nhận 0)\n  XX +20 phút vẫn lỗi (đạt ngưỡng) nhưng còn trong 60 phút chờ: vẫn 1 cảnh báo (nhận 0)\n  XX +75 phút vẫn lỗi: nhắc lại đúng 1 lần, tổng 2 (nhận 0)\nFAIL 5 tin lỗi đầu: 1 cảnh báo (nhận 0); 20 tin lỗi tiếp trong cùng khung: vẫn 1 cảnh báo (nhận 0); +20 phút vẫn lỗi (đạt ngưỡng) nhưng còn trong 60 phút chờ: vẫn 1 cảnh báo (nhận 0); +75 phút vẫn lỗi: nhắc lại đúng 1 lần, tổng 2 (nhận 0)",
       "tier": 1
     },
     {
       "eval": "node eval/T-224/check_6.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 21760,
+      "ms": 10797,
       "out": "ok không cấu hình gì, lỗi LLM: 200 và có sự kiện error (conversation,intent,error)\n  ok không cấu hình gì, LLM tốt: có chunk và done (conversation,intent,chunk,meta,done)\n  ok chỉ có webhook, không KV: chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok KV hỏng (mọi thao tác ngoài rl:* ném lỗi): chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok Slack trả 500: chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok Slack ném lỗi mạng: chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok PostHog trả 500: chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok PostHog ném lỗi mạng: chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok webhook rỗng, khoá rỗng: chat lỗi và chat tốt đều giữ nguyên hành vi\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "node eval/T-224/check_7.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 14170,
+      "ms": 6149,
       "out": "h kênh nào: chỉ gọi tới Gemini\n  XX có webhook: chỉ Gemini + host webhook (nhận generativelanguage.googleapis.com)\n  ok \n  ok có webhook + PostHog: chỉ Gemini, webhook, *.posthog.com (nhận generativelanguage.googleapis.com)\n  ok đủ ngưỡng nhưng không có webhook: không gọi tới Slack hay máy chủ lạ\n  XX cảnh báo gửi POST tới đúng ADMIN_SLACK_WEBHOOK_URL, thân JSON có chuỗi text\n  ok wrangler.toml: chỉ có binding r2_buckets + kv_namespaces như cũ (nhận kv_namespaces,r2_buckets)\n  ok wrangler.toml: không thêm D1/Queues/Durable Objects/Analytics Engine/AI/dịch vụ khác\n  ok package.json: dependencies vẫn chỉ có yaml (không thêm thư viện)\nFAIL có webhook: chỉ Gemini + host webhook (nhận generativelanguage.googleapis.com); cảnh báo gửi POST tới đúng ADMIN_SLACK_WEBHOOK_URL, thân JSON có chuỗi text",
       "tier": 1
     },
@@ -68,15 +68,31 @@
       "eval": "node eval/T-224/check_8.mjs",
       "kind": "cmd",
       "status": "FAIL",
-      "ms": 4404,
+      "ms": 2668,
       "out": "ok tin #1 (Gemini=402): không rò []\n  ok tin #2 (Gemini=402): không rò []\n  ok tin #3 (Gemini=402): không rò []\n  ok tin #4 (Gemini=402): không rò []\n  ok tin #5 (Gemini=402): không rò []\n  ok tin #6 (Gemini=402): không rò []\n  ok tin #7 (Gemini=throw): không rò []\n  ok tin #8 (Gemini=500): không rò []\n  ok tin #9 (Gemini=ok): không rò []\n  ok tin #10 (Gemini=402): không rò []\n  XX có tín hiệu để kiểm (log=0, PostHog=0); không có thì phép kiểm vô nghĩa\n  XX có ít nhất một cảnh báo Slack được kiểm (0)\nFAIL có tín hiệu để kiểm (log=0, PostHog=0); không có thì phép kiểm vô nghĩa; có ít nhất một cảnh báo Slack được kiểm (0)",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-224/check_9.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 14177,
+      "out": "ok 20 tin thành công (KV trống): 0 put/list/delete ngoài rl:* \n  ok 12 tin lỗi (có kích cảnh báo): mỗi tin tối đa 1 put (+1 khi gửi cảnh báo), 0 list/delete, put có TTL \n  ok 10 tin thành công khi đang có lỗi và đã cảnh báo: vẫn 0 put/list/delete \n  ok không có webhook: tin lỗi vẫn tối đa 1 put, không ghi khoá chống lặp \nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "node eval/T-224/check_10.mjs",
+      "kind": "cmd",
+      "status": "PASS",
+      "ms": 3706,
+      "out": "ok Slack treo 30s ở tin kích cảnh báo: error 304ms, đóng luồng 304ms (< 3000)\n  ok PostHog treo 30s, tin lỗi: 305ms / đóng 305ms\n  ok PostHog treo 30s, tin tốt: done 58ms / đóng 58ms\n  ok KV sức khoẻ chậm 30s, tin lỗi: 302ms / đóng 302ms\n  ok KV sức khoẻ chậm 30s, tin tốt: done 68ms / đóng 68ms\nPASS",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 49,
+      "ms": 52,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -84,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 190,
+      "ms": 189,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -92,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 35,
+      "ms": 26,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -100,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 38,
+      "ms": 37,
       "out": "PASS selftest 3 ca; 36 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -108,7 +124,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1307,
+      "ms": 1223,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -116,15 +132,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2352,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-JxOYIF/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2312,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-luLORf/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1525,
+      "ms": 1583,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -132,15 +148,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1190,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-SytIkN/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 908,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-c3xYnT/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2414,
+      "ms": 2325,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -148,7 +164,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 86,
+      "ms": 99,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -156,18 +172,34 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1694,
-      "out": "PASS (worker.js nén 816890 byte)",
+      "ms": 1417,
+      "out": "PASS (worker.js nén 817593 byte)",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/back/chat/inv-001-loi-402-provider-co-nhan-rieng-khong-thu-lai.mjs",
       "kind": "node",
-      "status": "FAIL",
-      "ms": 333,
-      "out": "XX  HTTP 402: sự kiện lỗi mang nhãn riêng (nhận unknown)\n  XX  HTTP 402: gọi provider đúng 1 lần, không thử lại (nhận 2 lần)\n  ok  HTTP 401: sự kiện lỗi mang nhãn riêng (nhận auth)\n  ok  HTTP 401: gọi provider đúng 1 lần, không thử lại (nhận 1 lần)\n  ok  HTTP 403: sự kiện lỗi mang nhãn riêng (nhận auth)\n  ok  HTTP 403: gọi provider đúng 1 lần, không thử lại (nhận 1 lần)\nFAIL HTTP 402 nhãn=unknown; HTTP 402 số lần gọi=2",
+      "status": "PASS",
+      "ms": 90,
+      "out": "ok  HTTP 402: sự kiện lỗi mang nhãn riêng (nhận billing)\n  ok  HTTP 402: gọi provider đúng 1 lần, không thử lại (nhận 1 lần)\n  ok  HTTP 401: sự kiện lỗi mang nhãn riêng (nhận auth)\n  ok  HTTP 401: gọi provider đúng 1 lần, không thử lại (nhận 1 lần)\n  ok  HTTP 403: sự kiện lỗi mang nhãn riêng (nhận auth)\n  ok  HTTP 403: gọi provider đúng 1 lần, không thử lại (nhận 1 lần)\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/back/chat/inv-002-loi-truoc-noi-dung-khong-tang-luot-dung-thu.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 1038,
+      "out": "ok  402: lượt lúc nhận error = 1, sau cùng = 1 (trước tin = 1)\n  ok  401: lượt lúc nhận error = 1, sau cùng = 1 (trước tin = 1)\n  ok  500: lượt lúc nhận error = 1, sau cùng = 1 (trước tin = 1)\n  ok  lỗi mạng: lượt lúc nhận error = 1, sau cùng = 1 (trước tin = 1)\n  ok  200 rồi đứt trước chữ đầu: lượt lúc nhận error = 1, sau cùng = 1 (trước tin = 1)\nPASS",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/back/chat/inv-003-luong-loi-chat-khong-lo-ma-http-ten-provider.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 229,
+      "out": "thẳng 402: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  gọi thẳng 401: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  gọi thẳng 403: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  gọi thẳng 429: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  gọi thẳng 500: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  gọi thẳng mạng: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  qua relay 402: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  qua relay 401: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  qua relay 403: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  qua relay 429: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  qua relay 500: không lộ; error = [[\"message\",\"recoverable\"]]\n  ok  qua relay mạng: không lộ; error = [[\"message\",\"recoverable\"]]\nPASS",
       "tier": 2
     }
   ],
-  "hint": "spec"
+  "hint": "code"
 }
