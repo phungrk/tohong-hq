@@ -1,6 +1,6 @@
 {
   "task": "T-222",
-  "at": "2026-11-23T07:04",
+  "at": "2026-11-23T07:06",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "python3 eval/T-221/check_1_gemini_402_dong_chan_doan.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1035,
+      "ms": 828,
       "out": "PASS Gemini 402/401: một dòng P0_HTTP_ERROR trước P0_STOP, cắt 300, hành vi và chi 0 giữ nguyên",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "python3 eval/T-221/check_2_che_khoa_ca_ba_loai.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 3558,
+      "ms": 2726,
       "out": "PASS khoá AIza…/key=…/Bearer… bị che ở cả ba loại lời gọi, kể cả khoá giả lạ, trong Content-Type của thân không phải JSON, và sát vị trí cắt; dòng vẫn một dòng",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "python3 eval/T-221/check_3_than_loi_khong_chuan_va_khong_lo_du_lieu.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 3885,
+      "ms": 3199,
       "out": "PASS thân không phải JSON chỉ ra non_json_body bytes/content_type; thân JSON không error ra rỗng; kiểu lạ không sập; không lộ dữ liệu vendor; chạy 200 không có dòng",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "python3 eval/T-221/check_4_details_tiep_tuc_va_dung_giu_nguyen.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 4527,
+      "ms": 3906,
       "out": "PASS Details 404 tiếp tục kèm dòng; Details 429/403, Text Search 403/500, Gemini lượt sau 429 dừng như cũ, dòng đứng trước P0_STOP",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "python3 eval/T-221/check_5_eval_T219_T220_van_xanh.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 51503,
+      "ms": 51724,
       "out": "PASS 24 eval T-219/T-220 vẫn xanh",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "python3 eval/T-221/check_6_khong_lo_du_lieu_vendor_khi_google_nhac_lai.py",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 9607,
+      "ms": 9656,
       "out": "PASS place_id/tên/địa chỉ/website/truy vấn đã gửi bị che ở mọi dạng (hoa/thường, \\uXXXX, thực thể), mọi vendor của lô; JSON có error không message và JSON không error ra rỗng; thân không phải JSON không in nội dung; stdout sạch",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 55,
+      "ms": 51,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -68,7 +68,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 196,
+      "ms": 217,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -76,7 +76,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 28,
+      "ms": 33,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -84,7 +84,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 39,
+      "ms": 55,
       "out": "PASS selftest 3 ca; 36 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -92,7 +92,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1234,
+      "ms": 1403,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -100,15 +100,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2428,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-4GQ5SG/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2399,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-4eRnHh/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1754,
+      "ms": 1922,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -116,15 +116,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1278,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-GB9b0t/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1291,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-J9D3aB/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2536,
+      "ms": 2792,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -132,7 +132,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 88,
+      "ms": 83,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -140,7 +140,7 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1559,
+      "ms": 1402,
       "out": "PASS (worker.js nén 816890 byte)",
       "tier": 2
     },
@@ -148,7 +148,7 @@
       "eval": "eval/invariants/planner/vendor/inv-001-pool-gia-co-nguon-va-khung-nhat-quan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 43,
+      "ms": 56,
       "out": "PASS (867 vendor có nguồn giá, khung nhất quán)",
       "tier": 2
     },
@@ -156,7 +156,7 @@
       "eval": "eval/invariants/planner/vendor/inv-002-gia-hien-ra-luon-co-nhan.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 394,
+      "ms": 348,
       "out": "PASS",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/vendor/inv-003-uoc-tinh-khong-lam-bang-chung-khang-dinh-ngan-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1774,
+      "ms": 1251,
       "out": "PASS",
       "tier": 2
     },
@@ -172,7 +172,7 @@
       "eval": "eval/invariants/planner/vendor/inv-004-venue-so-gia-ban-voi-tong-theo-so-ban.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1409,
+      "ms": 1363,
       "out": "PASS",
       "tier": 2
     },
@@ -180,7 +180,7 @@
       "eval": "eval/invariants/planner/vendor/inv-005-mot-so-khach-hieu-luc-tab-chat-seed.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 752,
+      "ms": 648,
       "out": "PASS\nPASS",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/vendor/inv-006-uoc-tinh-co-tin-hieu-rieng-trong-prompt-ai.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 505,
+      "ms": 403,
       "out": "PASS AI luôn nhận tín hiệu riêng cho vendor giá ước tính (chat + câu vì sao hợp)",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/vendor/inv-007-vendor-bi-go-khong-ra-phia-cap-doi.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 435,
+      "ms": 372,
       "out": "ục giảm đúng 1\n  ok  decor/Ẩn: /status có mục hidden:true (không null)\n  ok  decor/Ẩn: /:id 200, hidden:true, match:null, còn tên\n  ok  decor/Xoá: thao tác admin 200\n  ok  decor/Xoá: không ở ghép theo id, ghép theo hạng mục, ứng viên chat\n  ok  decor/Xoá: đếm hạng mục giảm đúng 1\n  ok  decor/Xoá: /status có mục hidden:true (không null)\n  ok  decor/Xoá: /:id 200, hidden:true, match:null, còn tên\n  ok  decor/Ẩn rồi Xoá: thao tác admin 200\n  ok  decor/Ẩn rồi Xoá: không ở ghép theo id, ghép theo hạng mục, ứng viên chat\n  ok  decor/Ẩn rồi Xoá: đếm hạng mục giảm đúng 1\n  ok  decor/Ẩn rồi Xoá: /status có mục hidden:true (không null)\n  ok  decor/Ẩn rồi Xoá: /:id 200, hidden:true, match:null, còn tên\n  ok  decor: ba cách gỡ cho cùng một kết quả ở mọi bề mặt cặp đôi\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     },
@@ -204,7 +204,7 @@
       "eval": "eval/invariants/planner/vendor/inv-008-nguon-gia-cap-doi-khop-nhan-xac-minh.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 276,
+      "ms": 262,
       "out": "PASS 80 vendor x 5 trạng thái overlay: cờ xác minh của cặp đôi khớp nhãn (65 vendor pool verified)",
       "tier": 2
     },
@@ -212,7 +212,7 @@
       "eval": "eval/invariants/planner/vendor/inv-009-lien-he-dia-chi-vendor-khong-doi-mot-byte-phia-cap-doi.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 303,
+      "ms": 268,
       "out": "  ok  lần sửa 2: admin lưu 200 và đọc lại đúng địa chỉ (đối chứng)\n  ok  sau lần sửa 2 · GET /api/vendors/:id: y hệt từng byte\n  ok  sau lần sửa 2 · GET /api/vendors/match?ids: y hệt từng byte\n  ok  sau lần sửa 2 · GET /api/vendors/match?category: y hệt từng byte\n  ok  sau lần sửa 2 · POST /api/vendors/status: y hệt từng byte\n  ok  sau lần sửa 2 · GET /api/vendors/categories: y hệt từng byte\n  ok  sau lần sửa 2 · ứng viên chat: y hệt từng byte\n  ok  sau lần sửa 2 · khối ứng viên trong prompt AI: y hệt từng byte\n  ok  vendor đang Ẩn: sửa 200; /status, /:id, ứng viên chat y hệt trước khi nhập liên hệ/địa chỉ\n  ok  cặp đôi gửi yêu cầu kết nối: 2xx, phản hồi không chứa địa chỉ/liên hệ vendor\n  ok  cặp đôi xem yêu cầu của mình: không chứa địa chỉ/liên hệ vendor\n  ok  không request ra ngoài\nPASS",
       "tier": 2
     },
@@ -220,7 +220,7 @@
       "eval": "eval/invariants/planner/vendor/inv-010-workflow-google-trong-so-dang-ky.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 134,
+      "ms": 97,
       "out": "PASS (5 workflow trả tiền đều trong sổ đăng ký)",
       "tier": 2
     },
@@ -228,7 +228,7 @@
       "eval": "eval/invariants/planner/vendor/inv-011-khoa-api-chi-qua-env-secrets.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 117,
+      "ms": 122,
       "out": "PASS khoá chỉ qua env/secrets, không key= trong URL",
       "tier": 2
     }
