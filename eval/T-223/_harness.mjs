@@ -17,8 +17,10 @@ export const COUPLE = "couple_20261001_aaaaaa";
 export const OWNER = "user_owner";
 export const MSG_BILLING = "Tơ Hồng chưa trả lời được lúc này, lỗi nằm ở phía chúng mình chứ không phải do bạn. Tin nhắn này không bị tính vào lượt dùng của bạn. Bạn vui lòng quay lại sau nhé.";
 export const MSG_TRANSIENT = "Tơ Hồng đang gặp lỗi kết nối tạm thời. Vui lòng thử lại sau một chút.";
-export const MSG_MIDSTREAM = "Kết nối AI bị gián đoạn. Bạn có thể thử lại để nhận phần trả lời đầy đủ.";
-export const MSG_INVARIANT_BAD = ["402", "401", "403", "gemini", "google", "billing", "payment", "quota", "api key", "apikey", "provider", "http", "token", "relay", FAKE_KEY, BODY_MARK];
+export const MSG_MIDSTREAM = "Kết nối AI bị gián đoạn giữa chừng. Bạn có thể gửi lại tin nhắn để Tơ Hồng trả lời lại.";
+export const RELAY_URL = "https://relay.test/api/proxy";
+export const RELAY_SECRET = "bi-mat-relay-gia";
+export const MSG_INVARIANT_BAD = ["relay.test", RELAY_SECRET, "kho lỗi giả", "402", "401", "403", "gemini", "google", "billing", "payment", "quota", "api key", "apikey", "provider", "http", "token", "relay", FAKE_KEY, BODY_MARK];
 
 const ORIGINAL_FETCH = globalThis.fetch;
 export const llmCalls = []; // mỗi phần tử: url đã gọi tới LLM giả
@@ -36,7 +38,7 @@ export const brokenStream = (text) => ({ pullStream: (() => { let n = 0; return 
 
 globalThis.fetch = async (input) => {
   const url = typeof input === "string" ? input : input?.url || String(input);
-  if (!url.startsWith("https://generativelanguage.googleapis.com/")) throw new Error(`eval offline: fetch ngoài dự kiến ${url}`);
+  if (!url.startsWith("https://generativelanguage.googleapis.com/") && url !== RELAY_URL) throw new Error(`eval offline: fetch ngoài dự kiến ${url}`);
   llmCalls.push(url);
   const r = llmBehaviour(llmCalls.length);
   if (r.throws) throw r.throws;
@@ -47,6 +49,7 @@ globalThis.fetch = async (input) => {
 export const { MemoryBucket } = await imp("test/helpers/memoryBucket.js");
 const worker = (await imp("worker.js")).default;
 export const { createOrchestrator } = await imp("lib/factory.js");
+export const { makeSubscriptionStore } = await imp("lib/subscriptionStore.js");
 
 export const subKey = `data/couples/${COUPLE}/subscription.json`;
 export function makeWorld(sub, extra = {}) {
