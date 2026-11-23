@@ -1,0 +1,157 @@
+{
+  "task": "T-223",
+  "at": "2026-11-23T13:17",
+  "verdict": "RED",
+  "tiers": {
+    "1": "hành vi",
+    "2": "bất biến vùng planner/back/chat",
+    "3": "đối kháng"
+  },
+  "results": [
+    {
+      "eval": "eval/T-223/c1-nhan-rieng-va-khong-thu-lai.mjs",
+      "kind": "node",
+      "status": "FAIL",
+      "ms": 502,
+      "out": "i provider đúng 1 lần\n  ok  HTTP 401: không có chunk/meta\n  ok  HTTP 402: có sự kiện error\n  XX  HTTP 402: event.category = billing (nhận undefined)\n  XX  HTTP 402: event.errors[0].category = billing (nhận unknown)\n  XX  HTTP 402: recoverable = false (nhận true)\n  XX  HTTP 402: gọi provider đúng 1 lần (nhận 2 lần)\n  ok  HTTP 402: không có chunk/meta\n  ok  HTTP 403: có sự kiện error\n  ok  HTTP 403: event.category = auth\n  ok  HTTP 403: event.errors[0].category = auth\n  ok  HTTP 403: recoverable = false\n  ok  HTTP 403: gọi provider đúng 1 lần\n  ok  HTTP 403: không có chunk/meta\nFAIL 4 điều kiện: HTTP 402: event.category = billing: nhận undefined; HTTP 402: event.errors[0].category = billing: nhận unknown; HTTP 402: recoverable = false: nhận true; HTTP 402: gọi provider đúng 1 lần: nhận 2 lần",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-223/c2-loi-tam-thoi-van-thu-lai.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 1173,
+      "out": "ok  429: thử lại, tổng 2 lần gọi\n  ok  429: 2 lỗi, nhãn rate_limit\n  ok  429: recoverable = true\n  ok  500: thử lại, tổng 2 lần gọi\n  ok  500: 2 lỗi, nhãn server_error\n  ok  500: recoverable = true\n  ok  lỗi mạng: thử lại, tổng 2 lần gọi\n  ok  lỗi mạng: 2 lỗi, nhãn unknown\n  ok  lỗi mạng: recoverable = true\n  ok  timeout: thử lại, tổng 2 lần gọi\n  ok  timeout: 2 lỗi, nhãn timeout\n  ok  timeout: recoverable = true\n  ok  PROVIDER_RETRIES=0 vẫn được tôn trọng (429 -> 1 lần gọi)\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-223/c3-thong-diep-cho-cap-doi.mjs",
+      "kind": "node",
+      "status": "FAIL",
+      "ms": 1501,
+      "out": "ble = false\n  ok  HTTP 403: không có chunk/meta/done\n  ok  HTTP 403: không lộ chi tiết kỹ thuật trong luồng\n  ok  HTTP 403: sự kiện error chỉ có message và recoverable\n  ok  429: giữ thông điệp tạm thời cũ, recoverable = true\n  ok  500: giữ thông điệp tạm thời cũ, recoverable = true\n  ok  lỗi mạng: giữ thông điệp tạm thời cũ, recoverable = true\n  ok  timeout: giữ thông điệp tạm thời cũ, recoverable = true\nFAIL 4 điều kiện: HTTP 402: thông điệp đúng nguyên văn: \"Tơ Hồng đang gặp lỗi kết nối tạm thời. Vui lòng thử lại sau một chút.\"; HTTP 402: recoverable = false: nhận true; HTTP 401: thông điệp đúng nguyên văn: \"Tơ Hồng đang gặp lỗi kết nối tạm thời. Vui lòng thử lại sau một chút.\"; HTTP 403: thông điệp đúng nguyên văn: \"Tơ Hồng đang gặp lỗi kết nối tạm thời. Vui lòng thử lại sau một chút.\"",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-223/c4-hoan-luot-khi-loi-truoc-noi-dung.mjs",
+      "kind": "node",
+      "status": "FAIL",
+      "ms": 2819,
+      "out": "t dùng = 1: nhận 2; 400: lúc cặp đôi nhận error, lượt dùng = 1: nhận 2; 400: sau cùng lượt dùng = 1: nhận 2; lỗi mạng: lúc cặp đôi nhận error, lượt dùng = 1: nhận 2; lỗi mạng: sau cùng lượt dùng = 1: nhận 2; timeout: lúc cặp đôi nhận error, lượt dùng = 1: nhận 2; timeout: sau cùng lượt dùng = 1: nhận 2; 200 rồi đứt trước chữ đầu tiên: lúc cặp đôi nhận error, lượt dùng = 1: nhận 2; 200 rồi đứt trước chữ đầu tiên: sau cùng lượt dùng = 1: nhận 2; 402 khi DEBUG_MATCHING=true: lúc cặp đôi nhận error, lượt dùng = 1: nhận 2; 402 khi DEBUG_MATCHING=true: sau cùng lượt dùng = 1: nhận 2; 402 ở tin nhắn cuối của dùng thử: lúc cặp đôi nhận error, lượt dùng = 2: nhận 3; 402 ở tin nhắn cuối của dùng thử: sau cùng lượt dùng = 2: nhận 3; gửi lại ngay sau lỗi: được trả lời (không bị cổng chặn): status=402,",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-223/c5-khong-hoan-khi-da-tra-noi-dung.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 220,
+      "out": "ok  thành công: có done, không có error\n  ok  thành công: lượt 1 -> 2, 1 lần gọi LLM\n  ok  đứt giữa chừng: phần chữ đã gửi vẫn tới cặp đôi\n  ok  đứt giữa chừng: không thử lại (1 lần gọi)\n  ok  đứt giữa chừng: thông điệp gián đoạn cũ, recoverable = true\n  ok  đứt giữa chừng: không có done\n  ok  đứt giữa chừng: KHÔNG hoàn lượt (1 -> 2)\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/T-223/c6-goi-tra-phi-va-het-luot.mjs",
+      "kind": "node",
+      "status": "PASS",
+      "ms": 703,
+      "out": "ok  gói trả phí, 402: bộ đếm vẫn 2\n  ok  gói trả phí, 402: gói không đổi\n  ok  gói trả phí, lỗi mạng: bộ đếm vẫn 2\n  ok  gói trả phí, lỗi mạng: gói không đổi\n  ok  gói trả phí, thành công: bộ đếm vẫn 2\n  ok  gói trả phí, thành công: gói không đổi\n  ok  hết 3/3: HTTP 402 subscription_required\n  ok  hết 3/3: không gọi LLM\n  ok  hết 3/3: bộ đếm giữ nguyên 3\n  ok  hết 6/6 sau gia hạn: HTTP 402 subscription_required\n  ok  hết 6/6 sau gia hạn: không gọi LLM\n  ok  hết 6/6 sau gia hạn: bộ đếm giữ nguyên 6\nPASS",
+      "tier": 1
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 4802,
+      "out": "PASS không có secret trong file git theo dõi",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
+      "kind": "sh",
+      "status": "PASS",
+      "ms": 172,
+      "out": "PASS sổ cái đọc được",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 25,
+      "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 36,
+      "out": "PASS selftest 3 ca; 36 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1123,
+      "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 9258,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-AAzi9l/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1606,
+      "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 955,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-mPPhKb/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 9474,
+      "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 174,
+      "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
+      "kind": "py",
+      "status": "PASS",
+      "ms": 1386,
+      "out": "PASS (worker.js nén 816890 byte)",
+      "tier": 2
+    },
+    {
+      "eval": "eval/invariants/planner/back/chat/inv-001-loi-402-provider-co-nhan-rieng-khong-thu-lai.mjs",
+      "kind": "node",
+      "status": "FAIL",
+      "ms": 327,
+      "out": "XX  HTTP 402: sự kiện lỗi mang nhãn riêng (nhận unknown)\n  XX  HTTP 402: gọi provider đúng 1 lần, không thử lại (nhận 2 lần)\n  ok  HTTP 401: sự kiện lỗi mang nhãn riêng (nhận auth)\n  ok  HTTP 401: gọi provider đúng 1 lần, không thử lại (nhận 1 lần)\n  ok  HTTP 403: sự kiện lỗi mang nhãn riêng (nhận auth)\n  ok  HTTP 403: gọi provider đúng 1 lần, không thử lại (nhận 1 lần)\nFAIL HTTP 402 nhãn=unknown; HTTP 402 số lần gọi=2",
+      "tier": 2
+    }
+  ],
+  "hint": "spec"
+}
