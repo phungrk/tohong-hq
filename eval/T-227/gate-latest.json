@@ -1,6 +1,6 @@
 {
   "task": "T-227",
-  "at": "2026-11-23T13:53",
+  "at": "2026-11-23T13:55",
   "verdict": "GREEN",
   "tiers": {
     "1": "hành vi",
@@ -12,7 +12,7 @@
       "eval": "node eval/T-224/check_1.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 1838,
+      "ms": 1967,
       "out": " category là chuỗi không rỗng\n  ok Gemini=500: http_status = 500 (số, hoặc null khi không có phản hồi HTTP)\n  ok Gemini=500: trường attempt đếm 1..n theo thứ tự\n  ok Gemini=429: 2 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau)\n  ok Gemini=429: mỗi tín hiệu có provider \"gemini\", model, category là chuỗi không rỗng\n  ok Gemini=429: http_status = 429 (số, hoặc null khi không có phản hồi HTTP)\n  ok Gemini=429: trường attempt đếm 1..n theo thứ tự\n  ok Gemini=throw: 2 tín hiệu cho 2 lần gọi thất bại (phải bằng nhau)\n  ok Gemini=throw: mỗi tín hiệu có provider \"gemini\", model, category là chuỗi không rỗng\n  ok Gemini=throw: http_status = null (số, hoặc null khi không có phản hồi HTTP)\n  ok Gemini=throw: trường attempt đếm 1..n theo thứ tự\n  ok chat thành công: 0 tín hiệu llm_provider_error\nPASS",
       "tier": 1
     },
@@ -20,7 +20,7 @@
       "eval": "node eval/T-224/check_2.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 665,
+      "ms": 738,
       "out": "ok tin nhắn lỗi: đúng 1 chat_llm_result (nhận 1)\n  ok ok=false, error_category = nhãn lỗi cuối, http_status=402\n  ok attempts = số lần gọi provider (1)\n  ok tin nhắn thành công: 1 chat_llm_result ok=true, provider gemini, attempts=1\n  ok thành công: error_category và http_status là null/vắng\n  ok không KV: vẫn đúng 1 chat_llm_result\nPASS",
       "tier": 1
     },
@@ -28,7 +28,7 @@
       "eval": "node eval/T-224/check_3.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 863,
+      "ms": 938,
       "out": "ok có khoá: 1 sự kiện llm_provider_error cho 1 lần gọi lỗi\n  ok có khoá: đúng 1 chat_llm_result ok=false\n  ok mọi sự kiện mang đúng khoá dự án đã cấu hình\n  ok thuộc tính: provider, http_status, category\n  ok ẩn danh: distinct_id không phải user/couple id, $process_person_profile=false\n  ok thành công có khoá: 1 chat_llm_result ok=true, không có llm_provider_error\n  ok không có POSTHOG_KEY: 0 request tới PostHog\n  ok POSTHOG_HOST đặt thì gửi tới đúng host đó\nPASS",
       "tier": 1
     },
@@ -36,7 +36,7 @@
       "eval": "node eval/T-224/check_4.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 11410,
+      "ms": 12253,
       "out": "ok A: 4 lỗi: 0 cảnh báo; lỗi thứ 5: đúng 1 (nhận 0,0,0,0,1)\n  ok A: cảnh báo POST JSON {text} có provider, số lỗi 5, mã 402 (text=\"Tơ Hồng: chat AI đang lỗi, 5 tin chat lỗi trong 15 đến 30 phút gần nhất (nhà cung cấp gemini, mã HTTP 402) · <https://ad\")\n  ok B: 6 tin tốt rồi 5 lỗi: cảnh báo đúng ở lỗi thứ 5 (nhận 0,0,0,0,1)\n  ok C: 3 lỗi 03:14 + 3 lỗi 03:16: đúng 1 cảnh báo, ở lỗi thứ 5 (nhận 0,0,0,0,1,0)\n  ok D: 5 lỗi cách nhau 20 phút: 0 cảnh báo (nhận 0)\n  ok E: 4 lỗi cũ (2 khung trước) + 1 lỗi mới: 0 cảnh báo (nhận 0)\n  ok F: HTTP 500 (10 lần gọi cho 5 tin): chưa cảnh báo ở 4 tin, cảnh báo ở tin thứ 5 (nhận 0,0,0,0,1)\n  ok F: HTTP 429 (10 lần gọi cho 5 tin): chưa cảnh báo ở 4 tin, cảnh báo ở tin thứ 5 (nhận 0,0,0,0,1)\nPASS",
       "tier": 1
     },
@@ -44,7 +44,7 @@
       "eval": "node eval/T-224/check_5.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 17532,
+      "ms": 17660,
       "out": "ok 5 tin lỗi đầu: 1 cảnh báo (nhận 1)\n  ok 20 tin lỗi tiếp trong cùng khung: vẫn 1 cảnh báo (nhận 1)\n  ok +20 phút vẫn lỗi (đạt ngưỡng) nhưng còn trong 60 phút chờ: vẫn 1 cảnh báo (nhận 1)\n  ok +75 phút vẫn lỗi: nhắc lại đúng 1 lần, tổng 2 (nhận 2)\nPASS",
       "tier": 1
     },
@@ -52,7 +52,7 @@
       "eval": "node eval/T-224/check_6.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 11320,
+      "ms": 11263,
       "out": "ok không cấu hình gì, lỗi LLM: 200 và có sự kiện error (conversation,intent,error)\n  ok không cấu hình gì, LLM tốt: có chunk và done (conversation,intent,chunk,meta,done)\n  ok chỉ có webhook, không KV: chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok KV hỏng (mọi thao tác ngoài rl:* ném lỗi): chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok Slack trả 500: chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok Slack ném lỗi mạng: chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok PostHog trả 500: chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok PostHog ném lỗi mạng: chat lỗi và chat tốt đều giữ nguyên hành vi\n  ok webhook rỗng, khoá rỗng: chat lỗi và chat tốt đều giữ nguyên hành vi\nPASS",
       "tier": 1
     },
@@ -60,7 +60,7 @@
       "eval": "node eval/T-224/check_7.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 6332,
+      "ms": 6641,
       "out": "ok không cấu hình kênh nào: chỉ gọi tới Gemini\n  ok có webhook: chỉ Gemini + host webhook (nhận generativelanguage.googleapis.com,hooks.slack.test)\n  ok \n  ok có webhook + PostHog: chỉ Gemini, webhook, *.posthog.com (nhận generativelanguage.googleapis.com,hooks.slack.test,us.i.posthog.com)\n  ok đủ ngưỡng nhưng không có webhook: không gọi tới Slack hay máy chủ lạ\n  ok cảnh báo gửi POST tới đúng ADMIN_SLACK_WEBHOOK_URL, thân JSON có chuỗi text\n  ok wrangler.toml: chỉ có binding r2_buckets + kv_namespaces như cũ (nhận kv_namespaces,r2_buckets)\n  ok wrangler.toml: không thêm D1/Queues/Durable Objects/Analytics Engine/AI/dịch vụ khác\n  ok package.json: dependencies vẫn chỉ có yaml (không thêm thư viện)\nPASS",
       "tier": 1
     },
@@ -68,7 +68,7 @@
       "eval": "node eval/T-224/check_8.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 2827,
+      "ms": 2789,
       "out": "ok tin #1 (Gemini=402): không rò []\n  ok tin #2 (Gemini=402): không rò []\n  ok tin #3 (Gemini=402): không rò []\n  ok tin #4 (Gemini=402): không rò []\n  ok tin #5 (Gemini=402): không rò []\n  ok tin #6 (Gemini=402): không rò []\n  ok tin #7 (Gemini=throw): không rò []\n  ok tin #8 (Gemini=500): không rò []\n  ok tin #9 (Gemini=ok): không rò []\n  ok tin #10 (Gemini=402): không rò []\n  ok có tín hiệu để kiểm (log=21, PostHog=10); không có thì phép kiểm vô nghĩa\n  ok có ít nhất một cảnh báo Slack được kiểm (1)\nPASS",
       "tier": 1
     },
@@ -76,7 +76,7 @@
       "eval": "node eval/T-224/check_9.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 14818,
+      "ms": 14577,
       "out": "ok 20 tin thành công (KV trống): 0 put/list/delete ngoài rl:* \n  ok 12 tin lỗi (có kích cảnh báo): mỗi tin tối đa 1 put (+1 khi gửi cảnh báo), 0 list/delete, put có TTL \n  ok 10 tin thành công khi đang có lỗi và đã cảnh báo: vẫn 0 put/list/delete \n  ok không có webhook: tin lỗi vẫn tối đa 1 put, không ghi khoá chống lặp \nPASS",
       "tier": 1
     },
@@ -84,15 +84,15 @@
       "eval": "node eval/T-224/check_10.mjs",
       "kind": "cmd",
       "status": "PASS",
-      "ms": 13875,
-      "out": "ok Slack treo 30s ở tin kích cảnh báo: error 322ms, đóng luồng 323ms (< 3000)\n  ok PostHog treo 30s, tin lỗi: 307ms / đóng 307ms\n  ok PostHog treo 30s, tin tốt: done 59ms / đóng 59ms\n  ok KV sức khoẻ chậm 30s, tin lỗi: 301ms / đóng 301ms\n  ok KV sức khoẻ chậm 30s, tin tốt: done 51ms / đóng 51ms\nPASS",
+      "ms": 13879,
+      "out": "ok Slack treo 30s ở tin kích cảnh báo: error 317ms, đóng luồng 318ms (< 3000)\n  ok PostHog treo 30s, tin lỗi: 326ms / đóng 326ms\n  ok PostHog treo 30s, tin tốt: done 54ms / đóng 54ms\n  ok KV sức khoẻ chậm 30s, tin lỗi: 301ms / đóng 301ms\n  ok KV sức khoẻ chậm 30s, tin tốt: done 54ms / đóng 54ms\nPASS",
       "tier": 1
     },
     {
       "eval": "eval/invariants/_shared/inv-001-khong-secret-trong-repo.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 57,
+      "ms": 49,
       "out": "PASS không có secret trong file git theo dõi",
       "tier": 2
     },
@@ -100,7 +100,7 @@
       "eval": "eval/invariants/_shared/inv-002-so-cai-doc-duoc.sh",
       "kind": "sh",
       "status": "PASS",
-      "ms": 181,
+      "ms": 180,
       "out": "PASS sổ cái đọc được",
       "tier": 2
     },
@@ -108,7 +108,7 @@
       "eval": "eval/invariants/_shared/inv-003-cong-cu-thu-nghiem-khong-de-dau-vet.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 23,
+      "ms": 25,
       "out": "PASS không có dấu vết của graphify trong .claude, scripts, templates, handbook, routines, .github, CLAUDE.md",
       "tier": 2
     },
@@ -116,7 +116,7 @@
       "eval": "eval/invariants/_shared/inv-004-bat-bien-khong-dem-cap-sai-tim-goc-hq.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 34,
+      "ms": 36,
       "out": "PASS selftest 3 ca; 36 dòng đếm cấp trong eval/invariants, 1 nợ miễn trừ (mien-tru-inv-004.txt), còn lại đều ra đúng gốc tohong-hq",
       "tier": 2
     },
@@ -124,7 +124,7 @@
       "eval": "eval/invariants/planner/inv-001-vite-dev-chi-qua-helper.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1193,
+      "ms": 1276,
       "out": "PASS mọi eval dựng máy chủ vite đều qua eval/_lib/vite_dev.cjs (vite build vẫn được phép)",
       "tier": 2
     },
@@ -132,15 +132,15 @@
       "eval": "eval/invariants/planner/inv-002-vite-dev-cache-rieng-don-sach.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2408,
-      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-t0Edj2/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
+      "ms": 2487,
+      "out": "PASS helper dùng cache riêng trong TMPDIR (tohong-vite-CjtJIr/deps), cache chung không đổi (24 mục), TMPDIR sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-003-helper-dung-config-vite-chon.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1648,
+      "ms": 1575,
       "out": "PASS helper bọc đúng file cấu hình vite tự chọn: (a) chỉ .cts -> vite chọn vite.config.cts; (b) .cjs + .mts -> vite chọn vite.config.cjs; (c) .js + .ts (đối chứng) -> vite chọn vite.config.js; (d) vite khác thứ tự (.cts đầu), .js + .cts -> vite chọn vite.config.cts",
       "tier": 2
     },
@@ -148,15 +148,15 @@
       "eval": "eval/invariants/planner/inv-004-vite-dev-khong-config-van-cache-rieng.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 938,
-      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-rSFEW4/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
+      "ms": 1187,
+      "out": "PASS repo không có vite.config: cache riêng trong TMPDIR (tohong-vite-8qfzd0/deps), node_modules/.vite của repo không bị ghi, TMPDIR và repo sạch sau stop()",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/inv-005-worker-back-khoi-dong-trong-workerd.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 2361,
+      "ms": 2511,
       "out": "PASS Worker khởi động trong workerd (flags=[]), /api/admin 403, export nội bộ ký đúng",
       "tier": 2
     },
@@ -164,7 +164,7 @@
       "eval": "eval/invariants/planner/inv-006-workflow-lenh-qua-tee-phai-pipefail.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 100,
+      "ms": 83,
       "out": "PASS mọi bước có ống sau chương trình của repo đều chạy dưới pipefail",
       "tier": 2
     },
@@ -172,15 +172,15 @@
       "eval": "eval/invariants/planner/inv-007-worker-nen-duoi-1mb.py",
       "kind": "py",
       "status": "PASS",
-      "ms": 1573,
-      "out": "PASS (worker.js nén 819696 byte)",
+      "ms": 1537,
+      "out": "PASS (worker.js nén 819668 byte)",
       "tier": 2
     },
     {
       "eval": "eval/invariants/planner/back/chat/inv-001-loi-402-provider-co-nhan-rieng-khong-thu-lai.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 105,
+      "ms": 88,
       "out": "ok  HTTP 402: sự kiện lỗi mang nhãn riêng (nhận billing)\n  ok  HTTP 402: gọi provider đúng 1 lần, không thử lại (nhận 1 lần)\n  ok  HTTP 401: sự kiện lỗi mang nhãn riêng (nhận auth)\n  ok  HTTP 401: gọi provider đúng 1 lần, không thử lại (nhận 1 lần)\n  ok  HTTP 403: sự kiện lỗi mang nhãn riêng (nhận auth)\n  ok  HTTP 403: gọi provider đúng 1 lần, không thử lại (nhận 1 lần)\nPASS",
       "tier": 2
     },
@@ -188,7 +188,7 @@
       "eval": "eval/invariants/planner/back/chat/inv-002-loi-truoc-noi-dung-khong-tang-luot-dung-thu.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 1025,
+      "ms": 983,
       "out": ":null,\"attempt\":1}\n{\"event\":\"llm_provider_error\",\"provider\":\"gemini\",\"model\":\"gemini-3.1-pro\",\"category\":\"network\",\"http_status\":null,\"attempt\":2}\n{\"event\":\"chat_llm_result\",\"ok\":false,\"provider\":\"gemini\",\"attempts\":2,\"error_category\":\"network\",\"http_status\":null}\n  ok  lỗi mạng: lượt lúc nhận error = 1, sau cùng = 1 (trước tin = 1)\n{\"event\":\"llm_provider_error\",\"provider\":\"gemini\",\"model\":\"gemini-3.1-pro\",\"category\":\"network\",\"http_status\":null,\"attempt\":1}\n{\"event\":\"llm_provider_error\",\"provider\":\"gemini\",\"model\":\"gemini-3.1-pro\",\"category\":\"network\",\"http_status\":null,\"attempt\":2}\n{\"event\":\"chat_llm_result\",\"ok\":false,\"provider\":\"gemini\",\"attempts\":2,\"error_category\":\"network\",\"http_status\":null}\n  ok  200 rồi đứt trước chữ đầu: lượt lúc nhận error = 1, sau cùng = 1 (trước tin = 1)\nPASS",
       "tier": 2
     },
@@ -196,7 +196,7 @@
       "eval": "eval/invariants/planner/back/chat/inv-003-luong-loi-chat-khong-lo-ma-http-ten-provider.mjs",
       "kind": "node",
       "status": "PASS",
-      "ms": 254,
+      "ms": 243,
       "out": "_llm_result\",\"ok\":false,\"provider\":\"gemini\",\"attempts\":1,\"error_category\":\"rate_limit\",\"http_status\":429}\n  ok  qua relay 429: không lộ; error = [[\"message\",\"recoverable\"]]\n{\"event\":\"llm_provider_error\",\"provider\":\"gemini\",\"model\":\"gemini-3.1-pro\",\"category\":\"server\",\"http_status\":500,\"attempt\":1}\n{\"event\":\"chat_llm_result\",\"ok\":false,\"provider\":\"gemini\",\"attempts\":1,\"error_category\":\"server\",\"http_status\":500}\n  ok  qua relay 500: không lộ; error = [[\"message\",\"recoverable\"]]\n{\"event\":\"llm_provider_error\",\"provider\":\"gemini\",\"model\":\"gemini-3.1-pro\",\"category\":\"network\",\"http_status\":null,\"attempt\":1}\n{\"event\":\"chat_llm_result\",\"ok\":false,\"provider\":\"gemini\",\"attempts\":1,\"error_category\":\"network\",\"http_status\":null}\n  ok  qua relay mạng: không lộ; error = [[\"message\",\"recoverable\"]]\nPASS",
       "tier": 2
     }
