@@ -20,6 +20,14 @@ Tab Dữ liệu vendor ở admin (lớp overlay R2) có hiệu lực ngay, khôn
 
 Lớp overlay này vẫn giữ nguyên khi pool được dựng lại ở bước 6.
 
+## Cờ `ai_mode_result` (T-230, ADR-152)
+
+- Khi enrich bằng Google AI Mode, ghi `"ai_mode_result": "not_found"` ở mức vendor trong `vendors.json` nếu AI Mode không tìm thấy doanh nghiệp **hoặc** doanh nghiệp đã đóng cửa vĩnh viễn / ngừng hoạt động. Tìm thấy và còn hoạt động thì ghi `"found"` hoặc bỏ trống. Tạm đóng cửa không dùng cờ này.
+- Chỉ đúng chuỗi `"not_found"` mới có tác dụng. Vendor nhiều bản ghi: một bản ghi mang cờ là đủ để loại.
+- Bước 6 (Sync) loại vendor mang cờ khỏi pool; vendor đang trong pool bị gỡ ở lần Sync kế tiếp. Dữ liệu nguồn không bị xoá.
+- Đưa lại: đổi thành `"found"` hoặc xoá khoá qua PR dữ liệu, rồi Sync.
+- Như mọi PR sửa `vendors.json`: sinh lại `enrich-report.json` (INV-003).
+
 ## Luật
 
 - Không sửa tay `*.generated.js` ở tohong-back. Bước 6 sẽ ghi đè chúng.
