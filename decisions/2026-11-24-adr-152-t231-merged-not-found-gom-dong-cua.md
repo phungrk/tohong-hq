@@ -29,3 +29,7 @@ Chưa chạy Sync vendor pool (bước 6) theo lời Capu: đang enrich thêm ve
 ## Phụ lục 2026-11-25: gắn cờ dữ liệu thật
 
 Theo yêu cầu Capu ("vendor có note AI Mode ghi not found/không tìm thấy thì ghi cờ"), Chief mở PR dữ liệu https://github.com/phungrk/tohong/pull/124: 68 bản ghi (67 id) ceremony/flower mang `ai_mode_result: "not_found"` — 63 theo ghi chú không tìm thấy doanh nghiệp, 5 theo ghi chú đóng cửa vĩnh viễn/ngừng hoạt động rõ ràng (flower 33, 40, 68, 76, 93). Không gắn: vendor tồn tại nhưng lệch địa chỉ (flower 74, 92), có ứng viên có thể đúng (flower 43), và 8 bản ghi "nhiều khả năng ngừng hoạt động" chưa khẳng định (flower 17, 45, 49, 50, 60, 73, 94; ceremony 74) — chờ Capu. Đã sinh lại `enrich-report.json`; test liên quan ok. Chưa Sync.
+
+## Phụ lục 2026-11-25 (2)
+
+Capu duyệt gắn cờ cả 8 vendor "nhiều khả năng ngừng hoạt động" (flower 17, 45, 49, 50, 60, 73, 94; ceremony 74). Đã thêm vào PR https://github.com/phungrk/tohong/pull/124: tổng 76 bản ghi, 75 id. Báo cáo sinh lại, test liên quan ok.
