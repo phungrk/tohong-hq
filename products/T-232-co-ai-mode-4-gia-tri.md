@@ -29,14 +29,11 @@ Nếu báo cáo giữ đủ 4 giá trị và có một lệnh đếm/kiểm thì
    - `verified_not_found` (SC-004, US3 kịch bản 2): `verification_status == "verified"` mà cờ là `not_found`, `address_mismatch` hoặc `wrong_category`.
    - `status_changed` (SC-004, chỉ khi có `--base`): so với bản ghi cùng hạng mục, cùng id ở ref nền, cờ đổi **và** `verification_status` đổi, mà dòng `google_ai_mode` cuối có khoá `changes.verification_status` không mang đúng trạng thái mới. Chỉ thêm cờ, trạng thái giữ nguyên: không vi phạm. Đổi trạng thái có ghi rõ trong dòng log: không vi phạm.
    - **Miễn trừ:** `tools/scraper/ai_mode_flags_exempt.json` = `{"exempt": [{"category", "id", "rule", "reason"}]}`; mục có `reason` không rỗng miễn đúng luật đó cho đúng bản ghi đó (in `AI_MODE_FLAG_EXEMPT ...`, không tính vi phạm); `reason` rỗng thì không có tác dụng. File vắng = không miễn.
-6. **Dữ liệu PR #124 (không log) — Chief chọn một (không phải việc code T-232):**
-   - (A, đề xuất) Miễn trừ: thêm 76 mục `{"category": "ceremony"|"flower", "id", "rule": "no_log", "reason": "gắn cờ bù từ verification_notes, PR tohong#124, ADR-153"}`. Trung thực: không giả một lần tra AI Mode không xảy ra; tự tin ~70% là cách Capu muốn.
-   - (B) Bổ sung log: PR #124 thêm mỗi bản ghi một dòng `{"source": "google_ai_mode", "timestamp": <timestamp dòng google_ai_mode đã ghi verification_notes đó>, "changes": {"ai_mode_result": "not_found"}}`. Hợp lệ vì cờ suy từ chính kết quả lần tra đó, nhưng sửa dữ liệu một PR mở (ngoài phạm vi T-232).
-   Dù chọn gì: `check` phải thoát 0 trên main sau khi các PR dữ liệu merge, trước khi bất biến đề xuất dưới đây được đưa vào bể.
+6. **Dữ liệu PR #124: Chief đã chọn bổ sung nhật ký (ADR-153, phụ lục).** PR #124 thêm `ai_mode_result: "not_found"` vào `changes` của dòng `google_ai_mode` cuối hiện có của 76 bản ghi (không thêm dòng mới, giữ bằng chứng style tag T-215); không cần miễn trừ. Cơ chế miễn trừ ở mục 5 vẫn có cho trường hợp sau, nhưng không dùng cho PR #124.
 
 ## Cập nhật spec 008 (đề xuất câu thay thế, không sửa nhánh của Capu)
 - **FR-009 (thay):** "Vendor có `ai_mode_result: not_found` không vào pool vendor (bước Sync loại, dữ liệu nguồn giữ nguyên, đảo ngược bằng đổi cờ; xem T-230/T-231). `address_mismatch`, `wrong_category`, `found` không ẩn vendor. Quyết định: ADR-153."
-- **FR-010 (thay):** "Các hạng mục đã enrich trước đó được gắn cờ bù từ `verification_notes` khi Capu yêu cầu (ceremony, flower ở PR tohong#124, ADR-153); bản ghi gắn bù không có dòng log AI Mode mới thì phải có mục miễn trừ `no_log` ghi lý do, hoặc dòng log bổ sung theo T-232 Hành vi 6."
+- **FR-010 (thay):** "Các hạng mục đã enrich trước đó được gắn cờ bù từ `verification_notes` khi Capu yêu cầu (ceremony, flower ở PR tohong#124, ADR-153); bản ghi gắn bù phải có `ai_mode_result` trong `changes` của dòng `enrichment_log` `google_ai_mode` cuối hiện có (dòng đã ghi `verification_notes` đó), để SC-002 đạt; không dùng miễn trừ."
 - Assumptions, câu cuối: bỏ "feature này không làm đổi pool và không cần Sync vendor pool riêng"; thay "cờ `not_found` làm đổi pool ở lần Sync kế tiếp (T-231)". Phần "Nguồn dữ liệu thật" bỏ "Vendor `not_found` hiện vẫn nằm trong pool...".
 
 ## Ràng buộc (vòi)
@@ -61,10 +58,13 @@ Nếu báo cáo giữ đủ 4 giá trị và có một lệnh đếm/kiểm thì
 Ghi chú: check_5 và check_8 xanh sẵn trên main (rào chắn); các check còn lại đỏ trên main.
 
 ## Bất biến đề xuất (tầng 2)
-`planner/vendor`: "`python3 tools/scraper/ai_mode_flags.py check` thoát 0 trên dữ liệu main" (gộp SC-002, SC-004, FR-005 cho dữ liệu thật). Chỉ đưa vào bể sau khi Chief chốt cách xử lý PR #124 (Hành vi 6), nếu không bất biến đỏ ngay khi #124 merge.
+`planner/vendor`: "`python3 tools/scraper/ai_mode_flags.py check` thoát 0 trên dữ liệu main" (gộp SC-002, SC-004, FR-005 cho dữ liệu thật). Đưa vào bể khi PR #124 (đã bổ sung nhật ký, ADR-153 phụ lục) và các PR dữ liệu mang cờ đã merge.
 
 ## Không làm
 Gọi Google; sửa dữ liệu PR #120, #121, #124-#133; đổi app cặp đôi; ẩn vendor theo `address_mismatch`/`wrong_category`; đưa đếm cờ vào `summary` báo cáo; bắt build_pool/báo cáo dừng khi gặp giá trị lạ.
 
 ## Câu hỏi mở
-Không (cách xử lý PR #124 là lựa chọn của Chief, Hành vi 6).
+Không.
+
+## Lịch sử sửa
+- 2026-11-28 (sau Spec Gate v1, sửa dựng eval theo tiền lệ ADR-128, không phải spec rework): check_5 thêm đường lui khi không có ref PR #120 (đạt nếu schema.py có đúng một khai báo giống hệt PR #120); bỏ phương án miễn trừ khỏi câu thay thế FR-010 và Hành vi 6, vì Chief đã chọn bổ sung nhật ký (ADR-153 phụ lục).
