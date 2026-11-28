@@ -1,11 +1,16 @@
 """T-232 tiêu chí 5: thay đổi trên nhánh code gộp sạch với nhánh PR tohong#120 (feat/enrich-hcm-invitation-batch-01): `git merge-tree --write-tree HEAD <ref>`
 không có file xung đột ngoài tools/scraper/output/ (dữ liệu và báo cáo sinh lại tự xung đột giữa các PR dữ liệu, giải bằng sinh lại; đã có trên main trước T-232) trong TOHONG_REPO. Ref mặc định origin/feat/enrich-hcm-invitation-batch-01, đổi bằng T232_PR120_REF.
-Nếu ref đã là tổ tiên của HEAD (PR #120 đã merge vào nhánh) thì đạt. Không có ref thì FAIL kèm lệnh fetch."""
+Nếu ref đã là tổ tiên của HEAD (PR #120 đã merge vào nhánh) thì đạt.
+Đường lui khi KHÔNG có ref (vd nhánh bị xoá sau khi PR #120 merge; sửa dựng eval theo tiền lệ ADR-128): đạt khi tools/scraper/schema.py ở HEAD có đúng một
+dòng khai báo `ai_mode_result:` và dòng đó (bỏ khoảng trắng đầu/cuối) giống hệt dòng của PR #120 giữ sẵn trong PR120_LINE; nếu không thì FAIL kèm lệnh fetch."""
 import os as _o, sys as _s
 _s.dont_write_bytecode = True
 _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))
 import os, subprocess
 from lib232 import Fail, run, R
+
+# Dòng khai báo của PR #120 (tohong feat/enrich-hcm-invitation-batch-01, tools/scraper/schema.py), chép nguyên văn.
+PR120_LINE = 'ai_mode_result: Optional[Literal["found", "not_found", "address_mismatch", "wrong_category"]] = None'
 
 
 def main():
@@ -13,7 +18,12 @@ def main():
     ref = os.environ.get("T232_PR120_REF", "origin/feat/enrich-hcm-invitation-batch-01")
     g = lambda *a: subprocess.run(["git", "-C", t, *a], capture_output=True, text=True)
     if g("rev-parse", "--verify", "-q", ref + "^{commit}").returncode != 0:
-        raise Fail(f"TOHONG_REPO không có ref {ref} (chạy: git -C <tohong> fetch origin feat/enrich-hcm-invitation-batch-01)")
+        sch = g("show", "HEAD:tools/scraper/schema.py")
+        decl = [l.strip() for l in sch.stdout.splitlines() if l.strip().startswith("ai_mode_result:")] if sch.returncode == 0 else []
+        if decl == [PR120_LINE]:
+            return f"không có ref {ref}; đường lui: schema.py ở HEAD có đúng một khai báo giống hệt PR #120"
+        raise Fail(f"TOHONG_REPO không có ref {ref} và schema.py ở HEAD không có đúng một khai báo giống hệt PR #120 ({decl}) "
+                   "(chạy: git -C <tohong> fetch origin feat/enrich-hcm-invitation-batch-01)")
     if g("merge-base", "--is-ancestor", ref, "HEAD").returncode == 0:
         return f"{ref} đã nằm trong HEAD"
     m = g("merge-tree", "--write-tree", "--name-only", "HEAD", ref)
